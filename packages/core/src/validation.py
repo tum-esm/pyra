@@ -8,6 +8,7 @@ PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 
+# TODO: Add required JSON schema here (https://docs.python-cerberus.org/en/stable/)
 SETUP_FILE_VALIDATOR = cerberus.Validator({})
 PARAMS_FILE_VALIDATOR = cerberus.Validator(
     {"secondsPerIteration": {"type": "number", "min": 0}}
@@ -31,7 +32,7 @@ class Validation:
 
             if not SETUP_FILE_VALIDATOR.validate(SETUP_FILE_CONTENT):
                 raise CerberusException(SETUP_FILE_VALIDATOR.errors)
-            # TODO: Remaining checks that cannot be done with cerberus
+            # TODO: Add checks that cannot be done with cerberus here
 
         except AssertionError as a:
             logging.error(f"Error in setup file: {a}")
@@ -50,7 +51,7 @@ class Validation:
 
             if not PARAMS_FILE_VALIDATOR.validate(PARAMS_FILE_CONTENT):
                 raise CerberusException(PARAMS_FILE_VALIDATOR.errors)
-            # TODO: Remaining checks that cannot be done with cerberus
+            # TODO: Add checks that cannot be done with cerberus here
 
         except AssertionError as a:
             logging.error(f"Error in parameters file: {a}")
