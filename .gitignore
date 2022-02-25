@@ -1,1 +1,4 @@
 .venv
+config/parameters.json
+config/setup.json
+*.pyc

@@ -4,6 +4,10 @@ from src.validation import Validation
 
 
 def run():
+    Validation.check_parameters_config()
+    Validation.check_setup_config()
+
+    """
     while True:
         # TODO: Validate setup and parameters
 
@@ -11,8 +15,4 @@ def run():
 
         # TODO: Sleep time per iteration specified in parameters
 
-        pass
-
-
-if __name__ == "__main__":
-    run()
+        pass"""
