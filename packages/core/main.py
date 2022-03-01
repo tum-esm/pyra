@@ -28,7 +28,8 @@ def run():
         with open(PARAMS_FILE_PATH, "r") as f:
             PARAMS = json.load(f)
 
-        # TODO: Do pyra stuff
+        # TODO: Possibly handle communication between these modules
+        # TODO: Pass SETUP and PARAMS to modules
         SystemTimeSync.run()
         SunTracking.run()
         OpusMeasurement.run()
