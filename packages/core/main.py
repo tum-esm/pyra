@@ -2,10 +2,14 @@ from datetime import datetime
 import json
 import os
 import time
-from src.validation import Validation
+
+from packages.core.opus_measurement import OpusMeasurement
+from packages.core.sun_tracking import SunTracking
+from packages.core.system_time_sync import SystemTimeSync
+from packages.core.validation import Validation
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 
@@ -25,9 +29,9 @@ def run():
             PARAMS = json.load(f)
 
         # TODO: Do pyra stuff
-        # 1. Time Sync
-        # 2. Sun Tracking
-        # 3. Measurement
+        SystemTimeSync.run()
+        SunTracking.run()
+        OpusMeasurement.run()
 
         execution_ended_at = datetime.now().timestamp()
         time_to_wait = PARAMS["secondsPerIteration"] - (

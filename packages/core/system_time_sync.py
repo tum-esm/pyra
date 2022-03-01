@@ -1,3 +1,7 @@
+# BktTimeSync is a software by IZ2BKT that synchronizes the system time with
+# either a NTP Server or a GPS receiver. This is important to keep the time
+# stamps accurate during the measurement.
+
 # TODO: Implement this for the "BktTimeSync" software
 
 # Later, make an abstract base class that enforces a standard interface
@@ -7,4 +11,5 @@
 class SystemTimeSync:
     @staticmethod
     def run():
+        print("Running SystemTimeSync")
         pass

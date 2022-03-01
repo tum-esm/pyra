@@ -4,7 +4,7 @@ import os
 import cerberus
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 
