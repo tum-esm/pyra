@@ -25,6 +25,9 @@ def run():
             PARAMS = json.load(f)
 
         # TODO: Do pyra stuff
+        # 1. Time Sync
+        # 2. Sun Tracking
+        # 3. Measurement
 
         execution_ended_at = datetime.now().timestamp()
         time_to_wait = PARAMS["secondsPerIteration"] - (
