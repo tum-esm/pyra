@@ -11,9 +11,11 @@
 
 import logging
 
+logger = logging.getLogger("pyra.core")
+
 
 class OpusMeasurement:
     @staticmethod
     def run():
-        logging.info("Running OpusMeasurement")
+        logger.info("Running OpusMeasurement")
         pass

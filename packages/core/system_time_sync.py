@@ -10,9 +10,11 @@
 
 import logging
 
+logger = logging.getLogger("pyra.core")
+
 
 class SystemTimeSync:
     @staticmethod
     def run():
-        logging.info("Running SystemTimeSync")
+        logger.info("Running SystemTimeSync")
         pass

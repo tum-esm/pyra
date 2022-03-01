@@ -11,9 +11,11 @@
 
 import logging
 
+logger = logging.getLogger("pyra.core")
+
 
 class SunTracking:
     @staticmethod
     def run():
-        logging.info("Running SunTracking")
+        logger.info("Running SunTracking")
         pass
