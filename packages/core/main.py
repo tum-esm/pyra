@@ -14,7 +14,7 @@ PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 
-# TODO: Setup logging module (logging to file)
+# Setup logging module
 logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(
     level=logging.DEBUG, filename="logs/debug.log", format=logging_format
