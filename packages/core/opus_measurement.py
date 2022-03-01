@@ -9,8 +9,11 @@
 # TODO: Mock the behaviour of OPUS when testing
 
 
+import logging
+
+
 class OpusMeasurement:
     @staticmethod
     def run():
-        print("Running OpusMeasurement")
+        logging.info("Running OpusMeasurement")
         pass

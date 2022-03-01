@@ -9,8 +9,11 @@
 # TODO: Mock the behaviour of OPUS when testing
 
 
+import logging
+
+
 class SunTracking:
     @staticmethod
     def run():
-        print("Running SunTracking")
+        logging.info("Running SunTracking")
         pass

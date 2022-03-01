@@ -8,8 +8,11 @@
 # to be implemented for any software like "BktTimeSync"
 
 
+import logging
+
+
 class SystemTimeSync:
     @staticmethod
     def run():
-        print("Running SystemTimeSync")
+        logging.info("Running SystemTimeSync")
         pass
