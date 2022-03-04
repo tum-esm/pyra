@@ -55,7 +55,7 @@ class OpusMeasurement:
         """Starts a new macro in OPUS over DDE connection.
         """
         self.connect_to_dde_opus()
-        answer = connection.Request("RUN_MACRO " + target)
+        answer = self.conversation.Request("RUN_MACRO " + target)
 
         if 'OK' in answer:
             logger.info("Started OPUS macro: {}.".format(target))
@@ -66,7 +66,7 @@ class OpusMeasurement:
         """Stops the currently running macro in OPUS over DDE connection.
         """
         self.connect_to_dde_opus()
-        answer = connection.Request("KILL_MACRO " + target)
+        answer = self.conversation.Request("KILL_MACRO " + target)
 
         if 'OK' in answer:
             logger.info("Stopped OPUS macro: {}.".format(target))
