@@ -10,12 +10,78 @@
 
 
 import logging
+import win32ui
+import dde
 
 logger = logging.getLogger("pyra.core")
 
 
 class OpusMeasurement:
+    """Creates a working DDE connection to the OPUS DDE Server.
+    Allows to remotely control experiments and macros in OPUS over the established DDE
+    connection.
+    """
+    def __init__(self):
+        #info for OPUS DDE server
+        self.dde_service = "OPUS"
+        self.dde_topic = "OPUS/System"
+        #for dde servers talk to servers
+        self.server = dde.CreateServer()
+        self.server.Create("Client")
+        self.conversation = dde.CreateConversation(self.server)
+
+
     @staticmethod
     def run():
         logger.info("Running OpusMeasurement")
         pass
+
+    def connect_to_dde_opus(self):
+        try:
+            self.conversation.ConnectTo(self.dde_service, self.dde_topic)
+            logger.info("Connected to OPUS DDE Server.")
+        except:
+            logger.info("Could not connect to OPUS DDE Server.")
+
+    def load_experiment(self, target):
+        """Loads a new experiment in OPUS over DDE connection.
+        """
+        self.connect_to_dde_opus()
+        answer = self.conversation.Request("LOAD_EXPERIMENT " + target)
+
+        if 'OK' in answer:
+            logger.info("Loaded new OPUS experiment: {}.".format(target))
+        else:
+            logger.info("Could not load OPUS experiment as expected.")
+
+    def start_macro(self, target):
+        """Starts a new macro in OPUS over DDE connection.
+        """
+        self.connect_to_dde_opus()
+        answer = connection.Request("RUN_MACRO " + target)
+
+        if 'OK' in answer:
+            logger.info("Started OPUS macro: {}.".format(target))
+        else:
+            logger.info("Could not start OPUS macro as expected.")
+
+    def stop_macro(self, target):
+        """Stops the currently running macro in OPUS over DDE connection.
+        """
+        self.connect_to_dde_opus()
+        answer = connection.Request("KILL_MACRO " + target)
+
+        if 'OK' in answer:
+            logger.info("Stopped OPUS macro: {}.".format(target))
+        else:
+            logger.info("Could not stop OPUS macro as expected.")
+
+    def shutdown_dde_server(self):
+        """Note the underlying DDE object (ie, Server, Topics and Items) are not cleaned up by this call.
+        """
+        self.server.Shutdown()
+
+    def destroy_dde_server(self):
+        """Destroys the underlying C++ object.
+        """
+        self.server.Destroy()
