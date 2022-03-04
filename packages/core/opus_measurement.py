@@ -22,10 +22,7 @@ class OpusMeasurement:
     connection.
     """
     def __init__(self):
-        #info for OPUS DDE server
-        self.dde_service = "OPUS"
-        self.dde_topic = "OPUS/System"
-        #for dde servers talk to servers
+        #note: dde servers talk to dde servers
         self.server = dde.CreateServer()
         self.server.Create("Client")
         self.conversation = dde.CreateConversation(self.server)
@@ -38,7 +35,7 @@ class OpusMeasurement:
 
     def connect_to_dde_opus(self):
         try:
-            self.conversation.ConnectTo(self.dde_service, self.dde_topic)
+            self.conversation.ConnectTo("OPUS", "OPUS/System")
             logger.info("Connected to OPUS DDE Server.")
         except:
             logger.info("Could not connect to OPUS DDE Server.")
