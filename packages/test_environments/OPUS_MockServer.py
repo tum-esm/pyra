@@ -10,7 +10,7 @@ class MyRequestTopic(object.Object):
         object.Object.__init__(self, topic)
 
     def Request(self, aString):
-        print("Request Topic asked to compute length of:", aString)
+        print("Received request:", aString)
         return "OK" + " " + aString
 
 server = dde.CreateServer()
