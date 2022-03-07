@@ -6,8 +6,7 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any version of OPUS (for later updates)
 
-# TODO: Mock the behaviour of OPUS when testing
-# TODO: Read parameters from JSON file
+# TODO: Add option for OPUS MockServer usage
 
 
 import logging
@@ -28,20 +27,26 @@ class OpusMeasurement:
         self.server = dde.CreateServer()
         self.server.Create("Client")
         self.conversation = dde.CreateConversation(self.server)
+        self._PARAMS = {}
+        self._SETUP = {}
 
-    @staticmethod
-    def run():
+    def run(self, setup: dict, params: dict):
         logger.info("Running OpusMeasurement")
-        pass
+        self.__get_json_variables(setup, params)
 
-    def connect_to_dde_opus(self):
+    def __connect_to_dde_opus(self):
         try:
             self.conversation.ConnectTo("OPUS", "OPUS/System")
             logger.info("Connected to OPUS DDE Server.")
         except:
             logger.info("Could not connect to OPUS DDE Server.")
 
-    def test_dde_connection(self):
+    def __get_json_variables(self, setup: dict, params: dict):
+        self._SETUP = setup
+        self._PARAMS = params
+
+    @property
+    def __test_dde_connection(self):
         """Tests the DDE connection.
         Tries to reinitialize the DDE socket if connection test fails.
          """
@@ -53,12 +58,12 @@ class OpusMeasurement:
             logger.info("DDE Connection seems to be not working.")
             logger.info("Trying to fix DDE Socket.")
             # destroy socket
-            self.destroy_dde_server()
+            self.__destroy_dde_server()
             # reconnect socket
             self.server = dde.CreateServer()
             self.server.Create("Client")
             self.conversation = dde.CreateConversation(self.server)
-            self.connect_to_dde_opus()
+            self.__connect_to_dde_opus()
 
             # retest DDE connection
             if self.conversation.Connected() == 1:
@@ -66,51 +71,54 @@ class OpusMeasurement:
             else:
                 return False
 
-    def load_experiment(self, full_path):
+    def __load_experiment(self, full_path):
         """Loads a new experiment in OPUS over DDE connection.
         """
-        self.connect_to_dde_opus()
+        self.__connect_to_dde_opus()
 
-        if self.test_dde_connection():
-            answer = self.conversation.Request("LOAD_EXPERIMENT " + full_path)
+        if not self.__test_dde_connection:
+            return
+        answer = self.conversation.Request("LOAD_EXPERIMENT " + full_path)
 
-            if 'OK' in answer:
-                logger.info("Loaded new OPUS experiment: {}.".format(full_path))
-            else:
-                logger.info("Could not load OPUS experiment as expected.")
+        if 'OK' in answer:
+            logger.info("Loaded new OPUS experiment: {}.".format(full_path))
+        else:
+            logger.info("Could not load OPUS experiment as expected.")
 
-    def start_macro(self, full_path):
+    def __start_macro(self, full_path):
         """Starts a new macro in OPUS over DDE connection.
         """
-        self.connect_to_dde_opus()
+        self.__connect_to_dde_opus()
 
-        if self.test_dde_connection():
-            answer = self.conversation.Request("RUN_MACRO " + full_path)
+        if not self.__test_dde_connection:
+            return
+        answer = self.conversation.Request("RUN_MACRO " + full_path)
 
-            if 'OK' in answer:
-                logger.info("Started OPUS macro: {}.".format(full_path))
-            else:
-                logger.info("Could not start OPUS macro as expected.")
+        if 'OK' in answer:
+            logger.info("Started OPUS macro: {}.".format(full_path))
+        else:
+            logger.info("Could not start OPUS macro as expected.")
 
-    def stop_macro(self, full_path):
+    def __stop_macro(self, full_path):
         """Stops the currently running macro in OPUS over DDE connection.
         """
-        self.connect_to_dde_opus()
+        self.__connect_to_dde_opus()
 
-        if self.test_dde_connection():
-            answer = self.conversation.Request("KILL_MACRO " + full_path)
+        if not self.__test_dde_connection:
+            return
+        answer = self.conversation.Request("KILL_MACRO " + full_path)
 
-            if 'OK' in answer:
-                logger.info("Stopped OPUS macro: {}.".format(full_path))
-            else:
-                logger.info("Could not stop OPUS macro as expected.")
+        if 'OK' in answer:
+            logger.info("Stopped OPUS macro: {}.".format(full_path))
+        else:
+            logger.info("Could not stop OPUS macro as expected.")
 
-    def shutdown_dde_server(self):
+    def __shutdown_dde_server(self):
         """Note the underlying DDE object (ie, Server, Topics and Items) are not cleaned up by this call.
         """
         self.server.Shutdown()
 
-    def destroy_dde_server(self):
+    def __destroy_dde_server(self):
         """Destroys the underlying C++ object.
         """
         self.server.Destroy()

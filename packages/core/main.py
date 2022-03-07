@@ -47,7 +47,7 @@ def run():
         # TODO: Pass SETUP and PARAMS to modules
         SystemTimeSync.run()
         SunTracking.run()
-        OpusMeasurement.run()
+        OpusMeasurement.run(SETUP, PARAMS)
 
         logger.info("Ending Iteration")
         execution_ended_at = datetime.now().timestamp()
