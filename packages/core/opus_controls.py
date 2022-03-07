@@ -6,7 +6,7 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any version of OPUS (for later updates)
 
-# TODO: Mock the behaviour of OPUS when testing
+# TODO: Add option for OPUS MockServer usage
 
 
 import logging
@@ -14,10 +14,14 @@ import logging
 logger = logging.getLogger("pyra.core")
 
 # TODO: think of a good class name
-class OpusMeasurement:
-    @staticmethod
-    def run():
-        logger.info("Running OpusMeasurement")
+class OpusControls:
+    """Creates a working DDE connection to the OPUS DDE Server.
+    Allows to remotely control experiments and macros in OPUS over the established DDE
+    connection.
+    """
+
+    def run(self, setup: dict, params: dict):
+        logger.info("Running OpusControls")
 
         # TODO: Check all conditions, whether to contact OPUS
 

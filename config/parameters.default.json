@@ -1,3 +1,8 @@
 {
-    "secondsPerIteration": 30
+    "OPUS_executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
+    "OPUS_executable_full_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe",
+    "OPUS_macro_full_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx",
+    "OPUS_experiment_full_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
+    "secondsPerIteration": 30,
+    "test_environment_mode": 0
 }

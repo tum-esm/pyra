@@ -5,7 +5,7 @@ import os
 import time
 from filelock import FileLock
 
-from packages.core.opus_measurement import OpusMeasurement
+from packages.core.opus_controls import OpusControls
 from packages.core.sun_tracking import SunTracking
 from packages.core.system_time_sync import SystemTimeSync
 from packages.core.validation import Validation
@@ -53,7 +53,7 @@ def run():
 
         SystemTimeSync.run()
         SunTracking.run()
-        OpusMeasurement.run()
+        OpusControls.run(SETUP, PARAMS)
 
         logger.info("Ending Iteration")
 
