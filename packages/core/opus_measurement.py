@@ -7,7 +7,6 @@
 # to be implemented for any version of OPUS (for later updates)
 
 # TODO: Mock the behaviour of OPUS when testing
-# TODO: Write parameters like marco/experiment target in JSON file
 # TODO: Read parameters from JSON file
 
 
@@ -68,42 +67,42 @@ class OpusMeasurement:
                 return False
 
 
-    def load_experiment(self, target):
+    def load_experiment(self, full_path):
         """Loads a new experiment in OPUS over DDE connection.
         """
         self.connect_to_dde_opus()
 
         if self.test_dde_connection():
-            answer = self.conversation.Request("LOAD_EXPERIMENT " + target)
+            answer = self.conversation.Request("LOAD_EXPERIMENT " + full_path)
 
             if 'OK' in answer:
-                logger.info("Loaded new OPUS experiment: {}.".format(target))
+                logger.info("Loaded new OPUS experiment: {}.".format(full_path))
             else:
                 logger.info("Could not load OPUS experiment as expected.")
 
-    def start_macro(self, target):
+    def start_macro(self, full_path):
         """Starts a new macro in OPUS over DDE connection.
         """
         self.connect_to_dde_opus()
 
         if self.test_dde_connection():
-            answer = self.conversation.Request("RUN_MACRO " + target)
+            answer = self.conversation.Request("RUN_MACRO " + full_path)
 
             if 'OK' in answer:
-                logger.info("Started OPUS macro: {}.".format(target))
+                logger.info("Started OPUS macro: {}.".format(full_path))
             else:
                 logger.info("Could not start OPUS macro as expected.")
 
-    def stop_macro(self, target):
+    def stop_macro(self, full_path):
         """Stops the currently running macro in OPUS over DDE connection.
         """
         self.connect_to_dde_opus()
 
         if self.test_dde_connection():
-            answer = self.conversation.Request("KILL_MACRO " + target)
+            answer = self.conversation.Request("KILL_MACRO " + full_path)
 
             if 'OK' in answer:
-                logger.info("Stopped OPUS macro: {}.".format(target))
+                logger.info("Stopped OPUS macro: {}.".format(full_path))
             else:
                 logger.info("Could not stop OPUS macro as expected.")
 
