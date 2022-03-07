@@ -7,6 +7,8 @@
 # to be implemented for any version of OPUS (for later updates)
 
 # TODO: Mock the behaviour of OPUS when testing
+# TODO: Write parameters like marco/experiment target in JSON file
+# TODO: Read parameters from JSON file
 
 
 import logging
@@ -40,38 +42,70 @@ class OpusMeasurement:
         except:
             logger.info("Could not connect to OPUS DDE Server.")
 
+    def test_dde_connection(self):
+        """Tests the DDE connection.
+        Tries to reinitialize the DDE socket if connection test fails.
+         """
+
+        #conversation.Connected() returns 1 <class 'int'> if connected
+        if self.conversation.Connected() == 1:
+            return True
+        else:
+            logger.info("DDE Connection seems to be not working.")
+            logger.info("Trying to fix DDE Socket.")
+            #destroy socket
+            self.destroy_dde_server()
+            #reconnect socket
+            self.server = dde.CreateServer()
+            self.server.Create("Client")
+            self.conversation = dde.CreateConversation(self.server)
+            self.connect_to_dde_opus()
+
+            #retest DDE connection
+            if self.conversation.Connected() == 1:
+                return True
+            else:
+                return False
+
+
     def load_experiment(self, target):
         """Loads a new experiment in OPUS over DDE connection.
         """
         self.connect_to_dde_opus()
-        answer = self.conversation.Request("LOAD_EXPERIMENT " + target)
 
-        if 'OK' in answer:
-            logger.info("Loaded new OPUS experiment: {}.".format(target))
-        else:
-            logger.info("Could not load OPUS experiment as expected.")
+        if self.test_dde_connection():
+            answer = self.conversation.Request("LOAD_EXPERIMENT " + target)
+
+            if 'OK' in answer:
+                logger.info("Loaded new OPUS experiment: {}.".format(target))
+            else:
+                logger.info("Could not load OPUS experiment as expected.")
 
     def start_macro(self, target):
         """Starts a new macro in OPUS over DDE connection.
         """
         self.connect_to_dde_opus()
-        answer = self.conversation.Request("RUN_MACRO " + target)
 
-        if 'OK' in answer:
-            logger.info("Started OPUS macro: {}.".format(target))
-        else:
-            logger.info("Could not start OPUS macro as expected.")
+        if self.test_dde_connection():
+            answer = self.conversation.Request("RUN_MACRO " + target)
+
+            if 'OK' in answer:
+                logger.info("Started OPUS macro: {}.".format(target))
+            else:
+                logger.info("Could not start OPUS macro as expected.")
 
     def stop_macro(self, target):
         """Stops the currently running macro in OPUS over DDE connection.
         """
         self.connect_to_dde_opus()
-        answer = self.conversation.Request("KILL_MACRO " + target)
 
-        if 'OK' in answer:
-            logger.info("Stopped OPUS macro: {}.".format(target))
-        else:
-            logger.info("Could not stop OPUS macro as expected.")
+        if self.test_dde_connection():
+            answer = self.conversation.Request("KILL_MACRO " + target)
+
+            if 'OK' in answer:
+                logger.info("Stopped OPUS macro: {}.".format(target))
+            else:
+                logger.info("Could not stop OPUS macro as expected.")
 
     def shutdown_dde_server(self):
         """Note the underlying DDE object (ie, Server, Topics and Items) are not cleaned up by this call.
