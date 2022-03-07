@@ -1,5 +1,7 @@
+.DS_Store
 .venv
 config/parameters.json
 config/setup.json
+config/config.lock
 *.pyc
 *.log

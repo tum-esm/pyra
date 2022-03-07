@@ -44,17 +44,22 @@ def run():
             with open(PARAMS_FILE_PATH, "r") as f:
                 PARAMS = json.load(f)
 
+        # TODO: Stability/system checks
+        # TODO: Enclosure communication (rain sensor, ...)
+        # TODO: How to group control sequences?
+
         # TODO: Possibly handle communication between these modules
         # TODO: Pass SETUP and PARAMS to modules
+
         SystemTimeSync.run()
         SunTracking.run()
         OpusMeasurement.run()
 
         logger.info("Ending Iteration")
+
+        # Wait some time so that a certain frequency of the loop is achieved
         execution_ended_at = datetime.now().timestamp()
         time_to_wait = PARAMS["secondsPerIteration"] - (
             execution_ended_at - execution_started_at
         )
-        time_to_wait = 0 if time_to_wait < 0 else time_to_wait
-        logger.debug(f"Waiting {time_to_wait} second(s)")
-        time.sleep(time_to_wait)
+        time.sleep(time_to_wait if time_to_wait > 0 else 0)
