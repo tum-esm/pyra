@@ -32,7 +32,8 @@ class OpusMeasurement:
 
     def run(self, setup: dict, params: dict):
         logger.info("Running OpusMeasurement")
-        self.__get_json_variables(setup, params)
+        logger.debug("Updating JSON Config Variables")
+        self.__update_json_config(setup, params)
 
     def __connect_to_dde_opus(self):
         try:
@@ -41,7 +42,7 @@ class OpusMeasurement:
         except:
             logger.info("Could not connect to OPUS DDE Server.")
 
-    def __get_json_variables(self, setup: dict, params: dict):
+    def __update_json_config(self, setup: dict, params: dict):
         self._SETUP = setup
         self._PARAMS = params
 
