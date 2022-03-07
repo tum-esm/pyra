@@ -22,12 +22,12 @@ class OpusMeasurement:
     Allows to remotely control experiments and macros in OPUS over the established DDE
     connection.
     """
+
     def __init__(self):
-        #note: dde servers talk to dde servers
+        # note: dde servers talk to dde servers
         self.server = dde.CreateServer()
         self.server.Create("Client")
         self.conversation = dde.CreateConversation(self.server)
-
 
     @staticmethod
     def run():
@@ -46,26 +46,25 @@ class OpusMeasurement:
         Tries to reinitialize the DDE socket if connection test fails.
          """
 
-        #conversation.Connected() returns 1 <class 'int'> if connected
+        # conversation.Connected() returns 1 <class 'int'> if connected
         if self.conversation.Connected() == 1:
             return True
         else:
             logger.info("DDE Connection seems to be not working.")
             logger.info("Trying to fix DDE Socket.")
-            #destroy socket
+            # destroy socket
             self.destroy_dde_server()
-            #reconnect socket
+            # reconnect socket
             self.server = dde.CreateServer()
             self.server.Create("Client")
             self.conversation = dde.CreateConversation(self.server)
             self.connect_to_dde_opus()
 
-            #retest DDE connection
+            # retest DDE connection
             if self.conversation.Connected() == 1:
                 return True
             else:
                 return False
-
 
     def load_experiment(self, full_path):
         """Loads a new experiment in OPUS over DDE connection.
