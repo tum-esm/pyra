@@ -13,7 +13,7 @@ import logging
 
 logger = logging.getLogger("pyra.core")
 
-# TODO: think of a good class name
+# TODO: Merge Patrick's progress
 class OpusControls:
     """Creates a working DDE connection to the OPUS DDE Server.
     Allows to remotely control experiments and macros in OPUS over the established DDE
