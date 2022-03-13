@@ -1,7 +1,27 @@
-.DS_Store
+# python
 .venv
+*.pyc
+
+# config
 config/parameters.json
 config/setup.json
 config/config.lock
-*.pyc
+
+# logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+.DS_Store
+
+# pyra ui
+packages/ui/node_modules/
+packages/ui/.webpack/
+packages/ui/out/
