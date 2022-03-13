@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 
 export default function TabLogs(props: {}) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
+
+    async function openFileDialog() {
+        const something = await window.electron.showDialog();
+    }
+
     return (
         <div className='flex flex-col w-full h-full p-6'>
             <div className='flex w-full'>
@@ -37,6 +42,7 @@ export default function TabLogs(props: {}) {
                         'px-3 py-0.5 font-medium rounded ' +
                         'bg-red-200 text-red-900'
                     }
+                    onClick={openFileDialog}
                 >
                     clear logs
                 </button>
