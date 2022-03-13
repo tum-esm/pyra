@@ -26,7 +26,7 @@
  * ```
  */
 
-import './styles/index.css';
-import './styles/prism.css';
-import './styles/prism.js';
-import './app';
+import './client/styles/index.css';
+import './client/styles/prism.css';
+import './client/styles/prism.js';
+import './client/app';
