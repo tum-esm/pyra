@@ -66,3 +66,7 @@ ipcMain.handle('readDebugLogs', async (_, args) => {
         'utf8'
     );
 });
+
+ipcMain.handle('playBeep', (_, args) => {
+    shell.beep();
+});

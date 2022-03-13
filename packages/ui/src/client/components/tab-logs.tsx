@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ICONS from '../assets/icons';
 
 export default function TabLogs(props: {}) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -18,6 +19,7 @@ export default function TabLogs(props: {}) {
                 .reverse()
                 .join('\n')
         );
+        window.electron.playBeep();
     }
 
     useEffect(() => {
@@ -26,7 +28,16 @@ export default function TabLogs(props: {}) {
 
     return (
         <div className='flex flex-col w-full h-full p-6'>
-            <div className='flex w-full'>
+            <div className='flex w-full gap-x-2'>
+                <button
+                    className={
+                        'px-1 py-1 font-medium rounded ' +
+                        'bg-white svg-white-button'
+                    }
+                    onClick={updateLogs}
+                >
+                    <div className='w-5 h-5'>{ICONS.refresh}</div>
+                </button>
                 <div className='flex bg-white rounded'>
                     {['info', 'debug'].map((l: 'info' | 'debug', i) => (
                         <button

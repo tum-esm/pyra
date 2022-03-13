@@ -5,6 +5,7 @@ declare global {
         electron: {
             readInfoLogs: () => Promise<string>;
             readDebugLogs: () => Promise<string>;
+            playBeep: () => void;
         };
     }
 }
