@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function TabLogs(props: {}) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
+    const [infoLogs, setInfoLogs] = useState<string>('');
 
-    async function openFileDialog() {
-        const something = await window.electron.showDialog();
+    async function updateInfoLogs() {
+        setInfoLogs(await window.electron.readInfoLogs());
     }
+
+    useEffect(() => {
+        updateInfoLogs();
+    }, []);
 
     return (
         <div className='flex flex-col w-full h-full p-6'>
@@ -42,18 +47,17 @@ export default function TabLogs(props: {}) {
                         'px-3 py-0.5 font-medium rounded ' +
                         'bg-red-200 text-red-900'
                     }
-                    onClick={openFileDialog}
                 >
                     clear logs
                 </button>
             </div>
-            <pre className='w-full p-3 mt-4 bg-white rounded'>
-                <code className='overflow-y-scroll language-log'>
-                    {'2022-03-02 14:55:11,061 - pyra.core - INFO - Starting Iteration\n' +
-                        '2022-03-02 14:55:17,067 - pyra.core - INFO - Running SystemTimeSync\n' +
-                        '2022-03-02 14:55:17,067 - pyra.core - INFO - Running SunTracking'}
+            <pre className='w-full !px-3 !py-2 mt-4 !mb-0 bg-white rounded'>
+                <code className='w-full h-full overflow-y-scroll language-log'>
+                    {infoLogs}
                 </code>
             </pre>
         </div>
     );
 }
+
+// TODO: Figure out how to remove the quotes from the logs inside the html -> in order to have syntax highlighting
