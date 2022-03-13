@@ -19,7 +19,11 @@ export default function TabLogs(props: {}) {
                 .reverse()
                 .join('\n')
         );
-        window.electron.playBeep();
+    }
+
+    async function clearLogs() {
+        await window.electron.clearLogs();
+        await updateLogs();
     }
 
     useEffect(() => {
@@ -34,7 +38,10 @@ export default function TabLogs(props: {}) {
                         'px-1 py-1 font-medium rounded ' +
                         'bg-white svg-white-button'
                     }
-                    onClick={updateLogs}
+                    onClick={() => {
+                        window.electron.playBeep();
+                        updateLogs();
+                    }}
                 >
                     <div className='w-5 h-5'>{ICONS.refresh}</div>
                 </button>
@@ -70,8 +77,9 @@ export default function TabLogs(props: {}) {
                         'px-3 py-0.5 font-medium rounded ' +
                         'bg-red-200 text-red-900'
                     }
+                    onClick={clearLogs}
                 >
-                    clear logs
+                    delete logs
                 </button>
             </div>
             <pre className='w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded'>
