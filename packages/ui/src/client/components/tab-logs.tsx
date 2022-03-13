@@ -3,13 +3,15 @@ import React, { useEffect, useState } from 'react';
 export default function TabLogs(props: {}) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
     const [infoLogs, setInfoLogs] = useState<string>('');
+    const [debugLogs, setDebugLogs] = useState<string>('');
 
-    async function updateInfoLogs() {
+    async function updateLogs() {
         setInfoLogs(await window.electron.readInfoLogs());
+        setDebugLogs(await window.electron.readDebugLogs());
     }
 
     useEffect(() => {
-        updateInfoLogs();
+        updateLogs();
     }, []);
 
     return (
@@ -51,9 +53,9 @@ export default function TabLogs(props: {}) {
                     clear logs
                 </button>
             </div>
-            <pre className='w-full !px-3 !py-2 mt-4 !mb-0 bg-white rounded'>
+            <pre className='w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded'>
                 <code className='w-full h-full overflow-y-scroll language-log'>
-                    {infoLogs}
+                    {logLevel === 'info' ? infoLogs : debugLogs}
                 </code>
             </pre>
         </div>

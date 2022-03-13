@@ -59,3 +59,10 @@ ipcMain.handle('readInfoLogs', async (_, args) => {
         'utf8'
     );
 });
+
+ipcMain.handle('readDebugLogs', async (_, args) => {
+    return readFile(
+        '/Users/moritz/Documents/research/pyra/logs/debug.log',
+        'utf8'
+    );
+});
