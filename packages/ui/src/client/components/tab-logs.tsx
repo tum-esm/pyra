@@ -6,8 +6,18 @@ export default function TabLogs(props: {}) {
     const [debugLogs, setDebugLogs] = useState<string>('');
 
     async function updateLogs() {
-        setInfoLogs(await window.electron.readInfoLogs());
-        setDebugLogs(await window.electron.readDebugLogs());
+        setInfoLogs(
+            (await window.electron.readInfoLogs())
+                .split('\n')
+                .reverse()
+                .join('\n')
+        );
+        setDebugLogs(
+            (await window.electron.readDebugLogs())
+                .split('\n')
+                .reverse()
+                .join('\n')
+        );
     }
 
     useEffect(() => {
