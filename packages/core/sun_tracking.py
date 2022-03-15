@@ -38,7 +38,7 @@ class SunTracking:
         #delete stop.txt file in camtracker folder if present
         #exe call with -automation
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        camtracker_call = PARAMS["CamTracker_executable_full_path"] + " -automation"
+        camtracker_call = self._PARAMS["CamTracker_executable_full_path"] + " -automation"
         hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(None, camtracker_call, None, None, 0,
                                                                            win32con.NORMAL_PRIORITY_CLASS, None,
                                                                            None, None)
@@ -47,7 +47,7 @@ class SunTracking:
 
     def __stop_sun_tracking_automation(self):
         #create stop.txt file in camtracker folder
-        camtracker_directory = os.path.dirname(PARAMS["CamTracker_executable_full_path"])
+        camtracker_directory = os.path.dirname(self._PARAMS["CamTracker_executable_full_path"])
         f = open(camtracker_directory + "stop.txt", 'w')
         f.close()
         pass
