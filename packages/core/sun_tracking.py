@@ -6,32 +6,50 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any software like "Camtracker"
 
-# TODO: Mock the behaviour of OPUS when testing
+# TODO:
 
 
 import logging
 import pywin32
+import os
 
 logger = logging.getLogger("pyra.core")
 
 
 class SunTracking:
-    @staticmethod
-    def run():
+
+    def __init__(self):
+        # note: dde servers talk to dde servers
+        self.camtracker_process = (None, None, None, None)
+        self._PARAMS = {}
+        self._SETUP = {}
+
+
+    def run(self, setup: dict, params: dict):
         logger.info("Running SunTracking")
+        self.__update_json_config(setup, params)
         pass
+
+    def __update_json_config(self, setup: dict, params: dict):
+        self._SETUP = setup
+        self._PARAMS = params
 
     def __start_sun_tracking_automation(self):
         #delete stop.txt file in camtracker folder if present
         #exe call with -automation
-        camtracker_call = "c/:camtracker.exe -automation"
+        # http://timgolden.me.uk/pywin32-docs/win32process.html
+        camtracker_call = PARAMS["CamTracker_executable_full_path"] + " -automation"
         hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(None, camtracker_call, None, None, 0,
                                                                            win32con.NORMAL_PRIORITY_CLASS, None,
                                                                            None, None)
 
+        return (hProcess, hThread, dwProcessId, dwThreadId)
 
     def __stop_sun_tracking_automation(self):
         #create stop.txt file in camtracker folder
+        camtracker_directory = os.path.dirname(PARAMS["CamTracker_executable_full_path"])
+        f = open(camtracker_directory + "stop.txt", 'w')
+        f.close()
         pass
 
     def __get_vbdsd_sun_status(self):

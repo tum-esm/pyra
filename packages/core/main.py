@@ -46,7 +46,7 @@ def run():
         # TODO: Possibly handle communication between these modules
         # TODO: Pass SETUP and PARAMS to modules
         SystemTimeSync.run()
-        SunTracking.run()
+        SunTracking.run(SETUP, PARAMS)
         OpusMeasurement.run(SETUP, PARAMS)
 
         logger.info("Ending Iteration")
