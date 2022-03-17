@@ -18,8 +18,8 @@ logger = logging.getLogger("pyra.core")
 
 class OpusMeasurement:
     """Creates a working DDE connection to the OPUS DDE Server.
-    Allows to remotely control experiments and macros in OPUS over the established DDE
-    connection.
+    Allows to remotely control experiments and macros in OPUS over the
+    established DDE connection.
     """
 
     def __init__(self):
@@ -115,7 +115,8 @@ class OpusMeasurement:
             logger.info("Could not stop OPUS macro as expected.")
 
     def __shutdown_dde_server(self):
-        """Note the underlying DDE object (ie, Server, Topics and Items) are not cleaned up by this call.
+        """Note the underlying DDE object (ie, Server, Topics and Items) are
+        not cleaned up by this call.
         """
         self.server.Shutdown()
 

@@ -6,8 +6,6 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any software like "Camtracker"
 
-# TODO: Add correct versions for os, jdcal and datetime to peotry
-
 
 import logging
 import pywin32
@@ -120,15 +118,11 @@ class SunTracking:
             return [None, None, None, None, None, None]
 
         f = open(target, 'r')
+        last_line = f.readlines()[-1]
+        f.close()
 
         #last_line: [Julian Date, Tracker Elevation, Tracker Azimuth,
         #Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px]
-        f.seek(-4, 2)
-        while f.read(1) != b"\n":
-            f.seek(-2, 1)
-        last_line = f.readline()
-        f.close()
-
         last_line = last_line.replace(' ','').replace('\n','').split(',')
 
         #convert julian day to greg calendar as tuple (Year, Month, Day)
@@ -157,26 +151,22 @@ class SunTracking:
             return
 
         f = open(target, 'r')
-
-        f.seek(-4, 2)
-        while f.read(1) != b"\n":
-            f.seek(-2, 1)
-        last_line = f.readline()
+        last_line = f.readlines()[-1]
         f.close()
 
         sun_intensity = last_line.split(',')[3].replace(' ', '').replace('\n', '')
 
-        #convert julian day to greg calendar as tuple (Year, Month, Day)
+        # convert julian day to greg calendar as tuple (Year, Month, Day)
         jddate = jdcal.jd2gcal(float(last_line.replace(' ', '').replace('\n', '').split(',')[0]), 0)[:3]
 
-        #get current date(example below)
-        #date = (Year, Month, Day)
+        # get current date(example below)
+        # date = (Year, Month, Day)
         now = datetime.datetime.now()
         date = (now.year, now.month, now.day)
 
         # if file is up to date
         if date == jddate:
-            #returns either 'good' or 'bad'
+            # returns either 'good' or 'bad'
             return sun_intensity
 
 
