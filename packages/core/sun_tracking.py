@@ -96,6 +96,9 @@ class SunTracking:
         f = open(camtracker_directory + "stop.txt", 'w')
         f.close()
 
+    def __read_motor_offsets(self):
+        # read azimuth and elevation motor offsets from camtracker logfiles
+        pass
 
     def __get_vbdsd_sun_status(self):
         #reads for outside sun conditions to start tracking
@@ -113,6 +116,4 @@ class SunTracking:
         #move enclosure cover to sun positin
         pass
 
-    def __read_motor_offsets(self):
-        #read azimuth and elevation motor offsets from camtracker logfiles
-        pass
+
