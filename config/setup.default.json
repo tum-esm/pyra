@@ -1,1 +1,8 @@
-{}
+{
+  "VBDSD_sensor_availability": 0,
+  "EM27_IP": "10.0.0.1",
+  "Enclosure_Type": 0,
+  "PLC_Type": 0,
+  "PLC_IP": "10.0.0.4"
+
+}

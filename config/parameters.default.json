@@ -4,7 +4,7 @@
     "OPUS_macro_full_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx",
     "OPUS_experiment_full_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
     "secondsPerIteration": 30,
-    "test_environment_mode": 0,
+    "PYRA_test_mode": 0,
     "CamTracker_executable_full_path": "C:\Users\Public\Documents\Bruker\camtracker_3_9_1_0\CamTracker_3_9.exe",
     "CamTracker_motor_offset_treshold": 10
 }
