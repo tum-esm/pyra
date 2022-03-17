@@ -1,17 +1,19 @@
-# CamTracker is a software that controls two electro motors that are connected
-# to mirrors. It tracks the sun movement and allows the spectrometer to follow
-# the sun in the course of the day.
+# CamTracker (ct) is a software that controls two electro motors that are
+# connected to mirrors. It tracks the sun movement and allows the spectrometer
+# to follow the sun in the course of the day.
 
 # TODO: Implement this for the "Camtracker" software
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any software like "Camtracker"
 
-# TODO:
+# TODO: Add correct versions for os, jdcal and datetime to peotry
 
 
 import logging
 import pywin32
 import os
+import jdcal
+import datetime
 
 logger = logging.getLogger("pyra.core")
 
@@ -37,6 +39,8 @@ class SunTracking:
         #startup camtrackerr automation: startup conditions given and inactive
         #stop camtracker automation: stop conditions given and active
 
+        #check motor offset, if over params.treshhold reinitialize CamTracker
+
         pass
 
     def __update_json_config(self, setup: dict, params: dict):
@@ -46,7 +50,7 @@ class SunTracking:
         self._SETUP = setup
         self._PARAMS = params
 
-    def __update_camtracker_application_status(self):
+    def __update_ct_application_status(self):
         """Updates the parameter self.camtracker_application_status.
         Uses win32process from pywin32 module to check hProcess available
         in self.camtracker_process.
@@ -67,7 +71,7 @@ class SunTracking:
         #delete stop.txt file in camtracker folder if present
         #exe call with -automation
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        camtracker_call = self._PARAMS["CamTracker_executable_full_path"] \
+        camtracker_call = self._SETUP["CamTracker_executable_full_path"] \
                           + " -automation"
         hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(
             None,
@@ -92,28 +96,88 @@ class SunTracking:
 
         #create stop.txt file in camtracker folder
         camtracker_directory = os.path.dirname(
-            self._PARAMS["CamTracker_executable_full_path"])
+            self._SETUP["CamTracker_executable_full_path"])
         f = open(camtracker_directory + "stop.txt", 'w')
         f.close()
 
-    def __read_motor_offsets(self):
+    def __read_ct_log_learn_az_elev(self):
+        """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
+
+        Returns a list of string parameter:
+        [
+        Julian Date,
+        Tracker Elevation,
+        Tracker Azimuth,
+        Elev Offset from Astro,
+        Az Offset from Astro,
+        Ellipse distance/px
+        ]
+        """
         # read azimuth and elevation motor offsets from camtracker logfiles
-        pass
+        target = self._SETUP["CamTracker_full_path_LEARN_Az_Elev"]
 
-    def __get_vbdsd_sun_status(self):
-        #reads for outside sun conditions to start tracking
-        #return
-        pass
+        if not os.path.isfile(target):
+            return [None, None, None, None, None, None]
 
-    def __get_camtracker_sun_status(self):
+        f = open(target, 'r')
+
+        #last_line: [Julian Date, Tracker Elevation, Tracker Azimuth,
+        #Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px]
+        f.seek(-4, 2)
+        while f.read(1) != b"\n":
+            f.seek(-2, 1)
+        last_line = f.readline()
+        f.close()
+
+        last_line = last_line.replace(' ','').replace('\n','').split(',')
+
+        #convert julian day to greg calendar as tuple (Year, Month, Day)
+        jddate = jdcal.jd2gcal(float(last_line[0]),0)[:3]
+
+        #get current date(example below)
+        #date = (Year, Month, Day)
+        now = datetime.datetime.now()
+        date = (now.year, now.month, now.day)
+
+        #if the in the log file read date is up-to-date
+        if date == jddate:
+            return last_line
+        else:
+            return [None, None, None, None, None, None]
+
+    def __read_ct_log_sunintensity(self):
+        """Reads the CamTracker Logile: SunIntensity.dat.
+
+        Returns the sun intensity as either 'good', 'bad', 'None'.
+        """
         #check sun status logged by camtracker
-        pass
+        target = self._SETUP["CamTracker_full_path_SunIntensity"]
 
-    def __get_camtracker_position(self):
-        pass
+        if not os.path.isfile(target):
+            return
 
-    def __move_enclosure_cover(self):
-        #move enclosure cover to sun positin
-        pass
+        f = open(target, 'r')
+
+        f.seek(-4, 2)
+        while f.read(1) != b"\n":
+            f.seek(-2, 1)
+        last_line = f.readline()
+        f.close()
+
+        sun_intensity = last_line.split(',')[3].replace(' ', '').replace('\n', '')
+
+        #convert julian day to greg calendar as tuple (Year, Month, Day)
+        jddate = jdcal.jd2gcal(float(last_line.replace(' ', '').replace('\n', '').split(',')[0]), 0)[:3]
+
+        #get current date(example below)
+        #date = (Year, Month, Day)
+        now = datetime.datetime.now()
+        date = (now.year, now.month, now.day)
+
+        # if file is up to date
+        if date == jddate:
+            #returns either 'good' or 'bad'
+            return sun_intensity
+
 
 

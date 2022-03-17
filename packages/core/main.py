@@ -6,7 +6,7 @@ import time
 
 from packages.core.opus_measurement import OpusMeasurement
 from packages.core.sun_tracking import SunTracking
-from packages.core.system_time_sync import SystemTimeSync
+from packages.core.measurement_conditions import MeasurementConditions
 from packages.core.validation import Validation
 
 dir = os.path.dirname
@@ -45,7 +45,7 @@ def run():
 
         # TODO: Possibly handle communication between these modules
         # TODO: Pass SETUP and PARAMS to modules
-        SystemTimeSync.run()
+        MeasurementConditions.run()
         SunTracking.run(SETUP, PARAMS)
         OpusMeasurement.run(SETUP, PARAMS)
 
