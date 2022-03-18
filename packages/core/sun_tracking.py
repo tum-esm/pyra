@@ -33,6 +33,7 @@ class SunTracking:
 
         # check for PYRA Test Mode status
         if self._PARAMS["PYRA_test_mode"] == 1:
+            logger.info("Test mode active.")
             return
 
         # automation is not active or was deactivated recently
@@ -40,6 +41,7 @@ class SunTracking:
 
             if self.__ct_application_running:
                 self.__stop_sun_tracking_automation()
+                logger.info("Stop CamTracker.")
 
             return
 
@@ -48,12 +50,14 @@ class SunTracking:
         #start ct if not currently running
         if not self.__ct_application_running:
             self.__start_sun_tracking_automation()
+            logger.info("Start CamTracker.")
 
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
         if not self.__valdiate_tracker_position:
             self.__stop_sun_tracking_automation()
+            logger.info("Stop CamTracker. Preparing for reinitialization.")
             # TODO: Check if a wait() is needed for the mirrors to move back to parking
 
 
@@ -199,9 +203,13 @@ class SunTracking:
 
         tracker_status = self.__read_ct_log_learn_az_elev()
 
+        if None in tracker_status:
+            return
+
         elev_offset = tracker_status[3]
         az_offeset = tracker_status[4]
         threshold = self._PARAMS["CamTracker_motor_offset_treshold"]
+
 
         if (elev_offset > threshold) or (az_offeset > threshold):
             return False
