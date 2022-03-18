@@ -194,5 +194,14 @@ class SunTracking:
         True -> Offsets are within treshhold
         False -> CamTracker lost sun position
         """
-        # TODO: Implement logic
-        return False
+
+        tracker_status = self.__read_ct_log_learn_az_elev()
+
+        elev_offset = tracker_status[3]
+        az_offeset = tracker_status[4]
+        treshhold = self._PARAMS["CamTracker_motor_offset_treshold"]
+
+        if (elev_offset > treshhold) or (az_offeset > treshhold):
+            return False
+
+        return True
