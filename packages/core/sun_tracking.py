@@ -44,15 +44,17 @@ class SunTracking:
             return
 
         # main logic for active automation
+
+        #start ct if not currently running
         if not self.__ct_application_running:
             self.__start_sun_tracking_automation()
 
 
-        # check motor offset, if over params.treshhold prepare to
+        # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
         if not self.__valdiate_tracker_position:
             self.__stop_sun_tracking_automation()
-            # TODO: Check if a wait() is needed for the mirrors to move
+            # TODO: Check if a wait() is needed for the mirrors to move back to parking
 
 
 
@@ -188,10 +190,10 @@ class SunTracking:
 
     @Property
     def __valdiate_tracker_position(self):
-        """Reads motor offsets and compares it with defined treshold.
+        """Reads motor offsets and compares it with defined threshold.
 
         Returns
-        True -> Offsets are within treshhold
+        True -> Offsets are within threshold
         False -> CamTracker lost sun position
         """
 
@@ -199,9 +201,9 @@ class SunTracking:
 
         elev_offset = tracker_status[3]
         az_offeset = tracker_status[4]
-        treshhold = self._PARAMS["CamTracker_motor_offset_treshold"]
+        threshold = self._PARAMS["CamTracker_motor_offset_treshold"]
 
-        if (elev_offset > treshhold) or (az_offeset > treshhold):
+        if (elev_offset > threshold) or (az_offeset > threshold):
             return False
 
         return True
