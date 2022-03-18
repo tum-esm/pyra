@@ -64,7 +64,7 @@ class SunTracking:
         self._PARAMS = params
 
     @Property
-    def __update_ct_application_status(self):
+    def __ct_application_running(self):
         """Updates the parameter self.camtracker_application_status.
         Uses win32process from pywin32 module to check hProcess available
         in self.camtracker_process.
@@ -113,16 +113,6 @@ class SunTracking:
             self._SETUP["CamTracker_executable_full_path"])
         f = open(camtracker_directory + "stop.txt", 'w')
         f.close()
-
-    def __ct_application_running(self):
-        """Checks if CamTracker application is currently running.
-
-        Returns
-        0 -> currently not running
-        1 -> currently running
-        """
-        # TODO: Implement logic
-        return 0
 
     def __read_ct_log_learn_az_elev(self):
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
