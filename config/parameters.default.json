@@ -5,4 +5,5 @@
     "secondsPerIteration": 30,
     "PYRA_test_mode": 0,
     "CamTracker_motor_offset_treshold": 10,
+    "PYRA_automation_status": 0
 }

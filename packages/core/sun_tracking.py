@@ -8,6 +8,8 @@
 
 
 import logging
+from msilib.schema import Property
+
 import pywin32
 import os
 import jdcal
@@ -29,17 +31,30 @@ class SunTracking:
         logger.info("Running SunTracking")
         self.__update_json_config(setup, params)
 
-        #check for PYRA Test Mode status
+        # check for PYRA Test Mode status
         if self._PARAMS["PYRA_test_mode"] == 1:
             return
 
+        # automation is not active or was deactivated recently
+        if self._PARAMS["PYRA_automation_status"] == 0:
 
-        #startup camtrackerr automation: startup conditions given and inactive
-        #stop camtracker automation: stop conditions given and active
+            if self.__ct_application_running:
+                self.__stop_sun_tracking_automation()
 
-        #check motor offset, if over params.treshhold reinitialize CamTracker
+            return
 
-        pass
+        # main logic for active automation
+        if not self.__ct_application_running:
+            self.__start_sun_tracking_automation()
+
+
+        # check motor offset, if over params.treshhold prepare to
+        # shutdown CamTracker. Will be restarted in next run() cycle.
+        if not self.__valdiate_tracker_position:
+            self.__stop_sun_tracking_automation()
+            # TODO: Check if a wait() is needed for the mirrors to move
+
+
 
     def __update_json_config(self, setup: dict, params: dict):
         """Updates class internal dictionaries to the latest version of the
@@ -48,16 +63,17 @@ class SunTracking:
         self._SETUP = setup
         self._PARAMS = params
 
+    @Property
     def __update_ct_application_status(self):
         """Updates the parameter self.camtracker_application_status.
         Uses win32process from pywin32 module to check hProcess available
         in self.camtracker_process.
 
-        0 if Application is currently not running on OS
-        1 if Application is currently running on OS
+        False if Application is currently not running on OS
+        True if Application is currently running on OS
         """
         # TODO: implement functionality
-        pass
+        return False
 
     def __start_sun_tracking_automation(self):
         """Uses win32process frm pywin32 module to start up the CamTracker
@@ -97,6 +113,16 @@ class SunTracking:
             self._SETUP["CamTracker_executable_full_path"])
         f = open(camtracker_directory + "stop.txt", 'w')
         f.close()
+
+    def __ct_application_running(self):
+        """Checks if CamTracker application is currently running.
+
+        Returns
+        0 -> currently not running
+        1 -> currently running
+        """
+        # TODO: Implement logic
+        return 0
 
     def __read_ct_log_learn_az_elev(self):
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
@@ -170,4 +196,13 @@ class SunTracking:
             return sun_intensity
 
 
+    @Property
+    def __valdiate_tracker_position(self):
+        """Reads motor offsets and compares it with defined treshold.
 
+        Returns
+        True -> Offsets are within treshhold
+        False -> CamTracker lost sun position
+        """
+        # TODO: Implement logic
+        return False
