@@ -10,6 +10,8 @@
 
 
 import logging
+from msilib.schema import Property
+
 import win32ui
 import dde
 
@@ -34,6 +36,11 @@ class OpusMeasurement:
         logger.info("Running OpusMeasurement")
         logger.debug("Updating JSON Config Variables")
         self.__update_json_config(setup, params)
+
+        if self.__is_em27_connected:
+            logger.info("Successful ping to EM27.")
+        else:
+            logger.info("EM27 seems to be not connected.")
 
     def __connect_to_dde_opus(self):
         try:
@@ -124,3 +131,13 @@ class OpusMeasurement:
         """Destroys the underlying C++ object.
         """
         self.server.Destroy()
+
+    @Property
+    def __is_em27_connected(self):
+        """Pings the EM27 and returns:
+
+        True -> Connected
+        False -> Not Connected"""
+        # TODO: Implement function
+        # use try if module give exceptions
+        return False
