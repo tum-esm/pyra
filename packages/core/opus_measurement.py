@@ -37,6 +37,12 @@ class OpusMeasurement:
         logger.debug("Updating JSON Config Variables")
         self.__update_json_config(setup, params)
 
+        # check for PYRA Test Mode status
+        if self._PARAMS["PYRA_test_mode"] == 1:
+            logger.info("Test mode active.")
+            return
+        # everything afterwards will be skipped if PYRA Test Mode is active
+
         if self.__is_em27_connected:
             logger.info("Successful ping to EM27.")
         else:
