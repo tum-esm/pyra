@@ -12,8 +12,8 @@
 import logging
 from msilib.schema import Property
 import time
-
-import win32ui
+import win32con
+import win32process
 import dde
 
 logger = logging.getLogger("pyra.core")
@@ -189,7 +189,7 @@ class OpusMeasurement:
             win32con.NORMAL_PRIORITY_CLASS,
             None,
             None,
-            None)
+            win32process.STARTUPINFO())
 
         return (hProcess, hThread, dwProcessId, dwThreadId)
 
@@ -202,5 +202,9 @@ class OpusMeasurement:
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
-        # TODO: implement functionality
-        return False
+        # TODO: implement functionality for None on opus_process
+        status = win32process.GetExitCodeProcess(self.opus_process[0])
+        if status == win32con.STILL_ACTIVE:
+            return True
+        else:
+            False

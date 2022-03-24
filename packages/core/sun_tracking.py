@@ -10,7 +10,8 @@
 import logging
 from msilib.schema import Property
 
-import pywin32
+import win32con
+import win32process
 import os
 import jdcal
 import datetime
@@ -76,8 +77,12 @@ class SunTracking:
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
-        # TODO: implement functionality
-        return False
+        # TODO: implement functionality for None on camtracker_process
+        status = win32process.GetExitCodeProcess(self.camtracker_process[0])
+        if status == win32con.STILL_ACTIVE:
+            return True
+        else:
+            False
 
     def __start_sun_tracking_automation(self):
         """Uses win32process frm pywin32 module to start up the CamTracker
@@ -101,7 +106,7 @@ class SunTracking:
             win32con.NORMAL_PRIORITY_CLASS,
             None,
             None,
-            None)
+            win32process.STARTUPINFO())
 
         return (hProcess, hThread, dwProcessId, dwThreadId)
 
