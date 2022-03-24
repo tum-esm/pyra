@@ -33,23 +33,32 @@ class OpusMeasurement:
         self._PARAMS = {}
         self._SETUP = {}
         self.last_cycle_automation_status = 0
+        self.opus_process = (None, None, None, None)
 
     def run(self, setup: dict, params: dict):
         logger.info("Running OpusMeasurement")
         logger.debug("Updating JSON Config Variables")
         self.__update_json_config(setup, params)
 
+        # start OPUS if not currently running
+        if not self.__opus_application_running:
+            self.opus_process = self.__start_opus()
+            logger.info("Start OPUS.")
+
         #check for automation state flank changes
         if self.last_cycle_automation_status != self._PARAMS["PYRA_automation_status"]:
             if self._PARAMS["PYRA_automation_status"] == 1:
                 # flank change 0 -> 1: load experiment, start macro
                 self.__load_experiment()
+                logger.info("Load OPUS Experiment.")
                 time.sleep(1)
                 self.__start_macro()
+                logger.info("Start OPUS Macro.")
 
             if self._PARAMS["PYRA_automation_status"] == 0:
                 # flank change 1 -> 0: stop macro
                 self.__stop_macro()
+                logger.info("Stop OPUS Macro.")
 
         # save the automation status for the next run
         self.last_cycle_automation_status = self._PARAMS["PYRA_automation_status"]
@@ -163,4 +172,35 @@ class OpusMeasurement:
         False -> Not Connected"""
         # TODO: Implement function
         # use try if module give exceptions
+        return False
+
+    def __start_opus(self):
+        """Uses win32process frm pywin32 module to start up OPUS
+         Returns pywin32 process information for later usage.
+         """
+        # http://timgolden.me.uk/pywin32-docs/win32process.html
+        opus_call = self._SETUP["OPUS_executable_full_path"]
+        hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(
+            None,
+            opus_call,
+            None,
+            None,
+            0,
+            win32con.NORMAL_PRIORITY_CLASS,
+            None,
+            None,
+            None)
+
+        return (hProcess, hThread, dwProcessId, dwThreadId)
+
+    @Property
+    def __opus_application_running(self):
+        """
+        Uses win32process from pywin32 module to check hProcess available
+        in self.opus_process.
+
+        False if Application is currently not running on OS
+        True if Application is currently running on OS
+        """
+        # TODO: implement functionality
         return False

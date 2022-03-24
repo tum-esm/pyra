@@ -24,7 +24,6 @@ class SunTracking:
         self._PARAMS = {}
         self._SETUP = {}
         self.camtracker_process = (None, None, None, None)
-        self.camtracker_application_status = 0
 
 
     def run(self, setup: dict, params: dict):
@@ -49,7 +48,7 @@ class SunTracking:
 
         #start ct if not currently running
         if not self.__ct_application_running:
-            self.__start_sun_tracking_automation()
+            self.camtracker_process = self.__start_sun_tracking_automation()
             logger.info("Start CamTracker.")
 
 
@@ -71,8 +70,7 @@ class SunTracking:
 
     @Property
     def __ct_application_running(self):
-        """Updates the parameter self.camtracker_application_status.
-        Uses win32process from pywin32 module to check hProcess available
+        """Uses win32process from pywin32 module to check hProcess available
         in self.camtracker_process.
 
         False if Application is currently not running on OS
@@ -87,7 +85,8 @@ class SunTracking:
         The paramter - automation will instruct CamTracker to automatically
         move the mirrors to the expected sun position during startup.
 
-         Returns pywin32 process information for later usage."""
+         Returns pywin32 process information for later usage.
+         """
         #delete stop.txt file in camtracker folder if present
         #exe call with -automation
         # http://timgolden.me.uk/pywin32-docs/win32process.html
