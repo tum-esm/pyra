@@ -1,5 +1,26 @@
+import json
 import click
 import os
+import sys
+from filelock import FileLock
+
+dir = os.path.dirname
+PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
+SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
+PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
+CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
+
+sys.path.append(PROJECT_DIR)
+from packages.core.validation import Validation
+
+
+error_handler = lambda m: click.echo(click.style(m, fg="red"))
+success_handler = lambda m: click.echo(click.style(m, fg="green"))
+VALIDATION_KWARGS = lambda label: {
+    "logging_handler": error_handler,
+    "logging_message": f"New {label} invalid: ",
+    "partial_validation": True,
+}
 
 
 @click.group()
@@ -12,18 +33,34 @@ def cli():
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
-def set_parameters(path, content):
-    if path == "" and content == "":
-        click.echo("You have to pass either a path or the file content.")
-    elif path != "" and content != "":
-        click.echo("You cannot pass both a path and the file content.")
+def set_parameters(path: str, content: str):
+    if (path == "" and content == "") or (path != "" and content != ""):
+        click.echo('You have to pass exactly one of "--path" or "--content"')
     else:
         if path != "":
-            # TODO: validate_file
-            pass
+            if not Validation.check_parameters_file(
+                file_path=path, **VALIDATION_KWARGS("parameters")
+            ):
+                return
+            with open(path, "r") as f:
+                new_partial_params: dict = json.load(f)
         else:
-            # TODO: validate content
-            pass
+            if not Validation.check_parameters_file(
+                content_string=content, **VALIDATION_KWARGS("parameters")
+            ):
+                return
+            new_partial_params = json.loads(content)
+
+        with FileLock(CONFIG_LOCK_PATH):
+            if not Validation.check_parameters_file(logging_handler=error_handler):
+                return
+            with open(PARAMS_FILE_PATH, "r") as f:
+                current_params: dict = json.load(f)
+
+            with open(PARAMS_FILE_PATH, "w") as f:
+                json.dump({**current_params, **new_partial_params}, f)
+
+        success_handler("Updated parameters file")
 
 
 cli.add_command(set_parameters)
