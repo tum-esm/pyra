@@ -40,10 +40,17 @@ class OpusMeasurement:
         logger.debug("Updating JSON Config Variables")
         self.__update_json_config(setup, params)
 
+        # check for PYRA Test Mode status
+        # everything afterwards will be skipped if PYRA Test Mode is active
+        if self._PARAMS["PYRA_test_mode"] == 1:
+            logger.info("Test mode active.")
+            return
+
         # start OPUS if not currently running
         if not self.__opus_application_running:
             self.__start_opus()
             logger.info("Start OPUS.")
+            # TODO: add a delay for OPUS to start? Or a return?
 
         #check for automation state flank changes
         if self.last_cycle_automation_status != self._PARAMS["PYRA_automation_status"]:
@@ -63,11 +70,6 @@ class OpusMeasurement:
         # save the automation status for the next run
         self.last_cycle_automation_status = self._PARAMS["PYRA_automation_status"]
 
-        # check for PYRA Test Mode status
-        # everything afterwards will be skipped if PYRA Test Mode is active
-        if self._PARAMS["PYRA_test_mode"] == 1:
-            logger.info("Test mode active.")
-            return
 
         if self.__is_em27_connected:
             logger.info("Successful ping to EM27.")
@@ -200,13 +202,6 @@ class OpusMeasurement:
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
-
-        #this option only works if you are sure to know the hProcess handle
-        #status = win32process.GetExitCodeProcess(self.opus_process[0])
-        #if status == win32con.STILL_ACTIVE:
-        #    return True
-        #else:
-        #    False
         # TODO: check OPUS window name with autoit window info or similar
         # FindWindow(className, windowName)
         # className: String, The window class name to find, else None
