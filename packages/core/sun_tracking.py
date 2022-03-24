@@ -24,8 +24,6 @@ class SunTracking:
     def __init__(self):
         self._PARAMS = {}
         self._SETUP = {}
-        self.camtracker_process = (None, None, None, None)
-
 
     def run(self, setup: dict, params: dict):
         logger.info("Running SunTracking")
@@ -49,7 +47,7 @@ class SunTracking:
 
         #start ct if not currently running
         if not self.__ct_application_running:
-            self.camtracker_process = self.__start_sun_tracking_automation()
+            self.__start_sun_tracking_automation()
             logger.info("Start CamTracker.")
 
 
@@ -71,22 +69,24 @@ class SunTracking:
 
     @Property
     def __ct_application_running(self):
-        """Uses win32process from pywin32 module to check hProcess available
-        in self.camtracker_process.
+        """Checks if CamTracker is already running by identifying the window.
 
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
-        # TODO: implement functionality for None on camtracker_process
-        status = win32process.GetExitCodeProcess(self.camtracker_process[0])
-        if status == win32con.STILL_ACTIVE:
-            return True
-        else:
-            False
+        # TODO: check camtracker window name with autoit window info or similar
+        # FindWindow(className, windowName)
+        # className: String, The window class name to find, else None
+        # windowName: String, The window name (ie,title) to find, else None
+        try:
+            if win32ui.FindWindow(None, "CamTracker"):
+                return True
+        except win32ui.error:
+            return False
 
     def __start_sun_tracking_automation(self):
         """Uses win32process frm pywin32 module to start up the CamTracker
-         executable with additional paramter -automation.
+         executable with additional parameter -automation.
         The paramter - automation will instruct CamTracker to automatically
         move the mirrors to the expected sun position during startup.
 

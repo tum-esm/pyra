@@ -14,6 +14,7 @@ from msilib.schema import Property
 import time
 import win32con
 import win32process
+import win32ui
 import dde
 
 logger = logging.getLogger("pyra.core")
@@ -33,7 +34,6 @@ class OpusMeasurement:
         self._PARAMS = {}
         self._SETUP = {}
         self.last_cycle_automation_status = 0
-        self.opus_process = (None, None, None, None)
 
     def run(self, setup: dict, params: dict):
         logger.info("Running OpusMeasurement")
@@ -42,7 +42,7 @@ class OpusMeasurement:
 
         # start OPUS if not currently running
         if not self.__opus_application_running:
-            self.opus_process = self.__start_opus()
+            self.__start_opus()
             logger.info("Start OPUS.")
 
         #check for automation state flank changes
@@ -191,20 +191,30 @@ class OpusMeasurement:
             None,
             win32process.STARTUPINFO())
 
-        return (hProcess, hThread, dwProcessId, dwThreadId)
+        #return (hProcess, hThread, dwProcessId, dwThreadId)
 
     @Property
     def __opus_application_running(self):
-        """
-        Uses win32process from pywin32 module to check hProcess available
-        in self.opus_process.
+        """Checks if OPUS is already running by identifying the window.
 
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
-        # TODO: implement functionality for None on opus_process
-        status = win32process.GetExitCodeProcess(self.opus_process[0])
-        if status == win32con.STILL_ACTIVE:
-            return True
-        else:
-            False
+
+        #this option only works if you are sure to know the hProcess handle
+        #status = win32process.GetExitCodeProcess(self.opus_process[0])
+        #if status == win32con.STILL_ACTIVE:
+        #    return True
+        #else:
+        #    False
+        # TODO: check OPUS window name with autoit window info or similar
+        # FindWindow(className, windowName)
+        # className: String, The window class name to find, else None
+        # windowName: String, The window name (ie,title) to find, else None
+        try:
+            if win32ui.FindWindow(None, "OPUS"):
+                return True
+        except win32ui.error:
+                return False
+
+
