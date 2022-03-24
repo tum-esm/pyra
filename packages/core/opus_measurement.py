@@ -11,6 +11,7 @@
 
 import logging
 from msilib.schema import Property
+import time
 
 import win32ui
 import dde
@@ -31,17 +32,36 @@ class OpusMeasurement:
         self.conversation = dde.CreateConversation(self.server)
         self._PARAMS = {}
         self._SETUP = {}
+        self.last_cycle_automation_status = 0
 
     def run(self, setup: dict, params: dict):
         logger.info("Running OpusMeasurement")
         logger.debug("Updating JSON Config Variables")
         self.__update_json_config(setup, params)
 
+        #check for automation state flank changes
+        if self.last_cycle_automation_status != self._PARAMS["PYRA_automation_status"]:
+            if self._PARAMS["PYRA_automation_status"] == 1:
+                # flank change 0 -> 1: load experiment, start macro
+                self.__load_experiment()
+                time.sleep(1)
+                self.__start_macro()
+
+
+            if self._PARAMS["PYRA_automation_status"] == 0:
+                # flank change 1 -> 0: stop macro
+                self.__stop_macro()
+
+        self.last_cycle_automation_status = self._PARAMS["PYRA_automation_status"]
+
+
+
+
         # check for PYRA Test Mode status
+        # everything afterwards will be skipped if PYRA Test Mode is active
         if self._PARAMS["PYRA_test_mode"] == 1:
             logger.info("Test mode active.")
             return
-        # everything afterwards will be skipped if PYRA Test Mode is active
 
         if self.__is_em27_connected:
             logger.info("Successful ping to EM27.")
