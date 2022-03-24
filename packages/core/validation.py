@@ -9,10 +9,11 @@ SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 
 # TODO: Add required JSON schema here (https://docs.python-cerberus.org/en/stable/)
-SETUP_FILE_VALIDATOR = cerberus.Validator({})
-PARAMS_FILE_VALIDATOR = cerberus.Validator(
-    {"secondsPerIteration": {"type": "number", "min": 0}}
-)
+SETUP_FILE_SCHEMA = {}
+PARAMS_FILE_SCHEMA = {
+    "secondsPerIteration": {"type": "number", "min": 0},
+    "test_environment_mode": {"type": "number", "allowed": [0, 1]},
+}
 
 
 class CerberusException(Exception):
@@ -41,23 +42,39 @@ class Validation:
         return content
 
     @staticmethod
-    def check_setup_file(file_path=SETUP_FILE_PATH, content_string=None):
+    def check_setup_file(
+        file_path=SETUP_FILE_PATH,
+        content_string=None,
+        logging_handler=logging.error,
+        logging_message="Error in current setup file: ",
+        partial_validation=False,
+    ):
         try:
-            content = Validation.__load_json(
-                file_path, content_string, SETUP_FILE_VALIDATOR
+            validator = cerberus.Validator(
+                SETUP_FILE_SCHEMA, require_all=(not partial_validation)
             )
+            content = Validation.__load_json(file_path, content_string, validator)
             # TODO: Add checks that cannot be done with cerberus here
-
+            return True
         except (AssertionError, CerberusException) as e:
-            logging.error(f"Error in setup file: {e}")
+            logging_handler(f"{logging_message}{e}")
+            return False
 
     @staticmethod
-    def check_parameters_file(file_path=PARAMS_FILE_PATH, content_string=None):
+    def check_parameters_file(
+        file_path=PARAMS_FILE_PATH,
+        content_string=None,
+        logging_handler=logging.error,
+        logging_message="Error in current parameters file: ",
+        partial_validation=False,
+    ):
         try:
-            content = Validation.__load_json(
-                file_path, content_string, PARAMS_FILE_VALIDATOR
+            validator = cerberus.Validator(
+                PARAMS_FILE_SCHEMA, require_all=(not partial_validation)
             )
+            content = Validation.__load_json(file_path, content_string, validator)
             # TODO: Add checks that cannot be done with cerberus here
-
+            return True
         except (AssertionError, CerberusException) as e:
-            logging.error(f"Error in parameters file: {e}")
+            logging_handler(f"{logging_message}{e}")
+            return False
