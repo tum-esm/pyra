@@ -47,15 +47,12 @@ class OpusMeasurement:
                 time.sleep(1)
                 self.__start_macro()
 
-
             if self._PARAMS["PYRA_automation_status"] == 0:
                 # flank change 1 -> 0: stop macro
                 self.__stop_macro()
 
+        # save the automation status for the next run
         self.last_cycle_automation_status = self._PARAMS["PYRA_automation_status"]
-
-
-
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
