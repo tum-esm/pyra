@@ -77,8 +77,15 @@ def get_parameters():
         error_handler(e)
 
 
+@click.command(help="Validate the current parameters.json file.")
+def validate_current_parameters():
+    if Validation.check_parameters_file(logging_handler=error_handler):
+        success_handler("Current parameters file is valid")
+
+
 cli.add_command(set_parameters)
 cli.add_command(get_parameters)
+cli.add_command(validate_current_parameters)
 
 if __name__ == "__main__":
     cli.main(prog_name="pyra-cli")
