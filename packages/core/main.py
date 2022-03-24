@@ -37,8 +37,8 @@ def run():
         # CLI should not interfere. A file "config/config.lock" will be created
         # and the existence of this file will make the next line wait.
         with FileLock(CONFIG_LOCK_PATH):
-            Validation.check_parameters_config()
-            Validation.check_setup_config()
+            Validation.check_parameters_file()
+            Validation.check_setup_file()
             with open(SETUP_FILE_PATH, "r") as f:
                 SETUP = json.load(f)
             with open(PARAMS_FILE_PATH, "r") as f:

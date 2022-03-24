@@ -21,39 +21,43 @@ class CerberusException(Exception):
 
 class Validation:
     @staticmethod
-    def check_setup_config():
-        try:
-            assert os.path.isfile(SETUP_FILE_PATH), "file does not exist"
-            with open(SETUP_FILE_PATH, "r") as f:
+    def __load_json(file_path, content_string, validator):
+        if content_string is None:
+            assert os.path.isfile(file_path), "file does not exist"
+            with open(file_path, "r") as f:
                 try:
-                    SETUP_FILE_CONTENT = json.load(f)
+                    content = json.load(f)
                 except:
-                    raise AssertionError("not in a valid json format")
+                    raise AssertionError("file not in a valid json format")
+        else:
+            try:
+                content = json.loads(content_string)
+            except:
+                raise AssertionError("content not in a valid json format")
 
-            if not SETUP_FILE_VALIDATOR.validate(SETUP_FILE_CONTENT):
-                raise CerberusException(SETUP_FILE_VALIDATOR.errors)
-            # TODO: Add checks that cannot be done with cerberus here
+        if not validator.validate(content):
+            raise CerberusException(validator.errors)
 
-        except AssertionError as a:
-            logging.error(f"Error in setup file: {a}")
-        except CerberusException as v:
-            logging.error(f"Error in parameters file: {v}")
+        return content
 
     @staticmethod
-    def check_parameters_config():
+    def check_setup_file(file_path=SETUP_FILE_PATH, content_string=None):
         try:
-            assert os.path.isfile(PARAMS_FILE_PATH), "file does not exist"
-            with open(PARAMS_FILE_PATH, "r") as f:
-                try:
-                    PARAMS_FILE_CONTENT = json.load(f)
-                except:
-                    raise AssertionError("not in a valid json format")
-
-            if not PARAMS_FILE_VALIDATOR.validate(PARAMS_FILE_CONTENT):
-                raise CerberusException(PARAMS_FILE_VALIDATOR.errors)
+            content = Validation.__load_json(
+                file_path, content_string, SETUP_FILE_VALIDATOR
+            )
             # TODO: Add checks that cannot be done with cerberus here
 
-        except AssertionError as a:
-            logging.error(f"Error in parameters file: {a}")
-        except CerberusException as v:
-            logging.error(f"Error in parameters file: {v}")
+        except (AssertionError, CerberusException) as e:
+            logging.error(f"Error in setup file: {e}")
+
+    @staticmethod
+    def check_parameters_file(file_path=PARAMS_FILE_PATH, content_string=None):
+        try:
+            content = Validation.__load_json(
+                file_path, content_string, PARAMS_FILE_VALIDATOR
+            )
+            # TODO: Add checks that cannot be done with cerberus here
+
+        except (AssertionError, CerberusException) as e:
+            logging.error(f"Error in parameters file: {e}")
