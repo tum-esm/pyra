@@ -63,7 +63,22 @@ def set_parameters(path: str, content: str):
         success_handler("Updated parameters file")
 
 
+@click.command(help="Read the current parameters.json file.")
+def get_parameters():
+    try:
+        assert os.path.isfile(PARAMS_FILE_PATH), "file does not exist"
+        with open(PARAMS_FILE_PATH, "r") as f:
+            try:
+                content = json.load(f)
+            except:
+                raise AssertionError("file not in a valid json format")
+        success_handler(content)
+    except AssertionError as e:
+        error_handler(e)
+
+
 cli.add_command(set_parameters)
+cli.add_command(get_parameters)
 
 if __name__ == "__main__":
     cli.main(prog_name="pyra-cli")
