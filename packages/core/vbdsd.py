@@ -1,6 +1,6 @@
 # filename          : vbdsd.py
 # description  : Vision-Based Direct Sunlight Detector
-#==============================================================================
+# ==============================================================================
 # author            : Benno Voggenreiter
 # email             : -
 # date              : 20190719
@@ -8,7 +8,7 @@
 # notes             : Created by Benno Voggenreiter (Master's Thesis)
 # license           : -
 # py version        : 2.7
-#==============================================================================
+# ==============================================================================
 # author            : Benno Voggenreiter
 # email             : -
 # date              : 20210226
@@ -16,7 +16,7 @@
 # notes             : Improved by Nikolas Hars (Bachelor's Thesis)
 # license           : -
 # py version        : 2.7
-#==============================================================================
+# ==============================================================================
 # author            : Patrick Aigner
 # email             : patrick.aigner@tum.de
 # date              : 20220328
@@ -24,7 +24,7 @@
 # notes             : Upgrade to Python 3.10 and refactoring for Pyra 4.
 # license           : -
 # py version        : 3.10
-#==============================================================================
+# ==============================================================================
 
 import cv2 as cv
 import time
@@ -41,11 +41,15 @@ import numpy as np
 
 
 def init_cam(cam_id):
+    """init_cam(int id): Connects to the camera with id and sets its parameters
+     from section 4.2.1. If successfully connected, the function returns an
+     instance object of the camera, otherwise None will be returned.
+    """
 
     cam = cv.VideoCapture(cam_id)
     cam.release()
-    height = 720 # 768
-    width = 1280 # 1024
+    height = 720  # 768
+    width = 1280  # 1024
 
     status = False
     for trial in range(1, 5):
@@ -55,11 +59,11 @@ def init_cam(cam_id):
         if cam.isOpened():
             cam.set(3, width)
             cam.set(4, height)
-            cam.set(15, -12)    # exposure
-            cam.set(10, 64)     # brightness
-            cam.set(11, 64)     # contrast
-            cam.set(12, 0)      # saturation
-            cam.set(14, 0)      # gain
+            cam.set(15, -12)  # exposure
+            cam.set(10, 64)  # brightness
+            cam.set(11, 64)  # contrast
+            cam.set(12, 0)  # saturation
+            cam.set(14, 0)  # gain
             status = True
             cam.read()
             break
@@ -70,6 +74,12 @@ def init_cam(cam_id):
 
 
 def get_tracker_position():
+    """get_tracker_position(): Reads out the height, the longitude and the
+    latitude of the system from CamTrackerConfig.txt, and computes the location
+    on earth. Therefore, the python package as- tropy [23] is imported, and its
+    function coord.EarthLocation() is used. The read out parameters, as well as
+    the computed location will be returned.
+    """
     conf_file = ReadWriteFiles()
     height = float(conf_file.config_file['Camtracker Config File Height'])
     longitude = float(conf_file.config_file['Camtracker Config File Longitude'])
@@ -79,15 +89,24 @@ def get_tracker_position():
 
 
 def get_interval_time():
+    """get_interval_time(): ReadsoutthetimeintervalDSDIntervalTimefromConfigFile.txt,
+    within images shall be captured and evaluated. During this interval, images
+    will be captured and ana- lyzed after every user defined period.
+    """
     conf_file = ReadWriteFiles()
     t_interval = conf_file.config_file['DSD Interval Time']
     return float(t_interval)
 
 
 def get_period_time():
+    """get_period_time(): Reads out the time period DSDP eriodT ime from
+    ConfigFile.txt. Images will be captured and evaluated after every period for
+     the user defined time interval.
+     """
     conf_file = ReadWriteFiles()
     t_period = conf_file.config_file['DSD Period Time']
     return float(t_period)
+
 
 def eval_sun_state_new(frame):
     """
@@ -127,7 +146,6 @@ def eval_sun_state_new(frame):
         if not ppi_contour is None:
             ret_val = 0
 
-
     if ret_val == 0:
         cv.drawContours(img_b, ppi_contour, -1, 0, 40)  # Draw over the white found contour: we might lose some contours
         # cv.drawContours(frame, ddi_contour, -1, (0,255,0), 20)
@@ -136,7 +154,8 @@ def eval_sun_state_new(frame):
         # Make borders black again
         cv.rectangle(img_b, (0, 0), (x_pix, border), (0), -1)
         cv.rectangle(img_b, (0, y_pix + border), (x_pix, y_pix + 2 * border), (0), -1)
-        cv.circle(img_b, (x_c, y_c), r + 5, 255, 10)  # Draw white and black circle to seperate projection plate from outside
+        cv.circle(img_b, (x_c, y_c), r + 5, 255,
+                  10)  # Draw white and black circle to seperate projection plate from outside
         cv.circle(img_b, (x_c, y_c), r - 2, 0, 5)
 
         contours_cropped, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
@@ -300,7 +319,7 @@ def eval_sun_state(frame):
         return 0, frame
 
 
-def extend_border(img,frame):
+def extend_border(img, frame):
     bordersize = 50  # Extend borders
     img_b = cv.copyMakeBorder(
         img,
@@ -323,8 +342,8 @@ def extend_border(img,frame):
     )
     return img_b, frame, bordersize
 
-def eval_sun_state_old(frame):
 
+def eval_sun_state_old(frame):
     blur = cv.medianBlur(frame, 15)
     frame_gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
     img_b = cv.adaptiveThreshold(frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 17, 2)
@@ -335,8 +354,8 @@ def eval_sun_state_old(frame):
 
     # get contours in binary frame
     if len(contours) <= 1:
-     	#print('nosun')
-      	return 0
+        # print('nosun')
+        return 0
     if len(contours) > 1:
         # get biggest contour which is projection plate
         # c = sorted(contours, key=cv.contourArea, reverse=True)
@@ -346,66 +365,91 @@ def eval_sun_state_old(frame):
         # cv.rectangle(img_b, (x, y), (x + w, y + h), 255, 1)
         # draw white circle on projection plate to separate
         # shadow contours from plate contours
-        cv.circle(img_b, (x + w/2, y + h/2), h/2, 255, 3)
+        cv.circle(img_b, (x + w / 2, y + h / 2), h / 2, 255, 3)
         # search for contours again
         contours_cropped, hierarchy = cv.findContours(img_b, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
-        #for n in range(0, len(contours_cropped)):
+        # for n in range(0, len(contours_cropped)):
         #    cv.drawContours(frame_gray, contours_cropped[n], -1, 255, 1)
         #    cv.imshow('contours_cropped', frame_gray)
         #    cv.waitKey()
 
-        #print(hierarchy)
+        # print(hierarchy)
         if len(contours_cropped) != 0:
             for i in range(0, len(contours_cropped)):
                 area = cv.contourArea(contours_cropped[i])
-                #print(hierarchy[0][i])
-                #print(area)
-                if(hierarchy[0][i][3]) >= 0 and float(area) > 2000:
-                    #print('sun')
+                # print(hierarchy[0][i])
+                # print(area)
+                if (hierarchy[0][i][3]) >= 0 and float(area) > 2000:
+                    # print('sun')
                     return 1
-	return 0
+        return 0
 
 
 def get_image_storage_path():
+    """get_image_storage_path(): Reads out the path DSDImageStoragePath, where
+    images cap- tured by the sensor shall be stored from ConfigFile.txt, and
+    returns it as a string. The parameter therefore is.
+    """
     conf_file = ReadWriteFiles()
     path = conf_file.config_file['DSD Image Storage Path']
     return path
 
 
 def get_angle_thres():
+    """get_angle_thres(): Reads out the minimum sun angle DSDMinAngle from
+    ConfigFile.txt, at which the Bruker EM27/SUN is able to measure."""
     conf_file = ReadWriteFiles()
     min_angle = conf_file.config_file['DSD Min Angle']
     return min_angle
 
 
 def get_m_thres():
+    """get_m_thres(): Reads out the measurement threshold value DSDMeasurementThres
+    for the evaluated images from ConfigFile.txt. If the percentage of images,
+    captured during above men- tioned time interval and shadow was successfully
+    detected within, exceeds this threshold, the measurement procedure will be
+    initiated. Otherwise, a possible running measurement will be stopped.
+    """
     conf_file = ReadWriteFiles()
     thr = conf_file.config_file['DSD Measurement Thres']
     return float(thr)
 
 
 def get_a_thres():
+    """get_a_thres(): Reads out the automation threshold value DSDAutomationT
+    hres for the eval- uated images from ConfigFile.txt. If the percentage of
+    images, captured during above mentioned time interval and shadow was
+    successfully detected within, is below that threshold, OPUS and CamTracker
+    will be terminated.
+    """
     conf_file = ReadWriteFiles()
     thr = conf_file.config_file['DSD Automation Thres']
     return float(thr)
 
 
 def get_cam_id():
+    """get_cam_id(): Reads out the camera ID DSDCamID to connect with from
+    ConfigFile.txt.
+    """
     conf_file = ReadWriteFiles()
     cam_id = conf_file.config_file['DSD Cam ID']
     return int(cam_id)
 
 
 def calc_sun_angle_deg(loc):
+    """calc_sun_angle_deg(location loc): Computes and returns the current sun
+    angle in degree, based on the location loc, computed by get_tracker_position(),
+     and current time. Therefore, the pack- ages time and astrophy are required.
+     """
     now = Time.now()
     altaz = coord.AltAz(location=loc, obstime=now)
     sun = coord.get_sun(now)
     sun_angle_deg = sun.transform_to(altaz).alt
     return sun_angle_deg
 
+
 def debug_log(file_name, msg):
     f = open(file_name, 'a')
     f.write(msg)
     f.close()
-
