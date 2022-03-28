@@ -50,7 +50,7 @@ class OpusMeasurement:
         if not self.__opus_application_running:
             self.__start_opus()
             logger.info("Start OPUS.")
-            # TODO: add a delay for OPUS to start? Or a return?
+            # TODO: add a delay for OPUS while start?
 
         #check for automation state flank changes
         if self.last_cycle_automation_status != self._PARAMS["PYRA_automation_status"]:

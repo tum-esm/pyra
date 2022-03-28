@@ -35,6 +35,7 @@ class SunTracking:
             return
 
         # automation is not active or was deactivated recently
+        # TODO: Prüfen ob Flankenwechsel notwendig
         if self._PARAMS["PYRA_automation_status"] == 0:
 
             if self.__ct_application_running:
@@ -97,7 +98,7 @@ class SunTracking:
         # http://timgolden.me.uk/pywin32-docs/win32process.html
         camtracker_call = self._SETUP["CamTracker_executable_full_path"] \
                           + " -automation"
-        hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(
+        hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
             camtracker_call,
             None,
