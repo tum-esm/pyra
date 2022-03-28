@@ -26,17 +26,11 @@
 # py version        : 3.10
 # ==============================================================================
 
-import cv2 as cv
 import time
-import astropy.coordinates as coord
 from astropy.time import Time
+import astropy.coordinates as coord
 import astropy.units as u
-import sys
-import logging
-import smtplib
-from UtilityModule import ReadWriteFiles
-import glob
-import imutils
+import cv2 as cv
 import numpy as np
 
 
@@ -106,139 +100,6 @@ def get_period_time():
     conf_file = ReadWriteFiles()
     t_period = conf_file.config_file['DSD Period Time']
     return float(t_period)
-
-
-def eval_sun_state_new(frame):
-    """
-    Sophisticated Contour Retrieval
-    :param frame: Captured image from the sun detector camera
-    :return: Status = -1, 0, 1.
-            -1 --> Circle could not be detected --> Change Exposure and try again
-             0 --> Circle detected but not enough contours on the projection plane
-             1 --> Successfully detected contours
-    """
-    ret_val = -1
-
-    x_pix, y_pix = 1280, 720
-    blur = cv.medianBlur(frame, 15)
-    frame_gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
-    img_b = cv.adaptiveThreshold(frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 21, 2)
-    img_b = cv.medianBlur(img_b, 15)
-
-    img_b, frame, border = extend_border(img_b, frame)
-
-    contours, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-    # get Projection Plate Contour
-    ppi_contour = None
-    if len(contours) > 0:
-        for i in range(len(contours)):
-            if cv.contourArea(contours[i]) > 2000:
-                x, y, w, h = cv.boundingRect(contours[i])
-                if 300 < x < 1280 / 2 and 680 < float(h) < 740 and 0.8 < float(w) / float(h) < 1. / 0.8:
-                    # Use constraints to find the projection plane
-                    x_c, y_c, r = int(x + w / 2), int(y + h / 2), int((w + h) / 4)
-                    logging.getLogger("VBDSD")
-                    logging.info("radius %s" % r)
-                    ppi_contour = contours[i]  # Save contour
-                    break
-                    # cv.drawContours(frame,contours[i], -1, (255,0,0),15)
-        img_b = cv.bitwise_not(img_b)  # Black background
-        if not ppi_contour is None:
-            ret_val = 0
-
-    if ret_val == 0:
-        cv.drawContours(img_b, ppi_contour, -1, 0, 40)  # Draw over the white found contour: we might lose some contours
-        # cv.drawContours(frame, ddi_contour, -1, (0,255,0), 20)
-        # if they are connected to the border
-
-        # Make borders black again
-        cv.rectangle(img_b, (0, 0), (x_pix, border), (0), -1)
-        cv.rectangle(img_b, (0, y_pix + border), (x_pix, y_pix + 2 * border), (0), -1)
-        cv.circle(img_b, (x_c, y_c), r + 5, 255,
-                  10)  # Draw white and black circle to seperate projection plate from outside
-        cv.circle(img_b, (x_c, y_c), r - 2, 0, 5)
-
-        contours_cropped, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-
-        if len(contours_cropped) > 1:
-            # Filter out small contours because they don't contain valuable information
-            c_areas = []
-            length_of_all_elements = 0
-            for contour in contours_cropped:
-                temp_area = cv.contourArea(contour)
-                if temp_area >= 50:
-                    length_of_all_elements += 1
-                c_areas.append(temp_area)
-            indices = np.argsort(c_areas)
-            ppi = indices[-1]  # Outer contour of projection plate
-
-            # Find the exact hierarchy to only check for contours that are children of the projection plane
-            # Using a breadth-first search like approach
-            all_elements = []
-            structure = []
-            level = 0
-            Stay = True
-            while Stay:
-                this_level = []
-                for i in indices:
-                    if c_areas[i] < 50:
-                        continue
-                    put_in_level = False
-                    if hierarchy[0][i][3] == -1 and level == 0:
-                        put_in_level = True
-                        for element in all_elements:
-                            if i == element:
-                                put_in_level = False
-                                break
-                        if put_in_level:
-                            all_elements.append(i)
-                            this_level.append(i)
-                    elif level != 0:
-                        for element in structure[level - 1]:
-                            if hierarchy[0][i][3] == element:
-                                put_in_level = True
-                                for single_number in all_elements:
-                                    if i == single_number:
-                                        put_in_level = False
-                                        break
-                                if put_in_level:
-                                    all_elements.append(i)
-                                    this_level.append(i)
-                if len(this_level) > 0:
-                    level += 1
-                    structure.append(this_level)
-                if len(all_elements) == length_of_all_elements:
-                    Stay = False
-                    break
-
-            # Check the size and parents and level of contour
-            font = cv.FONT_HERSHEY_SIMPLEX
-            colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (255, 255, 255)]
-            areas = [0]
-            for i in range(len(structure)):
-                for element in structure[i]:
-                    x, y, w, h = cv.boundingRect(contours_cropped[element])
-                    pos = (x, y)
-                    if hierarchy[0][element][3] == ppi + 1 or element == ppi or element == ppi + 1:
-                        # if parent of current contour is inner circle: check area
-                        # if contour = inner or outer pp (projection plate) --> draw as reference
-                        if i > 1:
-                            areas.append(c_areas[element])
-                        if c_areas[element] > 2000 and i > 1:  # Hierarchy > 1 so is child of ppi and ppi+1
-                            ret_val = 1
-                            cv.drawContours(frame, contours_cropped[element], -1, colors[4], 4)
-                            cv.putText(frame, ('%s (%s)' % (element, i)), pos, font, 1, colors[4], 2, 10)
-                        else:
-                            cv.drawContours(frame, contours_cropped[element], -1, colors[i], 4)
-                            cv.putText(frame, ('%s (%s)' % (element, i)), pos, font, 1, colors[i], 2, 10)
-                    else:
-                        cv.drawContours(frame, contours_cropped[element], -1, colors[5], 4)
-                        cv.putText(frame, ('%s (%s)' % (element, i)), pos, font, 1, colors[5], 2, 10)
-            area = sum(areas)
-            if len(areas) > 5:
-                if np.mean(areas[1:]) > 500 or area > 2000:
-                    ret_val = 1
-    return ret_val, frame
 
 
 def eval_sun_state(frame):
@@ -341,49 +202,6 @@ def extend_border(img, frame):
         value=[0, 0, 0]
     )
     return img_b, frame, bordersize
-
-
-def eval_sun_state_old(frame):
-    blur = cv.medianBlur(frame, 15)
-    frame_gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
-    img_b = cv.adaptiveThreshold(frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 17, 2)
-    img_b = cv.medianBlur(img_b, 15)
-    img_b = img_b[10:700, :]
-    contours, hierarchy = cv.findContours(img_b, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
-    img_b = cv.medianBlur(img_b, 15)
-
-    # get contours in binary frame
-    if len(contours) <= 1:
-        # print('nosun')
-        return 0
-    if len(contours) > 1:
-        # get biggest contour which is projection plate
-        # c = sorted(contours, key=cv.contourArea, reverse=True)
-        # cv.drawContours(frame_gray, c[0], -1, 255, 1)
-        # get pixel coordinates of bounding rectangle around projection plate
-        x, y, w, h = cv.boundingRect(contours[(np.amax(hierarchy[0], axis=0)[0] - 1)])
-        # cv.rectangle(img_b, (x, y), (x + w, y + h), 255, 1)
-        # draw white circle on projection plate to separate
-        # shadow contours from plate contours
-        cv.circle(img_b, (x + w / 2, y + h / 2), h / 2, 255, 3)
-        # search for contours again
-        contours_cropped, hierarchy = cv.findContours(img_b, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-
-        # for n in range(0, len(contours_cropped)):
-        #    cv.drawContours(frame_gray, contours_cropped[n], -1, 255, 1)
-        #    cv.imshow('contours_cropped', frame_gray)
-        #    cv.waitKey()
-
-        # print(hierarchy)
-        if len(contours_cropped) != 0:
-            for i in range(0, len(contours_cropped)):
-                area = cv.contourArea(contours_cropped[i])
-                # print(hierarchy[0][i])
-                # print(area)
-                if (hierarchy[0][i][3]) >= 0 and float(area) > 2000:
-                    # print('sun')
-                    return 1
-        return 0
 
 
 def get_image_storage_path():
