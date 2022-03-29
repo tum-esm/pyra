@@ -25,7 +25,7 @@
 # license           : -
 # py version        : 3.10
 # ==============================================================================
-
+import logging
 import os
 import time
 import astropy
@@ -280,6 +280,247 @@ def get_cam_id():
     return int(cam_id)
 
 if __name__ == "__main__":
+
+    # TODO: Ordnung in das Chaos bringen
+
+    PARAMS, SETUP = read_json_files()
     #while(1)
     # if "vbdsd_automation_status" == 1 do...
-    pass
+    valid_angle_flag = False
+
+    while not _stop.isSet():
+        # calculate new sun angle
+        sun_angle_deg = calc_sun_angle_deg(loc)
+
+        # power spectrometer if sun angle bigger than 10 degrees
+        # print('Sun Angle: {:.2f}'.format(self.sun_angle_deg))
+        if not heating_flag:
+            if sun_angle_deg >= 10 * astropy.units.deg:
+                heating_flag = True
+
+
+        # check whether angle is valid ( >15°)
+        if sun_angle_deg > PARAMS["vbdsd_min_angle"]:
+            logging.INFO("Minimum sun angle reached.")
+            if not self.valid_angle_flag:
+                valid_angle_flag = True
+
+            n = PARAMS["vbdsd_interval_time"] / PARAMS["vbdsd_period_time"]
+
+            logging.INFO("Capturing and Analysing {:.0f} Images in {:.2f} seconds ...".format(n, PARAMS["vbdsd_interval_time"]))
+
+            self.image_path = self.image_storage_path + '//img_' + datetime.now().date().strftime('%Y_%m_%d') + '/'
+            img_path_exists = True
+            if not os.path.exists(self.image_path):
+                try:
+                    os.makedirs(self.image_path)
+                    ui.write_to_log('INFO', 'DSDthread', 'Image Storage Path: ' + self.image_path)
+                except:
+                    ui.write_to_log('INFO', 'DSDthread', 'Image Storage Path not found')
+                    ui.write_to_log('INFO', 'DSDthread', 'Not storing VBDSD Images')
+                    img_path_exists = False
+                    pass
+            start_time0 = time.time()
+            self.change_exposure()  # Reset exposure
+            # acquire and analyse images
+            for idx in range(0, self.n):
+                self.dsd_logger.debug("Iteration Index {}".format(idx))
+                if not self._stop.isSet():
+                    start_time = time.time()
+                    self.dsd_logger.debug("capture_frame")
+                    try:
+                        status, frame = self.process_vbdsd_image()
+                        if status == -1:
+                            self.change_exposure(1)
+                            status, frame = self.process_vbdsd_image()
+                            if status == -1:
+                                status = 0
+                    except:  # join() causes an exception
+                        status = 0
+                        ui.write_to_log('WARNING', 'DSDthread', 'A frame could not be evaluated')
+                        pass
+                else:
+                    break
+                # store the images with CamTracker status for evaluation purpose
+                self.dsd_logger.debug("get_ct_status")
+                ct_status = ui.check_SunTracker_status_SunIntensity()
+                if img_path_exists:
+                    self.dsd_logger.debug("save_image")
+                    cv.imwrite(self.image_path + '/' + datetime.now().time().strftime('%H_%M_%S_')
+                               + ct_status + "_exp_" + str(self.exp) + '_' + str(status) + '.jpg', frame)
+
+                self.results.append(status)
+                if len(self.results) == self.n:
+                    self.dsd_logger.debug("15 Images are captured")
+                    break
+                else:
+                    self.change_exposure()
+                    elapsed_time = time.time() - start_time
+                    self.dsd_logger.debug("Elapsed Time = {}".format(int(elapsed_time)))
+                    timeout = self.t_period - abs(elapsed_time)
+                    self.dsd_logger.debug("Timeout = {}".format(int(timeout)))
+                    if timeout <= 0:
+                        timeout = 0.01
+                    # print('VBDSD single image: %s s' % elapsed_time)
+                    self.wait.acquire()
+                    self.wait.wait(timeout=timeout)
+                    self.dsd_logger.debug("self.wait.wait is timed out")
+
+            elapsed_time0 = time.time() - start_time0
+            # print('VBDSD all Images: %s s' % elapsed_time0)
+            if self._stop.isSet() or len(self.results) != self.n:
+                break
+
+            self.score = float(sum(self.results)) / float(len(self.results))
+            if self.score >= self.m_thres:
+                self.status = 'GOOD'
+            else:
+                self.status = 'BAD'
+
+            ui.write_to_log('INFO', 'DSDthread', 'VBDSD Results: ' + ', '
+                            .join(['%.f' % (self.results[n]) for n in xrange(len(self.results))]))
+            ui.write_to_log('INFO', 'DSDthread', 'Score: {:.2f}% ({:.0f}/{:.0f}) --> Sun Status: '
+                            .format(self.score * 100.0, sum(self.results), len(self.results)) + self.status)
+            self.results[:] = []
+            # score > m_thres
+            if not ui.indicatorRain.isChecked():
+                if self.score >= self.m_thres:
+                    self.dsd_logger.debug("Score > Measure")
+                    if ui.resetButton.isEnabled():
+                        ui.write_to_log('INFO', 'DSDthread', 'Resetting after rain')
+                        ui.resetButton.click()
+                        self.wait.acquire()
+                        self.wait.wait(timeout=6.0)
+                    if not ui.autoUpdateSwitch.isChecked() and not self._stop.isSet():
+                        ui.write_to_log('INFO', 'DSDthread', 'Synchronise Cover')
+                        ui.autoUpdateSwitch.setChecked(True)
+                    # start CT and OPUS (start automation)
+                    else:
+                        self.dsd_logger.debug("autoUpdateSwitch is Checked or stop is set, so no: Synchronise Cover")
+                    if ui.pushButton__start_automation.isEnabled() and not self._stop.isSet():
+                        start_time1 = time.time()
+                        ui.write_to_log('INFO', 'DSDthread', 'Automation START')
+                        ui.pushButton__start_automation.click()
+                        while not ui.pushButton_start_measurement.isEnabled() and not self._stop.isSet():
+                            self.wait.acquire()
+                            self.wait.wait(timeout=1.0)  # TODO: Infinite loop in Log_2020_11_16
+                        # print('Start Automation Time: %s' % (time.time() - start_time1))
+                    # start measurement
+                    if ui.pushButton_start_measurement.isEnabled() and not self._stop.isSet():
+                        start_time2 = time.time()
+                        Vbdsd.debug_log(self.debug_file, 'Measurement START: \n'
+                                        + datetime.now().strftime("%m/%d/%Y") + '\n'
+                                        + datetime.now().time().strftime("%H:%M:%S") + '\n')
+                        ui.write_to_log('INFO', 'DSDthread', 'Measurement START')
+                        ui.pushButton_start_measurement.click()
+                        while not ui.pushButton_stop_measurement.isEnabled() and not self._stop.isSet():
+                            self.wait.acquire()
+                            self.wait.wait(timeout=1.0)
+                    else:
+                        self.dsd_logger.debug("Start Measurement not enabled or stop is set")
+                        # print('Start Measurement Time: %s' % (time.time() - start_time2))
+                # stop measurement
+                else:
+                    self.dsd_logger.debug("Stop Measurement")
+                    if ui.pushButton_stop_measurement.isEnabled() and not self._stop.isSet():
+                        start_time3 = time.time()
+                        ui.write_to_log('INFO', 'DSDthread', 'Measurement STOP: Inappropriate Sun Intensity')
+                        Vbdsd.debug_log(self.debug_file, 'Measurement STOP: \n'
+                                        + datetime.now().strftime("%m/%d/%Y") + '\n'
+                                        + datetime.now().time().strftime("%H:%M:%S") + '\n')
+                        ui.pushButton_stop_measurement.click()
+                        while not ui.pushButton_start_measurement.isEnabled() and not self._stop.isSet():
+                            self.dsd_logger.debug("Start Measurement not enabled - In Loop")
+                            self.wait.acquire()
+                            self.wait.wait(timeout=1.0)
+                        # print('Stop Measurement Time: %s' % (time.time() - start_time3))
+                    else:
+                        self.dsd_logger.debug("Stop Measurement not enabled or stop is set")
+                    # score < a_thres
+                    if self.score < self.a_thres:
+                        self.dsd_logger.debug("Score < Automation")
+                        start_time4 = time.time()
+                        if ui.pushButton__stop_automation.isEnabled() and not self._stop.isSet():
+                            ui.write_to_log('INFO', 'DSDthread', 'Automation STOP: Inappropriate Sun Intensity')
+                            ui.pushButton__stop_automation.click()
+                            while not ui.pushButton__start_automation.isEnabled() and not self._stop.isSet():
+                                self.dsd_logger.debug("Start Automation not enabled - In Loop")
+                                self.wait.acquire()
+                                self.wait.wait(timeout=1.0)
+                            # print('Stop Automation Time: %s' % (time.time() - start_time4))
+                        else:
+                            self.dsd_logger.debug("Stop Automation not enabled or stop is set")
+                elapsed_time = time.time() - start_time
+                self.dsd_logger.debug("Elapsed Time = {}".format(int(elapsed_time)))
+                timeout = self.t_period - abs(elapsed_time)
+                self.dsd_logger.debug("Timeout = {}".format(int(timeout)))
+                if timeout <= 0:
+                    timeout = 0.01
+                self.wait.acquire()
+                self.wait.wait(timeout=timeout)
+                self.dsd_logger.debug("self.wait.wait is timed out")
+            else:
+                ui.write_to_log('INFO', 'DSDthread', 'Rain Detected')
+                if ui.autoUpdateSwitch.isChecked():
+                    ui.write_to_log('INFO', 'DSDthread', 'ECON Cover: CLOSE')
+                    ui.closeCoverButton.clicked.emit(True)
+                if ui.pushButton_stop_measurement.isEnabled() and not self._stop.isSet():
+                    Vbdsd.debug_log(self.debug_file, 'Measurement STOP: \n'
+                                    + datetime.now().strftime("%m/%d/%Y") + '\n'
+                                    + datetime.now().time().strftime("%H:%M:%S") + '\n')
+                    ui.write_to_log('INFO', 'DSDthread', 'Measurement Stopped')
+                    ui.pushButton_stop_measurement.click()
+                    while not ui.pushButton_start_measurement.isEnabled():
+                        self.wait.acquire()
+                        self.wait.wait(timeout=1.0)
+                if ui.pushButton__stop_automation.isEnabled() and not self._stop.isSet():
+                    ui.write_to_log('INFO', 'DSDthread', 'Automation Stopped')
+                    ui.pushButton__stop_automation.click()
+                    while not ui.pushButton__start_automation.isEnabled():
+                        self.wait.acquire()
+                        self.wait.wait(timeout=1.0)
+                elapsed_time = time.time() - start_time
+                self.dsd_logger.debug("Elapsed Time = {}".format(int(elapsed_time)))
+                timeout = self.t_period - abs(elapsed_time)
+                self.dsd_logger.debug("Timeout = {}".format(int(timeout)))
+                if timeout <= 0:
+                    timeout = 0.01
+                self.wait.acquire()
+                self.wait.wait(timeout=timeout)
+                self.dsd_logger.debug("self.wait.wait is timed out")
+        # inappropriate sun angle
+        else:
+            if self.valid_angle_flag:
+                ui.write_to_log('INFO', 'DSDthread', 'Inappropriate Sun Angle: {:.2f}'.format(self.sun_angle_deg))
+
+            # Sun angle out of range: stop measurement, stop automation, close ECON
+            if ui.pushButton_stop_measurement.isEnabled() and not self._stop.isSet():
+                ui.write_to_log('INFO', 'DSDthread', 'Measurement STOP: Inappropriate Sun Angle')
+                Vbdsd.debug_log(self.debug_file, 'Measurement STOP: \n'
+                                + datetime.now().strftime("%m/%d/%Y") + '\n'
+                                + datetime.now().time().strftime("%H:%M:%S") + '\n')
+                ui.pushButton_stop_measurement.click()
+                while not ui.pushButton_start_measurement.isEnabled() and not self._stop.isSet():
+                    self.wait.acquire()
+                    self.wait.wait(timeout=1.0)
+
+            if ui.pushButton__stop_automation.isEnabled() and not self._stop.isSet():
+                ui.write_to_log('INFO', 'DSDthread', 'Automation STOP: Inappropriate Sun Angle')
+                ui.pushButton__stop_automation.click()
+                while not ui.pushButton__start_automation.isEnabled() and not self._stop.isSet():
+                    self.wait.acquire()
+                    self.wait.wait(timeout=1.0)
+
+            if ui.autoUpdateSwitch.isChecked() and not self._stop.isSet():
+                ui.write_to_log('INFO', 'DSDthread', 'Closing Cover')
+                ui.closeCoverButton.clicked.emit(True)
+
+            if self.sun_angle_deg < 10.0 * u.deg and self.heating_flag:
+                ui.Spec_power.setChecked(False)
+                ui.write_to_log('INFO', 'DSDthread', 'Sun Angle: {:.2f}'.format(self.sun_angle_deg))
+                ui.write_to_log('INFO', 'DSDthread', 'Power off EM27')
+                self.heating_flag = False
+            self.valid_angle_flag = False
+            time.sleep(15)
+    ui.write_to_log('INFO', 'DSDthread', 'DSDthread stopped')
+    ui.automated_mode = False
