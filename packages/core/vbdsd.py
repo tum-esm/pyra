@@ -33,19 +33,19 @@ import numpy as np
 
 
 def init_cam(cam_id):
-    """init_cam(int id): Connects to the camera with id and sets its parameters
-     from section 4.2.1. If successfully connected, the function returns an
-     instance object of the camera, otherwise None will be returned.
+    """init_cam(int id): Connects to the camera with id and sets its parameters.
+    If successfully connected, the function returns an instance object of the
+    camera, otherwise None will be returned.
     """
-
-    cam = cv.VideoCapture(cam_id)
-    cam.release()
     height = 720  # 768
     width = 1280  # 1024
 
+    cam = cv.VideoCapture(cam_id)
+    cam.release()
+
     status = False
-    for trial in range(1, 5):
-        # print('Initializing Camera...Trial: {:.0f}'.format(trial))
+
+    for _ in range(5):
         cam = cv.VideoCapture(cam_id)
         time.sleep(1)
         if cam.isOpened():
