@@ -79,7 +79,7 @@ class OpusMeasurement:
     def set_config(self):
         pass
 
-    @config.setter
+    @set_config.setter
     def set_config(self, vals):
         self._SETUP, self._PARAMS = vals
 
