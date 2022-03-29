@@ -45,10 +45,10 @@ def run():
             PARAMS = json.load(f)
 
         # TODO: Possibly handle communication between these modules
-        EnclosureControl.set_config = (SETUP, PARAMS)
-        EnclosureControl.run()
         MeasurementConditions.set_config = (SETUP, PARAMS)
         MeasurementConditions.run()
+        EnclosureControl.set_config = (SETUP, PARAMS)
+        EnclosureControl.run()
         SunTracking.set_config = (SETUP, PARAMS)
         SunTracking.run()
         OpusMeasurement.set_config = (SETUP, PARAMS)
