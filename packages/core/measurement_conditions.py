@@ -12,7 +12,19 @@ logger = logging.getLogger("pyra.core")
 
 
 class MeasurementConditions:
+    def __init__(self):
+        self._SETUP = {}
+        self._PARAMS = {}
+
     @staticmethod
     def run():
         logger.info("Running MeasurementConditions")
         pass
+
+    @property
+    def set_config(self):
+        pass
+
+    @set_config.setter
+    def set_config(self, vals):
+        self._SETUP, self._PARAMS = vals

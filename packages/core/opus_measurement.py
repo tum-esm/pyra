@@ -35,7 +35,7 @@ class OpusMeasurement:
         self._SETUP = {}
         self.last_cycle_automation_status = 0
 
-    def run(self, setup: dict, params: dict):
+    def run(self):
         logger.info("Running OpusMeasurement")
         logger.debug("Updating JSON Config Variables")
 
