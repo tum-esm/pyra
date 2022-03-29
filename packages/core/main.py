@@ -44,7 +44,6 @@ def run():
             PARAMS = json.load(f)
 
         # TODO: Possibly handle communication between these modules
-        # TODO: Pass SETUP and PARAMS to modules
         MeasurementConditions.set_config = (SETUP, PARAMS)
         MeasurementConditions.run()
         SunTracking.set_config = (SETUP, PARAMS)
