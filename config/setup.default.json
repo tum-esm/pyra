@@ -1,8 +1,8 @@
 {
   "VBDSD_sensor_presence": 0,
   "EM27_IP": "10.0.0.1",
-  "Enclosure_presence": 0,
-  "Enclosure_generation": 0,
+  "enclosure_presence": 0,
+  "enclosure_generation": 0,
   "PLC_presence": 0,
   "PLC_IP": "10.0.0.4",
   "CamTracker_executable_full_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
