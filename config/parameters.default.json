@@ -10,7 +10,7 @@
     "vbdsd_period_time": 6,
     "vbdsd_image_storage_path": "C:\\img\\",
     "vbdsd_measurement_threshold": 0.6,
-    "vbdsd_automation_threshold": 0.4
+    "vbdsd_automation_threshold": 0.4,
     "vbdsd_min_angle": 11.0,
     "vbdsd_cam_id": 0
 }
