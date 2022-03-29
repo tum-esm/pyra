@@ -27,9 +27,7 @@
 # ==============================================================================
 
 import time
-from astropy.time import Time
-import astropy.coordinates as coord
-import astropy.units as u
+import astropy
 import cv2 as cv
 import numpy as np
 
@@ -78,7 +76,10 @@ def get_tracker_position():
     height = float(conf_file.config_file['Camtracker Config File Height'])
     longitude = float(conf_file.config_file['Camtracker Config File Longitude'])
     latitude = float(conf_file.config_file['Camtracker Config File Latitude'])
-    loc = coord.EarthLocation(lon=longitude * u.deg, lat=latitude * u.deg, height=height * u.km)
+
+    loc = astropy.coordinates.EarthLocation(lon=longitude * astropy.units.deg,
+                                            lat=latitude * astropy.units.deg,
+                                            height=height * astropy.units.km)
     return height, longitude, latitude, loc
 
 
@@ -260,9 +261,9 @@ def calc_sun_angle_deg(loc):
     angle in degree, based on the location loc, computed by get_tracker_position(),
      and current time. Therefore, the pack- ages time and astrophy are required.
      """
-    now = Time.now()
-    altaz = coord.AltAz(location=loc, obstime=now)
-    sun = coord.get_sun(now)
+    now = astropy.time.now()
+    altaz = astropy.coordinates.AltAz(location=loc, obstime=now)
+    sun = astropy.coordinates.get_sun(now)
     sun_angle_deg = sun.transform_to(altaz).alt
     return sun_angle_deg
 
