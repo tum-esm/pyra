@@ -7,6 +7,7 @@ import time
 from packages.core.opus_measurement import OpusMeasurement
 from packages.core.sun_tracking import SunTracking
 from packages.core.measurement_conditions import MeasurementConditions
+from packages.core.enclosure_control import EnclosureControl
 from packages.core.validation import Validation
 
 dir = os.path.dirname
@@ -44,6 +45,8 @@ def run():
             PARAMS = json.load(f)
 
         # TODO: Possibly handle communication between these modules
+        EnclosureControl.set_config = (SETUP, PARAMS)
+        EnclosureControl.run()
         MeasurementConditions.set_config = (SETUP, PARAMS)
         MeasurementConditions.run()
         SunTracking.set_config = (SETUP, PARAMS)
