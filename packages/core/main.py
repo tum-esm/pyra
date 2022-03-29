@@ -46,8 +46,10 @@ def run():
         # TODO: Possibly handle communication between these modules
         # TODO: Pass SETUP and PARAMS to modules
         MeasurementConditions.run()
+        SunTracking.set_config((SETUP, PARAMS))
         SunTracking.run(SETUP, PARAMS)
-        OpusMeasurement.run(SETUP, PARAMS)
+        OpusMeasurement.set_config((SETUP, PARAMS))
+        OpusMeasurement.run()
 
         logger.info("Ending Iteration")
         execution_ended_at = datetime.now().timestamp()

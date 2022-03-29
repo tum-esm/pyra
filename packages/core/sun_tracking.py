@@ -25,9 +25,8 @@ class SunTracking:
         self._PARAMS = {}
         self._SETUP = {}
 
-    def run(self, setup: dict, params: dict):
+    def run(self):
         logger.info("Running SunTracking")
-        self.__update_json_config(setup, params)
 
         # check for PYRA Test Mode status
         if self._PARAMS["PYRA_test_mode"] == 1:
@@ -59,14 +58,13 @@ class SunTracking:
             logger.info("Stop CamTracker. Preparing for reinitialization.")
             # TODO: Check if a wait() is needed for the mirrors to move back to parking
 
+    @property
+    def set_config(self):
+        pass
 
-
-    def __update_json_config(self, setup: dict, params: dict):
-        """Updates class internal dictionaries to the latest version of the
-        json files for SETUP and PARAMETERS.
-        """
-        self._SETUP = setup
-        self._PARAMS = params
+    @config.setter
+    def set_config(self, vals):
+        self._SETUP, self._PARAMS = vals
 
     @Property
     def __ct_application_running(self):

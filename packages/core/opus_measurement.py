@@ -38,7 +38,6 @@ class OpusMeasurement:
     def run(self, setup: dict, params: dict):
         logger.info("Running OpusMeasurement")
         logger.debug("Updating JSON Config Variables")
-        self.__update_json_config(setup, params)
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
@@ -76,6 +75,14 @@ class OpusMeasurement:
         else:
             logger.info("EM27 seems to be not connected.")
 
+    @property
+    def set_config(self):
+        pass
+
+    @config.setter
+    def set_config(self, vals):
+        self._SETUP, self._PARAMS = vals
+
     def __connect_to_dde_opus(self):
         try:
             self.conversation.ConnectTo("OPUS", "OPUS/System")
@@ -83,9 +90,6 @@ class OpusMeasurement:
         except:
             logger.info("Could not connect to OPUS DDE Server.")
 
-    def __update_json_config(self, setup: dict, params: dict):
-        self._SETUP = setup
-        self._PARAMS = params
 
     @property
     def __test_dde_connection(self):

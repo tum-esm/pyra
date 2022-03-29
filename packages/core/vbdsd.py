@@ -84,7 +84,7 @@ def get_tracker_position():
 
 
 def get_interval_time():
-    """get_interval_time(): ReadsoutthetimeintervalDSDIntervalTimefromConfigFile.txt,
+    """get_interval_time(): ReadsoutthetimeintervalDSDIntervalTimefromparameters.json,
     within images shall be captured and evaluated. During this interval, images
     will be captured and ana- lyzed after every user defined period.
     """
@@ -95,7 +95,7 @@ def get_interval_time():
 
 def get_period_time():
     """get_period_time(): Reads out the time period DSDP eriodT ime from
-    ConfigFile.txt. Images will be captured and evaluated after every period for
+    parameters.json. Images will be captured and evaluated after every period for
      the user defined time interval.
      """
     conf_file = ReadWriteFiles()
@@ -207,7 +207,7 @@ def extend_border(img, frame):
 
 def get_image_storage_path():
     """get_image_storage_path(): Reads out the path DSDImageStoragePath, where
-    images cap- tured by the sensor shall be stored from ConfigFile.txt, and
+    images cap- tured by the sensor shall be stored from parameters.json, and
     returns it as a string. The parameter therefore is.
     """
     conf_file = ReadWriteFiles()
@@ -217,7 +217,7 @@ def get_image_storage_path():
 
 def get_angle_thres():
     """get_angle_thres(): Reads out the minimum sun angle DSDMinAngle from
-    ConfigFile.txt, at which the Bruker EM27/SUN is able to measure."""
+    parameters.json, at which the Bruker EM27/SUN is able to measure."""
     conf_file = ReadWriteFiles()
     min_angle = conf_file.config_file['DSD Min Angle']
     return min_angle
@@ -225,7 +225,7 @@ def get_angle_thres():
 
 def get_m_thres():
     """get_m_thres(): Reads out the measurement threshold value DSDMeasurementThres
-    for the evaluated images from ConfigFile.txt. If the percentage of images,
+    for the evaluated images from parameters.json. If the percentage of images,
     captured during above men- tioned time interval and shadow was successfully
     detected within, exceeds this threshold, the measurement procedure will be
     initiated. Otherwise, a possible running measurement will be stopped.
@@ -237,7 +237,7 @@ def get_m_thres():
 
 def get_a_thres():
     """get_a_thres(): Reads out the automation threshold value DSDAutomationT
-    hres for the eval- uated images from ConfigFile.txt. If the percentage of
+    hres for the eval- uated images from parameters.json. If the percentage of
     images, captured during above mentioned time interval and shadow was
     successfully detected within, is below that threshold, OPUS and CamTracker
     will be terminated.
@@ -249,7 +249,7 @@ def get_a_thres():
 
 def get_cam_id():
     """get_cam_id(): Reads out the camera ID DSDCamID to connect with from
-    ConfigFile.txt.
+    parameters.json.
     """
     conf_file = ReadWriteFiles()
     cam_id = conf_file.config_file['DSD Cam ID']
