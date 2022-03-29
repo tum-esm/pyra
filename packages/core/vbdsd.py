@@ -26,10 +26,33 @@
 # py version        : 3.10
 # ==============================================================================
 
+import os
 import time
 import astropy
 import cv2 as cv
 import numpy as np
+import json
+from packages.core.validation import Validation
+
+dir = os.path.dirname
+PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
+SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
+PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
+
+def read_json_files():
+    """Reads and validates the available json config files.
+
+    Returns
+    SETUP:dict and PARAMS:dict as Tuple
+    """
+    Validation.check_parameters_config()
+    Validation.check_setup_config()
+    with open(SETUP_FILE_PATH, "r") as f:
+        SETUP = json.load(f)
+    with open(PARAMS_FILE_PATH, "r") as f:
+        PARAMS = json.load(f)
+
+    return (SETUP, PARAMS)
 
 
 def init_cam(cam_id):
@@ -63,45 +86,6 @@ def init_cam(cam_id):
         return cam
     else:
         return None
-
-
-def get_tracker_position():
-    """get_tracker_position(): Reads out the height, the longitude and the
-    latitude of the system from CamTrackerConfig.txt, and computes the location
-    on earth. Therefore, the python package as- tropy [23] is imported, and its
-    function coord.EarthLocation() is used. The read out parameters, as well as
-    the computed location will be returned.
-    """
-    conf_file = ReadWriteFiles()
-    height = float(conf_file.config_file['Camtracker Config File Height'])
-    longitude = float(conf_file.config_file['Camtracker Config File Longitude'])
-    latitude = float(conf_file.config_file['Camtracker Config File Latitude'])
-
-    loc = astropy.coordinates.EarthLocation(lon=longitude * astropy.units.deg,
-                                            lat=latitude * astropy.units.deg,
-                                            height=height * astropy.units.km)
-    return height, longitude, latitude, loc
-
-
-def get_interval_time():
-    """get_interval_time(): ReadsoutthetimeintervalDSDIntervalTimefromparameters.json,
-    within images shall be captured and evaluated. During this interval, images
-    will be captured and ana- lyzed after every user defined period.
-    """
-    conf_file = ReadWriteFiles()
-    t_interval = conf_file.config_file['DSD Interval Time']
-    return float(t_interval)
-
-
-def get_period_time():
-    """get_period_time(): Reads out the time period DSDP eriodT ime from
-    parameters.json. Images will be captured and evaluated after every period for
-     the user defined time interval.
-     """
-    conf_file = ReadWriteFiles()
-    t_period = conf_file.config_file['DSD Period Time']
-    return float(t_period)
-
 
 def eval_sun_state(frame):
     """
@@ -180,6 +164,51 @@ def eval_sun_state(frame):
     else:
         return 0, frame
 
+def calc_sun_angle_deg(loc):
+    """calc_sun_angle_deg(location loc): Computes and returns the current sun
+    angle in degree, based on the location loc, computed by get_tracker_position(),
+     and current time. Therefore, the pack- ages time and astrophy are required.
+     """
+    now = astropy.time.now()
+    altaz = astropy.coordinates.AltAz(location=loc, obstime=now)
+    sun = astropy.coordinates.get_sun(now)
+    sun_angle_deg = sun.transform_to(altaz).alt
+    return sun_angle_deg
+
+def get_tracker_position():
+    """get_tracker_position(): Reads out the height, the longitude and the
+    latitude of the system from CamTrackerConfig.txt, and computes the location
+    on earth. Therefore, the python package astropy [23] is imported, and its
+    function coord.EarthLocation() is used. The read out parameters, as well as
+    the computed location will be returned.
+    """
+    conf_file = ReadWriteFiles()
+    height = float(conf_file.config_file['Camtracker Config File Height'])
+    longitude = float(conf_file.config_file['Camtracker Config File Longitude'])
+    latitude = float(conf_file.config_file['Camtracker Config File Latitude'])
+
+    loc = astropy.coordinates.EarthLocation(lon=longitude * astropy.units.deg,
+                                            lat=latitude * astropy.units.deg,
+                                            height=height * astropy.units.km)
+    return height, longitude, latitude, loc
+
+def get_interval_time():
+    """get_interval_time(): ReadsoutthetimeintervalDSDIntervalTimefromparameters.json,
+    within images shall be captured and evaluated. During this interval, images
+    will be captured and ana- lyzed after every user defined period.
+    """
+    conf_file = ReadWriteFiles()
+    t_interval = conf_file.config_file['DSD Interval Time']
+    return float(t_interval)
+
+def get_period_time():
+    """get_period_time(): Reads out the time period DSDP eriodT ime from
+    parameters.json. Images will be captured and evaluated after every period for
+     the user defined time interval.
+     """
+    conf_file = ReadWriteFiles()
+    t_period = conf_file.config_file['DSD Period Time']
+    return float(t_period)
 
 def extend_border(img, frame):
     bordersize = 50  # Extend borders
@@ -204,7 +233,6 @@ def extend_border(img, frame):
     )
     return img_b, frame, bordersize
 
-
 def get_image_storage_path():
     """get_image_storage_path(): Reads out the path DSDImageStoragePath, where
     images cap- tured by the sensor shall be stored from parameters.json, and
@@ -214,14 +242,12 @@ def get_image_storage_path():
     path = conf_file.config_file['DSD Image Storage Path']
     return path
 
-
 def get_angle_thres():
     """get_angle_thres(): Reads out the minimum sun angle DSDMinAngle from
     parameters.json, at which the Bruker EM27/SUN is able to measure."""
     conf_file = ReadWriteFiles()
     min_angle = conf_file.config_file['DSD Min Angle']
     return min_angle
-
 
 def get_m_thres():
     """get_m_thres(): Reads out the measurement threshold value DSDMeasurementThres
@@ -234,7 +260,6 @@ def get_m_thres():
     thr = conf_file.config_file['DSD Measurement Thres']
     return float(thr)
 
-
 def get_a_thres():
     """get_a_thres(): Reads out the automation threshold value DSDAutomationT
     hres for the eval- uated images from parameters.json. If the percentage of
@@ -246,7 +271,6 @@ def get_a_thres():
     thr = conf_file.config_file['DSD Automation Thres']
     return float(thr)
 
-
 def get_cam_id():
     """get_cam_id(): Reads out the camera ID DSDCamID to connect with from
     parameters.json.
@@ -255,20 +279,7 @@ def get_cam_id():
     cam_id = conf_file.config_file['DSD Cam ID']
     return int(cam_id)
 
-
-def calc_sun_angle_deg(loc):
-    """calc_sun_angle_deg(location loc): Computes and returns the current sun
-    angle in degree, based on the location loc, computed by get_tracker_position(),
-     and current time. Therefore, the pack- ages time and astrophy are required.
-     """
-    now = astropy.time.now()
-    altaz = astropy.coordinates.AltAz(location=loc, obstime=now)
-    sun = astropy.coordinates.get_sun(now)
-    sun_angle_deg = sun.transform_to(altaz).alt
-    return sun_angle_deg
-
-
-def debug_log(file_name, msg):
-    f = open(file_name, 'a')
-    f.write(msg)
-    f.close()
+if __name__ == "__main__":
+    #while(1)
+    # if "vbdsd_automation_status" == 1 do...
+    pass

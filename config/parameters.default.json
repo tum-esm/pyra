@@ -6,6 +6,7 @@
     "PYRA_test_mode": 0,
     "CamTracker_motor_offset_treshold": 10,
     "PYRA_automation_status": 0,
+    "vbdsd_automation_status": 0,
     "vbdsd_interval_time": 90,
     "vbdsd_period_time": 6,
     "vbdsd_image_storage_path": "C:\\img\\",
