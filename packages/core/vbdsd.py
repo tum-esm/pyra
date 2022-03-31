@@ -309,26 +309,11 @@ if __name__ == "__main__":
 
             logging.INFO("Capturing and Analysing {:.0f} Images in {:.2f} seconds ...".format(n, PARAMS["vbdsd_interval_time"]))
 
-            self.image_path = self.image_storage_path + '//img_' + datetime.now().date().strftime('%Y_%m_%d') + '/'
-            img_path_exists = True
-            if not os.path.exists(self.image_path):
-                try:
-                    os.makedirs(self.image_path)
-                    ui.write_to_log('INFO', 'DSDthread', 'Image Storage Path: ' + self.image_path)
-                except:
-                    ui.write_to_log('INFO', 'DSDthread', 'Image Storage Path not found')
-                    ui.write_to_log('INFO', 'DSDthread', 'Not storing VBDSD Images')
-                    img_path_exists = False
-                    pass
-            start_time0 = time.time()
-            self.change_exposure()  # Reset exposure
-            # acquire and analyse images
-            for idx in range(0, self.n):
-                self.dsd_logger.debug("Iteration Index {}".format(idx))
-                if not self._stop.isSet():
-                    start_time = time.time()
-                    self.dsd_logger.debug("capture_frame")
-                    try:
+            image_path = image_storage_path + '//img_' + datetime.now().date().strftime('%Y_%m_%d') + '/'
+            # make sure image path actually exists
+
+
+            #for loop with n
                         status, frame = self.process_vbdsd_image()
                         if status == -1:
                             self.change_exposure(1)
