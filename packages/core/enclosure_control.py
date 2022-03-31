@@ -10,9 +10,8 @@ class EnclosureControl:
         self._SETUP = {}
         self._PARAMS = {}
 
-    @staticmethod
-    def run():
-        if self._SETUP["enclosure_presence"] == 0:
+    def run(self):
+        if not self._SETUP["enclosure_presence"]:
             return
 
         logger.info("Running EnclosureControl")
@@ -25,3 +24,7 @@ class EnclosureControl:
     @set_config.setter
     def set_config(self, vals):
         self._SETUP, self._PARAMS = vals
+
+
+    #check what resetbutton after rain does (and the auto reset option)
+    #trigger sync with cover if automation is 1

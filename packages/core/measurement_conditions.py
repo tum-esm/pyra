@@ -28,3 +28,11 @@ class MeasurementConditions:
     @set_config.setter
     def set_config(self, vals):
         self._SETUP, self._PARAMS = vals
+
+    #allow for multiple options
+    #check for time
+    #check for sun angle
+    #use vbdsd
+    #check for user input
+
+    #if self.sun_angle_deg < 10.0 * u.deg: em27 power off

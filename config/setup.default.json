@@ -1,9 +1,8 @@
 {
-  "VBDSD_sensor_presence": 0,
+  "VBDSD_sensor_presence": false,
   "EM27_IP": "10.0.0.1",
-  "TUM_enclosure_presence": 0,
-  "TUM_enclosure_generation": 0,
-  "PLC_presence": 0,
+  "TUM_enclosure_presence": false,
+  "PLC_presence": false,
   "PLC_IP": "10.0.0.4",
   "CamTracker_executable_full_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
   "CamTracker_full_path_LEARN_Az_Elev": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
