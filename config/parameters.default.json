@@ -6,11 +6,10 @@
     "PYRA_test_mode": 0,
     "CamTracker_motor_offset_treshold": 10,
     "PYRA_automation_status": 0,
-    "vbdsd_automation_status": 0,
     "vbdsd_interval_time": 6,
     "vbdsd_evaluation_size": 15,
     "vbdsd_measurement_threshold": 0.6,
-    "vbdsd_automation_threshold": 0.4,
     "vbdsd_min_angle": 11.0,
+    "em27_power_min_angle": 10.0
 
 }

@@ -300,12 +300,17 @@ if __name__ == "__main__":
     SETUP, PARAMS = read_json_files()
     status_history = RingList(PARAMS["vbdsd_evaluation_size"])
 
+    loc = get_tracker_position()
 
     cam = init_cam(SETUP["vbdsd_cam_id"])
     change_exposure()
 
     while(1):
         start_time = time.time()
+
+        #sleep while sun angle is too low
+        while(calc_sun_angle_deg(loc) < PARAMS["vbdsd_min_angle"]):
+            time.sleep(60)
 
         status, frame = process_vbdsd_image()
         #retry with change_exposure(1) if status fail
@@ -314,6 +319,7 @@ if __name__ == "__main__":
             change_exposure(1)
             status, frame = process_vbdsd_image()
 
+        #append sun status to status history
         if status == 1:
             status_history.append(1)
         else:
