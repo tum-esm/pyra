@@ -305,7 +305,8 @@ if __name__ == "__main__":
     change_exposure()
 
     while(1):
-        #TODO: time controlled loop
+        start_time = time.time()
+
         status, frame = process_vbdsd_image()
         #retry with change_exposure(1) if status fail
         #TODO: move retry in function
@@ -335,3 +336,9 @@ if __name__ == "__main__":
             else:
                 #sun status bad
                 pass
+
+        #wait rest of loop time
+        elapsed_time = time.time()
+        while((elapsed_time - start_time) < PARAMS["vbdsd_interval_time"]):
+            time.sleep(1)
+            elapsed_time = time.time()
