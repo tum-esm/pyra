@@ -71,6 +71,9 @@ class RingList:
     def maxsize(self):
         return self.__max__
 
+    def sum(self):
+        return float(sum(self.get()))
+
     def __str__(self):
         return ''.join(self.__data__)
 
@@ -302,10 +305,15 @@ if __name__ == "__main__":
     change_exposure()
 
     while(1):
+        #TODO: time controlled loop
         status, frame = process_vbdsd_image()
-        #retry with change_exposure(1)
+        #retry with change_exposure(1) if status fail
+        #TODO: move retry in function
+        if status == -1:
+            change_exposure(1)
+            status, frame = process_vbdsd_image()
 
-        if status == 1_
+        if status == 1:
             status_history.append(1)
         else:
             status_history.append(0)
@@ -318,6 +326,15 @@ if __name__ == "__main__":
 
         #start eval of sun state once initial list is filled
         if status_history.size() == status_history.maxsize():
+            score = status_history.sum() / status_history.size()
+
+            if score > PARAMS["vbdsd_measurement_threshold"]:
+                #TODO: status good, change automation parameter in json file
+                pass
+            else:
+                #sun status bad
+                pass
+
 
 
 
