@@ -39,6 +39,41 @@ PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 
+class RingList:
+    def __init__(self, length):
+        self.__data__ = []
+        self.__full__ = 0
+        self.__max__ = length
+        self.__cur__ = 0
+
+    def append(self, x):
+        if self.__full__ == 1:
+            for i in range (0, self.__cur__ - 1):
+                self.__data__[i] = self.__data__[i + 1]
+            self.__data__[self.__cur__ - 1] = x
+        else:
+            self.__data__.append(x)
+            self.__cur__ += 1
+            if self.__cur__ == self.__max__:
+                self.__full__ = 1
+
+    def get(self):
+        return self.__data__
+
+    def remove(self):
+        if (self.__cur__ > 0):
+            del self.__data__[self.__cur__ - 1]
+            self.__cur__ -= 1
+
+    def size(self):
+        return self.__cur__
+
+    def maxsize(self):
+        return self.__max__
+
+    def __str__(self):
+        return ''.join(self.__data__)
+
 def read_json_files():
     """Reads and validates the available json config files.
 
@@ -192,24 +227,6 @@ def get_tracker_position():
                                             height=height * astropy.units.km)
     return height, longitude, latitude, loc
 
-def get_interval_time():
-    """get_interval_time(): ReadsoutthetimeintervalDSDIntervalTimefromparameters.json,
-    within images shall be captured and evaluated. During this interval, images
-    will be captured and ana- lyzed after every user defined period.
-    """
-    conf_file = ReadWriteFiles()
-    t_interval = conf_file.config_file['DSD Interval Time']
-    return float(t_interval)
-
-def get_period_time():
-    """get_period_time(): Reads out the time period DSDP eriodT ime from
-    parameters.json. Images will be captured and evaluated after every period for
-     the user defined time interval.
-     """
-    conf_file = ReadWriteFiles()
-    t_period = conf_file.config_file['DSD Period Time']
-    return float(t_period)
-
 def extend_border(img, frame):
     bordersize = 50  # Extend borders
     img_b = cv.copyMakeBorder(
@@ -233,56 +250,78 @@ def extend_border(img, frame):
     )
     return img_b, frame, bordersize
 
-def get_image_storage_path():
-    """get_image_storage_path(): Reads out the path DSDImageStoragePath, where
-    images cap- tured by the sensor shall be stored from parameters.json, and
-    returns it as a string. The parameter therefore is.
-    """
-    conf_file = ReadWriteFiles()
-    path = conf_file.config_file['DSD Image Storage Path']
-    return path
+def change_exposure(self, diff = 0):
+    #self.sun_angle_deg = Vbdsd.calc_sun_angle_deg(self.loc)
+    if self.sun_angle_deg < 4 * u.deg:
+        temp = -9 + diff
+    elif self.sun_angle_deg < 6 * u.deg:
+        temp = -10 + diff
+    elif self.sun_angle_deg < 10 * u.deg:
+        temp = -11 + diff
+    else:
+        temp = -12 + diff
+    if temp != self.exp:
+        self.exp = temp
+        self.dsd_logger.debug("Exposure set to " + str(self.exp))
+        self.cam.set(15, self.exp)
+        self.cam.read()
+        time.sleep(0.2)
 
-def get_angle_thres():
-    """get_angle_thres(): Reads out the minimum sun angle DSDMinAngle from
-    parameters.json, at which the Bruker EM27/SUN is able to measure."""
-    conf_file = ReadWriteFiles()
-    min_angle = conf_file.config_file['DSD Min Angle']
-    return min_angle
+def take_vbdsd_image(self,count = 0): # Recursively taking images max = 5
+    ret, frame = self.cam.read()
+    if ret:
+        return ret, frame
+    else:  # for some reason, image retrieval inst always successful on Mb
+        if count < 5:
+            count += 1
+            temp_ret, temp_frame = self.take_vbdsd_image(count)
+            if temp_ret:
+                return temp_ret, temp_frame
+            else:
+                return False, None
+        else: # Count >= 5
+            return False, None
 
-def get_m_thres():
-    """get_m_thres(): Reads out the measurement threshold value DSDMeasurementThres
-    for the evaluated images from parameters.json. If the percentage of images,
-    captured during above men- tioned time interval and shadow was successfully
-    detected within, exceeds this threshold, the measurement procedure will be
-    initiated. Otherwise, a possible running measurement will be stopped.
-    """
-    conf_file = ReadWriteFiles()
-    thr = conf_file.config_file['DSD Measurement Thres']
-    return float(thr)
+def process_vbdsd_image(self):
+    ret, frame = take_vbdsd_image()
+    status = 0
+    if ret:
+        status, frame = eval_sun_state(frame)
+    else:
+        ret, frame = take_vbdsd_image()
+    return status, frame
 
-def get_a_thres():
-    """get_a_thres(): Reads out the automation threshold value DSDAutomationT
-    hres for the eval- uated images from parameters.json. If the percentage of
-    images, captured during above mentioned time interval and shadow was
-    successfully detected within, is below that threshold, OPUS and CamTracker
-    will be terminated.
-    """
-    conf_file = ReadWriteFiles()
-    thr = conf_file.config_file['DSD Automation Thres']
-    return float(thr)
-
-def get_cam_id():
-    """get_cam_id(): Reads out the camera ID DSDCamID to connect with from
-    parameters.json.
-    """
-    conf_file = ReadWriteFiles()
-    cam_id = conf_file.config_file['DSD Cam ID']
-    return int(cam_id)
 
 if __name__ == "__main__":
 
+    SETUP, PARAMS = read_json_files()
+    status_history = RingList(PARAMS["vbdsd_evaluation_size"])
 
 
+    cam = init_cam(SETUP["vbdsd_cam_id"])
+    change_exposure()
+
+    while(1):
+        status, frame = process_vbdsd_image()
+        #retry with change_exposure(1)
+
+        if status == 1_
+            status_history.append(1)
+        else:
+            status_history.append(0)
+
+        if os.path.exists(SETUP["vbdsd_image_storage_path"]):
+            img_name = time.strftime('%H_%M_%S_') + str(status) + ".jpg"
+            img_full_path = os.path.join(SETUP["vbdsd_image_storage_path"] + img_name)
+            #save image
+            cv.imwrite(img_full_path)
+
+        #start eval of sun state once initial list is filled
+        if status_history.size() == status_history.maxsize():
+
+
+
+#===============================================================================
     # TODO: Ordnung in das Chaos bringen
     PARAMS, SETUP = read_json_files()
     #while(1)

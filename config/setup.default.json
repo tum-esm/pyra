@@ -7,5 +7,7 @@
   "CamTracker_executable_full_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
   "CamTracker_full_path_LEARN_Az_Elev": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
   "CamTracker_full_path_SunIntensity": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat",
-  "OPUS_executable_full_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe"
+  "OPUS_executable_full_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe",
+  "vbdsd_cam_id": 0,
+  "vbdsd_image_storage_path": "C:\\img\\"
 }
