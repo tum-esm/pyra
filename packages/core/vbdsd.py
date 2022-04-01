@@ -320,7 +320,8 @@ if __name__ == "__main__":
 
         if os.path.exists(SETUP["vbdsd_image_storage_path"]):
             img_name = time.strftime('%H_%M_%S_') + str(status) + ".jpg"
-            img_full_path = os.path.join(SETUP["vbdsd_image_storage_path"] + img_name)
+            img_full_path = os.path.join(SETUP["vbdsd_image_storage_path"]
+                                         + img_name)
             #save image
             cv.imwrite(img_full_path)
 
@@ -334,91 +335,3 @@ if __name__ == "__main__":
             else:
                 #sun status bad
                 pass
-
-
-
-
-#===============================================================================
-    # TODO: Ordnung in das Chaos bringen
-    PARAMS, SETUP = read_json_files()
-    #while(1)
-    # if "vbdsd_automation_status" == 1 do...
-    valid_angle_flag = False
-
-    while not _stop.isSet():
-        # calculate new sun angle
-        sun_angle_deg = calc_sun_angle_deg(loc)
-
-        # power spectrometer if sun angle bigger than 10 degrees
-        # print('Sun Angle: {:.2f}'.format(self.sun_angle_deg))
-        if not heating_flag:
-            if sun_angle_deg >= 10 * astropy.units.deg:
-                heating_flag = True
-
-
-        # check whether angle is valid ( >15°)
-        if sun_angle_deg > PARAMS["vbdsd_min_angle"]:
-            logging.INFO("Minimum sun angle reached.")
-            if not self.valid_angle_flag:
-                valid_angle_flag = True
-
-            n = PARAMS["vbdsd_interval_time"] / PARAMS["vbdsd_period_time"]
-
-            logging.INFO("Capturing and Analysing {:.0f} Images in {:.2f} seconds ...".format(n, PARAMS["vbdsd_interval_time"]))
-
-            image_path = image_storage_path + '//img_' + datetime.now().date().strftime('%Y_%m_%d') + '/'
-            # make sure image path actually exists
-            # images are only saved if path is present
-
-
-            #for loop with n
-                        status, frame = self.process_vbdsd_image()
-                        if status == -1:
-                            self.change_exposure(1)
-                            status, frame = self.process_vbdsd_image()
-                            if status == -1:
-                                status = 0
-                    except:  # join() causes an exception
-                        status = 0
-                        #error in frame eval
-
-                # store the images with CamTracker status for evaluation purpose
-                self.dsd_logger.debug("get_ct_status")
-                ct_status = ui.check_SunTracker_status_SunIntensity()
-
-                results.append(status) #collect the status
-
-
-
-                    self.change_exposure()
-                    # do time loop logic
-
-
-            elapsed_time0 = time.time() - start_time0
-            # print('VBDSD all Images: %s s' % elapsed_time0)
-
-            #determine each cycle of threshold for good conditions is already reached
-            #check what change_exposure() does and why he sets it every image processing
-
-
-            # score > m_thres -> automation = 1
-            #check what reset button after rain does
-            #set synchonize with cover
-            # score < m_thres -> automation = 1
-            """
-            def change_exposure(self, diff=0):
-                # self.sun_angle_deg = Vbdsd.calc_sun_angle_deg(self.loc)
-                if self.sun_angle_deg < 4 * u.deg:
-                    temp = -9 + diff
-                elif self.sun_angle_deg < 6 * u.deg:
-                    temp = -10 + diff
-                elif self.sun_angle_deg < 10 * u.deg:
-                    temp = -11 + diff
-                else:
-                    temp = -12 + diff
-                if temp != self.exp:
-                    self.exp = temp
-                    self.dsd_logger.debug("Exposure set to " + str(self.exp))
-                    self.cam.set(15, self.exp)
-                    self.cam.read()
-            """
