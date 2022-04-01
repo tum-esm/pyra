@@ -216,7 +216,7 @@ def calc_sun_angle_deg(loc):
     sun_angle_deg = sun.transform_to(altaz).alt
     return sun_angle_deg
 
-def read_camtracker_config():
+def read_camtracker_config() -> list:
     # extracts the path to the folder that contains the camtracker.exe
     target = SETUP["CamTracker_full_path_Config"]
 
@@ -347,6 +347,7 @@ if __name__ == "__main__":
         while(calc_sun_angle_deg(loc) < PARAMS["vbdsd_min_angle"]):
             time.sleep(60)
 
+        # take a picture and process it
         status, frame = process_vbdsd_image()
         #retry with change_exposure(1) if status fail
         #TODO: move retry in function
