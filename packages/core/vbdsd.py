@@ -216,6 +216,36 @@ def calc_sun_angle_deg(loc):
     sun_angle_deg = sun.transform_to(altaz).alt
     return sun_angle_deg
 
+def read_camtracker_config():
+    # extracts the path to the folder that contains the camtracker.exe
+    target = SETUP["CamTracker_full_path_Config"]
+
+    if not os.path.isfile(target):
+        pass
+        #TODO: Raise error?
+
+    f = open(target, 'r')
+
+    list_lines = f.readlines()
+    first_line = list_lines[0]
+
+    # find $1 and $2 markers
+    for n, line in enumerate(list_lines):
+        if line == '$1\n':
+            line_info1 = n
+
+    # pos1 = latitude,
+    # pos2 = longitude,
+    # pos3 = height
+    tracker_position = [list_lines[line_info1 + 1].replace('\n', ''),
+                        list_lines[line_info1 + 2].replace('\n', ''),
+                        list_lines[line_info1 + 3].replace('\n', '')]
+
+
+    f.close()
+
+    return tracker_position
+
 def get_tracker_position():
     """get_tracker_position(): Reads out the height, the longitude and the
     latitude of the system from CamTrackerConfig.txt, and computes the location
@@ -223,15 +253,17 @@ def get_tracker_position():
     function coord.EarthLocation() is used. The read out parameters, as well as
     the computed location will be returned.
     """
-    conf_file = ReadWriteFiles()
-    height = float(conf_file.config_file['Camtracker Config File Height'])
-    longitude = float(conf_file.config_file['Camtracker Config File Longitude'])
-    latitude = float(conf_file.config_file['Camtracker Config File Latitude'])
 
-    loc = astropy.coordinates.EarthLocation(lon=longitude * astropy.units.deg,
-                                            lat=latitude * astropy.units.deg,
-                                            height=height * astropy.units.km)
-    return height, longitude, latitude, loc
+    readout = read_camtracker_config()
+
+    latitude = readout[0] * astropy.units.deg
+    longitude = readout[1] * astropy.units.deg
+    height = readout[2] * astropy.units.km
+
+    loc = astropy.coordinates.EarthLocation(lon=longitude, lat=latitude,
+                                            height=height)
+
+    return loc
 
 def extend_border(img, frame):
     bordersize = 50  # Extend borders
