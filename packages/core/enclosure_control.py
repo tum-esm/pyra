@@ -1,4 +1,13 @@
-# Description
+# author            : Patrick Aigner
+# email             : patrick.aigner@tum.de
+# date              : 20220401
+# version           : 3.0
+# notes             :
+# license           : -
+# py version        : 3.10
+# ==============================================================================
+# description       :
+# ==============================================================================
 
 import logging
 

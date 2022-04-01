@@ -1,6 +1,17 @@
+# ==============================================================================
+# author            : Patrick Aigner
+# email             : patrick.aigner@tum.de
+# date              : 20220401
+# version           : 3.0
+# notes             :
+# license           : -
+# py version        : 3.10
+# ==============================================================================
+# description       :
 # CamTracker (ct) is a software that controls two electro motors that are
 # connected to mirrors. It tracks the sun movement and allows the spectrometer
 # to follow the sun in the course of the day.
+# ==============================================================================
 
 # TODO: Implement this for the "Camtracker" software
 # Later, make an abstract base class that enforces a standard interface

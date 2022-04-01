@@ -1,5 +1,16 @@
+# ==============================================================================
+# author            : Patrick Aigner
+# email             : patrick.aigner@tum.de
+# date              : 20220401
+# version           : 3.0
+# notes             :
+# license           : -
+# py version        : 3.10
+# ==============================================================================
+# description       :
 # OPUS is the measurement software for the spectrometer EM27/Sun. It is used to
 # start and stop measurements and define measurement or saving parameters.
+# ==============================================================================
 
 # TODO: Implement this for our version of OPUS
 
