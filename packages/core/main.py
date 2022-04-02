@@ -37,10 +37,11 @@ def run():
         # CLI should not interfere. A file "config/config.lock" will be created
         # and the existence of this file will make the next line wait.
         with FileLock(CONFIG_LOCK_PATH):
-            if (
-                not Validation.check_parameters_file(),
-                not Validation.check_setup_file(),
+            if (not Validation.check_parameters_file()) or (
+                not Validation.check_setup_file()
             ):
+                # TODO: What to do here?
+                time.sleep(60)
                 continue
 
             with open(SETUP_FILE_PATH, "r") as f:
@@ -67,3 +68,20 @@ def run():
             execution_ended_at - execution_started_at
         )
         time.sleep(time_to_wait if time_to_wait > 0 else 0)
+
+        os.system("python3 vbdsd.py")
+
+
+async def some2():
+    pass
+
+
+async def some1():
+    pass
+
+
+async def someAll():
+    a = await some1()
+    b = await some2()
+    if a != b:
+        pass
