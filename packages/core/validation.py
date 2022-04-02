@@ -21,6 +21,8 @@ class CerberusException(Exception):
 
 
 class Validation:
+    logging_handler = logging.error
+
     @staticmethod
     def __load_json(file_path, content_string, validator):
         if content_string is None:
@@ -45,7 +47,6 @@ class Validation:
     def check_setup_file(
         file_path=SETUP_FILE_PATH,
         content_string=None,
-        logging_handler=logging.error,
         logging_message="Error in current setup file: ",
         partial_validation=False,
     ):
@@ -57,14 +58,13 @@ class Validation:
             # TODO: Add checks that cannot be done with cerberus here
             return True
         except (AssertionError, CerberusException) as e:
-            logging_handler(f"{logging_message}{e}")
+            Validation.logging_handler(f"{logging_message}{e}")
             return False
 
     @staticmethod
     def check_parameters_file(
         file_path=PARAMS_FILE_PATH,
         content_string=None,
-        logging_handler=logging.error,
         logging_message="Error in current parameters file: ",
         partial_validation=False,
     ):
@@ -76,5 +76,5 @@ class Validation:
             # TODO: Add checks that cannot be done with cerberus here
             return True
         except (AssertionError, CerberusException) as e:
-            logging_handler(f"{logging_message}{e}")
+            Validation.logging_handler(f"{logging_message}{e}")
             return False

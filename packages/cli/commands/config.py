@@ -11,10 +11,11 @@ PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 sys.path.append(PROJECT_DIR)
-from packages.core.validation import SETUP_FILE_SCHEMA, Validation, PARAMS_FILE_SCHEMA
+from packages.core.validation import Validation, SETUP_FILE_SCHEMA, PARAMS_FILE_SCHEMA
 
 error_handler = lambda m: click.echo(click.style(m, fg="red"))
 success_handler = lambda m: click.echo(click.style(m, fg="green"))
+Validation.logging_handler = error_handler
 
 
 @click.command(help="Read the current setup.json file.")
@@ -57,7 +58,6 @@ def set_setup(path: str, content: str):
         if path != "":
             if not Validation.check_setup_file(
                 file_path=path,
-                logging_handler=error_handler,
                 logging_message=f"New setup invalid: ",
                 partial_validation=True,
             ):
@@ -67,7 +67,6 @@ def set_setup(path: str, content: str):
         else:
             if not Validation.check_setup_file(
                 content_string=content,
-                logging_handler=error_handler,
                 logging_message=f"New setup invalid: ",
                 partial_validation=True,
             ):
@@ -75,7 +74,7 @@ def set_setup(path: str, content: str):
             new_partial_json = json.loads(content)
 
         with FileLock(CONFIG_LOCK_PATH):
-            if not Validation.check_setup_file(logging_handler=error_handler):
+            if not Validation.check_setup_file():
                 return
             with open(SETUP_FILE_PATH, "r") as f:
                 current_json: dict = json.load(f)
@@ -98,7 +97,6 @@ def set_parameters(path: str, content: str):
         if path != "":
             if not Validation.check_parameters_file(
                 file_path=path,
-                logging_handler=error_handler,
                 logging_message=f"New parameters invalid: ",
                 partial_validation=True,
             ):
@@ -108,7 +106,6 @@ def set_parameters(path: str, content: str):
         else:
             if not Validation.check_parameters_file(
                 content_string=content,
-                logging_handler=error_handler,
                 logging_message=f"New parameters invalid: ",
                 partial_validation=True,
             ):
@@ -116,7 +113,7 @@ def set_parameters(path: str, content: str):
             new_partial_params = json.loads(content)
 
         with FileLock(CONFIG_LOCK_PATH):
-            if not Validation.check_parameters_file(logging_handler=error_handler):
+            if not Validation.check_parameters_file():
                 return
             with open(PARAMS_FILE_PATH, "r") as f:
                 current_params: dict = json.load(f)
@@ -129,7 +126,7 @@ def set_parameters(path: str, content: str):
 
 @click.command(help="Validate the current setup.json file.")
 def validate_current_setup():
-    if Validation.check_setup_file(logging_handler=error_handler):
+    if Validation.check_setup_file():
         success_handler(
             f"Current setup file is invalid, required schema: {SETUP_FILE_SCHEMA}"
         )
@@ -137,7 +134,7 @@ def validate_current_setup():
 
 @click.command(help="Validate the current parameters.json file.")
 def validate_current_parameters():
-    if Validation.check_parameters_file(logging_handler=error_handler):
+    if Validation.check_parameters_file():
         success_handler(
             f"Current parameters file is invalid, required schema: {PARAMS_FILE_SCHEMA}"
         )

@@ -19,9 +19,11 @@ CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 # Setup logging module
 logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(
-    level=logging.DEBUG, filename="logs/debug.log", format=logging_format
+    level=logging.DEBUG, filename=f"{PROJECT_DIR}/logs/debug.log", format=logging_format
 )
-logging_info_handler = logging.FileHandler(filename="logs/info.log", mode="a")
+logging_info_handler = logging.FileHandler(
+    filename=f"{PROJECT_DIR}/logs/info.log", mode="a"
+)
 logging_info_handler.setLevel(logging.INFO)
 logging_info_handler.setFormatter(logging.Formatter(logging_format))
 logger = logging.getLogger("pyra.core")
