@@ -1,13 +1,12 @@
 import json
+import logging
 import click
 import os
 import sys
 from filelock import FileLock
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
-SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
-PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 sys.path.append(PROJECT_DIR)
@@ -15,65 +14,84 @@ from packages.core.validation import Validation, PARAMS_FILE_SCHEMA
 
 error_handler = lambda m: click.echo(click.style(m, fg="red"))
 success_handler = lambda m: click.echo(click.style(m, fg="green"))
-VALIDATION_KWARGS = lambda label: {
-    "logging_handler": error_handler,
-    "logging_message": f"New {label} invalid: ",
-    "partial_validation": True,
+
+cli_commands = {
+    "setup": {},
+    "parameters": {},
 }
 
+for filetype in ["setup", "parameters"]:
 
-@click.command(
-    help="Set parameters. Pass the JSON directly or via a file path. Only a subset of the required parameters has to be passed. The non-occuring values will be reused from the current config."
-)
-@click.option("--path", default="", help="Path to JSON file")
-@click.option("--content", default="", help="Content of JSON file")
-def set_parameters(path: str, content: str):
-    if (path == "" and content == "") or (path != "" and content != ""):
-        click.echo('You have to pass exactly one of "--path" or "--content"')
-    else:
-        if path != "":
-            if not Validation.check_parameters_file(
-                file_path=path, **VALIDATION_KWARGS("parameters")
-            ):
-                return
-            with open(path, "r") as f:
-                new_partial_params: dict = json.load(f)
-        else:
-            if not Validation.check_parameters_file(
-                content_string=content, **VALIDATION_KWARGS("parameters")
-            ):
-                return
-            new_partial_params = json.loads(content)
+    JSON_FILE_PATH = f"{PROJECT_DIR}/config/{filetype}.json"
 
-        with FileLock(CONFIG_LOCK_PATH):
-            if not Validation.check_parameters_file(logging_handler=error_handler):
-                return
-            with open(PARAMS_FILE_PATH, "r") as f:
-                current_params: dict = json.load(f)
-
-            with open(PARAMS_FILE_PATH, "w") as f:
-                json.dump({**current_params, **new_partial_params}, f)
-
-        success_handler("Updated parameters file")
-
-
-@click.command(help="Read the current parameters.json file.")
-def get_parameters():
-    try:
-        assert os.path.isfile(PARAMS_FILE_PATH), "file does not exist"
-        with open(PARAMS_FILE_PATH, "r") as f:
-            try:
-                content = json.load(f)
-            except:
-                raise AssertionError("file not in a valid json format")
-        success_handler(content)
-    except AssertionError as e:
-        error_handler(e)
-
-
-@click.command(help="Validate the current parameters.json file.")
-def validate_current_parameters():
-    if Validation.check_parameters_file(logging_handler=error_handler):
-        success_handler(
-            f"Current parameters file is invalid, required schema: {PARAMS_FILE_SCHEMA}"
+    def check_file(
+        file_path=JSON_FILE_PATH,
+        content_string=None,
+        partial_validation=True,
+    ):
+        (
+            Validation.check_parameters_file
+            if filetype == "parameters"
+            else Validation.check_setup_file
+        )(
+            file_path=file_path,
+            content_string=content_string,
+            logging_handler=error_handler,
+            logging_message=f"Error in current {filetype} file: ",
+            partial_validation=partial_validation,
         )
+
+    @click.command(help=f"Read the current {filetype}.json file.")
+    def get():
+        try:
+            with FileLock(CONFIG_LOCK_PATH):
+                assert os.path.isfile(JSON_FILE_PATH), "file does not exist"
+                with open(JSON_FILE_PATH, "r") as f:
+                    try:
+                        content = json.load(f)
+                    except:
+                        raise AssertionError("file not in a valid json format")
+                success_handler(content)
+        except AssertionError as e:
+            error_handler(e)
+
+    @click.command(
+        help=f"Set {filetype}. Pass the JSON directly or via a file path. Only a subset of the required {filetype} variables has to be passed. The non-occuring values will be reused from the current config."
+    )
+    @click.option("--path", default="", help="Path to JSON file")
+    @click.option("--content", default="", help="Content of JSON file")
+    def _set(path: str, content: str):
+        if (path == "" and content == "") or (path != "" and content != ""):
+            click.echo('You have to pass exactly one of "--path" or "--content"')
+        else:
+            if path != "":
+                if not check_file(file_path=path):
+                    return
+                with open(path, "r") as f:
+                    new_partial_json: dict = json.load(f)
+            else:
+                if not check_file(content_string=content):
+                    return
+                new_partial_json = json.loads(content)
+
+            with FileLock(CONFIG_LOCK_PATH):
+                if not check_file():
+                    return
+                with open(JSON_FILE_PATH, "r") as f:
+                    current_json: dict = json.load(f)
+
+                with open(JSON_FILE_PATH, "w") as f:
+                    json.dump({**current_json, **new_partial_json}, f)
+
+            success_handler(f"Updated {filetype} file")
+
+    @click.command(help=f"Validate the current {filetype}.json file.")
+    def _validate():
+        if check_file():
+            success_handler(
+                f"Current {filetype} file is invalid, required schema: {PARAMS_FILE_SCHEMA}"
+            )
+
+    cli_commands[filetype]["get"] = get
+    cli_commands[filetype]["set"] = _set
+    cli_commands[filetype]["validate"] = _validate
