@@ -6,14 +6,12 @@ export default function Header(props: {
     setActiveTabIndex(i: number): void;
 }) {
     return (
-        <header className='flex-col w-full pt-4 bg-slate-900'>
-            <h1 className='pb-1 text-3xl font-bold text-center text-white'>
-                PyRa{' '}
-                <span className='font-normal bg-amber-200 text-amber-700 text-sm rounded px-1 py-[0.0625rem] ml-1.5'>
-                    v4.0.0
-                </span>
+        <header className='flex flex-row items-center w-full px-2 py-2 bg-slate-900'>
+            <h1 className='pl-3 text-2xl font-bold text-center text-white whitespace-nowrap'>
+                PyRa <span className='pl-0.5 font-normal opacity-50'>4.0</span>
             </h1>
-            <div className='flex flex-wrap justify-center w-full px-4 py-3 gap-x-2 gap-y-2'>
+            <div className='flex-grow ' />
+            <div className='flex flex-wrap justify-center px-4 py-3 gap-x-2 gap-y-2'>
                 {props.tabs.map((t, i) => (
                     <button
                         className={
