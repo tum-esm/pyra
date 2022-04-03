@@ -6,7 +6,7 @@ import Header from './components/header';
 const tabs = ['Status', 'Setup', 'Parameters', 'Logs', 'Enclosure Controls'];
 
 function Main() {
-    const [activeTabIndex, setActiveTabIndex] = useState(3);
+    const [activeTabIndex, setActiveTabIndex] = useState(0);
 
     return (
         <div className='flex flex-col items-stretch w-screen h-screen overflow-hidden'>
