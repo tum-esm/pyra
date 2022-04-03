@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ICONS from '../assets/icons';
 
-export default function TabLogs(props: {}) {
+export default function LogTab(props: {}) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
     const [infoLogs, setInfoLogs] = useState<string>('');
     const [debugLogs, setDebugLogs] = useState<string>('');
