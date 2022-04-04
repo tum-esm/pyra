@@ -80,7 +80,7 @@ class RingList:
     def __str__(self):
         return ''.join(self.__data__)
 
-def read_json_files():
+def read_json_config_files():
     """Reads and validates the available json config files.
 
     Returns
@@ -107,8 +107,6 @@ def init_cam(cam_id):
     cam = cv.VideoCapture(cam_id)
     cam.release()
 
-    status = False
-
     for _ in range(5):
         cam = cv.VideoCapture(cam_id)
         time.sleep(1)
@@ -120,11 +118,8 @@ def init_cam(cam_id):
             cam.set(11, 64)  # contrast
             cam.set(12, 0)  # saturation
             cam.set(14, 0)  # gain
-            status = True
             cam.read()
-            break
-    if status:
-        return cam
+            return cam
     else:
         return None
 
@@ -139,31 +134,32 @@ def eval_sun_state(frame):
         frame_gray = frame_gray[:, 170:1100]
         frame = frame[:, 170:1100]
 
-    img_b = cv.adaptiveThreshold(frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 23, 2)
+    img_b = cv.adaptiveThreshold(frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C,
+                                 cv.THRESH_BINARY_INV, 23, 2)
+
     img_b = cv.medianBlur(img_b, 9)
 
     img_b, frame, border = extend_border(img_b, frame)
 
-    circles = cv.HoughCircles(img_b, cv.HOUGH_GRADIENT, 1, 900,
-                              param1=200, param2=1, minRadius=345, maxRadius=355)
+    circles = cv.HoughCircles(img_b, cv.HOUGH_GRADIENT, 1, 900, param1=200,
+                              param2=1, minRadius=345, maxRadius=355)
     # (min + max) radius have to be quite exact.
     # 900 = Distance to next circle to prevent wrong circles
 
-    if not circles is None:
-        circles = np.uint16(np.around(circles))
-        for i in circles[0, :]:
-            center = (i[0], i[1])
-            radius = i[2]
-
-            cv.circle(img_b, center, radius - 10, 255, 30)
-            cv.circle(img_b, center, radius - 20, 0, 15)
-
-            cv.circle(frame, center, radius, 255, 5)
-
-    else:
+    if circles is None:
         return -1, frame
 
-    contours, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
+    circles = np.uint16(np.around(circles))
+
+    for i in circles[0, :]:
+        center = (i[0], i[1])
+        radius = i[2]
+        cv.circle(img_b, center, radius - 10, 255, 30)
+        cv.circle(img_b, center, radius - 20, 0, 15)
+        cv.circle(frame, center, radius, 255, 5)
+
+    contours, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE,
+                                          cv.CHAIN_APPROX_NONE)
 
     ppi_contour = None
     ppi = -1
@@ -175,6 +171,7 @@ def eval_sun_state(frame):
                 if float(w) == float(h):  # Use constraints to find the projection plane
                     ppi_contour = contours[i]  # Save contour
                     ppi = i
+
         if ppi_contour is None:
             return -1, frame
 
@@ -199,7 +196,16 @@ def eval_sun_state(frame):
                 cv.drawContours(frame, contours[i], -1, color, 4)
                 cv.putText(frame, ('%s' % (i)), pos, font, 1, color, 2, 10)
                 areas.append(c_areas[i])
-    cv.putText(frame, "%05d" % (np.sum(areas)), (10, y_length - 20), font, 1, (255, 255, 255), 2, 10)
+
+    cv.putText(frame,
+               "%05d" % (np.sum(areas)),
+               (10, y_length - 20),
+               font,
+               1,
+               (255, 255, 255),
+               2,
+               10)
+
     if np.sum(areas) >= 8000:
         return 1, frame
     else:
@@ -340,7 +346,7 @@ def process_vbdsd_vision(cam):
 
 if __name__ == "__main__":
 
-    SETUP, PARAMS = read_json_files()
+    SETUP, PARAMS = read_json_config_files()
     status_history = RingList(PARAMS["vbdsd_evaluation_size"])
 
     loc = get_tracker_position()
