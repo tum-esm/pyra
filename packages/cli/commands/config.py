@@ -20,7 +20,7 @@ Validation.logging_handler = error_handler
 
 
 @click.command(help="Read the current setup.json file.")
-def get_setup():
+def _get_setup():
     try:
         assert os.path.isfile(SETUP_FILE_PATH), "file does not exist"
         with open(SETUP_FILE_PATH, "r") as f:
@@ -34,7 +34,7 @@ def get_setup():
 
 
 @click.command(help="Read the current parameters.json file.")
-def get_parameters():
+def _get_parameters():
     try:
         assert os.path.isfile(PARAMS_FILE_PATH), "file does not exist"
         with open(PARAMS_FILE_PATH, "r") as f:
@@ -48,11 +48,12 @@ def get_parameters():
 
 
 @click.command(
-    help=f"Set setup. Pass the JSON directly or via a file path. Only a subset of the required setup variables has to be passed. The non-occuring values will be reused from the current config.\n\nRequired schema: {SETUP_FILE_SCHEMA}"
+    short_help="Set the setup.json file.",
+    help=f"Set setup. Pass the JSON directly or via a file path. Only a subset of the required setup variables has to be passed. The non-occuring values will be reused from the current config.\n\nRequired schema: {SETUP_FILE_SCHEMA}",
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
-def set_setup(path: str, content: str):
+def _set_setup(path: str, content: str):
     if (path == "" and content == "") or (path != "" and content != ""):
         click.echo('You have to pass exactly one of "--path" or "--content"')
     else:
@@ -87,11 +88,12 @@ def set_setup(path: str, content: str):
 
 
 @click.command(
-    help=f"Set parameters. Pass the JSON directly or via a file path. Only a subset of the required parameters has to be passed. The non-occuring values will be reused from the current config.\n\nRequired schema: {PARAMS_FILE_SCHEMA}"
+    short_help="Set the parameters.json file.",
+    help=f"Set parameters. Pass the JSON directly or via a file path. Only a subset of the required parameters has to be passed. The non-occuring values will be reused from the current config.\n\nRequired schema: {PARAMS_FILE_SCHEMA}",
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
-def set_parameters(path: str, content: str):
+def _set_parameters(path: str, content: str):
     if (path == "" and content == "") or (path != "" and content != ""):
         click.echo('You have to pass exactly one of "--path" or "--content"')
     else:
@@ -128,7 +130,7 @@ def set_parameters(path: str, content: str):
 @click.command(
     help=f"Validate the current setup.json file.\n\nRequired schema: {SETUP_FILE_SCHEMA}"
 )
-def validate_current_setup():
+def _validate_setup():
     if Validation.check_setup_file():
         success_handler(f"Current setup file is valid")
     else:
@@ -140,10 +142,39 @@ def validate_current_setup():
 @click.command(
     help=f"Validate the current parameters.json file.\n\nRequired schema: {PARAMS_FILE_SCHEMA}"
 )
-def validate_current_parameters():
+def _validate_parameters():
     if Validation.check_parameters_file():
         success_handler(f"Current parameters file is valid")
     else:
         error_handler(
             f"Current parameters file is invalid, required schema: {PARAMS_FILE_SCHEMA}"
         )
+
+
+@click.group()
+def _setup_config_command_group():
+    pass
+
+
+_setup_config_command_group.add_command(_get_setup, name="get")
+_setup_config_command_group.add_command(_set_setup, name="set")
+_setup_config_command_group.add_command(_validate_setup, name="validate")
+
+
+@click.group()
+def _parameters_config_command_group():
+    pass
+
+
+_parameters_config_command_group.add_command(_get_parameters, name="get")
+_parameters_config_command_group.add_command(_set_parameters, name="set")
+_parameters_config_command_group.add_command(_validate_parameters, name="validate")
+
+
+@click.group()
+def config_command_group():
+    pass
+
+
+config_command_group.add_command(_setup_config_command_group, name="setup")
+config_command_group.add_command(_parameters_config_command_group, name="parameters")
