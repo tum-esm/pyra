@@ -217,7 +217,7 @@ def calc_sun_angle_deg(loc):
     return sun_angle_deg
 
 def read_camtracker_config() -> list:
-    # extracts the path to the folder that contains the camtracker.exe
+
     target = SETUP["CamTracker_full_path_Config"]
 
     if not os.path.isfile(target):
@@ -288,46 +288,54 @@ def extend_border(img, frame):
     )
     return img_b, frame, bordersize
 
-def change_exposure(self, diff = 0):
-    #self.sun_angle_deg = Vbdsd.calc_sun_angle_deg(self.loc)
-    if self.sun_angle_deg < 4 * u.deg:
-        temp = -9 + diff
-    elif self.sun_angle_deg < 6 * u.deg:
-        temp = -10 + diff
-    elif self.sun_angle_deg < 10 * u.deg:
-        temp = -11 + diff
+def change_exposure(diff = 0):
+
+    loc = get_tracker_position()
+    sun_angle_deg = calc_sun_angle_deg(loc)
+
+    if sun_angle_deg < 4 * astropy.units.deg:
+        exp = -9 + diff
+    elif sun_angle_deg < 6 * astropy.units.deg:
+        exp = -10 + diff
+    elif sun_angle_deg < 10 * astropy.units.deg:
+        exp = -11 + diff
     else:
-        temp = -12 + diff
-    if temp != self.exp:
-        self.exp = temp
-        self.dsd_logger.debug("Exposure set to " + str(self.exp))
-        self.cam.set(15, self.exp)
-        self.cam.read()
-        time.sleep(0.2)
+        exp = -12 + diff
 
-def take_vbdsd_image(self,count = 0): # Recursively taking images max = 5
-    ret, frame = self.cam.read()
-    if ret:
-        return ret, frame
-    else:  # for some reason, image retrieval inst always successful on Mb
-        if count < 5:
-            count += 1
-            temp_ret, temp_frame = self.take_vbdsd_image(count)
-            if temp_ret:
-                return temp_ret, temp_frame
-            else:
-                return False, None
-        else: # Count >= 5
-            return False, None
+    cam.set(15, exp)
+    cam.read()
+    time.sleep(0.2)
 
-def process_vbdsd_image(self):
-    ret, frame = take_vbdsd_image()
-    status = 0
+def take_vbdsd_image(cam, count:int = 1) :
+    """Takes a VBDSD image with retry option.
+
+    Returns
+    ret(retrieval): 1 or 0
+    frame: Source image
+    """
+
+    for _ in count:
+        ret, frame = cam.read()
+        if ret:
+            return ret, frame
+
+    return False, None
+
+def process_vbdsd_vision(cam):
+    """Calls take_vbdsd_image and processes the image if successful.
+
+    Returns
+    status: 1 or 0
+    frame: Source image
+    """
+
+    ret, frame = take_vbdsd_image(cam, 5)
     if ret:
         status, frame = eval_sun_state(frame)
+        return 1, frame
     else:
         ret, frame = take_vbdsd_image()
-    return status, frame
+        return 0, frame
 
 
 if __name__ == "__main__":
@@ -348,12 +356,12 @@ if __name__ == "__main__":
             time.sleep(60)
 
         # take a picture and process it
-        status, frame = process_vbdsd_image()
+        status, frame = process_vbdsd_vision(cam)
         #retry with change_exposure(1) if status fail
         #TODO: move retry in function
         if status == -1:
             change_exposure(1)
-            status, frame = process_vbdsd_image()
+            status, frame = process_vbdsd_vision(cam)
 
         #append sun status to status history
         if status == 1:
