@@ -3,6 +3,7 @@ import click
 import os
 import sys
 from filelock import FileLock
+import pprint
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -13,8 +14,8 @@ CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 sys.path.append(PROJECT_DIR)
 from packages.core.validation import Validation, SETUP_FILE_SCHEMA, PARAMS_FILE_SCHEMA
 
-error_handler = lambda m: click.echo(click.style(m, fg="red"))
-success_handler = lambda m: click.echo(click.style(m, fg="green"))
+error_handler = lambda text: click.echo(click.style(text, fg="red"))
+success_handler = lambda text: click.echo(click.style(text, fg="green"))
 Validation.logging_handler = error_handler
 
 
@@ -27,7 +28,7 @@ def get_setup():
                 content = json.load(f)
             except:
                 raise AssertionError("file not in a valid json format")
-        success_handler(content)
+        click.echo(content)
     except AssertionError as e:
         error_handler(e)
 
@@ -41,13 +42,13 @@ def get_parameters():
                 content = json.load(f)
             except:
                 raise AssertionError("file not in a valid json format")
-        success_handler(content)
+        click.echo(content)
     except AssertionError as e:
         error_handler(e)
 
 
 @click.command(
-    help="Set setup. Pass the JSON directly or via a file path. Only a subset of the required setup variables has to be passed. The non-occuring values will be reused from the current config."
+    help=f"Set setup. Pass the JSON directly or via a file path. Only a subset of the required setup variables has to be passed. The non-occuring values will be reused from the current config.\n\nRequired schema: {SETUP_FILE_SCHEMA}"
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
@@ -86,7 +87,7 @@ def set_setup(path: str, content: str):
 
 
 @click.command(
-    help="Set parameters. Pass the JSON directly or via a file path. Only a subset of the required parameters has to be passed. The non-occuring values will be reused from the current config."
+    help=f"Set parameters. Pass the JSON directly or via a file path. Only a subset of the required parameters has to be passed. The non-occuring values will be reused from the current config.\n\nRequired schema: {PARAMS_FILE_SCHEMA}"
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
@@ -124,17 +125,25 @@ def set_parameters(path: str, content: str):
         success_handler("Updated parameters file")
 
 
-@click.command(help="Validate the current setup.json file.")
+@click.command(
+    help=f"Validate the current setup.json file.\n\nRequired schema: {SETUP_FILE_SCHEMA}"
+)
 def validate_current_setup():
     if Validation.check_setup_file():
-        success_handler(
+        success_handler(f"Current setup file is valid")
+    else:
+        error_handler(
             f"Current setup file is invalid, required schema: {SETUP_FILE_SCHEMA}"
         )
 
 
-@click.command(help="Validate the current parameters.json file.")
+@click.command(
+    help=f"Validate the current parameters.json file.\n\nRequired schema: {PARAMS_FILE_SCHEMA}"
+)
 def validate_current_parameters():
     if Validation.check_parameters_file():
-        success_handler(
+        success_handler(f"Current parameters file is valid")
+    else:
+        error_handler(
             f"Current parameters file is invalid, required schema: {PARAMS_FILE_SCHEMA}"
         )
