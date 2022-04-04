@@ -27,7 +27,7 @@
 # ==============================================================================
 
 
-
+# TODO: Use logging after inital tests
 import logging
 import os
 import time
@@ -312,7 +312,7 @@ def change_exposure(diff = 0):
     cam.read()
     time.sleep(0.2)
 
-def take_vbdsd_image(cam, count:int = 1) :
+def take_vbdsd_image(count:int = 1) :
     """Takes a VBDSD image with retry option.
 
     Returns
@@ -327,7 +327,7 @@ def take_vbdsd_image(cam, count:int = 1) :
 
     return False, None
 
-def process_vbdsd_vision(cam):
+def process_vbdsd_vision():
     """Calls take_vbdsd_image and processes the image if successful.
 
     Returns
@@ -335,7 +335,7 @@ def process_vbdsd_vision(cam):
     frame: Source image
     """
 
-    ret, frame = take_vbdsd_image(cam, 5)
+    ret, frame = take_vbdsd_image(5)
     if ret:
         status, frame = eval_sun_state(frame)
         return 1, frame
@@ -362,11 +362,11 @@ if __name__ == "__main__":
             time.sleep(60)
 
         # take a picture and process it
-        status, frame = process_vbdsd_vision(cam)
+        status, frame = process_vbdsd_vision()
         #retry with change_exposure(1) if status fail
         if status == -1:
             change_exposure(1)
-            status, frame = process_vbdsd_vision(cam)
+            status, frame = process_vbdsd_vision()
 
         #append sun status to status history
         if status == 1:
