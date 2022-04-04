@@ -364,7 +364,6 @@ if __name__ == "__main__":
         # take a picture and process it
         status, frame = process_vbdsd_vision(cam)
         #retry with change_exposure(1) if status fail
-        #TODO: move retry in function
         if status == -1:
             change_exposure(1)
             status, frame = process_vbdsd_vision(cam)
