@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { defaultsDeep } from 'lodash';
 
 import TYPES from '../../types/index';
+import TextInputRow from '../components/text-input-row';
 
 export default function SetupTab(props: {}) {
     const [centralJSON, setCentralJSON] = useState<TYPES.setupJSON>(undefined);
@@ -55,23 +56,11 @@ export default function SetupTab(props: {}) {
         <div className='flex flex-col w-full h-full p-6'>
             {localJSON !== undefined && (
                 <>
-                    <label className='px-1 py-1 text-sm font-bold'>
-                        em27.ip
-                        {localJSON.em27.ip !== centralJSON.em27.ip && (
-                            <span className='font-medium opacity-70 ml-1.5'>
-                                modified, old value:{' '}
-                                <span className='rounded bg-slate-200 px-1 py-0.5'>
-                                    {centralJSON.em27.ip}
-                                </span>
-                            </span>
-                        )}
-                    </label>
-                    <input
+                    <TextInputRow
+                        label='em27.ip'
                         value={localJSON.em27.ip}
-                        className='px-2 py-1 font-mono rounded'
-                        onChange={e =>
-                            addLocalUpdate({ em27: { ip: e.target.value } })
-                        }
+                        oldValue={centralJSON.em27.ip}
+                        setValue={v => addLocalUpdate({ em27: { ip: v } })}
                     />
                 </>
             )}
