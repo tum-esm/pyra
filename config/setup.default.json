@@ -1,6 +1,6 @@
 {
     "enclosure": {
-        "TUM_enclosure_is_present": false
+        "tum_enclosure_is_present": false
     },
     "em27": {
         "ip": "10.0.0.1"

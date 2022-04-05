@@ -32,7 +32,7 @@ def is_valid_ip_adress(field, value, error):
 SETUP_FILE_SCHEMA = {
     "enclosure": {
         "type": "dict",
-        "schema": {"TUM_enclosure_is_present": {"type": "boolean"}},
+        "schema": {"tum_enclosure_is_present": {"type": "boolean"}},
     },
     "em27": {
         "type": "dict",
