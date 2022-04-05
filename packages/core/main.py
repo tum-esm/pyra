@@ -1,10 +1,10 @@
 from datetime import datetime
 import json
-import logging
 import os
 import time
 from filelock import FileLock
 
+from packages.core.logger import Logger
 from packages.core.opus_controls import OpusControls
 from packages.core.sun_tracking import SunTracking
 from packages.core.system_time_sync import SystemTimeSync
@@ -16,24 +16,11 @@ SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
-# Setup logging module
-logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-logging.basicConfig(
-    level=logging.DEBUG, filename=f"{PROJECT_DIR}/logs/debug.log", format=logging_format
-)
-logging_info_handler = logging.FileHandler(
-    filename=f"{PROJECT_DIR}/logs/info.log", mode="a"
-)
-logging_info_handler.setLevel(logging.INFO)
-logging_info_handler.setFormatter(logging.Formatter(logging_format))
-logger = logging.getLogger("pyra.core")
-logger.addHandler(logging_info_handler)
-
 
 def run():
     while True:
         execution_started_at = datetime.now().timestamp()
-        logger.info("Starting Iteration")
+        Logger.info("Starting Iteration")
 
         # FileLock = Mark, that the config JSONs are being used and the
         # CLI should not interfere. A file "config/config.lock" will be created
@@ -60,30 +47,15 @@ def run():
 
         SystemTimeSync.run()
         SunTracking.run()
-        OpusControls.run(SETUP, PARAMS)
+        OpusControls.run()
 
-        logger.info("Ending Iteration")
+        Logger.info("Ending Iteration")
 
         # Wait some time so that a certain frequency of the loop is achieved
         execution_ended_at = datetime.now().timestamp()
-        time_to_wait = PARAMS["secondsPerIteration"] - (
-            execution_ended_at - execution_started_at
+        time_to_wait = round(
+            PARAMS["secondsPerIteration"] - (execution_ended_at - execution_started_at),
+            3,
         )
+        Logger.debug(f"Waiting {time_to_wait} seconds")
         time.sleep(time_to_wait if time_to_wait > 0 else 0)
-
-        os.system("python3 vbdsd.py")
-
-
-async def some2():
-    pass
-
-
-async def some1():
-    pass
-
-
-async def someAll():
-    a = await some1()
-    b = await some2()
-    if a != b:
-        pass

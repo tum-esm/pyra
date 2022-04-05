@@ -7,14 +7,11 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any software like "BktTimeSync"
 
-
-import logging
-
-logger = logging.getLogger("pyra.core")
+from packages.core.logger import Logger
 
 
 class SystemTimeSync:
     @staticmethod
     def run():
-        logger.info("Running SystemTimeSync")
+        Logger.info("Running SystemTimeSync")
         pass

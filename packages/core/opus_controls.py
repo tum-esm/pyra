@@ -9,9 +9,7 @@
 # TODO: Add option for OPUS MockServer usage
 
 
-import logging
-
-logger = logging.getLogger("pyra.core")
+from packages.core.logger import Logger
 
 # TODO: Merge Patrick's progress
 class OpusControls:
@@ -20,8 +18,9 @@ class OpusControls:
     connection.
     """
 
-    def run(self, setup: dict, params: dict):
-        logger.info("Running OpusControls")
+    @staticmethod
+    def run():
+        Logger.info("Running OpusControls")
 
         # TODO: Check all conditions, whether to contact OPUS
 

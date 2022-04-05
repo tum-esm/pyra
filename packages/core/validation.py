@@ -1,7 +1,7 @@
 import json
-import logging
 import os
 import cerberus
+from packages.core.logger import Logger
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
@@ -21,7 +21,7 @@ class CerberusException(Exception):
 
 
 class Validation:
-    logging_handler = logging.error
+    logging_handler = Logger.error
 
     @staticmethod
     def __load_json(file_path, content_string, validator):

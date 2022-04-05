@@ -10,14 +10,11 @@
 
 # TODO: Mock the behaviour of OPUS when testing
 
-
-import logging
-
-logger = logging.getLogger("pyra.core")
+from packages.core.logger import Logger
 
 
 class SunTracking:
     @staticmethod
     def run():
-        logger.info("Running SunTracking")
+        Logger.info("Running SunTracking")
         pass
