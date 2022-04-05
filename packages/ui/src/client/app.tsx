@@ -12,7 +12,7 @@ function Main() {
 
     async function updateCliStatus() {
         setCheckingSetup(true);
-        const status = await window.electron.checkCliStatus();
+        const status = await window.electron.checkCLIStatus();
         setPyraIsSetUp(status);
         setCheckingSetup(false);
     }

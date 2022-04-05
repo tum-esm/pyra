@@ -5,7 +5,7 @@
     "description": "PyRa 4 User Interface",
     "main": ".webpack/main",
     "scripts": {
-        "start": "electron-forge start",
+        "develop": "electron-forge start",
         "package": "electron-forge package",
         "make": "electron-forge make",
         "publish": "electron-forge publish",

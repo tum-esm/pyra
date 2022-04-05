@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electron', {
-    checkCliStatus: async () => ipcRenderer.invoke('checkCliStatus'),
+    checkCLIStatus: async () => ipcRenderer.invoke('checkCLIStatus'),
     readInfoLogs: async () => ipcRenderer.invoke('readInfoLogs'),
     readDebugLogs: async () => ipcRenderer.invoke('readDebugLogs'),
     archiveLogs: async () => ipcRenderer.invoke('archiveLogs'),

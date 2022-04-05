@@ -3,7 +3,7 @@ export {};
 declare global {
     interface Window {
         electron: {
-            checkCliStatus: () => Promise<boolean>;
+            checkCLIStatus: () => Promise<boolean>;
             readInfoLogs: () => Promise<string>;
             readDebugLogs: () => Promise<string>;
             archiveLogs: () => void;
