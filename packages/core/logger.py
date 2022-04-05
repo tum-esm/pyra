@@ -23,26 +23,26 @@ logging.getLogger("filelock").setLevel(logging.WARNING)
 
 class Logger:
     @staticmethod
-    def debug(message: str, source="pyra.core"):
+    def debug(message: str, origin="pyra.core"):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(source).debug(message)
+            logging.getLogger(origin).debug(message)
 
     @staticmethod
-    def info(message: str, source="pyra.core"):
+    def info(message: str, origin="pyra.core"):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(source).info(message)
+            logging.getLogger(origin).info(message)
 
     @staticmethod
-    def warning(message: str, source="pyra.core"):
+    def warning(message: str, origin="pyra.core"):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(source).warning(message)
+            logging.getLogger(origin).warning(message)
 
     @staticmethod
-    def critical(message: str, source="pyra.core"):
+    def critical(message: str, origin="pyra.core"):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(source).critical(message)
+            logging.getLogger(origin).critical(message)
 
     @staticmethod
-    def error(message: str, source="pyra.core"):
+    def error(message: str, origin="pyra.core"):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(source).error(message)
+            logging.getLogger(origin).error(message)
