@@ -1,1 +1,26 @@
-{}
+{
+    "enclosure": {
+        "TUM_enclosure_is_present": false
+    },
+    "em27": {
+        "ip": "10.0.0.1"
+    },
+    "plc": {
+        "is_present": false,
+        "ip": "10.0.0.4"
+    },
+    "camtracker": {
+        "executable_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
+        "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
+        "sun_intensity_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat",
+        "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt"
+    },
+    "opus": {
+        "executable_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe"
+    },
+    "vbdsd": {
+        "sensor_is_present": false,
+        "cam_id": 0,
+        "image_storage_path": "C:\\img\\"
+    }
+}

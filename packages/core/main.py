@@ -31,7 +31,7 @@ def run():
                 not Validation.check_setup_file()
             ):
                 # TODO: What to do here?
-                time.sleep(60)
+                time.sleep(PARAMS["pyra"]["seconds_per_iteration"])
                 continue
 
             with open(SETUP_FILE_PATH, "r") as f:
@@ -55,7 +55,8 @@ def run():
         # Wait some time so that a certain frequency of the loop is achieved
         execution_ended_at = datetime.now().timestamp()
         time_to_wait = round(
-            PARAMS["secondsPerIteration"] - (execution_ended_at - execution_started_at),
+            PARAMS["pyra"]["seconds_per_iteration"]
+            - (execution_ended_at - execution_started_at),
             3,
         )
         Logger.debug(f"Waiting {time_to_wait} seconds")
