@@ -21,11 +21,16 @@ export default function TextInputRow(props: {
                     </span>
                 )}
             </label>
-            <input
-                value={value}
-                className='w-full px-2 py-1 font-mono rounded'
-                onChange={e => setValue(e.target.value)}
-            />
+            <div className='relative w-full'>
+                <input
+                    value={value}
+                    className='relative w-full px-2 py-1 font-mono rounded'
+                    onChange={e => setValue(e.target.value)}
+                />
+                {value !== oldValue && (
+                    <div className='absolute top-0 left-0 w-1.5 h-full -translate-x-2.5 bg-blue-500 rounded-sm' />
+                )}
+            </div>
         </div>
     );
 }
