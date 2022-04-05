@@ -82,9 +82,14 @@ export default function LogTab(props: {}) {
                     archive logs
                 </button>
             </div>
-            <pre className='w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded'>
-                <code className='w-full h-full overflow-y-scroll language-log'>
+            <pre className='w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded overflow-y-scroll'>
+                <code className='w-full h-full !text-sm language-log'>
                     {logLevel === 'info' ? infoLogs : debugLogs}
+                    {(logLevel === 'info' ? infoLogs : debugLogs)
+                        .replace('\n', '')
+                        .replace(' ', '').length === 0 && (
+                        <strong>logs are empty</strong>
+                    )}
                 </code>
             </pre>
         </div>
@@ -92,5 +97,3 @@ export default function LogTab(props: {}) {
 }
 
 // TODO: Figure out how to remove the quotes from the logs inside the html -> in order to have syntax highlighting
-
-// TODO: Render placeholder text when logs are empty

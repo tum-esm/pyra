@@ -67,8 +67,4 @@ function Main() {
     );
 }
 
-function render() {
-    ReactDOM.render(<Main />, document.body);
-}
-
-render();
+ReactDOM.render(<Main />, document.body);
