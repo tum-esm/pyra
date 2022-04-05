@@ -31,7 +31,7 @@ def _get_setup():
                 content = json.load(f)
             except:
                 raise AssertionError("file not in a valid json format")
-        click.echo(content)
+        click.echo(json.dumps(content))
     except AssertionError as e:
         error_handler(e)
 
@@ -45,7 +45,7 @@ def _get_parameters():
                 content = json.load(f)
             except:
                 raise AssertionError("file not in a valid json format")
-        click.echo(content)
+        click.echo(json.dumps(content))
     except AssertionError as e:
         error_handler(e)
 
