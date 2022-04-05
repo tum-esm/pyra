@@ -47,7 +47,16 @@ app.on('window-all-closed', () => {
     app.quit();
 });
 
-async function pyra_cli(command: string): Promise<string> {
+// Check if pyra-cli command exists
+async function check_pyra_cli(): Promise<boolean> {
+    const { stdout, stderr } = await exec(PYRA_CLI_COMMAND, {
+        shell: '/bin/bash',
+        windowsHide: true,
+    });
+    return stdout.startsWith('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...');
+}
+
+async function call_pyra_cli(command: string): Promise<string> {
     return (
         await exec(`${PYRA_CLI_COMMAND} ${command}`, {
             shell: '/bin/bash',
@@ -56,19 +65,23 @@ async function pyra_cli(command: string): Promise<string> {
     ).stdout;
 }
 
-// TODO: Check for pyra cli state (function + ipchandler)
+ipcMain.handle('checkCliStatus', async (_, args) => {
+    try {
+        return await check_pyra_cli();
+    } catch {
+        return false;
+    }
+});
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
 ipcMain.handle('readInfoLogs', async (_, args) => {
-    return (await pyra_cli('logs read --level INFO'))
+    return (await call_pyra_cli('logs read --level INFO'))
         .split('\n')
         .filter(l => l.length > 0)
         .join('\n');
 });
 
 ipcMain.handle('readDebugLogs', async (_, args) => {
-    return (await pyra_cli('logs read --level DEBUG'))
+    return (await call_pyra_cli('logs read --level DEBUG'))
         .split('\n')
         .filter(l => l.length > 0)
         .join('\n');
@@ -85,6 +98,6 @@ ipcMain.handle('archiveLogs', async (_, args) => {
         buttons: ['Yes', 'No'],
     });
     if (result.response === 0) {
-        pyra_cli('logs archive');
+        call_pyra_cli('logs archive');
     }
 });
