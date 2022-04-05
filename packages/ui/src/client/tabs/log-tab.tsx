@@ -21,8 +21,8 @@ export default function LogTab(props: {}) {
         );
     }
 
-    async function clearLogs() {
-        await window.electron.clearLogs();
+    async function archiveLogs() {
+        await window.electron.archiveLogs();
         await updateLogs();
     }
 
@@ -77,9 +77,9 @@ export default function LogTab(props: {}) {
                         'px-3 py-0.5 font-medium rounded ' +
                         'bg-red-200 text-red-900'
                     }
-                    onClick={clearLogs}
+                    onClick={archiveLogs}
                 >
-                    delete logs
+                    archive logs
                 </button>
             </div>
             <pre className='w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded'>

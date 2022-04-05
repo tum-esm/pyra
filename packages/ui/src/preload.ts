@@ -3,6 +3,6 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('electron', {
     readInfoLogs: async () => ipcRenderer.invoke('readInfoLogs'),
     readDebugLogs: async () => ipcRenderer.invoke('readDebugLogs'),
-    clearLogs: async () => ipcRenderer.invoke('clearLogs'),
+    archiveLogs: async () => ipcRenderer.invoke('archiveLogs'),
     playBeep: () => ipcRenderer.invoke('playBeep'),
 });
