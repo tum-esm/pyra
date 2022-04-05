@@ -34,6 +34,7 @@ function isObject(object: any) {
 export default function SetupTab(props: {}) {
     const [centralJSON, setCentralJSON] = useState<TYPES.setupJSON>(undefined);
     const [localJSON, setLocalJSON] = useState<TYPES.setupJSON>(undefined);
+    const [errorMessage, setErrorMessage] = useState<string>(undefined);
 
     async function loadCentralJSON() {
         const content = await window.electron.readSetupJSON();
@@ -48,8 +49,7 @@ export default function SetupTab(props: {}) {
         if (result.includes('Updated setup file')) {
             setCentralJSON(localJSON);
         } else {
-            // TODO: Show error message somewhere
-            console.log(result);
+            setErrorMessage(result);
         }
     }
 
@@ -64,6 +64,7 @@ export default function SetupTab(props: {}) {
         );
         console.log({ newObject });
         setLocalJSON(newObject);
+        setErrorMessage(undefined);
     }
 
     const configIsDiffering =
@@ -85,13 +86,24 @@ export default function SetupTab(props: {}) {
             )}
             {configIsDiffering && (
                 <div className='absolute bottom-0 left-0 z-50 flex flex-row items-center justify-center w-full px-6 py-2 text-sm font-medium bg-white shadow-lg gap-x-2'>
-                    <div>Save changes?</div>
-                    <Button
-                        text='yes'
-                        onClick={saveCentralJSON}
-                        variant='green'
-                    />
-                    <Button text='no' onClick={() => {}} variant='red' />
+                    {errorMessage !== undefined && (
+                        <span className='text-red-500'>{errorMessage}</span>
+                    )}
+                    {errorMessage === undefined && (
+                        <>
+                            <div>Save changes?</div>
+                            <Button
+                                text='yes'
+                                onClick={saveCentralJSON}
+                                variant='green'
+                            />
+                            <Button
+                                text='no'
+                                onClick={() => {}}
+                                variant='red'
+                            />
+                        </>
+                    )}
                 </div>
             )}
         </div>
