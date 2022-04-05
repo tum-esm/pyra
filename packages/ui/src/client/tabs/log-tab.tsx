@@ -92,3 +92,5 @@ export default function LogTab(props: {}) {
 }
 
 // TODO: Figure out how to remove the quotes from the logs inside the html -> in order to have syntax highlighting
+
+// TODO: Render placeholder text when logs are empty
