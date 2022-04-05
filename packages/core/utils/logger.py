@@ -3,7 +3,7 @@ import os
 from filelock import FileLock
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 LOGS_LOCK_PATH = f"{PROJECT_DIR}/logs/logs.lock"
 
 # Setup logging module
