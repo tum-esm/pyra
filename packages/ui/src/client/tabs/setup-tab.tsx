@@ -5,6 +5,32 @@ import TYPES from '../../types/index';
 import TextInputRow from '../components/text-input-row';
 import Button from '../components/button';
 
+// TODO: Move this to utils
+// I didn't find a built-in version yet
+// This code is from https://dmitripavlutin.com/how-to-compare-objects-in-javascript/#4-deep-equality
+function deepEqual(object1: any, object2: any) {
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+    for (const key of keys1) {
+        const val1 = object1[key];
+        const val2 = object2[key];
+        const areObjects = isObject(val1) && isObject(val2);
+        if (
+            (areObjects && !deepEqual(val1, val2)) ||
+            (!areObjects && val1 !== val2)
+        ) {
+            return false;
+        }
+    }
+    return true;
+}
+function isObject(object: any) {
+    return object != null && typeof object === 'object';
+}
+
 export default function SetupTab(props: {}) {
     const [centralJSON, setCentralJSON] = useState<TYPES.setupJSON>(undefined);
     const [localJSON, setLocalJSON] = useState<TYPES.setupJSON>(undefined);
@@ -28,30 +54,10 @@ export default function SetupTab(props: {}) {
         setLocalJSON(newObject);
     }
 
-    let configIsDiffering = false;
-    if (localJSON !== undefined && centralJSON !== undefined) {
-        configIsDiffering =
-            localJSON.enclosure.tum_enclosure_is_present !==
-                centralJSON.enclosure.tum_enclosure_is_present ||
-            localJSON.em27.ip !== centralJSON.em27.ip ||
-            localJSON.plc.is_present !== centralJSON.plc.is_present ||
-            localJSON.plc.ip !== centralJSON.plc.ip ||
-            localJSON.camtracker.executable_path !==
-                centralJSON.camtracker.executable_path ||
-            localJSON.camtracker.learn_az_elev_path !==
-                centralJSON.camtracker.learn_az_elev_path ||
-            localJSON.camtracker.sun_intensity_path !==
-                centralJSON.camtracker.sun_intensity_path ||
-            localJSON.camtracker.config_path !==
-                centralJSON.camtracker.config_path ||
-            localJSON.opus.executable_path !==
-                centralJSON.opus.executable_path ||
-            localJSON.vbdsd.sensor_is_present !==
-                centralJSON.vbdsd.sensor_is_present ||
-            localJSON.vbdsd.cam_id !== centralJSON.vbdsd.cam_id ||
-            localJSON.vbdsd.image_storage_path !==
-                centralJSON.vbdsd.image_storage_path;
-    }
+    const configIsDiffering =
+        localJSON !== undefined &&
+        centralJSON !== undefined &&
+        !deepEqual(localJSON, centralJSON);
 
     return (
         <div className='flex flex-col w-full h-full p-6'>
