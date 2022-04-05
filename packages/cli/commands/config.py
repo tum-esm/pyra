@@ -79,8 +79,6 @@ def _set_setup(path: str, content: str):
             new_partial_json = json.loads(content)
 
         with FileLock(CONFIG_LOCK_PATH):
-            if not Validation.check_setup_file():
-                return
             with open(SETUP_FILE_PATH, "r") as f:
                 current_json: dict = json.load(f)
 
@@ -119,8 +117,6 @@ def _set_parameters(path: str, content: str):
             new_partial_params = json.loads(content)
 
         with FileLock(CONFIG_LOCK_PATH):
-            if not Validation.check_parameters_file():
-                return
             with open(PARAMS_FILE_PATH, "r") as f:
                 current_params: dict = json.load(f)
 
