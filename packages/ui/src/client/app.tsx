@@ -7,7 +7,7 @@ import Header from './components/header';
 const tabs = ['Status', 'Setup', 'Parameters', 'Logs', 'Enclosure Controls'];
 
 function Main() {
-    const [activeTabIndex, setActiveTabIndex] = useState(0);
+    const [activeTabIndex, setActiveTabIndex] = useState(1);
     const [pyraIsSetUp, setPyraIsSetUp] = useState(false);
     const [checkingSetup, setCheckingSetup] = useState(true);
 
@@ -50,7 +50,7 @@ function Main() {
             {pyraIsSetUp && (
                 <>
                     <Header {...{ tabs, activeTabIndex, setActiveTabIndex }} />
-                    <main className='flex-grow w-full min-h-0 bg-slate-200'>
+                    <main className='flex-grow w-full min-h-0 bg-slate-300'>
                         {activeTabIndex === 1 && <SetupTab />}
                         {activeTabIndex === 3 && <LogTab />}
                     </main>

@@ -14,7 +14,7 @@ declare global {
 namespace TYPES {
     export type setupJSON = {
         enclosure: {
-            TUM_enclosure_is_present: boolean;
+            tum_enclosure_is_present: boolean;
         };
         em27: {
             ip: string;
