@@ -3,7 +3,6 @@ import click
 import os
 import sys
 from filelock import FileLock
-import pprint
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -12,7 +11,11 @@ PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 sys.path.append(PROJECT_DIR)
-from packages.core.validation import Validation, SETUP_FILE_SCHEMA, PARAMS_FILE_SCHEMA
+from packages.core.utils.validation import (
+    Validation,
+    SETUP_FILE_SCHEMA,
+    PARAMS_FILE_SCHEMA,
+)
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))

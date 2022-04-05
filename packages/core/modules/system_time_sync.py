@@ -7,7 +7,7 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any software like "BktTimeSync"
 
-from packages.core.logger import Logger
+from packages.core.utils.logger import Logger
 
 
 class SystemTimeSync:

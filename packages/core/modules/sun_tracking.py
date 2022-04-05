@@ -10,7 +10,7 @@
 
 # TODO: Mock the behaviour of OPUS when testing
 
-from packages.core.logger import Logger
+from packages.core.utils.logger import Logger
 
 
 class SunTracking:

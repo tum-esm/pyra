@@ -9,7 +9,7 @@
 # TODO: Add option for OPUS MockServer usage
 
 
-from packages.core.logger import Logger
+from packages.core.utils.logger import Logger
 
 # TODO: Merge Patrick's progress
 class OpusControls:

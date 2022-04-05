@@ -4,11 +4,12 @@ import os
 import time
 from filelock import FileLock
 
-from packages.core.logger import Logger
-from packages.core.opus_controls import OpusControls
-from packages.core.sun_tracking import SunTracking
-from packages.core.system_time_sync import SystemTimeSync
-from packages.core.validation import Validation
+from packages.core.utils.logger import Logger
+from packages.core.utils.validation import Validation
+
+from packages.core.modules.opus_controls import OpusControls
+from packages.core.modules.sun_tracking import SunTracking
+from packages.core.modules.system_time_sync import SystemTimeSync
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
