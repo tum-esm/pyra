@@ -41,6 +41,18 @@ export default function SetupTab(props: {}) {
         setLocalJSON(content);
     }
 
+    async function saveCentralJSON() {
+        const result = await window.electron.saveSetupJSON(
+            JSON.stringify(localJSON)
+        );
+        if (result.includes('Updated setup file')) {
+            setCentralJSON(localJSON);
+        } else {
+            // TODO: Show error message somewhere
+            console.log(result);
+        }
+    }
+
     useEffect(() => {
         loadCentralJSON();
     }, []);
@@ -74,7 +86,11 @@ export default function SetupTab(props: {}) {
             {configIsDiffering && (
                 <div className='absolute bottom-0 left-0 z-50 flex flex-row items-center justify-center w-full px-6 py-2 text-sm font-medium bg-white shadow-lg gap-x-2'>
                     <div>Save changes?</div>
-                    <Button text='yes' onClick={() => {}} variant='green' />
+                    <Button
+                        text='yes'
+                        onClick={saveCentralJSON}
+                        variant='green'
+                    />
                     <Button text='no' onClick={() => {}} variant='red' />
                 </div>
             )}

@@ -25,7 +25,7 @@ def is_valid_ip_adress(field, value, error):
         assert all([n.isnumeric() for n in value.split(".")])
         assert all([(int(n) >= 0) and (int(n) <= 255) for n in value.split(".")])
     except AssertionError:
-        error(field, "Path has to be an existing directory")
+        error(field, "String has to be a valid IPv4 address")
 
 
 # TODO: Add required JSON schema here (https://docs.python-cerberus.org/en/stable/)

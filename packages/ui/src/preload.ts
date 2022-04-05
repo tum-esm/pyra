@@ -6,5 +6,7 @@ contextBridge.exposeInMainWorld('electron', {
     readDebugLogs: async () => ipcRenderer.invoke('readDebugLogs'),
     archiveLogs: async () => ipcRenderer.invoke('archiveLogs'),
     playBeep: () => ipcRenderer.invoke('playBeep'),
-    readSetupJSON: () => ipcRenderer.invoke('readSetupJSON'),
+    readSetupJSON: async () => ipcRenderer.invoke('readSetupJSON'),
+    saveSetupJSON: async (newSetupJSON: string) =>
+        ipcRenderer.invoke('saveSetupJSON', newSetupJSON),
 });

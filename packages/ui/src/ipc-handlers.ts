@@ -64,4 +64,9 @@ export function initIPCHandlers() {
     ipcMain.handle('readSetupJSON', async (_, args) => {
         return JSON.parse(await call_pyra_cli('config setup get'));
     });
+    ipcMain.handle('saveSetupJSON', async (_, newSetupJSON: string) => {
+        return await call_pyra_cli(
+            `config setup set --content "${newSetupJSON.replace(/"/g, '\\"')}"`
+        );
+    });
 }

@@ -7,6 +7,7 @@ declare global {
             archiveLogs: () => void;
             playBeep: () => void;
             readSetupJSON: () => Promise<TYPES.setupJSON>;
+            saveSetupJSON: (newSetupJSON: string) => Promise<string>;
         };
     }
 }
