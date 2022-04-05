@@ -3,6 +3,7 @@ import { defaultsDeep } from 'lodash';
 
 import TYPES from '../../types/index';
 import TextInputRow from '../components/text-input-row';
+import Button from '../components/button';
 
 export default function SetupTab(props: {}) {
     const [centralJSON, setCentralJSON] = useState<TYPES.setupJSON>(undefined);
@@ -67,12 +68,8 @@ export default function SetupTab(props: {}) {
             {configIsDiffering && (
                 <div className='absolute bottom-0 left-0 z-50 flex flex-row items-center justify-center w-full px-6 py-2 text-sm font-medium bg-white shadow-lg gap-x-2'>
                     <div>Save changes?</div>
-                    <button className='text-green-700 bg-green-200 rounded'>
-                        yes
-                    </button>
-                    <button className='text-red-700 bg-red-200 rounded'>
-                        no
-                    </button>
+                    <Button text='yes' onClick={() => {}} variant='green' />
+                    <Button text='no' onClick={() => {}} variant='red' />
                 </div>
             )}
         </div>

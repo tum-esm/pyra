@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import SetupTab from './tabs/setup-tab';
 import LogTab from './tabs/log-tab';
 import Header from './components/header';
+import Button from './components/button';
 
 const tabs = ['Status', 'Setup', 'Parameters', 'Logs', 'Enclosure Controls'];
 
@@ -27,7 +28,7 @@ function Main() {
     return (
         <div className='flex flex-col items-stretch w-screen h-screen overflow-hidden'>
             {!pyraIsSetUp && !checkingSetup && (
-                <main className='flex flex-col items-center justify-center w-full h-full gap-y-4'>
+                <main className='flex flex-col items-center justify-center w-full h-full gap-y-4 bg-slate-300'>
                     <p className='max-w-sm text-center'>
                         <pre className='bg-slate-200 mr-1 px-1 py-0.5 rounded-sm font-bold inline'>
                             pyra-cli
@@ -39,12 +40,11 @@ function Main() {
                         </span>
                         .
                     </p>
-                    <button
+                    <Button
+                        text='Retry connection'
                         onClick={updateCliStatus}
-                        className='px-2 py-0.5 text-green-800 bg-green-200 rounded font-medium hover:bg-green-300 hover:text-green-900'
-                    >
-                        Retry connection
-                    </button>
+                        variant='green'
+                    />
                 </main>
             )}
             {pyraIsSetUp && (

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ICONS from '../assets/icons';
+import Button from '../components/button';
 
 export default function LogTab(props: {}) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -72,15 +73,11 @@ export default function LogTab(props: {}) {
                     ))}
                 </div>
                 <div className='flex-grow' />
-                <button
-                    className={
-                        'px-3 py-0.5 font-medium rounded ' +
-                        'bg-red-200 text-red-900'
-                    }
+                <Button
+                    text='Archive Logs'
                     onClick={archiveLogs}
-                >
-                    archive logs
-                </button>
+                    variant='red'
+                />
             </div>
             <pre className='w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded overflow-y-scroll'>
                 <code className='w-full h-full !text-sm language-log'>
