@@ -60,4 +60,8 @@ export function initIPCHandlers() {
     ipcMain.handle('playBeep', (_, args) => {
         shell.beep();
     });
+
+    ipcMain.handle('readSetupJSON', async (_, args) => {
+        return JSON.parse(await call_pyra_cli('config setup get'));
+    });
 }
