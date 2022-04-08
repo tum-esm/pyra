@@ -368,13 +368,13 @@ if __name__ == "__main__":
 
     while(1):
         start_time = time.time()
+        SETUP, PARAMS = read_json_config_files()
 
         #sleep while sun angle is too low
         while(calc_sun_angle_deg(loc) < PARAMS["vbdsd_min_angle"]):
             time.sleep(60)
 
-        SETUP, PARAMS = read_json_config_files()
-
+        #reinit if parameter changes
         if status_history.maxsize() != PARAMS["vbdsd_evaluation_size"]:
             status_history.reinitialize(PARAMS["vbdsd_evaluation_size"])
 
