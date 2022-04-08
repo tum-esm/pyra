@@ -27,7 +27,7 @@
 # ==============================================================================
 
 
-# TODO: Use logging after inital tests
+# TODO: Use logging after initial tests
 import logging
 import os
 import time
@@ -43,6 +43,9 @@ SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 
 class RingList:
+    """Base code created by Flavio Catalani on Tue, 5 Jul 2005 (PSF).
+    Added sum() and reinitialize() functions.
+    """
     def __init__(self, length):
         self.__data__ = []
         self.__full__ = 0
@@ -76,6 +79,16 @@ class RingList:
 
     def sum(self):
         return float(sum(self.get()))
+
+    def reinitialize(self, length):
+        self.__max__ = length
+        self.__full__ = 0
+        self.__cur__ = 0
+        handover_list = self.get()
+        self.__data__ = []
+
+        for item in handover_list:
+            self.append(item)
 
     def __str__(self):
         return ''.join(self.__data__)
@@ -337,17 +350,16 @@ def process_vbdsd_vision():
 
     ret, frame = take_vbdsd_image(5)
     if ret:
-        status, frame = eval_sun_state(frame)
-        return 1, frame
-    else:
-        ret, frame = take_vbdsd_image()
-        return 0, frame
+        return eval_sun_state(frame)
+
+    return 0, frame
 
 
 if __name__ == "__main__":
 
     SETUP, PARAMS = read_json_config_files()
     status_history = RingList(PARAMS["vbdsd_evaluation_size"])
+    # TODO: list dynamisch anpassen möglich?
 
     loc = get_tracker_position()
 
@@ -360,6 +372,11 @@ if __name__ == "__main__":
         #sleep while sun angle is too low
         while(calc_sun_angle_deg(loc) < PARAMS["vbdsd_min_angle"]):
             time.sleep(60)
+
+        SETUP, PARAMS = read_json_config_files()
+
+        if status_history.maxsize() != PARAMS["vbdsd_evaluation_size"]:
+            status_history.reinitialize(PARAMS["vbdsd_evaluation_size"])
 
         # take a picture and process it
         status, frame = process_vbdsd_vision()
