@@ -359,7 +359,6 @@ if __name__ == "__main__":
 
     SETUP, PARAMS = read_json_config_files()
     status_history = RingList(PARAMS["vbdsd_evaluation_size"])
-    # TODO: list dynamisch anpassen möglich?
 
     loc = get_tracker_position()
 
