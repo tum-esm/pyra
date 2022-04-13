@@ -11,6 +11,14 @@
 
 import logging
 
+# TODO: Cleanup Imports
+import snap7
+from snap7 import client as c
+from snap7.snap7types import *
+from snap7 import util
+
+
+
 logger = logging.getLogger("pyra.core")
 
 
@@ -39,6 +47,20 @@ class EnclosureControl:
     def set_config(self, vals):
         self._SETUP, self._PARAMS = vals
 
+"""
+https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
+db_read(db_number: int, start: int, size: int) → bytearray
+Reads a part of a DB from a PLC
+
+    Parameters
+    • db_number – number of the DB to be read.
+    • start – byte index from where is start to
+    readfrom .
+    • size – amount of bytes to be read.
+    
+    Returns Buffer read
+"""
+    # TODO: Refactor below
     def plc_connect(self):
         self.plc.connect('10.10.0.4', 0, 1)
         if self.plc.get_connected():
@@ -94,7 +116,7 @@ class EnclosureControl:
         #logger.debug("Set/ Get Fanspeed = %s/%s" % (speed,temp))
 
     def get_fan_speed(self):    #
-        msg = self.plc.db_read(8, 10, 2) # was 10 , 22, 4
+        msg = self.plc.db_read(8, 4, 2) # was 10 , 22, 4
         speed = util.get_int(msg, 0)
         logger.debug("Get Fan Speed: %s" % speed)
         return speed
@@ -182,8 +204,8 @@ class EnclosureControl:
 
     def get_heater_state(self):
         #logger.debug("Get Heater State: %s" % state)
-        msg = self.plc.db_read(8, 12, 1)
-        state = util.get_bool(msg, 0, 7)
+        msg = self.plc.db_read(8, 6, 1)
+        state = util.get_bool(msg, 0, 1)
         logger.debug("Get Heater State: %s\n" % state)
         return state
 
@@ -211,3 +233,57 @@ class EnclosureControl:
         msg = self.plc.db_read(8, 13, 1)
         util.set_bool(msg, 0, 0, state)
         self.plc.db_write(8, 13, msg)
+
+    def get_router_state(self):     #
+        #logger.debug("get_router_state()")
+        msg = self.plc.db_read(8, 12, 1)
+        state = util.get_bool(msg, 0, 4)
+        return state
+
+    def get_computer_state(self):   #
+        #logger.debug("get_computer_state()")
+        msg = self.plc.db_read(8, 13, 1)
+        state = util.get_bool(msg, 0, 2)
+        return state
+
+    def get_reset_needed(self):     #
+        #logger.debug("get_reset_needed()")
+        msg = self.plc.db_read(3, 2, 1)
+        state = util.get_bool(msg, 0, 2)
+        return state
+
+    def get_rain_state(self):       #
+        #logger.debug("get_rain_state()")
+        msg = self.plc.db_read(3, 0, 1)
+        state = util.get_bool(msg, 0, 0)
+        return state
+
+    def get_connection_state(self):
+        #logger.debug("get_connection_state()")
+        msg = self.plc.db_read(24, 10, 1)
+        state = util.get_bool(msg, 0, 3)
+        return state
+
+    def get_ups_alert(self):       #
+        #logger.debug("get_ups_alert()")
+        msg = self.plc.db_read(8, 13, 1)
+        state = util.get_bool(msg, 0, 6)
+        return state
+
+    def get_temp(self):     #
+        #logger.debug("get_temp()")
+        msg = self.plc.db_read(8, 16, 2)
+        temp = util.get_int(msg, 0)
+        return temp
+
+    def get_humidity(self):
+        #logger.debug("get_humidity")
+        msg = self.plc.db_read(8, 22, 2)
+        humidity = util.get_int(msg, 0)
+        return humidity
+
+    def get_cover_closed(self):
+        #self.logger.debug("get_cover_closed()")
+        msg = self.plc.db_read(6, 16, 1)
+        state = util.get_bool(msg, 0, 1)
+        return
