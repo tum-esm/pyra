@@ -139,7 +139,12 @@ def init_cam(cam_id):
 
 def eval_sun_state(frame):
     """
-    Hough Detection ALgorithm
+    This function will extract the current sun state from an input image (frame)
+    Is uses cv2 package for image detection / computer vision tasks.
+
+    returns:
+    1, frame -> sun status is good, picture used for evaluation
+    0, frame -> sun status is bad, picture used for evaluation
     """
     blur = cv.medianBlur(frame, 15)
     frame_gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
@@ -237,6 +242,12 @@ def calc_sun_angle_deg(loc):
     return sun_angle_deg
 
 def read_camtracker_config() -> list:
+    """Reads the config.txt file of the CamTracker application to receive the
+    latest tracker position.
+
+    Returns
+    tracker_position as a python list
+    """
 
     target = SETUP["camtracker"]["config_path"]
 
@@ -286,6 +297,9 @@ def get_tracker_position():
     return loc
 
 def extend_border(img, frame):
+    """This function allows to use different models of the vbdsd hardware setup
+    by cutting the field of view to the same base.
+    """
     bordersize = 50  # Extend borders
     img_b = cv.copyMakeBorder(
         img,
@@ -309,6 +323,9 @@ def extend_border(img, frame):
     return img_b, frame, bordersize
 
 def change_exposure(diff = 0):
+    """Changes the camera exposure settings according to the current sun angle
+    with a known setting. Allows to add an INT on top for further adjustment.
+    """
 
     loc = get_tracker_position()
     sun_angle_deg = calc_sun_angle_deg(loc)
