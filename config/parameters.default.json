@@ -1,15 +1,24 @@
 {
-    "OPUS_executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
-    "OPUS_macro_full_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx",
-    "OPUS_experiment_full_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
-    "secondsPerIteration": 30,
-    "PYRA_test_mode": 0,
-    "CamTracker_motor_offset_treshold": 10,
-    "PYRA_automation_status": 0,
-    "vbdsd_interval_time": 6,
-    "vbdsd_evaluation_size": 15,
-    "vbdsd_measurement_threshold": 0.6,
-    "vbdsd_min_angle": 11.0,
-    "EM27_power_min_angle": 10.0
-
+    "opus": {
+        "executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
+        "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx",
+        "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm"
+    },
+    "pyra": {
+        "seconds_per_iteration": 30,
+        "test_mode": false,
+        "automation_is_running": false
+    },
+    "camtracker": {
+        "motor_offset_treshold": 10
+    },
+    "vbdsd": {
+        "interval_time": 6,
+        "evaluation_size": 15,
+        "measurement_threshold": 0.6,
+        "min_angle": 11.0
+    },
+    "em27": {
+        "power_min_angle": 10.0
+    }
 }
