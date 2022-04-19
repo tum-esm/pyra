@@ -67,7 +67,7 @@ class SunTracking:
         if not self.__valdiate_tracker_position:
             self.__stop_sun_tracking_automation()
             logger.info("Stop CamTracker. Preparing for reinitialization.")
-            # TODO: Check if a wait() is needed for the mirrors to move back to parking
+
 
     @property
     def set_config(self):

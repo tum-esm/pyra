@@ -21,6 +21,7 @@
 
 
 import logging
+import os
 from msilib.schema import Property
 import time
 import win32con
@@ -189,9 +190,12 @@ class OpusMeasurement:
 
         True -> Connected
         False -> Not Connected"""
-        # TODO: Implement function
-        # use try if module give exceptions
-        return False
+        response = os.system("ping -n 1" + self._SETUP["em27"]["ip"])
+
+        if response == 0:
+            return True
+        else:
+            return False
 
     def __start_opus(self):
         """Uses win32process frm pywin32 module to start up OPUS
