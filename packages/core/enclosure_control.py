@@ -10,13 +10,7 @@
 # ==============================================================================
 
 import logging
-
-# TODO: Cleanup Imports
 import snap7
-from snap7 import client as c
-from snap7.snap7types import *
-from snap7 import util
-
 
 
 logger = logging.getLogger("pyra.core")
@@ -27,7 +21,7 @@ class EnclosureControl:
     def __init__(self):
         self._SETUP = {}
         self._PARAMS = {}
-        self.plc = c.Client()
+        self.plc = snap7.client.Client()
         self.connection = self.plc_connect()
 
     def run(self):
@@ -72,13 +66,22 @@ class EnclosureControl:
         else:
             return False
 
+    def plc_connected(self):
+        """Connects to the PLC Snap7
+
+       Returns:
+       True -> connected
+       False -> not connected
+       """
+        return self.plc.get_connected()
+
     def plc_read_int(self, action):
         """Redas an INT value in the PLC database."""
         assert(len(action) == 3)
         db_number, start, size = action
 
         msg = self.plc.db_read(db_number, start, size)
-        value = util.get_int(msg, 0)
+        value = snap7.util.get_int(msg, 0)
         return value
 
     def plc_write_int(self, action, value):
@@ -87,7 +90,7 @@ class EnclosureControl:
         db_number, start, size = action
 
         msg = bytearray(size)
-        util.set_int(msg, 0, value)
+        snap7.util.set_int(msg, 0, value)
         self.plc.db_write(db_number, start, msg)
 
     def plc_read_bool(self, action):
@@ -96,7 +99,7 @@ class EnclosureControl:
         db_number, start, size, bool_index = action
 
         msg = self.plc.db_read(db_number, start, size)
-        value = util.get_bool(msg, 0, bool_index)
+        value = snap7.util.get_bool(msg, 0, bool_index)
         return value
 
     def plc_write_bool(self, action, value):
@@ -105,5 +108,5 @@ class EnclosureControl:
         db_number, start, size, bool_index = action
 
         msg = self.plc.db_read(db_number, start, size)
-        util.set_bool(msg, 0, bool_index, value)
+        snap7.util.set_bool(msg, 0, bool_index, value)
         self.plc.db_write(db_number, start, msg)
