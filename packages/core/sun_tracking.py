@@ -89,7 +89,7 @@ class SunTracking:
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
         try:
-            if win32ui.FindWindow(None, "CamTracker"):
+            if win32ui.FindWindow(None, "CamTracker 3.9"):
                 return True
         except win32ui.error:
             return False

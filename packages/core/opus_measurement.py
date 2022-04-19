@@ -60,7 +60,9 @@ class OpusMeasurement:
         if not self.__opus_application_running:
             self.__start_opus()
             logger.info("Start OPUS.")
-            # TODO: add a delay for OPUS while start?
+            #returns to give OPUS time to start until next call of run()
+            return
+
 
         #check for automation state flank changes
         if self.last_cycle_automation_status != self._PARAMS["pyra"]["automation_status"]:
@@ -222,7 +224,7 @@ class OpusMeasurement:
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
         try:
-            if win32ui.FindWindow(None, "OPUS"):
+            if win32ui.FindWindow(None, "OPUS - Operator: Default  (Administrator) - [Display - default.ows]"):
                 return True
         except win32ui.error:
                 return False
