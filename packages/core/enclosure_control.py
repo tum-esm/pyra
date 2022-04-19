@@ -25,7 +25,7 @@ class EnclosureControl:
         self.connection = self.plc_connect()
 
     def run(self):
-        if not self._SETUP["enclosure_presence"]:
+        if not self._SETUP["enclosure"]["tum_enclosure_is_present"]:
             return
 
         # check what resetbutton after rain does (and the auto reset option)

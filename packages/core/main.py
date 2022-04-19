@@ -56,7 +56,7 @@ def run():
 
         logger.info("Ending Iteration")
         execution_ended_at = datetime.now().timestamp()
-        time_to_wait = PARAMS["secondsPerIteration"] - (
+        time_to_wait = PARAMS["pyra"]["seconds_per_iteration"] - (
             execution_ended_at - execution_started_at
         )
         time_to_wait = 0 if time_to_wait < 0 else time_to_wait

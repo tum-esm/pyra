@@ -40,13 +40,13 @@ class SunTracking:
         logger.info("Running SunTracking")
 
         # check for PYRA Test Mode status
-        if self._PARAMS["PYRA_test_mode"] == 1:
+        if self._PARAMS["pyra"]["test_mode"] == 1:
             logger.info("Test mode active.")
             return
 
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
-        if self._PARAMS["PYRA_automation_status"] == 0:
+        if self._PARAMS["pyra"]["automation_is_running"] == 0:
 
             if self.__ct_application_running:
                 self.__stop_sun_tracking_automation()
@@ -105,7 +105,7 @@ class SunTracking:
         #delete stop.txt file in camtracker folder if present
         #exe call with -automation
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        camtracker_call = self._SETUP["CamTracker_executable_full_path"] \
+        camtracker_call = self._SETUP["camtracker"]["executable_full_path"] \
                           + " -automation"
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
@@ -130,7 +130,7 @@ class SunTracking:
 
         #create stop.txt file in camtracker folder
         camtracker_directory = os.path.dirname(
-            self._SETUP["CamTracker_executable_full_path"])
+            self._SETUP["camtracker"]["executable_full_path"])
         f = open(camtracker_directory + "stop.txt", 'w')
         f.close()
 
@@ -148,7 +148,7 @@ class SunTracking:
         ]
         """
         # read azimuth and elevation motor offsets from camtracker logfiles
-        target = self._SETUP["CamTracker_full_path_LEARN_Az_Elev"]
+        target = self._SETUP["camtracker"]["learn_az_elev_path"]
 
         if not os.path.isfile(target):
             return [None, None, None, None, None, None]
@@ -181,7 +181,7 @@ class SunTracking:
         Returns the sun intensity as either 'good', 'bad', 'None'.
         """
         #check sun status logged by camtracker
-        target = self._SETUP["CamTracker_full_path_SunIntensity"]
+        target = self._SETUP["camtracker"]["sun_intensity_path"]
 
         if not os.path.isfile(target):
             return
@@ -222,7 +222,7 @@ class SunTracking:
 
         elev_offset = tracker_status[3]
         az_offeset = tracker_status[4]
-        threshold = self._PARAMS["CamTracker_motor_offset_treshold"]
+        threshold = self._PARAMS["camtracker"]["motor_offset_treshold"]
 
 
         if (elev_offset > threshold) or (az_offeset > threshold):

@@ -52,7 +52,7 @@ class OpusMeasurement:
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
-        if self._PARAMS["PYRA_test_mode"] == 1:
+        if self._PARAMS["pyra"]["test_mode"] == 1:
             logger.info("Test mode active.")
             return
 
@@ -63,8 +63,8 @@ class OpusMeasurement:
             # TODO: add a delay for OPUS while start?
 
         #check for automation state flank changes
-        if self.last_cycle_automation_status != self._PARAMS["PYRA_automation_status"]:
-            if self._PARAMS["PYRA_automation_status"] == 1:
+        if self.last_cycle_automation_status != self._PARAMS["pyra"]["automation_status"]:
+            if self._PARAMS["pyra"]["automation_status"] == 1:
                 # flank change 0 -> 1: load experiment, start macro
                 self.__load_experiment()
                 logger.info("Load OPUS Experiment.")
@@ -72,13 +72,13 @@ class OpusMeasurement:
                 self.__start_macro()
                 logger.info("Start OPUS Macro.")
 
-            if self._PARAMS["PYRA_automation_status"] == 0:
+            if self._PARAMS["pyra"]["automation_status"] == 0:
                 # flank change 1 -> 0: stop macro
                 self.__stop_macro()
                 logger.info("Stop OPUS Macro.")
 
         # save the automation status for the next run
-        self.last_cycle_automation_status = self._PARAMS["PYRA_automation_status"]
+        self.last_cycle_automation_status = self._PARAMS["pyra"]["automation_status"]
 
 
         if self.__is_em27_connected:
@@ -196,7 +196,7 @@ class OpusMeasurement:
          Returns pywin32 process information for later usage.
          """
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        opus_call = self._SETUP["OPUS_executable_full_path"]
+        opus_call = self._SETUP["opus"]["executable_full_path"]
         hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(
             None,
             opus_call,

@@ -237,7 +237,7 @@ def calc_sun_angle_deg(loc):
 
 def read_camtracker_config() -> list:
 
-    target = SETUP["CamTracker_full_path_Config"]
+    target = SETUP["camtracker"]["config_path"]
 
     if not os.path.isfile(target):
         pass
@@ -358,11 +358,11 @@ def process_vbdsd_vision():
 if __name__ == "__main__":
 
     SETUP, PARAMS = read_json_config_files()
-    status_history = RingList(PARAMS["vbdsd_evaluation_size"])
+    status_history = RingList(PARAMS["vbdsd"]["evaluation_size"])
 
     loc = get_tracker_position()
 
-    cam = init_cam(SETUP["vbdsd_cam_id"])
+    cam = init_cam(SETUP["vbdsd"]["cam_id"])
     change_exposure()
 
     while(1):
@@ -370,12 +370,12 @@ if __name__ == "__main__":
         SETUP, PARAMS = read_json_config_files()
 
         #sleep while sun angle is too low
-        while(calc_sun_angle_deg(loc) < PARAMS["vbdsd_min_angle"]):
+        while(calc_sun_angle_deg(loc) < PARAMS["vbdsd"]["min_angle"]):
             time.sleep(60)
 
         #reinit if parameter changes
-        if status_history.maxsize() != PARAMS["vbdsd_evaluation_size"]:
-            status_history.reinitialize(PARAMS["vbdsd_evaluation_size"])
+        if status_history.maxsize() != PARAMS["vbdsd"]["evaluation_size"]:
+            status_history.reinitialize(PARAMS["vbdsd"]["evaluation_size"])
 
         # take a picture and process it
         status, frame = process_vbdsd_vision()
@@ -390,9 +390,9 @@ if __name__ == "__main__":
         else:
             status_history.append(0)
 
-        if os.path.exists(SETUP["vbdsd_image_storage_path"]):
+        if os.path.exists(SETUP["vbdsd"]["image_storage_path"]):
             img_name = time.strftime('%H_%M_%S_') + str(status) + ".jpg"
-            img_full_path = os.path.join(SETUP["vbdsd_image_storage_path"]
+            img_full_path = os.path.join(SETUP["vbdsd"]["image_storage_path"]
                                          + img_name)
             #save image
             cv.imwrite(img_full_path)
@@ -401,7 +401,7 @@ if __name__ == "__main__":
         if status_history.size() == status_history.maxsize():
             score = status_history.sum() / status_history.size()
 
-            if score > PARAMS["vbdsd_measurement_threshold"]:
+            if score > PARAMS["vbdsd"]["measurement_threshold"]:
                 #TODO: status good, change automation parameter in json file
                 pass
             else:
@@ -410,6 +410,6 @@ if __name__ == "__main__":
 
         #wait rest of loop time
         elapsed_time = time.time()
-        while((elapsed_time - start_time) < PARAMS["vbdsd_interval_time"]):
+        while((elapsed_time - start_time) < PARAMS["vbdsd"]["interval_time"]):
             time.sleep(1)
             elapsed_time = time.time()
