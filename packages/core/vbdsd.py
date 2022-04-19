@@ -41,6 +41,7 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
+CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 class RingList:
     """Base code created by Flavio Catalani on Tue, 5 Jul 2005 (PSF).
@@ -402,11 +403,16 @@ if __name__ == "__main__":
             score = status_history.sum() / status_history.size()
 
             if score > PARAMS["vbdsd"]["measurement_threshold"]:
-                #TODO: status good, change automation parameter in json file
-                pass
+                with FileLock(CONFIG_LOCK_PATH):
+                    with open(PARAMS_FILE_PATH, "w") as f:
+                        PARAMS["pyra"]["automation_is_running"] = True
+                        json.dump(PARAMS, f, indent=2)
             else:
                 #sun status bad
-                pass
+                with FileLock(CONFIG_LOCK_PATH):
+                    with open(PARAMS_FILE_PATH, "w") as f:
+                        PARAMS["pyra"]["automation_is_running"] = False
+                        json.dump(PARAMS, f, indent=2)
 
         #wait rest of loop time
         elapsed_time = time.time()
