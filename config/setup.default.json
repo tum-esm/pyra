@@ -26,13 +26,15 @@
       "move_cover": [25,8,2],
       "fan_speed": [8,18,2],
       "nominal_angle": [25,8,2],
-      "current_angle": [25,6,2]
+      "current_angle": [25,6,2],
+      "cover_closed": [6,16,1,1]
     },
     "control": {
       "sync_to_tracker": [8,16,1,0],
       "auto_temp_mode": [8,24,1,2],
       "manual_temp_mode": [8,24,1,3],
-      "manual_control": [8,24,1,5]
+      "manual_control": [8,24,1,5],
+      "reset": [3,4,1,5]
     },
     "power": {
       "spectrometer": [8,16,1,1],
