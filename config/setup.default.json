@@ -24,9 +24,42 @@
         "image_storage_path": "C:\\img\\"
     },
   "plc": {
-    "power": {},
-    "state": {},
-    "actors": {},
-    "sensors": {}
+    "power": {
+      "spectrometer": [8,16,1,1],
+      "camera": [8,16,1,2],
+      "router": [8,16,1,3],
+      "heater": [8,16,1,5],
+      "computer": [8,16,1,6]
+    },
+    "state": {
+      "motor_failed": [8,12,1,3],
+      "spectrometer": [8,14,1,0],
+      "heater": [8,14,1,1],
+      "router": [8,14,1,2],
+      "computer": [8,14,1,3],
+      "camera": [8,14,1,6],
+      "reset_needed": [3,2,1,3],
+      "rain": [8,6,1,0],
+      "ups_alert": [8,0,1,1],
+      "cover": [25,2,1,2],
+      "network": [24,10,1,3]
+
+    },
+    "actors": {
+      "move_cover": [25,8,2],
+      "fan_speed": [8,18,2],
+      "nominal_angle": [25,8,2],
+      "current_angle": [25,8,2]
+    },
+    "sensors": {
+      "humidity": [8,22,2],
+      "temperature":[8,20,2]
+    },
+    "control": {
+      "sync_to_tracker": [8,16,1,0],
+      "auto_temp_mode": [8,24,1,2],
+      "manual_temp_mode": [8,24,1,3],
+      "manual_control": [8,24,1,5]
+    }
   }
 }
