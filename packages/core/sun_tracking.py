@@ -84,7 +84,6 @@ class SunTracking:
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
-        # TODO: check camtracker window name with autoit window info or similar
         # FindWindow(className, windowName)
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
