@@ -5,10 +5,6 @@
     "em27": {
         "ip": "10.0.0.1"
     },
-    "plc": {
-        "is_present": false,
-        "ip": "10.0.0.4"
-    },
     "camtracker": {
         "executable_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
         "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
@@ -24,6 +20,8 @@
         "image_storage_path": "C:\\img\\"
     },
   "plc": {
+    "is_present": false,
+    "ip": "10.0.0.4",
     "actors": {
       "move_cover": [25,8,2],
       "fan_speed": [8,18,2],
