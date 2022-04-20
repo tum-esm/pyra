@@ -51,7 +51,15 @@ class EnclosureControl:
                 #TODO: Trigger user warning?
 
 
-        #TODO: add continuous_readings() and a place for the output in parameters
+        # read current state of actors and sensors in enclosure
+        current_reading = self.continuous_readings()
+
+        with FileLock(CONFIG_LOCK_PATH):
+            with open(PARAMS_FILE_PATH, "w") as f:
+                PARAMS["enclosure"]["continuous_readings"] = current_reading
+                json.dump(PARAMS, f, indent=2)
+
+
         #TODO: check what resetbutton after rain does (and the auto reset option)
         #TODO: power off spectrometer during night
 

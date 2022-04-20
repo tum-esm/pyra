@@ -20,5 +20,8 @@
   "interval_time": 6,
   "measurement_threshold": 0.6,
   "min_angle": 11.0
+ },
+ "enclosure": {
+  "continuous_readings": []
  }
 }
