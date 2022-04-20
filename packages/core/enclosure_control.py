@@ -105,11 +105,15 @@ class EnclosureControl:
 
         #actors
         r.append(self.plc_read_bool(self._SETUP["plc"]["actors"]["cover_closed"]))
-        r.append(self.plc_read_bool(self._SETUP["plc"]["actors"]["fan_speed"]))
-        r.append(self.plc_read_bool(self._SETUP["plc"]["actors"]["current_angle"]))
+        r.append(self.plc_read_int(self._SETUP["plc"]["actors"]["fan_speed"]))
+        r.append(self.plc_read_int(self._SETUP["plc"]["actors"]["current_angle"]))
+        #control
+        r.append(self.plc_read_bool(self._SETUP["plc"]["control"]["auto_temp_mode"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["control"]["manual_control"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["control"]["manual_temp_mode"]))
         #sensors
-        r.append(self.plc_read_bool(self._SETUP["plc"]["sensors"]["humidity"]))
-        r.append(self.plc_read_bool(self._SETUP["plc"]["sensors"]["temperature"]))
+        r.append(self.plc_read_int(self._SETUP["plc"]["sensors"]["humidity"]))
+        r.append(self.plc_read_int(self._SETUP["plc"]["sensors"]["temperature"]))
         #state
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["camera"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["computer"]))
