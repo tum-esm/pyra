@@ -23,13 +23,37 @@ class EnclosureControl:
         self._PARAMS = {}
         self.plc = snap7.client.Client()
         self.connection = self.plc_connect()
+        self.last_cycle_automation_status = 0
+        self.plc_write_bool(self._SETUP["plc"]["control"]["auto_temp_mode"])
 
     def run(self):
         if not self._SETUP["enclosure"]["tum_enclosure_is_present"]:
             return
 
-        # check what resetbutton after rain does (and the auto reset option)
-        # trigger sync with cover if automation is 1
+        #check for automation state flank changes
+        if self.last_cycle_automation_status != self._PARAMS["pyra"]["automation_status"]:
+            if self._PARAMS["pyra"]["automation_status"] == 1:
+                # flank change 0 -> 1: load experiment, start macro
+                self.plc_write_bool(self._SETUP["plc"]["control"]["sync_to_tracker"])
+
+            if self._PARAMS["pyra"]["automation_status"] == 0:
+                # flank change 1 -> 0: stop macro
+                self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"], 0)
+
+
+        # save the automation status for the next run
+        self.last_cycle_automation_status = self._PARAMS["pyra"]["automation_status"]
+
+        #double check that cover is closed if automation == 0
+        if self._PARAMS["pyra"]["automation_status"] == 0:
+            if not self._PARAMS["plc"]["actors"]["cover_closed"]:
+                self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"], 0)
+                #TODO: Trigger user warning?
+
+
+        #TODO: add continuous_readings() and a place for the output in parameters
+        #TODO: check what resetbutton after rain does (and the auto reset option)
+        #TODO: power off spectrometer during night
 
         logger.info("Running EnclosureControl")
         pass
@@ -41,6 +65,38 @@ class EnclosureControl:
     @set_config.setter
     def set_config(self, vals):
         self._SETUP, self._PARAMS = vals
+
+    def continuous_readings(self):
+        """Checks the state of the enclosure by continuously reading sensor and
+        actor output.
+
+        returns
+        r: list
+        """
+        r = []
+
+        #actors
+        r.append(self.plc_read_bool(self._SETUP["plc"]["actors"]["cover_closed"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["actors"]["fan_speed"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["actors"]["current_angle"]))
+        #sensors
+        r.append(self.plc_read_bool(self._SETUP["plc"]["sensors"]["humidity"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["sensors"]["temperature"]))
+        #state
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["camera"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["computer"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["cover"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["heater"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["motor_failed"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["network"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["rain"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["reset_needed"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["router"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["spectrometer"]))
+        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["ups_alert"]))
+
+        return r
+
 
     def plc_connect(self):
         """Connects to the PLC Snap7
