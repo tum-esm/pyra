@@ -13,7 +13,8 @@
  "pyra": {
   "automation_is_running": false,
   "seconds_per_iteration": 30,
-  "test_mode": false
+  "test_mode": false,
+  "current_sun_angle": 0.0
  },
  "vbdsd": {
   "evaluation_size": 15,

@@ -11,6 +11,7 @@
 
 import logging
 import snap7
+import time
 
 
 logger = logging.getLogger("pyra.core")
@@ -27,6 +28,7 @@ class EnclosureControl:
         self.plc_write_bool(self._SETUP["plc"]["control"]["auto_temp_mode"])
 
     def run(self):
+        logger.info("Running EnclosureControl")
         if not self._SETUP["enclosure"]["tum_enclosure_is_present"]:
             return
 
@@ -59,12 +61,16 @@ class EnclosureControl:
                 PARAMS["enclosure"]["continuous_readings"] = current_reading
                 json.dump(PARAMS, f, indent=2)
 
+        # powerup spectrometer if sun angle is 10° or more
+        if self.plc_read_bool(self._PARAMS["pyra"]["current_sun_angle"]) > 10.0:
+            if not self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
+                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], True)
 
-        #TODO: check what resetbutton after rain does (and the auto reset option)
-        #TODO: power off spectrometer during night
+        if self.plc_read_bool(self._PARAMS["pyra"]["current_sun_angle"]) < 10.0:
+            if self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
+                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], False)
 
-        logger.info("Running EnclosureControl")
-        pass
+        # TODO: check what resetbutton after rain does (and the auto reset option
 
     @property
     def set_config(self):
@@ -146,6 +152,11 @@ class EnclosureControl:
 
         msg = self.plc.db_read(db_number, start, size)
         value = snap7.util.get_int(msg, 0)
+
+        # wait if cpu is still busy
+        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
+            time.sleep(2)
+
         return value
 
     def plc_write_int(self, action, value):
@@ -157,6 +168,10 @@ class EnclosureControl:
         snap7.util.set_int(msg, 0, value)
         self.plc.db_write(db_number, start, msg)
 
+        # wait if cpu is still busy
+        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
+            time.sleep(2)
+
     def plc_read_bool(self, action):
         """Reads a BOOL value in the PLC database."""
         assert (len(action) == 4)
@@ -164,6 +179,11 @@ class EnclosureControl:
 
         msg = self.plc.db_read(db_number, start, size)
         value = snap7.util.get_bool(msg, 0, bool_index)
+
+        # wait if cpu is still busy
+        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
+            time.sleep(2)
+
         return value
 
     def plc_write_bool(self, action, value):
@@ -174,3 +194,7 @@ class EnclosureControl:
         msg = self.plc.db_read(db_number, start, size)
         snap7.util.set_bool(msg, 0, bool_index, value)
         self.plc.db_write(db_number, start, msg)
+
+        # wait if cpu is still busy
+        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
+            time.sleep(2)
