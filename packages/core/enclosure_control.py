@@ -62,11 +62,13 @@ class EnclosureControl:
                 json.dump(PARAMS, f, indent=2)
 
         # powerup spectrometer if sun angle is 10° or more
-        if self.plc_read_bool(self._PARAMS["pyra"]["current_sun_angle"]) > 10.0:
+        if self.plc_read_bool(self._PARAMS["pyra"]["current_sun_angle"]) > \
+                self._PARAMS["enclsoure"]["min_sun_angle"]:
             if not self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
                 self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], True)
 
-        if self.plc_read_bool(self._PARAMS["pyra"]["current_sun_angle"]) < 10.0:
+        if self.plc_read_bool(self._PARAMS["pyra"]["current_sun_angle"]) < \
+                self._PARAMS["enclsoure"]["min_sun_angle"]:
             if self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
                 self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], False)
 

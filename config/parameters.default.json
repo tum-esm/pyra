@@ -14,7 +14,7 @@
   "automation_is_running": false,
   "seconds_per_iteration": 30,
   "test_mode": false,
-  "current_sun_angle": 0.0
+  "current_sun_angle": 0.0,
  },
  "vbdsd": {
   "evaluation_size": 15,
@@ -23,6 +23,7 @@
   "min_angle": 11.0
  },
  "enclosure": {
-  "continuous_readings": []
+  "continuous_readings": [],
+  "min_sun_angle": 10.0
  }
 }
