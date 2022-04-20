@@ -116,7 +116,6 @@ class EnclosureControl:
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["cover"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["heater"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["motor_failed"]))
-        r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["network"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["rain"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["reset_needed"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["router"]))
@@ -168,8 +167,7 @@ class EnclosureControl:
         value = snap7.util.get_int(msg, 0)
 
         # wait if cpu is still busy
-        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
-            time.sleep(2)
+        self.cpu_busy_check()
 
         return value
 
@@ -183,8 +181,7 @@ class EnclosureControl:
         self.plc.db_write(db_number, start, msg)
 
         # wait if cpu is still busy
-        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
-            time.sleep(2)
+        self.cpu_busy_check()
 
     def plc_read_bool(self, action):
         """Reads a BOOL value in the PLC database."""
@@ -195,8 +192,7 @@ class EnclosureControl:
         value = snap7.util.get_bool(msg, 0, bool_index)
 
         # wait if cpu is still busy
-        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
-            time.sleep(2)
+        self.cpu_busy_check()
 
         return value
 
@@ -210,5 +206,9 @@ class EnclosureControl:
         self.plc.db_write(db_number, start, msg)
 
         # wait if cpu is still busy
+        self.cpu_busy_check()
+
+    def cpu_busy_check(self):
+        """Sleeps if cpu is busy."""
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
             time.sleep(2)
