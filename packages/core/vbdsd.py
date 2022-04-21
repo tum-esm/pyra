@@ -388,7 +388,7 @@ if __name__ == "__main__":
         SETUP, PARAMS = read_json_config_files()
 
         #sleep while sun angle is too low
-        while(calc_sun_angle_deg(loc) < PARAMS["vbdsd"]["min_angle"]):
+        while(calc_sun_angle_deg(loc) < PARAMS["vbdsd"]["min_sun_angle"]):
             time.sleep(60)
 
         #reinit if parameter changes
