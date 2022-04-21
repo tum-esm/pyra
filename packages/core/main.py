@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import time
+import snap7
 
 from packages.core.opus_measurement import OpusMeasurement
 from packages.core.sun_tracking import SunTracking
@@ -36,23 +37,32 @@ def run():
         execution_started_at = datetime.now().timestamp()
         logger.info("Starting Iteration")
 
-        # TODO: lock config and parameter files during read operation
-        Validation.check_parameters_config()
-        Validation.check_setup_config()
-        with open(SETUP_FILE_PATH, "r") as f:
-            SETUP = json.load(f)
-        with open(PARAMS_FILE_PATH, "r") as f:
-            PARAMS = json.load(f)
+        try:
+            # TODO: lock config and parameter files during read operation
+            Validation.check_parameters_config()
+            Validation.check_setup_config()
+            with open(SETUP_FILE_PATH, "r") as f:
+                SETUP = json.load(f)
+            with open(PARAMS_FILE_PATH, "r") as f:
+                PARAMS = json.load(f)
 
-        # TODO: Possibly handle communication between these modules
-        MeasurementConditions.set_config = (SETUP, PARAMS)
-        MeasurementConditions.run()
-        EnclosureControl.set_config = (SETUP, PARAMS)
-        EnclosureControl.run()
-        SunTracking.set_config = (SETUP, PARAMS)
-        SunTracking.run()
-        OpusMeasurement.set_config = (SETUP, PARAMS)
-        OpusMeasurement.run()
+            # TODO: Possibly handle communication between these modules
+            MeasurementConditions.set_config = (SETUP, PARAMS)
+            MeasurementConditions.run()
+            EnclosureControl.set_config = (SETUP, PARAMS)
+            EnclosureControl.run()
+            SunTracking.set_config = (SETUP, PARAMS)
+            SunTracking.run()
+            OpusMeasurement.set_config = (SETUP, PARAMS)
+            OpusMeasurement.run()
+        except snap7.snap7exceptions.Snap7Exception:
+            pass
+        except Exception as e:
+            #TODO: use traceback?
+            print(f"{type(e).__name__} at line {e.__traceback__.tb_lineno} "
+                  f"of {__file__}: {e}")
+            logger.error(e, exc_info=True)
+            #TODO: trigger email?
 
         logger.info("Ending Iteration")
         execution_ended_at = datetime.now().timestamp()
