@@ -29,7 +29,7 @@
   "type": {
    "time": false,
    "sun_angle": false,
-   "vbdsd": false,
+   "vbdsd": true,
    "user_control": false
    },
   "start_time": [0,0,0],
