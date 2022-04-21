@@ -78,21 +78,26 @@ class EnclosureControl:
         """
         if self._PARAMS["pyra"]["automation_status"] == 0:
             if not self._PARAMS["plc"]["actors"]["cover_closed"]:
-                self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"], 0)
+                self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"],
+                                    0)
 
     def manage_spectrometer_power(self):
         """Shuts down spectrometer if the sun angle is too low. Starts up the
         spectrometer in the morning when minimum angle is satisfied.
         """
-        if self.plc_read_bool(self._PARAMS["pyra"]["current_sun_angle"]) > \
+        if self.plc_read_bool(
+                self._PARAMS["measurement_conditions"]["current_sun_angle"]) > \
                 self._PARAMS["enclsoure"]["min_sun_angle"]:
             if not self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
-                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], True)
+                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"],
+                                    True)
 
-        if self.plc_read_bool(self._PARAMS["pyra"]["current_sun_angle"]) < \
+        if self.plc_read_bool(
+                self._PARAMS["measurement_conditions"]["current_sun_angle"]) < \
                 self._PARAMS["enclsoure"]["min_sun_angle"]:
             if self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
-                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], False)
+                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"],
+                                    False)
 
     def continuous_readings(self):
         """Checks the state of the enclosure by continuously reading sensor and

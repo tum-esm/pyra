@@ -3,7 +3,7 @@
   "motor_offset_treshold": 10
  },
  "em27": {
-  "power_min_angle": 10.0
+  "power_min_angle": 10.0,
  },
  "opus": {
   "executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
@@ -14,7 +14,6 @@
   "automation_is_running": false,
   "seconds_per_iteration": 30,
   "test_mode": false,
-  "current_sun_angle": 0.0,
  },
  "vbdsd": {
   "evaluation_size": 15,
@@ -25,5 +24,21 @@
  "enclosure": {
   "continuous_readings": [],
   "min_sun_angle": 10.0
+ },
+ "measurement_triggers": {
+  "control": {
+   "time": false,
+   "sun_angle": false,
+   "vbdsd": false,
+   "user_control": false
+   },
+  "start_time": [0,0,0],
+  "stop_time": [0,0,0],
+  "user_trigger_present": false,
+  "sun_angle_start": 0.0,
+  "sun_angle_stop": 0.0
+ },
+ "measurement_conditions": {
+  "current_sun_angle": 0.0
  }
 }
