@@ -26,7 +26,7 @@
   "min_sun_angle": 10.0
  },
  "measurement_triggers": {
-  "control": {
+  "type": {
    "time": false,
    "sun_angle": false,
    "vbdsd": false,
