@@ -173,7 +173,7 @@ class CerberusException(Exception):
 
 
 class Validation:
-    logging_handler = Logger.error
+    logging_handler = Logger().error
 
     @staticmethod
     def __load_json(file_path, content_string, validator):

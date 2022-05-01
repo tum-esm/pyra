@@ -20,7 +20,6 @@
 # TODO: Add option for OPUS MockServer usage
 
 
-import logging
 import os
 import time
 
@@ -31,7 +30,8 @@ import win32process
 import win32ui
 import dde
 
-logger = logging.getLogger("pyra.core")
+from packages.core.utils.logger import Logger
+logger = Logger(origin="pyra.core.opus-measurement")
 
 
 class OpusMeasurement:

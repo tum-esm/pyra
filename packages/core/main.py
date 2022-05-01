@@ -4,7 +4,6 @@ import os
 import time
 import snap7
 
-from packages.core.utils.logger import Logger
 from packages.core.utils.validation import Validation
 
 from packages.core.modules.opus_measurement import OpusMeasurement
@@ -19,10 +18,13 @@ PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 
+from packages.core.utils.logger import Logger
+logger = Logger(origin="pyra.core.main")
+
 def run():
     while True:
         execution_started_at = datetime.now().timestamp()
-        Logger.info("Starting Iteration")
+        logger.info("Starting Iteration")
 
         try:
             # TODO: lock config and parameter files during read operation
@@ -50,14 +52,14 @@ def run():
                 f"{type(e).__name__} at line {e.__traceback__.tb_lineno} "
                 f"of {__file__}: {e}"
             )
-            Logger.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             # TODO: trigger email?
 
-        Logger.info("Ending Iteration")
+        logger.info("Ending Iteration")
         execution_ended_at = datetime.now().timestamp()
         time_to_wait = PARAMS["pyra"]["seconds_per_iteration"] - (
             execution_ended_at - execution_started_at
         )
         time_to_wait = 0 if time_to_wait < 0 else time_to_wait
-        Logger.debug(f"Waiting {time_to_wait} second(s)")
+        logger.debug(f"Waiting {time_to_wait} second(s)")
         time.sleep(time_to_wait)

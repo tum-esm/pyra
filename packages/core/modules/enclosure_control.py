@@ -11,13 +11,12 @@
 
 import json
 import os
-import logging
 from filelock import FileLock
 import snap7
 import time
 
-
-logger = logging.getLogger("pyra.core")
+from packages.core.utils.logger import Logger
+logger = Logger(origin="pyra.core.enclosure-control")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))

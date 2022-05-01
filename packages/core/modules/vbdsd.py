@@ -28,7 +28,6 @@
 
 
 # TODO: Use logging after initial tests
-import logging
 import os
 import time
 import astropy
@@ -40,10 +39,13 @@ import json
 from packages.core.utils.validation import Validation
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
+
+from packages.core.utils.logger import Logger
+logger = Logger(origin="pyra.core.vbdsd")
 
 class RingList:
     """Base code created by Flavio Catalani on Tue, 5 Jul 2005 (PSF).

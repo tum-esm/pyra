@@ -18,31 +18,32 @@ logging_info_handler.setLevel(logging.INFO)
 logging_info_handler.setFormatter(logging.Formatter(logging_format))
 logger = logging.getLogger("pyra.core")
 logger.addHandler(logging_info_handler)
+
+# Hide irrelevant logs from module "filelock"
 logging.getLogger("filelock").setLevel(logging.WARNING)
 
 
-class Logger:
-    @staticmethod
-    def debug(message: str, origin="pyra.core"):
+class Logger():
+    
+    def __init__(self, origin="pyra.core"):
+        self.logger = logging.getLogger(origin)
+    
+    def debug(self, message: str):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(origin).debug(message)
+            self.logger.debug(message)
 
-    @staticmethod
-    def info(message: str, origin="pyra.core"):
+    def info(self, message: str):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(origin).info(message)
+            self.logger.info(message)
 
-    @staticmethod
-    def warning(message: str, origin="pyra.core"):
+    def warning(self, message: str):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(origin).warning(message)
+            self.logger.warning(message)
 
-    @staticmethod
-    def critical(message: str, origin="pyra.core"):
+    def critical(self, message: str):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(origin).critical(message)
+            self.logger.critical(message)
 
-    @staticmethod
-    def error(message: str, origin="pyra.core"):
+    def error(self, message: str):
         with FileLock(LOGS_LOCK_PATH):
-            logging.getLogger(origin).error(message)
+            self.logger.error(message)

@@ -15,11 +15,8 @@
 
 # TODO: Integrate VBDSD sun status
 
-
-
-import logging
-
-logger = logging.getLogger("pyra.core")
+from packages.core.utils.logger import Logger
+logger = Logger(origin="pyra.core.measurement-conditions")
 
 
 class MeasurementConditions:

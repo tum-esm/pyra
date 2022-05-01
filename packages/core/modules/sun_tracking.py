@@ -17,8 +17,6 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any software like "Camtracker"
 
-
-import logging
 import os
 import jdcal
 import datetime
@@ -28,7 +26,8 @@ import win32con
 import win32ui
 import win32process
 
-logger = logging.getLogger("pyra.core")
+from packages.core.utils.logger import Logger
+logger = Logger(origin="pyra.core.sun-tracking")
 
 
 class SunTracking:
