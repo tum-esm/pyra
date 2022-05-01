@@ -10,12 +10,11 @@ SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
+# TODO: Add config json schemas to documentation
+
+
 sys.path.append(PROJECT_DIR)
-from packages.core.utils.validation import (
-    Validation,
-    SETUP_FILE_SCHEMA,
-    PARAMS_FILE_SCHEMA,
-)
+from packages.core.utils.validation import Validation
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
@@ -52,7 +51,7 @@ def _get_parameters():
 
 @click.command(
     short_help="Set the setup.json file.",
-    help=f"Set setup. Pass the JSON directly or via a file path. Only a subset of the required setup variables has to be passed. The non-occuring values will be reused from the current config.\n\nRequired schema: {SETUP_FILE_SCHEMA}",
+    help=f"Set setup. Pass the JSON directly or via a file path. Only a subset of the required setup variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation.",
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
@@ -90,7 +89,7 @@ def _set_setup(path: str, content: str):
 
 @click.command(
     short_help="Set the parameters.json file.",
-    help=f"Set parameters. Pass the JSON directly or via a file path. Only a subset of the required parameters has to be passed. The non-occuring values will be reused from the current config.\n\nRequired schema: {PARAMS_FILE_SCHEMA}",
+    help=f"Set parameters. Pass the JSON directly or via a file path. Only a subset of the required parameters has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation.",
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
@@ -127,27 +126,19 @@ def _set_parameters(path: str, content: str):
 
 
 @click.command(
-    help=f"Validate the current setup.json file.\n\nRequired schema: {SETUP_FILE_SCHEMA}"
+    help=f"Validate the current setup.json file.\n\nThe required schema can be found in the documentation."
 )
 def _validate_setup():
     if Validation.check_setup_file():
         success_handler(f"Current setup file is valid")
-    else:
-        error_handler(
-            f"Current setup file is invalid, required schema: {SETUP_FILE_SCHEMA}"
-        )
 
 
 @click.command(
-    help=f"Validate the current parameters.json file.\n\nRequired schema: {PARAMS_FILE_SCHEMA}"
+    help=f"Validate the current parameters.json file.\n\nThe required schema can be found in the documentation."
 )
 def _validate_parameters():
     if Validation.check_parameters_file():
         success_handler(f"Current parameters file is valid")
-    else:
-        error_handler(
-            f"Current parameters file is invalid, required schema: {PARAMS_FILE_SCHEMA}"
-        )
 
 
 @click.group()
