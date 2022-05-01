@@ -117,34 +117,54 @@ SETUP_FILE_SCHEMA = {
 }
 
 PARAMS_FILE_SCHEMA = {
+    "camtracker": DICT_SCHEMA({"motor_offset_treshold": {"type": "number"}}),
+    "em27": DICT_SCHEMA({"power_min_angle": {"type": "number"}}),
     "opus": DICT_SCHEMA(
         {
             "executable_parameter": {"type": "string"},
-            "macro_path": FILE_SCHEMA,
             "experiment_path": FILE_SCHEMA,
-        },
+            "macro_path": FILE_SCHEMA,
+        }
     ),
     "pyra": DICT_SCHEMA(
         {
-            "seconds_per_iteration": {"type": "number", "min": 1},
-            "test_mode": {"type": "boolean"},
             "automation_is_running": {"type": "boolean"},
-        },
-    ),
-    "camtracker": DICT_SCHEMA(
-        {"motor_offset_treshold": {"type": "number", "min": 0}},
+            "seconds_per_iteration": {"type": "number"},
+            "test_mode": {"type": "boolean"},
+        }
     ),
     "vbdsd": DICT_SCHEMA(
         {
-            "interval_time": {"type": "number", "min": 0},
-            "evaluation_size": {"type": "number", "min": 0},
-            "measurement_threshold": {"type": "number", "min": 0},
-            "min_angle": {"type": "number", "min": 0},
-        },
+            "evaluation_size": {"type": "integer"},
+            "interval_time": {"type": "number"},
+            "measurement_threshold": {"type": "number"},
+            "min_sun_angle": {"type": "number"},
+        }
     ),
-    "em27": DICT_SCHEMA(
-        {"power_min_angle": {"type": "number", "min": 0}},
+    "enclosure": DICT_SCHEMA(
+        {
+            "continuous_readings": {"type": "list"},
+            "min_sun_angle": {"type": "number"},
+        }
     ),
+    "measurement_triggers": DICT_SCHEMA(
+        {
+            "type": DICT_SCHEMA(
+                {
+                    "time": {"type": "boolean"},
+                    "sun_angle": {"type": "boolean"},
+                    "vbdsd": {"type": "boolean"},
+                    "user_control": {"type": "boolean"},
+                }
+            ),
+            "start_time": INT_LIST_SCHEMA(3),
+            "stop_time": INT_LIST_SCHEMA(3),
+            "user_trigger_present": {"type": "boolean"},
+            "sun_angle_start": {"type": "number"},
+            "sun_angle_stop": {"type": "number"},
+        }
+    ),
+    "measurement_conditions": DICT_SCHEMA({"current_sun_angle": {"type": "number"}}),
 }
 
 
