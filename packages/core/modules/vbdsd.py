@@ -33,9 +33,11 @@ import os
 import time
 import astropy
 import cv2 as cv
+from filelock import FileLock
 import numpy as np
 import json
-from packages.core.validation import Validation
+
+from packages.core.utils.validation import Validation
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
@@ -100,6 +102,7 @@ def read_json_config_files():
     Returns
     SETUP:dict and PARAMS:dict as Tuple
     """
+    # TODO: Handle errors from config validation
     Validation.check_parameters_config()
     Validation.check_setup_config()
     with open(SETUP_FILE_PATH, "r") as f:

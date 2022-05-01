@@ -22,8 +22,10 @@
 
 import logging
 import os
-from msilib.schema import Property
 import time
+
+# the following imports should be provided by pywin32
+import pywin32
 import win32con
 import win32process
 import win32ui
@@ -184,7 +186,7 @@ class OpusMeasurement:
         """
         self.server.Destroy()
 
-    @Property
+    @property
     def __is_em27_connected(self):
         """Pings the EM27 and returns:
 
@@ -216,7 +218,7 @@ class OpusMeasurement:
 
         #return (hProcess, hThread, dwProcessId, dwThreadId)
 
-    @Property
+    @property
     def __opus_application_running(self):
         """Checks if OPUS is already running by identifying the window.
 

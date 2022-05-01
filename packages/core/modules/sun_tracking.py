@@ -19,13 +19,14 @@
 
 
 import logging
-from msilib.schema import Property
-
-import win32con
-import win32process
 import os
 import jdcal
 import datetime
+
+# the following imports should be provided by pywin32
+import win32con
+import win32ui
+import win32process
 
 logger = logging.getLogger("pyra.core")
 
@@ -77,7 +78,7 @@ class SunTracking:
     def set_config(self, vals):
         self._SETUP, self._PARAMS = vals
 
-    @Property
+    @property
     def __ct_application_running(self):
         """Checks if CamTracker is already running by identifying the window.
 
@@ -205,7 +206,7 @@ class SunTracking:
             return sun_intensity
 
 
-    @Property
+    @property
     def __valdiate_tracker_position(self):
         """Reads motor offsets and compares it with defined threshold.
 

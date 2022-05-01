@@ -9,12 +9,21 @@
 # description       :
 # ==============================================================================
 
+import json
+import os
 import logging
+from filelock import FileLock
 import snap7
 import time
 
 
 logger = logging.getLogger("pyra.core")
+
+dir = os.path.dirname
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
+PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
+CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 
 class EnclosureControl:
@@ -55,8 +64,8 @@ class EnclosureControl:
 
         with FileLock(CONFIG_LOCK_PATH):
             with open(PARAMS_FILE_PATH, "w") as f:
-                PARAMS["enclosure"]["continuous_readings"] = current_reading
-                json.dump(PARAMS, f, indent=2)
+                self._PARAMS["enclosure"]["continuous_readings"] = current_reading
+                json.dump(self._PARAMS, f, indent=2)
 
         # powerup spectrometer if sun angle is 10° or more
         self.manage_spectrometer_power()

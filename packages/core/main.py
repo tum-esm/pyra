@@ -8,7 +8,7 @@ from packages.core.utils.logger import Logger
 from packages.core.utils.validation import Validation
 
 from packages.core.modules.opus_measurement import OpusMeasurement
-from packages.core.sun_tracking import SunTracking
+from packages.core.modules.sun_tracking import SunTracking
 from packages.core.modules.measurement_conditions import MeasurementConditions
 from packages.core.modules.enclosure_control import EnclosureControl
 
