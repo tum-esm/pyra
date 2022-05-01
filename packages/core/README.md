@@ -1,18 +1,28 @@
-Pyra-Core is the program that is constantly running on the enclosure and operates it.
+# `pyra-core`
+
+`pyra-core` is the program that is constantly running on the enclosure and operates it.
 
 <br/>
+<br/>
 
-All scripts that output statements in the process should use the `logging` module:
+## Logging
+
+All scripts that output messages at runtime should use the `Logger` class:
 
 ```python
-import logging
-logger = logging.getLogger("pyra.core")
+from packages.core.utils.logger import Logger
 
-logger.debug("...")
-logger.info("...")
-logger.warning("...")
-logger.critical("...")
-logger.error("...")
+Logger.debug("...")
+Logger.info("...")
+Logger.warning("...")
+Logger.critical("...")
+Logger.error("...")
+
+# By default, it will log from a "pyra.core" origin
+Logger.debug("...")
+
+# Here, it will log from a "pyra.core.camtracker" origin
+Logger.debug("...", origin="pyra.core.camtracker")
 ```
 
-Messages from all log levels can be found in `logs/debug.log`, messages from levels info/warning/critical/error can be found in `logs/info.log`.
+Messages from all log levels can be found in `logs/debug.log`, messages from levels INFO/WARNING/CRITICAL/ERROR can be found in `logs/info.log`.

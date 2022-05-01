@@ -232,4 +232,3 @@ class OpusMeasurement:
         except win32ui.error:
                 return False
 
-

@@ -1,5 +1,31 @@
+# python
 .venv
+*.pyc
+
+# config
 config/parameters.json
 config/setup.json
-*.pyc
+config/config.lock
+
+# logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+logs/logs.lock
+
+# runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+.DS_Store
+
+# pyra ui
+packages/ui/node_modules/
+packages/ui/.webpack/
+packages/ui/out/
+
+# development
+.vscode/
