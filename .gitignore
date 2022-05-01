@@ -15,7 +15,7 @@ yarn-error.log*
 lerna-debug.log*
 logs/logs.lock
 
-# Runtime data
+# runtime data
 pids
 *.pid
 *.seed
@@ -26,3 +26,6 @@ pids
 packages/ui/node_modules/
 packages/ui/.webpack/
 packages/ui/out/
+
+# development
+.vscode/
