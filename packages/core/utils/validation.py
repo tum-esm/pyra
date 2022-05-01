@@ -29,84 +29,122 @@ def is_valid_ip_adress(field, value, error):
 
 
 # TODO: Add required JSON schema here (https://docs.python-cerberus.org/en/stable/)
+FILE_SCHEMA = {"type": "string", "check_with": file_path_exists}
+DIR_SCHEMA = {"type": "string", "check_with": directory_path_exists}
+IP_SCHEMA = {"type": "string", "check_with": is_valid_ip_adress}
+DICT_SCHEMA = lambda schema: {"type": "dict", "schema": schema}
+INT_LIST_SCHEMA = lambda length: {
+    "type": "list",
+    "schema": {"type": "integer"},
+    "minlength": length,
+    "maxlength": length,
+}
+INT_SCHEMA = {"type": "integer"}
+BOOL_SCHEMA = {"type": "boolean"}
+
 SETUP_FILE_SCHEMA = {
-    "enclosure": {
-        "type": "dict",
-        "schema": {"tum_enclosure_is_present": {"type": "boolean"}},
-    },
-    "em27": {
-        "type": "dict",
-        "schema": {"ip": {"type": "string", "check_with": is_valid_ip_adress}},
-    },
-    "plc": {
-        "type": "dict",
-        "schema": {
+    "camtracker": DICT_SCHEMA(
+        {
+            "config_path": FILE_SCHEMA,
+            "executable_path": FILE_SCHEMA,
+            "learn_az_elev_path": FILE_SCHEMA,
+            "sun_intensity_path": FILE_SCHEMA,
+        }
+    ),
+    "em27": DICT_SCHEMA({"ip": IP_SCHEMA}),
+    "enclosure": DICT_SCHEMA({"tum_enclosure_is_present": {"type": "boolean"}}),
+    "opus": DICT_SCHEMA({"executable_path": FILE_SCHEMA}),
+    "plc": DICT_SCHEMA(
+        {
+            "actors": DICT_SCHEMA(
+                {
+                    "cover_closed": INT_LIST_SCHEMA(4),
+                    "current_angle": INT_LIST_SCHEMA(3),
+                    "fan_speed": INT_LIST_SCHEMA(3),
+                    "move_cover": INT_LIST_SCHEMA(3),
+                    "nominal_angle": INT_LIST_SCHEMA(3),
+                }
+            ),
+            "control": DICT_SCHEMA(
+                {
+                    "auto_temp_mode": INT_LIST_SCHEMA(4),
+                    "manual_control": INT_LIST_SCHEMA(4),
+                    "manual_temp_mode": INT_LIST_SCHEMA(4),
+                    "reset": INT_LIST_SCHEMA(4),
+                    "sync_to_tracker": INT_LIST_SCHEMA(4),
+                }
+            ),
             "is_present": {"type": "boolean"},
-            "ip": {"type": "string", "check_with": is_valid_ip_adress},
-        },
-    },
-    "camtracker": {
-        "type": "dict",
-        "schema": {
-            "executable_path": {"type": "string", "check_with": file_path_exists},
-            "learn_az_elev_path": {"type": "string", "check_with": file_path_exists},
-            "sun_intensity_path": {"type": "string", "check_with": file_path_exists},
-            "config_path": {"type": "string", "check_with": file_path_exists},
-        },
-    },
-    "opus": {
-        "type": "dict",
-        "schema": {
-            "executable_path": {"type": "string", "check_with": file_path_exists}
-        },
-    },
-    "vbdsd": {
-        "type": "dict",
-        "schema": {
+            "ip": IP_SCHEMA,
+            "power": DICT_SCHEMA(
+                {
+                    "camera": INT_LIST_SCHEMA(4),
+                    "computer": INT_LIST_SCHEMA(4),
+                    "heater": INT_LIST_SCHEMA(4),
+                    "router": INT_LIST_SCHEMA(4),
+                    "spectrometer": INT_LIST_SCHEMA(4),
+                }
+            ),
+            "sensors": DICT_SCHEMA(
+                {
+                    "humidity": INT_LIST_SCHEMA(3),
+                    "temperature": INT_LIST_SCHEMA(3),
+                }
+            ),
+            "state": DICT_SCHEMA(
+                {
+                    "camera": INT_LIST_SCHEMA(4),
+                    "computer": INT_LIST_SCHEMA(4),
+                    "cover": INT_LIST_SCHEMA(4),
+                    "heater": INT_LIST_SCHEMA(4),
+                    "motor_failed": INT_LIST_SCHEMA(4),
+                    "rain": INT_LIST_SCHEMA(4),
+                    "reset_needed": INT_LIST_SCHEMA(4),
+                    "router": INT_LIST_SCHEMA(4),
+                    "spectrometer": INT_LIST_SCHEMA(4),
+                    "ups_alert": INT_LIST_SCHEMA(4),
+                }
+            ),
+        }
+    ),
+    "vbdsd": DICT_SCHEMA(
+        {
+            "cam_id": {"type": "integer"},
+            "image_storage_path": DIR_SCHEMA,
             "sensor_is_present": {"type": "boolean"},
-            "cam_id": {"type": "number"},
-            "image_storage_path": {
-                "type": "string",
-                "check_with": directory_path_exists,
-            },
-        },
-    },
+        }
+    ),
 }
 
 PARAMS_FILE_SCHEMA = {
-    "opus": {
-        "type": "dict",
-        "schema": {
+    "opus": DICT_SCHEMA(
+        {
             "executable_parameter": {"type": "string"},
-            "macro_path": {"type": "string", "check_with": file_path_exists},
-            "experiment_path": {"type": "string", "check_with": file_path_exists},
+            "macro_path": FILE_SCHEMA,
+            "experiment_path": FILE_SCHEMA,
         },
-    },
-    "pyra": {
-        "type": "dict",
-        "schema": {
+    ),
+    "pyra": DICT_SCHEMA(
+        {
             "seconds_per_iteration": {"type": "number", "min": 1},
             "test_mode": {"type": "boolean"},
             "automation_is_running": {"type": "boolean"},
         },
-    },
-    "camtracker": {
-        "type": "dict",
-        "schema": {"motor_offset_treshold": {"type": "number", "min": 0}},
-    },
-    "vbdsd": {
-        "type": "dict",
-        "schema": {
+    ),
+    "camtracker": DICT_SCHEMA(
+        {"motor_offset_treshold": {"type": "number", "min": 0}},
+    ),
+    "vbdsd": DICT_SCHEMA(
+        {
             "interval_time": {"type": "number", "min": 0},
             "evaluation_size": {"type": "number", "min": 0},
             "measurement_threshold": {"type": "number", "min": 0},
             "min_angle": {"type": "number", "min": 0},
         },
-    },
-    "em27": {
-        "type": "dict",
-        "schema": {"power_min_angle": {"type": "number", "min": 0}},
-    },
+    ),
+    "em27": DICT_SCHEMA(
+        {"power_min_angle": {"type": "number", "min": 0}},
+    ),
 }
 
 
