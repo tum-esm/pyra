@@ -87,6 +87,7 @@ export default function SetupTab(props: {}) {
                         setValue={v =>
                             addLocalUpdate({ camtracker: { config_path: v } })
                         }
+                        fileSelector
                     />
                     <TextInputRow
                         label='camtracker.executable_path'
