@@ -42,7 +42,7 @@ export default function SetupTab(props: {}) {
         setLocalJSON(content);
     }
 
-    async function saveCentralJSON() {
+    async function saveLocalJSON() {
         const result = await window.electron.saveSetupJSON(
             JSON.stringify(localJSON)
         );
@@ -51,6 +51,10 @@ export default function SetupTab(props: {}) {
         } else {
             setErrorMessage(result);
         }
+    }
+
+    function restoreCentralJSON() {
+        setLocalJSON(centralJSON);
     }
 
     useEffect(() => {
@@ -73,14 +77,46 @@ export default function SetupTab(props: {}) {
         !deepEqual(localJSON, centralJSON);
 
     return (
-        <div className='flex flex-col w-full h-full p-6'>
+        <div className='flex flex-col w-full h-full p-6 gap-y-4'>
             {localJSON !== undefined && (
                 <>
                     <TextInputRow
-                        label='em27.ip'
-                        value={localJSON.em27.ip}
-                        oldValue={centralJSON.em27.ip}
-                        setValue={v => addLocalUpdate({ em27: { ip: v } })}
+                        label='camtracker.config_path'
+                        value={localJSON.camtracker.config_path}
+                        oldValue={centralJSON.camtracker.config_path}
+                        setValue={v =>
+                            addLocalUpdate({ camtracker: { config_path: v } })
+                        }
+                    />
+                    <TextInputRow
+                        label='camtracker.executable_path'
+                        value={localJSON.camtracker.executable_path}
+                        oldValue={centralJSON.camtracker.executable_path}
+                        setValue={v =>
+                            addLocalUpdate({
+                                camtracker: { executable_path: v },
+                            })
+                        }
+                    />
+                    <TextInputRow
+                        label='camtracker.learn_az_elev_path'
+                        value={localJSON.camtracker.learn_az_elev_path}
+                        oldValue={centralJSON.camtracker.learn_az_elev_path}
+                        setValue={v =>
+                            addLocalUpdate({
+                                camtracker: { learn_az_elev_path: v },
+                            })
+                        }
+                    />
+                    <TextInputRow
+                        label='camtracker.sun_intensity_path'
+                        value={localJSON.camtracker.sun_intensity_path}
+                        oldValue={centralJSON.camtracker.sun_intensity_path}
+                        setValue={v =>
+                            addLocalUpdate({
+                                camtracker: { sun_intensity_path: v },
+                            })
+                        }
                     />
                 </>
             )}
@@ -94,12 +130,12 @@ export default function SetupTab(props: {}) {
                             <div>Save changes?</div>
                             <Button
                                 text='yes'
-                                onClick={saveCentralJSON}
+                                onClick={saveLocalJSON}
                                 variant='green'
                             />
                             <Button
                                 text='no'
-                                onClick={() => {}}
+                                onClick={restoreCentralJSON}
                                 variant='red'
                             />
                         </>

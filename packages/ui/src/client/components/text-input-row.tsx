@@ -1,4 +1,5 @@
 import React from 'react';
+import { initial, last } from 'lodash';
 
 export default function TextInputRow(props: {
     label: string;
@@ -10,8 +11,13 @@ export default function TextInputRow(props: {
 
     return (
         <div className='flex flex-col items-start justify-start w-full'>
-            <label className='py-1 text-sm'>
-                <span className='font-bold uppercase'>{label}</span>
+            <label className='py-1 text-xs opacity-80'>
+                <span className='font-medium uppercase'>
+                    {initial(label.split('.'))}.
+                </span>
+                <span className='font-bold uppercase'>
+                    {last(label.split('.'))}
+                </span>
                 {value !== oldValue && (
                     <span className='font-normal opacity-80 ml-1.5'>
                         previous value:{' '}
@@ -24,7 +30,7 @@ export default function TextInputRow(props: {
             <div className='relative w-full'>
                 <input
                     value={value}
-                    className='relative w-full px-2 py-1 font-mono rounded'
+                    className='relative w-full px-2 py-1 font-mono text-sm text-gray-800 rounded'
                     onChange={e => setValue(e.target.value)}
                 />
                 {value !== oldValue && (
