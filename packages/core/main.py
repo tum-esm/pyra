@@ -35,18 +35,25 @@ def run():
         execution_started_at = datetime.now().timestamp()
         logger.info("Starting Iteration")
 
-        try:
-            # TODO: lock config and parameter files during read operation
-            with FileLock(CONFIG_LOCK_PATH):
-                Validation.check_parameters_config()
-                Validation.check_setup_config()
-                with open(SETUP_FILE_PATH, "r") as f:
-                    SETUP = json.load(f)
-                with open(PARAMS_FILE_PATH, "r") as f:
-                    PARAMS = json.load(f)
+        # FileLock = Mark, that the config JSONs are being used and the
+        # CLI should not interfere. A file "config/config.lock" will be created
+        # and the existence of this file will make the next line wait.
+        with FileLock(CONFIG_LOCK_PATH):
+            if (not Validation.check_parameters_file()) or (
+                not Validation.check_setup_file()
+            ):
+                # TODO: What to do here?
+                time.sleep(60)
+                continue
 
+            with open(SETUP_FILE_PATH, "r") as f:
+                _SETUP = json.load(f)
+            with open(PARAMS_FILE_PATH, "r") as f:
+                _PARAMS = json.load(f)
+
+        try:
             for module in _modules:
-                module.run(SETUP, PARAMS)
+                module.run(_SETUP, _PARAMS)
         except snap7.snap7exceptions.Snap7Exception:
             pass
         except Exception as e:
@@ -60,7 +67,7 @@ def run():
 
         logger.info("Ending Iteration")
         execution_ended_at = datetime.now().timestamp()
-        time_to_wait = PARAMS["pyra"]["seconds_per_iteration"] - (
+        time_to_wait = _PARAMS["pyra"]["seconds_per_iteration"] - (
             execution_ended_at - execution_started_at
         )
         time_to_wait = 0 if time_to_wait < 0 else time_to_wait
