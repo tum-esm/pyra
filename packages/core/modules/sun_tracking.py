@@ -44,7 +44,9 @@ class SunTracking:
             logger.info("Windows libraries not available, class is inactive")
             return
 
-    def run(self):
+    def run(self, new_setup: dict, new_parameters: dict):
+        self._SETUP, self._PARAMS = new_setup, new_parameters
+
         if not windows_libraries_available:
             return
 
@@ -77,14 +79,6 @@ class SunTracking:
         if not self.__valdiate_tracker_position:
             self.__stop_sun_tracking_automation()
             logger.info("Stop CamTracker. Preparing for reinitialization.")
-
-    @property
-    def set_config(self):
-        pass
-
-    @set_config.setter
-    def set_config(self, vals):
-        self._SETUP, self._PARAMS = vals
 
     @property
     def __ct_application_running(self):

@@ -37,7 +37,9 @@ class EnclosureControl:
         self.last_cycle_automation_status = 0
         self.plc_write_bool(self._SETUP["plc"]["control"]["auto_temp_mode"])
 
-    def run(self):
+    def run(self, new_setup: dict, new_parameters: dict):
+        self._SETUP, self._PARAMS = new_setup, new_parameters
+
         logger.info("Running EnclosureControl")
         if not self._SETUP["enclosure"]["tum_enclosure_is_present"]:
             return
@@ -74,14 +76,6 @@ class EnclosureControl:
         self.manage_spectrometer_power()
 
         # TODO: check what resetbutton after rain does (and the auto reset option
-
-    @property
-    def set_config(self):
-        pass
-
-    @set_config.setter
-    def set_config(self, vals):
-        self._SETUP, self._PARAMS = vals
 
     def double_check_cover(self):
         """Triggers another close clover, if not yet closed and automation

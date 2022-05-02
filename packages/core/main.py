@@ -5,11 +5,7 @@ import time
 import snap7
 
 from packages.core.utils.validation import Validation
-
-from packages.core.modules.opus_measurement import OpusMeasurement
-from packages.core.modules.sun_tracking import SunTracking
-from packages.core.modules.measurement_conditions import MeasurementConditions
-from packages.core.modules.enclosure_control import EnclosureControl
+from packages.core import modules
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
@@ -24,6 +20,16 @@ logger = Logger(origin="pyra.core.main")
 
 
 def run():
+
+    _modules = [
+        modules.measurement_conditions.MeasurementConditions(),
+        modules.enclosure_control.EnclosureControl(),
+        modules.sun_tracking.SunTracking(),
+        modules.opus_measurement.OpusMeasurement(),
+    ]
+
+    # TODO: Start vbdsd in a thread
+
     while True:
         execution_started_at = datetime.now().timestamp()
         logger.info("Starting Iteration")
@@ -37,15 +43,8 @@ def run():
             with open(PARAMS_FILE_PATH, "r") as f:
                 PARAMS = json.load(f)
 
-            # TODO: Possibly handle communication between these modules
-            MeasurementConditions.set_config = (SETUP, PARAMS)
-            MeasurementConditions.run()
-            EnclosureControl.set_config = (SETUP, PARAMS)
-            EnclosureControl.run()
-            SunTracking.set_config = (SETUP, PARAMS)
-            SunTracking.run()
-            OpusMeasurement.set_config = (SETUP, PARAMS)
-            OpusMeasurement.run()
+            for module in _modules:
+                module.run(SETUP, PARAMS)
         except snap7.snap7exceptions.Snap7Exception:
             pass
         except Exception as e:

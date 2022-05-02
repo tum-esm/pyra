@@ -59,7 +59,9 @@ class OpusMeasurement:
         self.conversation = dde.CreateConversation(self.server)
         self.last_cycle_automation_status = 0
 
-    def run(self):
+    def run(self, new_setup: dict, new_parameters: dict):
+        self._SETUP, self._PARAMS = new_setup, new_parameters
+
         if not windows_libraries_available:
             return
 
@@ -104,14 +106,6 @@ class OpusMeasurement:
             logger.info("Successful ping to EM27.")
         else:
             logger.info("EM27 seems to be not connected.")
-
-    @property
-    def set_config(self):
-        pass
-
-    @set_config.setter
-    def set_config(self, vals):
-        self._SETUP, self._PARAMS = vals
 
     def __connect_to_dde_opus(self):
         try:
