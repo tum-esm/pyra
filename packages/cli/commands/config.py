@@ -25,11 +25,12 @@ Validation.logging_handler = error_handler
 def _get_setup():
     try:
         assert os.path.isfile(SETUP_FILE_PATH), "file does not exist"
-        with open(SETUP_FILE_PATH, "r") as f:
-            try:
-                content = json.load(f)
-            except:
-                raise AssertionError("file not in a valid json format")
+        with FileLock(CONFIG_LOCK_PATH):
+            with open(SETUP_FILE_PATH, "r") as f:
+                try:
+                    content = json.load(f)
+                except:
+                    raise AssertionError("file not in a valid json format")
         click.echo(json.dumps(content))
     except AssertionError as e:
         error_handler(e)
@@ -39,11 +40,12 @@ def _get_setup():
 def _get_parameters():
     try:
         assert os.path.isfile(PARAMS_FILE_PATH), "file does not exist"
-        with open(PARAMS_FILE_PATH, "r") as f:
-            try:
-                content = json.load(f)
-            except:
-                raise AssertionError("file not in a valid json format")
+        with FileLock(CONFIG_LOCK_PATH):
+            with open(PARAMS_FILE_PATH, "r") as f:
+                try:
+                    content = json.load(f)
+                except:
+                    raise AssertionError("file not in a valid json format")
         click.echo(json.dumps(content))
     except AssertionError as e:
         error_handler(e)
@@ -129,16 +131,18 @@ def _set_parameters(path: str, content: str):
     help=f"Validate the current setup.json file.\n\nThe required schema can be found in the documentation."
 )
 def _validate_setup():
-    if Validation.check_setup_file():
-        success_handler(f"Current setup file is valid")
+    with FileLock(CONFIG_LOCK_PATH):
+        if Validation.check_setup_file():
+            success_handler(f"Current setup file is valid")
 
 
 @click.command(
     help=f"Validate the current parameters.json file.\n\nThe required schema can be found in the documentation."
 )
 def _validate_parameters():
-    if Validation.check_parameters_file():
-        success_handler(f"Current parameters file is valid")
+    with FileLock(CONFIG_LOCK_PATH):
+        if Validation.check_parameters_file():
+            success_handler(f"Current parameters file is valid")
 
 
 @click.group()
