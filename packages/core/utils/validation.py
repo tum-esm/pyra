@@ -58,7 +58,6 @@ SETUP_FILE_SCHEMA = {
         {
             "actors": DICT_SCHEMA(
                 {
-                    "cover_closed": INT_LIST_SCHEMA(4),
                     "current_angle": INT_LIST_SCHEMA(3),
                     "fan_speed": INT_LIST_SCHEMA(3),
                     "move_cover": INT_LIST_SCHEMA(3),
