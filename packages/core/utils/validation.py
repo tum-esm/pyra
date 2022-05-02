@@ -117,7 +117,7 @@ SETUP_FILE_SCHEMA = {
 }
 
 PARAMS_FILE_SCHEMA = {
-    "camtracker": DICT_SCHEMA({"motor_offset_treshold": {"type": "number"}}),
+    "camtracker": DICT_SCHEMA({"motor_offset_threshold": {"type": "number"}}),
     "em27": DICT_SCHEMA({"power_min_angle": {"type": "number"}}),
     "opus": DICT_SCHEMA(
         {

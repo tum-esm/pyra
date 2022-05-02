@@ -1,44 +1,44 @@
 {
     "camtracker": {
-     "motor_offset_treshold": 10
+        "motor_offset_threshold": 10
     },
     "em27": {
-     "power_min_angle": 10.0,
+        "power_min_angle": 10.0
     },
     "opus": {
-     "executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
-     "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
-     "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx"
+        "executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
+        "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
+        "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx"
     },
     "pyra": {
-     "automation_is_running": false,
-     "seconds_per_iteration": 30,
-     "test_mode": false,
+        "automation_is_running": false,
+        "seconds_per_iteration": 30,
+        "test_mode": false
     },
     "vbdsd": {
-     "evaluation_size": 15,
-     "interval_time": 6,
-     "measurement_threshold": 0.6,
-     "min_sun_angle": 11.0
+        "evaluation_size": 15,
+        "interval_time": 6,
+        "measurement_threshold": 0.6,
+        "min_sun_angle": 11.0
     },
     "enclosure": {
-     "continuous_readings": [],
-     "min_sun_angle": 10.0
+        "continuous_readings": [],
+        "min_sun_angle": 10.0
     },
     "measurement_triggers": {
-     "type": {
-      "time": false,
-      "sun_angle": false,
-      "vbdsd": true,
-      "user_control": false
-      },
-     "start_time": [0,0,0],
-     "stop_time": [0,0,0],
-     "user_trigger_present": false,
-     "sun_angle_start": 0.0,
-     "sun_angle_stop": 0.0
+        "type": {
+            "time": false,
+            "sun_angle": false,
+            "vbdsd": true,
+            "user_control": false
+        },
+        "start_time": [0, 0, 0],
+        "stop_time": [0, 0, 0],
+        "user_trigger_present": false,
+        "sun_angle_start": 0.0,
+        "sun_angle_stop": 0.0
     },
     "measurement_conditions": {
-     "current_sun_angle": 0.0
+        "current_sun_angle": 0.0
     }
-   }
+}

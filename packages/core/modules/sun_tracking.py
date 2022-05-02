@@ -1,8 +1,8 @@
 # ==============================================================================
 # author            : Patrick Aigner
 # email             : patrick.aigner@tum.de
-# date              : 20220401
-# version           : 3.0
+# date              : 20220421
+# version           : 1.0
 # notes             :
 # license           : -
 # py version        : 3.10
@@ -228,7 +228,7 @@ class SunTracking:
 
         elev_offset = tracker_status[3]
         az_offeset = tracker_status[4]
-        threshold = self._PARAMS["camtracker"]["motor_offset_treshold"]
+        threshold = self._PARAMS["camtracker"]["motor_offset_threshold"]
 
         if (elev_offset > threshold) or (az_offeset > threshold):
             return False

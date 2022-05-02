@@ -1,7 +1,7 @@
 # author            : Patrick Aigner
 # email             : patrick.aigner@tum.de
-# date              : 20220401
-# version           : 3.0
+# date              : 20220421
+# version           : 1.0
 # notes             :
 # license           : -
 # py version        : 3.10
@@ -42,6 +42,7 @@ class EnclosureControl:
 
         logger.info("Running EnclosureControl")
         if not self._SETUP["enclosure"]["tum_enclosure_is_present"]:
+            logger.debug("TUM enclosure not present. Skip Enclosure_Control.run().")
             return
 
         # check for automation state flank changes
@@ -52,10 +53,12 @@ class EnclosureControl:
             if self._PARAMS["pyra"]["automation_status"] == 1:
                 # flank change 0 -> 1: load experiment, start macro
                 self.plc_write_bool(self._SETUP["plc"]["control"]["sync_to_tracker"])
+                logger.info("Syncing Cover to Tracker.")
 
             if self._PARAMS["pyra"]["automation_status"] == 0:
                 # flank change 1 -> 0: stop macro
                 self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"], 0)
+                logger.info("Closing Cover.")
 
         # save the automation status for the next run
         self.last_cycle_automation_status = self._PARAMS["pyra"]["automation_status"]
@@ -66,6 +69,7 @@ class EnclosureControl:
 
         # read current state of actors and sensors in enclosure
         current_reading = self.continuous_readings()
+        logger.info("New continuous readings.")
 
         with FileLock(CONFIG_LOCK_PATH):
             with open(PARAMS_FILE_PATH, "w") as f:
@@ -84,6 +88,7 @@ class EnclosureControl:
         if self._PARAMS["pyra"]["automation_status"] == 0:
             if not self._PARAMS["plc"]["actors"]["cover_closed"]:
                 self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"], 0)
+                logger.info("Cover is still open. Trying to close again.")
 
     def manage_spectrometer_power(self):
         """Shuts down spectrometer if the sun angle is too low. Starts up the
@@ -97,6 +102,7 @@ class EnclosureControl:
         ):
             if not self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
                 self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], True)
+                logger.info("Power up the spectrometer.")
 
         if (
             self.plc_read_bool(
@@ -106,6 +112,7 @@ class EnclosureControl:
         ):
             if self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
                 self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], False)
+                logger.info("Removed power from the spectrometer.")
 
     def continuous_readings(self):
         """Checks the state of the enclosure by continuously reading sensor and

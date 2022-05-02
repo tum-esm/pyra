@@ -55,14 +55,13 @@ def run():
             for module in _modules:
                 module.run(_SETUP, _PARAMS)
         except snap7.snap7exceptions.Snap7Exception:
-            pass
+            logger.exception("An exception was thrown!")
         except Exception as e:
-            # TODO: use traceback?
+            logger.exception("An exception was thrown!")
             print(
                 f"{type(e).__name__} at line {e.__traceback__.tb_lineno} "
                 f"of {__file__}: {e}"
             )
-            logger.error(e, exc_info=True)
             # TODO: trigger email?
 
         logger.info("Ending Iteration")

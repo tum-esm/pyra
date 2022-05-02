@@ -1,192 +1,63 @@
 {
     "camtracker": {
-     "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt",
-     "executable_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
-     "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
-     "sun_intensity_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat"
+        "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt",
+        "executable_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
+        "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
+        "sun_intensity_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat"
     },
     "em27": {
-     "ip": "10.0.0.1"
+        "ip": "10.0.0.1"
     },
     "enclosure": {
-     "tum_enclosure_is_present": false
+        "tum_enclosure_is_present": false
     },
     "opus": {
-     "executable_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe"
+        "executable_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe"
     },
     "plc": {
-     "actors": {
-      "cover_closed": [
-       6,
-       16,
-       1,
-       1
-      ],
-      "current_angle": [
-       25,
-       6,
-       2
-      ],
-      "fan_speed": [
-       8,
-       18,
-       2
-      ],
-      "move_cover": [
-       25,
-       8,
-       2
-      ],
-      "nominal_angle": [
-       25,
-       8,
-       2
-      ]
-     },
-     "control": {
-      "auto_temp_mode": [
-       8,
-       24,
-       1,
-       2
-      ],
-      "manual_control": [
-       8,
-       24,
-       1,
-       5
-      ],
-      "manual_temp_mode": [
-       8,
-       24,
-       1,
-       3
-      ],
-      "reset": [
-       3,
-       4,
-       1,
-       5
-      ],
-      "sync_to_tracker": [
-       8,
-       16,
-       1,
-       0
-      ]
-     },
-     "ip": "10.0.0.4",
-     "is_present": false,
-     "power": {
-      "camera": [
-       8,
-       16,
-       1,
-       2
-      ],
-      "computer": [
-       8,
-       16,
-       1,
-       6
-      ],
-      "heater": [
-       8,
-       16,
-       1,
-       5
-      ],
-      "router": [
-       8,
-       16,
-       1,
-       3
-      ],
-      "spectrometer": [
-       8,
-       16,
-       1,
-       1
-      ]
-     },
-     "sensors": {
-      "humidity": [
-       8,
-       22,
-       2
-      ],
-      "temperature": [
-       8,
-       20,
-       2
-      ]
-     },
-     "state": {
-      "camera": [
-       8,
-       14,
-       1,
-       6
-      ],
-      "computer": [
-       8,
-       14,
-       1,
-       3
-      ],
-      "cover": [
-       25,
-       2,
-       1,
-       2
-      ],
-      "heater": [
-       8,
-       14,
-       1,
-       1
-      ],
-      "motor_failed": [
-       8,
-       12,
-       1,
-       3
-      ],
-      "rain": [
-       8,
-       6,
-       1,
-       0
-      ],
-      "reset_needed": [
-       3,
-       2,
-       1,
-       3
-      ],
-      "router": [
-       8,
-       14,
-       1,
-       2
-      ],
-      "spectrometer": [
-       8,
-       14,
-       1,
-       0
-      ],
-      "ups_alert": [
-       8,
-       0,
-       1,
-       1
-      ]
-     }
+        "actors": {
+            "cover_closed": [6, 16, 1, 1],
+            "current_angle": [25, 6, 2],
+            "fan_speed": [8, 18, 2],
+            "move_cover": [25, 8, 2],
+            "nominal_angle": [25, 8, 2]
+        },
+        "control": {
+            "auto_temp_mode": [8, 24, 1, 2],
+            "manual_control": [8, 24, 1, 5],
+            "manual_temp_mode": [8, 24, 1, 3],
+            "reset": [3, 4, 1, 5],
+            "sync_to_tracker": [8, 16, 1, 0]
+        },
+        "ip": "10.0.0.4",
+        "is_present": false,
+        "power": {
+            "camera": [8, 16, 1, 2],
+            "computer": [8, 16, 1, 6],
+            "heater": [8, 16, 1, 5],
+            "router": [8, 16, 1, 3],
+            "spectrometer": [8, 16, 1, 1]
+        },
+        "sensors": {
+            "humidity": [8, 22, 2],
+            "temperature": [8, 20, 2]
+        },
+        "state": {
+            "camera": [8, 14, 1, 6],
+            "computer": [8, 14, 1, 3],
+            "cover": [25, 2, 1, 2],
+            "heater": [8, 14, 1, 1],
+            "motor_failed": [8, 12, 1, 3],
+            "rain": [8, 6, 1, 0],
+            "reset_needed": [3, 2, 1, 3],
+            "router": [8, 14, 1, 2],
+            "spectrometer": [8, 14, 1, 0],
+            "ups_alert": [8, 0, 1, 1]
+        }
     },
     "vbdsd": {
-     "cam_id": 0,
-     "image_storage_path": "C:\\img\\",
-     "sensor_is_present": false
+        "cam_id": 0,
+        "image_storage_path": "C:\\img\\",
+        "sensor_is_present": false
     }
-   }
+}

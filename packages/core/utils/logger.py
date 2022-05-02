@@ -46,3 +46,7 @@ class Logger:
     def error(self, message: str):
         with FileLock(LOGS_LOCK_PATH):
             self.logger.error(message)
+
+    def exception(self, message: str):
+        with FileLock(LOGS_LOCK_PATH):
+            self.logger.exception(message)
