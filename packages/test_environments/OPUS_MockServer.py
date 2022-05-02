@@ -13,6 +13,7 @@ class MyRequestTopic(object.Object):
         print("Received request:", aString)
         return "OK" + " " + aString
 
+
 server = dde.CreateServer()
 server.AddTopic(MyRequestTopic("OPUS/System"))
 server.Create("OPUS")

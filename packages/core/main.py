@@ -19,7 +19,9 @@ CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 
 from packages.core.utils.logger import Logger
+
 logger = Logger(origin="pyra.core.main")
+
 
 def run():
     while True:

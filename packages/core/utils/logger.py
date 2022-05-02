@@ -23,11 +23,10 @@ logger.addHandler(logging_info_handler)
 logging.getLogger("filelock").setLevel(logging.WARNING)
 
 
-class Logger():
-    
+class Logger:
     def __init__(self, origin="pyra.core"):
         self.logger = logging.getLogger(origin)
-    
+
     def debug(self, message: str):
         with FileLock(LOGS_LOCK_PATH):
             self.logger.debug(message)

@@ -27,11 +27,11 @@ import win32ui
 import win32process
 
 from packages.core.utils.logger import Logger
+
 logger = Logger(origin="pyra.core.sun-tracking")
 
 
 class SunTracking:
-
     def __init__(self):
         self._PARAMS = {}
         self._SETUP = {}
@@ -56,18 +56,16 @@ class SunTracking:
 
         # main logic for active automation
 
-        #start ct if not currently running
+        # start ct if not currently running
         if not self.__ct_application_running:
             self.__start_sun_tracking_automation()
             logger.info("Start CamTracker.")
-
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
         if not self.__valdiate_tracker_position:
             self.__stop_sun_tracking_automation()
             logger.info("Stop CamTracker. Preparing for reinitialization.")
-
 
     @property
     def set_config(self):
@@ -100,12 +98,13 @@ class SunTracking:
         move the mirrors to the expected sun position during startup.
 
          Returns pywin32 process information for later usage.
-         """
-        #delete stop.txt file in camtracker folder if present
-        #exe call with -automation
+        """
+        # delete stop.txt file in camtracker folder if present
+        # exe call with -automation
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        camtracker_call = self._SETUP["camtracker"]["executable_full_path"] \
-                          + " -automation"
+        camtracker_call = (
+            self._SETUP["camtracker"]["executable_full_path"] + " -automation"
+        )
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
             camtracker_call,
@@ -115,7 +114,8 @@ class SunTracking:
             win32con.NORMAL_PRIORITY_CLASS,
             None,
             None,
-            win32process.STARTUPINFO())
+            win32process.STARTUPINFO(),
+        )
 
         return (hProcess, hThread, dwProcessId, dwThreadId)
 
@@ -127,10 +127,11 @@ class SunTracking:
         and will do a clean shutdown.
         """
 
-        #create stop.txt file in camtracker folder
+        # create stop.txt file in camtracker folder
         camtracker_directory = os.path.dirname(
-            self._SETUP["camtracker"]["executable_full_path"])
-        f = open(camtracker_directory + "stop.txt", 'w')
+            self._SETUP["camtracker"]["executable_full_path"]
+        )
+        f = open(camtracker_directory + "stop.txt", "w")
         f.close()
 
     def __read_ct_log_learn_az_elev(self):
@@ -152,23 +153,23 @@ class SunTracking:
         if not os.path.isfile(target):
             return [None, None, None, None, None, None]
 
-        f = open(target, 'r')
+        f = open(target, "r")
         last_line = f.readlines()[-1]
         f.close()
 
-        #last_line: [Julian Date, Tracker Elevation, Tracker Azimuth,
-        #Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px]
-        last_line = last_line.replace(' ','').replace('\n','').split(',')
+        # last_line: [Julian Date, Tracker Elevation, Tracker Azimuth,
+        # Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px]
+        last_line = last_line.replace(" ", "").replace("\n", "").split(",")
 
-        #convert julian day to greg calendar as tuple (Year, Month, Day)
-        jddate = jdcal.jd2gcal(float(last_line[0]),0)[:3]
+        # convert julian day to greg calendar as tuple (Year, Month, Day)
+        jddate = jdcal.jd2gcal(float(last_line[0]), 0)[:3]
 
-        #get current date(example below)
-        #date = (Year, Month, Day)
+        # get current date(example below)
+        # date = (Year, Month, Day)
         now = datetime.datetime.now()
         date = (now.year, now.month, now.day)
 
-        #if the in the log file read date is up-to-date
+        # if the in the log file read date is up-to-date
         if date == jddate:
             return last_line
         else:
@@ -179,20 +180,22 @@ class SunTracking:
 
         Returns the sun intensity as either 'good', 'bad', 'None'.
         """
-        #check sun status logged by camtracker
+        # check sun status logged by camtracker
         target = self._SETUP["camtracker"]["sun_intensity_path"]
 
         if not os.path.isfile(target):
             return
 
-        f = open(target, 'r')
+        f = open(target, "r")
         last_line = f.readlines()[-1]
         f.close()
 
-        sun_intensity = last_line.split(',')[3].replace(' ', '').replace('\n', '')
+        sun_intensity = last_line.split(",")[3].replace(" ", "").replace("\n", "")
 
         # convert julian day to greg calendar as tuple (Year, Month, Day)
-        jddate = jdcal.jd2gcal(float(last_line.replace(' ', '').replace('\n', '').split(',')[0]), 0)[:3]
+        jddate = jdcal.jd2gcal(
+            float(last_line.replace(" ", "").replace("\n", "").split(",")[0]), 0
+        )[:3]
 
         # get current date(example below)
         # date = (Year, Month, Day)
@@ -203,7 +206,6 @@ class SunTracking:
         if date == jddate:
             # returns either 'good' or 'bad'
             return sun_intensity
-
 
     @property
     def __valdiate_tracker_position(self):
@@ -222,7 +224,6 @@ class SunTracking:
         elev_offset = tracker_status[3]
         az_offeset = tracker_status[4]
         threshold = self._PARAMS["camtracker"]["motor_offset_treshold"]
-
 
         if (elev_offset > threshold) or (az_offeset > threshold):
             return False

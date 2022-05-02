@@ -31,6 +31,7 @@ import win32ui
 import dde
 
 from packages.core.utils.logger import Logger
+
 logger = Logger(origin="pyra.core.opus-measurement")
 
 
@@ -63,12 +64,14 @@ class OpusMeasurement:
         if not self.__opus_application_running:
             self.__start_opus()
             logger.info("Start OPUS.")
-            #returns to give OPUS time to start until next call of run()
+            # returns to give OPUS time to start until next call of run()
             return
 
-
-        #check for automation state flank changes
-        if self.last_cycle_automation_status != self._PARAMS["pyra"]["automation_status"]:
+        # check for automation state flank changes
+        if (
+            self.last_cycle_automation_status
+            != self._PARAMS["pyra"]["automation_status"]
+        ):
             if self._PARAMS["pyra"]["automation_status"] == 1:
                 # flank change 0 -> 1: load experiment, start macro
                 self.__load_experiment()
@@ -84,7 +87,6 @@ class OpusMeasurement:
 
         # save the automation status for the next run
         self.last_cycle_automation_status = self._PARAMS["pyra"]["automation_status"]
-
 
         if self.__is_em27_connected:
             logger.info("Successful ping to EM27.")
@@ -106,12 +108,11 @@ class OpusMeasurement:
         except:
             logger.info("Could not connect to OPUS DDE Server.")
 
-
     @property
     def __test_dde_connection(self):
         """Tests the DDE connection.
         Tries to reinitialize the DDE socket if connection test fails.
-         """
+        """
 
         # conversation.Connected() returns 1 <class 'int'> if connected
         if self.conversation.Connected() == 1:
@@ -134,43 +135,40 @@ class OpusMeasurement:
                 return False
 
     def __load_experiment(self, full_path):
-        """Loads a new experiment in OPUS over DDE connection.
-        """
+        """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
 
         if not self.__test_dde_connection:
             return
         answer = self.conversation.Request("LOAD_EXPERIMENT " + full_path)
 
-        if 'OK' in answer:
+        if "OK" in answer:
             logger.info("Loaded new OPUS experiment: {}.".format(full_path))
         else:
             logger.info("Could not load OPUS experiment as expected.")
 
     def __start_macro(self, full_path):
-        """Starts a new macro in OPUS over DDE connection.
-        """
+        """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
 
         if not self.__test_dde_connection:
             return
         answer = self.conversation.Request("RUN_MACRO " + full_path)
 
-        if 'OK' in answer:
+        if "OK" in answer:
             logger.info("Started OPUS macro: {}.".format(full_path))
         else:
             logger.info("Could not start OPUS macro as expected.")
 
     def __stop_macro(self, full_path):
-        """Stops the currently running macro in OPUS over DDE connection.
-        """
+        """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
 
         if not self.__test_dde_connection:
             return
         answer = self.conversation.Request("KILL_MACRO " + full_path)
 
-        if 'OK' in answer:
+        if "OK" in answer:
             logger.info("Stopped OPUS macro: {}.".format(full_path))
         else:
             logger.info("Could not stop OPUS macro as expected.")
@@ -182,8 +180,7 @@ class OpusMeasurement:
         self.server.Shutdown()
 
     def __destroy_dde_server(self):
-        """Destroys the underlying C++ object.
-        """
+        """Destroys the underlying C++ object."""
         self.server.Destroy()
 
     @property
@@ -201,8 +198,8 @@ class OpusMeasurement:
 
     def __start_opus(self):
         """Uses win32process frm pywin32 module to start up OPUS
-         Returns pywin32 process information for later usage.
-         """
+        Returns pywin32 process information for later usage.
+        """
         # http://timgolden.me.uk/pywin32-docs/win32process.html
         opus_call = self._SETUP["opus"]["executable_full_path"]
         hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(
@@ -214,9 +211,10 @@ class OpusMeasurement:
             win32con.NORMAL_PRIORITY_CLASS,
             None,
             None,
-            win32process.STARTUPINFO())
+            win32process.STARTUPINFO(),
+        )
 
-        #return (hProcess, hThread, dwProcessId, dwThreadId)
+        # return (hProcess, hThread, dwProcessId, dwThreadId)
 
     @property
     def __opus_application_running(self):
@@ -229,8 +227,10 @@ class OpusMeasurement:
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
         try:
-            if win32ui.FindWindow(None, "OPUS - Operator: Default  (Administrator) - [Display - default.ows]"):
+            if win32ui.FindWindow(
+                None,
+                "OPUS - Operator: Default  (Administrator) - [Display - default.ows]",
+            ):
                 return True
         except win32ui.error:
-                return False
-
+            return False

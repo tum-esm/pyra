@@ -16,6 +16,7 @@ import snap7
 import time
 
 from packages.core.utils.logger import Logger
+
 logger = Logger(origin="pyra.core.enclosure-control")
 
 dir = os.path.dirname
@@ -27,6 +28,7 @@ CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 class EnclosureControl:
     """https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf"""
+
     def __init__(self):
         self._SETUP = {}
         self._PARAMS = {}
@@ -40,8 +42,11 @@ class EnclosureControl:
         if not self._SETUP["enclosure"]["tum_enclosure_is_present"]:
             return
 
-        #check for automation state flank changes
-        if self.last_cycle_automation_status != self._PARAMS["pyra"]["automation_status"]:
+        # check for automation state flank changes
+        if (
+            self.last_cycle_automation_status
+            != self._PARAMS["pyra"]["automation_status"]
+        ):
             if self._PARAMS["pyra"]["automation_status"] == 1:
                 # flank change 0 -> 1: load experiment, start macro
                 self.plc_write_bool(self._SETUP["plc"]["control"]["sync_to_tracker"])
@@ -50,13 +55,12 @@ class EnclosureControl:
                 # flank change 1 -> 0: stop macro
                 self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"], 0)
 
-
         # save the automation status for the next run
         self.last_cycle_automation_status = self._PARAMS["pyra"]["automation_status"]
 
-        #double check that cover is closed if automation == 0
+        # double check that cover is closed if automation == 0
         self.double_check_cover()
-        #TODO: Trigger user warning?
+        # TODO: Trigger user warning?
 
         # read current state of actors and sensors in enclosure
         current_reading = self.continuous_readings()
@@ -68,7 +72,6 @@ class EnclosureControl:
 
         # powerup spectrometer if sun angle is 10° or more
         self.manage_spectrometer_power()
-
 
         # TODO: check what resetbutton after rain does (and the auto reset option
 
@@ -86,26 +89,29 @@ class EnclosureControl:
         """
         if self._PARAMS["pyra"]["automation_status"] == 0:
             if not self._PARAMS["plc"]["actors"]["cover_closed"]:
-                self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"],
-                                    0)
+                self.plc_write_bool(self._SETUP["plc"]["actors"]["move_cover"], 0)
 
     def manage_spectrometer_power(self):
         """Shuts down spectrometer if the sun angle is too low. Starts up the
         spectrometer in the morning when minimum angle is satisfied.
         """
-        if self.plc_read_bool(
-                self._PARAMS["measurement_conditions"]["current_sun_angle"]) > \
-                self._PARAMS["enclsoure"]["min_sun_angle"]:
+        if (
+            self.plc_read_bool(
+                self._PARAMS["measurement_conditions"]["current_sun_angle"]
+            )
+            > self._PARAMS["enclsoure"]["min_sun_angle"]
+        ):
             if not self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
-                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"],
-                                    True)
+                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], True)
 
-        if self.plc_read_bool(
-                self._PARAMS["measurement_conditions"]["current_sun_angle"]) < \
-                self._PARAMS["enclsoure"]["min_sun_angle"]:
+        if (
+            self.plc_read_bool(
+                self._PARAMS["measurement_conditions"]["current_sun_angle"]
+            )
+            < self._PARAMS["enclsoure"]["min_sun_angle"]
+        ):
             if self.plc_read_bool(self._SETUP["plc"]["power"]["spectrometer"]):
-                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"],
-                                    False)
+                self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], False)
 
     def continuous_readings(self):
         """Checks the state of the enclosure by continuously reading sensor and
@@ -116,18 +122,18 @@ class EnclosureControl:
         """
         r = []
 
-        #actors
+        # actors
         r.append(self.plc_read_bool(self._SETUP["plc"]["actors"]["cover_closed"]))
         r.append(self.plc_read_int(self._SETUP["plc"]["actors"]["fan_speed"]))
         r.append(self.plc_read_int(self._SETUP["plc"]["actors"]["current_angle"]))
-        #control
+        # control
         r.append(self.plc_read_bool(self._SETUP["plc"]["control"]["auto_temp_mode"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["control"]["manual_control"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["control"]["manual_temp_mode"]))
-        #sensors
+        # sensors
         r.append(self.plc_read_int(self._SETUP["plc"]["sensors"]["humidity"]))
         r.append(self.plc_read_int(self._SETUP["plc"]["sensors"]["temperature"]))
-        #state
+        # state
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["camera"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["computer"]))
         r.append(self.plc_read_bool(self._SETUP["plc"]["state"]["cover"]))
@@ -141,7 +147,6 @@ class EnclosureControl:
 
         return r
 
-
     def plc_connect(self):
         """Connects to the PLC Snap7
 
@@ -149,7 +154,7 @@ class EnclosureControl:
         True -> connected
         False -> not connected
         """
-        self.plc.connect('10.10.0.4', 0, 1)
+        self.plc.connect("10.10.0.4", 0, 1)
         return self.plc.get_connected()
 
     def plc_disconnect(self):
@@ -169,15 +174,15 @@ class EnclosureControl:
     def plc_connected(self):
         """Connects to the PLC Snap7
 
-       Returns:
-       True -> connected
-       False -> not connected
-       """
+        Returns:
+        True -> connected
+        False -> not connected
+        """
         return self.plc.get_connected()
 
     def plc_read_int(self, action):
         """Redas an INT value in the PLC database."""
-        assert(len(action) == 3)
+        assert len(action) == 3
         db_number, start, size = action
 
         msg = self.plc.db_read(db_number, start, size)
@@ -190,7 +195,7 @@ class EnclosureControl:
 
     def plc_write_int(self, action, value):
         """Changes an INT value in the PLC database."""
-        assert (len(action) == 3)
+        assert len(action) == 3
         db_number, start, size = action
 
         msg = bytearray(size)
@@ -202,7 +207,7 @@ class EnclosureControl:
 
     def plc_read_bool(self, action):
         """Reads a BOOL value in the PLC database."""
-        assert (len(action) == 4)
+        assert len(action) == 4
         db_number, start, size, bool_index = action
 
         msg = self.plc.db_read(db_number, start, size)
@@ -215,7 +220,7 @@ class EnclosureControl:
 
     def plc_write_bool(self, action, value):
         """Changes a BOOL value in the PLC database."""
-        assert (len(action) == 4)
+        assert len(action) == 4
         db_number, start, size, bool_index = action
 
         msg = self.plc.db_read(db_number, start, size)
