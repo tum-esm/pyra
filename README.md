@@ -34,10 +34,18 @@ For each file, there is a `*.default.json` file present in the repository. A ful
 
 ## CLI
 
-_coming soon_
+_documentation coming soon_
+
+Make `pyra-cli` command available:
+
+```bash
+alias pyra-cli=".../.venv/bin/python .../packages/cli/main.py"
+```
+
+TODO: Find a way to set up autocompletion on the `pyra-cli` command.
 
 <br/>
 
 ## Graphical User Interface
 
-_coming soon_
+_documentation coming soon_

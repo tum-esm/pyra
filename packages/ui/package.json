@@ -1,0 +1,104 @@
+{
+    "name": "pyra-4-ui",
+    "productName": "PyRa 4 UI",
+    "version": "4.0.0",
+    "description": "PyRa 4 User Interface",
+    "main": ".webpack/main",
+    "scripts": {
+        "develop": "electron-forge start",
+        "package": "electron-forge package",
+        "make": "electron-forge make",
+        "publish": "electron-forge publish",
+        "lint": "eslint --ext .ts,.tsx ."
+    },
+    "keywords": [],
+    "author": {
+        "name": "dostuffthatmatters",
+        "email": "moritz@dostuffthatmatters.dev"
+    },
+    "license": "MIT",
+    "config": {
+        "forge": {
+            "packagerConfig": {
+                "icon": "./src/client/assets/green-tum-logo_1024x.icns",
+                "name": "Pyra 4"
+            },
+            "makers": [
+                {
+                    "name": "@electron-forge/maker-squirrel",
+                    "config": {
+                        "name": "electron_test"
+                    }
+                },
+                {
+                    "name": "@electron-forge/maker-zip",
+                    "platforms": [
+                        "darwin"
+                    ]
+                },
+                {
+                    "name": "@electron-forge/maker-deb",
+                    "config": {}
+                },
+                {
+                    "name": "@electron-forge/maker-rpm",
+                    "config": {}
+                }
+            ],
+            "plugins": [
+                [
+                    "@electron-forge/plugin-webpack",
+                    {
+                        "mainConfig": "./webpack.main.config.js",
+                        "renderer": {
+                            "config": "./webpack.renderer.config.js",
+                            "entryPoints": [
+                                {
+                                    "html": "./src/index.html",
+                                    "js": "./src/renderer.ts",
+                                    "name": "main_window",
+                                    "preload": {
+                                        "js": "./src/preload.ts"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            ]
+        }
+    },
+    "devDependencies": {
+        "@electron-forge/cli": "^6.0.0-beta.63",
+        "@electron-forge/maker-deb": "^6.0.0-beta.63",
+        "@electron-forge/maker-rpm": "^6.0.0-beta.63",
+        "@electron-forge/maker-squirrel": "^6.0.0-beta.63",
+        "@electron-forge/maker-zip": "^6.0.0-beta.63",
+        "@electron-forge/plugin-webpack": "6.0.0-beta.63",
+        "@types/lodash": "^4.14.181",
+        "@types/react": "^17.0.40",
+        "@types/react-dom": "^17.0.13",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "@vercel/webpack-asset-relocator-loader": "1.7.0",
+        "autoprefixer": "^10.4.2",
+        "css-loader": "^6.0.0",
+        "electron": "17.1.2",
+        "eslint": "^8.0.1",
+        "eslint-plugin-import": "^2.25.0",
+        "fork-ts-checker-webpack-plugin": "^6.0.1",
+        "node-loader": "^2.0.0",
+        "postcss": "^8.4.8",
+        "postcss-loader": "^6.2.1",
+        "style-loader": "^3.0.0",
+        "tailwindcss": "^3.0.23",
+        "ts-loader": "^9.2.2",
+        "typescript": "~4.5.4"
+    },
+    "dependencies": {
+        "electron-squirrel-startup": "^1.0.0",
+        "lodash": "^4.17.21",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2"
+    }
+}
