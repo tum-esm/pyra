@@ -109,12 +109,13 @@ def read_json_config_files():
     SETUP:dict and PARAMS:dict as Tuple
     """
     # TODO: Handle errors from config validation
-    Validation.check_parameters_config()
-    Validation.check_setup_config()
-    with open(SETUP_FILE_PATH, "r") as f:
-        SETUP = json.load(f)
-    with open(PARAMS_FILE_PATH, "r") as f:
-        PARAMS = json.load(f)
+    with FileLock(CONFIG_LOCK_PATH):
+        Validation.check_parameters_config()
+        Validation.check_setup_config()
+        with open(SETUP_FILE_PATH, "r") as f:
+            SETUP = json.load(f)
+        with open(PARAMS_FILE_PATH, "r") as f:
+            PARAMS = json.load(f)
 
     return (SETUP, PARAMS)
 

@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import os
 import time
+from filelock import FileLock
 import snap7
 
 from packages.core.utils.validation import Validation
@@ -36,12 +37,13 @@ def run():
 
         try:
             # TODO: lock config and parameter files during read operation
-            Validation.check_parameters_config()
-            Validation.check_setup_config()
-            with open(SETUP_FILE_PATH, "r") as f:
-                SETUP = json.load(f)
-            with open(PARAMS_FILE_PATH, "r") as f:
-                PARAMS = json.load(f)
+            with FileLock(CONFIG_LOCK_PATH):
+                Validation.check_parameters_config()
+                Validation.check_setup_config()
+                with open(SETUP_FILE_PATH, "r") as f:
+                    SETUP = json.load(f)
+                with open(PARAMS_FILE_PATH, "r") as f:
+                    PARAMS = json.load(f)
 
             for module in _modules:
                 module.run(SETUP, PARAMS)
