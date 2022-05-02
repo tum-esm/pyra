@@ -87,7 +87,8 @@ export default function SetupTab(props: {}) {
                         setValue={v =>
                             addLocalUpdate({ camtracker: { config_path: v } })
                         }
-                        fileSelector
+                        showfileSelector
+                        disabled
                     />
                     <TextInputRow
                         label='camtracker.executable_path'
@@ -98,6 +99,8 @@ export default function SetupTab(props: {}) {
                                 camtracker: { executable_path: v },
                             })
                         }
+                        showfileSelector
+                        disabled
                     />
                     <TextInputRow
                         label='camtracker.learn_az_elev_path'
@@ -108,6 +111,8 @@ export default function SetupTab(props: {}) {
                                 camtracker: { learn_az_elev_path: v },
                             })
                         }
+                        showfileSelector
+                        disabled
                     />
                     <TextInputRow
                         label='camtracker.sun_intensity_path'
@@ -118,6 +123,8 @@ export default function SetupTab(props: {}) {
                                 camtracker: { sun_intensity_path: v },
                             })
                         }
+                        showfileSelector
+                        disabled
                     />
                 </>
             )}
