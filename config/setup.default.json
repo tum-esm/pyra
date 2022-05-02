@@ -16,7 +16,6 @@
     },
     "plc": {
         "actors": {
-            "cover_closed": [6, 16, 1, 1],
             "current_angle": [25, 6, 2],
             "fan_speed": [8, 18, 2],
             "move_cover": [25, 8, 2],

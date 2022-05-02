@@ -37,9 +37,9 @@ logger = Logger(origin="pyra.core.sun-tracking")
 
 
 class SunTracking:
-    def __init__(self):
-        self._PARAMS = {}
-        self._SETUP = {}
+    def __init__(self, initial_setup: dict, initial_parameters: dict):
+        self._SETUP = initial_setup
+        self._PARAMS = initial_parameters
         if not windows_libraries_available:
             logger.info("Windows libraries not available, class is inactive")
             return

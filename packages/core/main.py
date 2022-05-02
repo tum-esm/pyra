@@ -20,13 +20,30 @@ from packages.core.utils.logger import Logger
 logger = Logger(origin="pyra.core.main")
 
 
+def load_config():
+    # FileLock = Mark, that the config JSONs are being used and the
+    # CLI should not interfere. A file "config/config.lock" will be created
+    # and the existence of this file will make the next line wait.
+    with FileLock(CONFIG_LOCK_PATH):
+        assert (Validation.check_parameters_file() and Validation.check_setup_file())
+
+        with open(SETUP_FILE_PATH, "r") as f:
+            _SETUP = json.load(f)
+        with open(PARAMS_FILE_PATH, "r") as f:
+            _PARAMS = json.load(f)
+    return _SETUP, _PARAMS
+
+
+
 def run():
 
+    _SETUP, _PARAMS = load_config()
+
     _modules = [
-        modules.measurement_conditions.MeasurementConditions(),
-        modules.enclosure_control.EnclosureControl(),
-        modules.sun_tracking.SunTracking(),
-        modules.opus_measurement.OpusMeasurement(),
+        modules.measurement_conditions.MeasurementConditions(_SETUP, _PARAMS),
+        modules.enclosure_control.EnclosureControl(_SETUP, _PARAMS),
+        modules.sun_tracking.SunTracking(_SETUP, _PARAMS),
+        modules.opus_measurement.OpusMeasurement(_SETUP, _PARAMS),
     ]
 
     # TODO: Start vbdsd in a thread
@@ -35,21 +52,12 @@ def run():
         execution_started_at = datetime.now().timestamp()
         logger.info("Starting Iteration")
 
-        # FileLock = Mark, that the config JSONs are being used and the
-        # CLI should not interfere. A file "config/config.lock" will be created
-        # and the existence of this file will make the next line wait.
-        with FileLock(CONFIG_LOCK_PATH):
-            if (not Validation.check_parameters_file()) or (
-                not Validation.check_setup_file()
-            ):
-                # TODO: What to do here?
+        try:
+            _SETUP, _PARAMS = load_config()
+        except AssertionError:
+            # TODO: What to do here?
                 time.sleep(60)
                 continue
-
-            with open(SETUP_FILE_PATH, "r") as f:
-                _SETUP = json.load(f)
-            with open(PARAMS_FILE_PATH, "r") as f:
-                _PARAMS = json.load(f)
 
         try:
             for module in _modules:

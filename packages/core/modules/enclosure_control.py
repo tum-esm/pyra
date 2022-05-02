@@ -29,13 +29,13 @@ CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 class EnclosureControl:
     """https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf"""
 
-    def __init__(self):
-        self._SETUP = {}
-        self._PARAMS = {}
+    def __init__(self, initial_setup: dict, initial_parameters: dict):
+        self._SETUP = initial_setup
+        self._PARAMS = initial_parameters
         self.plc = snap7.client.Client()
         self.connection = self.plc_connect()
         self.last_cycle_automation_status = 0
-        self.plc_write_bool(self._SETUP["plc"]["control"]["auto_temp_mode"])
+        self.plc_write_bool(self._SETUP["plc"]["control"]["auto_temp_mode"], True)
 
     def run(self, new_setup: dict, new_parameters: dict):
         self._SETUP, self._PARAMS = new_setup, new_parameters
@@ -124,7 +124,6 @@ class EnclosureControl:
         r = []
 
         # actors
-        r.append(self.plc_read_bool(self._SETUP["plc"]["actors"]["cover_closed"]))
         r.append(self.plc_read_int(self._SETUP["plc"]["actors"]["fan_speed"]))
         r.append(self.plc_read_int(self._SETUP["plc"]["actors"]["current_angle"]))
         # control
