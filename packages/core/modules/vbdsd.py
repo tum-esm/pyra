@@ -30,11 +30,15 @@
 # TODO: Use logging after initial tests
 import os
 import time
-import astropy
+import astropy.units as astropy_units
+import astropy.coordinates as astropy_coordinates
+import astropy.time as astropy_time
 import cv2 as cv
 from filelock import FileLock
 import numpy as np
 import json
+
+
 
 from packages.core.utils.validation import Validation
 
@@ -110,8 +114,8 @@ def read_json_config_files():
     """
     # TODO: Handle errors from config validation
     with FileLock(CONFIG_LOCK_PATH):
-        Validation.check_parameters_config()
-        Validation.check_setup_config()
+        Validation.check_parameters_file()
+        Validation.check_setup_file()
         with open(SETUP_FILE_PATH, "r") as f:
             SETUP = json.load(f)
         with open(PARAMS_FILE_PATH, "r") as f:
@@ -259,9 +263,9 @@ def calc_sun_angle_deg(loc):
     angle in degree, based on the location loc, computed by get_tracker_position(),
      and current time. Therefore, the pack- ages time and astrophy are required.
     """
-    now = astropy.time.now()
-    altaz = astropy.coordinates.AltAz(location=loc, obstime=now)
-    sun = astropy.coordinates.get_sun(now)
+    now = astropy_time.Time.now()
+    altaz = astropy_coordinates.AltAz(location=loc, obstime=now)
+    sun = astropy_coordinates.get_sun(now)
     sun_angle_deg = sun.transform_to(altaz).alt
     return sun_angle_deg
 
@@ -314,11 +318,11 @@ def get_tracker_position():
 
     readout = read_camtracker_config()
 
-    latitude = readout[0] * astropy.units.deg
-    longitude = readout[1] * astropy.units.deg
-    height = readout[2] * astropy.units.km
+    latitude = readout[0]
+    longitude = readout[1]
+    height = readout[2]
 
-    loc = astropy.coordinates.EarthLocation(lon=longitude, lat=latitude, height=height)
+    loc = astropy_coordinates.EarthLocation.from_geodetic(height=height, lat=latitude, lon=longitude)
 
     return loc
 
@@ -358,11 +362,11 @@ def change_exposure(diff=0):
     loc = get_tracker_position()
     sun_angle_deg = calc_sun_angle_deg(loc)
 
-    if sun_angle_deg < 4 * astropy.units.deg:
+    if sun_angle_deg < 4 * astropy_units.deg:
         exp = -9 + diff
-    elif sun_angle_deg < 6 * astropy.units.deg:
+    elif sun_angle_deg < 6 * astropy_units.deg:
         exp = -10 + diff
-    elif sun_angle_deg < 10 * astropy.units.deg:
+    elif sun_angle_deg < 10 * astropy_units.deg:
         exp = -11 + diff
     else:
         exp = -12 + diff
@@ -380,7 +384,7 @@ def take_vbdsd_image(count: int = 1):
     frame: Source image
     """
 
-    for _ in count:
+    for _ in range(count):
         ret, frame = cam.read()
         if ret:
             return ret, frame
@@ -403,8 +407,8 @@ def process_vbdsd_vision():
     return 0, frame
 
 
-if __name__ == "__main__":
-
+def main(infinite_loop = True):
+    global SETUP, PARAMS, cam
     SETUP, PARAMS = read_json_config_files()
     status_history = RingList(PARAMS["vbdsd"]["evaluation_size"])
 
@@ -413,12 +417,14 @@ if __name__ == "__main__":
     cam = init_cam(SETUP["vbdsd"]["cam_id"])
     change_exposure()
 
-    while 1:
+    while(True):
+    
         start_time = time.time()
         SETUP, PARAMS = read_json_config_files()
 
         # sleep while sun angle is too low
-        while calc_sun_angle_deg(loc) < PARAMS["vbdsd"]["min_sun_angle"]:
+        # assert False, repr(calc_sun_angle_deg(loc).to_string())
+        while calc_sun_angle_deg(loc).is_within_bounds(None, PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg):
             time.sleep(60)
 
         # reinit if parameter changes
@@ -438,13 +444,13 @@ if __name__ == "__main__":
         else:
             status_history.append(0)
 
-        if os.path.exists(SETUP["vbdsd"]["image_storage_path"]):
+        if os.path.exists(SETUP["vbdsd"]["image_storage_path"]) and frame is not None:
             img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
             img_full_path = os.path.join(
                 SETUP["vbdsd"]["image_storage_path"] + img_name
             )
             # save image
-            cv.imwrite(img_full_path)
+            cv.imwrite(img_full_path, frame)
 
         # start eval of sun state once initial list is filled
         if status_history.size() == status_history.maxsize():
@@ -455,15 +461,22 @@ if __name__ == "__main__":
                     with open(PARAMS_FILE_PATH, "w") as f:
                         PARAMS["pyra"]["automation_is_running"] = True
                         json.dump(PARAMS, f, indent=2)
+                        print(PARAMS["vbdsd"])
             else:
                 # sun status bad
                 with FileLock(CONFIG_LOCK_PATH):
                     with open(PARAMS_FILE_PATH, "w") as f:
                         PARAMS["pyra"]["automation_is_running"] = False
                         json.dump(PARAMS, f, indent=2)
+                        print(PARAMS["vbdsd"])
 
         # wait rest of loop time
         elapsed_time = time.time()
         while (elapsed_time - start_time) < PARAMS["vbdsd"]["interval_time"]:
             time.sleep(1)
             elapsed_time = time.time()
+        
+        if not infinite_loop:
+            # TODO: Remove this when actual tests are in place
+            print(status_history.__data__)
+            break
