@@ -22,9 +22,14 @@ import jdcal
 import datetime
 
 # the following imports should be provided by pywin32
-import win32con
-import win32ui
-import win32process
+try:
+    import win32con
+    import win32ui
+    import win32process
+
+    windows_libraries_available = True
+except ModuleNotFoundError:
+    windows_libraries_available = False
 
 from packages.core.utils.logger import Logger
 
@@ -35,8 +40,14 @@ class SunTracking:
     def __init__(self):
         self._PARAMS = {}
         self._SETUP = {}
+        if not windows_libraries_available:
+            logger.info("Windows libraries not available, class is inactive")
+            return
 
     def run(self):
+        if not windows_libraries_available:
+            return
+
         logger.info("Running SunTracking")
 
         # check for PYRA Test Mode status

@@ -1,13 +1,13 @@
 import win32ui
-from pywin.mfc import object
+import pywin
 import dde
 
 
-class MyRequestTopic(object.Object):
+class MyRequestTopic(pywin.mfc.object.Object):
     def __init__(self, topicName):
         topic = dde.CreateTopic(topicName)
         topic.AddItem(dde.CreateStringItem(""))
-        object.Object.__init__(self, topic)
+        pywin.mfc.object.Object.__init__(self, topic)
 
     def Request(self, aString):
         print("Received request:", aString)

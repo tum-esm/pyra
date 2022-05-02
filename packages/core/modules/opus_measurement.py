@@ -24,11 +24,16 @@ import os
 import time
 
 # the following imports should be provided by pywin32
-import pywin32
-import win32con
-import win32process
-import win32ui
-import dde
+try:
+    import pywin32
+    import win32con
+    import win32process
+    import win32ui
+    import dde
+
+    windows_libraries_available = True
+except ModuleNotFoundError:
+    windows_libraries_available = False
 
 from packages.core.utils.logger import Logger
 
@@ -42,15 +47,22 @@ class OpusMeasurement:
     """
 
     def __init__(self):
+        self._PARAMS = {}
+        self._SETUP = {}
+        if not windows_libraries_available:
+            logger.info("Windows libraries not available, class is inactive")
+            return
+
         # note: dde servers talk to dde servers
         self.server = dde.CreateServer()
         self.server.Create("Client")
         self.conversation = dde.CreateConversation(self.server)
-        self._PARAMS = {}
-        self._SETUP = {}
         self.last_cycle_automation_status = 0
 
     def run(self):
+        if not windows_libraries_available:
+            return
+
         logger.info("Running OpusMeasurement")
         logger.debug("Updating JSON Config Variables")
 
