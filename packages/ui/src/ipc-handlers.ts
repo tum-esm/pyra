@@ -56,6 +56,11 @@ export function initIPCHandlers() {
             call_pyra_cli('logs archive');
         }
     });
+    ipcMain.handle('selectPath', async (_, args) => {
+        return dialog.showOpenDialogSync({
+            properties: ['openFile', 'openDirectory', 'showHiddenFiles'],
+        });
+    });
 
     ipcMain.handle('playBeep', (_, args) => {
         shell.beep();

@@ -10,6 +10,13 @@ export default function TextInputRow(props: {
 }) {
     const { label, value, oldValue, setValue, fileSelector } = props;
 
+    async function triggerFileSelection() {
+        const result = await window.electron.selectPath();
+        if (result !== undefined && result.length > 0) {
+            setValue(result[0]);
+        }
+    }
+
     return (
         <div className='flex flex-col items-start justify-start w-full'>
             <label className='py-1 text-xs opacity-80'>
@@ -38,20 +45,12 @@ export default function TextInputRow(props: {
                     <div className='absolute top-0 left-0 w-1.5 h-full -translate-x-2.5 bg-blue-500 rounded-sm' />
                 )}
                 {fileSelector && (
-                    <>
-                        <label
-                            htmlFor={`file-select-${label}`}
-                            className='absolute right-0 px-1.5 h-full text-xs font-bold text-blue-900 -translate-y-1/2 bg-blue-100 rounded-r top-1/2 hover:bg-blue-300 flex items-center justify-center cursor-pointer'
-                        >
-                            select path
-                        </label>
-                        <input
-                            type='file'
-                            className='hidden'
-                            id={`file-select-${label}`}
-                            onChange={console.log}
-                        />
-                    </>
+                    <button
+                        className='absolute right-0 px-1.5 h-full text-xs font-bold text-blue-900 -translate-y-1/2 bg-blue-100 rounded-r top-1/2 hover:bg-blue-300 flex items-center justify-center cursor-pointer'
+                        onClick={triggerFileSelection}
+                    >
+                        select path
+                    </button>
                 )}
             </div>
         </div>

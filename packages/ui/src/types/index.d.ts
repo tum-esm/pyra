@@ -5,6 +5,7 @@ declare global {
             readInfoLogs: () => Promise<string>;
             readDebugLogs: () => Promise<string>;
             archiveLogs: () => void;
+            selectPath: () => Promise<string[] | undefined>;
             playBeep: () => void;
             readSetupJSON: () => Promise<TYPES.setupJSON>;
             saveSetupJSON: (newSetupJSON: string) => Promise<string>;
