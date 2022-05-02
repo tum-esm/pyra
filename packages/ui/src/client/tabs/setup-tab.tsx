@@ -126,12 +126,22 @@ export default function SetupTab(props: {}) {
                         showfileSelector
                         disabled
                     />
+                    <div className='h-[2px] my-2 bg-slate-200 w-[calc(100%+3rem)] -ml-6' />
                 </>
             )}
             {configIsDiffering && (
-                <div className='absolute bottom-0 left-0 z-50 flex flex-row items-center justify-center w-full px-6 py-2 text-sm font-medium bg-white shadow-lg gap-x-2'>
+                <div className='absolute bottom-0 left-0 z-50 flex flex-row items-center justify-center w-full px-6 py-2 text-sm font-medium text-center bg-white shadow-lg gap-x-2'>
                     {errorMessage !== undefined && (
-                        <span className='text-red-500'>{errorMessage}</span>
+                        <span className='text-red-700'>
+                            {errorMessage}
+                            <br />
+                            <div className='h-1.5' />
+                            <Button
+                                text='revert changes'
+                                onClick={restoreCentralJSON}
+                                variant='red'
+                            />
+                        </span>
                     )}
                     {errorMessage === undefined && (
                         <>
