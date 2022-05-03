@@ -21,6 +21,7 @@ pids
 *.seed
 *.pid.lock
 .DS_Store
+images/*.jpg
 
 # pyra ui
 packages/ui/node_modules/
