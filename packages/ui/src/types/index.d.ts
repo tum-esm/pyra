@@ -35,7 +35,6 @@ namespace TYPES {
         };
         plc: {
             actors: {
-                cover_closed: int_array_4;
                 current_angle: int_array_4;
                 fan_speed: int_array_4;
                 move_cover: int_array_4;

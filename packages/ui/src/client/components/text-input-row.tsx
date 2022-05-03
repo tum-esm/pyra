@@ -21,7 +21,7 @@ export default function TextInputRow(props: {
 
     return (
         <div className='flex flex-col items-start justify-start w-full'>
-            <label className='py-1 text-xs opacity-80 text-slate-800'>
+            <label className='pb-1 text-xs opacity-80 text-slate-800'>
                 <span className='font-medium uppercase'>
                     {initial(label.split('.'))}.
                 </span>
@@ -31,7 +31,7 @@ export default function TextInputRow(props: {
                 {value !== oldValue && (
                     <span className='font-normal opacity-80 ml-1.5'>
                         previous value:{' '}
-                        <span className='rounded bg-slate-200 px-1 py-0.5'>
+                        <span className='rounded bg-slate-300 px-1 py-0.5 text-slate-900'>
                             {oldValue}
                         </span>
                     </span>
@@ -42,13 +42,14 @@ export default function TextInputRow(props: {
                     disabled={disabled !== undefined ? disabled : false}
                     value={value}
                     className={
-                        'relative z-0 flex-grow px-2 py-1 font-mono text-sm ' +
+                        'relative z-0 flex-grow px-3 py-1.5 font-mono text-sm ' +
+                        'focus:ring-2 focus:outline-none focus:ring-blue-500 ' +
                         (showfileSelector && !disabled
-                            ? 'rounded-l focus:ring-2 focus:outline-none focus:ring-blue-500 focus:rounded-r-sm focus:z-10 '
+                            ? 'rounded-l focus:rounded-r-sm focus:z-10 '
                             : 'rounded ') +
                         (disabled
                             ? 'bg-slate-200 text-slate-600 '
-                            : 'bg-white text-slate-800 ')
+                            : 'bg-white text-slate-700 ')
                     }
                     onChange={e => setValue(e.target.value)}
                 />
@@ -58,8 +59,9 @@ export default function TextInputRow(props: {
                 {showfileSelector && !disabled && (
                     <button
                         className={
-                            'z-0 relative h-full px-1.5 rounded-r text-xs ' +
-                            'font-bold text-blue-900 bg-blue-100 hover:bg-blue-300 ' +
+                            'z-0 relative h-full px-2 rounded-r text-xs ' +
+                            'font-medium text-blue-900 bg-blue-50 hover:bg-blue-300 ' +
+                            'border-l border-blue-300 focus:border-0 ' +
                             'flex items-center justify-center cursor-pointer ' +
                             'focus:ring-2 focus:outline-none focus:ring-blue-500 focus:z-10 focus:rounded-l-sm '
                         }

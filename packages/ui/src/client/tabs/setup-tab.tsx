@@ -4,6 +4,7 @@ import { defaultsDeep } from 'lodash';
 import TYPES from '../../types/index';
 import TextInputRow from '../components/text-input-row';
 import Button from '../components/button';
+import HorizontalLine from '../components/horizontal-line';
 
 // TODO: Move this to utils
 // I didn't find a built-in version yet
@@ -77,7 +78,7 @@ export default function SetupTab(props: {}) {
         !deepEqual(localJSON, centralJSON);
 
     return (
-        <div className='flex flex-col w-full h-full p-6 gap-y-4'>
+        <div className='flex flex-col w-full h-full p-6 overflow-y-scroll gap-y-4'>
             {localJSON !== undefined && (
                 <>
                     <TextInputRow
@@ -88,7 +89,6 @@ export default function SetupTab(props: {}) {
                             addLocalUpdate({ camtracker: { config_path: v } })
                         }
                         showfileSelector
-                        disabled
                     />
                     <TextInputRow
                         label='camtracker.executable_path'
@@ -100,7 +100,6 @@ export default function SetupTab(props: {}) {
                             })
                         }
                         showfileSelector
-                        disabled
                     />
                     <TextInputRow
                         label='camtracker.learn_az_elev_path'
@@ -112,7 +111,6 @@ export default function SetupTab(props: {}) {
                             })
                         }
                         showfileSelector
-                        disabled
                     />
                     <TextInputRow
                         label='camtracker.sun_intensity_path'
@@ -124,9 +122,30 @@ export default function SetupTab(props: {}) {
                             })
                         }
                         showfileSelector
-                        disabled
                     />
-                    <div className='h-[2px] my-2 bg-slate-200 w-[calc(100%+3rem)] -ml-6' />
+                    <HorizontalLine />
+                    <TextInputRow
+                        label='em27.ip'
+                        value={localJSON.em27.ip}
+                        oldValue={centralJSON.em27.ip}
+                        setValue={v =>
+                            addLocalUpdate({
+                                em27: { ip: v },
+                            })
+                        }
+                    />
+                    <HorizontalLine />
+                    <TextInputRow
+                        label='opus.executable_path'
+                        value={localJSON.opus.executable_path}
+                        oldValue={centralJSON.opus.executable_path}
+                        setValue={v =>
+                            addLocalUpdate({
+                                opus: { executable_path: v },
+                            })
+                        }
+                        showfileSelector
+                    />
                 </>
             )}
             {configIsDiffering && (

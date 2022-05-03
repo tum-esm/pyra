@@ -50,7 +50,7 @@ function Main() {
             {pyraIsSetUp && (
                 <>
                     <Header {...{ tabs, activeTabIndex, setActiveTabIndex }} />
-                    <main className='flex-grow w-full min-h-0 bg-slate-300'>
+                    <main className='flex-grow w-full min-h-0 bg-slate-200'>
                         {activeTabIndex === 1 && <SetupTab />}
                         {activeTabIndex === 3 && <LogTab />}
                     </main>
