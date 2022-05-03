@@ -5,6 +5,7 @@ import TYPES from '../../types/index';
 import TextInputRow from '../components/text-input-row';
 import Button from '../components/button';
 import HorizontalLine from '../components/horizontal-line';
+import Toggle from '../components/toggle';
 
 // TODO: Move this to utils
 // I didn't find a built-in version yet
@@ -78,7 +79,7 @@ export default function SetupTab(props: {}) {
         !deepEqual(localJSON, centralJSON);
 
     return (
-        <div className='flex flex-col w-full h-full p-6 overflow-y-scroll gap-y-4'>
+        <div className='flex flex-col items-start justify-start w-full h-full p-6 overflow-y-scroll gap-y-4'>
             {localJSON !== undefined && (
                 <>
                     <TextInputRow
@@ -131,6 +132,19 @@ export default function SetupTab(props: {}) {
                         setValue={v =>
                             addLocalUpdate({
                                 em27: { ip: v },
+                            })
+                        }
+                    />
+                    <HorizontalLine />
+                    <Toggle
+                        label='enclosure.tum_enclosure_is_present'
+                        value={localJSON.enclosure.tum_enclosure_is_present}
+                        oldValue={
+                            centralJSON.enclosure.tum_enclosure_is_present
+                        }
+                        setValue={v =>
+                            addLocalUpdate({
+                                enclosure: { tum_enclosure_is_present: v },
                             })
                         }
                     />
