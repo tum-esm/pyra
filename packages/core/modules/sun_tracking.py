@@ -18,6 +18,7 @@
 # to be implemented for any software like "Camtracker"
 
 import os
+import time
 import jdcal
 import datetime
 
@@ -108,7 +109,7 @@ class SunTracking:
         # exe call with -automation
         # http://timgolden.me.uk/pywin32-docs/win32process.html
         camtracker_call = (
-            self._SETUP["camtracker"]["executable_full_path"] + " -automation"
+            self._SETUP["camtracker"]["executable_path"] + " -autostart"
         )
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
@@ -134,9 +135,10 @@ class SunTracking:
 
         # create stop.txt file in camtracker folder
         camtracker_directory = os.path.dirname(
-            self._SETUP["camtracker"]["executable_full_path"]
+            self._SETUP["camtracker"]["executable_path"]
         )
-        f = open(camtracker_directory + "stop.txt", "w")
+        
+        f = open(os.path.join(camtracker_directory,"stop.txt"), "w")
         f.close()
 
     def __read_ct_log_learn_az_elev(self):
@@ -234,3 +236,26 @@ class SunTracking:
             return False
 
         return True
+
+    def test_setup(self):
+        ct_is_running = self.__ct_application_running
+        if not ct_is_running:
+            self.__start_sun_tracking_automation()
+            try_count = 0
+            while try_count < 10:
+                if self.__ct_application_running:
+                    break
+                try_count += 1
+                time.sleep(6)
+
+        assert self.__ct_application_running
+        
+
+        #time.sleep(20)
+
+        self.__stop_sun_tracking_automation()
+        time.sleep(10)
+
+        assert not self.__ct_application_running
+
+        assert(False)
