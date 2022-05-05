@@ -5,7 +5,8 @@ import TYPES from '../../types/index';
 import TextInputRow from '../components/text-input-row';
 import Button from '../components/button';
 import HorizontalLine from '../components/horizontal-line';
-import Toggle from '../components/toggle';
+import ToggleRow from '../components/toggle-row';
+import IntArrayInputRow from '../components/int-array-input-tow';
 
 // TODO: Move this to utils
 // I didn't find a built-in version yet
@@ -136,7 +137,7 @@ export default function SetupTab(props: {}) {
                         }
                     />
                     <HorizontalLine />
-                    <Toggle
+                    <ToggleRow
                         label='enclosure.tum_enclosure_is_present'
                         value={localJSON.enclosure.tum_enclosure_is_present}
                         oldValue={
@@ -159,6 +160,17 @@ export default function SetupTab(props: {}) {
                             })
                         }
                         showfileSelector
+                    />
+                    <HorizontalLine />
+                    <IntArrayInputRow
+                        label='plc.actors.current_angle'
+                        value={localJSON.plc.actors.current_angle}
+                        oldValue={centralJSON.plc.actors.current_angle}
+                        setValue={v =>
+                            addLocalUpdate({
+                                plc: { actors: { current_angle: v } },
+                            })
+                        }
                     />
                 </>
             )}

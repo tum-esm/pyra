@@ -2,7 +2,7 @@ import { initial, last } from 'lodash';
 import React from 'react';
 import ICONS from '../assets/icons';
 
-export default function Toggle(props: {
+export default function ToggleRow(props: {
     label: string;
     value: boolean;
     oldValue: boolean;
