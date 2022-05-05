@@ -4,7 +4,7 @@ import { defaultsDeep } from 'lodash';
 import TYPES from '../../types/index';
 import TextInputRow from '../components/text-input-row';
 import Button from '../components/button';
-import HorizontalLine from '../components/horizontal-line';
+import Divider from '../components/divider';
 import ToggleRow from '../components/toggle-row';
 import IntArrayInputRow from '../components/int-array-input-tow';
 
@@ -79,6 +79,12 @@ export default function SetupTab(props: {}) {
         centralJSON !== undefined &&
         !deepEqual(localJSON, centralJSON);
 
+    /*
+    centraljson.keys.map
+        divider
+        key.keys.map
+            textinput OR toggle OR intarraymatrix
+    */
     return (
         <div className='flex flex-col items-start justify-start w-full h-full p-6 overflow-y-scroll gap-y-4'>
             {localJSON !== undefined && (
@@ -125,7 +131,7 @@ export default function SetupTab(props: {}) {
                         }
                         showfileSelector
                     />
-                    <HorizontalLine />
+                    <Divider />
                     <TextInputRow
                         label='em27.ip'
                         value={localJSON.em27.ip}
@@ -136,7 +142,7 @@ export default function SetupTab(props: {}) {
                             })
                         }
                     />
-                    <HorizontalLine />
+                    <Divider />
                     <ToggleRow
                         label='enclosure.tum_enclosure_is_present'
                         value={localJSON.enclosure.tum_enclosure_is_present}
@@ -149,7 +155,7 @@ export default function SetupTab(props: {}) {
                             })
                         }
                     />
-                    <HorizontalLine />
+                    <Divider />
                     <TextInputRow
                         label='opus.executable_path'
                         value={localJSON.opus.executable_path}
@@ -161,7 +167,7 @@ export default function SetupTab(props: {}) {
                         }
                         showfileSelector
                     />
-                    <HorizontalLine />
+                    <Divider />
                     <IntArrayInputRow
                         label='plc.actors.current_angle'
                         value={localJSON.plc.actors.current_angle}
