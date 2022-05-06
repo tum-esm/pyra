@@ -49,13 +49,15 @@ export default function ConfigSection(props: {
                         };
                         switch (typeof centralJSON[key1][key2]) {
                             case 'string':
+                            case 'number':
                                 return (
                                     /* @ts-ignore */
                                     <TextInputRow
                                         {...commonProps}
-                                        showfileSelector={key2.endsWith(
-                                            '_path'
-                                        )}
+                                        numeric={
+                                            typeof centralJSON[key1][key2] ===
+                                            'number'
+                                        }
                                     />
                                 );
                             case 'boolean':

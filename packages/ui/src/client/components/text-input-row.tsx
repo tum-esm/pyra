@@ -3,14 +3,22 @@ import { initial, last } from 'lodash';
 
 export default function TextInputRow(props: {
     label: string;
-    value: string;
-    oldValue: string;
-    setValue(v: string): void;
-    showfileSelector?: boolean;
+    value: string | number;
+    oldValue: string | number;
+    setValue(v: string | number): void;
     disabled?: boolean;
+    numeric?: boolean;
 }) {
-    const { label, value, oldValue, setValue, showfileSelector, disabled } =
-        props;
+    const { label, value, oldValue, disabled } = props;
+
+    function setValue(v: string) {
+        let newValue: string | number = v;
+        if (props.numeric) {
+            let newNumber = parseInt(v);
+            newValue = isNaN(newNumber) ? 0 : newNumber;
+        }
+        props.setValue(newValue);
+    }
 
     async function triggerFileSelection() {
         const result = await window.electron.selectPath();
@@ -18,6 +26,8 @@ export default function TextInputRow(props: {
             setValue(result[0]);
         }
     }
+
+    const showfileSelector = label.endsWith('_path');
 
     return (
         <div className='flex flex-col items-start justify-start w-full'>
