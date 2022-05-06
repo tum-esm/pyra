@@ -29,3 +29,7 @@
 .flex-row-left {
     @apply flex flex-row items-center justify-start;
 }
+
+.flex-row-right {
+    @apply flex flex-row items-center justify-end;
+}

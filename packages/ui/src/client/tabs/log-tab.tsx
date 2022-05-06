@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ICONS from '../assets/icons';
-import Button from '../components/button';
+import Button from '../components/essential/button';
 
 export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');

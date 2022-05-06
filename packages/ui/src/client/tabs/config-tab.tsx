@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import TYPES from '../../types/index';
-import Divider from '../components/divider';
 import ConfigSection from '../components/config-section';
 import SavingOverlay from '../components/saving-overlay';
 import { defaultsDeep, trim } from 'lodash';

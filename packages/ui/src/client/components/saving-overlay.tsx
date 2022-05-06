@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from './button';
+import Button from './essential/button';
 
 export default function SavingOverlay(props: {
     errorMessage: undefined | string;
@@ -8,29 +8,28 @@ export default function SavingOverlay(props: {
 }) {
     const { errorMessage, saveLocalJSON, restoreCentralJSON } = props;
     return (
-        <div className='absolute bottom-0 left-0 z-50 flex flex-row items-center justify-center w-full px-6 py-2 text-sm font-medium text-center bg-white shadow-lg gap-x-2'>
-            {errorMessage !== undefined && (
-                <span className='text-red-700'>
-                    {errorMessage}
-                    <br />
-                    <div className='h-1.5' />
-                    <Button
-                        text='revert changes'
-                        onClick={restoreCentralJSON}
-                        variant='red'
-                    />
-                </span>
-            )}
+        <div className='absolute bottom-0 left-0 z-50 w-full p-3 text-sm font-medium text-center bg-white shadow-lg flex-row-right gap-x-2'>
             {errorMessage === undefined && (
                 <>
-                    <div>Save changes?</div>
                     <Button
-                        text='yes'
+                        text='save'
                         onClick={saveLocalJSON}
                         variant='green'
                     />
                     <Button
-                        text='no'
+                        text='revert'
+                        onClick={restoreCentralJSON}
+                        variant='red'
+                    />
+                </>
+            )}
+            {errorMessage !== undefined && (
+                <>
+                    <span className='flex-grow text-left text-red-700'>
+                        {errorMessage}
+                    </span>
+                    <Button
+                        text='revert'
                         onClick={restoreCentralJSON}
                         variant='red'
                     />

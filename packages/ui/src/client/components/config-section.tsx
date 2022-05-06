@@ -14,7 +14,7 @@ export default function ConfigSection(props: {
     addLocalUpdate(v: TYPES.configJSON): void;
 }) {
     const { key1, localJSON, centralJSON, addLocalUpdate } = props;
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
 
     return (
         <div

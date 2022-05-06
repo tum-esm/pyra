@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import ConfigTab from './tabs/config-tab';
 import LogTab from './tabs/log-tab';
 import Header from './components/header';
-import Button from './components/button';
+import Button from './components/essential/button';
 
 const tabs = ['Status', 'Setup', 'Parameters', 'Logs', 'Enclosure Controls'];
 
