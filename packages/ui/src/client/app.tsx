@@ -60,4 +60,4 @@ function Main() {
     );
 }
 
-ReactDOM.render(<Main />, document.body);
+ReactDOM.render(<Main />, document.getElementById('react-root-node'));

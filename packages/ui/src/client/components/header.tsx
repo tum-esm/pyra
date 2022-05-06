@@ -15,6 +15,7 @@ export default function Header(props: {
             <div className='flex flex-wrap justify-center px-4 py-3 gap-x-2 gap-y-2'>
                 {props.tabs.map((t, i) => (
                     <button
+                        key={i}
                         className={
                             'px-3 py-0.5 rounded font-medium cursor-pointer ' +
                             (i === props.activeTabIndex

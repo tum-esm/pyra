@@ -6,7 +6,7 @@ import TextInputRow from '../components/text-input-row';
 import Button from '../components/button';
 import Divider from '../components/divider';
 import ToggleRow from '../components/toggle-row';
-import IntArrayInputRow from '../components/int-array-input-tow';
+import IntArrayMatrix from '../components/int-array-matrix';
 
 // TODO: Move this to utils
 // I didn't find a built-in version yet
@@ -79,23 +79,18 @@ export default function SetupTab(props: {}) {
         centralJSON !== undefined &&
         !deepEqual(localJSON, centralJSON);
 
-    /*
-    centraljson.keys.map
-        divider
-        key.keys.map
-            textinput OR toggle OR intarraymatrix
-    */
     return (
         <div className='flex flex-col items-start justify-start w-full h-full p-6 overflow-y-scroll gap-y-4'>
             {localJSON !== undefined && (
                 <>
                     {Object.keys(centralJSON).map((key1: any, i: number) => (
-                        <>
+                        <React.Fragment key={key1}>
                             {i !== 0 && <Divider />}
                             {/* @ts-ignore */}
                             {Object.keys(centralJSON[key1]).map(
                                 (key2: string, j: number) => {
                                     const commonProps = {
+                                        key: `${key1}.${key2}`,
                                         label: `${key1}.${key2}`,
                                         /* @ts-ignore */
                                         value: localJSON[key1][key2],
@@ -124,11 +119,15 @@ export default function SetupTab(props: {}) {
                                                 <ToggleRow {...commonProps} />
                                             );
                                         case 'object':
-                                            return 'array matrix';
+                                            return (
+                                                <IntArrayMatrix
+                                                    {...commonProps}
+                                                />
+                                            );
                                     }
                                 }
                             )}
-                        </>
+                        </React.Fragment>
                     ))}
                     {/*
                     <IntArrayInputRow

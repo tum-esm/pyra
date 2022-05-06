@@ -27,5 +27,5 @@
 }
 
 .flex-row-left {
-    @apply flex flex-row items-start justify-center;
+    @apply flex flex-row items-center justify-start;
 }
