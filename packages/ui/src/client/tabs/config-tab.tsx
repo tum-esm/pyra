@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TYPES from '../../types/index';
-import Divider from './divider';
-import ConfigSection from './config-section';
-import SavingOverlay from './saving-overlay';
+import Divider from '../components/divider';
+import ConfigSection from '../components/config-section';
+import SavingOverlay from '../components/saving-overlay';
+import { defaultsDeep } from 'lodash';
 
 // TODO: Move this to utils
 // I didn't find a built-in version yet
@@ -30,22 +31,52 @@ function isObject(object: any) {
     return object != null && typeof object === 'object';
 }
 
-export default function ConfigTab(props: {
-    localJSON: TYPES.configJSON;
-    centralJSON: TYPES.configJSON;
-    addLocalUpdate(v: TYPES.configJSON): void;
-    errorMessage: undefined | string;
-    saveLocalJSON(): void;
-    restoreCentralJSON(): void;
-}) {
-    const {
-        localJSON,
-        centralJSON,
-        addLocalUpdate,
-        errorMessage,
-        saveLocalJSON,
-        restoreCentralJSON,
-    } = props;
+export default function ConfigTab(props: { type: 'setup' | 'parameters' }) {
+    const [centralJSON, setCentralJSON] = useState<TYPES.configJSON>(undefined);
+    const [localJSON, setLocalJSON] = useState<TYPES.configJSON>(undefined);
+    const [errorMessage, setErrorMessage] = useState<string>(undefined);
+
+    async function loadCentralJSON() {
+        const readConfigFunction =
+            props.type === 'setup'
+                ? window.electron.readSetupJSON
+                : window.electron.readSetupJSON;
+        const content = await readConfigFunction();
+        setCentralJSON(content);
+        setLocalJSON(content);
+    }
+
+    useEffect(() => {
+        loadCentralJSON();
+    }, []);
+
+    async function saveLocalJSON() {
+        const saveConfigFunction =
+            props.type === 'setup'
+                ? window.electron.saveSetupJSON
+                : window.electron.saveSetupJSON;
+        let result = await saveConfigFunction(JSON.stringify(localJSON));
+
+        if (result.includes('Updated setup file')) {
+            setCentralJSON(localJSON);
+        } else {
+            setErrorMessage(result);
+        }
+    }
+
+    function restoreCentralJSON() {
+        setLocalJSON(centralJSON);
+    }
+
+    function addLocalUpdate(update: object) {
+        const newObject = defaultsDeep(
+            update,
+            JSON.parse(JSON.stringify(localJSON))
+        );
+        console.log({ newObject });
+        setLocalJSON(newObject);
+        setErrorMessage(undefined);
+    }
 
     const configIsDiffering =
         localJSON !== undefined &&

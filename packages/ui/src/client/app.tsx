@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import SetupTab from './tabs/setup-tab';
+import ConfigTab from './tabs/config-tab';
 import LogTab from './tabs/log-tab';
 import Header from './components/header';
 import Button from './components/button';
@@ -51,8 +51,10 @@ function Main() {
                 <>
                     <Header {...{ tabs, activeTabIndex, setActiveTabIndex }} />
                     <main className='flex-grow w-full min-h-0 bg-slate-200'>
-                        {activeTabIndex === 1 && <SetupTab />}
-                        {activeTabIndex === 3 && <LogTab />}
+                        {tabs[activeTabIndex] === 'Setup' && (
+                            <ConfigTab type='setup' />
+                        )}
+                        {tabs[activeTabIndex] === 'Logs' && <LogTab />}
                     </main>
                 </>
             )}
