@@ -35,8 +35,8 @@ function isObject(object: any) {
 }
 
 export default function SetupTab(props: {}) {
-    const [centralJSON, setCentralJSON] = useState<TYPES.setupJSON>(undefined);
-    const [localJSON, setLocalJSON] = useState<TYPES.setupJSON>(undefined);
+    const [centralJSON, setCentralJSON] = useState<TYPES.configJSON>(undefined);
+    const [localJSON, setLocalJSON] = useState<TYPES.configJSON>(undefined);
     const [errorMessage, setErrorMessage] = useState<string>(undefined);
 
     async function loadCentralJSON() {
@@ -86,15 +86,12 @@ export default function SetupTab(props: {}) {
                     {Object.keys(centralJSON).map((key1: any, i: number) => (
                         <React.Fragment key={key1}>
                             {i !== 0 && <Divider />}
-                            {/* @ts-ignore */}
                             {Object.keys(centralJSON[key1]).map(
                                 (key2: string, j: number) => {
                                     const commonProps = {
                                         key: `${key1}.${key2}`,
                                         label: `${key1}.${key2}`,
-                                        /* @ts-ignore */
                                         value: localJSON[key1][key2],
-                                        /* @ts-ignore */
                                         oldValue: centralJSON[key1][key2],
                                         setValue: (v: any) =>
                                             addLocalUpdate({
@@ -103,10 +100,10 @@ export default function SetupTab(props: {}) {
                                                 },
                                             }),
                                     };
-                                    /* @ts-ignore */
                                     switch (typeof centralJSON[key1][key2]) {
                                         case 'string':
                                             return (
+                                                /* @ts-ignore */
                                                 <TextInputRow
                                                     {...commonProps}
                                                     showfileSelector={key2.endsWith(
@@ -116,10 +113,12 @@ export default function SetupTab(props: {}) {
                                             );
                                         case 'boolean':
                                             return (
+                                                /* @ts-ignore */
                                                 <ToggleRow {...commonProps} />
                                             );
                                         case 'object':
                                             return (
+                                                /* @ts-ignore */
                                                 <IntArrayMatrix
                                                     {...commonProps}
                                                 />
@@ -129,17 +128,6 @@ export default function SetupTab(props: {}) {
                             )}
                         </React.Fragment>
                     ))}
-                    {/*
-                    <IntArrayInputRow
-                        label='plc.actors.current_angle'
-                        value={localJSON.plc.actors.current_angle}
-                        oldValue={centralJSON.plc.actors.current_angle}
-                        setValue={v =>
-                            addLocalUpdate({
-                                plc: { actors: { current_angle: v } },
-                            })
-                        }
-                    />*/}
                 </>
             )}
             {configIsDiffering && (
