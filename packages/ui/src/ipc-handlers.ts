@@ -72,13 +72,12 @@ export function initIPCHandlers() {
     });
     ipcMain.handle(
         'saveSetupJSON',
-        async (_, newSetupJSON: TYPES.configJSON) => {
-            return await call_pyra_cli(
+        async (_, newSetupJSON: TYPES.configJSON) =>
+            await call_pyra_cli(
                 `config setup set --content "${JSON.stringify(
                     newSetupJSON
                 ).replace(/"/g, '\\"')}"`
-            );
-        }
+            )
     );
 
     ipcMain.handle('readParametersJSON', async (_, args) => {
@@ -86,12 +85,11 @@ export function initIPCHandlers() {
     });
     ipcMain.handle(
         'saveParametersJSON',
-        async (_, newParametersJSON: TYPES.configJSON) => {
-            const command = `config parameters set --content "${JSON.stringify(
-                newParametersJSON
-            ).replace(/"/g, '\\"')}"`;
-            console.log({ command });
-            return await call_pyra_cli(command);
-        }
+        async (_, newParametersJSON: TYPES.configJSON) =>
+            await call_pyra_cli(
+                `config parameters set --content "${JSON.stringify(
+                    newParametersJSON
+                ).replace(/"/g, '\\"')}"`
+            )
     );
 }

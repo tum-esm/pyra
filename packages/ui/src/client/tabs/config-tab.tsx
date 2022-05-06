@@ -4,32 +4,8 @@ import Divider from '../components/divider';
 import ConfigSection from '../components/config-section';
 import SavingOverlay from '../components/saving-overlay';
 import { defaultsDeep, trim } from 'lodash';
-
-// TODO: Move this to utils
-// I didn't find a built-in version yet
-// This code is from https://dmitripavlutin.com/how-to-compare-objects-in-javascript/#4-deep-equality
-function deepEqual(object1: any, object2: any) {
-    const keys1 = Object.keys(object1);
-    const keys2 = Object.keys(object2);
-    if (keys1.length !== keys2.length) {
-        return false;
-    }
-    for (const key of keys1) {
-        const val1 = object1[key];
-        const val2 = object2[key];
-        const areObjects = isObject(val1) && isObject(val2);
-        if (
-            (areObjects && !deepEqual(val1, val2)) ||
-            (!areObjects && val1 !== val2)
-        ) {
-            return false;
-        }
-    }
-    return true;
-}
-function isObject(object: any) {
-    return object != null && typeof object === 'object';
-}
+import deepEqual from '../utils/deep-equal';
+import sortConfigKeys from '../utils/sort-config-keys';
 
 export default function ConfigTab(props: { type: 'setup' | 'parameters' }) {
     const [centralJSON, setCentralJSON] = useState<TYPES.configJSON>(undefined);
@@ -91,19 +67,21 @@ export default function ConfigTab(props: { type: 'setup' | 'parameters' }) {
         <div className='flex flex-col items-start justify-start w-full h-full p-6 overflow-y-scroll gap-y-5'>
             {localJSON !== undefined && (
                 <>
-                    {Object.keys(centralJSON).map((key1: string, i: number) => (
-                        <React.Fragment key={key1}>
-                            {i !== 0 && <Divider />}
-                            <ConfigSection
-                                {...{
-                                    key1,
-                                    localJSON,
-                                    centralJSON,
-                                    addLocalUpdate,
-                                }}
-                            />
-                        </React.Fragment>
-                    ))}
+                    {sortConfigKeys(centralJSON).map(
+                        (key1: string, i: number) => (
+                            <React.Fragment key={key1}>
+                                {i !== 0 && <Divider />}
+                                <ConfigSection
+                                    {...{
+                                        key1,
+                                        localJSON,
+                                        centralJSON,
+                                        addLocalUpdate,
+                                    }}
+                                />
+                            </React.Fragment>
+                        )
+                    )}
                 </>
             )}
             {configIsDiffering && (

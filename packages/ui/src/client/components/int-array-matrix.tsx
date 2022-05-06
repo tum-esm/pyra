@@ -1,6 +1,7 @@
 import React from 'react';
 import { initial, last, isNaN } from 'lodash';
 import ToggleRow from './toggle-row';
+import sortConfigKeys from '../utils/sort-config-keys';
 
 function IntArrayRow(props: {
     label: string;
@@ -100,7 +101,7 @@ export default function IntArrayMatrix(props: {
                     {last(label.split('.'))}
                 </span>
             </label>
-            {Object.keys(value).map(key => {
+            {sortConfigKeys(value).map(key => {
                 switch (typeof value[key]) {
                     case 'boolean':
                         return (

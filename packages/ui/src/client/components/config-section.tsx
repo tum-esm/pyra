@@ -5,6 +5,7 @@ import TYPES from '../../types/index';
 import TextInputRow from './text-input-row';
 import ToggleRow from './toggle-row';
 import IntArrayMatrix from './int-array-matrix';
+import sortConfigKeys from '../utils/sort-config-keys';
 
 export default function ConfigSection(props: {
     key1: string;
@@ -33,7 +34,7 @@ export default function ConfigSection(props: {
             </div>
 
             {open &&
-                Object.keys(centralJSON[key1]).map(
+                sortConfigKeys(centralJSON[key1]).map(
                     (key2: string, j: number) => {
                         const commonProps = {
                             key: `${key1}.${key2}`,
