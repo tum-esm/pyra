@@ -7,7 +7,10 @@ import { defaultsDeep, trim } from 'lodash';
 import deepEqual from '../utils/deep-equal';
 import sortConfigKeys from '../utils/sort-config-keys';
 
-export default function ConfigTab(props: { type: 'setup' | 'parameters' }) {
+export default function ConfigTab(props: {
+    type: 'setup' | 'parameters';
+    visible: boolean;
+}) {
     const [centralJSON, setCentralJSON] = useState<TYPES.configJSON>(undefined);
     const [localJSON, setLocalJSON] = useState<TYPES.configJSON>(undefined);
     const [errorMessage, setErrorMessage] = useState<string>(undefined);
@@ -64,13 +67,17 @@ export default function ConfigTab(props: { type: 'setup' | 'parameters' }) {
         !deepEqual(localJSON, centralJSON);
 
     return (
-        <div className='flex flex-col items-start justify-start w-full h-full p-6 overflow-y-scroll gap-y-5'>
+        <div
+            className={
+                'flex-col items-start justify-start w-full h-full pb-20 pt-4 overflow-y-scroll ' +
+                (props.visible ? 'flex ' : 'hidden ')
+            }
+        >
             {localJSON !== undefined && (
                 <>
                     {sortConfigKeys(centralJSON).map(
                         (key1: string, i: number) => (
                             <React.Fragment key={key1}>
-                                {i !== 0 && <Divider />}
                                 <ConfigSection
                                     {...{
                                         key1,

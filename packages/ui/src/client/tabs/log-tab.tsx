@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ICONS from '../assets/icons';
 import Button from '../components/button';
 
-export default function LogTab(props: {}) {
+export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
     const [infoLogs, setInfoLogs] = useState<string>('');
     const [debugLogs, setDebugLogs] = useState<string>('');
@@ -32,7 +32,12 @@ export default function LogTab(props: {}) {
     }, []);
 
     return (
-        <div className='flex flex-col w-full h-full p-6'>
+        <div
+            className={
+                'flex-col w-full h-full p-6 ' +
+                (props.visible ? 'flex ' : 'hidden ')
+            }
+        >
             <div className='flex w-full gap-x-2'>
                 <button
                     className={

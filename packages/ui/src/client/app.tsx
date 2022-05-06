@@ -51,13 +51,15 @@ function Main() {
                 <>
                     <Header {...{ tabs, activeTabIndex, setActiveTabIndex }} />
                     <main className='flex-grow w-full min-h-0 bg-slate-200'>
-                        {tabs[activeTabIndex] === 'Setup' && (
-                            <ConfigTab type='setup' />
-                        )}
-                        {tabs[activeTabIndex] === 'Parameters' && (
-                            <ConfigTab type='parameters' />
-                        )}
-                        {tabs[activeTabIndex] === 'Logs' && <LogTab />}
+                        <ConfigTab
+                            type='setup'
+                            visible={tabs[activeTabIndex] === 'Setup'}
+                        />
+                        <ConfigTab
+                            type='parameters'
+                            visible={tabs[activeTabIndex] === 'Parameters'}
+                        />
+                        <LogTab visible={tabs[activeTabIndex] === 'Logs'} />
                     </main>
                 </>
             )}

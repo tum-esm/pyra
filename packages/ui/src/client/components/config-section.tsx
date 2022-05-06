@@ -17,8 +17,14 @@ export default function ConfigSection(props: {
     const [open, setOpen] = useState(false);
 
     return (
-        <>
-            <div className='w-full flex-row-left gap-x-1'>
+        <div
+            className={
+                'flex flex-col w-full gap-y-3 pl-14 pr-6 ' +
+                'transition-all duration-100 ' +
+                (open ? 'bg-gray-50 py-4 ' : 'py-2 ')
+            }
+        >
+            <div className='w-full -ml-8 flex-row-left gap-x-1'>
                 <button
                     className={
                         'w-7 h-7 p-0.5 rounded hover:bg-gray-50 ' +
@@ -28,7 +34,7 @@ export default function ConfigSection(props: {
                 >
                     {ICONS.chevronDown}
                 </button>
-                <h2 className='text-lg font-bold text-gray-800'>
+                <h2 className='text-base font-bold text-gray-800'>
                     {key1.toLocaleUpperCase()}
                 </h2>
             </div>
@@ -37,8 +43,8 @@ export default function ConfigSection(props: {
                 sortConfigKeys(centralJSON[key1]).map(
                     (key2: string, j: number) => {
                         const commonProps = {
-                            key: `${key1}.${key2}`,
-                            label: `${key1}.${key2}`,
+                            key: key2,
+                            label: key2,
                             value: localJSON[key1][key2],
                             oldValue: centralJSON[key1][key2],
                             setValue: (v: any) =>
@@ -74,6 +80,6 @@ export default function ConfigSection(props: {
                         }
                     }
                 )}
-        </>
+        </div>
     );
 }

@@ -30,12 +30,7 @@ export default function ToggleRow(props: {
         <div className='flex flex-col items-start justify-start w-full'>
             {label !== undefined && (
                 <label className='pb-1 text-xs opacity-80 text-slate-800'>
-                    <span className='font-medium uppercase'>
-                        {initial(label.split('.'))}.
-                    </span>
-                    <span className='font-bold uppercase'>
-                        {last(label.split('.'))}
-                    </span>
+                    <span className='font-medium'>{label}</span>
                     {value !== oldValue && (
                         <span className='font-normal opacity-80 ml-1.5'>
                             previous value:{' '}
