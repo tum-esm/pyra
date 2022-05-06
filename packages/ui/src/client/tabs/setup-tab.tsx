@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { defaultsDeep } from 'lodash';
 
 import TYPES from '../../types/index';
-import Button from '../components/button';
 import Divider from '../components/divider';
 import ConfigSection from '../components/config-section';
+import SavingOverlay from '../components/saving-overlay';
 
 // TODO: Move this to utils
 // I didn't find a built-in version yet
@@ -32,7 +32,7 @@ function isObject(object: any) {
     return object != null && typeof object === 'object';
 }
 
-export default function SetupTab(props: {}) {
+export default function SetupTab() {
     const [centralJSON, setCentralJSON] = useState<TYPES.configJSON>(undefined);
     const [localJSON, setLocalJSON] = useState<TYPES.configJSON>(undefined);
     const [errorMessage, setErrorMessage] = useState<string>(undefined);
@@ -97,35 +97,9 @@ export default function SetupTab(props: {}) {
                 </>
             )}
             {configIsDiffering && (
-                <div className='absolute bottom-0 left-0 z-50 flex flex-row items-center justify-center w-full px-6 py-2 text-sm font-medium text-center bg-white shadow-lg gap-x-2'>
-                    {errorMessage !== undefined && (
-                        <span className='text-red-700'>
-                            {errorMessage}
-                            <br />
-                            <div className='h-1.5' />
-                            <Button
-                                text='revert changes'
-                                onClick={restoreCentralJSON}
-                                variant='red'
-                            />
-                        </span>
-                    )}
-                    {errorMessage === undefined && (
-                        <>
-                            <div>Save changes?</div>
-                            <Button
-                                text='yes'
-                                onClick={saveLocalJSON}
-                                variant='green'
-                            />
-                            <Button
-                                text='no'
-                                onClick={restoreCentralJSON}
-                                variant='red'
-                            />
-                        </>
-                    )}
-                </div>
+                <SavingOverlay
+                    {...{ errorMessage, saveLocalJSON, restoreCentralJSON }}
+                />
             )}
         </div>
     );
