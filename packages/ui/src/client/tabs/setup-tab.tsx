@@ -89,85 +89,48 @@ export default function SetupTab(props: {}) {
         <div className='flex flex-col items-start justify-start w-full h-full p-6 overflow-y-scroll gap-y-4'>
             {localJSON !== undefined && (
                 <>
-                    <TextInputRow
-                        label='camtracker.config_path'
-                        value={localJSON.camtracker.config_path}
-                        oldValue={centralJSON.camtracker.config_path}
-                        setValue={v =>
-                            addLocalUpdate({ camtracker: { config_path: v } })
-                        }
-                        showfileSelector
-                    />
-                    <TextInputRow
-                        label='camtracker.executable_path'
-                        value={localJSON.camtracker.executable_path}
-                        oldValue={centralJSON.camtracker.executable_path}
-                        setValue={v =>
-                            addLocalUpdate({
-                                camtracker: { executable_path: v },
-                            })
-                        }
-                        showfileSelector
-                    />
-                    <TextInputRow
-                        label='camtracker.learn_az_elev_path'
-                        value={localJSON.camtracker.learn_az_elev_path}
-                        oldValue={centralJSON.camtracker.learn_az_elev_path}
-                        setValue={v =>
-                            addLocalUpdate({
-                                camtracker: { learn_az_elev_path: v },
-                            })
-                        }
-                        showfileSelector
-                    />
-                    <TextInputRow
-                        label='camtracker.sun_intensity_path'
-                        value={localJSON.camtracker.sun_intensity_path}
-                        oldValue={centralJSON.camtracker.sun_intensity_path}
-                        setValue={v =>
-                            addLocalUpdate({
-                                camtracker: { sun_intensity_path: v },
-                            })
-                        }
-                        showfileSelector
-                    />
-                    <Divider />
-                    <TextInputRow
-                        label='em27.ip'
-                        value={localJSON.em27.ip}
-                        oldValue={centralJSON.em27.ip}
-                        setValue={v =>
-                            addLocalUpdate({
-                                em27: { ip: v },
-                            })
-                        }
-                    />
-                    <Divider />
-                    <ToggleRow
-                        label='enclosure.tum_enclosure_is_present'
-                        value={localJSON.enclosure.tum_enclosure_is_present}
-                        oldValue={
-                            centralJSON.enclosure.tum_enclosure_is_present
-                        }
-                        setValue={v =>
-                            addLocalUpdate({
-                                enclosure: { tum_enclosure_is_present: v },
-                            })
-                        }
-                    />
-                    <Divider />
-                    <TextInputRow
-                        label='opus.executable_path'
-                        value={localJSON.opus.executable_path}
-                        oldValue={centralJSON.opus.executable_path}
-                        setValue={v =>
-                            addLocalUpdate({
-                                opus: { executable_path: v },
-                            })
-                        }
-                        showfileSelector
-                    />
-                    <Divider />
+                    {Object.keys(centralJSON).map((key1: any, i: number) => (
+                        <>
+                            {i !== 0 && <Divider />}
+                            {/* @ts-ignore */}
+                            {Object.keys(centralJSON[key1]).map(
+                                (key2: string, j: number) => {
+                                    const commonProps = {
+                                        label: `${key1}.${key2}`,
+                                        /* @ts-ignore */
+                                        value: localJSON[key1][key2],
+                                        /* @ts-ignore */
+                                        oldValue: centralJSON[key1][key2],
+                                        setValue: (v: any) =>
+                                            addLocalUpdate({
+                                                [key1]: {
+                                                    [key2]: v,
+                                                },
+                                            }),
+                                    };
+                                    /* @ts-ignore */
+                                    switch (typeof centralJSON[key1][key2]) {
+                                        case 'string':
+                                            return (
+                                                <TextInputRow
+                                                    {...commonProps}
+                                                    showfileSelector={key2.endsWith(
+                                                        '_path'
+                                                    )}
+                                                />
+                                            );
+                                        case 'boolean':
+                                            return (
+                                                <ToggleRow {...commonProps} />
+                                            );
+                                        case 'object':
+                                            return 'array matrix';
+                                    }
+                                }
+                            )}
+                        </>
+                    ))}
+                    {/*
                     <IntArrayInputRow
                         label='plc.actors.current_angle'
                         value={localJSON.plc.actors.current_angle}
@@ -177,7 +140,7 @@ export default function SetupTab(props: {}) {
                                 plc: { actors: { current_angle: v } },
                             })
                         }
-                    />
+                    />*/}
                 </>
             )}
             {configIsDiffering && (
