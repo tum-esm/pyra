@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { defaultsDeep } from 'lodash';
 
 import TYPES from '../../types/index';
-import TextInputRow from '../components/text-input-row';
 import Button from '../components/button';
 import Divider from '../components/divider';
-import ToggleRow from '../components/toggle-row';
-import IntArrayMatrix from '../components/int-array-matrix';
+import ConfigSection from '../components/config-section';
 
 // TODO: Move this to utils
 // I didn't find a built-in version yet
@@ -80,52 +78,20 @@ export default function SetupTab(props: {}) {
         !deepEqual(localJSON, centralJSON);
 
     return (
-        <div className='flex flex-col items-start justify-start w-full h-full p-6 overflow-y-scroll gap-y-4'>
+        <div className='flex flex-col items-start justify-start w-full h-full p-6 overflow-y-scroll gap-y-5'>
             {localJSON !== undefined && (
                 <>
-                    {Object.keys(centralJSON).map((key1: any, i: number) => (
+                    {Object.keys(centralJSON).map((key1: string, i: number) => (
                         <React.Fragment key={key1}>
                             {i !== 0 && <Divider />}
-                            {Object.keys(centralJSON[key1]).map(
-                                (key2: string, j: number) => {
-                                    const commonProps = {
-                                        key: `${key1}.${key2}`,
-                                        label: `${key1}.${key2}`,
-                                        value: localJSON[key1][key2],
-                                        oldValue: centralJSON[key1][key2],
-                                        setValue: (v: any) =>
-                                            addLocalUpdate({
-                                                [key1]: {
-                                                    [key2]: v,
-                                                },
-                                            }),
-                                    };
-                                    switch (typeof centralJSON[key1][key2]) {
-                                        case 'string':
-                                            return (
-                                                /* @ts-ignore */
-                                                <TextInputRow
-                                                    {...commonProps}
-                                                    showfileSelector={key2.endsWith(
-                                                        '_path'
-                                                    )}
-                                                />
-                                            );
-                                        case 'boolean':
-                                            return (
-                                                /* @ts-ignore */
-                                                <ToggleRow {...commonProps} />
-                                            );
-                                        case 'object':
-                                            return (
-                                                /* @ts-ignore */
-                                                <IntArrayMatrix
-                                                    {...commonProps}
-                                                />
-                                            );
-                                    }
-                                }
-                            )}
+                            <ConfigSection
+                                {...{
+                                    key1,
+                                    localJSON,
+                                    centralJSON,
+                                    addLocalUpdate,
+                                }}
+                            />
                         </React.Fragment>
                     ))}
                 </>
