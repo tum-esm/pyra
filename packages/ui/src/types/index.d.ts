@@ -7,8 +7,12 @@ declare global {
             archiveLogs: () => void;
             selectPath: () => Promise<string[] | undefined>;
             playBeep: () => void;
-            readSetupJSON: () => Promise<TYPES.setupJSON>;
-            saveSetupJSON: (newSetupJSON: string) => Promise<string>;
+            readSetupJSON: () => Promise<TYPES.configJSON>;
+            readParametersJSON: () => Promise<TYPES.configJSON>;
+            saveSetupJSON: (newSetupJSON: TYPES.configJSON) => Promise<string>;
+            saveParametersJSON: (
+                newSetupJSON: TYPES.configJSON
+            ) => Promise<string>;
         };
     }
 }

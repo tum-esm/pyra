@@ -1,11 +1,12 @@
 import React from 'react';
 import { initial, last, isNaN } from 'lodash';
+import ToggleRow from './toggle-row';
 
 function IntArrayRow(props: {
     label: string;
-    value: number[];
-    oldValue: number[];
-    setValue(v: number[]): void;
+    value: any;
+    oldValue: any;
+    setValue(v: any): void;
     disabled?: boolean;
 }) {
     const { label, value, oldValue, setValue, disabled } = props;
@@ -24,35 +25,50 @@ function IntArrayRow(props: {
             <label className='pl-3 overflow-hidden text-sm text-left w-44 opacity-80 text-slate-800 whitespace-nowrap'>
                 ↦ {label}:
             </label>
-            {value.map((v, i) => (
-                <input
-                    key={i}
-                    disabled={disabled !== undefined ? disabled : false}
-                    value={v}
-                    className={
-                        'relative z-0 w-12 px-1.5 py-1 font-mono text-xs rounded text-center ' +
-                        (disabled
-                            ? 'bg-slate-200 text-slate-600 '
-                            : 'bg-white text-slate-700 ')
-                    }
-                    onChange={e => setNumber(i, e.target.value)}
-                />
-            ))}
             {hasBeenModified && (
                 <div className='absolute top-0 left-0 w-1.5 h-full -translate-x-2.5 bg-blue-500 rounded-sm' />
             )}
-            {hasBeenModified && (
-                <span className='ml-1 text-sm font-normal flex-row-left opacity-80 gap-x-1'>
-                    previous value:{' '}
-                    {oldValue.map((v, i) => (
-                        <span
+            {typeof value === 'object' && (
+                <>
+                    {value.map((v: number, i: number) => (
+                        <input
                             key={i}
-                            className='rounded bg-slate-300 px-1 py-0.5 text-slate-900 text-xs'
-                        >
-                            {v}
-                        </span>
+                            disabled={disabled !== undefined ? disabled : false}
+                            value={v}
+                            className={
+                                'relative z-0 w-12 px-1.5 py-1 font-mono text-xs rounded text-center ' +
+                                (disabled
+                                    ? 'bg-slate-200 text-slate-600 '
+                                    : 'bg-white text-slate-700 ')
+                            }
+                            onChange={e => setNumber(i, e.target.value)}
+                        />
                     ))}
-                </span>
+                    {hasBeenModified && (
+                        <span className='ml-1 text-sm font-normal flex-row-left opacity-80 gap-x-1'>
+                            previous value: {/* @ts-ignore */}
+                            {oldValue.map((v, i) => (
+                                <span
+                                    key={i}
+                                    className='rounded bg-slate-300 px-1 py-0.5 text-slate-900 text-xs'
+                                >
+                                    {v}
+                                </span>
+                            ))}
+                        </span>
+                    )}
+                </>
+            )}
+            {typeof value === 'boolean' && (
+                <>
+                    <ToggleRow
+                        value={value}
+                        oldValue={oldValue}
+                        setValue={setValue}
+                        trueLabel='condiser'
+                        falseLabel='ignore'
+                    />
+                </>
             )}
         </div>
     );
@@ -84,15 +100,30 @@ export default function IntArrayMatrix(props: {
                     {last(label.split('.'))}
                 </span>
             </label>
-            {Object.keys(value).map(key => (
-                <IntArrayRow
-                    key={key}
-                    label={key}
-                    value={value[key]}
-                    oldValue={oldValue[key]}
-                    setValue={setArray(key)}
-                />
-            ))}
+            {Object.keys(value).map(key => {
+                switch (typeof value[key]) {
+                    case 'boolean':
+                        return (
+                            <IntArrayRow
+                                key={key}
+                                label={key}
+                                value={value[key]}
+                                oldValue={oldValue[key]}
+                                setValue={setArray(key)}
+                            />
+                        );
+                    case 'object':
+                        return (
+                            <IntArrayRow
+                                key={key}
+                                label={key}
+                                value={value[key]}
+                                oldValue={oldValue[key]}
+                                setValue={setArray(key)}
+                            />
+                        );
+                }
+            })}
         </div>
     );
 }

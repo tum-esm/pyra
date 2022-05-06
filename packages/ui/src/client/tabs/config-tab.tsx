@@ -3,7 +3,7 @@ import TYPES from '../../types/index';
 import Divider from '../components/divider';
 import ConfigSection from '../components/config-section';
 import SavingOverlay from '../components/saving-overlay';
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, trim } from 'lodash';
 
 // TODO: Move this to utils
 // I didn't find a built-in version yet
@@ -40,7 +40,7 @@ export default function ConfigTab(props: { type: 'setup' | 'parameters' }) {
         const readConfigFunction =
             props.type === 'setup'
                 ? window.electron.readSetupJSON
-                : window.electron.readSetupJSON;
+                : window.electron.readParametersJSON;
         const content = await readConfigFunction();
         setCentralJSON(content);
         setLocalJSON(content);
@@ -54,10 +54,14 @@ export default function ConfigTab(props: { type: 'setup' | 'parameters' }) {
         const saveConfigFunction =
             props.type === 'setup'
                 ? window.electron.saveSetupJSON
-                : window.electron.saveSetupJSON;
-        let result = await saveConfigFunction(JSON.stringify(localJSON));
+                : window.electron.saveParametersJSON;
+        let result = await saveConfigFunction(localJSON);
 
-        if (result.includes('Updated setup file')) {
+        if (
+            ['Updated setup file', 'Updated parameters file'].includes(
+                trim(result, '\n ')
+            )
+        ) {
             setCentralJSON(localJSON);
         } else {
             setErrorMessage(result);

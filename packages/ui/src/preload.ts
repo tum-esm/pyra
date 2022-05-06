@@ -8,6 +8,9 @@ contextBridge.exposeInMainWorld('electron', {
     selectPath: async () => ipcRenderer.invoke('selectPath'),
     playBeep: () => ipcRenderer.invoke('playBeep'),
     readSetupJSON: async () => ipcRenderer.invoke('readSetupJSON'),
+    readParametersJSON: async () => ipcRenderer.invoke('readParametersJSON'),
     saveSetupJSON: async (newSetupJSON: string) =>
         ipcRenderer.invoke('saveSetupJSON', newSetupJSON),
+    saveParametersJSON: async (newParametersJSON: string) =>
+        ipcRenderer.invoke('saveParametersJSON', newParametersJSON),
 });

@@ -54,6 +54,9 @@ function Main() {
                         {tabs[activeTabIndex] === 'Setup' && (
                             <ConfigTab type='setup' />
                         )}
+                        {tabs[activeTabIndex] === 'Parameters' && (
+                            <ConfigTab type='parameters' />
+                        )}
                         {tabs[activeTabIndex] === 'Logs' && <LogTab />}
                     </main>
                 </>

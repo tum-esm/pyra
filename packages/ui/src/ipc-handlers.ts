@@ -1,6 +1,7 @@
 import { shell, ipcMain, dialog } from 'electron';
 import util from 'util';
 import child_process from 'child_process';
+import TYPES from './types/index';
 const exec = util.promisify(child_process.exec);
 
 // TODO: Set corrent path on windows/unix (Fixed path required on every system)
@@ -69,9 +70,28 @@ export function initIPCHandlers() {
     ipcMain.handle('readSetupJSON', async (_, args) => {
         return JSON.parse(await call_pyra_cli('config setup get'));
     });
-    ipcMain.handle('saveSetupJSON', async (_, newSetupJSON: string) => {
-        return await call_pyra_cli(
-            `config setup set --content "${newSetupJSON.replace(/"/g, '\\"')}"`
-        );
+    ipcMain.handle(
+        'saveSetupJSON',
+        async (_, newSetupJSON: TYPES.configJSON) => {
+            return await call_pyra_cli(
+                `config setup set --content "${JSON.stringify(
+                    newSetupJSON
+                ).replace(/"/g, '\\"')}"`
+            );
+        }
+    );
+
+    ipcMain.handle('readParametersJSON', async (_, args) => {
+        return JSON.parse(await call_pyra_cli('config parameters get'));
     });
+    ipcMain.handle(
+        'saveParametersJSON',
+        async (_, newParametersJSON: TYPES.configJSON) => {
+            const command = `config parameters set --content "${JSON.stringify(
+                newParametersJSON
+            ).replace(/"/g, '\\"')}"`;
+            console.log({ command });
+            return await call_pyra_cli(command);
+        }
+    );
 }
