@@ -4,6 +4,7 @@ import os
 import time
 from filelock import FileLock
 import snap7
+from packages.core.utils.json_file_interaction import State
 
 from packages.core.utils.validation import Validation
 from packages.core import modules
@@ -12,6 +13,7 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
+STATE_FILE_PATH = f"{PROJECT_DIR}/config/state.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 
@@ -25,7 +27,7 @@ def load_config():
     # CLI should not interfere. A file "config/config.lock" will be created
     # and the existence of this file will make the next line wait.
     with FileLock(CONFIG_LOCK_PATH):
-        assert (Validation.check_parameters_file() and Validation.check_setup_file())
+        assert Validation.check_parameters_file() and Validation.check_setup_file()
 
         with open(SETUP_FILE_PATH, "r") as f:
             _SETUP = json.load(f)
@@ -34,10 +36,10 @@ def load_config():
     return _SETUP, _PARAMS
 
 
-
 def run():
 
     _SETUP, _PARAMS = load_config()
+    State.initialize()
 
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_SETUP, _PARAMS),
@@ -56,8 +58,8 @@ def run():
             _SETUP, _PARAMS = load_config()
         except AssertionError:
             # TODO: What to do here?
-                time.sleep(60)
-                continue
+            time.sleep(60)
+            continue
 
         try:
             for module in _modules:

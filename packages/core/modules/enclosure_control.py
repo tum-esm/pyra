@@ -9,11 +9,10 @@
 # description       :
 # ==============================================================================
 
-import json
 import os
-from filelock import FileLock
 import snap7
 import time
+from packages.core.utils.json_file_interaction import State
 
 from packages.core.utils.logger import Logger
 
@@ -68,14 +67,9 @@ class EnclosureControl:
         # TODO: Trigger user warning?
 
         # read current state of actors and sensors in enclosure
-        current_reading = self.continuous_readings()
+        current_reading = self.read_state_from_plc()
         logger.info("New continuous readings.")
-
-        # TODO: Write this to state.json instead of parameters.json
-        with FileLock(CONFIG_LOCK_PATH):
-            with open(PARAMS_FILE_PATH, "w") as f:
-                self._PARAMS["enclosure"]["continuous_readings"] = current_reading
-                json.dump(self._PARAMS, f, indent=2)
+        State.update({"continuous_readings": current_reading})
 
         # powerup spectrometer if sun angle is 10° or more
         self.manage_spectrometer_power()
@@ -115,7 +109,7 @@ class EnclosureControl:
                 self.plc_write_bool(self._SETUP["plc"]["power"]["spectrometer"], False)
                 logger.info("Removed power from the spectrometer.")
 
-    def continuous_readings(self):
+    def read_state_from_plc(self):
         """Checks the state of the enclosure by continuously reading sensor and
         actor output.
 

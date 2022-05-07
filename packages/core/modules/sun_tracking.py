@@ -21,6 +21,7 @@ import os
 import time
 import jdcal
 import datetime
+from packages.core.utils.json_file_interaction import State
 
 # the following imports should be provided by pywin32
 try:
@@ -60,13 +61,10 @@ class SunTracking:
 
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
-        # TODO: Read this from state.json instead of parameters.json
-        if self._PARAMS["pyra"]["automation_is_running"]:
-
+        if State.read()["vbdsd_evaluation_result"]:
             if self.__ct_application_running:
                 self.__stop_sun_tracking_automation()
                 logger.info("Stop CamTracker.")
-
             return
 
         # main logic for active automation
@@ -109,9 +107,7 @@ class SunTracking:
         # delete stop.txt file in camtracker folder if present
         # exe call with -automation
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        camtracker_call = (
-            self._SETUP["camtracker"]["executable_path"] + " -autostart"
-        )
+        camtracker_call = self._SETUP["camtracker"]["executable_path"] + " -autostart"
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
             camtracker_call,
@@ -138,8 +134,8 @@ class SunTracking:
         camtracker_directory = os.path.dirname(
             self._SETUP["camtracker"]["executable_path"]
         )
-        
-        f = open(os.path.join(camtracker_directory,"stop.txt"), "w")
+
+        f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
         f.close()
 
     def __read_ct_log_learn_az_elev(self):
@@ -250,13 +246,12 @@ class SunTracking:
                 time.sleep(6)
 
         assert self.__ct_application_running
-        
 
-        #time.sleep(20)
+        # time.sleep(20)
 
         self.__stop_sun_tracking_automation()
         time.sleep(10)
 
         assert not self.__ct_application_running
 
-        assert(False)
+        assert False

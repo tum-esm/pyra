@@ -24,7 +24,7 @@ class MeasurementConditions:
     def __init__(self, initial_setup: dict, initial_parameters: dict):
         self._SETUP = initial_setup
         self._PARAMS = initial_parameters
-    
+
     def run(self, new_setup: dict, new_parameters: dict):
         self._SETUP, self._PARAMS = new_setup, new_parameters
 

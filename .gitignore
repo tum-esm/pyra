@@ -5,6 +5,7 @@
 # config
 config/parameters.json
 config/setup.json
+config/state.json
 config/config.lock
 
 # logs

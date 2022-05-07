@@ -40,11 +40,13 @@ import json
 
 
 from packages.core.utils.validation import Validation
+from packages.core.utils.json_file_interaction import State
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
+STATE_FILE_PATH = f"{PROJECT_DIR}/config/state.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 from packages.core.utils.logger import Logger
@@ -458,15 +460,13 @@ def main(infinite_loop=True):
         # start eval of sun state once initial list is filled
         if status_history.size() == status_history.maxsize():
             score = status_history.sum() / status_history.size()
-
-            # TODO: Write this to state.json instead of parameters.json
-            with FileLock(CONFIG_LOCK_PATH):
-                with open(PARAMS_FILE_PATH, "w") as f:
-                    PARAMS["pyra"]["automation_is_running"] = (
+            State.update(
+                {
+                    "vbdsd_evaluation_result": (
                         score > PARAMS["vbdsd"]["measurement_threshold"]
                     )
-                    json.dump(PARAMS, f, indent=2)
-                    print(PARAMS["vbdsd"])
+                }
+            )
 
         # wait rest of loop time
         elapsed_time = time.time()
