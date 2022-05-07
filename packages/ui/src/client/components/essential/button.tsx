@@ -3,7 +3,13 @@ import React from 'react';
 export default function Button(props: {
     children: React.ReactNode;
     onClick(): void;
-    variant: 'green' | 'red' | 'blue' | 'gray' | 'toggle-true' | 'toggle-false';
+    variant:
+        | 'green'
+        | 'red'
+        | 'blue'
+        | 'gray'
+        | 'toggle-active'
+        | 'toggle-inactive';
     disabled?: boolean;
 }) {
     const { children, onClick, variant } = props;
@@ -24,25 +30,24 @@ export default function Button(props: {
             break;
         case 'blue':
             colorClasses =
-                'text-blue-800 bg-blue-75 hover:bg-blue-200 hover:text-blue-900 border-blue-300 ';
+                'text-blue-900 bg-blue-75 hover:bg-blue-200 hover:text-blue-950 border-blue-300 ';
             break;
-        case 'toggle-true':
-            colorClasses = 'text-blue-900 bg-blue-300 border-blue-500 ';
+        case 'toggle-active':
+            colorClasses = 'text-blue-950 bg-blue-300 border-blue-500 ';
             break;
-        case 'toggle-false':
+        case 'toggle-inactive':
             colorClasses =
-                'text-gray-500 bg-gray-75 hover:bg-gray-200 hover:text-gray-800 border-gray-300 ';
+                'text-gray-450 bg-gray-50 hover:bg-gray-200 hover:text-gray-800 border-gray-300 ';
             break;
     }
     return (
         <button
+            type='button'
             onClick={onClick}
             className={
-                'border shadow-sm px-3 h-8 rounded ' +
-                'font-medium whitespace-nowrap text-sm ' +
-                'focus:ring-1 focus:outline-none focus:ring-blue-500 ' +
-                'border focus:border-blue-500 ' +
-                colorClasses
+                'inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 h-9 ' +
+                colorClasses +
+                (variant.startsWith('navigation') ? ' ' : 'shadow-sm ')
             }
         >
             {children}

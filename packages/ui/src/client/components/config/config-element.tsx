@@ -13,10 +13,8 @@ export default function ConfigElement(props: {
         'relative flex flex-col items-start justify-start w-full gap-y-1';
     return (
         <div className={sharedClasses}>
-            <label className='text-sm text-gray-800 flex-row-left'>
-                <span className='font-semibold'>
-                    {capitalizeConfigKey(label)}
-                </span>
+            <label className='block text-sm font-medium text-gray-700 flex-row-left'>
+                <span className=''>{capitalizeConfigKey(label)}</span>
                 <PreviousValue previousValue={previousValue} />
             </label>
             <div className={sharedClasses}>

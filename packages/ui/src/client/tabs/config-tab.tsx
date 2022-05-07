@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import TYPES from '../../types/index';
 import ConfigSection from '../components/config/config-section';
 import SavingOverlay from '../components/config/saving-overlay';
-import { defaultsDeep, trim } from 'lodash';
+import { defaultsDeep, first, trim } from 'lodash';
 import deepEqual from '../utils/deep-equal';
 import sortConfigKeys from '../utils/sort-config-keys';
+import Button from '../components/essential/button';
+import capitalizeConfigKey from '../utils/capitalize-config-key';
 
 export default function ConfigTab(props: {
     type: 'setup' | 'parameters';
@@ -13,6 +15,7 @@ export default function ConfigTab(props: {
     const [centralJSON, setCentralJSON] = useState<TYPES.configJSON>(undefined);
     const [localJSON, setLocalJSON] = useState<TYPES.configJSON>(undefined);
     const [errorMessage, setErrorMessage] = useState<string>(undefined);
+    const [activeKey, setActiveKey] = useState<string>(undefined);
 
     async function loadCentralJSON() {
         const readConfigFunction =
@@ -22,6 +25,7 @@ export default function ConfigTab(props: {
         const content = await readConfigFunction();
         setCentralJSON(content);
         setLocalJSON(content);
+        setActiveKey(first(sortConfigKeys(content)));
     }
 
     useEffect(() => {
@@ -66,37 +70,71 @@ export default function ConfigTab(props: {
         !deepEqual(localJSON, centralJSON);
 
     return (
-        <>
-            <div
-                className={
-                    'flex-col items-start justify-start w-full h-full overflow-y-scroll ' +
-                    (props.visible ? 'flex ' : 'hidden ')
-                }
-            >
-                {localJSON !== undefined && (
-                    <>
+        <div
+            className={'w-full h-full ' + (props.visible ? 'flex ' : 'hidden ')}
+        >
+            {localJSON !== undefined && (
+                <>
+                    <div
+                        className={
+                            'bg-white border-r border-gray-300 shadow ' +
+                            'flex flex-col p-3 gap-y-2 z-10 '
+                        }
+                    >
                         {sortConfigKeys(centralJSON).map(
                             (key1: string, i: number) => (
-                                <React.Fragment key={key1}>
-                                    <ConfigSection
-                                        {...{
-                                            key1,
-                                            localJSON,
-                                            centralJSON,
-                                            addLocalUpdate,
-                                        }}
+                                <button
+                                    onClick={() => setActiveKey(key1)}
+                                    className={
+                                        'px-3 py-1.5 text-base font-semibold rounded text-left ' +
+                                        'flex-row-center gap-x-2 ' +
+                                        (key1 === activeKey
+                                            ? 'bg-blue-200 text-blue-950 '
+                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-600 ')
+                                    }
+                                >
+                                    {capitalizeConfigKey(key1)}
+                                    <div className='flex-grow' />
+                                    <div
+                                        className={
+                                            'w-2 h-2 bg-blue-400 rounded-full ' +
+                                            (key1 === activeKey
+                                                ? 'bg-blue-400 '
+                                                : 'bg-transparent')
+                                        }
                                     />
-                                </React.Fragment>
+                                </button>
                             )
                         )}
-                    </>
-                )}
-            </div>
-            {configIsDiffering && (
-                <SavingOverlay
-                    {...{ errorMessage, saveLocalJSON, restoreCentralJSON }}
-                />
+                    </div>
+                    <div
+                        className={
+                            'z-0 flex-grow h-full p-6 overflow-y-scroll ' +
+                            'flex-col-left space-y-4 relative'
+                        }
+                    >
+                        {activeKey !== undefined && (
+                            <ConfigSection
+                                key1={activeKey}
+                                {...{
+                                    localJSON,
+                                    centralJSON,
+                                    addLocalUpdate,
+                                }}
+                            />
+                        )}
+                        {configIsDiffering && (
+                            <SavingOverlay
+                                {...{
+                                    errorMessage,
+                                    saveLocalJSON,
+                                    restoreCentralJSON,
+                                }}
+                            />
+                        )}
+                    </div>
+                </>
             )}
-        </>
+        </div>
     );
 }

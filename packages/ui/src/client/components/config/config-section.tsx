@@ -47,82 +47,51 @@ export default function ConfigSection(props: {
     addLocalUpdate(v: TYPES.configJSON): void;
 }) {
     const { key1, localJSON, centralJSON, addLocalUpdate } = props;
-    const [open, setOpen] = useState(false);
 
     return (
-        <div
-            className={
-                'flex flex-col w-full gap-y-3 pl-14 pr-6 ' +
-                'transition-all duration-100 first:pt-4 last:pb-20 ' +
-                (open
-                    ? 'bg-white py-4 border-gray-300 -mt-px first:mt-0 '
-                    : 'py-1 border-transparent ') +
-                'first:border-t-0 border-y border-collapse '
-            }
-        >
-            <button
-                className={
-                    'pr-2.5 mr-auto -ml-8 rounded flex-row-left gap-x-1 ' +
-                    'text-black fill-black ' +
-                    'hover:text-green-600 hover:fill-green-600 '
+        <>
+            {sortConfigKeys(centralJSON[key1]).map(
+                (key2: string, j: number) => {
+                    const commonProps = {
+                        key: key2,
+                        label: key2,
+                        value: localJSON[key1][key2],
+                        oldValue: centralJSON[key1][key2],
+                        setValue: (v: any) =>
+                            addLocalUpdate({
+                                [key1]: {
+                                    [key2]: v,
+                                },
+                            }),
+                    };
+                    const oldValue: any = centralJSON[key1][key2];
+                    switch (typeof oldValue) {
+                        case 'string':
+                        case 'number':
+                            return (
+                                /* @ts-ignore */
+                                <ConfigElementText {...commonProps} />
+                            );
+                        case 'boolean':
+                            return (
+                                /* @ts-ignore */
+                                <ConfigElementToggle {...commonProps} />
+                            );
+                        case 'object':
+                            if (oldValue.length === undefined) {
+                                return (
+                                    /* @ts-ignore */
+                                    <ConfigElementMatrix {...commonProps} />
+                                );
+                            } else if (oldValue.length === 3) {
+                                return (
+                                    /* @ts-ignore */
+                                    <ConfigElementTime {...commonProps} />
+                                );
+                            }
+                    }
                 }
-                onClick={() => setOpen(!open)}
-            >
-                <div
-                    className={
-                        'w-7 h-7 p-0.5 ' + (open ? 'rotate-0 ' : '-rotate-90')
-                    }
-                >
-                    {ICONS.chevronDown}
-                </div>
-                <div className={'text-base font-bold '}>
-                    {capitalizeConfigKey(key1)}
-                </div>
-            </button>
-
-            {open &&
-                sortConfigKeys(centralJSON[key1]).map(
-                    (key2: string, j: number) => {
-                        const commonProps = {
-                            key: key2,
-                            label: key2,
-                            value: localJSON[key1][key2],
-                            oldValue: centralJSON[key1][key2],
-                            setValue: (v: any) =>
-                                addLocalUpdate({
-                                    [key1]: {
-                                        [key2]: v,
-                                    },
-                                }),
-                        };
-                        const oldValue: any = centralJSON[key1][key2];
-                        switch (typeof oldValue) {
-                            case 'string':
-                            case 'number':
-                                return (
-                                    /* @ts-ignore */
-                                    <ConfigElementText {...commonProps} />
-                                );
-                            case 'boolean':
-                                return (
-                                    /* @ts-ignore */
-                                    <ConfigElementToggle {...commonProps} />
-                                );
-                            case 'object':
-                                if (oldValue.length === undefined) {
-                                    return (
-                                        /* @ts-ignore */
-                                        <ConfigElementMatrix {...commonProps} />
-                                    );
-                                } else if (oldValue.length === 3) {
-                                    return (
-                                        /* @ts-ignore */
-                                        <ConfigElementTime {...commonProps} />
-                                    );
-                                }
-                        }
-                    }
-                )}
-        </div>
+            )}
+        </>
     );
 }

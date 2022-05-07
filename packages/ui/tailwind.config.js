@@ -14,6 +14,7 @@ const customColors = {
         700: '#1d4ed8',
         800: '#1e40af',
         900: '#1e3a8a',
+        950: '#0f1d45',
     },
     gray: {
         50: '#f8fafc',
@@ -24,6 +25,7 @@ const customColors = {
         300: '#cbd5e1',
         350: '#afbccc',
         400: '#94a3b8',
+        450: '#7c8ba1',
         500: '#64748b',
         600: '#475569',
         700: '#334155',
@@ -90,5 +92,5 @@ module.exports = {
             fill: customColors,
         },
     },
-    plugins: [],
+    plugins: [require('@tailwindcss/forms')],
 };

@@ -47,7 +47,9 @@ export default function LogTab(props: { visible: boolean }) {
                     }}
                     variant='gray'
                 >
-                    <div className='w-5 h-5'>{ICONS.refresh}</div>
+                    <div className='w-6 h-6 fill-gray-700 '>
+                        {ICONS.refresh}
+                    </div>
                 </Button>
 
                 <span className='pl-3 ml-3 font-medium text-gray-800 border-l border-gray-400'>
