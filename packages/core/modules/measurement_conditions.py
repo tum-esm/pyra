@@ -14,6 +14,7 @@
 # ==============================================================================
 
 import datetime
+from packages.core.utils.astronomy import Astronomy
 from packages.core.utils.json_file_interaction import State
 from packages.core.utils.logger import Logger
 
@@ -58,7 +59,7 @@ class MeasurementConditions:
                     if current_time_is_before_noon()
                     else _triggers["sun_angle_stop"]
                 )
-                if State.read()["current_sun_elevation"] < min_required_elevation:
+                if Astronomy.get_current_sun_elevation() < min_required_elevation:
                     automation_should_be_running &= False
 
             # consider start_time and end_time

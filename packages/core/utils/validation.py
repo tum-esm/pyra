@@ -44,6 +44,7 @@ BOOL_SCHEMA = {"type": "boolean"}
 SETUP_FILE_SCHEMA = {
     "opus": DICT_SCHEMA(
         {
+            "em27_ip": IP_SCHEMA,
             "executable_path": FILE_SCHEMA,
             "executable_parameter": {"type": "string"},
             "experiment_path": FILE_SCHEMA,
@@ -58,10 +59,7 @@ SETUP_FILE_SCHEMA = {
             "sun_intensity_path": FILE_SCHEMA,
         }
     ),
-    "general": DICT_SCHEMA(
-        {"em27_ip": IP_SCHEMA, "tum_enclosure_is_present": {"type": "boolean"}}
-    ),
-    "plc": DICT_SCHEMA(
+    "tum_plc": DICT_SCHEMA(
         {
             "actors": DICT_SCHEMA(
                 {
@@ -148,7 +146,6 @@ PARAMS_FILE_SCHEMA = {
                     "time": {"type": "boolean"},
                     "sun_angle": {"type": "boolean"},
                     "vbdsd": {"type": "boolean"},
-                    "user_control": {"type": "boolean"},
                 }
             ),
             "start_time": INT_LIST_SCHEMA(3),

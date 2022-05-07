@@ -3,26 +3,26 @@ import astropy.time as astropy_time
 
 
 class Astronomy:
-
     SETUP = None
     PARAMS = None
 
+    # TODO: Is "elevation" what this should return?
     @staticmethod
-    def get_current_sun_angle():
+    def get_current_sun_elevation():
         """calc_sun_angle_deg(location loc): Computes and returns the current sun
         angle in degree, based on the location loc, computed by get_tracker_position(),
         and current time. Therefore, the pack- ages time and astrophy are required.
         """
         now = astropy_time.Time.now()
         altaz = astropy_coordinates.AltAz(
-            location=Astronomy.get_astropy_location(), obstime=now
+            location=Astronomy.__get_astropy_location(), obstime=now
         )
         sun = astropy_coordinates.get_sun(now)
         sun_angle_deg = sun.transform_to(altaz).alt
         return sun_angle_deg
 
     @staticmethod
-    def get_location_from_camtracker_config() -> tuple[float]:
+    def __get_location_from_camtracker_config() -> tuple[float]:
         """Reads the config.txt file of the CamTracker application to receive the
         latest tracker position.
 
@@ -54,7 +54,7 @@ class Astronomy:
             )
 
     @staticmethod
-    def get_astropy_location():
+    def __get_astropy_location():
         """
         get_tracker_position(): Reads out the height, the longitude and the
         latitude of the system from CamTrackerConfig.txt, and computes the location
@@ -62,7 +62,11 @@ class Astronomy:
         function coord.EarthLocation() is used. The read out parameters, as well as
         the computed location will be returned.
         """
-        latitude, longitude, altitude = Astronomy.get_location_from_camtracker_config()
+        (
+            latitude,
+            longitude,
+            altitude,
+        ) = Astronomy.__get_location_from_camtracker_config()
         return astropy_coordinates.EarthLocation.from_geodetic(
             height=altitude, lat=latitude, lon=longitude
         )

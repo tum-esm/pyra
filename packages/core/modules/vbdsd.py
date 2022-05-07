@@ -204,7 +204,7 @@ class _VBDSD:
         with a known setting. Allows to add an INT on top for further adjustment.
         """
 
-        current_sun_angle = Astronomy.get_current_sun_angle()
+        current_sun_angle = Astronomy.get_current_sun_elevation()
 
         if current_sun_angle < 4 * astropy_units.deg:
             exp = -9 + diff
@@ -238,26 +238,20 @@ class _VBDSD:
         return 0, frame
 
 
-def _sync_config():
+def main(infinite_loop=True):
     global _SETUP, _PARAMS
     _SETUP, _PARAMS = Config.read()
-    Astronomy.SETUP = _SETUP
-    Astronomy.PARAMS = _PARAMS
-
-
-def main(infinite_loop=True):
-    _sync_config()
 
     status_history = RingList(_PARAMS["vbdsd"]["evaluation_size"])
     _VBDSD.init_cam()
 
     while True:
         start_time = time.time()
-        _sync_config()
+        _SETUP, _PARAMS = Config.read()
 
         # sleep while sun angle is too low
         # assert False, repr(calc_sun_angle_deg(loc).to_string())
-        while Astronomy.get_current_sun_angle().is_within_bounds(
+        while Astronomy.get_current_sun_elevation().is_within_bounds(
             None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
         ):
             time.sleep(60)

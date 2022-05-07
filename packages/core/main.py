@@ -1,4 +1,4 @@
-from datetime import datetime
+import sys
 import time
 import snap7
 
@@ -14,6 +14,7 @@ def run():
     State.initialize()
 
     _SETUP, _PARAMS = Config.read()
+    sys.exit()
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_SETUP, _PARAMS),
         modules.enclosure_control.EnclosureControl(_SETUP, _PARAMS),
