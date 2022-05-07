@@ -5,9 +5,12 @@ class RingList:
     """
 
     def __init__(self, length):
+        self.__max__ = length
+        self.empty()
+
+    def empty(self):
         self.__data__ = []
         self.__full__ = 0
-        self.__max__ = length
         self.__cur__ = 0
 
     def append(self, x):
