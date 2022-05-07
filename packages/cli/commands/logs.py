@@ -4,7 +4,9 @@ import filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-LOGS_LOCK_PATH = f"{PROJECT_DIR}/logs/logs.lock"
+INFO_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "info.log")
+DEBUG_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "debug.log")
+LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", "logs.lock")
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
@@ -14,7 +16,7 @@ success_handler = lambda text: click.echo(click.style(text, fg="green"))
 # and the existence of this file will make the next line wait.
 def with_filelock(function):
     def locked_function(*args, **kwargs):
-        with filelock.FileLock(LOGS_LOCK_PATH):
+        with filelock.FileLock(LOG_FILES_LOCK):
             return function(*args, **kwargs)
 
     return locked_function
@@ -25,7 +27,7 @@ def with_filelock(function):
 @with_filelock
 def _read_logs(level: str):
     if level in ["INFO", "DEBUG"]:
-        with open(f"{PROJECT_DIR}/logs/{level.lower()}.log", "r") as f:
+        with open(INFO_LOG_FILE if level == "INFO" else DEBUG_LOG_FILE, "r") as f:
             click.echo("".join(f.readlines()))
     else:
         error_handler("Level has to be either INFO or DEBUG.")
@@ -34,11 +36,11 @@ def _read_logs(level: str):
 @click.command(help="Archive the current log files.")
 @with_filelock
 def _archive_logs():
-
     for filetype in ["info", "debug"]:
-        with open(f"{PROJECT_DIR}/logs/{filetype}.log", "r") as f:
+        _filepath = INFO_LOG_FILE if filetype == "info" else DEBUG_LOG_FILE
+        with open(_filepath, "r") as f:
             new_log_lines = f.readlines()
-        with open(f"{PROJECT_DIR}/logs/{filetype}.log", "w") as f:
+        with open(_filepath, "w") as f:
             pass
         new_log_date_groups = {}
         for line in new_log_lines:
@@ -49,7 +51,12 @@ def _archive_logs():
 
         for date_group, lines in new_log_date_groups.items():
             with open(
-                f"{PROJECT_DIR}/logs/archive/{date_group.replace('-', '')}-{filetype}.log",
+                os.path.join(
+                    PROJECT_DIR,
+                    "logs",
+                    "archive",
+                    f"{date_group.replace('-', '')}-{filetype}.log",
+                ),
                 "a",
             ) as f:
                 f.writelines(lines)

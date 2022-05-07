@@ -6,9 +6,9 @@ import filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
-PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
-CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
+SETUP_FILE_PATH = os.path.join(PROJECT_DIR, "config", "setup.json")
+PARAMS_FILE_PATH = os.path.join(PROJECT_DIR, "config", "parameters.json")
+CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", "config.lock")
 
 
 sys.path.append(PROJECT_DIR)

@@ -3,14 +3,17 @@ import os
 import filelock
 
 dir = os.path.dirname
-LOGS_DIR = dir(dir(dir(dir(os.path.abspath(__file__))))) + "/logs"
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+INFO_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "info.log")
+DEBUG_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "debug.log")
+LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", "logs.lock")
 
 # Set up logging module
-_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-logging.basicConfig(level=logging.DEBUG, filename=LOGS_DIR + "/debug.log", format=_fmt)
-_info_log_handler = logging.FileHandler(filename=LOGS_DIR + "/info.log", mode="a")
+_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.DEBUG, filename=DEBUG_LOG_FILE, format=_format)
+_info_log_handler = logging.FileHandler(filename=INFO_LOG_FILE, mode="a")
 _info_log_handler.setLevel(logging.INFO)
-_info_log_handler.setFormatter(logging.Formatter(_fmt))
+_info_log_handler.setFormatter(logging.Formatter(_format))
 
 # Hide irrelevant logs from libraries
 logging.getLogger("filelock").setLevel(logging.WARNING)
@@ -18,7 +21,7 @@ logging.getLogger("filelock").setLevel(logging.WARNING)
 
 def with_filelock(function):
     def locked_function(*args, **kwargs):
-        with filelock.FileLock(LOGS_DIR + "/logs.lock"):
+        with filelock.FileLock(LOG_FILES_LOCK):
             return function(*args, **kwargs)
 
     return locked_function
