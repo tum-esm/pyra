@@ -24,6 +24,7 @@ namespace TYPES {
                 | string
                 | number
                 | boolean
+                | number[]
                 | {
                       [key: string]:
                           | [number, number, number]

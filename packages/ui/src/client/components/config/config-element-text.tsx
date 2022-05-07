@@ -3,7 +3,7 @@ import TextInput from '../essential/text-input';
 import Button from '../essential/button';
 import ConfigElement from './config-element';
 
-export default function TextInputRow(props: {
+export default function ConfigElementText(props: {
     label: string;
     value: string | number;
     oldValue: string | number;

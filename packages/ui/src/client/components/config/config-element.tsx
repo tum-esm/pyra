@@ -1,9 +1,10 @@
 import React from 'react';
 import capitalizeConfigKey from '../../utils/capitalize-config-key';
+import PreviousValue from '../essential/previous-value';
 
 export default function ConfigElement(props: {
     label: string;
-    previousValue?: string;
+    previousValue?: string | number[] | number;
     children: React.ReactNode;
 }) {
     const { label, previousValue, children } = props;
@@ -12,18 +13,11 @@ export default function ConfigElement(props: {
         'relative flex flex-col items-start justify-start w-full gap-y-1';
     return (
         <div className={sharedClasses}>
-            <label className='text-sm text-gray-800'>
+            <label className='text-sm text-gray-800 flex-row-left'>
                 <span className='font-semibold'>
                     {capitalizeConfigKey(label)}
                 </span>
-                {previousValue !== undefined && (
-                    <span className='font-normal opacity-80 ml-1.5'>
-                        previous value:{' '}
-                        <span className='rounded bg-slate-300 px-1 py-0.5 text-slate-900'>
-                            {previousValue}
-                        </span>
-                    </span>
-                )}
+                <PreviousValue previousValue={previousValue} />
             </label>
             <div className={sharedClasses}>
                 {previousValue !== undefined && (

@@ -11,5 +11,6 @@ export default function capitalizeConfigKey(key: string) {
         .replace('Id', 'ID')
         .replace('Em27', 'EM27')
         .replace('Vbdsd', 'VBDSD')
-        .replace('Tum', 'TUM');
+        .replace('Tum', 'TUM')
+        .replace('Camtracker', 'CamTracker');
 }

@@ -17,14 +17,14 @@ export default function Toggle(props: {
                 disabled={disabled}
                 variant={value ? 'toggle-true' : 'toggle-false'}
             >
-                {trueLabel === undefined ? 'Yes' : trueLabel}
+                {trueLabel === undefined ? 'yes' : trueLabel}
             </Button>
             <Button
                 onClick={() => setValue(false)}
                 disabled={disabled}
                 variant={value ? 'toggle-false' : 'toggle-true'}
             >
-                {falseLabel === undefined ? 'No' : falseLabel}
+                {falseLabel === undefined ? 'no' : falseLabel}
             </Button>
         </div>
     );

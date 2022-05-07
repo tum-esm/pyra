@@ -14,7 +14,7 @@ export default function ConfigElementToggle(props: {
         <ConfigElement
             label={label}
             previousValue={
-                value !== oldValue ? (oldValue ? 'Yes' : 'No') : undefined
+                value !== oldValue ? (oldValue ? 'yes' : 'no') : undefined
             }
         >
             <Toggle {...{ value, setValue }} />

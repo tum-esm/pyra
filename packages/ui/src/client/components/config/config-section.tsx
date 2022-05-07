@@ -3,8 +3,10 @@ import ICONS from '../../assets/icons';
 import TYPES from '../../../types/index';
 
 import ConfigElementText from './config-element-text';
-import ToggleRow from './config-element-toggle';
-import IntArrayMatrix from './config-element-matrix';
+import ConfigElementToggle from './config-element-toggle';
+import ConfigElementMatrix from './config-element-matrix';
+import ConfigElementTime from './config-element-time';
+
 import sortConfigKeys from '../../utils/sort-config-keys';
 import capitalizeConfigKey from '../../utils/capitalize-config-key';
 
@@ -26,20 +28,25 @@ export default function ConfigSection(props: {
                 'first:border-0 border-t border-gray-300'
             }
         >
-            <div className='w-full -ml-8 flex-row-left gap-x-1'>
-                <button
+            <button
+                className={
+                    'pr-2.5 mr-auto -ml-8 rounded flex-row-left gap-x-1 ' +
+                    'text-black fill-black ' +
+                    'hover:text-green-600 hover:fill-green-600'
+                }
+                onClick={() => setOpen(!open)}
+            >
+                <div
                     className={
-                        'w-7 h-7 p-0.5 rounded hover:bg-gray-50 ' +
-                        (open ? 'rotate-0 ' : '-rotate-90')
+                        'w-7 h-7 p-0.5 ' + (open ? 'rotate-0 ' : '-rotate-90')
                     }
-                    onClick={() => setOpen(!open)}
                 >
                     {ICONS.chevronDown}
-                </button>
-                <h2 className='text-lg font-bold text-gray-900'>
+                </div>
+                <div className={'text-base font-bold '}>
                     {capitalizeConfigKey(key1)}
-                </h2>
-            </div>
+                </div>
+            </button>
 
             {open &&
                 sortConfigKeys(centralJSON[key1]).map(
@@ -56,7 +63,8 @@ export default function ConfigSection(props: {
                                     },
                                 }),
                         };
-                        switch (typeof centralJSON[key1][key2]) {
+                        const oldValue: any = centralJSON[key1][key2];
+                        switch (typeof oldValue) {
                             case 'string':
                             case 'number':
                                 return (
@@ -66,13 +74,20 @@ export default function ConfigSection(props: {
                             case 'boolean':
                                 return (
                                     /* @ts-ignore */
-                                    <ToggleRow {...commonProps} />
+                                    <ConfigElementToggle {...commonProps} />
                                 );
                             case 'object':
-                                return (
-                                    /* @ts-ignore */
-                                    <IntArrayMatrix {...commonProps} />
-                                );
+                                if (oldValue.length === undefined) {
+                                    return (
+                                        /* @ts-ignore */
+                                        <ConfigElementMatrix {...commonProps} />
+                                    );
+                                } else if (oldValue.length === 3) {
+                                    return (
+                                        /* @ts-ignore */
+                                        <ConfigElementTime {...commonProps} />
+                                    );
+                                }
                         }
                     }
                 )}

@@ -4,6 +4,7 @@ import sortConfigKeys from '../../utils/sort-config-keys';
 import ConfigElement from './config-element';
 import TextInput from '../essential/text-input';
 import capitalizeConfigKey from '../../utils/capitalize-config-key';
+import PreviousValue from '../essential/previous-value';
 
 function IntArrayRow(props: {
     label: string;
@@ -41,19 +42,9 @@ function IntArrayRow(props: {
                             small
                         />
                     ))}
-                    {hasBeenModified && (
-                        <span className='ml-1 text-sm font-normal flex-row-left opacity-80 gap-x-1'>
-                            previous values:
-                            {oldValue.map((v: any, i: number) => (
-                                <span
-                                    key={i}
-                                    className='rounded bg-gray-200 border border-gray-500 px-1 py-0.5 text-slate-700 text-xs'
-                                >
-                                    {v}
-                                </span>
-                            ))}
-                        </span>
-                    )}
+                    <PreviousValue
+                        previousValue={hasBeenModified ? oldValue : undefined}
+                    />
                 </>
             )}
             {typeof value === 'boolean' && (
@@ -63,6 +54,15 @@ function IntArrayRow(props: {
                         setValue={setValue}
                         trueLabel='consider'
                         falseLabel='ignore'
+                    />
+                    <PreviousValue
+                        previousValue={
+                            hasBeenModified
+                                ? oldValue
+                                    ? 'consider'
+                                    : 'ignore'
+                                : undefined
+                        }
                     />
                 </>
             )}
