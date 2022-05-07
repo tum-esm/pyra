@@ -25,7 +25,6 @@ import time
 
 # the following imports should be provided by pywin32
 try:
-    import pywin32
     import win32con
     import win32process
     import win32ui
@@ -51,6 +50,7 @@ class OpusMeasurement:
         self._PARAMS = initial_parameters
         if not windows_libraries_available:
             logger.info("Windows libraries not available, class is inactive")
+            print("Windows libraries not available, class is inactive")
             return
 
         # note: dde servers talk to dde servers
@@ -140,9 +140,10 @@ class OpusMeasurement:
             else:
                 return False
 
-    def __load_experiment(self, full_path):
+    def __load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
+        full_path = self._PARAMS["opus"]["experiment_path"]
 
         if not self.__test_dde_connection:
             return
@@ -153,9 +154,10 @@ class OpusMeasurement:
         else:
             logger.info("Could not load OPUS experiment as expected.")
 
-    def __start_macro(self, full_path):
+    def __start_macro(self):
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
+        full_path = self._PARAMS["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -166,9 +168,10 @@ class OpusMeasurement:
         else:
             logger.info("Could not start OPUS macro as expected.")
 
-    def __stop_macro(self, full_path):
+    def __stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
+        full_path = self._PARAMS["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -195,7 +198,7 @@ class OpusMeasurement:
 
         True -> Connected
         False -> Not Connected"""
-        response = os.system("ping -n 1" + self._SETUP["em27"]["ip"])
+        response = os.system("ping -n 1 " + self._SETUP["em27"]["ip"])
 
         if response == 0:
             return True
@@ -207,8 +210,8 @@ class OpusMeasurement:
         Returns pywin32 process information for later usage.
         """
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        opus_call = self._SETUP["opus"]["executable_full_path"]
-        hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(
+        opus_call = self._SETUP["opus"]["executable_path"] + " " + self._PARAMS["opus"]["executable_parameter"]
+        hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
             opus_call,
             None,
@@ -240,3 +243,29 @@ class OpusMeasurement:
                 return True
         except win32ui.error:
             return False
+
+    def test_setup(self):
+        opus_is_running = self.__opus_application_running
+        if not opus_is_running:
+            self.__start_opus()
+            try_count = 0
+            while try_count < 10:
+                if self.__opus_application_running:
+                    break
+                try_count += 1
+                time.sleep(6)
+
+        assert self.__opus_application_running
+        assert self.__test_dde_connection
+
+        print("__is_em27_connected: ", self.__is_em27_connected)
+
+        self.__load_experiment()
+        time.sleep(2)
+
+        self.__start_macro()
+        time.sleep(10)
+
+        self.__stop_macro()
+
+        print("__is_em27_connected: ", self.__is_em27_connected)
