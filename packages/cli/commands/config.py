@@ -2,15 +2,13 @@ import json
 import click
 import os
 import sys
-from filelock import FileLock
+import filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
-
-# TODO: Add config json schemas to documentation
 
 
 sys.path.append(PROJECT_DIR)
@@ -20,32 +18,43 @@ error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
 Validation.logging_handler = error_handler
 
+# FileLock = Mark, that the config JSONs are being used and the
+# CLI should not interfere. A file "config/config.lock" will be created
+# and the existence of this file will make the next line wait.
+def with_filelock(function):
+    def locked_function(*args, **kwargs):
+        with filelock.FileLock(CONFIG_LOCK_PATH):
+            return function(*args, **kwargs)
+
+    return locked_function
+
 
 @click.command(help="Read the current setup.json file.")
+@with_filelock
 def _get_setup():
     try:
         assert os.path.isfile(SETUP_FILE_PATH), "file does not exist"
-        with FileLock(CONFIG_LOCK_PATH):
-            with open(SETUP_FILE_PATH, "r") as f:
-                try:
-                    content = json.load(f)
-                except:
-                    raise AssertionError("file not in a valid json format")
+        with open(SETUP_FILE_PATH, "r") as f:
+            try:
+                content = json.load(f)
+            except:
+                raise AssertionError("file not in a valid json format")
         click.echo(json.dumps(content))
     except AssertionError as e:
         error_handler(e)
 
 
 @click.command(help="Read the current parameters.json file.")
+@with_filelock
 def _get_parameters():
     try:
         assert os.path.isfile(PARAMS_FILE_PATH), "file does not exist"
-        with FileLock(CONFIG_LOCK_PATH):
-            with open(PARAMS_FILE_PATH, "r") as f:
-                try:
-                    content = json.load(f)
-                except:
-                    raise AssertionError("file not in a valid json format")
+
+        with open(PARAMS_FILE_PATH, "r") as f:
+            try:
+                content = json.load(f)
+            except:
+                raise AssertionError("file not in a valid json format")
         click.echo(json.dumps(content))
     except AssertionError as e:
         error_handler(e)
@@ -57,6 +66,7 @@ def _get_parameters():
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
+@with_filelock
 def _set_setup(path: str, content: str):
     if (path == "" and content == "") or (path != "" and content != ""):
         click.echo('You have to pass exactly one of "--path" or "--content"')
@@ -79,12 +89,11 @@ def _set_setup(path: str, content: str):
                 return
             new_partial_json = json.loads(content)
 
-        with FileLock(CONFIG_LOCK_PATH):
-            with open(SETUP_FILE_PATH, "r") as f:
-                current_json: dict = json.load(f)
+        with open(SETUP_FILE_PATH, "r") as f:
+            current_json: dict = json.load(f)
 
-            with open(SETUP_FILE_PATH, "w") as f:
-                json.dump({**current_json, **new_partial_json}, f)
+        with open(SETUP_FILE_PATH, "w") as f:
+            json.dump({**current_json, **new_partial_json}, f)
 
         success_handler("Updated setup file")
 
@@ -95,6 +104,7 @@ def _set_setup(path: str, content: str):
 )
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
+@with_filelock
 def _set_parameters(path: str, content: str):
     if (path == "" and content == "") or (path != "" and content != ""):
         click.echo('You have to pass exactly one of "--path" or "--content"')
@@ -117,12 +127,11 @@ def _set_parameters(path: str, content: str):
                 return
             new_partial_params = json.loads(content)
 
-        with FileLock(CONFIG_LOCK_PATH):
-            with open(PARAMS_FILE_PATH, "r") as f:
-                current_params: dict = json.load(f)
+        with open(PARAMS_FILE_PATH, "r") as f:
+            current_params: dict = json.load(f)
 
-            with open(PARAMS_FILE_PATH, "w") as f:
-                json.dump({**current_params, **new_partial_params}, f)
+        with open(PARAMS_FILE_PATH, "w") as f:
+            json.dump({**current_params, **new_partial_params}, f)
 
         success_handler("Updated parameters file")
 
@@ -130,19 +139,19 @@ def _set_parameters(path: str, content: str):
 @click.command(
     help=f"Validate the current setup.json file.\n\nThe required schema can be found in the documentation."
 )
+@with_filelock
 def _validate_setup():
-    with FileLock(CONFIG_LOCK_PATH):
-        if Validation.check_setup_file():
-            success_handler(f"Current setup file is valid")
+    if Validation.check_setup_file():
+        success_handler(f"Current setup file is valid")
 
 
 @click.command(
     help=f"Validate the current parameters.json file.\n\nThe required schema can be found in the documentation."
 )
+@with_filelock
 def _validate_parameters():
-    with FileLock(CONFIG_LOCK_PATH):
-        if Validation.check_parameters_file():
-            success_handler(f"Current parameters file is valid")
+    if Validation.check_parameters_file():
+        success_handler(f"Current parameters file is valid")
 
 
 @click.group()

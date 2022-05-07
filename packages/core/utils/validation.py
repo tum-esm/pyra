@@ -28,6 +28,8 @@ def _is_valid_ip_adress(field, value, error):
         error(field, "String has to be a valid IPv4 address")
 
 
+# TODO: Add config json schemas to documentation
+
 FILE_SCHEMA = {"type": "string", "check_with": _file_path_exists}
 DIR_SCHEMA = {"type": "string", "check_with": _directory_path_exists}
 IP_SCHEMA = {"type": "string", "check_with": _is_valid_ip_adress}
