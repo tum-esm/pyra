@@ -28,27 +28,15 @@
 
 
 # TODO: Use logging after initial tests
+
 import os
 import time
 import astropy.units as astropy_units
 import astropy.coordinates as astropy_coordinates
 import astropy.time as astropy_time
 import cv2 as cv
-from filelock import FileLock
 import numpy as np
-import json
-
-
-from packages.core.utils.validation import Validation
 from packages.core.utils.json_file_interaction import State
-
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
-PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
-STATE_FILE_PATH = f"{PROJECT_DIR}/config/state.json"
-CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
-
 from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.vbdsd")
@@ -105,24 +93,6 @@ class RingList:
 
     def __str__(self):
         return "".join(self.__data__)
-
-
-def read_json_config_files():
-    """Reads and validates the available json config files.
-
-    Returns
-    SETUP:dict and PARAMS:dict as Tuple
-    """
-    # TODO: Handle errors from config validation
-    with FileLock(CONFIG_LOCK_PATH):
-        Validation.check_parameters_file()
-        Validation.check_setup_file()
-        with open(SETUP_FILE_PATH, "r") as f:
-            SETUP = json.load(f)
-        with open(PARAMS_FILE_PATH, "r") as f:
-            PARAMS = json.load(f)
-
-    return (SETUP, PARAMS)
 
 
 def init_cam(cam_id):
@@ -412,7 +382,7 @@ def process_vbdsd_vision():
 
 def main(infinite_loop=True):
     global SETUP, PARAMS, cam
-    SETUP, PARAMS = read_json_config_files()
+    SETUP, PARAMS = State.read()
     status_history = RingList(PARAMS["vbdsd"]["evaluation_size"])
 
     loc = get_tracker_position()
@@ -423,7 +393,7 @@ def main(infinite_loop=True):
     while True:
 
         start_time = time.time()
-        SETUP, PARAMS = read_json_config_files()
+        SETUP, PARAMS = State.read()
 
         # sleep while sun angle is too low
         # assert False, repr(calc_sun_angle_deg(loc).to_string())

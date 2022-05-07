@@ -1,52 +1,54 @@
 import logging
 import os
-from filelock import FileLock
+import filelock
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-LOGS_LOCK_PATH = f"{PROJECT_DIR}/logs/logs.lock"
+LOGS_DIR = dir(dir(dir(dir(os.path.abspath(__file__))))) + "/logs"
 
-# Setup logging module
-logging_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-logging.basicConfig(
-    level=logging.DEBUG, filename=f"{PROJECT_DIR}/logs/debug.log", format=logging_format
-)
-logging_info_handler = logging.FileHandler(
-    filename=f"{PROJECT_DIR}/logs/info.log", mode="a"
-)
-logging_info_handler.setLevel(logging.INFO)
-logging_info_handler.setFormatter(logging.Formatter(logging_format))
-logger = logging.getLogger("pyra.core")
-logger.addHandler(logging_info_handler)
+# Set up logging module
+_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.DEBUG, filename=LOGS_DIR + "/debug.log", format=_fmt)
+_info_log_handler = logging.FileHandler(filename=LOGS_DIR + "/info.log", mode="a")
+_info_log_handler.setLevel(logging.INFO)
+_info_log_handler.setFormatter(logging.Formatter(_fmt))
 
-# Hide irrelevant logs from module "filelock"
+# Hide irrelevant logs from libraries
 logging.getLogger("filelock").setLevel(logging.WARNING)
+
+
+def with_filelock(function):
+    def locked_function(*args, **kwargs):
+        with filelock.FileLock(LOGS_DIR + "/logs.lock"):
+            return function(*args, **kwargs)
+
+    return locked_function
 
 
 class Logger:
     def __init__(self, origin="pyra.core"):
         self.logger = logging.getLogger(origin)
+        self.logger.addHandler(_info_log_handler)
 
+    @with_filelock
     def debug(self, message: str):
-        with FileLock(LOGS_LOCK_PATH):
-            self.logger.debug(message)
+        self.logger.debug(message)
 
+    @with_filelock
     def info(self, message: str):
-        with FileLock(LOGS_LOCK_PATH):
-            self.logger.info(message)
+        self.logger.info(message)
 
+    @with_filelock
     def warning(self, message: str):
-        with FileLock(LOGS_LOCK_PATH):
-            self.logger.warning(message)
+        self.logger.warning(message)
 
+    @with_filelock
     def critical(self, message: str):
-        with FileLock(LOGS_LOCK_PATH):
-            self.logger.critical(message)
+        self.logger.critical(message)
 
+    @with_filelock
     def error(self, message: str):
-        with FileLock(LOGS_LOCK_PATH):
-            self.logger.error(message)
+        self.logger.error(message)
 
+    @with_filelock
     def exception(self, message: str):
-        with FileLock(LOGS_LOCK_PATH):
-            self.logger.exception(message)
+        self.logger.exception(message)

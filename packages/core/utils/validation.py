@@ -9,17 +9,17 @@ SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
 PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
 
 
-def file_path_exists(field, value, error):
+def _file_path_exists(field, value, error):
     if not os.path.isfile(value):
         error(field, "Path has to be an existing file")
 
 
-def directory_path_exists(field, value, error):
+def _directory_path_exists(field, value, error):
     if not os.path.isdir(value):
         error(field, "Path has to be an existing directory")
 
 
-def is_valid_ip_adress(field, value, error):
+def _is_valid_ip_adress(field, value, error):
     try:
         assert len(value.split(".")) == 4
         assert all([n.isnumeric() for n in value.split(".")])
@@ -28,10 +28,9 @@ def is_valid_ip_adress(field, value, error):
         error(field, "String has to be a valid IPv4 address")
 
 
-# TODO: Add required JSON schema here (https://docs.python-cerberus.org/en/stable/)
-FILE_SCHEMA = {"type": "string", "check_with": file_path_exists}
-DIR_SCHEMA = {"type": "string", "check_with": directory_path_exists}
-IP_SCHEMA = {"type": "string", "check_with": is_valid_ip_adress}
+FILE_SCHEMA = {"type": "string", "check_with": _file_path_exists}
+DIR_SCHEMA = {"type": "string", "check_with": _directory_path_exists}
+IP_SCHEMA = {"type": "string", "check_with": _is_valid_ip_adress}
 DICT_SCHEMA = lambda schema: {"type": "dict", "schema": schema}
 INT_LIST_SCHEMA = lambda length: {
     "type": "list",
@@ -204,7 +203,7 @@ class Validation:
                 SETUP_FILE_SCHEMA, require_all=(not partial_validation)
             )
             content = Validation.__load_json(file_path, content_string, validator)
-            # TODO: Add checks that cannot be done with cerberus here
+            # Add checks that cannot be done with cerberus here
             return True
         except (AssertionError, CerberusException) as e:
             Validation.logging_handler(f"{logging_message}{e}")
@@ -222,7 +221,7 @@ class Validation:
                 PARAMS_FILE_SCHEMA, require_all=(not partial_validation)
             )
             content = Validation.__load_json(file_path, content_string, validator)
-            # TODO: Add checks that cannot be done with cerberus here
+            # Add checks that cannot be done with cerberus here
             return True
         except (AssertionError, CerberusException) as e:
             Validation.logging_handler(f"{logging_message}{e}")

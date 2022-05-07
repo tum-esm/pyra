@@ -9,20 +9,12 @@
 # description       :
 # ==============================================================================
 
-import os
 import snap7
 import time
 from packages.core.utils.json_file_interaction import State
-
 from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.enclosure-control")
-
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
-PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
-CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
 
 
 class EnclosureControl:
@@ -45,6 +37,7 @@ class EnclosureControl:
             return
 
         # check for automation state flank changes
+        # TODO: Move automation_status to state.json
         if (
             self.last_cycle_automation_status
             != self._PARAMS["pyra"]["automation_status"]

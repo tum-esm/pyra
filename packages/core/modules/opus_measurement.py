@@ -21,20 +21,16 @@
 
 
 import os
+import sys
 import time
+from packages.core.utils.logger import Logger
 
-# the following imports should be provided by pywin32
-try:
+if sys.platform == "win32":
+    # these imports are provided by pywin32
     import win32con
     import win32process
     import win32ui
     import dde
-
-    windows_libraries_available = True
-except ModuleNotFoundError:
-    windows_libraries_available = False
-
-from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.opus-measurement")
 
@@ -48,9 +44,8 @@ class OpusMeasurement:
     def __init__(self, initial_setup: dict, initial_parameters: dict):
         self._SETUP = initial_setup
         self._PARAMS = initial_parameters
-        if not windows_libraries_available:
-            logger.info("Windows libraries not available, class is inactive")
-            print("Windows libraries not available, class is inactive")
+        if sys.platform != "win32":
+            print("The OpusMeasurement class can only be tested on windows")
             return
 
         # note: dde servers talk to dde servers
@@ -62,7 +57,7 @@ class OpusMeasurement:
     def run(self, new_setup: dict, new_parameters: dict):
         self._SETUP, self._PARAMS = new_setup, new_parameters
 
-        if not windows_libraries_available:
+        if sys.platform != "win32":
             return
 
         logger.info("Running OpusMeasurement")
@@ -210,7 +205,11 @@ class OpusMeasurement:
         Returns pywin32 process information for later usage.
         """
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        opus_call = self._SETUP["opus"]["executable_path"] + " " + self._PARAMS["opus"]["executable_parameter"]
+        opus_call = (
+            self._SETUP["opus"]["executable_path"]
+            + " "
+            + self._PARAMS["opus"]["executable_parameter"]
+        )
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
             opus_call,
@@ -245,6 +244,9 @@ class OpusMeasurement:
             return False
 
     def test_setup(self):
+        if sys.platform != "win32":
+            return
+
         opus_is_running = self.__opus_application_running
         if not opus_is_running:
             self.__start_opus()
