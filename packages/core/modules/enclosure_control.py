@@ -71,6 +71,7 @@ class EnclosureControl:
         current_reading = self.continuous_readings()
         logger.info("New continuous readings.")
 
+        # TODO: Write this to state.json instead of parameters.json
         with FileLock(CONFIG_LOCK_PATH):
             with open(PARAMS_FILE_PATH, "w") as f:
                 self._PARAMS["enclosure"]["continuous_readings"] = current_reading

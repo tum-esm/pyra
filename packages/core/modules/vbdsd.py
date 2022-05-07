@@ -39,7 +39,6 @@ import numpy as np
 import json
 
 
-
 from packages.core.utils.validation import Validation
 
 dir = os.path.dirname
@@ -322,7 +321,9 @@ def get_tracker_position():
     longitude = readout[1]
     height = readout[2]
 
-    loc = astropy_coordinates.EarthLocation.from_geodetic(height=height, lat=latitude, lon=longitude)
+    loc = astropy_coordinates.EarthLocation.from_geodetic(
+        height=height, lat=latitude, lon=longitude
+    )
 
     return loc
 
@@ -407,7 +408,7 @@ def process_vbdsd_vision():
     return 0, frame
 
 
-def main(infinite_loop = True):
+def main(infinite_loop=True):
     global SETUP, PARAMS, cam
     SETUP, PARAMS = read_json_config_files()
     status_history = RingList(PARAMS["vbdsd"]["evaluation_size"])
@@ -417,14 +418,16 @@ def main(infinite_loop = True):
     cam = init_cam(SETUP["vbdsd"]["cam_id"])
     change_exposure()
 
-    while(True):
-    
+    while True:
+
         start_time = time.time()
         SETUP, PARAMS = read_json_config_files()
 
         # sleep while sun angle is too low
         # assert False, repr(calc_sun_angle_deg(loc).to_string())
-        while calc_sun_angle_deg(loc).is_within_bounds(None, PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg):
+        while calc_sun_angle_deg(loc).is_within_bounds(
+            None, PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
+        ):
             time.sleep(60)
 
         # reinit if parameter changes
@@ -456,26 +459,21 @@ def main(infinite_loop = True):
         if status_history.size() == status_history.maxsize():
             score = status_history.sum() / status_history.size()
 
-            if score > PARAMS["vbdsd"]["measurement_threshold"]:
-                with FileLock(CONFIG_LOCK_PATH):
-                    with open(PARAMS_FILE_PATH, "w") as f:
-                        PARAMS["pyra"]["automation_is_running"] = True
-                        json.dump(PARAMS, f, indent=2)
-                        print(PARAMS["vbdsd"])
-            else:
-                # sun status bad
-                with FileLock(CONFIG_LOCK_PATH):
-                    with open(PARAMS_FILE_PATH, "w") as f:
-                        PARAMS["pyra"]["automation_is_running"] = False
-                        json.dump(PARAMS, f, indent=2)
-                        print(PARAMS["vbdsd"])
+            # TODO: Write this to state.json instead of parameters.json
+            with FileLock(CONFIG_LOCK_PATH):
+                with open(PARAMS_FILE_PATH, "w") as f:
+                    PARAMS["pyra"]["automation_is_running"] = (
+                        score > PARAMS["vbdsd"]["measurement_threshold"]
+                    )
+                    json.dump(PARAMS, f, indent=2)
+                    print(PARAMS["vbdsd"])
 
         # wait rest of loop time
         elapsed_time = time.time()
         while (elapsed_time - start_time) < PARAMS["vbdsd"]["interval_time"]:
             time.sleep(1)
             elapsed_time = time.time()
-        
+
         if not infinite_loop:
             # TODO: Remove this when actual tests are in place
             print(status_history.__data__)

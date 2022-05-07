@@ -110,7 +110,7 @@ SETUP_FILE_SCHEMA = {
         {
             "cam_id": {"type": "integer"},
             "image_storage_path": DIR_SCHEMA,
-            "sensor_is_present": {"type": "boolean"},
+            "is_present": {"type": "boolean"},
         }
     ),
 }
@@ -127,7 +127,6 @@ PARAMS_FILE_SCHEMA = {
     ),
     "pyra": DICT_SCHEMA(
         {
-            "automation_is_running": {"type": "boolean"},
             "seconds_per_iteration": {"type": "number"},
             "test_mode": {"type": "boolean"},
         }
@@ -142,7 +141,6 @@ PARAMS_FILE_SCHEMA = {
     ),
     "enclosure": DICT_SCHEMA(
         {
-            "continuous_readings": {"type": "list"},
             "min_sun_angle": {"type": "number"},
         }
     ),

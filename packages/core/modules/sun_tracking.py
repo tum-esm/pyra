@@ -59,7 +59,8 @@ class SunTracking:
 
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
-        if self._PARAMS["pyra"]["automation_is_running"] == 0:
+        # TODO: Read this from state.json instead of parameters.json
+        if self._PARAMS["pyra"]["automation_is_running"]:
 
             if self.__ct_application_running:
                 self.__stop_sun_tracking_automation()
