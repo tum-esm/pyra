@@ -1,14 +1,16 @@
 import json
 import os
+import shutil
 import filelock
 from packages.core.utils.validation import Validation
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
-SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
-PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
-STATE_FILE_PATH = f"{PROJECT_DIR}/config/state.json"
-CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
+SETUP_FILE_PATH = os.path.join(PROJECT_DIR, "config", "setup.json")
+PARAMS_FILE_PATH = os.path.join(PROJECT_DIR, "config", "parameters.json")
+STATE_FILE_PATH = os.path.join(PROJECT_DIR, "config", "state.json")
+CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", "config.lock")
+VBDSD_IMG_DIR = os.path.join(PROJECT_DIR, "runtime_data", "vbdsd")
 
 
 # FileLock = Mark, that the config JSONs are being used and the
@@ -26,6 +28,7 @@ class State:
     @staticmethod
     @with_filelock
     def initialize():
+        # reset state.json
         os.remove(STATE_FILE_PATH)
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(
@@ -37,6 +40,11 @@ class State:
                 },
                 f,
             )
+
+        # reset directory where vbdsd images are stored
+        shutil.rmtree(VBDSD_IMG_DIR)
+        os.mkdir(VBDSD_IMG_DIR)
+        os.system("touch" + os.path.join(VBDSD_IMG_DIR, ".gitkeep"))
 
     @staticmethod
     @with_filelock
