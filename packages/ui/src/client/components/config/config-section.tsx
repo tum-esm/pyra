@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import ICONS from '../assets/icons';
-import TYPES from '../../types/index';
+import ICONS from '../../assets/icons';
+import TYPES from '../../../types/index';
 
 import ConfigElementText from './config-element-text';
 import ToggleRow from './config-element-toggle';
 import IntArrayMatrix from './config-element-matrix';
-import sortConfigKeys from '../utils/sort-config-keys';
-import capitalizeConfigKey from '../utils/capitalize-config-key';
+import sortConfigKeys from '../../utils/sort-config-keys';
+import capitalizeConfigKey from '../../utils/capitalize-config-key';
 
 export default function ConfigSection(props: {
     key1: string;
@@ -15,14 +15,15 @@ export default function ConfigSection(props: {
     addLocalUpdate(v: TYPES.configJSON): void;
 }) {
     const { key1, localJSON, centralJSON, addLocalUpdate } = props;
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
 
     return (
         <div
             className={
                 'flex flex-col w-full gap-y-3 pl-14 pr-6 ' +
-                'transition-all duration-100 ' +
-                (open ? 'bg-gray-50 py-4 ' : 'py-2 ')
+                'transition-all duration-100 first:pt-6 last:pb-20 ' +
+                (open ? 'bg-gray-50 py-4 ' : 'py-2 ') +
+                'first:border-0 border-t border-gray-300'
             }
         >
             <div className='w-full -ml-8 flex-row-left gap-x-1'>
@@ -35,7 +36,7 @@ export default function ConfigSection(props: {
                 >
                     {ICONS.chevronDown}
                 </button>
-                <h2 className='text-base font-bold text-gray-800'>
+                <h2 className='text-lg font-bold text-gray-900'>
                     {capitalizeConfigKey(key1)}
                 </h2>
             </div>

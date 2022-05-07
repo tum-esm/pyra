@@ -8,7 +8,7 @@ export default function TextInput(props: {
 }) {
     function setValue(v: string) {
         if (typeof props.value === 'number') {
-            let newNumber = parseInt(v);
+            let newNumber = parseFloat(v);
             props.setValue(isNaN(newNumber) ? 0 : newNumber);
         } else {
             props.setValue(v);

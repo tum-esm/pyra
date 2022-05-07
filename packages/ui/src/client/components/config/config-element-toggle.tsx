@@ -1,5 +1,5 @@
 import React from 'react';
-import Toggle from './essential/toggle';
+import Toggle from '../essential/toggle';
 import ConfigElement from './config-element';
 
 export default function ConfigElementToggle(props: {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TYPES from '../../types/index';
-import ConfigSection from '../components/config-section';
-import SavingOverlay from '../components/saving-overlay';
+import ConfigSection from '../components/config/config-section';
+import SavingOverlay from '../components/config/saving-overlay';
 import { defaultsDeep, trim } from 'lodash';
 import deepEqual from '../utils/deep-equal';
 import sortConfigKeys from '../utils/sort-config-keys';
@@ -66,35 +66,37 @@ export default function ConfigTab(props: {
         !deepEqual(localJSON, centralJSON);
 
     return (
-        <div
-            className={
-                'flex-col items-start justify-start w-full h-full pb-20 pt-4 overflow-y-scroll ' +
-                (props.visible ? 'flex ' : 'hidden ')
-            }
-        >
-            {localJSON !== undefined && (
-                <>
-                    {sortConfigKeys(centralJSON).map(
-                        (key1: string, i: number) => (
-                            <React.Fragment key={key1}>
-                                <ConfigSection
-                                    {...{
-                                        key1,
-                                        localJSON,
-                                        centralJSON,
-                                        addLocalUpdate,
-                                    }}
-                                />
-                            </React.Fragment>
-                        )
-                    )}
-                </>
-            )}
+        <>
+            <div
+                className={
+                    'flex-col items-start justify-start w-full h-full overflow-y-scroll ' +
+                    (props.visible ? 'flex ' : 'hidden ')
+                }
+            >
+                {localJSON !== undefined && (
+                    <>
+                        {sortConfigKeys(centralJSON).map(
+                            (key1: string, i: number) => (
+                                <React.Fragment key={key1}>
+                                    <ConfigSection
+                                        {...{
+                                            key1,
+                                            localJSON,
+                                            centralJSON,
+                                            addLocalUpdate,
+                                        }}
+                                    />
+                                </React.Fragment>
+                            )
+                        )}
+                    </>
+                )}
+            </div>
             {configIsDiffering && (
                 <SavingOverlay
                     {...{ errorMessage, saveLocalJSON, restoreCentralJSON }}
                 />
             )}
-        </div>
+        </>
     );
 }

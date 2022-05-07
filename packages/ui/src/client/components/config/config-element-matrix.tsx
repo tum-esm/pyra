@@ -1,9 +1,9 @@
 import React from 'react';
-import Toggle from './essential/toggle';
-import sortConfigKeys from '../utils/sort-config-keys';
+import Toggle from '../essential/toggle';
+import sortConfigKeys from '../../utils/sort-config-keys';
 import ConfigElement from './config-element';
-import TextInput from './essential/text-input';
-import capitalizeConfigKey from '../utils/capitalize-config-key';
+import TextInput from '../essential/text-input';
+import capitalizeConfigKey from '../../utils/capitalize-config-key';
 
 function IntArrayRow(props: {
     label: string;
@@ -23,7 +23,7 @@ function IntArrayRow(props: {
     const hasBeenModified = JSON.stringify(value) !== JSON.stringify(oldValue);
 
     return (
-        <div className='relative w-full flex-row-left gap-x-2'>
+        <div className='relative w-full flex-row-left gap-x-1'>
             <label className='pl-3 overflow-hidden text-sm text-left w-44 opacity-80 text-slate-800 whitespace-nowrap'>
                 ↦ {capitalizeConfigKey(label)}:
             </label>

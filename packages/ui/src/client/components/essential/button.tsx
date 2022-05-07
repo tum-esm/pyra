@@ -1,12 +1,12 @@
 import React from 'react';
 
 export default function Button(props: {
-    text: string;
+    children: React.ReactNode;
     onClick(): void;
     variant: 'green' | 'red' | 'blue' | 'gray' | 'toggle-true' | 'toggle-false';
     disabled?: boolean;
 }) {
-    const { text, onClick, variant } = props;
+    const { children, onClick, variant } = props;
 
     let colorClasses: string = '';
     switch (variant) {
@@ -45,7 +45,7 @@ export default function Button(props: {
                 colorClasses
             }
         >
-            {text}
+            {children}
         </button>
     );
 }

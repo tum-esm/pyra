@@ -1,5 +1,5 @@
 import React from 'react';
-import capitalizeConfigKey from '../utils/capitalize-config-key';
+import capitalizeConfigKey from '../../utils/capitalize-config-key';
 
 export default function ConfigElement(props: {
     label: string;
@@ -12,8 +12,8 @@ export default function ConfigElement(props: {
         'relative flex flex-col items-start justify-start w-full gap-y-1';
     return (
         <div className={sharedClasses}>
-            <label className='pb-1 text-xs opacity-80 text-slate-800'>
-                <span className='font-medium'>
+            <label className='text-sm text-gray-800'>
+                <span className='font-semibold'>
                     {capitalizeConfigKey(label)}
                 </span>
                 {previousValue !== undefined && (

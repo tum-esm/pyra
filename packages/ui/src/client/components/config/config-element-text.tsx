@@ -1,6 +1,6 @@
 import React from 'react';
-import TextInput from './essential/text-input';
-import Button from './essential/button';
+import TextInput from '../essential/text-input';
+import Button from '../essential/button';
 import ConfigElement from './config-element';
 
 export default function TextInputRow(props: {
@@ -29,11 +29,9 @@ export default function TextInputRow(props: {
             <div className='relative flex w-full gap-x-1'>
                 <TextInput value={value} setValue={setValue} />
                 {showfileSelector && !disabled && (
-                    <Button
-                        text='choose path'
-                        variant='blue'
-                        onClick={triggerFileSelection}
-                    />
+                    <Button variant='blue' onClick={triggerFileSelection}>
+                        choose path
+                    </Button>
                 )}
             </div>
         </ConfigElement>

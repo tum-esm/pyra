@@ -40,11 +40,9 @@ function Main() {
                         </span>
                         .
                     </p>
-                    <Button
-                        text='Retry connection'
-                        onClick={updateCliStatus}
-                        variant='green'
-                    />
+                    <Button onClick={updateCliStatus} variant='green'>
+                        retry connection
+                    </Button>
                 </main>
             )}
             {pyraIsSetUp && (

@@ -10,5 +10,6 @@ export default function capitalizeConfigKey(key: string) {
         .replace('Ip', 'IP')
         .replace('Id', 'ID')
         .replace('Em27', 'EM27')
+        .replace('Vbdsd', 'VBDSD')
         .replace('Tum', 'TUM');
 }

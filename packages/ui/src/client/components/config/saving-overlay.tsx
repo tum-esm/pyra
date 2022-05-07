@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from './essential/button';
+import Button from '../essential/button';
 
 export default function SavingOverlay(props: {
     errorMessage: undefined | string;
@@ -14,9 +14,13 @@ export default function SavingOverlay(props: {
                     {errorMessage}
                 </span>
             )}
-            <Button text='revert' onClick={restoreCentralJSON} variant='gray' />
+            <Button onClick={restoreCentralJSON} variant='gray'>
+                revert
+            </Button>
             {errorMessage === undefined && (
-                <Button text='save' onClick={saveLocalJSON} variant='gray' />
+                <Button onClick={saveLocalJSON} variant='gray'>
+                    save
+                </Button>
             )}
         </div>
     );

@@ -13,17 +13,19 @@ export default function Toggle(props: {
     return (
         <div className='relative flex gap-x-1'>
             <Button
-                text={props.trueLabel === undefined ? 'Yes' : props.trueLabel}
                 onClick={() => setValue(true)}
-                disabled={props.disabled}
+                disabled={disabled}
                 variant={value ? 'toggle-true' : 'toggle-false'}
-            />
+            >
+                {trueLabel === undefined ? 'Yes' : trueLabel}
+            </Button>
             <Button
-                text={props.falseLabel === undefined ? 'No' : props.falseLabel}
                 onClick={() => setValue(false)}
-                disabled={props.disabled}
+                disabled={disabled}
                 variant={value ? 'toggle-false' : 'toggle-true'}
-            />
+            >
+                {falseLabel === undefined ? 'No' : falseLabel}
+            </Button>
         </div>
     );
 }

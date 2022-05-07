@@ -78,11 +78,9 @@ export default function LogTab(props: { visible: boolean }) {
                     ))}
                 </div>
                 <div className='flex-grow' />
-                <Button
-                    text='Archive Logs'
-                    onClick={archiveLogs}
-                    variant='red'
-                />
+                <Button onClick={archiveLogs} variant='red'>
+                    archive logs
+                </Button>
             </div>
             <pre className='w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded overflow-y-scroll'>
                 <code className='w-full h-full !text-sm language-log'>
