@@ -57,7 +57,7 @@ class SunTracking:
 
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
-        if State.read()["vbdsd_evaluation_result"]:
+        if not State.read()["vbdsd_evaluation_is_positive"]:
             if self.__ct_application_running:
                 self.__stop_sun_tracking_automation()
                 logger.info("Stop CamTracker.")

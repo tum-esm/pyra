@@ -24,19 +24,15 @@
         "min_sun_angle": 10.0
     },
     "measurement_triggers": {
+        "manual_override": false,
         "type": {
             "time": false,
             "sun_angle": false,
-            "vbdsd": true,
-            "user_control": false
+            "vbdsd": true
         },
         "start_time": [0, 0, 0],
         "stop_time": [0, 0, 0],
-        "user_trigger_present": false,
         "sun_angle_start": 0.0,
         "sun_angle_stop": 0.0
-    },
-    "measurement_conditions": {
-        "current_sun_angle": 0.0
     }
 }

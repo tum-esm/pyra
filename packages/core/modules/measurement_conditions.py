@@ -13,11 +13,28 @@
 # status, temporal conditions like current time, or manual user input.
 # ==============================================================================
 
-# TODO: Integrate VBDSD sun status
-
+import datetime
+from packages.core.utils.json_file_interaction import State
 from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.measurement-conditions")
+
+
+def get_current_sun_elevation() -> float:
+    pass
+
+
+def current_time_is_before_noon() -> bool:
+    pass
+
+
+# returns (hour, minute, second) tuple
+def current_time_is_in_range_tuples(t_start: tuple[int], t_end: tuple[int]):
+    now = datetime.datetime.now()
+    current_time = datetime.time(now.hour, now.minute, now.second)
+    start_time = datetime.time(*t_start)
+    end_time = datetime.time(*t_end)
+    return current_time > start_time and current_time < end_time
 
 
 class MeasurementConditions:
@@ -27,14 +44,32 @@ class MeasurementConditions:
 
     def run(self, new_setup: dict, new_parameters: dict):
         self._SETUP, self._PARAMS = new_setup, new_parameters
+        _triggers = self._PARAMS["measurement_triggers"]
 
         logger.info("Running MeasurementConditions")
-        pass
 
-    # allow for multiple options
-    # check for time
-    # check for sun angle
-    # use vbdsd
-    # check for user input
+        automation_should_be_running = True
 
-    # if self.sun_angle_deg < 10.0 * u.deg: em27 power off
+        if not _triggers["manually_enforced"]:
+            if _triggers["type"]["sun_angle"]:
+                min_required_elevation = (
+                    _triggers["sun_angle_start"]
+                    if current_time_is_before_noon()
+                    else _triggers["sun_angle_stop"]
+                )
+                if State.read()["current_sun_elevation"] < min_required_elevation:
+                    automation_should_be_running &= False
+
+            if _triggers["type"]["time"]:
+                if not current_time_is_in_range_tuples(
+                    _triggers["start_time"], _triggers["stop_time"]
+                ):
+                    automation_should_be_running &= False
+
+            if _triggers["type"]["vbdsd"]:
+                if not State.read()["vbdsd_evaluation_is_positive"]:
+                    automation_should_be_running &= False
+
+        State.update({"automation_should_be_running": automation_should_be_running})
+
+        # if self.sun_angle_deg < 10.0 * u.deg: em27 power off

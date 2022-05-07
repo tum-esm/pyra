@@ -28,7 +28,15 @@ class State:
     def initialize():
         os.remove(STATE_FILE_PATH)
         with open(STATE_FILE_PATH, "w") as f:
-            json.dump({"vbdsd_evaluation_result": False, "continuous_readings": []}, f)
+            json.dump(
+                {
+                    "vbdsd_evaluation_is_positive": False,
+                    "enclosure_plc_readings": [],
+                    "automation_should_be_running": False,
+                    "current_sun_elevation": None,
+                },
+                f,
+            )
 
     @staticmethod
     @with_filelock

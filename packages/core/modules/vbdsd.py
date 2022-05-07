@@ -432,7 +432,7 @@ def main(infinite_loop=True):
             score = status_history.sum() / status_history.size()
             State.update(
                 {
-                    "vbdsd_evaluation_result": (
+                    "vbdsd_evaluation_is_positive": (
                         score > PARAMS["vbdsd"]["measurement_threshold"]
                     )
                 }

@@ -77,30 +77,27 @@ class OpusMeasurement:
             return
 
         # check for automation state flank changes
-        if (
-            self.last_cycle_automation_status
-            != self._PARAMS["pyra"]["automation_status"]
-        ):
-            if self._PARAMS["pyra"]["automation_status"] == 1:
+        automation_should_be_running = State.read()["automation_should_be_running"]
+        if self.last_cycle_automation_status != automation_should_be_running:
+            if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
                 self.__load_experiment()
-                logger.info("Load OPUS Experiment.")
+                logger.info("Loading OPUS Experiment.")
                 time.sleep(1)
                 self.__start_macro()
-                logger.info("Start OPUS Macro.")
-
-            if self._PARAMS["pyra"]["automation_status"] == 0:
+                logger.info("Starting OPUS Macro.")
+            else:
                 # flank change 1 -> 0: stop macro
                 self.__stop_macro()
-                logger.info("Stop OPUS Macro.")
+                logger.info("Stopping OPUS Macro.")
 
         # save the automation status for the next run
-        self.last_cycle_automation_status = self._PARAMS["pyra"]["automation_status"]
+        self.last_cycle_automation_status = automation_should_be_running
 
         if self.__is_em27_connected:
             logger.info("Successful ping to EM27.")
         else:
-            logger.info("EM27 seems to be not connected.")
+            logger.info("EM27 seems to be disconnected.")
 
     def __connect_to_dde_opus(self):
         try:

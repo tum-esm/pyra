@@ -147,6 +147,7 @@ PARAMS_FILE_SCHEMA = {
     ),
     "measurement_triggers": DICT_SCHEMA(
         {
+            "manual_override": {"type": "boolean"},
             "type": DICT_SCHEMA(
                 {
                     "time": {"type": "boolean"},
@@ -157,12 +158,10 @@ PARAMS_FILE_SCHEMA = {
             ),
             "start_time": INT_LIST_SCHEMA(3),
             "stop_time": INT_LIST_SCHEMA(3),
-            "user_trigger_present": {"type": "boolean"},
             "sun_angle_start": {"type": "number"},
             "sun_angle_stop": {"type": "number"},
         }
     ),
-    "measurement_conditions": DICT_SCHEMA({"current_sun_angle": {"type": "number"}}),
 }
 
 
