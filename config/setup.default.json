@@ -56,7 +56,6 @@
     },
     "vbdsd": {
         "is_present": false,
-        "cam_id": 0,
-        "image_storage_path": "C:\\img\\"
+        "cam_id": 0
     }
 }

@@ -5,7 +5,6 @@
 # config
 config/parameters.json
 config/setup.json
-config/state.json
 config/config.lock
 
 # logs
@@ -22,10 +21,12 @@ pids
 *.seed
 *.pid.lock
 .DS_Store
-images/*.jpg
 *.dat
 Bilder/**/*.JPG
 *.txt
+runtime_data/state.json
+runtime_data/state.lock
+runtime_data/vbdsd/*.jpg
 
 # pyra ui
 packages/ui/node_modules/

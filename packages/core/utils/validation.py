@@ -108,11 +108,7 @@ SETUP_FILE_SCHEMA = {
         }
     ),
     "vbdsd": DICT_SCHEMA(
-        {
-            "is_present": {"type": "boolean"},
-            "cam_id": {"type": "integer"},
-            "image_storage_path": DIR_SCHEMA,
-        }
+        {"is_present": {"type": "boolean"}, "cam_id": {"type": "integer"}}
     ),
 }
 

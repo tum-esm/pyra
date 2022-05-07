@@ -36,10 +36,14 @@ import astropy.coordinates as astropy_coordinates
 import astropy.time as astropy_time
 import cv2 as cv
 import numpy as np
-from packages.core.utils.json_file_interaction import State
+from packages.core.utils.json_file_interaction import PROJECT_DIR, State
 from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.vbdsd")
+
+dir = os.path.dirname
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+IMG_DIR = os.path.join(PROJECT_DIR, "runtime_data", " vbdsd")
 
 
 class RingList:
@@ -419,13 +423,9 @@ def main(infinite_loop=True):
         else:
             status_history.append(0)
 
-        if os.path.exists(SETUP["vbdsd"]["image_storage_path"]) and frame is not None:
+        if frame is not None:
             img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
-            img_full_path = os.path.join(
-                SETUP["vbdsd"]["image_storage_path"] + img_name
-            )
-            # save image
-            cv.imwrite(img_full_path, frame)
+            cv.imwrite(os.path.join(IMG_DIR + img_name), frame)
 
         # start eval of sun state once initial list is filled
         if status_history.size() == status_history.maxsize():
