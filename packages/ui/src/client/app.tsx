@@ -28,7 +28,7 @@ function Main() {
     return (
         <div className='flex flex-col items-stretch w-screen h-screen overflow-hidden'>
             {!pyraIsSetUp && !checkingSetup && (
-                <main className='flex flex-col items-center justify-center w-full h-full gap-y-4 bg-slate-300'>
+                <main className='flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4'>
                     <p className='max-w-sm text-center'>
                         <pre className='bg-slate-200 mr-1 px-1 py-0.5 rounded-sm font-bold inline'>
                             pyra-cli
@@ -48,7 +48,7 @@ function Main() {
             {pyraIsSetUp && (
                 <>
                     <Header {...{ tabs, activeTabIndex, setActiveTabIndex }} />
-                    <main className='flex-grow w-full min-h-0 bg-slate-200'>
+                    <main className='flex-grow w-full min-h-0 bg-gray-100'>
                         <ConfigTab
                             type='setup'
                             visible={tabs[activeTabIndex] === 'Setup'}

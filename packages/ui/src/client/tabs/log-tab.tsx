@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Toggle from '../components/essential/toggle';
 import ICONS from '../assets/icons';
 import Button from '../components/essential/button';
 
@@ -38,51 +39,37 @@ export default function LogTab(props: { visible: boolean }) {
                 (props.visible ? 'flex ' : 'hidden ')
             }
         >
-            <div className='flex w-full gap-x-2'>
-                <button
-                    className={
-                        'px-1 py-1 font-medium rounded ' +
-                        'bg-white svg-white-button'
-                    }
+            <div className='flex-row-center gap-x-2'>
+                <Button
                     onClick={() => {
                         window.electron.playBeep();
                         updateLogs();
                     }}
+                    variant='gray'
                 >
                     <div className='w-5 h-5'>{ICONS.refresh}</div>
-                </button>
-                <div className='flex bg-white rounded'>
-                    {['info', 'debug'].map((l: 'info' | 'debug', i) => (
-                        <button
-                            className={
-                                'px-3 py-0.5 font-medium rounded-sm ' +
-                                'flex items-center gap-x-2 ' +
-                                (l === logLevel
-                                    ? 'bg-blue-300 text-blue-900 '
-                                    : 'bg-slate-100 text-slate-500 ') +
-                                (i === 0 ? 'rounded-l ' : '') +
-                                (i === 1 ? 'rounded-r ' : '')
-                            }
-                            onClick={() => setLogLevel(l)}
-                        >
-                            <div
-                                className={
-                                    'w-2 h-2 rounded-full ' +
-                                    (l === logLevel
-                                        ? 'bg-blue-500 '
-                                        : 'bg-slate-200 ')
-                                }
-                            />
-                            {l}
-                        </button>
-                    ))}
-                </div>
+                </Button>
+
+                <span className='pl-3 ml-3 font-medium text-gray-800 border-l border-gray-400'>
+                    level:
+                </span>
+                <Toggle
+                    value={logLevel == 'info'}
+                    setValue={v => setLogLevel(v ? 'info' : 'debug')}
+                    trueLabel='info'
+                    falseLabel='debug'
+                />
                 <div className='flex-grow' />
                 <Button onClick={archiveLogs} variant='red'>
                     archive logs
                 </Button>
             </div>
-            <pre className='w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded overflow-y-scroll'>
+            <pre
+                className={
+                    'w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded overflow-y-scroll ' +
+                    'border border-gray-300 shadow-sm'
+                }
+            >
                 <code className='w-full h-full !text-sm language-log'>
                     {logLevel === 'info' ? infoLogs : debugLogs}
                     {(logLevel === 'info' ? infoLogs : debugLogs)

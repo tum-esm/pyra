@@ -10,6 +10,36 @@ import ConfigElementTime from './config-element-time';
 import sortConfigKeys from '../../utils/sort-config-keys';
 import capitalizeConfigKey from '../../utils/capitalize-config-key';
 
+/*
+Special triggers:
+
+If (!measurement_triggers.type.sun_angle) {
+    hide and set to old value -> measurement_triggers.sun_angle_start
+    hide and set to old value -> measurement_triggers.sun_angle_stop
+}
+
+If (!measurement_triggers.type.time) {
+    hide and set to old value -> measurement_triggers.start_time
+    hide and set to old value -> measurement_triggers.stop_time
+}
+
+TODO: rename measurement_triggers.user_trigger_present!!!
+If (!measurement_triggers.type.user_control) {
+    hide and set to old value -> measurement_triggers.user_trigger_present
+}
+
+If (!plc.is_present) {
+    hide and set to old value -> all other stuff inside plc
+    set plc.ip to 0.0.0.0
+}
+
+TODO: remove vbdsd.image_storage_path
+TODO: rename vbdsd.sensor_is_present to vbdsd.is_present
+If (!vbdsd.sensor_is_present) {
+    hide and set to old value -> all other stuff inside vbdsd
+    hide the whole vbdsd section inside parameters
+}
+*/
 export default function ConfigSection(props: {
     key1: string;
     localJSON: TYPES.configJSON;
@@ -23,16 +53,18 @@ export default function ConfigSection(props: {
         <div
             className={
                 'flex flex-col w-full gap-y-3 pl-14 pr-6 ' +
-                'transition-all duration-100 first:pt-6 last:pb-20 ' +
-                (open ? 'bg-gray-50 py-4 ' : 'py-2 ') +
-                'first:border-0 border-t border-gray-300'
+                'transition-all duration-100 first:pt-4 last:pb-20 ' +
+                (open
+                    ? 'bg-white py-4 border-gray-300 -mt-px first:mt-0 '
+                    : 'py-1 border-transparent ') +
+                'first:border-t-0 border-y border-collapse '
             }
         >
             <button
                 className={
                     'pr-2.5 mr-auto -ml-8 rounded flex-row-left gap-x-1 ' +
                     'text-black fill-black ' +
-                    'hover:text-green-600 hover:fill-green-600'
+                    'hover:text-green-600 hover:fill-green-600 '
                 }
                 onClick={() => setOpen(!open)}
             >
