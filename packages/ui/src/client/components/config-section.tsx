@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import ICONS from '../assets/icons';
 import TYPES from '../../types/index';
 
-import TextInputRow from './text-input-row';
-import ToggleRow from './toggle-row';
-import IntArrayMatrix from './int-array-matrix';
+import ConfigElementText from './config-element-text';
+import ToggleRow from './config-element-toggle';
+import IntArrayMatrix from './config-element-matrix';
 import sortConfigKeys from '../utils/sort-config-keys';
+import capitalizeConfigKey from '../utils/capitalize-config-key';
 
 export default function ConfigSection(props: {
     key1: string;
@@ -35,7 +36,7 @@ export default function ConfigSection(props: {
                     {ICONS.chevronDown}
                 </button>
                 <h2 className='text-base font-bold text-gray-800'>
-                    {key1.toLocaleUpperCase()}
+                    {capitalizeConfigKey(key1)}
                 </h2>
             </div>
 
@@ -59,13 +60,7 @@ export default function ConfigSection(props: {
                             case 'number':
                                 return (
                                     /* @ts-ignore */
-                                    <TextInputRow
-                                        {...commonProps}
-                                        numeric={
-                                            typeof centralJSON[key1][key2] ===
-                                            'number'
-                                        }
-                                    />
+                                    <ConfigElementText {...commonProps} />
                                 );
                             case 'boolean':
                                 return (
