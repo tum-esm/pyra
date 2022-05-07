@@ -135,7 +135,7 @@ class OpusMeasurement:
     def __load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._PARAMS["opus"]["experiment_path"]
+        full_path = self._SETUP["opus"]["experiment_path"]
 
         if not self.__test_dde_connection:
             return
@@ -149,7 +149,7 @@ class OpusMeasurement:
     def __start_macro(self):
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._PARAMS["opus"]["macro_path"]
+        full_path = self._SETUP["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -163,7 +163,7 @@ class OpusMeasurement:
     def __stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._PARAMS["opus"]["macro_path"]
+        full_path = self._SETUP["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -205,7 +205,7 @@ class OpusMeasurement:
         opus_call = (
             self._SETUP["opus"]["executable_path"]
             + " "
-            + self._PARAMS["opus"]["executable_parameter"]
+            + self._SETUP["opus"]["executable_parameter"]
         )
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,

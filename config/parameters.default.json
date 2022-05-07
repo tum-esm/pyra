@@ -5,18 +5,13 @@
     "em27": {
         "power_min_angle": 10.0
     },
-    "opus": {
-        "executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
-        "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
-        "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx"
-    },
     "pyra": {
-        "seconds_per_iteration": 30,
+        "seconds_per_interval": 30,
         "test_mode": false
     },
     "vbdsd": {
         "evaluation_size": 15,
-        "interval_time": 6,
+        "seconds_per_interval": 6,
         "measurement_threshold": 0.6,
         "min_sun_angle": 11.0
     },

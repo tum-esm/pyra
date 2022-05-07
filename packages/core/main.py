@@ -24,7 +24,7 @@ def run():
     # TODO: Start vbdsd in a thread
 
     while True:
-        execution_started_at = datetime.now().timestamp()
+        start_time = time.time()
         logger.info("Starting Iteration")
 
         try:
@@ -48,10 +48,10 @@ def run():
             # TODO: trigger email?
 
         logger.info("Ending Iteration")
-        execution_ended_at = datetime.now().timestamp()
-        time_to_wait = _PARAMS["pyra"]["seconds_per_iteration"] - (
-            execution_ended_at - execution_started_at
-        )
-        time_to_wait = 0 if time_to_wait < 0 else time_to_wait
-        logger.debug(f"Waiting {time_to_wait} second(s)")
-        time.sleep(time_to_wait)
+
+        # wait rest of loop time
+        elapsed_time = time.time() - start_time
+        time_to_wait = _PARAMS["pyra"]["seconds_per_interval"] - elapsed_time
+        if time_to_wait > 0:
+            logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
+            time.sleep(time_to_wait)

@@ -28,8 +28,6 @@ def _is_valid_ip_adress(field, value, error):
         error(field, "String has to be a valid IPv4 address")
 
 
-# TODO: Add config json schemas to documentation
-
 FILE_SCHEMA = {"type": "string", "check_with": _file_path_exists}
 DIR_SCHEMA = {"type": "string", "check_with": _directory_path_exists}
 IP_SCHEMA = {"type": "string", "check_with": _is_valid_ip_adress}
@@ -44,6 +42,14 @@ INT_SCHEMA = {"type": "integer"}
 BOOL_SCHEMA = {"type": "boolean"}
 
 SETUP_FILE_SCHEMA = {
+    "opus": DICT_SCHEMA(
+        {
+            "executable_path": FILE_SCHEMA,
+            "executable_parameter": {"type": "string"},
+            "experiment_path": FILE_SCHEMA,
+            "macro_path": FILE_SCHEMA,
+        }
+    ),
     "camtracker": DICT_SCHEMA(
         {
             "config_path": FILE_SCHEMA,
@@ -52,9 +58,9 @@ SETUP_FILE_SCHEMA = {
             "sun_intensity_path": FILE_SCHEMA,
         }
     ),
-    "em27": DICT_SCHEMA({"ip": IP_SCHEMA}),
-    "enclosure": DICT_SCHEMA({"tum_enclosure_is_present": {"type": "boolean"}}),
-    "opus": DICT_SCHEMA({"executable_path": FILE_SCHEMA}),
+    "general": DICT_SCHEMA(
+        {"em27_ip": IP_SCHEMA, "tum_enclosure_is_present": {"type": "boolean"}}
+    ),
     "plc": DICT_SCHEMA(
         {
             "actors": DICT_SCHEMA(
@@ -115,23 +121,16 @@ SETUP_FILE_SCHEMA = {
 PARAMS_FILE_SCHEMA = {
     "camtracker": DICT_SCHEMA({"motor_offset_threshold": {"type": "number"}}),
     "em27": DICT_SCHEMA({"power_min_angle": {"type": "number"}}),
-    "opus": DICT_SCHEMA(
-        {
-            "executable_parameter": {"type": "string"},
-            "experiment_path": FILE_SCHEMA,
-            "macro_path": FILE_SCHEMA,
-        }
-    ),
     "pyra": DICT_SCHEMA(
         {
-            "seconds_per_iteration": {"type": "number"},
+            "seconds_per_interval": {"type": "number"},
             "test_mode": {"type": "boolean"},
         }
     ),
     "vbdsd": DICT_SCHEMA(
         {
             "evaluation_size": {"type": "integer"},
-            "interval_time": {"type": "number"},
+            "seconds_per_interval": {"type": "number"},
             "measurement_threshold": {"type": "number"},
             "min_sun_angle": {"type": "number"},
         }

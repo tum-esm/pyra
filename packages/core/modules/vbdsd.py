@@ -44,7 +44,7 @@ logger = Logger(origin="pyra.core.vbdsd")
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 IMG_DIR = os.path.join(PROJECT_DIR, "runtime_data", " vbdsd")
-SETUP, PARAMS = None, None
+_SETUP, _PARAMS = None, None
 
 
 class _VBDSD:
@@ -57,7 +57,7 @@ class _VBDSD:
         If successfully connected, the function returns an instance object of the
         camera, otherwise None will be returned.
         """
-        cam_id = SETUP["vbdsd"]["cam_id"]
+        cam_id = _SETUP["vbdsd"]["cam_id"]
         _VBDSD.cam = cv.VideoCapture(cam_id)
         _VBDSD.cam.release()
 
@@ -239,16 +239,16 @@ class _VBDSD:
 
 
 def _sync_config():
-    global SETUP, PARAMS
-    SETUP, PARAMS = Config.read()
-    Astronomy.SETUP = SETUP
-    Astronomy.PARAMS = PARAMS
+    global _SETUP, _PARAMS
+    _SETUP, _PARAMS = Config.read()
+    Astronomy.SETUP = _SETUP
+    Astronomy.PARAMS = _PARAMS
 
 
 def main(infinite_loop=True):
     _sync_config()
 
-    status_history = RingList(PARAMS["vbdsd"]["evaluation_size"])
+    status_history = RingList(_PARAMS["vbdsd"]["evaluation_size"])
     _VBDSD.init_cam()
 
     while True:
@@ -258,13 +258,13 @@ def main(infinite_loop=True):
         # sleep while sun angle is too low
         # assert False, repr(calc_sun_angle_deg(loc).to_string())
         while Astronomy.get_current_sun_angle().is_within_bounds(
-            None, PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
+            None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
         ):
             time.sleep(60)
 
         # reinit if parameter changes
-        if status_history.maxsize() != PARAMS["vbdsd"]["evaluation_size"]:
-            status_history.reinitialize(PARAMS["vbdsd"]["evaluation_size"])
+        if status_history.maxsize() != _PARAMS["vbdsd"]["evaluation_size"]:
+            status_history.reinitialize(_PARAMS["vbdsd"]["evaluation_size"])
 
         # try to reconnect to camera if not connected
         if _VBDSD.cam is None:
@@ -293,15 +293,17 @@ def main(infinite_loop=True):
             State.update(
                 {
                     "vbdsd_evaluation_is_positive": (
-                        score > PARAMS["vbdsd"]["measurement_threshold"]
+                        score > _PARAMS["vbdsd"]["measurement_threshold"]
                     )
                 }
             )
 
         # wait rest of loop time
         elapsed_time = time.time() - start_time
-        if elapsed_time < PARAMS["vbdsd"]["interval_time"]:
-            time.sleep(PARAMS["vbdsd"]["interval_time"] - elapsed_time)
+        time_to_wait = _PARAMS["vbdsd"]["seconds_per_interval"] - elapsed_time
+        if time_to_wait > 0:
+            logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
+            time.sleep(time_to_wait)
 
         if not infinite_loop:
             # TODO: Remove this when actual tests are in place
