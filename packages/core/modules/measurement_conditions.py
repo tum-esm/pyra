@@ -20,12 +20,8 @@ from packages.core.utils.logger import Logger
 logger = Logger(origin="pyra.core.measurement-conditions")
 
 
-def get_current_sun_elevation() -> float:
-    pass
-
-
 def current_time_is_before_noon() -> bool:
-    pass
+    return datetime.datetime.now().hour < 13
 
 
 # returns (hour, minute, second) tuple
@@ -50,7 +46,12 @@ class MeasurementConditions:
 
         automation_should_be_running = True
 
+        # the "manually_enforced" option (when set to true) makes
+        # the decision process ignore all other factors
         if not _triggers["manually_enforced"]:
+
+            # consider elevation on mornings and evenings
+            # TODO: Is this what "sun_angle_start" and "sun_angle_stop" mean
             if _triggers["type"]["sun_angle"]:
                 min_required_elevation = (
                     _triggers["sun_angle_start"]
@@ -60,16 +61,16 @@ class MeasurementConditions:
                 if State.read()["current_sun_elevation"] < min_required_elevation:
                     automation_should_be_running &= False
 
+            # consider start_time and end_time
             if _triggers["type"]["time"]:
                 if not current_time_is_in_range_tuples(
                     _triggers["start_time"], _triggers["stop_time"]
                 ):
                     automation_should_be_running &= False
 
+            # consider evaluation from the vbdsd
             if _triggers["type"]["vbdsd"]:
                 if not State.read()["vbdsd_evaluation_is_positive"]:
                     automation_should_be_running &= False
 
         State.update({"automation_should_be_running": automation_should_be_running})
-
-        # if self.sun_angle_deg < 10.0 * u.deg: em27 power off
