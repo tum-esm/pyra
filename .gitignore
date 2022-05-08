@@ -24,9 +24,7 @@ pids
 *.dat
 Bilder/**/*.JPG
 *.txt
-runtime_data/state.json
-runtime_data/state.lock
-runtime_data/vbdsd/*.jpg
+runtime_data/
 
 # pyra ui
 packages/ui/node_modules/

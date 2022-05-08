@@ -45,7 +45,7 @@ logger = Logger(origin="pyra.core.vbdsd")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-IMG_DIR = os.path.join(PROJECT_DIR, "runtime_data", " vbdsd")
+IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", " vbdsd")
 _SETUP, _PARAMS = None, None
 
 
@@ -268,9 +268,9 @@ class VBDSD_Thread:
 
     @staticmethod
     def __remove_vbdsd_images():
-        shutil.rmtree(IMG_DIR)
+        if os.path.exists(IMG_DIR):
+            shutil.rmtree(IMG_DIR)
         os.mkdir(IMG_DIR)
-        os.system("touch " + os.path.join(IMG_DIR, ".gitkeep"))
 
     @staticmethod
     def __main(infinite_loop=True):

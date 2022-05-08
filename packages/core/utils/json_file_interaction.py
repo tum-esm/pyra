@@ -12,8 +12,9 @@ SETUP_FILE_PATH = os.path.join(PROJECT_DIR, "config", "setup.json")
 PARAMS_FILE_PATH = os.path.join(PROJECT_DIR, "config", "parameters.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", "config.lock")
 
-STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime_data", "state.json")
-VBDSD_IMG_DIR = os.path.join(PROJECT_DIR, "runtime_data", "vbdsd")
+RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
+STATE_FILE_PATH = os.path.join(RUNTIME_DATA_PATH, "state.json")
+VBDSD_IMG_DIR = os.path.join(RUNTIME_DATA_PATH, "vbdsd")
 
 
 # FileLock = Mark, that the config JSONs are being used and the
@@ -31,8 +32,13 @@ class State:
     @staticmethod
     @with_filelock
     def initialize():
-        # reset state.json
-        os.remove(STATE_FILE_PATH)
+        # clear runtime_data directory
+        if os.path.exists(RUNTIME_DATA_PATH):
+            shutil.rmtree(RUNTIME_DATA_PATH)
+        os.mkdir(RUNTIME_DATA_PATH)
+        os.mkdir(VBDSD_IMG_DIR)
+
+        # write initial state.json file
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(
                 {
@@ -42,11 +48,6 @@ class State:
                 },
                 f,
             )
-
-        # reset directory where vbdsd images are stored
-        shutil.rmtree(VBDSD_IMG_DIR)
-        os.mkdir(VBDSD_IMG_DIR)
-        os.system("touch " + os.path.join(VBDSD_IMG_DIR, ".gitkeep"))
 
     @staticmethod
     @with_filelock
