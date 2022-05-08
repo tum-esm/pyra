@@ -1,16 +1,18 @@
 import React from 'react';
 import TextInput from '../essential/text-input';
 import Button from '../essential/button';
-import ConfigElement from './config-element';
+import LabeledRow from './labeled-row';
+import PreviousValue from '../essential/previous-value';
 
 export default function ConfigElementText(props: {
-    label: string;
+    key1: string;
+    key2: string;
     value: string | number;
     oldValue: string | number;
     setValue(v: string | number): void;
     disabled?: boolean;
 }) {
-    const { label, value, oldValue, setValue, disabled } = props;
+    const { key1, key2, value, oldValue, setValue, disabled } = props;
 
     async function triggerFileSelection() {
         const result = await window.electron.selectPath();
@@ -19,13 +21,10 @@ export default function ConfigElementText(props: {
         }
     }
 
-    const showfileSelector = label.endsWith('_path');
+    const showfileSelector = key2.endsWith('_path');
 
     return (
-        <ConfigElement
-            label={label}
-            previousValue={value !== oldValue ? oldValue.toString() : undefined}
-        >
+        <LabeledRow key2={key2} modified={value !== oldValue}>
             <div className='relative flex w-full gap-x-1'>
                 <TextInput value={value} setValue={setValue} />
                 {showfileSelector && !disabled && (
@@ -34,6 +33,9 @@ export default function ConfigElementText(props: {
                     </Button>
                 )}
             </div>
-        </ConfigElement>
+            <PreviousValue
+                previousValue={value !== oldValue ? `${oldValue}` : undefined}
+            />
+        </LabeledRow>
     );
 }

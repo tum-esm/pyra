@@ -11,8 +11,9 @@ export default function Button(props: {
         | 'toggle-active'
         | 'toggle-inactive';
     disabled?: boolean;
+    className?: string;
 }) {
-    const { children, onClick, variant } = props;
+    const { children, onClick, variant, className } = props;
 
     let colorClasses: string = '';
     switch (variant) {
@@ -33,11 +34,11 @@ export default function Button(props: {
                 'text-blue-900 bg-blue-75 hover:bg-blue-200 hover:text-blue-950 border-blue-300 ';
             break;
         case 'toggle-active':
-            colorClasses = 'text-blue-950 bg-blue-300 border-blue-500 ';
+            colorClasses = 'text-blue-950 bg-blue-300 border-blue-500 z-10 ';
             break;
         case 'toggle-inactive':
             colorClasses =
-                'text-gray-450 bg-gray-50 hover:bg-gray-200 hover:text-gray-800 border-gray-300 ';
+                'text-gray-450 bg-gray-50 hover:bg-gray-200 hover:text-gray-800 border-gray-300 z-0 ';
             break;
     }
     return (
@@ -45,9 +46,10 @@ export default function Button(props: {
             type='button'
             onClick={onClick}
             className={
-                'inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 h-9 ' +
+                'inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 h-9 border-collapse focus:z-20 ' +
                 colorClasses +
-                (variant.startsWith('navigation') ? ' ' : 'shadow-sm ')
+                (variant.startsWith('navigation') ? ' ' : 'shadow-sm ') +
+                className
             }
         >
             {children}

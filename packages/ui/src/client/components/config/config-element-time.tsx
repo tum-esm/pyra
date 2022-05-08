@@ -1,25 +1,22 @@
 import React from 'react';
 import TextInput from '../essential/text-input';
-import ConfigElement from './config-element';
+import LabeledRow from './labeled-row';
+import PreviousValue from '../essential/previous-value';
 
 export default function ConfigElementTime(props: {
-    label: string;
+    key1: string;
+    key2: string;
     value: [number, number, number];
     oldValue: [number, number, number];
     setValue(v: [number, number, number]): void;
     disabled?: boolean;
 }) {
-    const { label, value, oldValue, setValue, disabled } = props;
+    const { key1, key2, value, oldValue, setValue, disabled } = props;
+
+    const hasChanged = JSON.stringify(value) !== JSON.stringify(oldValue);
 
     return (
-        <ConfigElement
-            label={label + ' (h : m : s)'}
-            previousValue={
-                JSON.stringify(value) !== JSON.stringify(oldValue)
-                    ? oldValue
-                    : undefined
-            }
-        >
+        <LabeledRow key2={key2 + ' (h:m:s)'} modified={hasChanged}>
             <div className='relative flex w-full gap-x-1'>
                 <TextInput
                     value={value[0]}
@@ -38,7 +35,10 @@ export default function ConfigElementTime(props: {
                     setValue={(v: number) => setValue([value[0], value[1], v])}
                     small
                 />
+                <PreviousValue
+                    previousValue={hasChanged ? oldValue : undefined}
+                />
             </div>
-        </ConfigElement>
+        </LabeledRow>
     );
 }

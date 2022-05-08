@@ -11,11 +11,12 @@ export default function Toggle(props: {
     const { value, setValue, disabled, trueLabel, falseLabel } = props;
 
     return (
-        <div className='relative flex gap-x-1'>
+        <div className='relative flex gap-x-0'>
             <Button
                 onClick={() => setValue(true)}
                 disabled={disabled}
                 variant={value ? 'toggle-active' : 'toggle-inactive'}
+                className='py-1 -mr-px rounded-r-none h-7 rounded-l-md'
             >
                 {trueLabel === undefined ? 'yes' : trueLabel}
             </Button>
@@ -23,6 +24,7 @@ export default function Toggle(props: {
                 onClick={() => setValue(false)}
                 disabled={disabled}
                 variant={value ? 'toggle-inactive' : 'toggle-active'}
+                className='py-1 rounded-l-none h-7 rounded-r-md'
             >
                 {falseLabel === undefined ? 'no' : falseLabel}
             </Button>

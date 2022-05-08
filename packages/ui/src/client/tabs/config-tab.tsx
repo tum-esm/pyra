@@ -110,7 +110,7 @@ export default function ConfigTab(props: {
                     <div
                         className={
                             'z-0 flex-grow h-full p-6 overflow-y-scroll ' +
-                            'flex-col-left space-y-4 relative'
+                            'flex-col-left space-y-6 relative pb-20'
                         }
                     >
                         {activeKey !== undefined && (

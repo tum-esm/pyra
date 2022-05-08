@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import ICONS from '../../assets/icons';
+import React from 'react';
 import TYPES from '../../../types/index';
 
 import ConfigElementText from './config-element-text';
@@ -8,7 +7,6 @@ import ConfigElementMatrix from './config-element-matrix';
 import ConfigElementTime from './config-element-time';
 
 import sortConfigKeys from '../../utils/sort-config-keys';
-import capitalizeConfigKey from '../../utils/capitalize-config-key';
 
 /*
 Special triggers:
@@ -54,7 +52,8 @@ export default function ConfigSection(props: {
                 (key2: string, j: number) => {
                     const commonProps = {
                         key: key2,
-                        label: key2,
+                        key1: key1,
+                        key2: key2,
                         value: localJSON[key1][key2],
                         oldValue: centralJSON[key1][key2],
                         setValue: (v: any) =>
