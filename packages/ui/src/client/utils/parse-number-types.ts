@@ -1,12 +1,13 @@
 export default function parseNumberTypes(oldValue: any, newValue: any): any {
-    if (typeof oldValue === 'string') {
+    if (typeof oldValue === 'string' || typeof oldValue === 'boolean') {
         return newValue;
     }
     if (typeof oldValue === 'number') {
-        const parsedNewValue = parseFloat(newValue);
-        return `${parsedNewValue}` === `${newValue}`
-            ? parsedNewValue
-            : newValue;
+        if (new RegExp('^\\d*(\\.\\d+)?$').test(newValue.toString())) {
+            return parseFloat(newValue);
+        } else {
+            return newValue;
+        }
     }
     if (typeof oldValue === 'object') {
         if (oldValue.length !== undefined) {

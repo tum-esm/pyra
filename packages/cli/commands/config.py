@@ -29,6 +29,23 @@ def with_filelock(function):
     return locked_function
 
 
+def update_dict_rec(old_dict, new_dict):
+    if type(old_dict) not in [int, float] and type(new_dict) not in [int, float]:
+        assert type(old_dict) == type(
+            new_dict
+        ), f"{old_dict} = {type(old_dict)} -> {new_dict} = {type(new_dict)}"
+    if type(old_dict) == dict:
+        updated_dict = {}
+        for key in old_dict.keys():
+            if key in new_dict:
+                updated_dict[key] = update_dict_rec(old_dict[key], new_dict[key])
+            else:
+                updated_dict[key] = old_dict[key]
+        return updated_dict
+    else:
+        return new_dict
+
+
 @click.command(help="Read the current setup.json file.")
 @with_filelock
 def _get_setup():
@@ -92,8 +109,9 @@ def _set_setup(path: str, content: str):
         with open(SETUP_FILE_PATH, "r") as f:
             current_json: dict = json.load(f)
 
+        merged_json = update_dict_rec(current_json, new_partial_json)
         with open(SETUP_FILE_PATH, "w") as f:
-            json.dump({**current_json, **new_partial_json}, f)
+            json.dump(merged_json, f)
 
         success_handler("Updated setup file")
 
@@ -117,7 +135,7 @@ def _set_parameters(path: str, content: str):
             ):
                 return
             with open(path, "r") as f:
-                new_partial_params: dict = json.load(f)
+                new_partial_json: dict = json.load(f)
         else:
             if not Validation.check_parameters_file(
                 content_string=content,
@@ -125,13 +143,14 @@ def _set_parameters(path: str, content: str):
                 partial_validation=True,
             ):
                 return
-            new_partial_params = json.loads(content)
+            new_partial_json = json.loads(content)
 
         with open(PARAMS_FILE_PATH, "r") as f:
-            current_params: dict = json.load(f)
+            current_json: dict = json.load(f)
 
+        merged_json = update_dict_rec(current_json, new_partial_json)
         with open(PARAMS_FILE_PATH, "w") as f:
-            json.dump({**current_params, **new_partial_params}, f)
+            json.dump(merged_json, f)
 
         success_handler("Updated parameters file")
 

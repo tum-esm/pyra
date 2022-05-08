@@ -37,16 +37,16 @@ export default function ConfigTab(props: {
             props.type === 'setup'
                 ? window.electron.saveSetupJSON
                 : window.electron.saveParametersJSON;
-        let result = await saveConfigFunction(
-            parseNumberTypes(centralJSON, localJSON)
-        );
+        const parsedLocalJSON = parseNumberTypes(centralJSON, localJSON);
+        let result = await saveConfigFunction(parsedLocalJSON);
 
         if (
             ['Updated setup file', 'Updated parameters file'].includes(
                 trim(result, '\n ')
             )
         ) {
-            setCentralJSON(localJSON);
+            setLocalJSON(parsedLocalJSON);
+            setCentralJSON(parsedLocalJSON);
         } else {
             setErrorMessage(result);
         }
@@ -89,6 +89,7 @@ export default function ConfigTab(props: {
                         {sortConfigKeys(centralJSON).map(
                             (key1: string, i: number) => (
                                 <button
+                                    key={key1}
                                     onClick={() => setActiveKey(key1)}
                                     className={
                                         'px-6 py-2.5 text-base font-semibold text-left ' +
