@@ -2,6 +2,8 @@ import win32ui
 import pywin
 import dde
 
+# TODO: OPUS Mock server
+
 
 class MyRequestTopic(pywin.mfc.object.Object):
     def __init__(self, topicName):
