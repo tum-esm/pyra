@@ -17,7 +17,7 @@ export default function TextInput(props: {
     }
 
     return (
-        <div className='relative flex-grow'>
+        <div className={'relative ' + (props.small ? '' : 'flex-grow')}>
             <input
                 type='text'
                 value={props.value}

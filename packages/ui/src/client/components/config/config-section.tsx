@@ -1,6 +1,4 @@
 import React from 'react';
-import TYPES from '../../../types/index';
-
 import ConfigElementText from './config-element-text';
 import ConfigElementToggle from './config-element-toggle';
 import ConfigElementMatrix from './config-element-matrix';
@@ -39,12 +37,13 @@ If (!vbdsd.sensor_is_present) {
 }
 */
 export default function ConfigSection(props: {
+    key0: 'setup' | 'parameters';
     key1: string;
-    localJSON: TYPES.configJSON;
-    centralJSON: TYPES.configJSON;
-    addLocalUpdate(v: TYPES.configJSON): void;
+    localJSON: any;
+    centralJSON: any;
+    addLocalUpdate(v: any): void;
 }) {
-    const { key1, localJSON, centralJSON, addLocalUpdate } = props;
+    const { key0, key1, localJSON, centralJSON, addLocalUpdate } = props;
 
     return (
         <>
@@ -64,6 +63,51 @@ export default function ConfigSection(props: {
                             }),
                     };
                     const oldValue: any = centralJSON[key1][key2];
+
+                    if (key0 === 'setup') {
+                        if (key1 === 'tum_plc') {
+                            const noTUMPLC =
+                                !localJSON['tum_plc']['is_present'];
+                            if (noTUMPLC && key2 !== 'is_present') {
+                                return <></>;
+                            }
+                        }
+                        if (key1 === 'vbdsd') {
+                            const noVBDSD = !localJSON['vbdsd']['is_present'];
+                            if (noVBDSD && key2 !== 'is_present') {
+                                return <></>;
+                            }
+                        }
+                    }
+                    if (key0 === 'parameters') {
+                        if (key1 === 'measurement_triggers') {
+                            const triggerOverride =
+                                localJSON['measurement_triggers'][
+                                    'manual_override'
+                                ];
+
+                            const ignoringSunAngle =
+                                !localJSON['measurement_triggers']['type'][
+                                    'sun_angle'
+                                ];
+
+                            const ignoringTime =
+                                !localJSON['measurement_triggers']['type'][
+                                    'time'
+                                ];
+
+                            if (
+                                (triggerOverride &&
+                                    key2 !== 'manual_override') ||
+                                (ignoringSunAngle &&
+                                    key2.startsWith('sun_angle')) ||
+                                (ignoringTime && key2.endsWith('time'))
+                            ) {
+                                return <></>;
+                            }
+                        }
+                    }
+
                     switch (typeof oldValue) {
                         case 'string':
                         case 'number':

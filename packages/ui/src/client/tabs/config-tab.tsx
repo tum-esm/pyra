@@ -5,7 +5,6 @@ import SavingOverlay from '../components/config/saving-overlay';
 import { defaultsDeep, first, trim } from 'lodash';
 import deepEqual from '../utils/deep-equal';
 import sortConfigKeys from '../utils/sort-config-keys';
-import Button from '../components/essential/button';
 import capitalizeConfigKey from '../utils/capitalize-config-key';
 
 export default function ConfigTab(props: {
@@ -78,7 +77,7 @@ export default function ConfigTab(props: {
                     <div
                         className={
                             'bg-white border-r border-gray-300 shadow ' +
-                            'flex flex-col p-3 gap-y-2 z-10 '
+                            'flex flex-col py-3 z-10 '
                         }
                     >
                         {sortConfigKeys(centralJSON).map(
@@ -86,7 +85,7 @@ export default function ConfigTab(props: {
                                 <button
                                     onClick={() => setActiveKey(key1)}
                                     className={
-                                        'px-3 py-1.5 text-base font-semibold rounded text-left ' +
+                                        'px-6 py-2.5 text-base font-semibold text-left ' +
                                         'flex-row-center gap-x-2 ' +
                                         (key1 === activeKey
                                             ? 'bg-blue-200 text-blue-950 '
@@ -115,6 +114,7 @@ export default function ConfigTab(props: {
                     >
                         {activeKey !== undefined && (
                             <ConfigSection
+                                key0={props.type}
                                 key1={activeKey}
                                 {...{
                                     localJSON,

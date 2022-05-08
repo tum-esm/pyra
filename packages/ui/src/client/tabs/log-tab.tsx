@@ -46,15 +46,12 @@ export default function LogTab(props: { visible: boolean }) {
                         updateLogs();
                     }}
                     variant='gray'
+                    className='px-0.5 py-1 h-7 '
                 >
                     <div className='w-6 h-6 fill-gray-700 '>
                         {ICONS.refresh}
                     </div>
                 </Button>
-
-                <span className='pl-3 ml-3 font-medium text-gray-800 border-l border-gray-400'>
-                    level:
-                </span>
                 <Toggle
                     value={logLevel == 'info'}
                     setValue={v => setLogLevel(v ? 'info' : 'debug')}

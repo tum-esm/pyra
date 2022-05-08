@@ -46,7 +46,7 @@ function IntArrayRow(props: {
                 </div>
             )}
             {typeof value === 'boolean' && (
-                <>
+                <div className='flex-row-left gap-x-1'>
                     <Toggle
                         value={value}
                         setValue={setValue}
@@ -62,7 +62,7 @@ function IntArrayRow(props: {
                                 : undefined
                         }
                     />
-                </>
+                </div>
             )}
         </LabeledRow>
     );

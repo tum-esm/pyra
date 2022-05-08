@@ -1,4 +1,4 @@
-import { range, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 
 const priorities = [
     ['tum_enclosure_is_present', 'is_present', 'type', 'manual_override'],
