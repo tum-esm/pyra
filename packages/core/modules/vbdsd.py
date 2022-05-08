@@ -240,73 +240,6 @@ class _VBDSD:
         return 0, frame
 
 
-def _main(infinite_loop=True):
-    global _SETUP, _PARAMS
-    _SETUP, _PARAMS = Config.read()
-
-    status_history = RingList(_PARAMS["vbdsd"]["evaluation_size"])
-    _VBDSD.init_cam()
-
-    while True:
-        start_time = time.time()
-        _SETUP, _PARAMS = Config.read()
-
-        # sleep while sun angle is too low
-        # assert False, repr(calc_sun_angle_deg(loc).to_string())
-        while Astronomy.get_current_sun_elevation().is_within_bounds(
-            None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
-        ):
-            time.sleep(60)
-
-        # reinit if parameter changes
-        if status_history.maxsize() != _PARAMS["vbdsd"]["evaluation_size"]:
-            status_history.reinitialize(_PARAMS["vbdsd"]["evaluation_size"])
-
-        # try to reconnect to camera if not connected
-        if _VBDSD.cam is None:
-            logger.error("VBDSD camera not connected found")
-            status_history.empty()
-            _VBDSD.init_cam()
-            time.sleep(60)
-
-        # take a picture and process it
-        status, frame = _VBDSD.run()
-        # retry with change_exposure(1) if status fail
-        if status == -1:
-            _VBDSD.change_exposure(1)
-            status, frame = _VBDSD.run()
-
-        # append sun status to status history
-        status_history.append(max(status, 0))
-
-        if frame is not None:
-            img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
-            cv.imwrite(os.path.join(IMG_DIR + img_name), frame)
-
-        # start eval of sun state once initial list is filled
-        if status_history.size() == status_history.maxsize():
-            score = status_history.sum() / status_history.size()
-            State.update(
-                {
-                    "vbdsd_evaluation_is_positive": (
-                        score > _PARAMS["vbdsd"]["measurement_threshold"]
-                    )
-                }
-            )
-
-        # wait rest of loop time
-        elapsed_time = time.time() - start_time
-        time_to_wait = _PARAMS["vbdsd"]["seconds_per_interval"] - elapsed_time
-        if time_to_wait > 0:
-            logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
-            time.sleep(time_to_wait)
-
-        if not infinite_loop:
-            # TODO: Remove this when actual tests are in place
-            print(status_history.__data__)
-            break
-
-
 class VBDSD_Thread:
     def __init__(self):
         self.__process = None
@@ -316,7 +249,7 @@ class VBDSD_Thread:
         Start a thread using the multiprocessing library
         """
         logger.info("starting thread")
-        self.__process = multiprocessing.Process(target=_main)
+        self.__process = multiprocessing.Process(target=VBDSD_Thread.__main)
         self.__process.start()
 
     def is_running(self):
@@ -330,10 +263,78 @@ class VBDSD_Thread:
         logger.info("terminating thread")
         self.__process.terminate()
         logger.info("removing all images")
-        self.__remove_vbdsd_images()
+        VBDSD_Thread.__remove_vbdsd_images()
         self.__process = None
 
+    @staticmethod
     def __remove_vbdsd_images():
         shutil.rmtree(IMG_DIR)
         os.mkdir(IMG_DIR)
         os.system("touch " + os.path.join(IMG_DIR, ".gitkeep"))
+
+    @staticmethod
+    def __main(infinite_loop=True):
+        global _SETUP, _PARAMS
+        _SETUP, _PARAMS = Config.read()
+
+        status_history = RingList(_PARAMS["vbdsd"]["evaluation_size"])
+        _VBDSD.init_cam()
+
+        while True:
+            start_time = time.time()
+            _SETUP, _PARAMS = Config.read()
+
+            # sleep while sun angle is too low
+            # assert False, repr(calc_sun_angle_deg(loc).to_string())
+            while Astronomy.get_current_sun_elevation().is_within_bounds(
+                None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
+            ):
+                time.sleep(60)
+
+            # reinit if parameter changes
+            if status_history.maxsize() != _PARAMS["vbdsd"]["evaluation_size"]:
+                status_history.reinitialize(_PARAMS["vbdsd"]["evaluation_size"])
+
+            # try to reconnect to camera if not connected
+            if _VBDSD.cam is None:
+                logger.error("VBDSD camera not connected found")
+                status_history.empty()
+                _VBDSD.init_cam()
+                time.sleep(60)
+
+            # take a picture and process it
+            status, frame = _VBDSD.run()
+            # retry with change_exposure(1) if status fail
+            if status == -1:
+                _VBDSD.change_exposure(1)
+                status, frame = _VBDSD.run()
+
+            # append sun status to status history
+            status_history.append(max(status, 0))
+
+            if frame is not None:
+                img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
+                cv.imwrite(os.path.join(IMG_DIR + img_name), frame)
+
+            # start eval of sun state once initial list is filled
+            if status_history.size() == status_history.maxsize():
+                score = status_history.sum() / status_history.size()
+                State.update(
+                    {
+                        "vbdsd_evaluation_is_positive": (
+                            score > _PARAMS["vbdsd"]["measurement_threshold"]
+                        )
+                    }
+                )
+
+            # wait rest of loop time
+            elapsed_time = time.time() - start_time
+            time_to_wait = _PARAMS["vbdsd"]["seconds_per_interval"] - elapsed_time
+            if time_to_wait > 0:
+                logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
+                time.sleep(time_to_wait)
+
+            if not infinite_loop:
+                # TODO: Remove this when actual tests are in place
+                print(status_history.__data__)
+                break
