@@ -1,7 +1,5 @@
-import sys
 import time
 import snap7
-
 from packages.core import modules
 from packages.core.utils.json_file_interaction import State, Config
 from packages.core.utils.logger import Logger
@@ -14,15 +12,13 @@ def run():
     State.initialize()
 
     _SETUP, _PARAMS = Config.read()
-    sys.exit()
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_SETUP, _PARAMS),
         modules.enclosure_control.EnclosureControl(_SETUP, _PARAMS),
         modules.sun_tracking.SunTracking(_SETUP, _PARAMS),
         modules.opus_measurement.OpusMeasurement(_SETUP, _PARAMS),
     ]
-
-    # TODO: Start vbdsd in a thread
+    vbdsd_thread = modules.vbdsd.VBDSD_Thread()
 
     while True:
         start_time = time.time()
@@ -34,6 +30,13 @@ def run():
             # TODO: What to do here?
             time.sleep(60)
             continue
+
+        # Start or stop VBDSD in a thread
+        vbdsd_should_be_running = _PARAMS["measurement_triggers"]["type"]["vbdsd"]
+        if vbdsd_should_be_running and not vbdsd_thread.is_running():
+            vbdsd_thread.start()
+        if not vbdsd_should_be_running and vbdsd_thread.is_running():
+            vbdsd_thread.stop()
 
         try:
             for module in _modules:

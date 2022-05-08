@@ -29,7 +29,9 @@
 
 # TODO: Use logging after initial tests
 
+import multiprocessing
 import os
+import shutil
 import time
 import astropy.units as astropy_units
 import cv2 as cv
@@ -238,7 +240,7 @@ class _VBDSD:
         return 0, frame
 
 
-def main(infinite_loop=True):
+def _main(infinite_loop=True):
     global _SETUP, _PARAMS
     _SETUP, _PARAMS = Config.read()
 
@@ -303,3 +305,35 @@ def main(infinite_loop=True):
             # TODO: Remove this when actual tests are in place
             print(status_history.__data__)
             break
+
+
+class VBDSD_Thread:
+    def __init__(self):
+        self.__process = None
+
+    def start(self):
+        """
+        Start a thread using the multiprocessing library
+        """
+        logger.info("starting thread")
+        self.__process = multiprocessing.Process(target=_main)
+        self.__process.start()
+
+    def is_running(self):
+        return self.__process is not None
+
+    def stop(self):
+        """
+        Stop the thread and remove all images inside
+        the directory "runtime_data/vbdsd"
+        """
+        logger.info("terminating thread")
+        self.__process.terminate()
+        logger.info("removing all images")
+        self.__remove_vbdsd_images()
+        self.__process = None
+
+    def __remove_vbdsd_images():
+        shutil.rmtree(IMG_DIR)
+        os.mkdir(IMG_DIR)
+        os.system("touch " + os.path.join(IMG_DIR, ".gitkeep"))
