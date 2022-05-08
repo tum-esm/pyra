@@ -6,6 +6,7 @@ import { defaultsDeep, first, trim } from 'lodash';
 import deepEqual from '../utils/deep-equal';
 import sortConfigKeys from '../utils/sort-config-keys';
 import capitalizeConfigKey from '../utils/capitalize-config-key';
+import parseNumberTypes from '../utils/parse-number-types';
 
 export default function ConfigTab(props: {
     type: 'setup' | 'parameters';
@@ -36,7 +37,9 @@ export default function ConfigTab(props: {
             props.type === 'setup'
                 ? window.electron.saveSetupJSON
                 : window.electron.saveParametersJSON;
-        let result = await saveConfigFunction(localJSON);
+        let result = await saveConfigFunction(
+            parseNumberTypes(centralJSON, localJSON)
+        );
 
         if (
             ['Updated setup file', 'Updated parameters file'].includes(
@@ -70,14 +73,17 @@ export default function ConfigTab(props: {
 
     return (
         <div
-            className={'w-full h-full ' + (props.visible ? 'flex ' : 'hidden ')}
+            className={
+                'w-full h-full relative ' +
+                (props.visible ? 'flex ' : 'hidden ')
+            }
         >
             {localJSON !== undefined && (
                 <>
                     <div
                         className={
                             'bg-white border-r border-gray-300 shadow ' +
-                            'flex flex-col py-3 z-10 '
+                            'flex flex-col py-3 z-10 w-44'
                         }
                     >
                         {sortConfigKeys(centralJSON).map(

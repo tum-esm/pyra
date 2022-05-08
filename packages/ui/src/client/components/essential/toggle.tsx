@@ -16,7 +16,7 @@ export default function Toggle(props: {
                 onClick={() => setValue(true)}
                 disabled={disabled}
                 variant={value ? 'toggle-active' : 'toggle-inactive'}
-                className='py-1 -mr-px rounded-r-none h-7 rounded-l-md'
+                className='py-1 -mr-px rounded-r-none !h-7 rounded-l-md'
             >
                 {trueLabel === undefined ? 'yes' : trueLabel}
             </Button>
@@ -24,7 +24,7 @@ export default function Toggle(props: {
                 onClick={() => setValue(false)}
                 disabled={disabled}
                 variant={value ? 'toggle-inactive' : 'toggle-active'}
-                className='py-1 rounded-l-none h-7 rounded-r-md'
+                className='py-1 rounded-l-none !h-7 rounded-r-md'
             >
                 {falseLabel === undefined ? 'no' : falseLabel}
             </Button>

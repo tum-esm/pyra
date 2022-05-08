@@ -39,7 +39,7 @@ export default function ConfigElementText(props: {
         <LabeledRow key2={key2} modified={value !== oldValue}>
             <div className='relative flex w-full gap-x-1'>
                 <TextInput
-                    value={value}
+                    value={value.toString()}
                     setValue={setValue}
                     postfix={postfixes[`${key1}.${key2}`]}
                 />

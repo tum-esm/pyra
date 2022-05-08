@@ -46,7 +46,7 @@ export default function LogTab(props: { visible: boolean }) {
                         updateLogs();
                     }}
                     variant='gray'
-                    className='px-0.5 py-1 h-7 '
+                    className='!px-0.5 !py-1 !h-7 '
                 >
                     <div className='w-6 h-6 fill-gray-700 '>
                         {ICONS.refresh}

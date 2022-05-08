@@ -8,7 +8,7 @@ export default function SavingOverlay(props: {
 }) {
     const { errorMessage, saveLocalJSON, restoreCentralJSON } = props;
     return (
-        <div className='fixed bottom-0 left-0 z-50 w-full p-3 text-sm font-medium text-center border-t border-yellow-300 bg-yellow-75 flex-row-right gap-x-2'>
+        <div className='fixed bottom-0 left-0 z-50 w-full p-3 text-sm font-medium pl-[11.75rem] text-center border-t border-yellow-300 bg-yellow-75 flex-row-right gap-x-2'>
             {errorMessage !== undefined && (
                 <span className='flex-grow text-left text-yellow-800'>
                     {errorMessage}

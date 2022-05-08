@@ -1,27 +1,18 @@
 import React from 'react';
 
 export default function TextInput(props: {
-    value: string | number;
-    setValue(v: string | number): void;
+    value: string;
+    setValue(v: string): void;
     disabled?: boolean;
     small?: boolean;
     postfix?: string | undefined;
 }) {
-    function setValue(v: string) {
-        if (typeof props.value === 'number') {
-            let newNumber = parseFloat(v);
-            props.setValue(isNaN(newNumber) ? 0 : newNumber);
-        } else {
-            props.setValue(v);
-        }
-    }
-
     return (
         <div className={'relative ' + (props.small ? '' : 'flex-grow')}>
             <input
                 type='text'
                 value={props.value}
-                onChange={e => setValue(e.target.value)}
+                onChange={e => props.setValue(e.target.value)}
                 className={
                     'shadow-sm rounded-md border-gray-300 text-sm w-full ' +
                     'focus:ring-blue-500 focus:border-blue-500 ' +

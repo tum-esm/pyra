@@ -34,7 +34,7 @@ function IntArrayRow(props: {
                     {value.map((v: number, i: number) => (
                         <TextInput
                             key={i}
-                            value={v}
+                            value={v.toString()}
                             disabled={disabled}
                             setValue={setNumber(i)}
                             small
