@@ -257,13 +257,18 @@ class VBDSD_Thread:
 
     def stop(self):
         """
-        Stop the thread and remove all images inside
-        the directory "runtime_data/vbdsd"
+        Stop the thread, remove all images inside the directory
+        "runtime_data/vbdsd" and set the state to 'null'
         """
         logger.info("terminating thread")
         self.__process.terminate()
+
         logger.info("removing all images")
         VBDSD_Thread.__remove_vbdsd_images()
+
+        logger.info("setting state to 'null'")
+        State.update({"vbdsd_indicates_good_conditions": None})
+
         self.__process = None
 
     @staticmethod
@@ -278,6 +283,7 @@ class VBDSD_Thread:
         _SETUP, _PARAMS = Config.read()
 
         status_history = RingList(_PARAMS["vbdsd"]["evaluation_size"])
+        current_state = None
         _VBDSD.init_cam()
 
         while True:
@@ -292,8 +298,9 @@ class VBDSD_Thread:
                 time.sleep(60)
 
             # reinit if parameter changes
-            if status_history.maxsize() != _PARAMS["vbdsd"]["evaluation_size"]:
-                status_history.reinitialize(_PARAMS["vbdsd"]["evaluation_size"])
+            new_size = _PARAMS["vbdsd"]["evaluation_size"]
+            if status_history.maxsize() != new_size:
+                status_history.reinitialize(new_size)
 
             # try to reconnect to camera if not connected
             if _VBDSD.cam is None:
@@ -316,16 +323,16 @@ class VBDSD_Thread:
                 img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
                 cv.imwrite(os.path.join(IMG_DIR + img_name), frame)
 
-            # start eval of sun state once initial list is filled
+            # evaluate sun state only if list is filled
             if status_history.size() == status_history.maxsize():
                 score = status_history.sum() / status_history.size()
-                State.update(
-                    {
-                        "vbdsd_evaluation_is_positive": (
-                            score > _PARAMS["vbdsd"]["measurement_threshold"]
-                        )
-                    }
-                )
+                new_state = score > _PARAMS["vbdsd"]["measurement_threshold"]
+            else:
+                new_state = None
+
+            if current_state != new_state:
+                State.update({"vbdsd_indicates_good_conditions": new_state})
+                current_state = new_state
 
             # wait rest of loop time
             elapsed_time = time.time() - start_time

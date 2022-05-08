@@ -42,7 +42,7 @@ class State:
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(
                 {
-                    "vbdsd_evaluation_is_positive": False,
+                    "vbdsd_indicates_good_conditions": None,
                     "enclosure_plc_readings": [],
                     "automation_should_be_running": False,
                 },

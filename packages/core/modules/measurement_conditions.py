@@ -71,7 +71,9 @@ class MeasurementConditions:
 
             # consider evaluation from the vbdsd
             if _triggers["type"]["vbdsd"]:
-                if not State.read()["vbdsd_evaluation_is_positive"]:
+                # Don't consider VBDSD if it does not have enough
+                # images yet, which will result in a state of "None"
+                if State.read()["vbdsd_indicates_good_conditions"] == False:
                     automation_should_be_running &= False
 
         State.update({"automation_should_be_running": automation_should_be_running})
