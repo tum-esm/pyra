@@ -4,6 +4,18 @@ import Button from '../essential/button';
 import LabeledRow from './labeled-row';
 import PreviousValue from '../essential/previous-value';
 
+const postfixes: any = {
+    'camtracker.motor_offset_threshold': 'degrees',
+    'em27.power_min_angle': 'degrees',
+    'enclosure.min_sun_angle': 'degrees',
+    'measurement_triggers.sun_angle_start': 'degrees',
+    'measurement_triggers.sun_angle_stop': 'degrees',
+    'pyra.seconds_per_interval': 'seconds',
+    'vbdsd.evaluation_size': 'images',
+    'vbdsd.min_sun_angle': 'degrees',
+    'vbdsd.seconds_per_interval': 'seconds',
+};
+
 export default function ConfigElementText(props: {
     key1: string;
     key2: string;
@@ -26,7 +38,11 @@ export default function ConfigElementText(props: {
     return (
         <LabeledRow key2={key2} modified={value !== oldValue}>
             <div className='relative flex w-full gap-x-1'>
-                <TextInput value={value} setValue={setValue} />
+                <TextInput
+                    value={value}
+                    setValue={setValue}
+                    postfix={postfixes[`${key1}.${key2}`]}
+                />
                 {showfileSelector && !disabled && (
                     <Button variant='blue' onClick={triggerFileSelection}>
                         choose path

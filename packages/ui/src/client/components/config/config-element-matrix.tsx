@@ -30,7 +30,7 @@ function IntArrayRow(props: {
             modified={JSON.stringify(value) !== JSON.stringify(oldValue)}
         >
             {typeof value === 'object' && (
-                <div className='flex-row-left gap-x-2'>
+                <div className='flex-row-left gap-x-1'>
                     {value.map((v: number, i: number) => (
                         <TextInput
                             key={i}
