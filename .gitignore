@@ -27,9 +27,10 @@ Bilder/**/*.JPG
 runtime_data/
 
 # pyra ui
+packages/electron-ui/node_modules/
+packages/electron-ui/.webpack/
+packages/electron-ui/out/
 packages/ui/node_modules/
-packages/ui/.webpack/
-packages/ui/out/
 
 # development
 .vscode/
