@@ -1,10 +1,50 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import './index.css'
+import React, { useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import Button from './components/essential/button';
+import './styles/index.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-)
+const tabs = ['Status', 'Setup', 'Parameters', 'Logs', 'Enclosure Controls'];
+
+function Main() {
+    const [activeTabIndex, setActiveTabIndex] = useState(1);
+    const [pyraIsSetUp, setPyraIsSetUp] = useState(false);
+    const [checkingSetup, setCheckingSetup] = useState(true);
+
+    async function updateCliStatus() {
+        setCheckingSetup(true);
+        const status = false;
+        setPyraIsSetUp(status);
+        setCheckingSetup(false);
+    }
+
+    useEffect(() => {
+        if (!pyraIsSetUp) {
+            updateCliStatus();
+        }
+    }, []);
+
+    return (
+        <div className='flex flex-col items-stretch w-screen h-screen overflow-hidden'>
+            {!pyraIsSetUp && !checkingSetup && (
+                <main className='flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4'>
+                    <p className='max-w-sm text-center'>
+                        <pre className='bg-slate-200 mr-1 px-1 py-0.5 rounded-sm font-bold inline'>
+                            pyra-cli
+                        </pre>{' '}
+                        has not been found on your system. Please following the
+                        installation instructions on{' '}
+                        <span className='font-bold text-blue-500 underline'>
+                            https://github.com/tum-esm/pyra
+                        </span>
+                        .
+                    </p>
+                    <Button onClick={updateCliStatus} variant='green'>
+                        retry connection
+                    </Button>
+                </main>
+            )}
+        </div>
+    );
+}
+
+ReactDOM.render(<Main />, document.getElementById('root'));
