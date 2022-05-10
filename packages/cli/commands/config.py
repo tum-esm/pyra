@@ -84,7 +84,7 @@ def _get_parameters():
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
 @with_filelock
-def _set_setup(path: str, content: str):
+def _update_setup(path: str, content: str):
     if (path == "" and content == "") or (path != "" and content != ""):
         click.echo('You have to pass exactly one of "--path" or "--content"')
     else:
@@ -123,7 +123,7 @@ def _set_setup(path: str, content: str):
 @click.option("--path", default="", help="Path to JSON file")
 @click.option("--content", default="", help="Content of JSON file")
 @with_filelock
-def _set_parameters(path: str, content: str):
+def _update_parameters(path: str, content: str):
     if (path == "" and content == "") or (path != "" and content != ""):
         click.echo('You have to pass exactly one of "--path" or "--content"')
     else:
@@ -179,7 +179,7 @@ def _setup_config_command_group():
 
 
 _setup_config_command_group.add_command(_get_setup, name="get")
-_setup_config_command_group.add_command(_set_setup, name="set")
+_setup_config_command_group.add_command(_update_setup, name="update")
 _setup_config_command_group.add_command(_validate_setup, name="validate")
 
 
@@ -189,7 +189,7 @@ def _parameters_config_command_group():
 
 
 _parameters_config_command_group.add_command(_get_parameters, name="get")
-_parameters_config_command_group.add_command(_set_parameters, name="set")
+_parameters_config_command_group.add_command(_update_parameters, name="update")
 _parameters_config_command_group.add_command(_validate_parameters, name="validate")
 
 
