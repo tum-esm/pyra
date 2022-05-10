@@ -1,3 +1,4 @@
+from datetime import datetime
 import click
 import os
 import filelock
@@ -22,6 +23,15 @@ def with_filelock(function):
     return locked_function
 
 
+def is_valid_log_line(log_line: str):
+    try:
+        assert len(log_line) >= 10
+        datetime.strptime(log_line[:10], "%Y-%m-%d")
+        return True
+    except:
+        return False
+
+
 @click.command(help="Read the current info.log or debug.log file.")
 @click.option("--level", default="INFO", help="Log level INFO or DEBUG")
 @with_filelock
@@ -44,10 +54,11 @@ def _archive_logs():
             pass
         new_log_date_groups = {}
         for line in new_log_lines:
-            date = line[:10]
-            if date not in new_log_date_groups.keys():
-                new_log_date_groups[date] = []
-            new_log_date_groups[date].append(line)
+            if is_valid_log_line(line):
+                date = line[:10]
+                if date not in new_log_date_groups.keys():
+                    new_log_date_groups[date] = []
+                new_log_date_groups[date].append(line)
 
         for date_group, lines in new_log_date_groups.items():
             with open(
