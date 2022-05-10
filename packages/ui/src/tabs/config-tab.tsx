@@ -67,7 +67,7 @@ export default function ConfigTab(props: {
     const configIsDiffering =
         localJSON !== undefined &&
         centralJSON !== undefined &&
-        !deepEqual(localJSON, centralJSON);
+        !deepEqual(parseNumberTypes(centralJSON, localJSON), centralJSON);
 
     return (
         <div

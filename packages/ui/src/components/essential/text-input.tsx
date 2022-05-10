@@ -18,7 +18,7 @@ export default function TextInput(props: {
                 }
             />
             {props.postfix !== undefined && (
-                <div className="absolute text-sm text-gray-900 -translate-y-[calc(50%-0.5px)] opacity-50 top-1/2 left-3 pointer-events-none">
+                <div className="absolute text-sm text-gray-900 -translate-y-[calc(50%-0.5px)] opacity-50 top-1/2 left-3 pointer-events-none whitespace-pre">
                     <span className="opacity-0">{props.value}</span> {props.postfix}
                 </div>
             )}

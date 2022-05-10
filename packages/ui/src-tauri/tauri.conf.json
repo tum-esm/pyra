@@ -13,7 +13,7 @@
     "tauri": {
         "allowlist": {
             "dialog": {
-                "message": true,
+                "confirm": true,
                 "open": true
             }
         },
@@ -64,7 +64,8 @@
                 "height": 500,
                 "minHeight": 500,
                 "width": 900,
-                "minWidth": 900
+                "minWidth": 900,
+                "center": true
             }
         ]
     }

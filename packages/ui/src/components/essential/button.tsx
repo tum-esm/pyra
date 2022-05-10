@@ -3,13 +3,7 @@ import React from 'react';
 export default function Button(props: {
     children: React.ReactNode;
     onClick(): void;
-    variant:
-        | 'green'
-        | 'red'
-        | 'blue'
-        | 'gray'
-        | 'toggle-active'
-        | 'toggle-inactive';
+    variant: 'green' | 'red' | 'blue' | 'gray' | 'toggle-active' | 'toggle-inactive';
     disabled?: boolean;
     className?: string;
 }) {
@@ -43,7 +37,7 @@ export default function Button(props: {
     }
     return (
         <button
-            type='button'
+            type="button"
             onClick={onClick}
             className={
                 'inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 h-9 border-collapse focus:z-20 whitespace-nowrap ' +

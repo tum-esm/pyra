@@ -10,7 +10,7 @@ export default function Toggle(props: {
     const { value, setValue, disabled, trueLabel, falseLabel } = props;
 
     return (
-        <div className="relative flex gap-x-0">
+        <div className="relative flex my-1 gap-x-0">
             <Button
                 onClick={() => setValue(true)}
                 disabled={disabled}

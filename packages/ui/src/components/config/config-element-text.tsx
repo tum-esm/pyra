@@ -2,6 +2,8 @@ import TextInput from '../essential/text-input';
 import Button from '../essential/button';
 import LabeledRow from './labeled-row';
 import PreviousValue from '../essential/previous-value';
+import { dialog } from '@tauri-apps/api';
+import parseNumberTypes from '../../utils/parse-number-types';
 
 const postfixes: any = {
     'camtracker.motor_offset_threshold': 'degrees',
@@ -25,18 +27,18 @@ export default function ConfigElementText(props: {
 }) {
     const { key1, key2, value, oldValue, setValue, disabled } = props;
 
-    // TODO: Use fileselector api
     async function triggerFileSelection() {
-        const result = 'todo: use fileselector';
-        if (result !== undefined && result.length > 0) {
+        const result = await dialog.open({ title: 'PyRa 4 UI', multiple: false });
+        if (result !== null && result.length > 0) {
             setValue(result[0]);
         }
     }
 
     const showfileSelector = key2.endsWith('_path');
+    const hasBeenModified = parseNumberTypes(oldValue, value) !== oldValue;
 
     return (
-        <LabeledRow key2={key2} modified={value !== oldValue}>
+        <LabeledRow key2={key2} modified={hasBeenModified}>
             <div className="relative flex w-full gap-x-1">
                 <TextInput
                     value={value.toString()}
@@ -50,7 +52,7 @@ export default function ConfigElementText(props: {
                 )}
             </div>
             <PreviousValue
-                previousValue={value !== oldValue ? `${oldValue}` : undefined}
+                previousValue={hasBeenModified ? `${oldValue}` : undefined}
             />
         </LabeledRow>
     );

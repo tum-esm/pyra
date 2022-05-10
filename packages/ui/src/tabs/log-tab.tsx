@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Toggle from '../components/essential/toggle';
 import ICONS from '../assets/icons';
 import Button from '../components/essential/button';
 import backend from '../utils/backend';
+import { dialog } from '@tauri-apps/api';
 
 export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -16,8 +17,15 @@ export default function LogTab(props: { visible: boolean }) {
 
     // TODO: show dialog
     async function archiveLogs() {
-        await backend.archiveLogs();
-        await updateLogs();
+        if (
+            await dialog.confirm(
+                'Do you want to archive all current logs?',
+                'PyRa 4 UI'
+            )
+        ) {
+            await backend.archiveLogs();
+            await updateLogs();
+        }
     }
 
     useEffect(() => {

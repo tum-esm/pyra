@@ -8,7 +8,7 @@ const priorities = [
 ];
 
 export default function sortConfigKeys(config: object) {
-    return sortBy(Object.keys(config), key => {
+    return sortBy(Object.keys(config), (key) => {
         priorities.forEach((p, i) => {
             if (p.includes(key)) {
                 key = `${i}${key}`;

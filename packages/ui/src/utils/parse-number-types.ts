@@ -16,11 +16,8 @@ export default function parseNumberTypes(oldValue: any, newValue: any): any {
             );
         } else {
             const parsedNewValue: any = {};
-            Object.keys(oldValue).forEach(key1 => {
-                parsedNewValue[key1] = parseNumberTypes(
-                    oldValue[key1],
-                    newValue[key1]
-                );
+            Object.keys(oldValue).forEach((key1) => {
+                parsedNewValue[key1] = parseNumberTypes(oldValue[key1], newValue[key1]);
             });
             return parsedNewValue;
         }
