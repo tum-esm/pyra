@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { invoke } from '@tauri-apps/api/tauri';
+
 import Button from './components/essential/button';
 import './styles/index.css';
 
@@ -12,8 +14,8 @@ function Main() {
 
     async function updateCliStatus() {
         setCheckingSetup(true);
-        const status = false;
-        setPyraIsSetUp(status);
+        const cliIsAvailable = (await invoke('pyra_cli_is_available')) === true;
+        setPyraIsSetUp(cliIsAvailable);
         setCheckingSetup(false);
     }
 
@@ -43,6 +45,7 @@ function Main() {
                     </Button>
                 </main>
             )}
+            {pyraIsSetUp && <p>pyra-4 command has been found</p>}
         </div>
     );
 }
