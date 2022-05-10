@@ -1,38 +1,25 @@
 import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import './styles/index.css';
 
 import Button from './components/essential/button';
-import './styles/index.css';
+import Header from './components/header';
+import ConfigTab from './tabs/config-tab';
+import LogTab from './tabs/log-tab';
 import backend from './utils/backend';
 
 const tabs = ['Status', 'Setup', 'Parameters', 'Logs', 'Enclosure Controls'];
 
 function Main() {
+    console.log('RUNNING MAINS');
     const [activeTabIndex, setActiveTabIndex] = useState(1);
     const [pyraIsSetUp, setPyraIsSetUp] = useState(false);
     const [checkingSetup, setCheckingSetup] = useState(true);
 
     async function updateCliStatus() {
         setCheckingSetup(true);
-        const backendIsAvailable = await backend.isAvailable();
-        const infoLogs = await backend.readInfoLogs();
-        const debugLogs = await backend.readDebugLogs();
-        const setupJSON = await backend.readSetupJSON();
-        const parametersJSON = await backend.readParametersJSON();
-
-        const updateSetupJSON = await backend.updateSetupJSON({
-            opus: { em27_ip: '9.8.7.6' },
-        });
-
-        console.log({
-            backendIsAvailable,
-            infoLogs,
-            debugLogs,
-            setupJSON,
-            parametersJSON,
-            updateSetupJSON,
-        });
-        setPyraIsSetUp(backendIsAvailable);
+        const status = await backend.isAvailable();
+        setPyraIsSetUp(status);
         setCheckingSetup(false);
     }
 
@@ -62,7 +49,22 @@ function Main() {
                     </Button>
                 </main>
             )}
-            {pyraIsSetUp && <p>pyra-4 command has been found</p>}
+            {pyraIsSetUp && (
+                <>
+                    <Header {...{ tabs, activeTabIndex, setActiveTabIndex }} />
+                    <main className="flex-grow w-full min-h-0 bg-gray-100">
+                        <ConfigTab
+                            type="setup"
+                            visible={tabs[activeTabIndex] === 'Setup'}
+                        />
+                        <ConfigTab
+                            type="parameters"
+                            visible={tabs[activeTabIndex] === 'Parameters'}
+                        />
+                        <LogTab visible={tabs[activeTabIndex] === 'Logs'} />
+                    </main>
+                </>
+            )}
         </div>
     );
 }

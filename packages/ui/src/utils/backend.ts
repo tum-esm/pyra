@@ -1,5 +1,6 @@
 import { invoke as invokeTauriCommand } from '@tauri-apps/api/tauri';
 import { trim } from 'lodash';
+import TYPES from './types';
 
 async function invoke(command: string, argument?: object): Promise<any> {
     /* @ts-ignore */
@@ -20,14 +21,15 @@ const backend = {
     readInfoLogs: async (): Promise<string[]> => await invoke('read_info_logs'),
     readDebugLogs: async (): Promise<string[]> => await invoke('read_debug_logs'),
     archiveLogs: async (): Promise<string[]> => await invoke('archive_logs'),
-    readSetupJSON: async (): Promise<object> => await invoke('read_setup_json'),
-    readParametersJSON: async (): Promise<object> =>
+    readSetupJSON: async (): Promise<TYPES.configJSON> =>
+        await invoke('read_setup_json'),
+    readParametersJSON: async (): Promise<TYPES.configJSON> =>
         await invoke('read_parameters_json'),
-    updateSetupJSON: async (newConfig: object): Promise<string[]> =>
+    updateSetupJSON: async (newConfig: TYPES.configJSON): Promise<string[]> =>
         await invoke('update_setup_json', {
             newJsonString: JSON.stringify(newConfig).replace(/"/g, '\\"'),
         }),
-    updateParamtersJSON: async (newConfig: object): Promise<string[]> =>
+    updateParamtersJSON: async (newConfig: TYPES.configJSON): Promise<string[]> =>
         await invoke('update_parameters_json', {
             newJsonString: JSON.stringify(newConfig),
         }),

@@ -12,7 +12,10 @@
     },
     "tauri": {
         "allowlist": {
-            "all": true
+            "dialog": {
+                "message": true,
+                "open": true
+            }
         },
         "bundle": {
             "active": true,
@@ -56,10 +59,12 @@
         "windows": [
             {
                 "fullscreen": false,
-                "height": 600,
                 "resizable": true,
                 "title": "Pyra 4 UI",
-                "width": 800
+                "height": 500,
+                "minHeight": 500,
+                "width": 900,
+                "minWidth": 900
             }
         ]
     }
