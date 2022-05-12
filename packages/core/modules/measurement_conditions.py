@@ -13,28 +13,67 @@
 # status, temporal conditions like current time, or manual user input.
 # ==============================================================================
 
-# TODO: Integrate VBDSD sun status
-
+import datetime
+from packages.core.utils.astronomy import Astronomy
+from packages.core.utils.json_file_interaction import State
 from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.measurement-conditions")
+
+
+def current_time_is_before_noon() -> bool:
+    return datetime.datetime.now().hour < 13
+
+
+# returns (hour, minute, second) tuple
+def current_time_is_in_range_tuples(t_start: tuple[int], t_end: tuple[int]):
+    now = datetime.datetime.now()
+    current_time = datetime.time(now.hour, now.minute, now.second)
+    start_time = datetime.time(*t_start)
+    end_time = datetime.time(*t_end)
+    return current_time > start_time and current_time < end_time
 
 
 class MeasurementConditions:
     def __init__(self, initial_setup: dict, initial_parameters: dict):
         self._SETUP = initial_setup
         self._PARAMS = initial_parameters
-    
+
     def run(self, new_setup: dict, new_parameters: dict):
         self._SETUP, self._PARAMS = new_setup, new_parameters
+        _triggers = self._PARAMS["measurement_triggers"]
 
         logger.info("Running MeasurementConditions")
-        pass
 
-    # allow for multiple options
-    # check for time
-    # check for sun angle
-    # use vbdsd
-    # check for user input
+        automation_should_be_running = True
 
-    # if self.sun_angle_deg < 10.0 * u.deg: em27 power off
+        # the "manually_enforced" option (when set to true) makes
+        # the decision process ignore all other factors
+        if not _triggers["manually_enforced"]:
+
+            # consider elevation on mornings and evenings
+            # TODO: Is this what "sun_angle_start" and "sun_angle_stop" mean
+            if _triggers["type"]["sun_angle"]:
+                min_required_elevation = (
+                    _triggers["sun_angle_start"]
+                    if current_time_is_before_noon()
+                    else _triggers["sun_angle_stop"]
+                )
+                if Astronomy.get_current_sun_elevation() < min_required_elevation:
+                    automation_should_be_running &= False
+
+            # consider start_time and end_time
+            if _triggers["type"]["time"]:
+                if not current_time_is_in_range_tuples(
+                    _triggers["start_time"], _triggers["stop_time"]
+                ):
+                    automation_should_be_running &= False
+
+            # consider evaluation from the vbdsd
+            if _triggers["type"]["vbdsd"]:
+                # Don't consider VBDSD if it does not have enough
+                # images yet, which will result in a state of "None"
+                if State.read()["vbdsd_indicates_good_conditions"] == False:
+                    automation_should_be_running &= False
+
+        State.update({"automation_should_be_running": automation_should_be_running})

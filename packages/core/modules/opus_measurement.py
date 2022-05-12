@@ -21,21 +21,16 @@
 
 
 import os
+import sys
 import time
+from packages.core.utils.logger import Logger
 
-# the following imports should be provided by pywin32
-try:
-    import pywin32
+if sys.platform == "win32":
+    # these imports are provided by pywin32
     import win32con
     import win32process
     import win32ui
     import dde
-
-    windows_libraries_available = True
-except ModuleNotFoundError:
-    windows_libraries_available = False
-
-from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.opus-measurement")
 
@@ -49,8 +44,8 @@ class OpusMeasurement:
     def __init__(self, initial_setup: dict, initial_parameters: dict):
         self._SETUP = initial_setup
         self._PARAMS = initial_parameters
-        if not windows_libraries_available:
-            logger.info("Windows libraries not available, class is inactive")
+        if sys.platform != "win32":
+            print("The OpusMeasurement class can only be tested on windows")
             return
 
         # note: dde servers talk to dde servers
@@ -62,7 +57,7 @@ class OpusMeasurement:
     def run(self, new_setup: dict, new_parameters: dict):
         self._SETUP, self._PARAMS = new_setup, new_parameters
 
-        if not windows_libraries_available:
+        if sys.platform != "win32":
             return
 
         logger.info("Running OpusMeasurement")
@@ -82,30 +77,27 @@ class OpusMeasurement:
             return
 
         # check for automation state flank changes
-        if (
-            self.last_cycle_automation_status
-            != self._PARAMS["pyra"]["automation_status"]
-        ):
-            if self._PARAMS["pyra"]["automation_status"] == 1:
+        automation_should_be_running = State.read()["automation_should_be_running"]
+        if self.last_cycle_automation_status != automation_should_be_running:
+            if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
                 self.__load_experiment()
-                logger.info("Load OPUS Experiment.")
+                logger.info("Loading OPUS Experiment.")
                 time.sleep(1)
                 self.__start_macro()
-                logger.info("Start OPUS Macro.")
-
-            if self._PARAMS["pyra"]["automation_status"] == 0:
+                logger.info("Starting OPUS Macro.")
+            else:
                 # flank change 1 -> 0: stop macro
                 self.__stop_macro()
-                logger.info("Stop OPUS Macro.")
+                logger.info("Stopping OPUS Macro.")
 
         # save the automation status for the next run
-        self.last_cycle_automation_status = self._PARAMS["pyra"]["automation_status"]
+        self.last_cycle_automation_status = automation_should_be_running
 
         if self.__is_em27_connected:
             logger.info("Successful ping to EM27.")
         else:
-            logger.info("EM27 seems to be not connected.")
+            logger.info("EM27 seems to be disconnected.")
 
     def __connect_to_dde_opus(self):
         try:
@@ -140,9 +132,10 @@ class OpusMeasurement:
             else:
                 return False
 
-    def __load_experiment(self, full_path):
+    def __load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
+        full_path = self._SETUP["opus"]["experiment_path"]
 
         if not self.__test_dde_connection:
             return
@@ -153,9 +146,10 @@ class OpusMeasurement:
         else:
             logger.info("Could not load OPUS experiment as expected.")
 
-    def __start_macro(self, full_path):
+    def __start_macro(self):
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
+        full_path = self._SETUP["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -166,9 +160,10 @@ class OpusMeasurement:
         else:
             logger.info("Could not start OPUS macro as expected.")
 
-    def __stop_macro(self, full_path):
+    def __stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
+        full_path = self._SETUP["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -195,7 +190,7 @@ class OpusMeasurement:
 
         True -> Connected
         False -> Not Connected"""
-        response = os.system("ping -n 1" + self._SETUP["em27"]["ip"])
+        response = os.system("ping -n 1 " + self._SETUP["em27"]["ip"])
 
         if response == 0:
             return True
@@ -207,8 +202,12 @@ class OpusMeasurement:
         Returns pywin32 process information for later usage.
         """
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        opus_call = self._SETUP["opus"]["executable_full_path"]
-        hProcess, hThread, dwProcessId, dwThreadId = pywin32.CreateProcess(
+        opus_call = (
+            self._SETUP["opus"]["executable_path"]
+            + " "
+            + self._SETUP["opus"]["executable_parameter"]
+        )
+        hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
             opus_call,
             None,
@@ -240,3 +239,32 @@ class OpusMeasurement:
                 return True
         except win32ui.error:
             return False
+
+    def test_setup(self):
+        if sys.platform != "win32":
+            return
+
+        opus_is_running = self.__opus_application_running
+        if not opus_is_running:
+            self.__start_opus()
+            try_count = 0
+            while try_count < 10:
+                if self.__opus_application_running:
+                    break
+                try_count += 1
+                time.sleep(6)
+
+        assert self.__opus_application_running
+        assert self.__test_dde_connection
+
+        print("__is_em27_connected: ", self.__is_em27_connected)
+
+        self.__load_experiment()
+        time.sleep(2)
+
+        self.__start_macro()
+        time.sleep(10)
+
+        self.__stop_macro()
+
+        print("__is_em27_connected: ", self.__is_em27_connected)

@@ -5,21 +5,21 @@ from packages.core.utils.logger import Logger
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
-PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
+SETUP_FILE_PATH = os.path.join(PROJECT_DIR, "config", "setup.json")
+PARAMS_FILE_PATH = os.path.join(PROJECT_DIR, "config", "parameters.json")
 
 
-def file_path_exists(field, value, error):
+def _file_path_exists(field, value, error):
     if not os.path.isfile(value):
         error(field, "Path has to be an existing file")
 
 
-def directory_path_exists(field, value, error):
+def _directory_path_exists(field, value, error):
     if not os.path.isdir(value):
         error(field, "Path has to be an existing directory")
 
 
-def is_valid_ip_adress(field, value, error):
+def _is_valid_ip_adress(field, value, error):
     try:
         assert len(value.split(".")) == 4
         assert all([n.isnumeric() for n in value.split(".")])
@@ -28,10 +28,9 @@ def is_valid_ip_adress(field, value, error):
         error(field, "String has to be a valid IPv4 address")
 
 
-# TODO: Add required JSON schema here (https://docs.python-cerberus.org/en/stable/)
-FILE_SCHEMA = {"type": "string", "check_with": file_path_exists}
-DIR_SCHEMA = {"type": "string", "check_with": directory_path_exists}
-IP_SCHEMA = {"type": "string", "check_with": is_valid_ip_adress}
+FILE_SCHEMA = {"type": "string", "check_with": _file_path_exists}
+DIR_SCHEMA = {"type": "string", "check_with": _directory_path_exists}
+IP_SCHEMA = {"type": "string", "check_with": _is_valid_ip_adress}
 DICT_SCHEMA = lambda schema: {"type": "dict", "schema": schema}
 INT_LIST_SCHEMA = lambda length: {
     "type": "list",
@@ -43,6 +42,15 @@ INT_SCHEMA = {"type": "integer"}
 BOOL_SCHEMA = {"type": "boolean"}
 
 SETUP_FILE_SCHEMA = {
+    "opus": DICT_SCHEMA(
+        {
+            "em27_ip": IP_SCHEMA,
+            "executable_path": FILE_SCHEMA,
+            "executable_parameter": {"type": "string"},
+            "experiment_path": FILE_SCHEMA,
+            "macro_path": FILE_SCHEMA,
+        }
+    ),
     "camtracker": DICT_SCHEMA(
         {
             "config_path": FILE_SCHEMA,
@@ -51,10 +59,7 @@ SETUP_FILE_SCHEMA = {
             "sun_intensity_path": FILE_SCHEMA,
         }
     ),
-    "em27": DICT_SCHEMA({"ip": IP_SCHEMA}),
-    "enclosure": DICT_SCHEMA({"tum_enclosure_is_present": {"type": "boolean"}}),
-    "opus": DICT_SCHEMA({"executable_path": FILE_SCHEMA}),
-    "plc": DICT_SCHEMA(
+    "tum_plc": DICT_SCHEMA(
         {
             "actors": DICT_SCHEMA(
                 {
@@ -107,63 +112,48 @@ SETUP_FILE_SCHEMA = {
         }
     ),
     "vbdsd": DICT_SCHEMA(
-        {
-            "cam_id": {"type": "integer"},
-            "image_storage_path": DIR_SCHEMA,
-            "sensor_is_present": {"type": "boolean"},
-        }
+        {"is_present": {"type": "boolean"}, "cam_id": {"type": "integer"}}
     ),
 }
 
 PARAMS_FILE_SCHEMA = {
     "camtracker": DICT_SCHEMA({"motor_offset_threshold": {"type": "number"}}),
     "em27": DICT_SCHEMA({"power_min_angle": {"type": "number"}}),
-    "opus": DICT_SCHEMA(
-        {
-            "executable_parameter": {"type": "string"},
-            "experiment_path": FILE_SCHEMA,
-            "macro_path": FILE_SCHEMA,
-        }
-    ),
     "pyra": DICT_SCHEMA(
         {
-            "automation_is_running": {"type": "boolean"},
-            "seconds_per_iteration": {"type": "number"},
+            "seconds_per_interval": {"type": "number"},
             "test_mode": {"type": "boolean"},
         }
     ),
     "vbdsd": DICT_SCHEMA(
         {
             "evaluation_size": {"type": "integer"},
-            "interval_time": {"type": "number"},
+            "seconds_per_interval": {"type": "number"},
             "measurement_threshold": {"type": "number"},
             "min_sun_angle": {"type": "number"},
         }
     ),
     "enclosure": DICT_SCHEMA(
         {
-            "continuous_readings": {"type": "list"},
             "min_sun_angle": {"type": "number"},
         }
     ),
     "measurement_triggers": DICT_SCHEMA(
         {
+            "manual_override": {"type": "boolean"},
             "type": DICT_SCHEMA(
                 {
                     "time": {"type": "boolean"},
                     "sun_angle": {"type": "boolean"},
                     "vbdsd": {"type": "boolean"},
-                    "user_control": {"type": "boolean"},
                 }
             ),
             "start_time": INT_LIST_SCHEMA(3),
             "stop_time": INT_LIST_SCHEMA(3),
-            "user_trigger_present": {"type": "boolean"},
             "sun_angle_start": {"type": "number"},
             "sun_angle_stop": {"type": "number"},
         }
     ),
-    "measurement_conditions": DICT_SCHEMA({"current_sun_angle": {"type": "number"}}),
 }
 
 
@@ -206,7 +196,7 @@ class Validation:
                 SETUP_FILE_SCHEMA, require_all=(not partial_validation)
             )
             content = Validation.__load_json(file_path, content_string, validator)
-            # TODO: Add checks that cannot be done with cerberus here
+            # Add checks that cannot be done with cerberus here
             return True
         except (AssertionError, CerberusException) as e:
             Validation.logging_handler(f"{logging_message}{e}")
@@ -224,7 +214,7 @@ class Validation:
                 PARAMS_FILE_SCHEMA, require_all=(not partial_validation)
             )
             content = Validation.__load_json(file_path, content_string, validator)
-            # TODO: Add checks that cannot be done with cerberus here
+            # Add checks that cannot be done with cerberus here
             return True
         except (AssertionError, CerberusException) as e:
             Validation.logging_handler(f"{logging_message}{e}")

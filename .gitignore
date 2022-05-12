@@ -1,6 +1,8 @@
 # python
 .venv
 *.pyc
+.pytest_cache
+__pycache__
 
 # config
 config/parameters.json
@@ -21,12 +23,16 @@ pids
 *.seed
 *.pid.lock
 .DS_Store
-images/*.jpg
+*.dat
+Bilder/**/*.JPG
+*.txt
+runtime-data/
 
 # pyra ui
+packages/electron-ui/node_modules/
+packages/electron-ui/.webpack/
+packages/electron-ui/out/
 packages/ui/node_modules/
-packages/ui/.webpack/
-packages/ui/out/
 
 # development
 .vscode/

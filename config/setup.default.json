@@ -1,20 +1,20 @@
 {
+    "opus": {
+        "em27_ip": "10.0.0.1",
+        "executable_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe",
+        "executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
+        "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
+        "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx"
+    },
     "camtracker": {
         "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt",
         "executable_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
         "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
         "sun_intensity_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat"
     },
-    "em27": {
-        "ip": "10.0.0.1"
-    },
-    "enclosure": {
-        "tum_enclosure_is_present": false
-    },
-    "opus": {
-        "executable_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe"
-    },
-    "plc": {
+    "tum_plc": {
+        "is_present": false,
+        "ip": "10.0.0.4",
         "actors": {
             "current_angle": [25, 6, 2],
             "fan_speed": [8, 18, 2],
@@ -28,8 +28,6 @@
             "reset": [3, 4, 1, 5],
             "sync_to_tracker": [8, 16, 1, 0]
         },
-        "ip": "10.0.0.4",
-        "is_present": false,
         "power": {
             "camera": [8, 16, 1, 2],
             "computer": [8, 16, 1, 6],
@@ -55,8 +53,7 @@
         }
     },
     "vbdsd": {
-        "cam_id": 0,
-        "image_storage_path": "C:\\img\\",
-        "sensor_is_present": false
+        "is_present": false,
+        "cam_id": 0
     }
 }

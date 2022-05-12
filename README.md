@@ -13,8 +13,10 @@ Dependency management using https://python-poetry.org/.
 python3.10 -m venv .venv
 
 # activate virtual environment
-source .venv/bin/activate
+source .venv/bin/activate   # unix
+.venv\Scripts\activate.bat  # windows
 
+# when your venv is activated your command line has a (.venv) prefix
 # install dependencies using poetry
 poetry install
 ```

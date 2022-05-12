@@ -1,63 +1,42 @@
-from datetime import datetime
-import json
-import os
 import time
-from filelock import FileLock
 import snap7
-
-from packages.core.utils.validation import Validation
 from packages.core import modules
-
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
-SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
-PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
-CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
-
-
+from packages.core.utils.json_file_interaction import State, Config
 from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.main")
 
 
-def load_config():
-    # FileLock = Mark, that the config JSONs are being used and the
-    # CLI should not interfere. A file "config/config.lock" will be created
-    # and the existence of this file will make the next line wait.
-    with FileLock(CONFIG_LOCK_PATH):
-        assert (Validation.check_parameters_file() and Validation.check_setup_file())
-
-        with open(SETUP_FILE_PATH, "r") as f:
-            _SETUP = json.load(f)
-        with open(PARAMS_FILE_PATH, "r") as f:
-            _PARAMS = json.load(f)
-    return _SETUP, _PARAMS
-
-
-
 def run():
 
-    _SETUP, _PARAMS = load_config()
+    State.initialize()
 
+    _SETUP, _PARAMS = Config.read()
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_SETUP, _PARAMS),
         modules.enclosure_control.EnclosureControl(_SETUP, _PARAMS),
         modules.sun_tracking.SunTracking(_SETUP, _PARAMS),
         modules.opus_measurement.OpusMeasurement(_SETUP, _PARAMS),
     ]
-
-    # TODO: Start vbdsd in a thread
+    vbdsd_thread = modules.vbdsd.VBDSD_Thread()
 
     while True:
-        execution_started_at = datetime.now().timestamp()
+        start_time = time.time()
         logger.info("Starting Iteration")
 
         try:
-            _SETUP, _PARAMS = load_config()
+            _SETUP, _PARAMS = Config.read()
         except AssertionError:
             # TODO: What to do here?
-                time.sleep(60)
-                continue
+            time.sleep(60)
+            continue
+
+        # Start or stop VBDSD in a thread
+        vbdsd_should_be_running = _PARAMS["measurement_triggers"]["type"]["vbdsd"]
+        if vbdsd_should_be_running and not vbdsd_thread.is_running():
+            vbdsd_thread.start()
+        if not vbdsd_should_be_running and vbdsd_thread.is_running():
+            vbdsd_thread.stop()
 
         try:
             for module in _modules:
@@ -73,10 +52,10 @@ def run():
             # TODO: trigger email?
 
         logger.info("Ending Iteration")
-        execution_ended_at = datetime.now().timestamp()
-        time_to_wait = _PARAMS["pyra"]["seconds_per_iteration"] - (
-            execution_ended_at - execution_started_at
-        )
-        time_to_wait = 0 if time_to_wait < 0 else time_to_wait
-        logger.debug(f"Waiting {time_to_wait} second(s)")
-        time.sleep(time_to_wait)
+
+        # wait rest of loop time
+        elapsed_time = time.time() - start_time
+        time_to_wait = _PARAMS["pyra"]["seconds_per_interval"] - elapsed_time
+        if time_to_wait > 0:
+            logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
+            time.sleep(time_to_wait)

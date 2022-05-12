@@ -28,455 +28,345 @@
 
 
 # TODO: Use logging after initial tests
+
+import multiprocessing
 import os
+import shutil
 import time
 import astropy.units as astropy_units
-import astropy.coordinates as astropy_coordinates
-import astropy.time as astropy_time
 import cv2 as cv
-from filelock import FileLock
 import numpy as np
-import json
-
-
-
-from packages.core.utils.validation import Validation
-
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-SETUP_FILE_PATH = f"{PROJECT_DIR}/config/setup.json"
-PARAMS_FILE_PATH = f"{PROJECT_DIR}/config/parameters.json"
-CONFIG_LOCK_PATH = f"{PROJECT_DIR}/config/config.lock"
-
+from packages.core.utils.json_file_interaction import Config, State
 from packages.core.utils.logger import Logger
+from packages.core.utils.ring_list import RingList
+from packages.core.utils.astronomy import Astronomy
 
 logger = Logger(origin="pyra.core.vbdsd")
 
-
-class RingList:
-    """Base code created by Flavio Catalani on Tue, 5 Jul 2005 (PSF).
-    Added sum() and reinitialize() functions.
-    """
-
-    def __init__(self, length):
-        self.__data__ = []
-        self.__full__ = 0
-        self.__max__ = length
-        self.__cur__ = 0
-
-    def append(self, x):
-        if self.__full__ == 1:
-            for i in range(0, self.__cur__ - 1):
-                self.__data__[i] = self.__data__[i + 1]
-            self.__data__[self.__cur__ - 1] = x
-        else:
-            self.__data__.append(x)
-            self.__cur__ += 1
-            if self.__cur__ == self.__max__:
-                self.__full__ = 1
-
-    def get(self):
-        return self.__data__
-
-    def remove(self):
-        if self.__cur__ > 0:
-            del self.__data__[self.__cur__ - 1]
-            self.__cur__ -= 1
-
-    def size(self):
-        return self.__cur__
-
-    def maxsize(self):
-        return self.__max__
-
-    def sum(self):
-        return float(sum(self.get()))
-
-    def reinitialize(self, length):
-        self.__max__ = length
-        self.__full__ = 0
-        self.__cur__ = 0
-        handover_list = self.get()
-        self.__data__ = []
-
-        for item in handover_list:
-            self.append(item)
-
-    def __str__(self):
-        return "".join(self.__data__)
+dir = os.path.dirname
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", "vbdsd")
+_SETUP, _PARAMS = None, None
 
 
-def read_json_config_files():
-    """Reads and validates the available json config files.
+class _VBDSD:
+    cam = None
 
-    Returns
-    SETUP:dict and PARAMS:dict as Tuple
-    """
-    # TODO: Handle errors from config validation
-    with FileLock(CONFIG_LOCK_PATH):
-        Validation.check_parameters_file()
-        Validation.check_setup_file()
-        with open(SETUP_FILE_PATH, "r") as f:
-            SETUP = json.load(f)
-        with open(PARAMS_FILE_PATH, "r") as f:
-            PARAMS = json.load(f)
+    @staticmethod
+    def init_cam(retries: int = 5):
+        """
+        init_cam(int id): Connects to the camera with id and sets its parameters.
+        If successfully connected, the function returns an instance object of the
+        camera, otherwise None will be returned.
+        """
+        cam_id = _SETUP["vbdsd"]["cam_id"]
+        _VBDSD.cam = cv.VideoCapture(cam_id)
+        _VBDSD.cam.release()
 
-    return (SETUP, PARAMS)
+        for _ in range(retries):
+            _VBDSD.cam = cv.VideoCapture(cam_id)
+            time.sleep(1)
+            if _VBDSD.cam.isOpened():
+                logger.debug(f"Camera with id {cam_id} is now connected")
+                _VBDSD.cam.set(3, 1280)  # width
+                _VBDSD.cam.set(4, 720)  # height
+                _VBDSD.cam.set(15, -12)  # exposure
+                _VBDSD.cam.set(10, 64)  # brightness
+                _VBDSD.cam.set(11, 64)  # contrast
+                _VBDSD.cam.set(12, 0)  # saturation
+                _VBDSD.cam.set(14, 0)  # gain
+                _VBDSD.cam.read()
+                _VBDSD.change_exposure()
+                return
 
+        logger.debug(f"Camera with id {cam_id} could not be found")
 
-def init_cam(cam_id):
-    """init_cam(int id): Connects to the camera with id and sets its parameters.
-    If successfully connected, the function returns an instance object of the
-    camera, otherwise None will be returned.
-    """
-    height = 720  # 768
-    width = 1280  # 1024
+    @staticmethod
+    def eval_sun_state(frame):
+        """
+        This function will extract the current sun state from an input image (frame)
+        Is uses cv2 package for image detection / computer vision tasks.
 
-    cam = cv.VideoCapture(cam_id)
-    cam.release()
+        returns:
+        1, frame -> sun status is good, picture used for evaluation
+        0, frame -> sun status is bad, picture used for evaluation
+        """
+        blur = cv.medianBlur(frame, 15)
+        frame_gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
 
-    for _ in range(5):
-        cam = cv.VideoCapture(cam_id)
-        time.sleep(1)
-        if cam.isOpened():
-            cam.set(3, width)
-            cam.set(4, height)
-            cam.set(15, -12)  # exposure
-            cam.set(10, 64)  # brightness
-            cam.set(11, 64)  # contrast
-            cam.set(12, 0)  # saturation
-            cam.set(14, 0)  # gain
-            cam.read()
-            return cam
-    else:
-        return None
+        if frame_gray.shape[1] == 1280:  # Crop on sides
+            frame_gray = frame_gray[:, 170:1100]
+            frame = frame[:, 170:1100]
 
+        img_b = cv.adaptiveThreshold(
+            frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 23, 2
+        )
+        img_b = cv.medianBlur(img_b, 9)
+        img_b, frame = _VBDSD.extend_border(img_b, frame)
 
-def eval_sun_state(frame):
-    """
-    This function will extract the current sun state from an input image (frame)
-    Is uses cv2 package for image detection / computer vision tasks.
+        circles = cv.HoughCircles(
+            img_b,
+            cv.HOUGH_GRADIENT,
+            1,
+            900,
+            param1=200,
+            param2=1,
+            minRadius=345,
+            maxRadius=355,
+        )
+        # (min + max) radius have to be quite exact.
+        # 900 = Distance to next circle to prevent wrong circles
 
-    returns:
-    1, frame -> sun status is good, picture used for evaluation
-    0, frame -> sun status is bad, picture used for evaluation
-    """
-    blur = cv.medianBlur(frame, 15)
-    frame_gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
-
-    if frame_gray.shape[1] == 1280:  # Crop on sides
-        frame_gray = frame_gray[:, 170:1100]
-        frame = frame[:, 170:1100]
-
-    img_b = cv.adaptiveThreshold(
-        frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 23, 2
-    )
-
-    img_b = cv.medianBlur(img_b, 9)
-
-    img_b, frame, border = extend_border(img_b, frame)
-
-    circles = cv.HoughCircles(
-        img_b,
-        cv.HOUGH_GRADIENT,
-        1,
-        900,
-        param1=200,
-        param2=1,
-        minRadius=345,
-        maxRadius=355,
-    )
-    # (min + max) radius have to be quite exact.
-    # 900 = Distance to next circle to prevent wrong circles
-
-    if circles is None:
-        return -1, frame
-
-    circles = np.uint16(np.around(circles))
-
-    for i in circles[0, :]:
-        center = (i[0], i[1])
-        radius = i[2]
-        cv.circle(img_b, center, radius - 10, 255, 30)
-        cv.circle(img_b, center, radius - 20, 0, 15)
-        cv.circle(frame, center, radius, 255, 5)
-
-    contours, hierarchy = cv.findContours(
-        img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE
-    )
-
-    ppi_contour = None
-    ppi = -1
-    areas = [0]
-    if len(contours) > 0:
-        for i in range(len(contours)):
-            if cv.contourArea(contours[i]) > 2000:
-                x, y, w, h = cv.boundingRect(contours[i])
-                if float(w) == float(h):  # Use constraints to find the projection plane
-                    ppi_contour = contours[i]  # Save contour
-                    ppi = i
-
-        if ppi_contour is None:
+        if circles is None:
             return -1, frame
 
-        if ppi >= 0:
-            c_areas = []
-            for contour in contours:
-                temp_area = cv.contourArea(contour)
-                c_areas.append(temp_area)
-            indices = np.argsort(c_areas)
+        circles = np.uint16(np.around(circles))
 
-        font = cv.FONT_HERSHEY_SIMPLEX
-        color = (0, 0, 255)  # red
+        for i in circles[0, :]:
+            center = (i[0], i[1])
+            radius = i[2]
+            cv.circle(img_b, center, radius - 10, 255, 30)
+            cv.circle(img_b, center, radius - 20, 0, 15)
+            cv.circle(frame, center, radius, 255, 5)
 
-        # x_length = frame.shape[1]
-        y_length = frame.shape[0]
+        contours, hierarchy = cv.findContours(
+            img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE
+        )
 
-        # Check the size and parents and level of contour
-        for i in indices:
-            if hierarchy[0][i][3] == ppi:  # Contour is on pp
-                x, y, w, h = cv.boundingRect(contours[i])
-                pos = (x, y)
-                cv.drawContours(frame, contours[i], -1, color, 4)
-                cv.putText(frame, ("%s" % (i)), pos, font, 1, color, 2, 10)
-                areas.append(c_areas[i])
+        ppi_contour = None
+        ppi = -1
+        areas = [0]
+        if len(contours) > 0:
+            for i in range(len(contours)):
+                if cv.contourArea(contours[i]) > 2000:
+                    x, y, w, h = cv.boundingRect(contours[i])
+                    if float(w) == float(
+                        h
+                    ):  # Use constraints to find the projection plane
+                        ppi_contour = contours[i]  # Save contour
+                        ppi = i
 
-    cv.putText(
-        frame,
-        "%05d" % (np.sum(areas)),
-        (10, y_length - 20),
-        font,
-        1,
-        (255, 255, 255),
-        2,
-        10,
-    )
+            if ppi_contour is None:
+                return -1, frame
 
-    if np.sum(areas) >= 8000:
-        return 1, frame
-    else:
+            if ppi >= 0:
+                c_areas = []
+                for contour in contours:
+                    temp_area = cv.contourArea(contour)
+                    c_areas.append(temp_area)
+                indices = np.argsort(c_areas)
+
+            font = cv.FONT_HERSHEY_SIMPLEX
+            color = (0, 0, 255)  # red
+
+            # x_length = frame.shape[1]
+            y_length = frame.shape[0]
+
+            # Check the size and parents and level of contour
+            for i in indices:
+                if hierarchy[0][i][3] == ppi:  # Contour is on pp
+                    x, y, w, h = cv.boundingRect(contours[i])
+                    pos = (x, y)
+                    cv.drawContours(frame, contours[i], -1, color, 4)
+                    cv.putText(frame, ("%s" % (i)), pos, font, 1, color, 2, 10)
+                    areas.append(c_areas[i])
+
+        cv.putText(
+            frame,
+            "%05d" % (np.sum(areas)),
+            (10, y_length - 20),
+            font,
+            1,
+            (255, 255, 255),
+            2,
+            10,
+        )
+
+        if np.sum(areas) >= 8000:
+            return 1, frame
+        else:
+            return 0, frame
+
+    @staticmethod
+    def extend_border(img, frame):
+        """This function allows to use different models of the vbdsd hardware setup
+        by cutting the field of view to the same base.
+        """
+        bordersize = 50
+        make_border = lambda f: cv.copyMakeBorder(
+            f,
+            top=bordersize,
+            bottom=bordersize,
+            left=0,
+            right=0,
+            borderType=cv.BORDER_CONSTANT,
+            value=[0, 0, 0],
+        )
+        return make_border(img), make_border(frame)
+
+    @staticmethod
+    def change_exposure(diff=0):
+        """Changes the camera exposure settings according to the current sun angle
+        with a known setting. Allows to add an INT on top for further adjustment.
+        """
+
+        current_sun_angle = Astronomy.get_current_sun_elevation()
+
+        if current_sun_angle < 4 * astropy_units.deg:
+            exp = -9 + diff
+        elif current_sun_angle < 6 * astropy_units.deg:
+            exp = -10 + diff
+        elif current_sun_angle < 10 * astropy_units.deg:
+            exp = -11 + diff
+        else:
+            exp = -12 + diff
+
+        _VBDSD.cam.set(15, exp)
+        _VBDSD.cam.read()
+        time.sleep(0.2)
+
+    @staticmethod
+    def run(retries: int = 5):
+        """
+        Calls take_vbdsd_image and processes the image if successful.
+
+        Returns
+        status: 1 or 0
+        frame: Source image
+        """
+
+        frame = None
+        for _ in range(retries + 1):
+            ret, frame = _VBDSD.cam.read()
+            if ret:
+                return _VBDSD.eval_sun_state(frame)
+
         return 0, frame
 
 
-def calc_sun_angle_deg(loc):
-    """calc_sun_angle_deg(location loc): Computes and returns the current sun
-    angle in degree, based on the location loc, computed by get_tracker_position(),
-     and current time. Therefore, the pack- ages time and astrophy are required.
-    """
-    now = astropy_time.Time.now()
-    altaz = astropy_coordinates.AltAz(location=loc, obstime=now)
-    sun = astropy_coordinates.get_sun(now)
-    sun_angle_deg = sun.transform_to(altaz).alt
-    return sun_angle_deg
+class VBDSD_Thread:
+    def __init__(self):
+        self.__process = None
 
+    def start(self):
+        """
+        Start a thread using the multiprocessing library
+        """
+        logger.info("Starting thread")
+        self.__process = multiprocessing.Process(target=VBDSD_Thread.main)
+        self.__process.start()
 
-def read_camtracker_config() -> list:
-    """Reads the config.txt file of the CamTracker application to receive the
-    latest tracker position.
+    def is_running(self):
+        return self.__process is not None
 
-    Returns
-    tracker_position as a python list
-    """
+    def stop(self):
+        """
+        Stop the thread, remove all images inside the directory
+        "runtime_data/vbdsd" and set the state to 'null'
+        """
+        logger.info("Terminating thread")
+        self.__process.terminate()
 
-    target = SETUP["camtracker"]["config_path"]
+        logger.debug("Removing all images")
+        VBDSD_Thread.__remove_vbdsd_images()
 
-    if not os.path.isfile(target):
-        pass
-        # TODO: Raise error?
+        logger.debug('Setting state to "null"')
+        State.update({"vbdsd_indicates_good_conditions": None})
 
-    f = open(target, "r")
+        self.__process = None
 
-    list_lines = f.readlines()
-    first_line = list_lines[0]
+    @staticmethod
+    def __remove_vbdsd_images():
+        if os.path.exists(IMG_DIR):
+            shutil.rmtree(IMG_DIR)
+        os.mkdir(IMG_DIR)
 
-    # find $1 and $2 markers
-    for n, line in enumerate(list_lines):
-        if line == "$1\n":
-            line_info1 = n
+    @staticmethod
+    def main(infinite_loop=True):
+        global _SETUP, _PARAMS
+        _SETUP, _PARAMS = Config.read()
 
-    # pos1 = latitude,
-    # pos2 = longitude,
-    # pos3 = height
-    tracker_position = [
-        list_lines[line_info1 + 1].replace("\n", ""),
-        list_lines[line_info1 + 2].replace("\n", ""),
-        list_lines[line_info1 + 3].replace("\n", ""),
-    ]
+        status_history = RingList(_PARAMS["vbdsd"]["evaluation_size"])
+        current_state = None
 
-    f.close()
+        while True:
+            start_time = time.time()
+            _SETUP, _PARAMS = Config.read()
 
-    return tracker_position
+            if _VBDSD.cam is None:
+                logger.info(f"(Re)connecting to camera")
+                _VBDSD.init_cam()
 
+                # if connecting was not successful
+                if _VBDSD.cam is None:
+                    status_history.empty()
+                    time.sleep(60)
+                    continue
 
-def get_tracker_position():
-    """get_tracker_position(): Reads out the height, the longitude and the
-    latitude of the system from CamTrackerConfig.txt, and computes the location
-    on earth. Therefore, the python package astropy [23] is imported, and its
-    function coord.EarthLocation() is used. The read out parameters, as well as
-    the computed location will be returned.
-    """
+            # reinit if parameter changes
+            new_size = _PARAMS["vbdsd"]["evaluation_size"]
+            if status_history.maxsize() != new_size:
+                logger.debug(
+                    "Size of status histroy has changed: "
+                    + f"{status_history.maxsize()} -> {new_size}"
+                )
+                status_history.reinitialize(new_size)
 
-    readout = read_camtracker_config()
+            # sleep while sun angle is too low
+            if Astronomy.get_current_sun_elevation().is_within_bounds(
+                None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
+            ):
+                logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
+                if current_state != None:
+                    State.update({"vbdsd_indicates_good_conditions": current_state})
+                    current_state = None
+                time.sleep(300)
+                continue
 
-    latitude = readout[0]
-    longitude = readout[1]
-    height = readout[2]
+            # take a picture and process it
+            status, frame = _VBDSD.run()
 
-    loc = astropy_coordinates.EarthLocation.from_geodetic(height=height, lat=latitude, lon=longitude)
+            # retry with change_exposure(1) if status fail
+            if status == -1:
+                _VBDSD.change_exposure(1)
+                status, frame = _VBDSD.run()
 
-    return loc
+            # append sun status to status history
+            status_history.append(max(status, 0))
+            logger.debug(f"New status: {status}")
+            logger.debug(f"New status history: {status_history.get()}")
 
-
-def extend_border(img, frame):
-    """This function allows to use different models of the vbdsd hardware setup
-    by cutting the field of view to the same base.
-    """
-    bordersize = 50  # Extend borders
-    img_b = cv.copyMakeBorder(
-        img,
-        top=bordersize,
-        bottom=bordersize,
-        left=0,
-        right=0,
-        borderType=cv.BORDER_CONSTANT,
-        value=[0, 0, 0],
-    )
-
-    frame = cv.copyMakeBorder(
-        frame,
-        top=bordersize,
-        bottom=bordersize,
-        left=0,
-        right=0,
-        borderType=cv.BORDER_CONSTANT,
-        value=[0, 0, 0],
-    )
-    return img_b, frame, bordersize
-
-
-def change_exposure(diff=0):
-    """Changes the camera exposure settings according to the current sun angle
-    with a known setting. Allows to add an INT on top for further adjustment.
-    """
-
-    loc = get_tracker_position()
-    sun_angle_deg = calc_sun_angle_deg(loc)
-
-    if sun_angle_deg < 4 * astropy_units.deg:
-        exp = -9 + diff
-    elif sun_angle_deg < 6 * astropy_units.deg:
-        exp = -10 + diff
-    elif sun_angle_deg < 10 * astropy_units.deg:
-        exp = -11 + diff
-    else:
-        exp = -12 + diff
-
-    cam.set(15, exp)
-    cam.read()
-    time.sleep(0.2)
-
-
-def take_vbdsd_image(count: int = 1):
-    """Takes a VBDSD image with retry option.
-
-    Returns
-    ret(retrieval): 1 or 0
-    frame: Source image
-    """
-
-    for _ in range(count):
-        ret, frame = cam.read()
-        if ret:
-            return ret, frame
-
-    return False, None
-
-
-def process_vbdsd_vision():
-    """Calls take_vbdsd_image and processes the image if successful.
-
-    Returns
-    status: 1 or 0
-    frame: Source image
-    """
-
-    ret, frame = take_vbdsd_image(5)
-    if ret:
-        return eval_sun_state(frame)
-
-    return 0, frame
-
-
-def main(infinite_loop = True):
-    global SETUP, PARAMS, cam
-    SETUP, PARAMS = read_json_config_files()
-    status_history = RingList(PARAMS["vbdsd"]["evaluation_size"])
-
-    loc = get_tracker_position()
-
-    cam = init_cam(SETUP["vbdsd"]["cam_id"])
-    change_exposure()
-
-    while(True):
-    
-        start_time = time.time()
-        SETUP, PARAMS = read_json_config_files()
-
-        # sleep while sun angle is too low
-        # assert False, repr(calc_sun_angle_deg(loc).to_string())
-        while calc_sun_angle_deg(loc).is_within_bounds(None, PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg):
-            time.sleep(60)
-
-        # reinit if parameter changes
-        if status_history.maxsize() != PARAMS["vbdsd"]["evaluation_size"]:
-            status_history.reinitialize(PARAMS["vbdsd"]["evaluation_size"])
-
-        # take a picture and process it
-        status, frame = process_vbdsd_vision()
-        # retry with change_exposure(1) if status fail
-        if status == -1:
-            change_exposure(1)
-            status, frame = process_vbdsd_vision()
-
-        # append sun status to status history
-        if status == 1:
-            status_history.append(1)
-        else:
-            status_history.append(0)
-
-        if os.path.exists(SETUP["vbdsd"]["image_storage_path"]) and frame is not None:
-            img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
-            img_full_path = os.path.join(
-                SETUP["vbdsd"]["image_storage_path"] + img_name
-            )
-            # save image
-            cv.imwrite(img_full_path, frame)
-
-        # start eval of sun state once initial list is filled
-        if status_history.size() == status_history.maxsize():
-            score = status_history.sum() / status_history.size()
-
-            if score > PARAMS["vbdsd"]["measurement_threshold"]:
-                with FileLock(CONFIG_LOCK_PATH):
-                    with open(PARAMS_FILE_PATH, "w") as f:
-                        PARAMS["pyra"]["automation_is_running"] = True
-                        json.dump(PARAMS, f, indent=2)
-                        print(PARAMS["vbdsd"])
+            if frame is not None:
+                img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
+                img_path = os.path.join(IMG_DIR, img_name)
+                cv.imwrite(img_path, frame)
+                logger.debug(f"Saving image to: {img_path}")
             else:
-                # sun status bad
-                with FileLock(CONFIG_LOCK_PATH):
-                    with open(PARAMS_FILE_PATH, "w") as f:
-                        PARAMS["pyra"]["automation_is_running"] = False
-                        json.dump(PARAMS, f, indent=2)
-                        print(PARAMS["vbdsd"])
+                logger.debug(f"Could not take image")
 
-        # wait rest of loop time
-        elapsed_time = time.time()
-        while (elapsed_time - start_time) < PARAMS["vbdsd"]["interval_time"]:
-            time.sleep(1)
-            elapsed_time = time.time()
-        
-        if not infinite_loop:
-            # TODO: Remove this when actual tests are in place
-            print(status_history.__data__)
-            break
+            # evaluate sun state only if list is filled
+            if status_history.size() == status_history.maxsize():
+                score = status_history.sum() / status_history.size()
+                new_state = score > _PARAMS["vbdsd"]["measurement_threshold"]
+            else:
+                new_state = None
+
+            if current_state != new_state:
+                logger.info(
+                    f"State change: {'GOOD' if current_state else 'BAD'}"
+                    + f" -> {'GOOD' if new_state else 'BAD'}"
+                )
+                State.update({"vbdsd_indicates_good_conditions": new_state})
+                current_state = new_state
+
+            # wait rest of loop time
+            elapsed_time = time.time() - start_time
+            time_to_wait = _PARAMS["vbdsd"]["seconds_per_interval"] - elapsed_time
+            if time_to_wait > 0:
+                logger.debug(
+                    f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)"
+                )
+                time.sleep(time_to_wait)
+
+            if not infinite_loop:
+                return status_history

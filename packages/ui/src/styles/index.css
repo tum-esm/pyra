@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.svg-green-button path {
+    @apply fill-slate-800;
+}
+
+.svg-toggle-true .primary {
+    @apply fill-blue-300;
+}
+
+.svg-toggle-true .secondary {
+    @apply fill-blue-900;
+}
+
+.svg-toggle-false .primary {
+    @apply fill-gray-200;
+}
+
+.svg-toggle-false .secondary {
+    @apply fill-transparent;
+}
+
+.flex-row-center {
+    @apply flex flex-row items-center justify-center;
+}
+
+.flex-row-left {
+    @apply flex flex-row items-center justify-start;
+}
+
+.flex-row-right {
+    @apply flex flex-row items-center justify-end;
+}

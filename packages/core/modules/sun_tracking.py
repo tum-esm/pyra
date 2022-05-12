@@ -13,25 +13,23 @@
 # to follow the sun in the course of the day.
 # ==============================================================================
 
-# TODO: Implement this for the "Camtracker" software
-# Later, make an abstract base class that enforces a standard interface
-# to be implemented for any software like "Camtracker"
+# This is an Implementation this for the "Camtracker" software
+# Later, we will make an abstract base class that enforces a standard
+# interface to be implemented for any software like "Camtracker"
 
 import os
+import sys
+import time
 import jdcal
 import datetime
+from packages.core.utils.json_file_interaction import State
+from packages.core.utils.logger import Logger
 
 # the following imports should be provided by pywin32
-try:
+if sys.platform == "win32":
     import win32con
     import win32ui
     import win32process
-
-    windows_libraries_available = True
-except ModuleNotFoundError:
-    windows_libraries_available = False
-
-from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.sun-tracking")
 
@@ -40,14 +38,14 @@ class SunTracking:
     def __init__(self, initial_setup: dict, initial_parameters: dict):
         self._SETUP = initial_setup
         self._PARAMS = initial_parameters
-        if not windows_libraries_available:
-            logger.info("Windows libraries not available, class is inactive")
+        if sys.platform != "win32":
+            print("The SunTracking class can only be tested on windows")
             return
 
     def run(self, new_setup: dict, new_parameters: dict):
         self._SETUP, self._PARAMS = new_setup, new_parameters
 
-        if not windows_libraries_available:
+        if sys.platform != "win32":
             return
 
         logger.info("Running SunTracking")
@@ -59,12 +57,10 @@ class SunTracking:
 
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
-        if self._PARAMS["pyra"]["automation_is_running"] == 0:
-
+        if not State.read()["vbdsd_evaluation_is_positive"]:
             if self.__ct_application_running:
                 self.__stop_sun_tracking_automation()
                 logger.info("Stop CamTracker.")
-
             return
 
         # main logic for active automation
@@ -107,9 +103,7 @@ class SunTracking:
         # delete stop.txt file in camtracker folder if present
         # exe call with -automation
         # http://timgolden.me.uk/pywin32-docs/win32process.html
-        camtracker_call = (
-            self._SETUP["camtracker"]["executable_full_path"] + " -automation"
-        )
+        camtracker_call = self._SETUP["camtracker"]["executable_path"] + " -autostart"
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
             camtracker_call,
@@ -134,9 +128,10 @@ class SunTracking:
 
         # create stop.txt file in camtracker folder
         camtracker_directory = os.path.dirname(
-            self._SETUP["camtracker"]["executable_full_path"]
+            self._SETUP["camtracker"]["executable_path"]
         )
-        f = open(camtracker_directory + "stop.txt", "w")
+
+        f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
         f.close()
 
     def __read_ct_log_learn_az_elev(self):
@@ -234,3 +229,28 @@ class SunTracking:
             return False
 
         return True
+
+    def test_setup(self):
+        if sys.platform != "win32":
+            return
+
+        ct_is_running = self.__ct_application_running
+        if not ct_is_running:
+            self.__start_sun_tracking_automation()
+            try_count = 0
+            while try_count < 10:
+                if self.__ct_application_running:
+                    break
+                try_count += 1
+                time.sleep(6)
+
+        assert self.__ct_application_running
+
+        # time.sleep(20)
+
+        self.__stop_sun_tracking_automation()
+        time.sleep(10)
+
+        assert not self.__ct_application_running
+
+        assert False
