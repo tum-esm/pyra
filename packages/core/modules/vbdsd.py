@@ -67,6 +67,7 @@ class _VBDSD:
             _VBDSD.cam = cv.VideoCapture(cam_id)
             time.sleep(1)
             if _VBDSD.cam.isOpened():
+                logger.debug(f"Camera with id {cam_id} is now connected")
                 _VBDSD.cam.set(3, 1280)  # width
                 _VBDSD.cam.set(4, 720)  # height
                 _VBDSD.cam.set(15, -12)  # exposure
@@ -76,6 +77,9 @@ class _VBDSD:
                 _VBDSD.cam.set(14, 0)  # gain
                 _VBDSD.cam.read()
                 _VBDSD.change_exposure()
+                return
+
+        logger.debug(f"Camera with id {cam_id} could not be found")
 
     @staticmethod
     def eval_sun_state(frame):
@@ -248,7 +252,7 @@ class VBDSD_Thread:
         """
         Start a thread using the multiprocessing library
         """
-        logger.info("starting thread")
+        logger.info("Starting thread")
         self.__process = multiprocessing.Process(target=VBDSD_Thread.main)
         self.__process.start()
 
@@ -260,13 +264,13 @@ class VBDSD_Thread:
         Stop the thread, remove all images inside the directory
         "runtime_data/vbdsd" and set the state to 'null'
         """
-        logger.info("terminating thread")
+        logger.info("Terminating thread")
         self.__process.terminate()
 
-        logger.info("removing all images")
+        logger.debug("Removing all images")
         VBDSD_Thread.__remove_vbdsd_images()
 
-        logger.info("setting state to 'null'")
+        logger.debug('Setting state to "null"')
         State.update({"vbdsd_indicates_good_conditions": None})
 
         self.__process = None
@@ -284,37 +288,44 @@ class VBDSD_Thread:
 
         status_history = RingList(_PARAMS["vbdsd"]["evaluation_size"])
         current_state = None
-        _VBDSD.init_cam()
 
         while True:
             start_time = time.time()
             _SETUP, _PARAMS = Config.read()
 
-            # sleep while sun angle is too low
-            # assert False, repr(calc_sun_angle_deg(loc).to_string())
-            while Astronomy.get_current_sun_elevation().is_within_bounds(
-                None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
-            ):
-                logger.debug("current sun elevation below minimum")
-                time.sleep(60)
-                continue
+            if _VBDSD.cam is None:
+                logger.info(f"(Re)connecting to camera")
+                _VBDSD.init_cam()
+
+                # if connecting was not successful
+                if _VBDSD.cam is None:
+                    status_history.empty()
+                    time.sleep(60)
+                    continue
 
             # reinit if parameter changes
             new_size = _PARAMS["vbdsd"]["evaluation_size"]
             if status_history.maxsize() != new_size:
-                logger.debug(f"size of status histroy has changed {status_history.maxsize()}->{new_size}")
+                logger.debug(
+                    "Size of status histroy has changed: "
+                    + f"{status_history.maxsize()} -> {new_size}"
+                )
                 status_history.reinitialize(new_size)
 
-            # try to reconnect to camera if not connected
-            if _VBDSD.cam is None:
-                logger.error("VBDSD camera not connected found")
-                status_history.empty()
-                _VBDSD.init_cam()
-                time.sleep(60)
+            # sleep while sun angle is too low
+            if Astronomy.get_current_sun_elevation().is_within_bounds(
+                None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
+            ):
+                logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
+                if current_state != None:
+                    State.update({"vbdsd_indicates_good_conditions": current_state})
+                    current_state = None
+                time.sleep(300)
                 continue
 
             # take a picture and process it
             status, frame = _VBDSD.run()
+
             # retry with change_exposure(1) if status fail
             if status == -1:
                 _VBDSD.change_exposure(1)
@@ -323,12 +334,13 @@ class VBDSD_Thread:
             # append sun status to status history
             status_history.append(max(status, 0))
             logger.debug(f"New status: {status}")
+            logger.debug(f"New status history: {status_history.get()}")
 
             if frame is not None:
                 img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
                 img_path = os.path.join(IMG_DIR, img_name)
                 cv.imwrite(img_path, frame)
-                logger.debug(f"Saving image to {img_path}")
+                logger.debug(f"Saving image to: {img_path}")
             else:
                 logger.debug(f"Could not take image")
 
@@ -340,7 +352,10 @@ class VBDSD_Thread:
                 new_state = None
 
             if current_state != new_state:
-                logger.debug(f"State change {current_state}->{new_state}")
+                logger.info(
+                    f"State change: {'GOOD' if current_state else 'BAD'}"
+                    + f" -> {'GOOD' if new_state else 'BAD'}"
+                )
                 State.update({"vbdsd_indicates_good_conditions": new_state})
                 current_state = new_state
 
@@ -348,10 +363,10 @@ class VBDSD_Thread:
             elapsed_time = time.time() - start_time
             time_to_wait = _PARAMS["vbdsd"]["seconds_per_interval"] - elapsed_time
             if time_to_wait > 0:
-                logger.debug(f"Finished loop, waiting {round(time_to_wait, 2)} second(s)")
+                logger.debug(
+                    f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)"
+                )
                 time.sleep(time_to_wait)
 
             if not infinite_loop:
-                # TODO: Remove this when actual tests are in place
-                print(status_history.__data__)
-                break
+                return status_history

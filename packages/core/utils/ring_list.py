@@ -52,4 +52,4 @@ class RingList:
             self.append(item)
 
     def __str__(self):
-        return "".join(self.__data__)
+        return str(self.__data__)
