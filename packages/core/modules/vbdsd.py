@@ -45,7 +45,7 @@ logger = Logger(origin="pyra.core.vbdsd")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", " vbdsd")
+IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", "vbdsd")
 _SETUP, _PARAMS = None, None
 
 
@@ -249,7 +249,7 @@ class VBDSD_Thread:
         Start a thread using the multiprocessing library
         """
         logger.info("starting thread")
-        self.__process = multiprocessing.Process(target=VBDSD_Thread.__main)
+        self.__process = multiprocessing.Process(target=VBDSD_Thread.main)
         self.__process.start()
 
     def is_running(self):
@@ -278,7 +278,7 @@ class VBDSD_Thread:
         os.mkdir(IMG_DIR)
 
     @staticmethod
-    def __main(infinite_loop=True):
+    def main(infinite_loop=True):
         global _SETUP, _PARAMS
         _SETUP, _PARAMS = Config.read()
 
@@ -295,11 +295,14 @@ class VBDSD_Thread:
             while Astronomy.get_current_sun_elevation().is_within_bounds(
                 None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
             ):
+                logger.debug("current sun elevation below minimum")
                 time.sleep(60)
+                continue
 
             # reinit if parameter changes
             new_size = _PARAMS["vbdsd"]["evaluation_size"]
             if status_history.maxsize() != new_size:
+                logger.debug(f"size of status histroy has changed {status_history.maxsize()}->{new_size}")
                 status_history.reinitialize(new_size)
 
             # try to reconnect to camera if not connected
@@ -308,6 +311,7 @@ class VBDSD_Thread:
                 status_history.empty()
                 _VBDSD.init_cam()
                 time.sleep(60)
+                continue
 
             # take a picture and process it
             status, frame = _VBDSD.run()
@@ -318,10 +322,15 @@ class VBDSD_Thread:
 
             # append sun status to status history
             status_history.append(max(status, 0))
+            logger.debug(f"New status: {status}")
 
             if frame is not None:
                 img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
-                cv.imwrite(os.path.join(IMG_DIR + img_name), frame)
+                img_path = os.path.join(IMG_DIR, img_name)
+                cv.imwrite(img_path, frame)
+                logger.debug(f"Saving image to {img_path}")
+            else:
+                logger.debug(f"Could not take image")
 
             # evaluate sun state only if list is filled
             if status_history.size() == status_history.maxsize():
@@ -331,6 +340,7 @@ class VBDSD_Thread:
                 new_state = None
 
             if current_state != new_state:
+                logger.debug(f"State change {current_state}->{new_state}")
                 State.update({"vbdsd_indicates_good_conditions": new_state})
                 current_state = new_state
 
@@ -338,7 +348,7 @@ class VBDSD_Thread:
             elapsed_time = time.time() - start_time
             time_to_wait = _PARAMS["vbdsd"]["seconds_per_interval"] - elapsed_time
             if time_to_wait > 0:
-                logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
+                logger.debug(f"Finished loop, waiting {round(time_to_wait, 2)} second(s)")
                 time.sleep(time_to_wait)
 
             if not infinite_loop:

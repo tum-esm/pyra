@@ -1,6 +1,8 @@
 # python
 .venv
 *.pyc
+.pytest_cache
+__pycache__
 
 # config
 config/parameters.json
@@ -24,7 +26,7 @@ pids
 *.dat
 Bilder/**/*.JPG
 *.txt
-runtime_data/
+runtime-data/
 
 # pyra ui
 packages/electron-ui/node_modules/
