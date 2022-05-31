@@ -114,6 +114,14 @@ SETUP_FILE_SCHEMA = {
     "vbdsd": DICT_SCHEMA(
         {"is_present": {"type": "boolean"}, "cam_id": {"type": "integer"}}
     ),
+    "error_email": DICT_SCHEMA(
+        {
+            "sender_address": {"type": "string"},
+            "sender_password": {"type": "string"},
+            "notify_recipients": {"type": "boolean"},
+            "recipients": {"type": "string"},
+        }
+    ),
 }
 
 PARAMS_FILE_SCHEMA = {

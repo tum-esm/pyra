@@ -57,7 +57,9 @@
         "cam_id": 0
     },
     "error_email": {
-        "recipients": ["your@mail.com"],
-        "notify_recipients": false
+        "sender_address": "esm-technical-user@gmail.com",
+        "sender_password": "...",
+        "notify_recipients": true,
+        "recipients": ["your@mail.com"]
     }
 }

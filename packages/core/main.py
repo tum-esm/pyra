@@ -1,6 +1,6 @@
 import time
-import snap7
 from packages.core import modules
+from packages.core.utils import email_client
 from packages.core.utils.json_file_interaction import State, Config
 from packages.core.utils.logger import Logger
 
@@ -20,6 +20,8 @@ def run():
     ]
     vbdsd_thread = modules.vbdsd.VBDSD_Thread()
 
+    current_exceptions = []
+
     while True:
         start_time = time.time()
         logger.info("Starting Iteration")
@@ -38,18 +40,22 @@ def run():
         if not vbdsd_should_be_running and vbdsd_thread.is_running():
             vbdsd_thread.stop()
 
+        new_exception = None
         try:
             for module in _modules:
                 module.run(_SETUP, _PARAMS)
-        except snap7.snap7exceptions.Snap7Exception:
-            logger.exception("An exception was thrown!")
         except Exception as e:
-            logger.exception("An exception was thrown!")
-            print(
-                f"{type(e).__name__} at line {e.__traceback__.tb_lineno} "
-                f"of {__file__}: {e}"
-            )
-            # TODO: trigger email?
+            new_exception = e
+
+        if new_exception is not None:
+            if type(e).__name__ not in current_exceptions:
+                current_exceptions.append(type(e).__name__)
+                logger.exception(f"Exception {type(e).__name__} has occured.")
+                email_client.handle_occured_exception(_SETUP, e)
+        else:
+            current_exceptions = []
+            logger.info(f"All exceptions have been resolved.")
+            email_client.handle_resolved_exception(_SETUP)
 
         logger.info("Ending Iteration")
 
