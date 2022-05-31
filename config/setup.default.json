@@ -55,5 +55,9 @@
     "vbdsd": {
         "is_present": false,
         "cam_id": 0
+    },
+    "error_email": {
+        "recipients": ["your@mail.com"],
+        "notify_recipients": false
     }
 }
