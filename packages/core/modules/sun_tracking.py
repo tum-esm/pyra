@@ -55,6 +55,9 @@ class SunTracking:
             logger.info("Test mode active.")
             return
 
+        #remove stop.txt if present
+        self.clean_stop_file()
+
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
         if not State.read()["vbdsd_evaluation_is_positive"]:
@@ -133,6 +136,12 @@ class SunTracking:
 
         f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
         f.close()
+
+    def clean_stop_file(self):
+        stop_file_path = os.path.join(camtracker_directory, "stop.txt")
+
+        if os.path.exists(stop_file_path):
+            os.remove(stop_file_path)
 
     def __read_ct_log_learn_az_elev(self):
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
