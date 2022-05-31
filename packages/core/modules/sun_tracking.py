@@ -55,9 +55,6 @@ class SunTracking:
             logger.info("Test mode active.")
             return
 
-        #remove stop.txt if present
-        self.clean_stop_file()
-
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
         if not State.read()["vbdsd_evaluation_is_positive"]:
@@ -127,6 +124,8 @@ class SunTracking:
 
         CamTracker has an internal check for a stop.txt file in its directory
         and will do a clean shutdown.
+
+        Afterwards the stop file will be removed.
         """
 
         # create stop.txt file in camtracker folder
@@ -137,7 +136,20 @@ class SunTracking:
         f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
         f.close()
 
+        #wait for ct to shut down
+        while(self.__ct_application_running):
+            time.sleep(1)
+
+        self.clean_stop_file()
+
     def clean_stop_file(self):
+        """CamTracker needs a stop.txt file to safely shutdown.
+        This file needs to be removed after CamTracker shutdown.
+        """
+
+        camtracker_directory = os.path.dirname(
+            self._SETUP["camtracker"]["executable_path"]
+        )
         stop_file_path = os.path.join(camtracker_directory, "stop.txt")
 
         if os.path.exists(stop_file_path):
