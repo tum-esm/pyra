@@ -101,22 +101,18 @@ class SunTracking:
          Returns pywin32 process information for later usage.
         """
         # delete stop.txt file in camtracker folder if present
-        # exe call with -automation
-        # http://timgolden.me.uk/pywin32-docs/win32process.html
-        camtracker_call = self._SETUP["camtracker"]["executable_path"] + " -autostart"
-        hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
-            None,
-            camtracker_call,
-            None,
-            None,
-            0,
-            win32con.NORMAL_PRIORITY_CLASS,
-            None,
-            None,
-            win32process.STARTUPINFO(),
-        )
+        self.clean_stop_file()
 
-        return (hProcess, hThread, dwProcessId, dwThreadId)
+        ct_path = self._SETUP["camtracker"]["executable_path"]
+
+
+        #works only > python3.10
+        #without cwd CT will have trouble loading its internal database)
+        os.startfile(path=os.path.filename(ct_path),
+                     cwd=os.path.basename(ct_path),
+                     arguments="-autostart",
+                     show_cmd=2)
+
 
     def __stop_sun_tracking_automation(self):
         """Tells the CamTracker application to end program and move mirrors
@@ -124,8 +120,6 @@ class SunTracking:
 
         CamTracker has an internal check for a stop.txt file in its directory
         and will do a clean shutdown.
-
-        Afterwards the stop file will be removed.
         """
 
         # create stop.txt file in camtracker folder
@@ -136,11 +130,6 @@ class SunTracking:
         f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
         f.close()
 
-        #wait for ct to shut down
-        while(self.__ct_application_running):
-            time.sleep(1)
-
-        self.clean_stop_file()
 
     def clean_stop_file(self):
         """CamTracker needs a stop.txt file to safely shutdown.
