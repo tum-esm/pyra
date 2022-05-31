@@ -17,6 +17,8 @@ from packages.core.utils.logger import Logger
 
 logger = Logger(origin="pyra.core.enclosure-control")
 
+class CoverError(Exception):
+    pass
 
 class EnclosureControl:
     """
@@ -52,17 +54,18 @@ class EnclosureControl:
                 # flank change 1 -> 0: stop macro
                 self.plc_write_bool(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
                 logger.info("Closing Cover.")
+                self.wait_for_cover_closing()
+
+
 
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
 
-        # TODO: Wait before checking again? Since the cover takes some time to move.
         if not automation_should_be_running:
             if not self._SETUP["tum_plc"]["actors"]["cover_closed"]:
                 logger.info("Cover is still open. Trying to close again.")
                 self.plc_write_bool(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
-
-        # TODO: Trigger user warning if cover does not close?
+                self.wait_for_cover_closing()
 
         # read current state of actors and sensors in enclosure
         current_reading = self.read_state_from_plc()
@@ -216,3 +219,28 @@ class EnclosureControl:
         """Sleeps if cpu is busy."""
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
             time.sleep(2)
+
+    def wait_for_cover_closing(self):
+        """Waits steps of 5s for the enclosure cover to close.
+
+        Raises the custom error CoverError if clover doesn't close in a given
+        period of time.
+        """
+
+        start_time = time.time()
+        loop = True
+
+        while(loop):
+            time.sleep(5)
+
+            if self._SETUP["tum_plc"]["actors"]["cover_closed"]:
+                loop = False
+
+            elapsed_time = time.time() - start_time
+            if elapsed_time > 31:
+                raise CoverError("Enclosure cover might be stuck.")
+
+
+
+
+
