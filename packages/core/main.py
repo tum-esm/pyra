@@ -47,15 +47,19 @@ def run():
         except Exception as e:
             new_exception = e
 
-        if new_exception is not None:
-            if type(e).__name__ not in current_exceptions:
-                current_exceptions.append(type(e).__name__)
-                logger.exception(f"Exception {type(e).__name__} has occured.")
-                email_client.handle_occured_exception(_SETUP, e)
-        else:
-            current_exceptions = []
-            logger.info(f"All exceptions have been resolved.")
-            email_client.handle_resolved_exception(_SETUP)
+        try:
+            if new_exception is not None:
+                if type(e).__name__ not in current_exceptions:
+                    current_exceptions.append(type(e).__name__)
+                    logger.exception(f"Exception {type(e).__name__} has occured.")
+                    email_client.handle_occured_exception(_SETUP, e)
+
+            if new_exception is None and len(current_exceptions) > 0:
+                current_exceptions = []
+                logger.info(f"All exceptions have been resolved.")
+                email_client.handle_resolved_exception(_SETUP)
+        except Exception as e:
+            logger.exception(f"Exception {type(e).__name__} during email sending.")
 
         logger.info("Ending Iteration")
 

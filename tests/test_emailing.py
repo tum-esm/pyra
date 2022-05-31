@@ -11,4 +11,4 @@ def test_emailing():
         raise Exception("some exception name")
     except Exception as e:
         email_client.handle_occured_exception(_SETUP, e)
-        email_client.handle_resolved_exception(_SETUP, type(e).__name__)
+        email_client.handle_resolved_exception(_SETUP)
