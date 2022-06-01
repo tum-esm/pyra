@@ -3,7 +3,7 @@ import datetime
 
 # TODO: Refine comment quality
 
-class EnergyError(Exception):
+class LowEnergyError(Exception):
     pass
 
 
@@ -18,8 +18,7 @@ def ceck_average_system_load() ->list:
 
 
 def check_memory_usage()->float:
-    """
-    returns -> tuple (total, available, percent, used, free, active, inactive,
+    """returns -> tuple (total, available, percent, used, free, active, inactive,
     buffers, cached, shared, slab)
     """
     v_memory = psutil.virtual_memory()
@@ -44,12 +43,14 @@ def check_conecction_status(ip: str) -> str:
         if connection.raddr:
             if connection.raddr[0] == ip:
                 return connection.status
+            else:
+                return "NOINFO"
 
 
 #battery
 def check_system_battery():
     if psutil.sensors_battery().percent < 20:
-        raise EnergyError("The battery of the system is below 20%.")
+        raise LowEnergyError("The battery of the system is below 20%.")
 
 
 #time since last boot up
@@ -65,3 +66,5 @@ def check_process_status(process_name:str) -> str:
     for p in psutil.process_iter():
         if p.name() == process_name:
             return p.status()
+        else:
+            return "not found"
