@@ -6,13 +6,16 @@ import datetime
 class LowEnergyError(Exception):
     pass
 
+class StorageError(Exception):
+    pass
+
 
 def check_cpu_usage()->list:
     """returns cpu_percent for all cores -> list [cpu1%, cpu2%,...]"""
     return psutil.cpu_percent(interval=1, percpu=True)
 
 
-def ceck_average_system_load() ->list:
+def check_average_system_load() ->list:
     """returns average system load in the last [1min,5min,15min] in %"""
     return [x / psutil.cpu_count() * 100 for x in psutil.getloadavg()]
 
@@ -31,8 +34,13 @@ def check_disk_space()->float:
     disk = psutil.disk_usage('/')
     return disk.percent
 
+def validate_disk_space():
+    """Raises an error if the diskspace is less than 10%"""
+    if check_disk_space() < 10:
+        raise StorageError
 
-def check_conecction_status(ip: str) -> str:
+
+def check_connection_status(ip: str) -> str:
     """Checks the ip connection.
     Takes IP as input as str: i.e. 10.10.0.4
     and returns status i.e. ESTABLISHED
@@ -48,7 +56,10 @@ def check_conecction_status(ip: str) -> str:
 
 
 def check_system_battery():
-    if psutil.sensors_battery().percent < 20:
+    return psutil.sensors_battery().percent
+
+def validate_system_battery():
+    if check_system_battery() < 20:
         raise LowEnergyError("The battery of the system is below 20%.")
 
 
