@@ -55,11 +55,14 @@ def check_connection_status(ip: str) -> str:
                 return "NOINFO"
 
 
-def check_system_battery():
+def check_system_battery()->float:
+    """Returns system battery in percent as a float"""
     return psutil.sensors_battery().percent
 
+
 def validate_system_battery():
-    if check_system_battery() < 20:
+    """Raises LowEnergyError if system battery runs lower than 20%."""
+    if check_system_battery() < 20.0:
         raise LowEnergyError("The battery of the system is below 20%.")
 
 
