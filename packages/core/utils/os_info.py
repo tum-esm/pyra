@@ -31,7 +31,7 @@ def check_disk_space()->float:
     disk = psutil.disk_usage('/')
     return disk.percent
 
-#ip connections
+
 def check_conecction_status(ip: str) -> str:
     """Checks the ip connection.
     Takes IP as input as str: i.e. 10.10.0.4
@@ -47,18 +47,16 @@ def check_conecction_status(ip: str) -> str:
                 return "NOINFO"
 
 
-#battery
 def check_system_battery():
     if psutil.sensors_battery().percent < 20:
         raise LowEnergyError("The battery of the system is below 20%.")
 
 
-#time since last boot up
 def time_since_os_boot():
+    """Returns time since last OS boot up."""
     return datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
 
 
-#check process status
 def check_process_status(process_name:str) -> str:
     """Takes a process name "*.exe" and returns its OS process status: i.e.
     "running".
