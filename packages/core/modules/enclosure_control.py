@@ -166,7 +166,7 @@ class EnclosureControl:
         return self.plc.get_connected()
 
     def plc_read_int(self, action):
-        """Redas an INT value in the PLC database."""
+        """Reads an INT value in the PLC database."""
         assert len(action) == 3
         db_number, start, size = action
 

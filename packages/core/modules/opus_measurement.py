@@ -17,8 +17,6 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any version of OPUS (for later updates)
 
-# TODO: Add option for OPUS MockServer usage
-
 
 import os
 import sys

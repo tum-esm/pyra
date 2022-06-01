@@ -52,7 +52,6 @@ class MeasurementConditions:
         if not _triggers["manually_enforced"]:
 
             # consider elevation on mornings and evenings
-            # TODO: Is this what "sun_angle_start" and "sun_angle_stop" mean
             if _triggers["type"]["sun_angle"]:
                 min_required_elevation = (
                     _triggers["sun_angle_start"]
