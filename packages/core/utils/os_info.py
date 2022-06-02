@@ -45,7 +45,7 @@ class OSInfo:
     def check_connection_status(ip: str) -> str:
         """Checks the ip connection.
         Takes IP as input as str: i.e. 10.10.0.4
-        and returns status i.e. ESTABLISHED
+        and returns status i.e. ESTABLISHED, CLOSED, SYN_SENT
         returns NOINFO if IP is not found.
         """
         connections = psutil.net_connections(kind="inet4")
