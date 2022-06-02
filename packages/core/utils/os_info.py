@@ -75,12 +75,13 @@ class OSInfo:
 
     @staticmethod
     def check_process_status(process_name:str) -> str:
-        """Takes a process name "*.exe" and returns its OS process status: i.e.
-        "running".
-        returns "not found" if process is not found.
+        """Takes a process name "*.exe" and returns its OS process status:
+        “running”, “paused”, “start_pending”, “pause_pending”, “continue_pending”,
+         “stop_pending” or “stopped”.
+        returns "not_found" if process is not found.
         """
         for p in psutil.process_iter():
             if p.name() == process_name:
                 return p.status()
             else:
-                return "not found"
+                return "not_found"
