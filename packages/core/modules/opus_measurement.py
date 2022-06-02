@@ -84,6 +84,11 @@ class OpusMeasurement:
         if plc_status == "NOINFO":
             raise SpectrometerError("Could not find an active EM27 IP connection.")
 
+        if self.__is_em27_responsive:
+            logger.info("Successful ping to EM27.")
+        else:
+            logger.info("EM27 seems to be disconnected.")
+
         # check for automation state flank changes
         automation_should_be_running = State.read()["automation_should_be_running"]
         if self.last_cycle_automation_status != automation_should_be_running:
@@ -102,10 +107,6 @@ class OpusMeasurement:
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
 
-        if self.__is_em27_connected:
-            logger.info("Successful ping to EM27.")
-        else:
-            logger.info("EM27 seems to be disconnected.")
 
     def __connect_to_dde_opus(self):
         try:
@@ -192,8 +193,8 @@ class OpusMeasurement:
         """Destroys the underlying C++ object."""
         self.server.Destroy()
 
-    @property
-    def __is_em27_connected(self):
+    # TODO: is this still needed?
+    def __is_em27_responsive(self):
         """Pings the EM27 and returns:
 
         True -> Connected
@@ -265,7 +266,7 @@ class OpusMeasurement:
         assert self.__opus_application_running
         assert self.__test_dde_connection
 
-        print("__is_em27_connected: ", self.__is_em27_connected)
+        print("__is_em27_connected: ", self.__is_em27_responsive)
 
         self.__load_experiment()
         time.sleep(2)
@@ -275,4 +276,4 @@ class OpusMeasurement:
 
         self.__stop_macro()
 
-        print("__is_em27_connected: ", self.__is_em27_connected)
+        print("__is_em27_connected: ", self.__is_em27_responsive)
