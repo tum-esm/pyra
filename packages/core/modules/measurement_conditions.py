@@ -68,6 +68,7 @@ class MeasurementConditions:
         #raises error if system battery is below 20%
         OSInfo.validate_system_battery()
 
+        # TODO: add cli enforced option?
         #check for conditions to start measurements
         automation_should_be_running = True
 
