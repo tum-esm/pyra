@@ -57,6 +57,15 @@ class MeasurementConditions:
         ans = OSInfo.check_memory_usage()
         logger.debug("Current v_memory usage for the system is {}.".format(ans))
 
+        ans = OSInfo.time_since_os_boot()
+        logger.debug("The system is running since {}.".format(ans))
+
+        OSInfo.validate_disk_space()
+        OSInfo.validate_system_battery()
+
+
+
+
         #check for conditions to start measurements
         automation_should_be_running = True
 
