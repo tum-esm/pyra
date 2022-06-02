@@ -53,6 +53,7 @@ class EnclosureControl:
                 # TODO: check if that is correct reset handling
                 if self.plc_read_bool(self._SETUP["tum_plc"]["state"]["reset_needed"]):
                     self.plc_write_bool(self._SETUP["tum_plc"]["control"]["reset"], False)
+                    time.sleep(10)
 
                 self.plc_write_bool(self._SETUP["tum_plc"]["control"]["sync_to_tracker"], True)
                 logger.info("Syncing Cover to Tracker.")
