@@ -52,12 +52,13 @@ class EnclosureControl:
                 # flank change 0 -> 1: load experiment, start macro
                 # TODO: check if that is correct reset handling
                 if self.plc_read_bool(self._SETUP["tum_plc"]["state"]["reset_needed"]):
-                    self.plc_write_bool(self._SETUP["tum_plc"]["control"]["reset"])
+                    self.plc_write_bool(self._SETUP["tum_plc"]["control"]["reset"], False)
 
-                self.plc_write_bool(self._SETUP["tum_plc"]["control"]["sync_to_tracker"])
+                self.plc_write_bool(self._SETUP["tum_plc"]["control"]["sync_to_tracker"], True)
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
+                self.plc_write_bool(self._SETUP["tum_plc"]["control"]["sync_to_tracker"], False)
                 self.plc_write_int(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
                 logger.info("Closing Cover.")
                 self.wait_for_cover_closing()
