@@ -10,7 +10,7 @@ class StorageError(Exception):
     pass
 
 class OSInfo:
-   @staticmethod
+    @staticmethod
     def check_cpu_usage()->list:
         """returns cpu_percent for all cores -> list [cpu1%, cpu2%,...]"""
         return psutil.cpu_percent(interval=1, percpu=True)
