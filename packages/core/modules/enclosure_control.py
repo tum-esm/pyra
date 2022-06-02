@@ -57,9 +57,7 @@ class EnclosureControl:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                self.plc_write_bool(
-                    self._SETUP["tum_plc"]["control"]["sync_to_tracker"]
-                )
+                self.plc_write_bool(self._SETUP["tum_plc"]["control"]["sync_to_tracker"])
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
@@ -96,20 +94,14 @@ class EnclosureControl:
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
         min_sun_angle = self._PARAMS["enclosure"]["min_sun_angle"]
-        spectrometer_has_power = self.plc_read_bool(
-            self._SETUP["tum_plc"]["power"]["spectrometer"]
-        )
+        spectrometer_has_power = self.plc_read_bool(self._SETUP["tum_plc"]["power"]["spectrometer"])
 
         if current_sun_elevation is not None:
             if (current_sun_elevation > min_sun_angle) and (not spectrometer_has_power):
-                self.plc_write_bool(
-                    self._SETUP["tum_plc"]["power"]["spectrometer"], True
-                )
+                self.plc_write_bool(self._SETUP["tum_plc"]["power"]["spectrometer"], True)
                 logger.info("Powering up the spectrometer.")
             elif spectrometer_has_power:
-                self.plc_write_bool(
-                    self._SETUP["tum_plc"]["power"]["spectrometer"], False
-                )
+                self.plc_write_bool(self._SETUP["tum_plc"]["power"]["spectrometer"], False)
                 logger.info("Powering down the spectrometer.")
 
     def read_state_from_plc(self):
@@ -130,7 +122,7 @@ class EnclosureControl:
             self.plc_read_int(self._SETUP["tum_plc"]["sensors"]["temperature"]),
             self.plc_read_bool(self._SETUP["tum_plc"]["state"]["camera"]),
             self.plc_read_bool(self._SETUP["tum_plc"]["state"]["computer"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["cover"]),
+            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["cover_closed"]),
             self.plc_read_bool(self._SETUP["tum_plc"]["state"]["heater"]),
             self.plc_read_bool(self._SETUP["tum_plc"]["state"]["motor_failed"]),
             self.plc_read_bool(self._SETUP["tum_plc"]["state"]["rain"]),
