@@ -51,7 +51,7 @@ class MeasurementConditions:
         logger.debug("Current CPU usage for all cores is {}%.".format(ans))
 
         ans = OSInfo.check_average_system_load()
-        logger.debug("The average system load in the past 1/5/15 minutes was"
+        logger.info("The average system load in the past 1/5/15 minutes was"
                      " {}.".format(ans))
 
         ans = OSInfo.check_memory_usage()
@@ -59,6 +59,9 @@ class MeasurementConditions:
 
         ans = OSInfo.time_since_os_boot()
         logger.debug("The system is running since {}.".format(ans))
+
+        ans = OSInfo.check_disk_space()
+        logger.debug("The disk is currently filled with {}%.".format(ans))
 
         #raises error if disk_space is below 10%
         OSInfo.validate_disk_space()
