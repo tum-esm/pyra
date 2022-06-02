@@ -47,7 +47,7 @@ class OSInfo:
         """Checks the ip connection.
         Takes IP as input as str: i.e. 10.10.0.4
         and returns status i.e. ESTABLISHED, CLOSED, SYN_SENT
-        returns NOINFO if IP is not found.
+        returns NO_INFO if IP is not found.
         """
         connections = psutil.net_connections(kind="inet4")
 
@@ -56,7 +56,7 @@ class OSInfo:
                 if connection.raddr[0] == ip:
                     return connection.status
                 else:
-                    return "NOINFO"
+                    return "NO_INFO"
 
     @staticmethod
     def check_system_battery()->float:
