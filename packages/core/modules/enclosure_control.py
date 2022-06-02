@@ -52,7 +52,6 @@ class EnclosureControl:
         if plc_status == "NOINFO":
             raise PLCError("Could not find an active PLC IP connection.")
 
-
         # check for automation state flank changes
         automation_should_be_running = State.read()["automation_should_be_running"]
         if self.last_cycle_automation_status != automation_should_be_running:

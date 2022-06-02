@@ -22,6 +22,7 @@ import os
 import sys
 import time
 from packages.core.utils.logger import Logger
+from packages.core.utils.os_info import OSInfo
 
 if sys.platform == "win32":
     # these imports are provided by pywin32
@@ -32,6 +33,8 @@ if sys.platform == "win32":
 
 logger = Logger(origin="pyra.core.opus-measurement")
 
+class SpectrometerError(Exception):
+    pass
 
 class OpusMeasurement:
     """Creates a working DDE connection to the OPUS DDE Server.
@@ -73,6 +76,13 @@ class OpusMeasurement:
             logger.info("Start OPUS.")
             # returns to give OPUS time to start until next call of run()
             return
+
+        #check EM27 ip connection
+        plc_status = OSInfo.check_connection_status(self._SETUP["opus"]["em27_ip"])
+        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
+
+        if plc_status == "NOINFO":
+            raise SpectrometerError("Could not find an active EM27 IP connection.")
 
         # check for automation state flank changes
         automation_should_be_running = State.read()["automation_should_be_running"]
