@@ -1,7 +1,6 @@
 import psutil
 import datetime
 
-# TODO: Refine comment quality
 
 class LowEnergyError(Exception):
     pass
@@ -47,6 +46,7 @@ class OSInfo:
         """Checks the ip connection.
         Takes IP as input as str: i.e. 10.10.0.4
         and returns status i.e. ESTABLISHED
+        returns NOINFO if IP is not found.
         """
         connections = psutil.net_connections(kind="inet4")
 
@@ -77,6 +77,7 @@ class OSInfo:
     def check_process_status(process_name:str) -> str:
         """Takes a process name "*.exe" and returns its OS process status: i.e.
         "running".
+        returns "not found" if process is not found.
         """
         for p in psutil.process_iter():
             if p.name() == process_name:
