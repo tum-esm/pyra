@@ -39,7 +39,7 @@ class OSInfo:
     def validate_disk_space():
         """Raises an error if the diskspace is less than 10%"""
         if check_disk_space() < 10:
-            raise StorageError
+            raise StorageError("Disk space is less than 10%. This is bad for the OS stability.")
 
     @staticmethod
     def check_connection_status(ip: str) -> str:
@@ -66,7 +66,7 @@ class OSInfo:
     def validate_system_battery():
         """Raises LowEnergyError if system battery runs lower than 20%."""
         if check_system_battery() < 20.0:
-            raise LowEnergyError("The battery of the system is below 20%.")
+            raise LowEnergyError("The battery of the system is below 20%. Please check the power supply.")
 
     @staticmethod
     def time_since_os_boot():
