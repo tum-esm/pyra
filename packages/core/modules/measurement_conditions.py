@@ -17,6 +17,7 @@ import datetime
 from packages.core.utils.astronomy import Astronomy
 from packages.core.utils.json_file_interaction import State
 from packages.core.utils.logger import Logger
+from packages.core.utils.os_info import OSInfo
 
 logger = Logger(origin="pyra.core.measurement-conditions")
 
@@ -45,6 +46,18 @@ class MeasurementConditions:
 
         logger.info("Running MeasurementConditions")
 
+        #check os system stability
+        ans = OSInfo.check_cpu_usage()
+        logger.debug("Current CPU usage for all cores is {}%.".format(ans))
+
+        ans = OSInfo.check_average_system_load()
+        logger.debug("The average system load in the past 1/5/15 minutes was"
+                     " {}.".format(ans))
+
+        ans = OSInfo.check_memory_usage()
+        logger.debug("Current v_memory usage for the system is {}.".format(ans))
+
+        #check for conditions to start measurements
         automation_should_be_running = True
 
         # the "manually_enforced" option (when set to true) makes
