@@ -38,6 +38,8 @@ def test_cover_movement():
     _SETUP, _PARAMS = load_config()
     control = EnclosureControl(_SETUP, _PARAMS)
 
+    control.plc_write_bool(_SETUP["tum_plc"]["control"]["sync_to_tracker"], False)
+
     control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 90)
     time.sleep(5)
     assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
