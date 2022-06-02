@@ -18,21 +18,21 @@ def test_em27_power_relay():
     state = control.plc_read_bool(_SETUP["tum_plc"]["power"]["spectrometer"])
 
     if state == True:
-        control._SETUP["tum_plc"]["power"]["spectrometer"], False
+        control.plc_write_bool(_SETUP["tum_plc"]["power"]["spectrometer"], False)
 
     time.sleep(2)
 
-    assert(control.plc_read_bool(_SETUP["tum_plc"]["power"]["spectrometer"]) == False)
+    assert(not control.plc_read_bool(_SETUP["tum_plc"]["power"]["spectrometer"]))
     assert(OSInfo.check_connection_status(_SETUP["tum_plc"]["ip"]) == '"NO_INFO"')
 
     time.sleep(2)
 
-    control._SETUP["tum_plc"]["power"]["spectrometer"], True
+    control.plc_write_bool(_SETUP["tum_plc"]["power"]["spectrometer"], True)
 
     time.sleep(10)
 
-    assert (control.plc_read_bool(_SETUP["tum_plc"]["power"]["spectrometer"]) == True)
-    assert (OSInfo.check_connection_status(_SETUP["tum_plc"]["ip"]) != '"NO_INFO"')
+    assert(control.plc_read_bool(_SETUP["tum_plc"]["power"]["spectrometer"]))
+    assert(OSInfo.check_connection_status(_SETUP["tum_plc"]["ip"]) != '"NO_INFO"')
 
 def test_cover_movement():
     _SETUP, _PARAMS = load_config()
