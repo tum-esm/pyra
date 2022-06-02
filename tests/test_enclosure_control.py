@@ -34,6 +34,30 @@ def test_em27_power_relay():
     assert (control.plc_read_bool(_SETUP["tum_plc"]["power"]["spectrometer"]) == True)
     assert (OSInfo.check_connection_status(_SETUP["tum_plc"]["ip"]) != '"NO_INFO"')
 
+def test_cover_movement():
+    _SETUP, _PARAMS = load_config()
+    control = EnclosureControl(_SETUP, _PARAMS)
+
+    control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 90)
+    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
+
+    time.sleep(5)
+
+    control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 250)
+    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
+
+    time.sleep(5)
+
+    control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 160)
+    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
+
+    time.sleep(5)
+
+    control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 0)
+    assert(control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
+
+
+
 
 
 

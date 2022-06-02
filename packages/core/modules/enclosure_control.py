@@ -63,7 +63,7 @@ class EnclosureControl:
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
-                self.plc_write_bool(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
+                self.plc_write_int(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
                 logger.info("Closing Cover.")
                 self.wait_for_cover_closing()
 
@@ -75,7 +75,7 @@ class EnclosureControl:
         if not automation_should_be_running:
             if not self._SETUP["tum_plc"]["actors"]["cover_closed"]:
                 logger.info("Cover is still open. Trying to close again.")
-                self.plc_write_bool(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
+                self.plc_write_int(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
                 self.wait_for_cover_closing()
 
         # read current state of actors and sensors in enclosure
@@ -244,7 +244,7 @@ class EnclosureControl:
         while(loop):
             time.sleep(5)
 
-            if self._SETUP["tum_plc"]["actors"]["cover_closed"]:
+            if self.plc_read_bool(["tum_plc"]["state"]["cover_closed"]):
                 loop = False
 
             elapsed_time = time.time() - start_time
