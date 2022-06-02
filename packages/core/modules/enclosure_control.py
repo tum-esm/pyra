@@ -14,10 +14,14 @@ import time
 from packages.core.utils.astronomy import Astronomy
 from packages.core.utils.json_file_interaction import State
 from packages.core.utils.logger import Logger
+from packages.core.utils.os_info import OSInfo
 
 logger = Logger(origin="pyra.core.enclosure-control")
 
 class CoverError(Exception):
+    pass
+
+class PLCError(Exception):
     pass
 
 class EnclosureControl:
@@ -40,6 +44,14 @@ class EnclosureControl:
         if not self._SETUP["tum_plc"]["is_present"]:
             logger.debug("PLC is not present. Skipping Enclosure_Control.run().")
             return
+
+        #check PLC ip connection
+        plc_status = OSInfo.check_connection_status(self._SETUP["tum_plc"]["ip"])
+        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
+
+        if plc_status != "NOINFO":
+            raise PLCError("Could not find an active PLC IP connection.")
+
 
         # check for automation state flank changes
         automation_should_be_running = State.read()["automation_should_be_running"]
@@ -137,7 +149,7 @@ class EnclosureControl:
         True -> connected
         False -> not connected
         """
-        self.plc.connect(self._SETUP["ip"], 0, 1)
+        self.plc.connect(self._SETUP["tum_plc"]["ip"], 0, 1)
         return self.plc.get_connected()
 
     def plc_disconnect(self):
