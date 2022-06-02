@@ -39,21 +39,25 @@ def test_cover_movement():
     control = EnclosureControl(_SETUP, _PARAMS)
 
     control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 90)
-    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
-
     time.sleep(5)
+    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
+    assert(control.plc_read_int(_SETUP["tum_plc"]["actors"]["move_cover"]) == 90)
+
 
     control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 250)
-    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
-
     time.sleep(5)
+    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
+    assert (control.plc_read_int(_SETUP["tum_plc"]["actors"]["move_cover"]) == 90)
+
 
     control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 160)
-    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
-
     time.sleep(5)
+    assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
+    assert (control.plc_read_int(_SETUP["tum_plc"]["actors"]["move_cover"]) == 90)
+
 
     control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 0)
+    time.sleep(5)
     assert(control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
 
 
