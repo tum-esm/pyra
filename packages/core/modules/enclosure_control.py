@@ -49,7 +49,7 @@ class EnclosureControl:
         plc_status = OSInfo.check_connection_status(self._SETUP["tum_plc"]["ip"])
         logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
 
-        if plc_status != "NOINFO":
+        if plc_status == "NOINFO":
             raise PLCError("Could not find an active PLC IP connection.")
 
 
