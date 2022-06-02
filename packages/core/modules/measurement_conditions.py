@@ -60,11 +60,10 @@ class MeasurementConditions:
         ans = OSInfo.time_since_os_boot()
         logger.debug("The system is running since {}.".format(ans))
 
+        #raises error if disk_space is below 10%
         OSInfo.validate_disk_space()
+        #raises error if system battery is below 20%
         OSInfo.validate_system_battery()
-
-
-
 
         #check for conditions to start measurements
         automation_should_be_running = True
