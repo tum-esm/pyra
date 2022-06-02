@@ -35,6 +35,7 @@ class OSInfo:
         -> tuple (total, used, free, percent)"""
         disk = psutil.disk_usage('/')
         return disk.percent
+
     @staticmethod
     def validate_disk_space():
         """Raises an error if the diskspace is less than 10%"""
