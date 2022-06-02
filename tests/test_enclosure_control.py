@@ -53,12 +53,12 @@ def test_cover_movement():
     control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 160)
     time.sleep(5)
     assert(not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"]))
-    assert (control.plc_read_int(_SETUP["tum_plc"]["actors"]["move_cover"]) == 90)
+    assert(control.plc_read_int(_SETUP["tum_plc"]["actors"]["move_cover"]) == 90)
 
 
     control.plc_write_int(_SETUP["tum_plc"]["actors"]["move_cover"], 0)
     control.wait_for_cover_closing()
-    tum_plc"]["state"]["cover_closed"]))
+    assert(control.plc_read_bool(_SETUP["tum_plc"]["state"]["cover_closed"]))
 
 
 
