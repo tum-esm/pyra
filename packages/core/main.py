@@ -1,4 +1,3 @@
-import os
 import time
 from packages.core import modules
 from packages.core.utils import email_client
@@ -9,10 +8,10 @@ from packages.core.utils import ConfigInterface, StateInterface, Logger
 # everything should be logged to the log files and no exception
 # should go missing
 
+logger = Logger(origin="pyra.core.main")
+
 
 def run():
-
-    logger = Logger(origin="pyra.core.main")
 
     StateInterface.initialize()
     _CONFIG = ConfigInterface.read()
