@@ -15,12 +15,14 @@ import sys
 import time
 from packages.core.utils import Logger, StateInterface, OSInfo
 
+
+# these imports are provided by pywin32
 if sys.platform == "win32":
-    # these imports are provided by pywin32
-    import win32con
-    import win32process
-    import win32ui
-    import dde
+    import win32con  # type: ignore
+    import win32process  # type: ignore
+    import win32ui  # type: ignore
+    import dde  # type: ignore
+
 
 logger = Logger(origin="pyra.core.opus-measurement")
 

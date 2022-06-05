@@ -24,11 +24,11 @@ import jdcal
 import datetime
 from packages.core.utils import StateInterface, Logger
 
-# the following imports should be provided by pywin32
+
+# these imports are provided by pywin32
 if sys.platform == "win32":
-    import win32con
-    import win32ui
-    import win32process
+    import win32ui  # type: ignore
+
 
 logger = Logger(origin="pyra.core.sun-tracking")
 
