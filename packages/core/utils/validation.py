@@ -27,7 +27,8 @@ def _is_valid_ip_adress(field, value, error):
         error(field, "String has to be a valid IPv4 address")
 
 
-DICT_SCHEMA = lambda schema: {"type": "dict", "schema": schema}
+DICT_SCHEMA = lambda s: {"type": "dict", "schema": s}
+NULLABLE_DICT_SCHEMA = lambda s: {"type": "dict", "schema": s, "nullable": True}
 
 
 class Schemas:
@@ -64,13 +65,12 @@ class Schemas:
 
 
 CONFIG_FILE_SCHEMA = {
-    "camtracker": DICT_SCHEMA(
+    "general": DICT_SCHEMA(
         {
-            "config_path": Schemas.file,
-            "executable_path": Schemas.file,
-            "learn_az_elev_path": Schemas.file,
-            "sun_intensity_path": Schemas.file,
-            "motor_offset_threshold": Schemas.number,
+            "enclosure_min_power_elevation": Schemas.sun_elevation,
+            "em27_min_power_elevation": Schemas.sun_elevation,
+            "seconds_per_core_interval": Schemas.time_interval,
+            "test_mode": Schemas.boolean,
         }
     ),
     "opus": DICT_SCHEMA(
@@ -82,22 +82,21 @@ CONFIG_FILE_SCHEMA = {
             "macro_path": Schemas.file,
         }
     ),
-    "general": DICT_SCHEMA(
+    "camtracker": DICT_SCHEMA(
         {
-            "enclosure_min_power_elevation": Schemas.sun_elevation,
-            "em27_min_power_elevation": Schemas.sun_elevation,
-            "seconds_per_core_interval": Schemas.time_interval,
-            "test_mode": Schemas.boolean,
+            "config_path": Schemas.file,
+            "executable_path": Schemas.file,
+            "learn_az_elev_path": Schemas.file,
+            "sun_intensity_path": Schemas.file,
+            "motor_offset_threshold": Schemas.number,
         }
     ),
-    "vbdsd": DICT_SCHEMA(
+    "error_email": DICT_SCHEMA(
         {
-            "is_present": Schemas.boolean,
-            "camera_id": {"type": "integer", "min": 0, "max": 999999},
-            "evaluation_size": {"type": "integer", "min": 1, "max": 100},
-            "seconds_per_interval": Schemas.time_interval,
-            "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
-            "min_sun_elevation": Schemas.sun_elevation,
+            "sender_address": Schemas.string,
+            "sender_password": Schemas.string,
+            "notify_recipients": Schemas.boolean,
+            "recipients": Schemas.string,
         }
     ),
     "measurement_decision": DICT_SCHEMA(
@@ -118,9 +117,8 @@ CONFIG_FILE_SCHEMA = {
             "max_sun_elevation": Schemas.sun_elevation,
         }
     ),
-    "tum_plc": DICT_SCHEMA(
+    "tum_plc": NULLABLE_DICT_SCHEMA(
         {
-            "is_present": Schemas.boolean,
             "ip": Schemas.ip,
             "actors": DICT_SCHEMA(
                 {
@@ -167,12 +165,13 @@ CONFIG_FILE_SCHEMA = {
             ),
         }
     ),
-    "error_email": DICT_SCHEMA(
+    "vbdsd": NULLABLE_DICT_SCHEMA(
         {
-            "sender_address": Schemas.string,
-            "sender_password": Schemas.string,
-            "notify_recipients": Schemas.boolean,
-            "recipients": Schemas.string,
+            "camera_id": {"type": "integer", "min": 0, "max": 999999},
+            "evaluation_size": {"type": "integer", "min": 1, "max": 100},
+            "seconds_per_interval": Schemas.time_interval,
+            "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
+            "min_sun_elevation": Schemas.sun_elevation,
         }
     ),
 }

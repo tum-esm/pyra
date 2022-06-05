@@ -16,9 +16,6 @@ from packages.core.utils import StateInterface, Logger, Astronomy
 logger = Logger(origin="pyra.core.enclosure-control")
 
 
-# TODO: Make tum_plc config nullable
-
-
 class EnclosureControl:
     """
     https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
@@ -26,9 +23,10 @@ class EnclosureControl:
 
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
-        if not self._CONFIG["tum_plc"]["is_present"]:
+        if self._CONFIG["tum_plc"] is None:
             logger.debug("TUM PLC is not present. Skipping Enclosure_Control.__init__")
             return
+
         self.plc = snap7.client.Client()
         self.connection = self.plc_connect()
         self.last_cycle_automation_status = 0
@@ -36,9 +34,8 @@ class EnclosureControl:
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
-
         logger.info("Running EnclosureControl")
-        if not self._CONFIG["tum_plc"]["is_present"]:
+        if self._CONFIG["tum_plc"] is None:
             logger.debug("TUM PLC is not present. Skipping Enclosure_Control.run")
             return
 

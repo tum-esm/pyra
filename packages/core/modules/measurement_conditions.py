@@ -51,7 +51,7 @@ class MeasurementConditions:
                 if sun_is_too_low or sun_is_too_high:
                     automation_should_be_running &= False
 
-            # consider start_time and end_time
+            # consider daytime
             if _triggers["consider_time"]:
                 current_time, start_time, end_time = get_times_from_tuples(_triggers)
                 time_is_too_early = current_time < start_time
@@ -59,8 +59,8 @@ class MeasurementConditions:
                 if time_is_too_early or time_is_too_late:
                     automation_should_be_running &= False
 
-            # consider evaluation from the vbdsd
-            if _triggers["consider_vbdsd"]:
+            # consider evaluation from the VBDSD
+            if _triggers["consider_vbdsd"] and (self._CONFIG["vbdsd"] is not None):
                 # Don't consider VBDSD if it does not have enough
                 # images yet, which will result in a state of "None"
                 if StateInterface.read()["vbdsd_indicates_good_conditions"] == False:

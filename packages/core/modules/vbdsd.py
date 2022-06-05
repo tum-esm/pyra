@@ -44,8 +44,6 @@ from packages.core.utils import (
     Astronomy,
 )
 
-# TODO: Make vbdsd config nullable
-
 logger = Logger(origin="pyra.core.vbdsd")
 
 dir = os.path.dirname
@@ -290,6 +288,9 @@ class VBDSD_Thread:
     def main(infinite_loop=True):
         global _CONFIG
         _CONFIG = ConfigInterface.read()
+        if _CONFIG["vbdsd"] is None:
+            VBDSD_Thread.__remove_vbdsd_images()
+            return
 
         status_history = RingList(_CONFIG["vbdsd"]["evaluation_size"])
         current_state = None
@@ -297,6 +298,9 @@ class VBDSD_Thread:
         while True:
             start_time = time.time()
             _CONFIG = ConfigInterface.read()
+            if _CONFIG["vbdsd"] is None:
+                VBDSD_Thread.__remove_vbdsd_images()
+                return
 
             if _VBDSD.cam is None:
                 logger.info(f"(Re)connecting to camera")
