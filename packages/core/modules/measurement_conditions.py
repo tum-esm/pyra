@@ -33,16 +33,19 @@ class MeasurementConditions:
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
+        _decision = self._CONFIG["measurement_decision"]
         _triggers = self._CONFIG["measurement_triggers"]
         logger.info("Running MeasurementConditions")
+
         automation_should_be_running = True
 
-        # TODO: Use new logic that replaces "manually_enforced"
+        if _decision["mode"] == "manual":
+            automation_should_be_running = _decision["manual_decision_result"]
 
-        # the "manually_enforced" option (when set to true) makes
-        # the decision process ignore all other factors
-        if not _triggers["manually_enforced"]:
+        if _decision["mode"] == "cli":
+            automation_should_be_running = _decision["cli_decision_result"]
 
+        if _decision["mode"] == "automatic":
             # consider sun elevation
             if _triggers["consider_sun_elevation"]:
                 current_sun_elevation = Astronomy.get_current_sun_elevation()
