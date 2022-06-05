@@ -8,6 +8,7 @@ sys.path.append(PROJECT_DIR)
 
 from packages.cli.commands.config import config_command_group
 from packages.cli.commands.logs import logs_command_group
+from packages.cli.commands.core import core_command_group
 
 
 @click.group()
@@ -17,6 +18,7 @@ def cli():
 
 cli.add_command(config_command_group, name="config")
 cli.add_command(logs_command_group, name="logs")
+cli.add_command(core_command_group, name="core")
 
 
 if __name__ == "__main__":
