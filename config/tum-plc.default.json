@@ -28,7 +28,7 @@
     "state": {
         "camera": [8, 14, 1, 6],
         "computer": [8, 14, 1, 3],
-        "cover": [25, 2, 1, 2],
+        "cover_closed": [25, 2, 1, 2],
         "heater": [8, 14, 1, 1],
         "motor_failed": [8, 12, 1, 3],
         "rain": [8, 6, 1, 0],

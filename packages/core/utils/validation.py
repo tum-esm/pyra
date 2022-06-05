@@ -153,7 +153,7 @@ CONFIG_FILE_SCHEMA = {
                 {
                     "camera": Schemas.int_list_4,
                     "computer": Schemas.int_list_4,
-                    "cover": Schemas.int_list_4,
+                    "cover_closed": Schemas.int_list_4,
                     "heater": Schemas.int_list_4,
                     "motor_failed": Schemas.int_list_4,
                     "rain": Schemas.int_list_4,

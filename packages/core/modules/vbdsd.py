@@ -27,8 +27,6 @@
 # ==============================================================================
 
 
-# TODO: Use logging after initial tests
-
 import multiprocessing
 import os
 import shutil
@@ -62,15 +60,15 @@ class _VBDSD:
         If successfully connected, the function returns an instance object of the
         camera, otherwise None will be returned.
         """
-        cam_id = _CONFIG["vbdsd"]["camera_id"]
-        _VBDSD.cam = cv.VideoCapture(cam_id)
+        camera_id = _CONFIG["vbdsd"]["camera_id"]
+        _VBDSD.cam = cv.VideoCapture(camera_id)
         _VBDSD.cam.release()
 
         for _ in range(retries):
-            _VBDSD.cam = cv.VideoCapture(cam_id)
+            _VBDSD.cam = cv.VideoCapture(camera_id)
             time.sleep(1)
             if _VBDSD.cam.isOpened():
-                logger.debug(f"Camera with id {cam_id} is now connected")
+                logger.debug(f"Camera with id {camera_id} is now connected")
                 _VBDSD.cam.set(3, 1280)  # width
                 _VBDSD.cam.set(4, 720)  # height
                 _VBDSD.cam.set(15, -12)  # exposure
@@ -82,7 +80,7 @@ class _VBDSD:
                 _VBDSD.change_exposure()
                 return
 
-        logger.debug(f"Camera with id {cam_id} could not be found")
+        logger.debug(f"Camera with id {camera_id} could not be found")
 
     @staticmethod
     def eval_sun_state(frame):

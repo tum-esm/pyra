@@ -48,7 +48,7 @@ class EnclosureControl:
             return
 
         # check PLC ip connection
-        plc_status = OSInfo.check_connection_status(self._SETUP["tum_plc"]["ip"])
+        plc_status = OSInfo.check_connection_status(self._CONFIG["tum_plc"]["ip"])
         logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
 
         if plc_status == "NO_INFO":
@@ -144,7 +144,7 @@ class EnclosureControl:
             self.plc_read_int(self._CONFIG["tum_plc"]["sensors"]["temperature"]),
             self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["camera"]),
             self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["computer"]),
-            self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["cover"]),
+            self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["cover_closed"]),
             self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["heater"]),
             self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["motor_failed"]),
             self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["rain"]),

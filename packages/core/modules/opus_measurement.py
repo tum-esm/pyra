@@ -58,7 +58,7 @@ class OpusMeasurement:
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
-        if self._CONFIG["general"]["test_mode"] == 1:
+        if self._CONFIG["general"]["test_mode"]:
             logger.info("Test mode active.")
             return
 
@@ -70,7 +70,7 @@ class OpusMeasurement:
             return
 
         # check EM27 ip connection
-        plc_status = OSInfo.check_connection_status(self._SETUP["opus"]["em27_ip"])
+        plc_status = OSInfo.check_connection_status(self._CONFIG["opus"]["em27_ip"])
         logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
 
         if plc_status == "NO_INFO":

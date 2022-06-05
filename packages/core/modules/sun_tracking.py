@@ -49,7 +49,7 @@ class SunTracking:
         logger.info("Running SunTracking")
 
         # check for PYRA Test Mode status
-        if self._CONFIG["general"]["test_mode"] == 1:
+        if self._CONFIG["general"]["test_mode"]:
             logger.info("Test mode active.")
             return
 
