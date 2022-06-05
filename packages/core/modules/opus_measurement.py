@@ -1,12 +1,4 @@
 # ==============================================================================
-# author            : Patrick Aigner
-# email             : patrick.aigner@tum.de
-# date              : 20220421
-# version           : 1.0
-# notes             :
-# license           : -
-# py version        : 3.10
-# ==============================================================================
 # description       :
 # OPUS is the measurement software for the spectrometer EM27/Sun. It is used to
 # start and stop measurements and define measurement or saving parameters.
@@ -17,13 +9,11 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any version of OPUS (for later updates)
 
-# TODO: Add option for OPUS MockServer usage
-
 
 import os
 import sys
 import time
-from packages.core.utils import Logger, StateInterface
+from packages.core.utils import Logger, StateInterface, OSInfo
 
 if sys.platform == "win32":
     # these imports are provided by pywin32
@@ -33,6 +23,10 @@ if sys.platform == "win32":
     import dde
 
 logger = Logger(origin="pyra.core.opus-measurement")
+
+
+class SpectrometerError(Exception):
+    pass
 
 
 class OpusMeasurement:
@@ -75,6 +69,18 @@ class OpusMeasurement:
             # returns to give OPUS time to start until next call of run()
             return
 
+        # check EM27 ip connection
+        plc_status = OSInfo.check_connection_status(self._SETUP["opus"]["em27_ip"])
+        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
+
+        if plc_status == "NO_INFO":
+            raise SpectrometerError("Could not find an active EM27 IP connection.")
+
+        if self.__is_em27_responsive:
+            logger.info("Successful ping to EM27.")
+        else:
+            logger.info("EM27 seems to be disconnected.")
+
         # check for automation state flank changes
         automation_should_be_running = StateInterface.read()[
             "automation_should_be_running"
@@ -94,11 +100,6 @@ class OpusMeasurement:
 
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
-
-        if self.__is_em27_connected:
-            logger.info("Successful ping to EM27.")
-        else:
-            logger.info("EM27 seems to be disconnected.")
 
     def __connect_to_dde_opus(self):
         try:
@@ -185,8 +186,8 @@ class OpusMeasurement:
         """Destroys the underlying C++ object."""
         self.server.Destroy()
 
-    @property
-    def __is_em27_connected(self):
+    # TODO: is this still needed?
+    def __is_em27_responsive(self):
         """Pings the EM27 and returns:
 
         True -> Connected
@@ -258,7 +259,7 @@ class OpusMeasurement:
         assert self.__opus_application_running
         assert self.__test_dde_connection
 
-        print("__is_em27_connected: ", self.__is_em27_connected)
+        print("__is_em27_connected: ", self.__is_em27_responsive)
 
         self.__load_experiment()
         time.sleep(2)
@@ -268,4 +269,4 @@ class OpusMeasurement:
 
         self.__stop_macro()
 
-        print("__is_em27_connected: ", self.__is_em27_connected)
+        print("__is_em27_connected: ", self.__is_em27_responsive)

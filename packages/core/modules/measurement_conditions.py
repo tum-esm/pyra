@@ -14,16 +14,16 @@
 # ==============================================================================
 
 import datetime
-from packages.core.utils import StateInterface, Astronomy, Logger
+from packages.core.utils import Astronomy, StateInterface, Logger, OSInfo
 
 logger = Logger(origin="pyra.core.measurement-conditions")
 
 
-def get_times_from_tuples(_triggers: any):
+def get_times_from_tuples(triggers: any):
     now = datetime.datetime.now()
     current_time = datetime.time(now.hour, now.minute, now.second)
-    start_time = datetime.time(*_triggers["start_time"])
-    end_time = datetime.time(*_triggers["stop_time"])
+    start_time = datetime.time(*triggers["start_time"])
+    end_time = datetime.time(*triggers["stop_time"])
     return current_time, start_time, end_time
 
 
@@ -33,37 +33,61 @@ class MeasurementConditions:
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
-        _decision = self._CONFIG["measurement_decision"]
-        _triggers = self._CONFIG["measurement_triggers"]
         logger.info("Running MeasurementConditions")
 
-        automation_should_be_running = True
+        # check os system stability
+        ans = OSInfo.check_cpu_usage()
+        logger.debug("Current CPU usage for all cores is {}%.".format(ans))
 
-        if _decision["mode"] == "manual":
-            automation_should_be_running = _decision["manual_decision_result"]
+        ans = OSInfo.check_average_system_load()
+        logger.info(
+            "The average system load in the past 1/5/15 minutes was" " {}.".format(ans)
+        )
 
-        if _decision["mode"] == "cli":
-            automation_should_be_running = _decision["cli_decision_result"]
+        ans = OSInfo.check_memory_usage()
+        logger.debug("Current v_memory usage for the system is {}.".format(ans))
 
-        if _decision["mode"] == "automatic":
+        ans = OSInfo.time_since_os_boot()
+        logger.debug("The system is running since {}.".format(ans))
+
+        ans = OSInfo.check_disk_space()
+        logger.debug("The disk is currently filled with {}%.".format(ans))
+
+        # raises error if disk_space is below 10%
+        OSInfo.validate_disk_space()
+        # raises error if system battery is below 20%
+        OSInfo.validate_system_battery()
+
+        decision = self._CONFIG["measurement_decision"]
+        triggers = self._CONFIG["measurement_triggers"]
+
+        if decision["mode"] == "manual":
+            automation_should_be_running = decision["manual_decision_result"]
+
+        if decision["mode"] == "cli":
+            automation_should_be_running = decision["cli_decision_result"]
+
+        if decision["mode"] == "automatic":
+            automation_should_be_running = True
+
             # consider sun elevation
-            if _triggers["consider_sun_elevation"]:
+            if triggers["consider_sun_elevation"]:
                 current_sun_elevation = Astronomy.get_current_sun_elevation()
-                sun_is_too_low = current_sun_elevation < _triggers["min_sun_elevation"]
-                sun_is_too_high = current_sun_elevation > _triggers["max_sun_elevation"]
+                sun_is_too_low = current_sun_elevation < triggers["min_sun_elevation"]
+                sun_is_too_high = current_sun_elevation > triggers["max_sun_elevation"]
                 if sun_is_too_low or sun_is_too_high:
                     automation_should_be_running &= False
 
             # consider daytime
-            if _triggers["consider_time"]:
-                current_time, start_time, end_time = get_times_from_tuples(_triggers)
+            if triggers["consider_time"]:
+                current_time, start_time, end_time = get_times_from_tuples(triggers)
                 time_is_too_early = current_time < start_time
                 time_is_too_late = current_time > end_time
                 if time_is_too_early or time_is_too_late:
                     automation_should_be_running &= False
 
             # consider evaluation from the VBDSD
-            if _triggers["consider_vbdsd"] and (self._CONFIG["vbdsd"] is not None):
+            if triggers["consider_vbdsd"] and (self._CONFIG["vbdsd"] is not None):
                 # Don't consider VBDSD if it does not have enough
                 # images yet, which will result in a state of "None"
                 if StateInterface.read()["vbdsd_indicates_good_conditions"] == False:

@@ -316,7 +316,7 @@ class VBDSD_Thread:
             new_size = _CONFIG["vbdsd"]["evaluation_size"]
             if status_history.maxsize() != new_size:
                 logger.debug(
-                    "Size of status histroy has changed: "
+                    "Size of status history has changed: "
                     + f"{status_history.maxsize()} -> {new_size}"
                 )
                 status_history.reinitialize(new_size)

@@ -11,9 +11,17 @@
 
 import snap7
 import time
-from packages.core.utils import StateInterface, Logger, Astronomy
+from packages.core.utils import StateInterface, Logger, OSInfo, Astronomy
 
 logger = Logger(origin="pyra.core.enclosure-control")
+
+
+class CoverError(Exception):
+    pass
+
+
+class PLCError(Exception):
+    pass
 
 
 class EnclosureControl:
@@ -39,6 +47,13 @@ class EnclosureControl:
             logger.debug("TUM PLC is not present. Skipping Enclosure_Control.run")
             return
 
+        # check PLC ip connection
+        plc_status = OSInfo.check_connection_status(self._SETUP["tum_plc"]["ip"])
+        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
+
+        if plc_status == "NO_INFO":
+            raise PLCError("Could not find an active PLC IP connection.")
+
         # check for automation state flank changes
         automation_should_be_running = StateInterface.read()[
             "automation_should_be_running"
@@ -46,25 +61,34 @@ class EnclosureControl:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
+                # TODO: check if that is correct reset handling
+                if self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["reset_needed"]):
+                    self.plc_write_bool(
+                        self._CONFIG["tum_plc"]["control"]["reset"], False
+                    )
+                    time.sleep(10)
+
                 self.plc_write_bool(
-                    self._CONFIG["tum_plc"]["control"]["sync_to_tracker"]
+                    self._CONFIG["tum_plc"]["control"]["sync_to_tracker"], True
                 )
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
-                self.plc_write_bool(self._CONFIG["tum_plc"]["actors"]["move_cover"], 0)
+                self.plc_write_bool(
+                    self._CONFIG["tum_plc"]["control"]["sync_to_tracker"], False
+                )
+                self.plc_write_int(self._CONFIG["tum_plc"]["actors"]["move_cover"], 0)
                 logger.info("Closing Cover.")
+                self.wait_for_cover_closing()
 
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
 
-        # TODO: Wait before checking again? Since the cover takes some time to move.
         if not automation_should_be_running:
             if not self._CONFIG["tum_plc"]["actors"]["cover_closed"]:
                 logger.info("Cover is still open. Trying to close again.")
-                self.plc_write_bool(self._CONFIG["tum_plc"]["actors"]["move_cover"], 0)
-
-        # TODO: Trigger user warning if cover does not close?
+                self.plc_write_int(self._CONFIG["tum_plc"]["actors"]["move_cover"], 0)
+                self.wait_for_cover_closing()
 
         # read current state of actors and sensors in enclosure
         current_reading = self.read_state_from_plc()
@@ -167,7 +191,7 @@ class EnclosureControl:
         return self.plc.get_connected()
 
     def plc_read_int(self, action):
-        """Redas an INT value in the PLC database."""
+        """Reads an INT value in the PLC database."""
         assert len(action) == 3
         db_number, start, size = action
 
@@ -220,3 +244,23 @@ class EnclosureControl:
         """Sleeps if cpu is busy."""
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
             time.sleep(2)
+
+    def wait_for_cover_closing(self):
+        """Waits steps of 5s for the enclosure cover to close.
+
+        Raises the custom error CoverError if clover doesn't close in a given
+        period of time.
+        """
+
+        start_time = time.time()
+        loop = True
+
+        while loop:
+            time.sleep(5)
+
+            if self.plc_read_bool(["tum_plc"]["state"]["cover_closed"]):
+                loop = False
+
+            elapsed_time = time.time() - start_time
+            if elapsed_time > 31:
+                raise CoverError("Enclosure cover might be stuck.")
