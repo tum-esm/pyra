@@ -1,17 +1,23 @@
+import os
 import time
 from packages.core import modules
 from packages.core.utils import email_client
 from packages.core.utils.json_file_interaction import State, Config
 from packages.core.utils.logger import Logger
 
-logger = Logger(origin="pyra.core.main")
+
+# TODO: Figure out, where the program could get stuck. In the end,
+# everything should be logged to the log files and no exception
+# should go missing
 
 
 def run():
 
-    State.initialize()
+    logger = Logger(origin="pyra.core.main")
 
+    State.initialize()
     _SETUP, _PARAMS = Config.read()
+
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_SETUP, _PARAMS),
         modules.enclosure_control.EnclosureControl(_SETUP, _PARAMS),
@@ -29,8 +35,7 @@ def run():
         try:
             _SETUP, _PARAMS = Config.read()
         except AssertionError:
-            # TODO: What to do here?
-            time.sleep(60)
+            time.sleep(30)
             continue
 
         # Start or stop VBDSD in a thread
@@ -48,16 +53,21 @@ def run():
             new_exception = e
 
         try:
+            new_current_exceptions = [*current_exceptions]
+
             if new_exception is not None:
                 if type(e).__name__ not in current_exceptions:
-                    current_exceptions.append(type(e).__name__)
-                    logger.exception(f"Exception {type(e).__name__} has occured.")
+                    new_current_exceptions.append(type(e).__name__)
                     email_client.handle_occured_exception(_SETUP, e)
+                    logger.exception(f"Exception {type(e).__name__} has occured.")
+            else:
+                if len(current_exceptions) > 0:
+                    new_current_exceptions = []
+                    email_client.handle_resolved_exception(_SETUP)
+                    logger.info(f"All exceptions have been resolved.")
 
-            if new_exception is None and len(current_exceptions) > 0:
-                current_exceptions = []
-                logger.info(f"All exceptions have been resolved.")
-                email_client.handle_resolved_exception(_SETUP)
+            # if no errors until now
+            current_exceptions = [*new_current_exceptions]
         except Exception as e:
             logger.exception(f"Exception {type(e).__name__} during email sending.")
 

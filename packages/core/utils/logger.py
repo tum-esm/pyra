@@ -8,6 +8,8 @@ INFO_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "info.log")
 DEBUG_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "debug.log")
 LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", "logs.lock")
 
+# TODO: Figure out why duplicate logs are written to the INFO log files
+
 # Set up logging module
 _format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, filename=DEBUG_LOG_FILE, format=_format)
