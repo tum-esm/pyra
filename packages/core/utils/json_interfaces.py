@@ -8,8 +8,7 @@ from packages.core.utils.validation import Validation
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
-SETUP_FILE_PATH = os.path.join(PROJECT_DIR, "config", "setup.json")
-PARAMS_FILE_PATH = os.path.join(PROJECT_DIR, "config", "parameters.json")
+CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", "config.lock")
 
 RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
@@ -28,7 +27,7 @@ def with_filelock(function):
     return locked_function
 
 
-class State:
+class StateInterface:
     @staticmethod
     @with_filelock
     def initialize():
@@ -64,17 +63,13 @@ class State:
             json.dump({**_STATE, **update}, f)
 
 
-class Config:
+class ConfigInterface:
     @staticmethod
     @with_filelock
-    def read() -> tuple[dict]:
-        assert Validation.check_parameters_file()
-        assert Validation.check_setup_file()
-        with open(SETUP_FILE_PATH, "r") as f:
-            _SETUP = json.load(f)
-        with open(PARAMS_FILE_PATH, "r") as f:
-            _PARAMS = json.load(f)
+    def read() -> dict:
+        assert Validation.check_current_config()
+        with open(CONFIG_FILE_PATH, "r") as f:
+            _CONFIG = json.load(f)
 
-        Astronomy.SETUP = _SETUP
-        Astronomy.PARAMS = _PARAMS
-        return _SETUP, _PARAMS
+        Astronomy.CONFIG = _CONFIG
+        return _CONFIG

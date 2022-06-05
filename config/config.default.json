@@ -1,4 +1,11 @@
 {
+    "camtracker": {
+        "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt",
+        "executable_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
+        "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
+        "sun_intensity_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat",
+        "motor_offset_threshold": 10
+    },
     "opus": {
         "em27_ip": "10.0.0.1",
         "executable_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe",
@@ -6,14 +13,35 @@
         "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
         "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx"
     },
-    "camtracker": {
-        "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt",
-        "executable_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
-        "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
-        "sun_intensity_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat"
+    "general": {
+        "seconds_per_core_interval": 30,
+        "test_mode": false
+    },
+    "vbdsd": {
+        "is_present": false,
+        "camera_id": 0,
+        "evaluation_size": 15,
+        "seconds_per_interval": 6,
+        "measurement_threshold": 0.6,
+        "min_sun_elevation": 11.0
+    },
+    "measurement_decision": {
+        "mode": "automatic",
+        "manual_decision_result": false,
+        "cli_decision_result": false
+    },
+    "measurement_triggers": {
+        "consider_time": true,
+        "consider_sun_elevation": true,
+        "consider_vbdsd": true,
+        "start_time": [0, 0, 0],
+        "stop_time": [0, 0, 0],
+        "min_sun_elevation": 0.0,
+        "max_sun_elevation": 0.0
     },
     "tum_plc": {
         "is_present": false,
+        "min_power_elevation": 10.0,
         "ip": "10.0.0.4",
         "actors": {
             "current_angle": [25, 6, 2],
@@ -52,14 +80,10 @@
             "ups_alert": [8, 0, 1, 1]
         }
     },
-    "vbdsd": {
-        "is_present": false,
-        "cam_id": 0
-    },
     "error_email": {
         "sender_address": "esm-technical-user@gmail.com",
         "sender_password": "...",
         "notify_recipients": true,
-        "recipients": ["your@mail.com"]
+        "recipients": "your@mail.com"
     }
 }

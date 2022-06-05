@@ -9,6 +9,8 @@ DEBUG_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "debug.log")
 LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", "logs.lock")
 
 # TODO: Figure out why duplicate logs are written to the INFO log files
+# Maybe I can simply write into log these files directly, without the
+# logging module. Does not really make a performance difference.
 
 # Set up logging module
 _format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

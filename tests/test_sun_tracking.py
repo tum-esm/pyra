@@ -1,11 +1,10 @@
-
-
-from packages.core.main import load_config
+from packages.core.utils import ConfigInterface
 from packages.core.modules.sun_tracking import SunTracking
 
+
 def test_ct_measurement():
-    _SETUP, _PARAMS = load_config()
-    instance = SunTracking(_SETUP, _PARAMS)
+    _CONFIG = ConfigInterface().read()
+    instance = SunTracking(_CONFIG)
     # print(control.continuous_readings())
     # assert(False)
 

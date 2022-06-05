@@ -8,10 +8,10 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
 
-def _send_email(setup: dict, text: str, html: str, subject: str):
-    sender_email = setup["error_email"]["sender_address"]
-    sender_password = setup["error_email"]["sender_password"]
-    recipients = setup["error_email"]["recipients"].replace(" ", "").split(",")
+def _send_email(email_config: dict, text: str, html: str, subject: str):
+    sender_email = email_config["sender_address"]
+    sender_password = email_config["sender_password"]
+    recipients = email_config["recipients"].replace(" ", "").split(",")
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
@@ -31,7 +31,7 @@ def _send_email(setup: dict, text: str, html: str, subject: str):
         )
 
 
-def handle_resolved_exception(setup: dict):
+def handle_resolved_exception(email_config: dict):
 
     # TODO: add instance name
 
@@ -53,10 +53,10 @@ def handle_resolved_exception(setup: dict):
     </html>
     """
 
-    _send_email(setup, text, html, "✅ PYRA issues resolved")
+    _send_email(email_config, text, html, "✅ PYRA issues resolved")
 
 
-def handle_occured_exception(setup: dict, exception: Exception):
+def handle_occured_exception(email_config: dict, exception: Exception):
 
     # TODO: add instance name
 
@@ -103,4 +103,4 @@ def handle_occured_exception(setup: dict, exception: Exception):
     </html>
     """
 
-    _send_email(setup, text, html, "❗️ PYRA issue occured")
+    _send_email(email_config, text, html, "❗️ PYRA issue occured")

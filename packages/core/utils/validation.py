@@ -5,8 +5,7 @@ from packages.core.utils.logger import Logger
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-SETUP_FILE_PATH = os.path.join(PROJECT_DIR, "config", "setup.json")
-PARAMS_FILE_PATH = os.path.join(PROJECT_DIR, "config", "parameters.json")
+CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 
 
 def _file_path_exists(field, value, error):
@@ -28,138 +27,152 @@ def _is_valid_ip_adress(field, value, error):
         error(field, "String has to be a valid IPv4 address")
 
 
-FILE_SCHEMA = {"type": "string", "check_with": _file_path_exists}
-DIR_SCHEMA = {"type": "string", "check_with": _directory_path_exists}
-IP_SCHEMA = {"type": "string", "check_with": _is_valid_ip_adress}
 DICT_SCHEMA = lambda schema: {"type": "dict", "schema": schema}
-INT_LIST_SCHEMA = lambda length: {
-    "type": "list",
-    "schema": {"type": "integer"},
-    "minlength": length,
-    "maxlength": length,
-}
-INT_SCHEMA = {"type": "integer"}
-BOOL_SCHEMA = {"type": "boolean"}
 
-SETUP_FILE_SCHEMA = {
-    "opus": DICT_SCHEMA(
+
+class Schemas:
+    sun_elevation = ({"type": "number", "min": 0, "max": 90},)
+    time_list = [
+        {"type": "integer", "min": 0, "max": 23},
+        {"type": "integer", "min": 0, "max": 59},
+        {"type": "integer", "min": 0, "max": 59},
+    ]
+    time_interval = {"type": "number", "min": 5, "max": 600}
+    number = {"type": "number"}
+    integer = {"type": "integer"}
+    string = {"type": "string"}
+    boolean = {"type": "boolean"}
+    int_list_3 = (
         {
-            "em27_ip": IP_SCHEMA,
-            "executable_path": FILE_SCHEMA,
-            "executable_parameter": {"type": "string"},
-            "experiment_path": FILE_SCHEMA,
-            "macro_path": FILE_SCHEMA,
-        }
-    ),
+            "type": "list",
+            "schema": {"type": "integer"},
+            "minlength": 3,
+            "maxlength": 3,
+        },
+    )
+    int_list_4 = (
+        {
+            "type": "list",
+            "schema": {"type": "integer"},
+            "minlength": 4,
+            "maxlength": 4,
+        },
+    )
+    ip = ({"type": "string", "check_with": _is_valid_ip_adress},)
+    directory = ({"type": "string", "check_with": _directory_path_exists},)
+    file = {"type": "string", "check_with": _file_path_exists}
+
+
+CONFIG_FILE_SCHEMA = {
     "camtracker": DICT_SCHEMA(
         {
-            "config_path": FILE_SCHEMA,
-            "executable_path": FILE_SCHEMA,
-            "learn_az_elev_path": FILE_SCHEMA,
-            "sun_intensity_path": FILE_SCHEMA,
+            "config_path": Schemas.file,
+            "executable_path": Schemas.file,
+            "learn_az_elev_path": Schemas.file,
+            "sun_intensity_path": Schemas.file,
+            "motor_offset_threshold": Schemas.number,
         }
     ),
-    "tum_plc": DICT_SCHEMA(
+    "opus": DICT_SCHEMA(
         {
-            "actors": DICT_SCHEMA(
-                {
-                    "current_angle": INT_LIST_SCHEMA(3),
-                    "fan_speed": INT_LIST_SCHEMA(3),
-                    "move_cover": INT_LIST_SCHEMA(3),
-                    "nominal_angle": INT_LIST_SCHEMA(3),
-                }
-            ),
-            "control": DICT_SCHEMA(
-                {
-                    "auto_temp_mode": INT_LIST_SCHEMA(4),
-                    "manual_control": INT_LIST_SCHEMA(4),
-                    "manual_temp_mode": INT_LIST_SCHEMA(4),
-                    "reset": INT_LIST_SCHEMA(4),
-                    "sync_to_tracker": INT_LIST_SCHEMA(4),
-                }
-            ),
-            "is_present": {"type": "boolean"},
-            "ip": IP_SCHEMA,
-            "power": DICT_SCHEMA(
-                {
-                    "camera": INT_LIST_SCHEMA(4),
-                    "computer": INT_LIST_SCHEMA(4),
-                    "heater": INT_LIST_SCHEMA(4),
-                    "router": INT_LIST_SCHEMA(4),
-                    "spectrometer": INT_LIST_SCHEMA(4),
-                }
-            ),
-            "sensors": DICT_SCHEMA(
-                {
-                    "humidity": INT_LIST_SCHEMA(3),
-                    "temperature": INT_LIST_SCHEMA(3),
-                }
-            ),
-            "state": DICT_SCHEMA(
-                {
-                    "camera": INT_LIST_SCHEMA(4),
-                    "computer": INT_LIST_SCHEMA(4),
-                    "cover": INT_LIST_SCHEMA(4),
-                    "heater": INT_LIST_SCHEMA(4),
-                    "motor_failed": INT_LIST_SCHEMA(4),
-                    "rain": INT_LIST_SCHEMA(4),
-                    "reset_needed": INT_LIST_SCHEMA(4),
-                    "router": INT_LIST_SCHEMA(4),
-                    "spectrometer": INT_LIST_SCHEMA(4),
-                    "ups_alert": INT_LIST_SCHEMA(4),
-                }
-            ),
+            "em27_ip": Schemas.ip,
+            "executable_path": Schemas.file,
+            "executable_parameter": Schemas.string,
+            "experiment_path": Schemas.file,
+            "macro_path": Schemas.file,
         }
     ),
-    "vbdsd": DICT_SCHEMA(
-        {"is_present": {"type": "boolean"}, "cam_id": {"type": "integer"}}
-    ),
-    "error_email": DICT_SCHEMA(
+    "general": DICT_SCHEMA(
         {
-            "sender_address": {"type": "string"},
-            "sender_password": {"type": "string"},
-            "notify_recipients": {"type": "boolean"},
-            "recipients": {"type": "string"},
-        }
-    ),
-}
-
-PARAMS_FILE_SCHEMA = {
-    "camtracker": DICT_SCHEMA({"motor_offset_threshold": {"type": "number"}}),
-    "em27": DICT_SCHEMA({"power_min_angle": {"type": "number"}}),
-    "pyra": DICT_SCHEMA(
-        {
-            "seconds_per_interval": {"type": "number"},
-            "test_mode": {"type": "boolean"},
+            "enclosure_min_power_elevation": Schemas.sun_elevation,
+            "em27_min_power_elevation": Schemas.sun_elevation,
+            "seconds_per_core_interval": Schemas.time_interval,
+            "test_mode": Schemas.boolean,
         }
     ),
     "vbdsd": DICT_SCHEMA(
         {
-            "evaluation_size": {"type": "integer"},
-            "seconds_per_interval": {"type": "number"},
-            "measurement_threshold": {"type": "number"},
-            "min_sun_angle": {"type": "number"},
+            "is_present": Schemas.boolean,
+            "camera_id": {"type": "integer", "min": 0, "max": 999999},
+            "evaluation_size": {"type": "integer", "min": 1, "max": 100},
+            "seconds_per_interval": Schemas.time_interval,
+            "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
+            "min_sun_elevation": Schemas.sun_elevation,
         }
     ),
-    "enclosure": DICT_SCHEMA(
+    "measurement_decision": DICT_SCHEMA(
         {
-            "min_sun_angle": {"type": "number"},
+            "mode": {"type": "string", "allowed": ["automatic", "manual", "cli"]},
+            "manual_decision_result": Schemas.boolean,
+            "cli_decision_result": Schemas.boolean,
         }
     ),
     "measurement_triggers": DICT_SCHEMA(
         {
-            "manual_override": {"type": "boolean"},
-            "type": DICT_SCHEMA(
+            "consider_time": Schemas.boolean,
+            "consider_sun_elevation": Schemas.boolean,
+            "consider_vbdsd": Schemas.boolean,
+            "start_time": Schemas.time_list,
+            "stop_time": Schemas.time_list,
+            "min_sun_elevation": Schemas.sun_elevation,
+            "max_sun_elevation": Schemas.sun_elevation,
+        }
+    ),
+    "tum_plc": DICT_SCHEMA(
+        {
+            "is_present": Schemas.boolean,
+            "ip": Schemas.ip,
+            "actors": DICT_SCHEMA(
                 {
-                    "time": {"type": "boolean"},
-                    "sun_angle": {"type": "boolean"},
-                    "vbdsd": {"type": "boolean"},
+                    "current_angle": Schemas.int_list_3,
+                    "fan_speed": Schemas.int_list_3,
+                    "move_cover": Schemas.int_list_3,
+                    "nominal_angle": Schemas.int_list_3,
                 }
             ),
-            "start_time": INT_LIST_SCHEMA(3),
-            "stop_time": INT_LIST_SCHEMA(3),
-            "sun_angle_start": {"type": "number"},
-            "sun_angle_stop": {"type": "number"},
+            "control": DICT_SCHEMA(
+                {
+                    "auto_temp_mode": Schemas.int_list_4,
+                    "manual_control": Schemas.int_list_4,
+                    "manual_temp_mode": Schemas.int_list_4,
+                    "reset": Schemas.int_list_4,
+                    "sync_to_tracker": Schemas.int_list_4,
+                }
+            ),
+            "power": DICT_SCHEMA(
+                {
+                    "camera": Schemas.int_list_4,
+                    "computer": Schemas.int_list_4,
+                    "heater": Schemas.int_list_4,
+                    "router": Schemas.int_list_4,
+                    "spectrometer": Schemas.int_list_4,
+                }
+            ),
+            "sensors": DICT_SCHEMA(
+                {"humidity": Schemas.int_list_3, "temperature": Schemas.int_list_3}
+            ),
+            "state": DICT_SCHEMA(
+                {
+                    "camera": Schemas.int_list_4,
+                    "computer": Schemas.int_list_4,
+                    "cover": Schemas.int_list_4,
+                    "heater": Schemas.int_list_4,
+                    "motor_failed": Schemas.int_list_4,
+                    "rain": Schemas.int_list_4,
+                    "reset_needed": Schemas.int_list_4,
+                    "router": Schemas.int_list_4,
+                    "spectrometer": Schemas.int_list_4,
+                    "ups_alert": Schemas.int_list_4,
+                }
+            ),
+        }
+    ),
+    "error_email": DICT_SCHEMA(
+        {
+            "sender_address": Schemas.string,
+            "sender_password": Schemas.string,
+            "notify_recipients": Schemas.boolean,
+            "recipients": Schemas.string,
         }
     ),
 }
@@ -173,57 +186,45 @@ class Validation:
     logging_handler = Logger().error
 
     @staticmethod
-    def __load_json(file_path, content_string, validator):
-        if content_string is None:
-            assert os.path.isfile(file_path), "file does not exist"
-            with open(file_path, "r") as f:
-                try:
-                    content = json.load(f)
-                except:
-                    raise AssertionError("file not in a valid json format")
-        else:
-            try:
-                content = json.loads(content_string)
-            except:
-                raise AssertionError("content not in a valid json format")
-
-        if not validator.validate(content):
-            raise CerberusException(validator.errors)
-
-        return content
+    def _check(
+        file_content: dict,
+        partial_validation: bool = False,
+    ):
+        validator = cerberus.Validator(
+            CONFIG_FILE_SCHEMA, require_all=(not partial_validation)
+        )
+        assert validator.validate(file_content), validator.errors
+        # Add assertions that cannot be done with cerberus here
 
     @staticmethod
-    def check_setup_file(
-        file_path=SETUP_FILE_PATH,
-        content_string=None,
-        logging_message="Error in current setup file: ",
-        partial_validation=False,
-    ):
+    def check_current_config():
         try:
-            validator = cerberus.Validator(
-                SETUP_FILE_SCHEMA, require_all=(not partial_validation)
-            )
-            content = Validation.__load_json(file_path, content_string, validator)
-            # Add checks that cannot be done with cerberus here
+            assert os.path.isfile(CONFIG_FILE_PATH), "file does not exist"
+            with open(CONFIG_FILE_PATH, "r") as f:
+                try:
+                    file_content = json.load(f)
+                except:
+                    raise AssertionError("file not in a valid json format")
+
+            Validation._check(file_content, partial_validation=False)
             return True
-        except (AssertionError, CerberusException) as e:
-            Validation.logging_handler(f"{logging_message}{e}")
+        except Exception as e:
+            Validation.logging_handler(f"Error in current config file: {e}")
             return False
 
     @staticmethod
-    def check_parameters_file(
-        file_path=PARAMS_FILE_PATH,
-        content_string=None,
-        logging_message="Error in current parameters file: ",
+    def check_config_string(
+        content_string,
         partial_validation=False,
     ):
         try:
-            validator = cerberus.Validator(
-                PARAMS_FILE_SCHEMA, require_all=(not partial_validation)
-            )
-            content = Validation.__load_json(file_path, content_string, validator)
-            # Add checks that cannot be done with cerberus here
+            try:
+                file_content = json.loads(content_string)
+            except:
+                raise AssertionError("content not in a valid json format")
+
+            Validation._check(file_content, partial_validation)
             return True
-        except (AssertionError, CerberusException) as e:
-            Validation.logging_handler(f"{logging_message}{e}")
+        except Exception as e:
+            Validation.logging_handler(f"Error in new config string: {e}")
             return False

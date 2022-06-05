@@ -23,7 +23,7 @@
 import os
 import sys
 import time
-from packages.core.utils.logger import Logger
+from packages.core.utils import Logger, StateInterface
 
 if sys.platform == "win32":
     # these imports are provided by pywin32
@@ -41,9 +41,8 @@ class OpusMeasurement:
     established DDE connection.
     """
 
-    def __init__(self, initial_setup: dict, initial_parameters: dict):
-        self._SETUP = initial_setup
-        self._PARAMS = initial_parameters
+    def __init__(self, initial_config: dict):
+        self._CONFIG = initial_config
         if sys.platform != "win32":
             print("The OpusMeasurement class can only be tested on windows")
             return
@@ -54,8 +53,8 @@ class OpusMeasurement:
         self.conversation = dde.CreateConversation(self.server)
         self.last_cycle_automation_status = 0
 
-    def run(self, new_setup: dict, new_parameters: dict):
-        self._SETUP, self._PARAMS = new_setup, new_parameters
+    def run(self, new_config: dict):
+        self._CONFIG = new_config
 
         if sys.platform != "win32":
             return
@@ -65,7 +64,7 @@ class OpusMeasurement:
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
-        if self._PARAMS["pyra"]["test_mode"] == 1:
+        if self._CONFIG["general"]["test_mode"] == 1:
             logger.info("Test mode active.")
             return
 
@@ -77,7 +76,9 @@ class OpusMeasurement:
             return
 
         # check for automation state flank changes
-        automation_should_be_running = State.read()["automation_should_be_running"]
+        automation_should_be_running = StateInterface.read()[
+            "automation_should_be_running"
+        ]
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -135,7 +136,7 @@ class OpusMeasurement:
     def __load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._SETUP["opus"]["experiment_path"]
+        full_path = self._CONFIG["opus"]["experiment_path"]
 
         if not self.__test_dde_connection:
             return
@@ -149,7 +150,7 @@ class OpusMeasurement:
     def __start_macro(self):
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._SETUP["opus"]["macro_path"]
+        full_path = self._CONFIG["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -163,7 +164,7 @@ class OpusMeasurement:
     def __stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._SETUP["opus"]["macro_path"]
+        full_path = self._CONFIG["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -203,9 +204,9 @@ class OpusMeasurement:
         """
         # http://timgolden.me.uk/pywin32-docs/win32process.html
         opus_call = (
-            self._SETUP["opus"]["executable_path"]
+            self._CONFIG["opus"]["executable_path"]
             + " "
-            + self._SETUP["opus"]["executable_parameter"]
+            + self._CONFIG["opus"]["executable_parameter"]
         )
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,

@@ -22,8 +22,7 @@ import sys
 import time
 import jdcal
 import datetime
-from packages.core.utils.json_file_interaction import State
-from packages.core.utils.logger import Logger
+from packages.core.utils import StateInterface, Logger
 
 # the following imports should be provided by pywin32
 if sys.platform == "win32":
@@ -35,15 +34,14 @@ logger = Logger(origin="pyra.core.sun-tracking")
 
 
 class SunTracking:
-    def __init__(self, initial_setup: dict, initial_parameters: dict):
-        self._SETUP = initial_setup
-        self._PARAMS = initial_parameters
+    def __init__(self, initial_config: dict):
+        self._CONFIG = initial_config
         if sys.platform != "win32":
             print("The SunTracking class can only be tested on windows")
             return
 
-    def run(self, new_setup: dict, new_parameters: dict):
-        self._SETUP, self._PARAMS = new_setup, new_parameters
+    def run(self, new_config: dict):
+        self._CONFIG = new_config
 
         if sys.platform != "win32":
             return
@@ -51,13 +49,13 @@ class SunTracking:
         logger.info("Running SunTracking")
 
         # check for PYRA Test Mode status
-        if self._PARAMS["pyra"]["test_mode"] == 1:
+        if self._CONFIG["general"]["test_mode"] == 1:
             logger.info("Test mode active.")
             return
 
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
-        if not State.read()["vbdsd_evaluation_is_positive"]:
+        if not StateInterface.read()["vbdsd_evaluation_is_positive"]:
             if self.__ct_application_running:
                 self.__stop_sun_tracking_automation()
                 logger.info("Stop CamTracker.")
@@ -103,16 +101,16 @@ class SunTracking:
         # delete stop.txt file in camtracker folder if present
         self.clean_stop_file()
 
-        ct_path = self._SETUP["camtracker"]["executable_path"]
+        ct_path = self._CONFIG["camtracker"]["executable_path"]
 
-
-        #works only > python3.10
-        #without cwd CT will have trouble loading its internal database)
-        os.startfile(path=os.path.filename(ct_path),
-                     cwd=os.path.basename(ct_path),
-                     arguments="-autostart",
-                     show_cmd=2)
-
+        # works only > python3.10
+        # without cwd CT will have trouble loading its internal database)
+        os.startfile(
+            path=os.path.filename(ct_path),
+            cwd=os.path.basename(ct_path),
+            arguments="-autostart",
+            show_cmd=2,
+        )
 
     def __stop_sun_tracking_automation(self):
         """Tells the CamTracker application to end program and move mirrors
@@ -124,12 +122,11 @@ class SunTracking:
 
         # create stop.txt file in camtracker folder
         camtracker_directory = os.path.dirname(
-            self._SETUP["camtracker"]["executable_path"]
+            self._CONFIG["camtracker"]["executable_path"]
         )
 
         f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
         f.close()
-
 
     def clean_stop_file(self):
         """CamTracker needs a stop.txt file to safely shutdown.
@@ -137,7 +134,7 @@ class SunTracking:
         """
 
         camtracker_directory = os.path.dirname(
-            self._SETUP["camtracker"]["executable_path"]
+            self._CONFIG["camtracker"]["executable_path"]
         )
         stop_file_path = os.path.join(camtracker_directory, "stop.txt")
 
@@ -158,7 +155,7 @@ class SunTracking:
         ]
         """
         # read azimuth and elevation motor offsets from camtracker logfiles
-        target = self._SETUP["camtracker"]["learn_az_elev_path"]
+        target = self._CONFIG["camtracker"]["learn_az_elev_path"]
 
         if not os.path.isfile(target):
             return [None, None, None, None, None, None]
@@ -191,7 +188,7 @@ class SunTracking:
         Returns the sun intensity as either 'good', 'bad', 'None'.
         """
         # check sun status logged by camtracker
-        target = self._SETUP["camtracker"]["sun_intensity_path"]
+        target = self._CONFIG["camtracker"]["sun_intensity_path"]
 
         if not os.path.isfile(target):
             return
@@ -233,7 +230,7 @@ class SunTracking:
 
         elev_offset = tracker_status[3]
         az_offeset = tracker_status[4]
-        threshold = self._PARAMS["camtracker"]["motor_offset_threshold"]
+        threshold = self._CONFIG["camtracker"]["motor_offset_threshold"]
 
         if (elev_offset > threshold) or (az_offeset > threshold):
             return False

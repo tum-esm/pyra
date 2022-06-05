@@ -14,66 +14,58 @@
 # ==============================================================================
 
 import datetime
-from packages.core.utils.astronomy import Astronomy
-from packages.core.utils.json_file_interaction import State
-from packages.core.utils.logger import Logger
+from packages.core.utils import StateInterface, Astronomy, Logger
 
 logger = Logger(origin="pyra.core.measurement-conditions")
 
 
-def current_time_is_before_noon() -> bool:
-    return datetime.datetime.now().hour < 13
-
-
-# returns (hour, minute, second) tuple
-def current_time_is_in_range_tuples(t_start: tuple[int], t_end: tuple[int]):
+def get_times_from_tuples(_triggers: any):
     now = datetime.datetime.now()
     current_time = datetime.time(now.hour, now.minute, now.second)
-    start_time = datetime.time(*t_start)
-    end_time = datetime.time(*t_end)
-    return current_time > start_time and current_time < end_time
+    start_time = datetime.time(*_triggers["start_time"])
+    end_time = datetime.time(*_triggers["stop_time"])
+    return current_time, start_time, end_time
 
 
 class MeasurementConditions:
-    def __init__(self, initial_setup: dict, initial_parameters: dict):
-        self._SETUP = initial_setup
-        self._PARAMS = initial_parameters
+    def __init__(self, initial_config: dict):
+        self._CONFIG = initial_config
 
-    def run(self, new_setup: dict, new_parameters: dict):
-        self._SETUP, self._PARAMS = new_setup, new_parameters
-        _triggers = self._PARAMS["measurement_triggers"]
-
+    def run(self, new_config: dict):
+        self._CONFIG = new_config
+        _triggers = self._CONFIG["measurement_triggers"]
         logger.info("Running MeasurementConditions")
-
         automation_should_be_running = True
+
+        # TODO: Use new logic that replaces "manually_enforced"
 
         # the "manually_enforced" option (when set to true) makes
         # the decision process ignore all other factors
         if not _triggers["manually_enforced"]:
 
-            # consider elevation on mornings and evenings
-            # TODO: Is this what "sun_angle_start" and "sun_angle_stop" mean
-            if _triggers["type"]["sun_angle"]:
-                min_required_elevation = (
-                    _triggers["sun_angle_start"]
-                    if current_time_is_before_noon()
-                    else _triggers["sun_angle_stop"]
-                )
-                if Astronomy.get_current_sun_elevation() < min_required_elevation:
+            # consider sun elevation
+            if _triggers["consider_sun_elevation"]:
+                current_sun_elevation = Astronomy.get_current_sun_elevation()
+                sun_is_too_low = current_sun_elevation < _triggers["min_sun_elevation"]
+                sun_is_too_high = current_sun_elevation > _triggers["max_sun_elevation"]
+                if sun_is_too_low or sun_is_too_high:
                     automation_should_be_running &= False
 
             # consider start_time and end_time
-            if _triggers["type"]["time"]:
-                if not current_time_is_in_range_tuples(
-                    _triggers["start_time"], _triggers["stop_time"]
-                ):
+            if _triggers["consider_time"]:
+                current_time, start_time, end_time = get_times_from_tuples(_triggers)
+                time_is_too_early = current_time < start_time
+                time_is_too_late = current_time > end_time
+                if time_is_too_early or time_is_too_late:
                     automation_should_be_running &= False
 
             # consider evaluation from the vbdsd
-            if _triggers["type"]["vbdsd"]:
+            if _triggers["consider_vbdsd"]:
                 # Don't consider VBDSD if it does not have enough
                 # images yet, which will result in a state of "None"
-                if State.read()["vbdsd_indicates_good_conditions"] == False:
+                if StateInterface.read()["vbdsd_indicates_good_conditions"] == False:
                     automation_should_be_running &= False
 
-        State.update({"automation_should_be_running": automation_should_be_running})
+        StateInterface.update(
+            {"automation_should_be_running": automation_should_be_running}
+        )

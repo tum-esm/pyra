@@ -5,8 +5,7 @@
 __pycache__
 
 # config
-config/parameters.json
-config/setup.json
+config/config.json
 config/config.lock
 
 # logs
