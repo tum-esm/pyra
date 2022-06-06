@@ -1,7 +1,11 @@
 import time
 from packages.core import modules
-from packages.core.utils import email_client
-from packages.core.utils import ConfigInterface, StateInterface, Logger
+from packages.core.utils import (
+    ConfigInterface,
+    StateInterface,
+    Logger,
+    ExceptionEmailClient,
+)
 
 
 # TODO: Figure out, where the program could get stuck. In the end,
@@ -56,12 +60,16 @@ def run():
             if new_exception is not None:
                 if type(e).__name__ not in current_exceptions:
                     new_current_exceptions.append(type(e).__name__)
-                    email_client.handle_occured_exception(_CONFIG["error_email"], e)
+                    ExceptionEmailClient.handle_occured_exception(
+                        _CONFIG["error_email"], e
+                    )
                     logger.exception(f"Exception {type(e).__name__} has occured.")
             else:
                 if len(current_exceptions) > 0:
                     new_current_exceptions = []
-                    email_client.handle_resolved_exception(_CONFIG["error_email"])
+                    ExceptionEmailClient.handle_resolved_exception(
+                        _CONFIG["error_email"]
+                    )
                     logger.info(f"All exceptions have been resolved.")
 
             # if no errors until now
