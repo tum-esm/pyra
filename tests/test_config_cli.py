@@ -15,39 +15,30 @@ def assert_config_file_content(expected_content: dict, message: str):
     with open(CONFIG_FILE_PATH, "r") as f:
         actual_content = json.load(f)
 
+    print(f"actual_content: {json.dumps(actual_content, indent=4)}")
+    print(f"expected_content: {json.dumps(expected_content, indent=4)}")
+
     difference = DeepDiff(expected_content, actual_content)
     assert difference == {}, f"{message}: {difference}"
 
 
-def assert_current_config_validity(verbose: bool = False):
+def run_cli_command(command: list[str]):
     process = subprocess.run(
-        [INTERPRETER_PATH, PYRA_CLI_PATH, "config", "validate"],
+        [INTERPRETER_PATH, PYRA_CLI_PATH, *command],
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
     stdout = process.stdout.decode()
     stderr = process.stderr.decode()
-    if verbose:
-        print(f"stdout: {stdout}")
-        print(f"stderr: {stderr}")
-
+    print(f"stdout: {stdout}", end="")
+    print(f"stderr: {stderr}", end="\n\n")
     assert process.returncode == 0
-    assert stdout.startswith("Current config file is valid")
+    return stdout
 
 
 def test_get_config(original_config):
     # get config from cli
-    process = subprocess.run(
-        [INTERPRETER_PATH, PYRA_CLI_PATH, "config", "get"],
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-    )
-    stdout = process.stdout.decode()
-    stderr = process.stderr.decode()
-    print(f"stdout: {stdout}")
-    print(f"stderr: {stderr}")
-
-    assert process.returncode == 0
+    stdout = run_cli_command(["config", "get"])
     config_object_1 = json.loads(stdout)
 
     # get config from file
@@ -57,21 +48,8 @@ def test_get_config(original_config):
 
 
 def test_validate_current_config(original_config):
-    assert_current_config_validity(verbose=True)
-
-
-def perform_update(update):
-    process = subprocess.run(
-        [INTERPRETER_PATH, PYRA_CLI_PATH, "config", "update", json.dumps(update)],
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-    )
-    stdout = process.stdout.decode()
-    stderr = process.stderr.decode()
-    print(f"stdout: {stdout}")
-    print(f"stderr: {stderr}")
-    assert process.returncode == 0
-    return stdout
+    stdout = run_cli_command(["config", "validate"])
+    assert stdout.startswith("Current config file is valid")
 
 
 def test_update_config(original_config):
@@ -88,7 +66,7 @@ def test_update_config(original_config):
 
     # run "pyra-cli config update" for some invalid variables
     for update in updates:
-        stdout = perform_update(update)
+        stdout = run_cli_command(["config", "update", json.dumps(update)])
         assert "Error in new config string" in stdout
 
     assert_config_file_content(original_config, "config.json should not have changed")
@@ -117,10 +95,34 @@ def test_update_config(original_config):
 
     # run "pyra-cli config update" for some valid variables
     for index, update in enumerate(updates):
-        stdout = perform_update(update)
+        stdout = run_cli_command(["config", "update", json.dumps(update)])
         assert "Updated config file" in stdout
         original_config = transform(original_config, index)
 
         assert_config_file_content(
             original_config, "config.json did not update as expected"
+        )
+
+
+def test_add_default_config(original_config):
+
+    cases = {"vbdsd": None, "tum_plc": None}
+
+    for c in cases:
+        with open(os.path.join(PROJECT_DIR, "config", f"{c}.default.json"), "r") as f:
+            cases[c] = json.load(f)
+
+    for c in cases:
+        stdout = run_cli_command(["config", "update", json.dumps({c: None})])
+        assert "Updated config file" in stdout
+        original_config[c] = None
+
+    assert_config_file_content(original_config, "config.json is in an unexpected state")
+
+    for c in cases:
+        stdout = run_cli_command(["config", "add-default", c])
+        assert "Updated config file" in stdout
+        original_config[c] = cases[c]
+        assert_config_file_content(
+            original_config, f'config.json does not include the "{c}" config'
         )
