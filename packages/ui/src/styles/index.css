@@ -26,10 +26,18 @@
     @apply flex flex-row items-center justify-center;
 }
 
+.flex-col-center {
+    @apply flex flex-col items-center justify-center;
+}
+
 .flex-row-left {
     @apply flex flex-row items-center justify-start;
 }
 
 .flex-row-right {
     @apply flex flex-row items-center justify-end;
+}
+
+.elevated-panel {
+    @apply shadow-sm rounded-md bg-white;
 }

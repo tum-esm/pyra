@@ -26,7 +26,12 @@ export default function StatusTab(props: {
         >
             <PyraCoreStatus {...{ pyraCorePID, setPyraCorePID }} />
             {pyraCorePID !== undefined && pyraCorePID !== -1 && (
-                <MeasurementDecisionStatus {...{ centralConfig, setCentralConfig }} />
+                <>
+                    <div className="w-full h-px bg-gray-300" />
+                    <MeasurementDecisionStatus
+                        {...{ centralConfig, setCentralConfig }}
+                    />
+                </>
             )}
         </div>
     );

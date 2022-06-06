@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import backend from '../../utils/backend';
 import TYPES from '../../utils/types';
 import { defaultsDeep } from 'lodash';
+import Button from '../essential/button';
 
 export default function MeasurementDecisionStatus(props: {
     centralConfig: TYPES.config;
     setCentralConfig(c: TYPES.config): void;
 }) {
     const { centralConfig, setCentralConfig } = props;
+    const [loading, setLoading] = useState(false);
 
     const measurementDecision = centralConfig.measurement_decision;
 
@@ -17,7 +20,10 @@ export default function MeasurementDecisionStatus(props: {
     // TODO: add cli and automatic decision result
 
     async function updateMeasurementDecisionMode(mode: 'automatic' | 'manual' | 'cli') {
-        const update = { measurement_decision: { mode } };
+        setLoading(true);
+        const update = {
+            measurement_decision: { mode, manual_decision_result: false },
+        };
         const newCentralConfig = defaultsDeep(
             update,
             JSON.parse(JSON.stringify(centralConfig))
@@ -28,9 +34,11 @@ export default function MeasurementDecisionStatus(props: {
         } else {
             // TODO: add message to queue
         }
+        setLoading(false);
     }
 
     async function updateManualMeasurementDecisionResult(result: boolean) {
+        setLoading(true);
         const update = { measurement_decision: { manual_decision_result: result } };
         const newCentralConfig = defaultsDeep(
             update,
@@ -42,22 +50,19 @@ export default function MeasurementDecisionStatus(props: {
         } else {
             // TODO: add message to queue
         }
+        setLoading(false);
     }
 
     return (
-        <div
-            className={
-                'w-full text-sm bg-white border border-gray-300 ' +
-                'rounded-md shadow-sm flex-row-left'
-            }
-        >
-            <div className="px-3 font-normal flex-row-left">
-                Measurements are{' '}
+        <div className={'w-full text-sm flex gap-x-2'}>
+            <div className="h-8 px-3 text-base font-normal flex-row-left">
+                Measurements are currently{' '}
                 <span className="ml-1 mr-4">
-                    {!mesurementDecisionResult && (
+                    {loading && '...'}
+                    {!loading && !mesurementDecisionResult && (
                         <span className="font-semibold text-red-600">not running</span>
                     )}
-                    {mesurementDecisionResult && (
+                    {!loading && mesurementDecisionResult && (
                         <>
                             <span className="font-semibold text-green-600">
                                 running
@@ -67,8 +72,8 @@ export default function MeasurementDecisionStatus(props: {
                 </span>
             </div>
             <div className="flex-grow" />
-            <div className="flex flex-col">
-                <div className="flex flex-row">
+            <div className="flex-col-center gap-y-2">
+                <div className="flex flex-row elevated-panel">
                     {['automatic', 'manual', 'cli'].map((m: any) => (
                         <button
                             onClick={() =>
@@ -77,10 +82,10 @@ export default function MeasurementDecisionStatus(props: {
                                     : {}
                             }
                             className={
-                                'px-3 py-1.5 last:rounded-tr-md border-l border-b border-gray-300 font-medium w-32 flex-row-center ' +
+                                'px-3 h-8 first:rounded-l-md last:rounded-r-md font-medium w-28 flex-row-center ' +
                                 (measurementDecision.mode === m
                                     ? 'bg-blue-200 text-blue-950 '
-                                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-950 ')
+                                    : 'text-gray-400 hover:bg-gray-100 hover:text-gray-950 ')
                             }
                         >
                             <div
@@ -98,29 +103,26 @@ export default function MeasurementDecisionStatus(props: {
                 {measurementDecision.mode !== 'manual' && (
                     <div
                         className={
-                            'px-3 py-1.5 border-l border-gray-300 font-light w-full ' +
-                            'bg-gray-50 text-gray-500 text-center rounded-br-md'
+                            'h-8 flex-row-center font-light w-full text-gray-500 text-center'
                         }
                     >
                         automated decision
                     </div>
                 )}
                 {measurementDecision.mode === 'manual' && (
-                    <button
+                    <Button
                         onClick={() =>
                             updateManualMeasurementDecisionResult(
                                 !measurementDecision.manual_decision_result
                             )
                         }
-                        className={
-                            'px-3 py-1.5 border-l border-gray-300 font-medium w-full rounded-br-md ' +
-                            (!measurementDecision.manual_decision_result
-                                ? 'bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 '
-                                : 'bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 ')
+                        className="w-full"
+                        variant={
+                            measurementDecision.manual_decision_result ? 'red' : 'green'
                         }
                     >
                         {measurementDecision.manual_decision_result ? 'stop' : 'start'}
-                    </button>
+                    </Button>
                 )}
             </div>
         </div>

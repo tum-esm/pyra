@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import backend from '../../utils/backend';
+import Button from '../essential/button';
 
 export default function PyraCoreStatus(props: {
     pyraCorePID: number | undefined;
@@ -35,13 +36,8 @@ export default function PyraCoreStatus(props: {
     }
 
     return (
-        <div
-            className={
-                'w-full text-sm bg-white border border-gray-300 ' +
-                'rounded-md shadow-sm flex-row-left'
-            }
-        >
-            <div className="px-3 font-normal flex-row-left">
+        <div className={'w-full text-sm flex-row-left gap-x-2'}>
+            <div className="flex-grow h-8 px-3 text-base flex-row-left">
                 pyra-core is{' '}
                 {pyraCorePID === undefined && (
                     <span className="ml-1 mr-4 font-semibold">...</span>
@@ -64,18 +60,13 @@ export default function PyraCoreStatus(props: {
                     </span>
                 )}
             </div>
-            <div className="flex-grow" />
-            <button
+            <Button
                 onClick={pyraCorePID === -1 ? startPyraCore : stopPyraCore}
-                className={
-                    'px-3 py-1.5 rounded-r-md border-l border-gray-300 font-medium w-16 ' +
-                    (pyraCorePID === -1
-                        ? 'bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 '
-                        : 'bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 ')
-                }
+                className={'w-16'}
+                variant={pyraCorePID === -1 ? 'green' : 'red'}
             >
                 {pyraCorePID === -1 ? 'start' : 'stop'}
-            </button>
+            </Button>
         </div>
     );
 }
