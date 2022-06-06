@@ -1,0 +1,25 @@
+{
+    "tauri": {
+        "allowlist": {
+            "shell": {
+                "scope": [
+                    {
+                        "name": "pyra-cli-core-start",
+                        "cmd": ".venv\\bin\\python",
+                        "args": ["packages\\cli\\main.py", "core", "start"]
+                    },
+                    {
+                        "name": "pyra-cli-core-is-running",
+                        "cmd": ".venv\\bin\\python",
+                        "args": ["packages\\cli\\main.py", "core", "is-running"]
+                    },
+                    {
+                        "name": "pyra-cli-core-stop",
+                        "cmd": ".venv\\bin\\python",
+                        "args": ["packages\\cli\\main.py", "core", "stop"]
+                    }
+                ]
+            }
+        }
+    }
+}

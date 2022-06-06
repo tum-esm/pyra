@@ -36,13 +36,19 @@ If (!vbdsd.sensor_is_present) {
 }
 */
 export default function ConfigSection(props: {
-    key0: 'setup' | 'parameters';
     key1: string;
-    localJSON: any;
-    centralJSON: any;
+    localConfig: any;
+    centralConfig: any;
     addLocalUpdate(v: any): void;
 }) {
-    const { key0, key1, localJSON, centralJSON, addLocalUpdate } = props;
+    const {
+        key1,
+        localConfig: localJSON,
+        centralConfig: centralJSON,
+        addLocalUpdate,
+    } = props;
+
+    const key0 = 'parameters';
 
     return (
         <>
@@ -62,7 +68,7 @@ export default function ConfigSection(props: {
                 };
                 const oldValue: any = centralJSON[key1][key2];
 
-                if (key0 === 'setup') {
+                /*if (key0 === 'setup') {
                     if (key1 === 'tum_plc') {
                         const noTUMPLC = !localJSON['tum_plc']['is_present'];
                         if (noTUMPLC && key2 !== 'is_present') {
@@ -75,7 +81,7 @@ export default function ConfigSection(props: {
                             return <></>;
                         }
                     }
-                }
+                }*/
                 if (key0 === 'parameters') {
                     if (key1 === 'measurement_triggers') {
                         const triggerOverride =

@@ -1,7 +1,9 @@
 import { sortBy } from 'lodash';
 
+// TODO: Not use this anymore
+
 const priorities = [
-    ['tum_enclosure_is_present', 'is_present', 'type', 'manual_override'],
+    ['notify_recipients', 'type', 'manual_override'],
     ['ip', 'type'],
     ['sun_angle_start'],
     ['sun_angle_stop'],

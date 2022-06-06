@@ -13,61 +13,54 @@ export default function ConfigTab(props: {
     type: 'setup' | 'parameters';
     visible: boolean;
 }) {
-    const [centralJSON, setCentralJSON] = useState<TYPES.configJSON | undefined>(
+    const [centralConfig, setCentralConfig] = useState<TYPES.config | undefined>(
         undefined
     );
-    const [localJSON, setLocalJSON] = useState<TYPES.configJSON | undefined>(undefined);
+    const [localConfig, setLocalConfig] = useState<TYPES.config | undefined>(undefined);
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-    const [activeKey, setActiveKey] = useState<string | undefined>(undefined);
+    const [activeKey, setActiveKey] = useState<string>('general');
 
-    async function loadCentralJSON() {
-        const readConfigFunction =
-            props.type === 'setup' ? backend.readSetupJSON : backend.readParametersJSON;
-        const content = await readConfigFunction();
-        setCentralJSON(content);
-        setLocalJSON(content);
-        setActiveKey(first(sortConfigKeys(content)));
+    async function loadCentralConfig() {
+        const content = await backend.readConfig();
+        setCentralConfig(content);
+        setLocalConfig(content);
     }
 
     useEffect(() => {
-        loadCentralJSON();
+        loadCentralConfig();
     }, []);
 
-    async function saveLocalJSON() {
-        const saveConfigFunction =
-            props.type === 'setup'
-                ? backend.updateSetupJSON
-                : backend.updateParamtersJSON;
-        const parsedLocalJSON = parseNumberTypes(centralJSON, localJSON);
-        let result = await saveConfigFunction(parsedLocalJSON);
+    async function saveLocalConfig() {
+        const parsedLocalConfig = parseNumberTypes(centralConfig, localConfig);
+        let result = await backend.updateConfig(parsedLocalConfig);
 
         if (
             ['Updated setup file', 'Updated parameters file'].includes(
                 result.join('\n')
             )
         ) {
-            setLocalJSON(parsedLocalJSON);
-            setCentralJSON(parsedLocalJSON);
+            setLocalConfig(parsedLocalConfig);
+            setCentralConfig(parsedLocalConfig);
         } else {
             setErrorMessage(result.join(' '));
         }
     }
 
-    function restoreCentralJSON() {
-        setLocalJSON(centralJSON);
+    function restoreCentralConfig() {
+        setLocalConfig(centralConfig);
     }
 
     function addLocalUpdate(update: object) {
-        const newObject = defaultsDeep(update, JSON.parse(JSON.stringify(localJSON)));
+        const newObject = defaultsDeep(update, JSON.parse(JSON.stringify(localConfig)));
         console.log({ newObject });
-        setLocalJSON(newObject);
+        setLocalConfig(newObject);
         setErrorMessage(undefined);
     }
 
     const configIsDiffering =
-        localJSON !== undefined &&
-        centralJSON !== undefined &&
-        !deepEqual(parseNumberTypes(centralJSON, localJSON), centralJSON);
+        localConfig !== undefined &&
+        centralConfig !== undefined &&
+        !deepEqual(parseNumberTypes(centralConfig, localConfig), centralConfig);
 
     return (
         <div
@@ -75,7 +68,7 @@ export default function ConfigTab(props: {
                 'w-full h-full relative ' + (props.visible ? 'flex ' : 'hidden ')
             }
         >
-            {centralJSON !== undefined && localJSON !== undefined && (
+            {centralConfig !== undefined && localConfig !== undefined && (
                 <>
                     <div
                         className={
@@ -83,30 +76,32 @@ export default function ConfigTab(props: {
                             'flex flex-col py-3 z-10 w-44'
                         }
                     >
-                        {sortConfigKeys(centralJSON).map((key1: string, i: number) => (
-                            <button
-                                key={key1}
-                                onClick={() => setActiveKey(key1)}
-                                className={
-                                    'px-6 py-2.5 text-base font-semibold text-left ' +
-                                    'flex-row-center gap-x-2 ' +
-                                    (key1 === activeKey
-                                        ? 'bg-blue-200 text-blue-950 '
-                                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-600 ')
-                                }
-                            >
-                                {capitalizeConfigKey(key1)}
-                                <div className="flex-grow" />
-                                <div
+                        {sortConfigKeys(centralConfig).map(
+                            (key1: string, i: number) => (
+                                <button
+                                    key={key1}
+                                    onClick={() => setActiveKey(key1)}
                                     className={
-                                        'w-2 h-2 bg-blue-400 rounded-full ' +
+                                        'px-6 py-2.5 text-base font-semibold text-left ' +
+                                        'flex-row-center gap-x-2 ' +
                                         (key1 === activeKey
-                                            ? 'bg-blue-400 '
-                                            : 'bg-transparent')
+                                            ? 'bg-blue-200 text-blue-950 '
+                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-600 ')
                                     }
-                                />
-                            </button>
-                        ))}
+                                >
+                                    {capitalizeConfigKey(key1)}
+                                    <div className="flex-grow" />
+                                    <div
+                                        className={
+                                            'w-2 h-2 bg-blue-400 rounded-full ' +
+                                            (key1 === activeKey
+                                                ? 'bg-blue-400 '
+                                                : 'bg-transparent')
+                                        }
+                                    />
+                                </button>
+                            )
+                        )}
                     </div>
                     <div
                         className={
@@ -114,23 +109,20 @@ export default function ConfigTab(props: {
                             'flex-col-left space-y-6 relative pb-20'
                         }
                     >
-                        {activeKey !== undefined && (
-                            <ConfigSection
-                                key0={props.type}
-                                key1={activeKey}
-                                {...{
-                                    localJSON,
-                                    centralJSON,
-                                    addLocalUpdate,
-                                }}
-                            />
-                        )}
+                        <ConfigSection
+                            key1={activeKey}
+                            {...{
+                                localConfig,
+                                centralConfig,
+                                addLocalUpdate,
+                            }}
+                        />
                         {configIsDiffering && (
                             <SavingOverlay
                                 {...{
                                     errorMessage,
-                                    saveLocalJSON,
-                                    restoreCentralJSON,
+                                    saveLocalConfig,
+                                    restoreCentralConfig,
                                 }}
                             />
                         )}
