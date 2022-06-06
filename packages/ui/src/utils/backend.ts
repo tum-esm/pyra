@@ -50,7 +50,7 @@ const backend = {
         const command = generateCliInvocation('pyra-cli-config-get', ['config', 'get']);
         return await command.execute();
     },
-    updateConfig: async (newConfig: TYPES.config): Promise<ChildProcess> => {
+    updateConfig: async (newConfig: TYPES.partialConfig): Promise<ChildProcess> => {
         const command = generateCliInvocation('pyra-cli-config-update', [
             'config',
             'update',

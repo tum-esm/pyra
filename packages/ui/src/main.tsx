@@ -7,6 +7,7 @@ import Button from './components/essential/button';
 import Header from './components/header';
 import LogTab from './tabs/log-tab';
 import StatusTab from './tabs/status-tab';
+import TYPES from './utils/types';
 
 const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
 
@@ -15,7 +16,9 @@ function Main() {
     const [backendIntegrity, setBackendIntegrity] = useState<
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
-    const [centralConfig, setCentralConfig] = useState(undefined);
+    const [centralConfig, setCentralConfig] = useState<TYPES.config | undefined>(
+        undefined
+    );
 
     useEffect(() => {
         loadInitialState();
@@ -78,7 +81,10 @@ function Main() {
                 <>
                     <Header {...{ tabs, activeTab, setActiveTab }} />
                     <main className="flex-grow w-full min-h-0 bg-gray-100">
-                        <StatusTab visible={activeTab === 'Status'} />
+                        <StatusTab
+                            visible={activeTab === 'Status'}
+                            {...{ centralConfig, setCentralConfig }}
+                        />
                         <LogTab visible={activeTab === 'Logs'} />
                     </main>
                 </>
