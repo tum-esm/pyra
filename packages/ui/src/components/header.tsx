@@ -1,7 +1,7 @@
 export default function Header(props: {
     tabs: string[];
-    activeTabIndex: number;
-    setActiveTabIndex(i: number): void;
+    activeTab: string;
+    setActiveTab(s: string): void;
 }) {
     return (
         <header className="z-50 flex flex-row items-center w-full px-2 py-1 shadow bg-slate-900">
@@ -15,11 +15,11 @@ export default function Header(props: {
                         key={i}
                         className={
                             'px-3 py-1 rounded font-medium cursor-pointer text-base ' +
-                            (i === props.activeTabIndex
+                            (t === props.activeTab
                                 ? 'bg-slate-600 text-white '
                                 : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200')
                         }
-                        onClick={() => props.setActiveTabIndex(i)}
+                        onClick={() => props.setActiveTab(t)}
                     >
                         {t}
                     </button>

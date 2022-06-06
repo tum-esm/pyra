@@ -1,26 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Command } from '@tauri-apps/api/shell';
 import ReactDOM from 'react-dom';
 import './styles/index.css';
 
+import backend from './utils/backend';
 import Button from './components/essential/button';
 import Header from './components/header';
 import LogTab from './tabs/log-tab';
-import backend from './utils/backend';
+import StatusTab from './tabs/status-tab';
 
 const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
 
-async function runCommand() {
-    const command = new Command('pyra-cli-core-is-running', [], {
-        cwd: import.meta.env.VITE_PROJECT_DIR,
-    });
-    const p = await command.execute();
-    console.log({ p });
-}
-
 function Main() {
-    console.log('RUNNING MAINS');
-    const [activeTabIndex, setActiveTabIndex] = useState(1);
+    const [activeTab, setActiveTab] = useState('Status');
     const [pyraIsSetUp, setPyraIsSetUp] = useState(false);
     const [checkingSetup, setCheckingSetup] = useState(true);
 
@@ -35,7 +26,6 @@ function Main() {
         if (!pyraIsSetUp) {
             updateCliStatus();
         }
-        runCommand();
     }, []);
 
     return (
@@ -60,9 +50,10 @@ function Main() {
             )}
             {pyraIsSetUp && (
                 <>
-                    <Header {...{ tabs, activeTabIndex, setActiveTabIndex }} />
+                    <Header {...{ tabs, activeTab, setActiveTab }} />
                     <main className="flex-grow w-full min-h-0 bg-gray-100">
-                        <LogTab visible={tabs[activeTabIndex] === 'Logs'} />
+                        <StatusTab visible={activeTab === 'Status'} />
+                        <LogTab visible={activeTab === 'Logs'} />
                     </main>
                 </>
             )}

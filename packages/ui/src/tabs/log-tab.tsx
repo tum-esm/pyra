@@ -65,7 +65,7 @@ export default function LogTab(props: { visible: boolean }) {
                     'border border-gray-300 shadow-sm'
                 }
             >
-                <code className="w-full h-full !text-sm language-log">
+                <code className="w-full h-full !text-xs language-log">
                     {logLevel === 'info' ? infoLogs : debugLogs}
                     {(logLevel === 'info' ? infoLogs : debugLogs)
                         .replace('\n', '')

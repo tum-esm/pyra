@@ -1,3 +1,4 @@
+import os
 import time
 from packages.core import modules
 from packages.core.utils import (
@@ -19,6 +20,8 @@ def run():
 
     StateInterface.initialize()
     _CONFIG = ConfigInterface.read()
+
+    logger.info(f"started mainloop inside process with PID {os.getpid()}")
 
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_CONFIG),
