@@ -13,11 +13,6 @@ def _file_path_exists(field, value, error):
         error(field, "Path has to be an existing file")
 
 
-def _directory_path_exists(field, value, error):
-    if not os.path.isdir(value):
-        error(field, "Path has to be an existing directory")
-
-
 def _is_valid_ip_adress(field, value, error):
     try:
         assert len(value.split(".")) == 4
@@ -32,43 +27,39 @@ NULLABLE_DICT_SCHEMA = lambda s: {"type": "dict", "schema": s, "nullable": True}
 
 
 class Schemas:
-    sun_elevation = ({"type": "number", "min": 0, "max": 90},)
-    time_list = [
-        {"type": "integer", "min": 0, "max": 23},
-        {"type": "integer", "min": 0, "max": 59},
-        {"type": "integer", "min": 0, "max": 59},
-    ]
+    sun_elevation = {"type": "number", "min": 0, "max": 90}
+    time_dict = {
+        "type": "dict",
+        "schema": {
+            "hour": {"type": "integer", "min": 0, "max": 23},
+            "minute": {"type": "integer", "min": 0, "max": 59},
+            "second": {"type": "integer", "min": 0, "max": 59},
+        },
+    }
     time_interval = {"type": "number", "min": 5, "max": 600}
     number = {"type": "number"}
     integer = {"type": "integer"}
     string = {"type": "string"}
     boolean = {"type": "boolean"}
-    int_list_3 = (
-        {
-            "type": "list",
-            "schema": {"type": "integer"},
-            "minlength": 3,
-            "maxlength": 3,
-        },
-    )
-    int_list_4 = (
-        {
-            "type": "list",
-            "schema": {"type": "integer"},
-            "minlength": 4,
-            "maxlength": 4,
-        },
-    )
-    ip = ({"type": "string", "check_with": _is_valid_ip_adress},)
-    directory = ({"type": "string", "check_with": _directory_path_exists},)
+    int_list_3 = {
+        "type": "list",
+        "schema": {"type": "integer"},
+        "minlength": 3,
+        "maxlength": 3,
+    }
+    int_list_4 = {
+        "type": "list",
+        "schema": {"type": "integer"},
+        "minlength": 4,
+        "maxlength": 4,
+    }
+    ip = {"type": "string", "check_with": _is_valid_ip_adress}
     file = {"type": "string", "check_with": _file_path_exists}
 
 
 CONFIG_FILE_SCHEMA = {
     "general": DICT_SCHEMA(
         {
-            "enclosure_min_power_elevation": Schemas.sun_elevation,
-            "em27_min_power_elevation": Schemas.sun_elevation,
             "seconds_per_core_interval": Schemas.time_interval,
             "test_mode": Schemas.boolean,
         }
@@ -111,14 +102,15 @@ CONFIG_FILE_SCHEMA = {
             "consider_time": Schemas.boolean,
             "consider_sun_elevation": Schemas.boolean,
             "consider_vbdsd": Schemas.boolean,
-            "start_time": Schemas.time_list,
-            "stop_time": Schemas.time_list,
+            "start_time": Schemas.time_dict,
+            "stop_time": Schemas.time_dict,
             "min_sun_elevation": Schemas.sun_elevation,
             "max_sun_elevation": Schemas.sun_elevation,
         }
     ),
     "tum_plc": NULLABLE_DICT_SCHEMA(
         {
+            "min_power_elevation": Schemas.sun_elevation,
             "ip": Schemas.ip,
             "actors": DICT_SCHEMA(
                 {

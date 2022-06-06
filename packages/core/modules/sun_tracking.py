@@ -36,22 +36,16 @@ logger = Logger(origin="pyra.core.sun-tracking")
 class SunTracking:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
-        if sys.platform != "win32":
-            print("The SunTracking class can only be tested on windows")
+        if self._CONFIG["general"]["test_mode"]:
             return
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
-
-        if sys.platform != "win32":
+        if self._CONFIG["general"]["test_mode"]:
+            logger.debug("Skipping SunTracking in test mode")
             return
 
         logger.info("Running SunTracking")
-
-        # check for PYRA Test Mode status
-        if self._CONFIG["general"]["test_mode"]:
-            logger.info("Test mode active.")
-            return
 
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig

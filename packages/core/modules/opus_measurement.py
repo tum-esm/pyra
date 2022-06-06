@@ -39,8 +39,7 @@ class OpusMeasurement:
 
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
-        if sys.platform != "win32":
-            print("The OpusMeasurement class can only be tested on windows")
+        if self._CONFIG["general"]["test_mode"]:
             return
 
         # note: dde servers talk to dde servers
@@ -51,8 +50,8 @@ class OpusMeasurement:
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
-
-        if sys.platform != "win32":
+        if self._CONFIG["general"]["test_mode"]:
+            logger.debug("Skipping OpusMeasurement in test mode")
             return
 
         logger.info("Running OpusMeasurement")

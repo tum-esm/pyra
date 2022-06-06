@@ -31,8 +31,11 @@ class EnclosureControl:
 
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
+        if self._CONFIG["general"]["test_mode"]:
+            return
+
         if self._CONFIG["tum_plc"] is None:
-            logger.debug("TUM PLC is not present. Skipping Enclosure_Control.__init__")
+            logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
         self.plc = snap7.client.Client()
@@ -42,10 +45,14 @@ class EnclosureControl:
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
-        logger.info("Running EnclosureControl")
-        if self._CONFIG["tum_plc"] is None:
-            logger.debug("TUM PLC is not present. Skipping Enclosure_Control.run")
+        if self._CONFIG["general"]["test_mode"]:
+            logger.debug("Skipping EnclosureControl in test mode")
             return
+        if self._CONFIG["tum_plc"] is None:
+            logger.debug("Skipping EnclosureControl without a TUM PLC")
+            return
+
+        logger.info("Running EnclosureControl")
 
         # check PLC ip connection
         plc_status = OSInfo.check_connection_status(self._CONFIG["tum_plc"]["ip"])
@@ -258,7 +265,7 @@ class EnclosureControl:
         while loop:
             time.sleep(5)
 
-            if self.plc_read_bool(["tum_plc"]["state"]["cover_closed"]):
+            if self.plc_read_bool(self._CONFIG["tum_plc"]["state"]["cover_closed"]):
                 loop = False
 
             elapsed_time = time.time() - start_time

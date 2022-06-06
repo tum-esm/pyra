@@ -13,4 +13,7 @@ if os.path.exists(PROCESS_STATE_FILE):
 with open(PROCESS_STATE_FILE, "w") as f:
     json.dump({"pid": os.getpid()}, f)
 
-main.run()
+try:
+    main.run()
+except:
+    os.remove(PROCESS_STATE_FILE)

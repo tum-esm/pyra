@@ -30,9 +30,15 @@ def get_times_from_tuples(triggers: any):
 class MeasurementConditions:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
+        if self._CONFIG["general"]["test_mode"]:
+            return
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
+        if self._CONFIG["general"]["test_mode"]:
+            logger.debug("Skipping MeasurementConditions in test mode")
+            return
+
         logger.info("Running MeasurementConditions")
 
         # check os system stability
