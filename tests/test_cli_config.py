@@ -2,7 +2,7 @@ import json
 import subprocess
 import os
 from deepdiff import DeepDiff
-from . import original_config
+from .fixtures import original_config
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(os.path.abspath(__file__)))

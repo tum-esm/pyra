@@ -47,7 +47,11 @@ def _start_pyra_core():
     if existing_pid is not None:
         error_handler(f"Background process already exists with PID {existing_pid}")
     else:
-        p = subprocess.Popen([INTERPRETER_PATH, SCRIPT_PATH], stderr=subprocess.PIPE)
+        p = subprocess.Popen(
+            [INTERPRETER_PATH, SCRIPT_PATH],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         success_handler(f"Started background process with PID {p.pid}")
 
 
@@ -59,7 +63,7 @@ def _stop_pyra_core():
     else:
         success_handler(
             f"Terminated {len(termination_pids)} background "
-            + f"processes with PIDs {termination_pids}"
+            + f"processe(s) with PID(s) {termination_pids}"
         )
 
 
