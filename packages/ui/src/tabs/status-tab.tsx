@@ -18,6 +18,12 @@ export default function StatusTab(props: {
     const [manualMeasurementDecisionResult, setManualMeasurementDecisionResult] =
         useState(props.centralConfig.measurement_decision.manual_decision_result);
 
+    let mesurementDecisionResult = undefined;
+    if (measurementDecisionMode === 'manual') {
+        mesurementDecisionResult = manualMeasurementDecisionResult;
+    }
+    // TODO: add cli and automatic decision result
+
     async function updatePyraCoreIsRunning() {
         const p = await backend.checkPyraCoreState();
         if (p.stdout.includes('pyra-core is running with PID')) {
@@ -31,14 +37,21 @@ export default function StatusTab(props: {
         updatePyraCoreIsRunning();
     }, []);
 
-    async function updateMeasurementDecisionMode(
-        newMode: 'automatic' | 'manual' | 'cli'
-    ) {
+    async function updateMeasurementDecisionMode(mode: 'automatic' | 'manual' | 'cli') {
+        const p = await backend.updateConfig({ measurement_decision: { mode } });
+        if (p.stdout.includes('Updated config file')) {
+            setMeasurementDecisionMode(mode);
+        } else {
+            // TODO: add message to queue
+        }
+    }
+
+    async function updateManualMeasurementDecisionResult(result: boolean) {
         const p = await backend.updateConfig({
-            measurement_decision: { mode: newMode },
+            measurement_decision: { manual_decision_result: result },
         });
         if (p.stdout.includes('Updated config file')) {
-            setMeasurementDecisionMode(newMode);
+            setManualMeasurementDecisionResult(result);
         } else {
             // TODO: add message to queue
         }
@@ -68,111 +81,137 @@ export default function StatusTab(props: {
             }
         >
             {pyraCorePID !== undefined && (
-                <div
-                    className={
-                        'w-full text-sm bg-white border border-gray-300 ' +
-                        'rounded-md shadow-sm flex-row-left'
-                    }
-                >
-                    <div className="px-3 font-normal flex-row-left">
-                        pyra-core is{' '}
-                        {pyraCoreStateIsPending && (
-                            <span className="ml-1 mr-4 font-semibold">...</span>
-                        )}
-                        {!pyraCoreStateIsPending && (
-                            <span className="ml-1 mr-4">
-                                {pyraCorePID === -1 && (
-                                    <span className="font-semibold text-red-600">
-                                        not running
-                                    </span>
-                                )}
-                                {pyraCorePID !== -1 && (
-                                    <>
-                                        <span className="font-semibold text-green-600">
-                                            running
-                                        </span>{' '}
-                                        with process ID {pyraCorePID}
-                                    </>
-                                )}
-                            </span>
-                        )}
-                    </div>
-                    <div className="flex-grow" />
-                    <button
-                        onClick={pyraCorePID === -1 ? startPyraCore : stopPyraCore}
+                <>
+                    <div
                         className={
-                            'px-3 py-1.5 rounded-r-md border-l border-gray-300 font-medium w-16 ' +
-                            (pyraCorePID === -1
-                                ? 'bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 '
-                                : 'bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 ')
+                            'w-full text-sm bg-white border border-gray-300 ' +
+                            'rounded-md shadow-sm flex-row-left'
                         }
                     >
-                        {pyraCorePID === -1 ? 'start' : 'stop'}
-                    </button>
-                </div>
-            )}
-            <div
-                className={
-                    'w-full text-sm bg-white border border-gray-300 ' +
-                    'rounded-md shadow-sm flex-row-left'
-                }
-            >
-                <div className="px-3 font-normal flex-row-left">
-                    Measurement decision:
-                </div>
-                <div className="flex-grow" />
-                <div className="flex flex-col">
-                    <div className="flex flex-row">
-                        {['automatic', 'manual', 'cli'].map((m: any) => (
-                            <button
-                                onClick={() =>
-                                    measurementDecisionMode !== m
-                                        ? updateMeasurementDecisionMode(m)
-                                        : {}
-                                }
-                                className={
-                                    'px-3 py-1.5 last:rounded-tr-md border-l border-b border-gray-300 font-medium w-32 flex-row-center ' +
-                                    (measurementDecisionMode === m
-                                        ? 'bg-blue-200 text-blue-950 '
-                                        : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-950 ')
-                                }
-                            >
-                                <div
-                                    className={
-                                        'w-2 h-2 mr-1 rounded-full ' +
-                                        (measurementDecisionMode === m
-                                            ? 'bg-blue-800 '
-                                            : 'bg-gray-300')
-                                    }
-                                />
-                                {m}
-                            </button>
-                        ))}
-                    </div>
-                    {measurementDecisionMode !== 'manual' && (
-                        <div
-                            className={
-                                'px-3 py-1.5 border-l border-gray-300 font-light w-full ' +
-                                'bg-gray-50 text-gray-500 text-center rounded-br-md'
-                            }
-                        >
-                            automated decision
+                        <div className="px-3 font-normal flex-row-left">
+                            pyra-core is{' '}
+                            {pyraCoreStateIsPending && (
+                                <span className="ml-1 mr-4 font-semibold">...</span>
+                            )}
+                            {!pyraCoreStateIsPending && (
+                                <span className="ml-1 mr-4">
+                                    {pyraCorePID === -1 && (
+                                        <span className="font-semibold text-red-600">
+                                            not running
+                                        </span>
+                                    )}
+                                    {pyraCorePID !== -1 && (
+                                        <>
+                                            <span className="font-semibold text-green-600">
+                                                running
+                                            </span>{' '}
+                                            with process ID {pyraCorePID}
+                                        </>
+                                    )}
+                                </span>
+                            )}
                         </div>
-                    )}
-                    {measurementDecisionMode === 'manual' && (
+                        <div className="flex-grow" />
                         <button
+                            onClick={pyraCorePID === -1 ? startPyraCore : stopPyraCore}
                             className={
-                                'px-3 py-1.5 border-l border-gray-300 font-medium w-full rounded-br-md ' +
-                                (true
+                                'px-3 py-1.5 rounded-r-md border-l border-gray-300 font-medium w-16 ' +
+                                (pyraCorePID === -1
                                     ? 'bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 '
                                     : 'bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 ')
                             }
                         >
-                            "start/stop"
+                            {pyraCorePID === -1 ? 'start' : 'stop'}
                         </button>
+                    </div>
+
+                    {pyraCorePID !== -1 && (
+                        <div
+                            className={
+                                'w-full text-sm bg-white border border-gray-300 ' +
+                                'rounded-md shadow-sm flex-row-left'
+                            }
+                        >
+                            <div className="px-3 font-normal flex-row-left">
+                                Measurements are{' '}
+                                <span className="ml-1 mr-4">
+                                    {!mesurementDecisionResult && (
+                                        <span className="font-semibold text-red-600">
+                                            not running
+                                        </span>
+                                    )}
+                                    {mesurementDecisionResult && (
+                                        <>
+                                            <span className="font-semibold text-green-600">
+                                                running
+                                            </span>
+                                        </>
+                                    )}
+                                </span>
+                            </div>
+                            <div className="flex-grow" />
+                            <div className="flex flex-col">
+                                <div className="flex flex-row">
+                                    {['automatic', 'manual', 'cli'].map((m: any) => (
+                                        <button
+                                            onClick={() =>
+                                                measurementDecisionMode !== m
+                                                    ? updateMeasurementDecisionMode(m)
+                                                    : {}
+                                            }
+                                            className={
+                                                'px-3 py-1.5 last:rounded-tr-md border-l border-b border-gray-300 font-medium w-32 flex-row-center ' +
+                                                (measurementDecisionMode === m
+                                                    ? 'bg-blue-200 text-blue-950 '
+                                                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-950 ')
+                                            }
+                                        >
+                                            <div
+                                                className={
+                                                    'w-2 h-2 mr-1 rounded-full ' +
+                                                    (measurementDecisionMode === m
+                                                        ? 'bg-blue-800 '
+                                                        : 'bg-gray-300')
+                                                }
+                                            />
+                                            {m}
+                                        </button>
+                                    ))}
+                                </div>
+                                {measurementDecisionMode !== 'manual' && (
+                                    <div
+                                        className={
+                                            'px-3 py-1.5 border-l border-gray-300 font-light w-full ' +
+                                            'bg-gray-50 text-gray-500 text-center rounded-br-md'
+                                        }
+                                    >
+                                        automated decision
+                                    </div>
+                                )}
+                                {measurementDecisionMode === 'manual' && (
+                                    <button
+                                        onClick={() =>
+                                            updateManualMeasurementDecisionResult(
+                                                !manualMeasurementDecisionResult
+                                            )
+                                        }
+                                        className={
+                                            'px-3 py-1.5 border-l border-gray-300 font-medium w-full rounded-br-md ' +
+                                            (!manualMeasurementDecisionResult
+                                                ? 'bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 '
+                                                : 'bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-900 ')
+                                        }
+                                    >
+                                        {manualMeasurementDecisionResult
+                                            ? 'stop'
+                                            : 'start'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     )}
-                </div>
-            </div>
+                </>
+            )}
         </div>
     );
 }
