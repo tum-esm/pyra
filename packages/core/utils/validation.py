@@ -178,43 +178,40 @@ class Validation:
 
     @staticmethod
     def _check(
-        file_content: dict,
+        content_object: dict,
         partial_validation: bool = False,
     ):
         validator = cerberus.Validator(
             CONFIG_FILE_SCHEMA, require_all=(not partial_validation)
         )
-        assert validator.validate(file_content), validator.errors
+        assert validator.validate(content_object), validator.errors
         # Add assertions that cannot be done with cerberus here
 
     @staticmethod
-    def check_current_config():
+    def check_current_config_file():
         try:
             assert os.path.isfile(CONFIG_FILE_PATH), "file does not exist"
             with open(CONFIG_FILE_PATH, "r") as f:
                 try:
-                    file_content = json.load(f)
+                    content_object = json.load(f)
                 except:
                     raise AssertionError("file not in a valid json format")
 
-            Validation._check(file_content, partial_validation=False)
+            Validation._check(content_object, partial_validation=False)
             return True
         except Exception as e:
             Validation.logging_handler(f"Error in current config file: {e}")
             return False
 
     @staticmethod
-    def check_config_string(
-        content_string,
-        partial_validation=False,
-    ):
+    def check_partial_config_string(content: str):
         try:
             try:
-                file_content = json.loads(content_string)
+                content_object = json.loads(content)
             except:
                 raise AssertionError("content not in a valid json format")
 
-            Validation._check(file_content, partial_validation)
+            Validation._check(content_object, partial_validation=True)
             return True
         except Exception as e:
             Validation.logging_handler(f"Error in new config string: {e}")

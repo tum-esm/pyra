@@ -67,7 +67,7 @@ class ConfigInterface:
     @staticmethod
     @with_filelock
     def read() -> dict:
-        assert Validation.check_current_config()
+        assert Validation.check_current_config_file()
         with open(CONFIG_FILE_PATH, "r") as f:
             _CONFIG = json.load(f)
 

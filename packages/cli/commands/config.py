@@ -64,7 +64,7 @@ def _get_config():
     short_help="Set the config.json file.",
     help=f"Set config. Pass the JSON directly or via a file path. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation.",
 )
-@click.argument("content", default="", help="Content of JSON file")
+@click.argument("content", default="{}")
 @with_filelock
 def _update_config(content: str):
     if not Validation.check_partial_config_string(content):
