@@ -45,7 +45,12 @@ export default function StatusTab(props: { visible: boolean }) {
             }
         >
             {pyraCorePID !== undefined && (
-                <div className="w-full text-sm bg-white border border-gray-300 rounded-md shadow-sm flex-row-left">
+                <div
+                    className={
+                        'w-full text-sm bg-white border border-gray-300 ' +
+                        'rounded-md shadow-sm flex-row-left'
+                    }
+                >
                     <div className="px-3 font-normal flex-row-left">
                         pyra-core is{' '}
                         {pyraCoreStateIsPending && (
@@ -83,6 +88,14 @@ export default function StatusTab(props: { visible: boolean }) {
                     </button>
                 </div>
             )}
+            <div
+                className={
+                    'w-full text-sm bg-white border border-gray-300 ' +
+                    'rounded-md shadow-sm flex-row-left'
+                }
+            >
+                asd
+            </div>
         </div>
     );
 }
