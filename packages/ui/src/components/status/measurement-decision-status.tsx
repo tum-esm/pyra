@@ -4,6 +4,7 @@ import TYPES from '../../utils/types';
 import { defaultsDeep } from 'lodash';
 import Button from '../essential/button';
 import Toggle from '../essential/toggle';
+import Ping from '../essential/ping';
 
 export default function MeasurementDecisionStatus(props: {
     centralConfig: TYPES.config;
@@ -14,9 +15,9 @@ export default function MeasurementDecisionStatus(props: {
 
     const measurementDecision = centralConfig.measurement_decision;
 
-    let mesurementDecisionResult = undefined;
+    let measurementDecisionResult = undefined;
     if (measurementDecision.mode === 'manual') {
-        mesurementDecisionResult = measurementDecision.manual_decision_result;
+        measurementDecisionResult = measurementDecision.manual_decision_result;
     }
     // TODO: add cli and automatic decision result
 
@@ -57,20 +58,11 @@ export default function MeasurementDecisionStatus(props: {
     return (
         <div className={'w-full text-sm flex gap-x-2 px-6'}>
             <div className="text-sm font-normal h-7 flex-row-left">
-                Measurements are currently{' '}
-                <span className="ml-1 mr-4">
-                    {loading && '...'}
-                    {!loading && !mesurementDecisionResult && (
-                        <span className="font-semibold text-red-600">not running</span>
-                    )}
-                    {!loading && mesurementDecisionResult && (
-                        <>
-                            <span className="font-semibold text-green-600">
-                                running
-                            </span>
-                        </>
-                    )}
-                </span>
+                <Ping state={loading ? undefined : measurementDecisionResult} />
+                <span className="ml-2.5 mr-1">Measurements are currently</span>
+                {loading && '...'}
+                {!loading && !measurementDecisionResult && 'not running'}
+                {!loading && measurementDecisionResult && 'running'}
             </div>
             <div className="flex-grow" />
             <div className="flex-col-center gap-y-2">
