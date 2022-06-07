@@ -21,16 +21,17 @@ export default function StatusTab(props: {
     return (
         <div
             className={
-                'flex-col w-full h-full p-6 gap-y-4 ' + (visible ? 'flex ' : 'hidden ')
+                'flex-col w-full h-full gap-y-4 py-4 ' + (visible ? 'flex ' : 'hidden ')
             }
         >
             <PyraCoreStatus {...{ pyraCorePID, setPyraCorePID }} />
+            <div className="w-full h-px bg-slate-300" />
             {pyraCorePID !== undefined && pyraCorePID !== -1 && (
                 <>
-                    <div className="w-full h-px bg-gray-300" />
                     <MeasurementDecisionStatus
                         {...{ centralConfig, setCentralConfig }}
                     />
+                    <div className="w-full h-px bg-slate-300" />
                 </>
             )}
         </div>

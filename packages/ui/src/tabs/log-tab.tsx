@@ -35,24 +35,23 @@ export default function LogTab(props: { visible: boolean }) {
     return (
         <div
             className={
-                'flex-col w-full h-full p-6 ' + (props.visible ? 'flex ' : 'hidden ')
+                'flex-col w-full h-full pt-4 ' + (props.visible ? 'flex ' : 'hidden ')
             }
         >
-            <div className="flex-row-center gap-x-2">
+            <div className="px-6 mb-4 flex-row-center gap-x-2">
                 <Button
                     onClick={() => {
                         updateLogs();
                     }}
-                    variant="gray"
-                    className="!px-0.5 !py-1 !h-7 "
+                    variant="slate"
+                    className="!px-1.5"
                 >
-                    <div className="w-6 h-6 fill-gray-700 ">{ICONS.refresh}</div>
+                    <div className="w-6 h-6 fill-slate-700 ">{ICONS.refresh}</div>
                 </Button>
                 <Toggle
-                    value={logLevel == 'info'}
-                    setValue={(v) => setLogLevel(v ? 'info' : 'debug')}
-                    trueLabel="info"
-                    falseLabel="debug"
+                    value={logLevel}
+                    setValue={(s: any) => setLogLevel(s)}
+                    values={['info', 'debug']}
                 />
                 <div className="flex-grow" />
                 <Button onClick={archiveLogs} variant="red">
@@ -61,8 +60,8 @@ export default function LogTab(props: { visible: boolean }) {
             </div>
             <pre
                 className={
-                    'w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded overflow-y-scroll ' +
-                    'border border-gray-300 shadow-sm'
+                    'w-full !px-6 !py-2 !mb-0 overflow-y-scroll ' +
+                    'border-t border-slate-300 bg-white'
                 }
             >
                 <code className="w-full h-full !text-xs language-log">

@@ -13,11 +13,11 @@ export default function SavingOverlay(props: {
                     {errorMessage}
                 </span>
             )}
-            <Button onClick={restoreCentralConfig} variant="gray">
+            <Button onClick={restoreCentralConfig} variant="slate">
                 revert
             </Button>
             {errorMessage === undefined && (
-                <Button onClick={saveLocalConfig} variant="gray">
+                <Button onClick={saveLocalConfig} variant="slate">
                     save
                 </Button>
             )}

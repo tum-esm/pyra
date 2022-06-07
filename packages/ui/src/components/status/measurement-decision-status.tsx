@@ -3,6 +3,7 @@ import backend from '../../utils/backend';
 import TYPES from '../../utils/types';
 import { defaultsDeep } from 'lodash';
 import Button from '../essential/button';
+import Toggle from '../essential/toggle';
 
 export default function MeasurementDecisionStatus(props: {
     centralConfig: TYPES.config;
@@ -54,8 +55,8 @@ export default function MeasurementDecisionStatus(props: {
     }
 
     return (
-        <div className={'w-full text-sm flex gap-x-2'}>
-            <div className="h-8 px-3 text-base font-normal flex-row-left">
+        <div className={'w-full text-sm flex gap-x-2 px-6'}>
+            <div className="text-sm font-normal h-7 flex-row-left">
                 Measurements are currently{' '}
                 <span className="ml-1 mr-4">
                     {loading && '...'}
@@ -73,37 +74,16 @@ export default function MeasurementDecisionStatus(props: {
             </div>
             <div className="flex-grow" />
             <div className="flex-col-center gap-y-2">
-                <div className="flex flex-row elevated-panel">
-                    {['automatic', 'manual', 'cli'].map((m: any) => (
-                        <button
-                            onClick={() =>
-                                measurementDecision.mode !== m
-                                    ? updateMeasurementDecisionMode(m)
-                                    : {}
-                            }
-                            className={
-                                'px-3 h-8 first:rounded-l-md last:rounded-r-md font-medium w-28 flex-row-center ' +
-                                (measurementDecision.mode === m
-                                    ? 'bg-blue-200 text-blue-950 '
-                                    : 'text-gray-400 hover:bg-gray-100 hover:text-gray-950 ')
-                            }
-                        >
-                            <div
-                                className={
-                                    'w-2 h-2 mr-1 rounded-full ' +
-                                    (measurementDecision.mode === m
-                                        ? 'bg-blue-800 '
-                                        : 'bg-gray-300')
-                                }
-                            />
-                            {m}
-                        </button>
-                    ))}
-                </div>
+                <Toggle
+                    value={measurementDecision.mode}
+                    values={['automatic', 'manual', 'cli']}
+                    className="w-28"
+                    setValue={updateMeasurementDecisionMode}
+                />
                 {measurementDecision.mode !== 'manual' && (
                     <div
                         className={
-                            'h-8 flex-row-center font-light w-full text-gray-500 text-center'
+                            'h-7 flex-row-center font-light w-full text-slate-500 text-center'
                         }
                     >
                         automated decision

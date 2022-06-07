@@ -47,7 +47,7 @@ function Main() {
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
             {(backendIntegrity === 'cli is missing' ||
                 backendIntegrity === 'config is invalid') && (
-                <main className="flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4">
+                <main className="flex flex-col items-center justify-center w-full h-full bg-slate-100 gap-y-4">
                     <p className="inline max-w-sm text-center">
                         {backendIntegrity === 'cli is missing' && (
                             <>
@@ -80,7 +80,7 @@ function Main() {
             {backendIntegrity === 'valid' && centralConfig !== undefined && (
                 <>
                     <Header {...{ tabs, activeTab, setActiveTab }} />
-                    <main className="flex-grow w-full min-h-0 bg-gray-100">
+                    <main className="flex-grow w-full min-h-0 bg-slate-50">
                         <StatusTab
                             visible={activeTab === 'Status'}
                             {...{ centralConfig, setCentralConfig }}

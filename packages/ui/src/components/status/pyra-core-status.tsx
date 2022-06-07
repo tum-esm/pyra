@@ -36,8 +36,8 @@ export default function PyraCoreStatus(props: {
     }
 
     return (
-        <div className={'w-full text-sm flex-row-left gap-x-2'}>
-            <div className="flex-grow h-8 px-3 text-base flex-row-left">
+        <div className={'w-full text-sm flex-row-left gap-x-2 px-6'}>
+            <div className="flex-grow text-sm h-7 flex-row-left">
                 pyra-core is{' '}
                 {pyraCorePID === undefined && (
                     <span className="ml-1 mr-4 font-semibold">...</span>
@@ -62,7 +62,7 @@ export default function PyraCoreStatus(props: {
             </div>
             <Button
                 onClick={pyraCorePID === -1 ? startPyraCore : stopPyraCore}
-                className={'w-16'}
+                className="w-[21rem]"
                 variant={pyraCorePID === -1 ? 'green' : 'red'}
             >
                 {pyraCorePID === -1 ? 'start' : 'stop'}

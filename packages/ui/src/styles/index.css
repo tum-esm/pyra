@@ -39,5 +39,5 @@
 }
 
 .elevated-panel {
-    @apply shadow-sm rounded-md bg-white;
+    @apply shadow-sm rounded-md bg-white border-gray-300 border;
 }

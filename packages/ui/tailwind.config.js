@@ -16,7 +16,7 @@ const customColors = {
         900: '#1e3a8a',
         950: '#0f1d45',
     },
-    gray: {
+    slate: {
         50: '#f8fafc',
         75: '#f4f7fa',
         100: '#f1f5f9',

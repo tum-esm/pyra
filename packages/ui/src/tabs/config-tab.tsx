@@ -72,7 +72,7 @@ export default function ConfigTab(props: {
                 <>
                     <div
                         className={
-                            'bg-white border-r border-gray-300 shadow ' +
+                            'bg-white border-r border-slate-300 shadow ' +
                             'flex flex-col py-3 z-10 w-44'
                         }
                     >
@@ -86,7 +86,7 @@ export default function ConfigTab(props: {
                                         'flex-row-center gap-x-2 ' +
                                         (key1 === activeKey
                                             ? 'bg-blue-200 text-blue-950 '
-                                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-600 ')
+                                            : 'text-slate-500 hover:bg-slate-100 hover:text-slate-600 ')
                                     }
                                 >
                                     {capitalizeConfigKey(key1)}
