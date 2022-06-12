@@ -96,7 +96,7 @@ export default function ConfigTab(props: { visible: boolean }) {
                                     'flex-row-center gap-x-2 ' +
                                     (key1 === activeKey
                                         ? 'bg-blue-200 text-blue-950 '
-                                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-600 ')
+                                        : 'text-slate-500 hover:bg-slate-150 hover:text-slate-700 ')
                                 }
                             >
                                 {capitalizeConfigKey(key1)}

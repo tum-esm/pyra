@@ -10,9 +10,15 @@ export default function LogTab(props: { visible: boolean }) {
     const [infoLogs, setInfoLogs] = useState<string>('');
     const [debugLogs, setDebugLogs] = useState<string>('');
 
+    const [loading, setLoading] = useState(true);
+
     async function updateLogs() {
-        setInfoLogs((await backend.readInfoLogs()).reverse().join('\n'));
-        setDebugLogs((await backend.readDebugLogs()).reverse().join('\n'));
+        setLoading(true);
+        const newInfoLogs = (await backend.readInfoLogs()).reverse().join('\n');
+        const newDebugLogs = (await backend.readInfoLogs()).reverse().join('\n');
+        setInfoLogs(newInfoLogs);
+        setDebugLogs(newDebugLogs);
+        setLoading(false);
     }
 
     // TODO: show dialog
@@ -44,9 +50,12 @@ export default function LogTab(props: { visible: boolean }) {
                         updateLogs();
                     }}
                     variant="slate"
-                    className="!px-1.5"
+                    className="!px-2"
                 >
-                    <div className="w-6 h-6 fill-slate-700 ">{ICONS.refresh}</div>
+                    {loading && <span className="w-4">...</span>}
+                    {!loading && (
+                        <div className="w-4 h-4 fill-slate-700 ">{ICONS.refresh}</div>
+                    )}
                 </Button>
                 <Toggle
                     value={logLevel}
