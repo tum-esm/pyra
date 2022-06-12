@@ -10,6 +10,7 @@ import ConfigSectionGeneral from '../components/config/sections/config-section-g
 import ConfigSectionOpus from '../components/config/sections/config-section-opus';
 import ConfigSectionCamtracker from '../components/config/sections/config-section-camtracker';
 import ConfigSectionErrorEmail from '../components/config/sections/config-section-error-email';
+import ConfigSectionMeasurementTriggers from '../components/config/sections/config-section-measurement-triggers';
 
 const sectionKeys: TYPES.configSectionKey[] = [
     'general',
@@ -146,6 +147,15 @@ export default function ConfigTab(props: { visible: boolean }) {
                         )}
                         {activeKey == 'error_email' && (
                             <ConfigSectionErrorEmail
+                                {...{
+                                    localConfig,
+                                    centralConfig,
+                                    addLocalUpdate,
+                                }}
+                            />
+                        )}
+                        {activeKey == 'measurement_triggers' && (
+                            <ConfigSectionMeasurementTriggers
                                 {...{
                                     localConfig,
                                     centralConfig,
