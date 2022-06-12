@@ -9,6 +9,7 @@ import backend from '../utils/backend';
 import ConfigSectionGeneral from '../components/config/sections/config-section-general';
 import ConfigSectionOpus from '../components/config/sections/config-section-opus';
 import ConfigSectionCamtracker from '../components/config/sections/config-section-camtracker';
+import ConfigSectionErrorEmail from '../components/config/sections/config-section-error-email';
 
 const sectionKeys: TYPES.configSectionKey[] = [
     'general',
@@ -113,7 +114,7 @@ export default function ConfigTab(props: { visible: boolean }) {
                     <div
                         className={
                             'z-0 flex-grow h-full p-6 overflow-y-scroll ' +
-                            'flex-col-left space-y-6 relative pb-20'
+                            'flex-col-left relative pb-20'
                         }
                     >
                         {activeKey == 'general' && (
@@ -136,6 +137,15 @@ export default function ConfigTab(props: { visible: boolean }) {
                         )}
                         {activeKey == 'camtracker' && (
                             <ConfigSectionCamtracker
+                                {...{
+                                    localConfig,
+                                    centralConfig,
+                                    addLocalUpdate,
+                                }}
+                            />
+                        )}
+                        {activeKey == 'error_email' && (
+                            <ConfigSectionErrorEmail
                                 {...{
                                     localConfig,
                                     centralConfig,
