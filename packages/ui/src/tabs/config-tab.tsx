@@ -8,6 +8,7 @@ import parseNumberTypes from '../utils/parse-number-types';
 import backend from '../utils/backend';
 import ConfigSectionGeneral from '../components/config/sections/config-section-general';
 import ConfigSectionOpus from '../components/config/sections/config-section-opus';
+import ConfigSectionCamtracker from '../components/config/sections/config-section-camtracker';
 
 const sectionKeys: TYPES.configSectionKey[] = [
     'general',
@@ -126,6 +127,15 @@ export default function ConfigTab(props: { visible: boolean }) {
                         )}
                         {activeKey == 'opus' && (
                             <ConfigSectionOpus
+                                {...{
+                                    localConfig,
+                                    centralConfig,
+                                    addLocalUpdate,
+                                }}
+                            />
+                        )}
+                        {activeKey == 'camtracker' && (
+                            <ConfigSectionCamtracker
                                 {...{
                                     localConfig,
                                     centralConfig,
