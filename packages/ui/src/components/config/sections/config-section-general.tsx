@@ -2,18 +2,6 @@ import TYPES from '../../../utils/types';
 import ConfigElementText from '../rows/config-element-text';
 import ConfigElementToggle from '../rows/config-element-toggle';
 
-/*
-Special triggers:
-
-If (!measurement_triggers.type.sun_angle) {
-    hide and set to old value -> measurement_triggers.sun_angle_start
-    hide and set to old value -> measurement_triggers.sun_angle_stop
-}
-If (!measurement_triggers.type.time) {
-    hide and set to old value -> measurement_triggers.start_time
-    hide and set to old value -> measurement_triggers.stop_time
-}
-*/
 export default function ConfigSectionGeneral(props: {
     localConfig: TYPES.config;
     centralConfig: any;

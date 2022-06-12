@@ -7,6 +7,7 @@ import capitalizeConfigKey from '../utils/capitalize-config-key';
 import parseNumberTypes from '../utils/parse-number-types';
 import backend from '../utils/backend';
 import ConfigSectionGeneral from '../components/config/sections/config-section-general';
+import ConfigSectionOpus from '../components/config/sections/config-section-opus';
 
 const sectionKeys: TYPES.configSectionKey[] = [
     'general',
@@ -116,6 +117,15 @@ export default function ConfigTab(props: { visible: boolean }) {
                     >
                         {activeKey == 'general' && (
                             <ConfigSectionGeneral
+                                {...{
+                                    localConfig,
+                                    centralConfig,
+                                    addLocalUpdate,
+                                }}
+                            />
+                        )}
+                        {activeKey == 'opus' && (
+                            <ConfigSectionOpus
                                 {...{
                                     localConfig,
                                     centralConfig,

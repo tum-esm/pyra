@@ -3,7 +3,7 @@ import React from 'react';
 export default function Button(props: {
     children: React.ReactNode;
     onClick(): void;
-    variant: 'green' | 'red' | 'blue' | 'slate' | 'toggle-active' | 'toggle-inactive';
+    variant: 'white' | 'green' | 'red' | 'slate';
     disabled?: boolean;
     className?: string;
     dot?: boolean;
@@ -13,18 +13,21 @@ export default function Button(props: {
     let colorClasses: string = '';
     let dotColor: string = ' ';
     switch (variant) {
+        case 'white':
+            colorClasses = 'text-slate-800 hover:bg-slate-150 hover:text-slate-900 ';
+            dotColor = 'bg-slate-300 ';
+            break;
         case 'slate':
             colorClasses =
-                'text-slate-800 bg-white hover:bg-slate-100 hover:text-slate-900 ';
+                'text-slate-600 !bg-slate-150 hover:!bg-slate-200 hover:text-slate-950 ';
             dotColor = 'bg-slate-300 ';
             break;
         case 'green':
-            colorClasses =
-                'text-green-700 bg-white hover:bg-green-50 hover:text-green-900 ';
+            colorClasses = 'text-green-700 hover:bg-green-50 hover:text-green-900 ';
             dotColor = 'bg-green-300 ';
             break;
         case 'red':
-            colorClasses = 'text-red-700 bg-white hover:bg-red-50 hover:text-red-900 ';
+            colorClasses = 'text-red-700 hover:bg-red-50 hover:text-red-900 ';
             dotColor = 'bg-red-300 ';
             break;
     }

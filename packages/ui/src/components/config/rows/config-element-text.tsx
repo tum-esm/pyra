@@ -28,9 +28,10 @@ export default function ConfigElementText(props: {
     const { key2, value, oldValue, setValue, disabled } = props;
 
     async function triggerFileSelection() {
-        const result = await dialog.open({ title: 'PyRa 4 UI', multiple: false });
-        if (result !== null && result.length > 0) {
-            setValue(result[0]);
+        const result: any = await dialog.open({ title: 'PyRa 4 UI', multiple: false });
+        console.log({ result });
+        if (result !== null) {
+            setValue(result);
         }
     }
 
@@ -39,15 +40,15 @@ export default function ConfigElementText(props: {
 
     return (
         <LabeledRow key2={key2} modified={hasBeenModified}>
-            <div className="relative flex w-full gap-x-1">
+            <div className="relative w-full flex-row-center gap-x-1">
                 <TextInput
                     value={value.toString()}
                     setValue={setValue}
                     postfix={getPostfix(key2)}
                 />
                 {showfileSelector && !disabled && (
-                    <Button variant="blue" onClick={triggerFileSelection}>
-                        choose path
+                    <Button variant="slate" onClick={triggerFileSelection}>
+                        select
                     </Button>
                 )}
             </div>
