@@ -8,6 +8,7 @@ import Header from './components/header';
 import LogTab from './tabs/log-tab';
 import StatusTab from './tabs/status-tab';
 import TYPES from './utils/types';
+import ConfigTab from './tabs/config-tab';
 
 const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
 
@@ -85,6 +86,7 @@ function Main() {
                             visible={activeTab === 'Status'}
                             {...{ centralConfig, setCentralConfig }}
                         />
+                        <ConfigTab visible={activeTab === 'Config'} />
                         <LogTab visible={activeTab === 'Logs'} />
                     </main>
                 </>

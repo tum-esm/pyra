@@ -1,5 +1,5 @@
-import ConfigElementText from './config-element-text';
-import ConfigElementToggle from './config-element-toggle';
+import ConfigElementText from './rows/config-element-text';
+import ConfigElementToggle from './rows/config-element-toggle';
 import ConfigElementMatrix from './config-element-matrix';
 import ConfigElementTime from './config-element-time';
 
@@ -12,27 +12,9 @@ If (!measurement_triggers.type.sun_angle) {
     hide and set to old value -> measurement_triggers.sun_angle_start
     hide and set to old value -> measurement_triggers.sun_angle_stop
 }
-
 If (!measurement_triggers.type.time) {
     hide and set to old value -> measurement_triggers.start_time
     hide and set to old value -> measurement_triggers.stop_time
-}
-
-TODO: rename measurement_triggers.user_trigger_present!!!
-If (!measurement_triggers.type.user_control) {
-    hide and set to old value -> measurement_triggers.user_trigger_present
-}
-
-If (!plc.is_present) {
-    hide and set to old value -> all other stuff inside plc
-    set plc.ip to 0.0.0.0
-}
-
-TODO: remove vbdsd.image_storage_path
-TODO: rename vbdsd.sensor_is_present to vbdsd.is_present
-If (!vbdsd.sensor_is_present) {
-    hide and set to old value -> all other stuff inside vbdsd
-    hide the whole vbdsd section inside parameters
 }
 */
 export default function ConfigSection(props: {

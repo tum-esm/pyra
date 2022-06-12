@@ -1,5 +1,9 @@
 export default function parseNumberTypes(oldValue: any, newValue: any): any {
-    if (typeof oldValue === 'string' || typeof oldValue === 'boolean') {
+    if (
+        typeof oldValue === 'string' ||
+        typeof oldValue === 'boolean' ||
+        oldValue === null
+    ) {
         return newValue;
     }
     if (typeof oldValue === 'number') {

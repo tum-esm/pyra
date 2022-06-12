@@ -1,29 +1,40 @@
 import { useState, useEffect } from 'react';
 import TYPES from '../utils/types';
-import ConfigSection from '../components/config/config-section';
 import SavingOverlay from '../components/config/saving-overlay';
-import { defaultsDeep, first, trim } from 'lodash';
+import { defaultsDeep } from 'lodash';
 import deepEqual from '../utils/deep-equal';
-import sortConfigKeys from '../utils/sort-config-keys';
 import capitalizeConfigKey from '../utils/capitalize-config-key';
 import parseNumberTypes from '../utils/parse-number-types';
 import backend from '../utils/backend';
+import ConfigSectionGeneral from '../components/config/sections/config-section-general';
 
-export default function ConfigTab(props: {
-    type: 'setup' | 'parameters';
-    visible: boolean;
-}) {
+const sectionKeys: TYPES.configSectionKey[] = [
+    'general',
+    'opus',
+    'camtracker',
+    'error_email',
+    'measurement_triggers',
+    'tum_plc',
+    'vbdsd',
+];
+
+export default function ConfigTab(props: { visible: boolean }) {
     const [centralConfig, setCentralConfig] = useState<TYPES.config | undefined>(
         undefined
     );
     const [localConfig, setLocalConfig] = useState<TYPES.config | undefined>(undefined);
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-    const [activeKey, setActiveKey] = useState<string>('general');
+    const [activeKey, setActiveKey] = useState<TYPES.configSectionKey>('general');
 
     async function loadCentralConfig() {
-        const content = await backend.readConfig();
-        setCentralConfig(content);
-        setLocalConfig(content);
+        const content = await backend.getConfig();
+        try {
+            const newConfig = JSON.parse(content.stdout);
+            setCentralConfig(newConfig);
+            setLocalConfig(newConfig);
+        } catch {
+            console.log(`Output from get-config: ${content.stdout}`);
+        }
     }
 
     useEffect(() => {
@@ -34,15 +45,11 @@ export default function ConfigTab(props: {
         const parsedLocalConfig = parseNumberTypes(centralConfig, localConfig);
         let result = await backend.updateConfig(parsedLocalConfig);
 
-        if (
-            ['Updated setup file', 'Updated parameters file'].includes(
-                result.join('\n')
-            )
-        ) {
+        if (result.stdout.includes('Updated config file')) {
             setLocalConfig(parsedLocalConfig);
             setCentralConfig(parsedLocalConfig);
         } else {
-            setErrorMessage(result.join(' '));
+            setErrorMessage(result.stdout);
         }
     }
 
@@ -76,32 +83,30 @@ export default function ConfigTab(props: {
                             'flex flex-col py-3 z-10 w-44'
                         }
                     >
-                        {sortConfigKeys(centralConfig).map(
-                            (key1: string, i: number) => (
-                                <button
-                                    key={key1}
-                                    onClick={() => setActiveKey(key1)}
+                        {sectionKeys.map((key1, i) => (
+                            <button
+                                key={key1}
+                                onClick={() => setActiveKey(key1)}
+                                className={
+                                    'px-6 py-2.5 text-base font-semibold text-left ' +
+                                    'flex-row-center gap-x-2 ' +
+                                    (key1 === activeKey
+                                        ? 'bg-blue-200 text-blue-950 '
+                                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-600 ')
+                                }
+                            >
+                                {capitalizeConfigKey(key1)}
+                                <div className="flex-grow" />
+                                <div
                                     className={
-                                        'px-6 py-2.5 text-base font-semibold text-left ' +
-                                        'flex-row-center gap-x-2 ' +
+                                        'w-2 h-2 bg-blue-400 rounded-full ' +
                                         (key1 === activeKey
-                                            ? 'bg-blue-200 text-blue-950 '
-                                            : 'text-slate-500 hover:bg-slate-100 hover:text-slate-600 ')
+                                            ? 'bg-blue-400 '
+                                            : 'bg-transparent')
                                     }
-                                >
-                                    {capitalizeConfigKey(key1)}
-                                    <div className="flex-grow" />
-                                    <div
-                                        className={
-                                            'w-2 h-2 bg-blue-400 rounded-full ' +
-                                            (key1 === activeKey
-                                                ? 'bg-blue-400 '
-                                                : 'bg-transparent')
-                                        }
-                                    />
-                                </button>
-                            )
-                        )}
+                                />
+                            </button>
+                        ))}
                     </div>
                     <div
                         className={
@@ -109,14 +114,15 @@ export default function ConfigTab(props: {
                             'flex-col-left space-y-6 relative pb-20'
                         }
                     >
-                        <ConfigSection
-                            key1={activeKey}
-                            {...{
-                                localConfig,
-                                centralConfig,
-                                addLocalUpdate,
-                            }}
-                        />
+                        {activeKey == 'general' && (
+                            <ConfigSectionGeneral
+                                {...{
+                                    localConfig,
+                                    centralConfig,
+                                    addLocalUpdate,
+                                }}
+                            />
+                        )}
                         {configIsDiffering && (
                             <SavingOverlay
                                 {...{

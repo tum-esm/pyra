@@ -1,31 +1,31 @@
-import TextInput from '../essential/text-input';
-import Button from '../essential/button';
-import LabeledRow from './labeled-row';
-import PreviousValue from '../essential/previous-value';
+import TextInput from '../../essential/text-input';
+import Button from '../../essential/button';
+import LabeledRow from '../labeled-row';
+import PreviousValue from '../../essential/previous-value';
 import { dialog } from '@tauri-apps/api';
-import parseNumberTypes from '../../utils/parse-number-types';
+import parseNumberTypes from '../../../utils/parse-number-types';
 
-const postfixes: any = {
-    'camtracker.motor_offset_threshold': 'degrees',
-    'em27.power_min_angle': 'degrees',
-    'enclosure.min_sun_angle': 'degrees',
-    'measurement_triggers.sun_angle_start': 'degrees',
-    'measurement_triggers.sun_angle_stop': 'degrees',
-    'pyra.seconds_per_interval': 'seconds',
-    'vbdsd.evaluation_size': 'images',
-    'vbdsd.min_sun_angle': 'degrees',
-    'vbdsd.seconds_per_interval': 'seconds',
-};
+function getPostfix(key: string) {
+    if (key.includes('angle') || key.includes('threshold')) {
+        return 'degrees';
+    }
+    if (key.includes('seconds')) {
+        return 'seconds';
+    }
+    if (key.includes('evaluation_size')) {
+        return 'images';
+    }
+    return undefined;
+}
 
 export default function ConfigElementText(props: {
-    key1: string;
     key2: string;
     value: string | number;
     oldValue: string | number;
     setValue(v: string | number): void;
     disabled?: boolean;
 }) {
-    const { key1, key2, value, oldValue, setValue, disabled } = props;
+    const { key2, value, oldValue, setValue, disabled } = props;
 
     async function triggerFileSelection() {
         const result = await dialog.open({ title: 'PyRa 4 UI', multiple: false });
@@ -43,7 +43,7 @@ export default function ConfigElementText(props: {
                 <TextInput
                     value={value.toString()}
                     setValue={setValue}
-                    postfix={postfixes[`${key1}.${key2}`]}
+                    postfix={getPostfix(key2)}
                 />
                 {showfileSelector && !disabled && (
                     <Button variant="blue" onClick={triggerFileSelection}>
