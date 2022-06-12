@@ -2,6 +2,7 @@ import TYPES from '../../../utils/types';
 import ConfigElementText from '../rows/config-element-text';
 import ConfigElementToggle from '../rows/config-element-toggle';
 import ICONS from '../../../assets/icons';
+import ConfigElementTime from '../rows/config-element-time';
 
 export default function ConfigSectionMeasurementTriggers(props: {
     localConfig: TYPES.config;
@@ -41,6 +42,23 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 oldValue={centralConfig.measurement_triggers.consider_vbdsd}
             />
             <div className="w-full h-px mb-6 -mt-2 bg-slate-300" />
+            <ConfigElementTime
+                key2="start_time"
+                value={localConfig.measurement_triggers.start_time}
+                setValue={(v) =>
+                    addLocalUpdate({ measurement_triggers: { start_time: v } })
+                }
+                oldValue={centralConfig.measurement_triggers.start_time}
+            />
+            <div className="h-0 -mt-4" />
+            <ConfigElementTime
+                key2="stop_time"
+                value={localConfig.measurement_triggers.stop_time}
+                setValue={(v) =>
+                    addLocalUpdate({ measurement_triggers: { stop_time: v } })
+                }
+                oldValue={centralConfig.measurement_triggers.stop_time}
+            />
             <ConfigElementText
                 key2="min_sun_elevation"
                 value={localConfig.measurement_triggers.min_sun_elevation}
@@ -49,6 +67,7 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 }
                 oldValue={centralConfig.measurement_triggers.min_sun_elevation}
             />
+            <div className="h-0 -mt-4" />
             <ConfigElementText
                 key2="max_sun_elevation"
                 value={localConfig.measurement_triggers.max_sun_elevation}

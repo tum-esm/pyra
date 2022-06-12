@@ -6,7 +6,11 @@ import { dialog } from '@tauri-apps/api';
 import parseNumberTypes from '../../../utils/parse-number-types';
 
 function getPostfix(key: string) {
-    if (key.includes('angle') || key.includes('threshold')) {
+    if (
+        key.includes('angle') ||
+        key.includes('threshold') ||
+        key.includes('elevation')
+    ) {
         return 'degrees';
     }
     if (key.includes('seconds')) {
