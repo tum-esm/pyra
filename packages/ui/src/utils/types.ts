@@ -133,42 +133,7 @@ namespace TYPES {
         tum_plc?: null | {
             min_power_elevation?: number;
             ip?: string;
-            actors?: {
-                current_angle?: intArray3;
-                fan_speed?: intArray3;
-                move_cover?: intArray3;
-                nominal_angle?: intArray3;
-            };
-            control?: {
-                auto_temp_mode?: intArray4;
-                manual_control?: intArray4;
-                manual_temp_mode?: intArray4;
-                reset?: intArray4;
-                sync_to_tracker?: intArray4;
-            };
-            power?: {
-                camera?: intArray4;
-                computer?: intArray4;
-                heater?: intArray4;
-                router?: intArray4;
-                spectrometer?: intArray4;
-            };
-            sensors?: {
-                humidity?: intArray3;
-                temperature?: intArray3;
-            };
-            state?: {
-                camera?: intArray4;
-                computer?: intArray4;
-                cover_closed?: intArray4;
-                heater?: intArray4;
-                motor_failed?: intArray4;
-                rain?: intArray4;
-                reset_needed?: intArray4;
-                router?: intArray4;
-                spectrometer?: intArray4;
-                ups_alert?: intArray4;
-            };
+            version?: 1 | 2;
         };
         vbdsd?: null | {
             camera_id?: number;

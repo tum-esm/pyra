@@ -112,49 +112,7 @@ CONFIG_FILE_SCHEMA = {
         {
             "min_power_elevation": Schemas.sun_elevation,
             "ip": Schemas.ip,
-            "actors": DICT_SCHEMA(
-                {
-                    "current_angle": Schemas.int_list_3,
-                    "fan_speed": Schemas.int_list_3,
-                    "move_cover": Schemas.int_list_3,
-                    "nominal_angle": Schemas.int_list_3,
-                }
-            ),
-            "control": DICT_SCHEMA(
-                {
-                    "auto_temp_mode": Schemas.int_list_4,
-                    "manual_control": Schemas.int_list_4,
-                    "manual_temp_mode": Schemas.int_list_4,
-                    "reset": Schemas.int_list_4,
-                    "sync_to_tracker": Schemas.int_list_4,
-                }
-            ),
-            "power": DICT_SCHEMA(
-                {
-                    "camera": Schemas.int_list_4,
-                    "computer": Schemas.int_list_4,
-                    "heater": Schemas.int_list_4,
-                    "router": Schemas.int_list_4,
-                    "spectrometer": Schemas.int_list_4,
-                }
-            ),
-            "sensors": DICT_SCHEMA(
-                {"humidity": Schemas.int_list_3, "temperature": Schemas.int_list_3}
-            ),
-            "state": DICT_SCHEMA(
-                {
-                    "camera": Schemas.int_list_4,
-                    "computer": Schemas.int_list_4,
-                    "cover_closed": Schemas.int_list_4,
-                    "heater": Schemas.int_list_4,
-                    "motor_failed": Schemas.int_list_4,
-                    "rain": Schemas.int_list_4,
-                    "reset_needed": Schemas.int_list_4,
-                    "router": Schemas.int_list_4,
-                    "spectrometer": Schemas.int_list_4,
-                    "ups_alert": Schemas.int_list_4,
-                }
-            ),
+            "version": {"type": "integer", "allowed": [1, 2]},
         }
     ),
     "vbdsd": NULLABLE_DICT_SCHEMA(

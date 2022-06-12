@@ -5,3 +5,4 @@ from .astronomy import Astronomy
 from .json_interfaces import ConfigInterface, StateInterface
 from .os_info import OSInfo
 from .exception_email_client import ExceptionEmailClient
+from .plc_interface import STANDARD_PLC_INTERFACES, PLCInterface
