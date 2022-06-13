@@ -52,7 +52,7 @@ namespace TYPES {
         tum_plc: null | {
             min_power_elevation: number;
             ip: string;
-            version: 1 | 2;
+            version: number;
         };
         vbdsd: null | {
             camera_id: number;
@@ -106,7 +106,7 @@ namespace TYPES {
         tum_plc?: null | {
             min_power_elevation?: number;
             ip?: string;
-            version?: 1 | 2;
+            version?: number;
         };
         vbdsd?: null | {
             camera_id?: number;

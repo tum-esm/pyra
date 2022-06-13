@@ -11,6 +11,7 @@ import ConfigSectionOpus from '../components/config/sections/config-section-opus
 import ConfigSectionCamtracker from '../components/config/sections/config-section-camtracker';
 import ConfigSectionErrorEmail from '../components/config/sections/config-section-error-email';
 import ConfigSectionMeasurementTriggers from '../components/config/sections/config-section-measurement-triggers';
+import ConfigSectionTumPlc from '../components/config/sections/config-section-tum-plc';
 
 const sectionKeys: TYPES.configSectionKey[] = [
     'general',
@@ -21,7 +22,6 @@ const sectionKeys: TYPES.configSectionKey[] = [
     'tum_plc',
     'vbdsd',
 ];
-
 export default function ConfigTab(props: { visible: boolean }) {
     const [centralConfig, setCentralConfig] = useState<TYPES.config | undefined>(
         undefined
@@ -46,14 +46,16 @@ export default function ConfigTab(props: { visible: boolean }) {
     }, []);
 
     async function saveLocalConfig() {
-        const parsedLocalConfig = parseNumberTypes(centralConfig, localConfig);
-        let result = await backend.updateConfig(parsedLocalConfig);
+        if (localConfig !== undefined) {
+            const parsedLocalConfig = parseNumberTypes(localConfig);
+            let result = await backend.updateConfig(parsedLocalConfig);
 
-        if (result.stdout.includes('Updated config file')) {
-            setLocalConfig(parsedLocalConfig);
-            setCentralConfig(parsedLocalConfig);
-        } else {
-            setErrorMessage(result.stdout);
+            if (result.stdout.includes('Updated config file')) {
+                setLocalConfig(parsedLocalConfig);
+                setCentralConfig(parsedLocalConfig);
+            } else {
+                setErrorMessage(result.stdout);
+            }
         }
     }
 
@@ -68,10 +70,14 @@ export default function ConfigTab(props: { visible: boolean }) {
         setErrorMessage(undefined);
     }
 
+    function addDefaultSection(variant: 'tum_plc' | 'vbdsd') {}
+
     const configIsDiffering =
         localConfig !== undefined &&
         centralConfig !== undefined &&
-        !deepEqual(parseNumberTypes(centralConfig, localConfig), centralConfig);
+        !deepEqual(parseNumberTypes(localConfig), centralConfig);
+
+    const sharedSectionProps: any = { localConfig, centralConfig, addLocalUpdate };
 
     return (
         <div
@@ -118,50 +124,23 @@ export default function ConfigTab(props: { visible: boolean }) {
                             'flex-col-left relative pb-20'
                         }
                     >
-                        {activeKey == 'general' && (
-                            <ConfigSectionGeneral
-                                {...{
-                                    localConfig,
-                                    centralConfig,
-                                    addLocalUpdate,
-                                }}
-                            />
+                        {activeKey === 'general' && (
+                            <ConfigSectionGeneral {...sharedSectionProps} />
                         )}
-                        {activeKey == 'opus' && (
-                            <ConfigSectionOpus
-                                {...{
-                                    localConfig,
-                                    centralConfig,
-                                    addLocalUpdate,
-                                }}
-                            />
+                        {activeKey === 'opus' && (
+                            <ConfigSectionOpus {...sharedSectionProps} />
                         )}
-                        {activeKey == 'camtracker' && (
-                            <ConfigSectionCamtracker
-                                {...{
-                                    localConfig,
-                                    centralConfig,
-                                    addLocalUpdate,
-                                }}
-                            />
+                        {activeKey === 'camtracker' && (
+                            <ConfigSectionCamtracker {...sharedSectionProps} />
                         )}
-                        {activeKey == 'error_email' && (
-                            <ConfigSectionErrorEmail
-                                {...{
-                                    localConfig,
-                                    centralConfig,
-                                    addLocalUpdate,
-                                }}
-                            />
+                        {activeKey === 'error_email' && (
+                            <ConfigSectionErrorEmail {...sharedSectionProps} />
                         )}
-                        {activeKey == 'measurement_triggers' && (
-                            <ConfigSectionMeasurementTriggers
-                                {...{
-                                    localConfig,
-                                    centralConfig,
-                                    addLocalUpdate,
-                                }}
-                            />
+                        {activeKey === 'measurement_triggers' && (
+                            <ConfigSectionMeasurementTriggers {...sharedSectionProps} />
+                        )}
+                        {activeKey === 'tum_plc' && (
+                            <ConfigSectionTumPlc {...sharedSectionProps} />
                         )}
                         {configIsDiffering && (
                             <SavingOverlay

@@ -40,7 +40,7 @@ export default function ConfigElementText(props: {
     }
 
     const showfileSelector = key2.endsWith('_path');
-    const hasBeenModified = parseNumberTypes(oldValue, value) !== oldValue;
+    const hasBeenModified = value != oldValue;
 
     return (
         <LabeledRow key2={key2} modified={hasBeenModified}>
