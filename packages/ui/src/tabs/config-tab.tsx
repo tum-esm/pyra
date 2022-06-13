@@ -12,6 +12,7 @@ import ConfigSectionCamtracker from '../components/config/sections/config-sectio
 import ConfigSectionErrorEmail from '../components/config/sections/config-section-error-email';
 import ConfigSectionMeasurementTriggers from '../components/config/sections/config-section-measurement-triggers';
 import ConfigSectionTumPlc from '../components/config/sections/config-section-tum-plc';
+import ConfigSectionVbdsd from '../components/config/sections/config-section-vbdsd';
 
 const sectionKeys: TYPES.configSectionKey[] = [
     'general',
@@ -141,6 +142,9 @@ export default function ConfigTab(props: { visible: boolean }) {
                         )}
                         {activeKey === 'tum_plc' && (
                             <ConfigSectionTumPlc {...sharedSectionProps} />
+                        )}
+                        {activeKey === 'vbdsd' && (
+                            <ConfigSectionVbdsd {...sharedSectionProps} />
                         )}
                         {configIsDiffering && (
                             <SavingOverlay

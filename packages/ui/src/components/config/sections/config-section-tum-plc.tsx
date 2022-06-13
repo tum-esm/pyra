@@ -1,6 +1,5 @@
 import TYPES from '../../../utils/types';
 import ConfigElementText from '../rows/config-element-text';
-import ConfigElementToggle from '../rows/config-element-toggle';
 import Button from '../../essential/button';
 import PreviousValue from '../../essential/previous-value';
 
@@ -29,7 +28,7 @@ export default function ConfigSectionTumPlc(props: {
 
     if (localConfig.tum_plc === null) {
         return (
-            <div className="space-y-2 text-sm flex-col-left">
+            <div className="relative space-y-2 text-sm flex-col-left">
                 <div className="space-x-2 text-sm flex-row-left">
                     <span className="whitespace-nowrap">Not configured yet </span>
                     <Button variant="slate" onClick={addDefault}>
@@ -40,9 +39,14 @@ export default function ConfigSectionTumPlc(props: {
                     previousValue={
                         centralConfig.tum_plc !== null
                             ? JSON.stringify(centralConfig.tum_plc)
+                                  .replace(/":/g, '": ')
+                                  .replace(/,"/g, ', "')
                             : undefined
                     }
                 />
+                {centralConfig.tum_plc !== null && (
+                    <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
+                )}
             </div>
         );
     }

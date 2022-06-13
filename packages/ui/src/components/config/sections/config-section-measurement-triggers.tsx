@@ -1,7 +1,6 @@
 import TYPES from '../../../utils/types';
 import ConfigElementText from '../rows/config-element-text';
 import ConfigElementToggle from '../rows/config-element-toggle';
-import ICONS from '../../../assets/icons';
 import ConfigElementTime from '../rows/config-element-time';
 
 export default function ConfigSectionMeasurementTriggers(props: {
