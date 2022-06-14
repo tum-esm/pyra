@@ -36,6 +36,9 @@ export default function ConfigSectionVbdsd(props: {
                     <Button variant="slate" onClick={addDefault}>
                         set up now
                     </Button>
+                    {centralConfig.vbdsd !== null && (
+                        <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
+                    )}
                 </div>
                 <PreviousValue
                     previousValue={
@@ -46,14 +49,9 @@ export default function ConfigSectionVbdsd(props: {
                             : undefined
                     }
                 />
-                {centralConfig.vbdsd !== null && (
-                    <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
-                )}
             </div>
         );
     }
-
-    // TODO: revert button (with "previously ...")
 
     return (
         <>
@@ -70,6 +68,7 @@ export default function ConfigSectionVbdsd(props: {
                         ? centralConfig.vbdsd.camera_id
                         : 'null'
                 }
+                numeric
             />
             <ConfigElementText
                 key2="min_sun_elevation"
@@ -82,6 +81,7 @@ export default function ConfigSectionVbdsd(props: {
                         ? centralConfig.vbdsd.min_sun_elevation
                         : 'null'
                 }
+                numeric
             />
             <ConfigElementText
                 key2="seconds_per_interval"
@@ -94,6 +94,7 @@ export default function ConfigSectionVbdsd(props: {
                         ? centralConfig.vbdsd.seconds_per_interval
                         : 'null'
                 }
+                numeric
             />
             <ConfigElementText
                 key2="evaluation_size"
@@ -104,6 +105,7 @@ export default function ConfigSectionVbdsd(props: {
                         ? centralConfig.vbdsd.evaluation_size
                         : 'null'
                 }
+                numeric
             />
             <ConfigElementText
                 key2="measurement_threshold"
@@ -116,6 +118,7 @@ export default function ConfigSectionVbdsd(props: {
                         ? centralConfig.vbdsd.measurement_threshold
                         : 'null'
                 }
+                numeric
             />
         </>
     );

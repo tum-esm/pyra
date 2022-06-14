@@ -1,20 +1,34 @@
 // I didn't find a built-in version yet. This code is from
+
+import { reduce, uniq } from 'lodash';
+
 // https://dmitripavlutin.com/how-to-compare-objects-in-javascript/#4-deep-equality
-export default function deepEqual(object1: any, object2: any) {
-    const keys1 = Object.keys(object1);
-    const keys2 = Object.keys(object2);
-    if (keys1.length !== keys2.length) {
+export default function deepEqual(a: any, b: any): boolean {
+    const aIsObject = isObject(a);
+    const bIsObject = isObject(b);
+
+    if ((aIsObject && !bIsObject) || (!aIsObject && bIsObject)) {
         return false;
     }
-    for (const key of keys1) {
-        const val1 = object1[key];
-        const val2 = object2[key];
-        const areObjects = isObject(val1) && isObject(val2);
-        if ((areObjects && !deepEqual(val1, val2)) || (!areObjects && val1 !== val2)) {
+    // now we can assume either both are objects or none
+
+    if (!aIsObject) {
+        if (a != b) {
             return false;
         }
+        if ((a === '' && b === 0) || (b === '' && a === 0)) {
+            return false;
+        }
+        return true;
     }
-    return true;
+
+    // [true, false, ...] for each key in the objects
+    const subequality = uniq([...Object.keys(a), ...Object.keys(b)]).map((k) => {
+        return deepEqual(a[k], b[k]);
+    });
+
+    // checks if all are true
+    return reduce(subequality, (prev, curr, i) => prev && curr, true);
 }
 
 function isObject(object: any) {

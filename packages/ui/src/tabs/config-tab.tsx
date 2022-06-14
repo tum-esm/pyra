@@ -66,17 +66,14 @@ export default function ConfigTab(props: { visible: boolean }) {
 
     function addLocalUpdate(update: object) {
         const newObject = defaultsDeep(update, JSON.parse(JSON.stringify(localConfig)));
-        console.log({ newObject });
         setLocalConfig(newObject);
         setErrorMessage(undefined);
     }
 
-    function addDefaultSection(variant: 'tum_plc' | 'vbdsd') {}
-
     const configIsDiffering =
         localConfig !== undefined &&
         centralConfig !== undefined &&
-        !deepEqual(parseNumberTypes(localConfig), centralConfig);
+        !deepEqual(localConfig, centralConfig);
 
     const sharedSectionProps: any = { localConfig, centralConfig, addLocalUpdate };
 

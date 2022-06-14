@@ -3,7 +3,7 @@ import Button from '../../essential/button';
 import LabeledRow from '../labeled-row';
 import PreviousValue from '../../essential/previous-value';
 import { dialog } from '@tauri-apps/api';
-import parseNumberTypes from '../../../utils/parse-number-types';
+import deepEqual from '../../../utils/deep-equal';
 
 function getPostfix(key: string) {
     if (
@@ -28,8 +28,9 @@ export default function ConfigElementText(props: {
     oldValue: string | number;
     setValue(v: string | number): void;
     disabled?: boolean;
+    numeric?: boolean;
 }) {
-    const { key2, value, oldValue, setValue, disabled } = props;
+    const { key2, value, oldValue, setValue, disabled, numeric } = props;
 
     async function triggerFileSelection() {
         const result: any = await dialog.open({ title: 'PyRa 4 UI', multiple: false });
@@ -39,15 +40,21 @@ export default function ConfigElementText(props: {
         }
     }
 
+    function parseNumericValue(v: string): any {
+        return `${v}`.replace(/[^\d\.]/g, '');
+    }
+
     const showfileSelector = key2.endsWith('_path');
-    const hasBeenModified = value != oldValue;
+    const hasBeenModified = !deepEqual(oldValue, value);
 
     return (
         <LabeledRow key2={key2} modified={hasBeenModified}>
             <div className="relative w-full flex-row-center gap-x-1">
                 <TextInput
                     value={value.toString()}
-                    setValue={setValue}
+                    setValue={(v) =>
+                        numeric ? setValue(parseNumericValue(v)) : setValue(v)
+                    }
                     postfix={getPostfix(key2)}
                 />
                 {showfileSelector && !disabled && (

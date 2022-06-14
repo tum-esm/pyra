@@ -7,8 +7,7 @@ Hence, I need to store it in a string and when passing it to the CLI, this trans
 formation needs to happen.
 */
 export default function parseNumberTypes(newConfig: TYPES.config): TYPES.config {
-    console.log({ newConfig });
-    const parsedConfig = {
+    return {
         general: {
             ...newConfig.general,
             seconds_per_core_interval: parseFloat(
@@ -78,6 +77,4 @@ export default function parseNumberTypes(newConfig: TYPES.config): TYPES.config 
                       ),
                   },
     };
-    console.log({ parsedConfig });
-    return parsedConfig;
 }
