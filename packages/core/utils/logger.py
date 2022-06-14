@@ -6,7 +6,7 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 INFO_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "info.log")
 DEBUG_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "debug.log")
-LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", "logs.lock")
+LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")
 
 # The logging module behaved very weird with the setup we have
 # therefore I am just formatting and appending the log lines
