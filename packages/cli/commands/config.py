@@ -94,34 +94,6 @@ def _validate_current_config():
         success_handler(f"Current config file is valid")
 
 
-@click.command(help=f'Add the default "vbdsd" or "tum-plc" config to config.json')
-@click.argument("variant", default="")
-@with_filelock
-def _add_default_config(variant: str):
-    assert variant in [
-        "vbdsd",
-        "tum_plc",
-    ], 'variant has to be one of ["vbdsd", "tum_plc"]'
-
-    path_to_default = os.path.join(PROJECT_DIR, "config", f"{variant}.default.json")
-    with open(path_to_default, "r") as f:
-        default_config_addition: dict = json.load(f)
-
-    try:
-        with open(CONFIG_FILE_PATH, "r") as f:
-            current_json: dict = json.load(f)
-    except FileNotFoundError:
-        error_handler("config.json does not exist")
-    except json.JSONDecodeError:
-        error_handler("config.json is not a valid json")
-
-    current_json[variant] = default_config_addition
-    with open(CONFIG_FILE_PATH, "w") as f:
-        json.dump(current_json, f)
-
-    success_handler("Updated config file")
-
-
 @click.group()
 def config_command_group():
     pass
@@ -130,4 +102,3 @@ def config_command_group():
 config_command_group.add_command(_get_config, name="get")
 config_command_group.add_command(_update_config, name="update")
 config_command_group.add_command(_validate_current_config, name="validate")
-config_command_group.add_command(_add_default_config, name="add-default")
