@@ -22,42 +22,34 @@ import sys
 import time
 import jdcal
 import datetime
-from packages.core.utils.json_file_interaction import State
-from packages.core.utils.logger import Logger
+from packages.core.utils import StateInterface, Logger
 
-# the following imports should be provided by pywin32
+
+# these imports are provided by pywin32
 if sys.platform == "win32":
-    import win32con
-    import win32ui
-    import win32process
+    import win32ui  # type: ignore
+
 
 logger = Logger(origin="pyra.core.sun-tracking")
 
 
 class SunTracking:
-    def __init__(self, initial_setup: dict, initial_parameters: dict):
-        self._SETUP = initial_setup
-        self._PARAMS = initial_parameters
-        if sys.platform != "win32":
-            print("The SunTracking class can only be tested on windows")
+    def __init__(self, initial_config: dict):
+        self._CONFIG = initial_config
+        if self._CONFIG["general"]["test_mode"]:
             return
 
-    def run(self, new_setup: dict, new_parameters: dict):
-        self._SETUP, self._PARAMS = new_setup, new_parameters
-
-        if sys.platform != "win32":
+    def run(self, new_config: dict):
+        self._CONFIG = new_config
+        if self._CONFIG["general"]["test_mode"]:
+            logger.debug("Skipping SunTracking in test mode")
             return
 
         logger.info("Running SunTracking")
 
-        # check for PYRA Test Mode status
-        if self._PARAMS["pyra"]["test_mode"] == 1:
-            logger.info("Test mode active.")
-            return
-
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
-        if not State.read()["vbdsd_evaluation_is_positive"]:
+        if not StateInterface.read()["vbdsd_evaluation_is_positive"]:
             if self.__ct_application_running:
                 self.__stop_sun_tracking_automation()
                 logger.info("Stop CamTracker.")
@@ -101,22 +93,18 @@ class SunTracking:
          Returns pywin32 process information for later usage.
         """
         # delete stop.txt file in camtracker folder if present
-        # exe call with -automation
-        # http://timgolden.me.uk/pywin32-docs/win32process.html
-        camtracker_call = self._SETUP["camtracker"]["executable_path"] + " -autostart"
-        hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
-            None,
-            camtracker_call,
-            None,
-            None,
-            0,
-            win32con.NORMAL_PRIORITY_CLASS,
-            None,
-            None,
-            win32process.STARTUPINFO(),
-        )
+        self.clean_stop_file()
 
-        return (hProcess, hThread, dwProcessId, dwThreadId)
+        ct_path = self._CONFIG["camtracker"]["executable_path"]
+
+        # works only > python3.10
+        # without cwd CT will have trouble loading its internal database)
+        os.startfile(
+            path=os.path.filename(ct_path),
+            cwd=os.path.basename(ct_path),
+            arguments="-autostart",
+            show_cmd=2,
+        )
 
     def __stop_sun_tracking_automation(self):
         """Tells the CamTracker application to end program and move mirrors
@@ -128,11 +116,24 @@ class SunTracking:
 
         # create stop.txt file in camtracker folder
         camtracker_directory = os.path.dirname(
-            self._SETUP["camtracker"]["executable_path"]
+            self._CONFIG["camtracker"]["executable_path"]
         )
 
         f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
         f.close()
+
+    def clean_stop_file(self):
+        """CamTracker needs a stop.txt file to safely shutdown.
+        This file needs to be removed after CamTracker shutdown.
+        """
+
+        camtracker_directory = os.path.dirname(
+            self._CONFIG["camtracker"]["executable_path"]
+        )
+        stop_file_path = os.path.join(camtracker_directory, "stop.txt")
+
+        if os.path.exists(stop_file_path):
+            os.remove(stop_file_path)
 
     def __read_ct_log_learn_az_elev(self):
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
@@ -148,7 +149,7 @@ class SunTracking:
         ]
         """
         # read azimuth and elevation motor offsets from camtracker logfiles
-        target = self._SETUP["camtracker"]["learn_az_elev_path"]
+        target = self._CONFIG["camtracker"]["learn_az_elev_path"]
 
         if not os.path.isfile(target):
             return [None, None, None, None, None, None]
@@ -181,7 +182,7 @@ class SunTracking:
         Returns the sun intensity as either 'good', 'bad', 'None'.
         """
         # check sun status logged by camtracker
-        target = self._SETUP["camtracker"]["sun_intensity_path"]
+        target = self._CONFIG["camtracker"]["sun_intensity_path"]
 
         if not os.path.isfile(target):
             return
@@ -223,7 +224,7 @@ class SunTracking:
 
         elev_offset = tracker_status[3]
         az_offeset = tracker_status[4]
-        threshold = self._PARAMS["camtracker"]["motor_offset_threshold"]
+        threshold = self._CONFIG["camtracker"]["motor_offset_threshold"]
 
         if (elev_offset > threshold) or (az_offeset > threshold):
             return False

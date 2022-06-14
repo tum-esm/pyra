@@ -15,6 +15,52 @@
             "dialog": {
                 "confirm": true,
                 "open": true
+            },
+            "shell": {
+                "execute": true,
+                "open": ".*",
+                "scope": [
+                    {
+                        "name": "pyra-cli",
+                        "cmd": ".venv/bin/python",
+                        "args": ["packages/cli/main.py"]
+                    },
+                    {
+                        "name": "pyra-cli-core-start",
+                        "cmd": ".venv/bin/python",
+                        "args": ["packages/cli/main.py", "core", "start"]
+                    },
+                    {
+                        "name": "pyra-cli-core-is-running",
+                        "cmd": ".venv/bin/python",
+                        "args": ["packages/cli/main.py", "core", "is-running"]
+                    },
+                    {
+                        "name": "pyra-cli-core-stop",
+                        "cmd": ".venv/bin/python",
+                        "args": ["packages/cli/main.py", "core", "stop"]
+                    },
+                    {
+                        "name": "pyra-cli-config-get",
+                        "cmd": ".venv/bin/python",
+                        "args": ["packages/cli/main.py", "config", "get"]
+                    },
+                    {
+                        "name": "pyra-cli-config-update",
+                        "cmd": ".venv/bin/python",
+                        "args": [
+                            "packages/cli/main.py",
+                            "config",
+                            "update",
+                            { "validator": "\\{.*\\}" }
+                        ]
+                    },
+                    {
+                        "name": "pyra-cli-state-get",
+                        "cmd": ".venv/bin/python",
+                        "args": ["packages/cli/main.py", "state", "get"]
+                    }
+                ]
             }
         },
         "bundle": {

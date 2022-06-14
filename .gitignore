@@ -5,17 +5,17 @@
 __pycache__
 
 # config
-config/parameters.json
-config/setup.json
-config/config.lock
+config/config.json
+config/config.original.json
+config/.config.lock
 
 # logs
 *.log
+logs/.logs.lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
-logs/logs.lock
 
 # runtime data
 pids
@@ -27,6 +27,7 @@ pids
 Bilder/**/*.JPG
 *.txt
 runtime-data/
+pyra-core-process-state.json
 
 # pyra ui
 packages/electron-ui/node_modules/

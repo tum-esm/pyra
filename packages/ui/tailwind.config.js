@@ -16,7 +16,7 @@ const customColors = {
         900: '#1e3a8a',
         950: '#0f1d45',
     },
-    gray: {
+    slate: {
         50: '#f8fafc',
         75: '#f4f7fa',
         100: '#f1f5f9',
@@ -48,6 +48,8 @@ const customColors = {
         700: '#15803d',
         800: '#166534',
         900: '#14532d',
+        900: '#14532d',
+        950: '#0a2916',
     },
     red: {
         50: '#fef2f2',
@@ -62,6 +64,7 @@ const customColors = {
         700: '#b91c1c',
         800: '#991b1b',
         900: '#7f1d1d',
+        950: '#3f0e0e',
     },
     yellow: {
         50: '#fefce8',
@@ -76,6 +79,7 @@ const customColors = {
         700: '#a16207',
         800: '#854d0e',
         900: '#713f12',
+        950: '#381f09',
     },
     orange: colors.orange,
     teal: colors.teal,

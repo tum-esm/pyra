@@ -1,4 +1,4 @@
-import logging
+from datetime import datetime
 import os
 import filelock
 
@@ -6,52 +6,39 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 INFO_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "info.log")
 DEBUG_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "debug.log")
-LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", "logs.lock")
+LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")
 
-# Set up logging module
-_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-logging.basicConfig(level=logging.DEBUG, filename=DEBUG_LOG_FILE, format=_format)
-_info_log_handler = logging.FileHandler(filename=INFO_LOG_FILE, mode="a")
-_info_log_handler.setLevel(logging.INFO)
-_info_log_handler.setFormatter(logging.Formatter(_format))
-
-# Hide irrelevant logs from libraries
-logging.getLogger("filelock").setLevel(logging.WARNING)
-
-
-def with_filelock(function):
-    def locked_function(*args, **kwargs):
-        with filelock.FileLock(LOG_FILES_LOCK):
-            return function(*args, **kwargs)
-
-    return locked_function
+# The logging module behaved very weird with the setup we have
+# therefore I am just formatting and appending the log lines
+# manually. Doesn't really make a performance difference
 
 
 class Logger:
     def __init__(self, origin="pyra.core"):
-        self.logger = logging.getLogger(origin)
-        self.logger.addHandler(_info_log_handler)
+        self.origin = origin
 
-    @with_filelock
     def debug(self, message: str):
-        self.logger.debug(message)
+        self._write_log_line("DEBUG", message)
 
-    @with_filelock
     def info(self, message: str):
-        self.logger.info(message)
+        self._write_log_line("INFO", message)
 
-    @with_filelock
     def warning(self, message: str):
-        self.logger.warning(message)
+        self._write_log_line("WARNING", message)
 
-    @with_filelock
-    def critical(self, message: str):
-        self.logger.critical(message)
-
-    @with_filelock
     def error(self, message: str):
-        self.logger.error(message)
+        self._write_log_line("ERROR", message)
 
-    @with_filelock
     def exception(self, message: str):
-        self.logger.exception(message)
+        # TODO: Attach traceback to message string
+        self._write_log_line("EXCEPTION", message)
+
+    def _write_log_line(self, level: str, message: str):
+        timestamp = datetime.utcnow()
+        log_string = f"{timestamp} - {self.origin} - {level} - {message}\n"
+        with filelock.FileLock(LOG_FILES_LOCK):
+            with open(DEBUG_LOG_FILE, "a") as f1:
+                f1.write(log_string)
+            if level != "DEBUG":
+                with open(INFO_LOG_FILE, "a") as f2:
+                    f2.write(log_string)

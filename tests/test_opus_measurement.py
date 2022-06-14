@@ -1,11 +1,10 @@
-
-
-from packages.core.main import load_config
+from packages.core.utils import ConfigInterface
 from packages.core.modules.opus_measurement import OpusMeasurement
 
+
 def test_opus_measurement():
-    _SETUP, _PARAMS = load_config()
-    instance = OpusMeasurement(_SETUP, _PARAMS)
+    _CONFIG = ConfigInterface().read()
+    instance = OpusMeasurement(_CONFIG)
     # print(control.continuous_readings())
     # assert(False)
 

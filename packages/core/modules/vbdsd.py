@@ -27,8 +27,6 @@
 # ==============================================================================
 
 
-# TODO: Use logging after initial tests
-
 import multiprocessing
 import os
 import shutil
@@ -36,17 +34,20 @@ import time
 import astropy.units as astropy_units
 import cv2 as cv
 import numpy as np
-from packages.core.utils.json_file_interaction import Config, State
-from packages.core.utils.logger import Logger
-from packages.core.utils.ring_list import RingList
-from packages.core.utils.astronomy import Astronomy
+from packages.core.utils import (
+    ConfigInterface,
+    StateInterface,
+    Logger,
+    RingList,
+    Astronomy,
+)
 
 logger = Logger(origin="pyra.core.vbdsd")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", "vbdsd")
-_SETUP, _PARAMS = None, None
+_CONFIG = None
 
 
 class _VBDSD:
@@ -59,15 +60,15 @@ class _VBDSD:
         If successfully connected, the function returns an instance object of the
         camera, otherwise None will be returned.
         """
-        cam_id = _SETUP["vbdsd"]["cam_id"]
-        _VBDSD.cam = cv.VideoCapture(cam_id)
+        camera_id = _CONFIG["vbdsd"]["camera_id"]
+        _VBDSD.cam = cv.VideoCapture(camera_id)
         _VBDSD.cam.release()
 
         for _ in range(retries):
-            _VBDSD.cam = cv.VideoCapture(cam_id)
+            _VBDSD.cam = cv.VideoCapture(camera_id)
             time.sleep(1)
             if _VBDSD.cam.isOpened():
-                logger.debug(f"Camera with id {cam_id} is now connected")
+                logger.debug(f"Camera with id {camera_id} is now connected")
                 _VBDSD.cam.set(3, 1280)  # width
                 _VBDSD.cam.set(4, 720)  # height
                 _VBDSD.cam.set(15, -12)  # exposure
@@ -79,7 +80,7 @@ class _VBDSD:
                 _VBDSD.change_exposure()
                 return
 
-        logger.debug(f"Camera with id {cam_id} could not be found")
+        logger.debug(f"Camera with id {camera_id} could not be found")
 
     @staticmethod
     def eval_sun_state(frame):
@@ -271,7 +272,7 @@ class VBDSD_Thread:
         VBDSD_Thread.__remove_vbdsd_images()
 
         logger.debug('Setting state to "null"')
-        State.update({"vbdsd_indicates_good_conditions": None})
+        StateInterface.update({"vbdsd_indicates_good_conditions": None})
 
         self.__process = None
 
@@ -283,15 +284,21 @@ class VBDSD_Thread:
 
     @staticmethod
     def main(infinite_loop=True):
-        global _SETUP, _PARAMS
-        _SETUP, _PARAMS = Config.read()
+        global _CONFIG
+        _CONFIG = ConfigInterface.read()
+        if _CONFIG["vbdsd"] is None:
+            VBDSD_Thread.__remove_vbdsd_images()
+            return
 
-        status_history = RingList(_PARAMS["vbdsd"]["evaluation_size"])
+        status_history = RingList(_CONFIG["vbdsd"]["evaluation_size"])
         current_state = None
 
         while True:
             start_time = time.time()
-            _SETUP, _PARAMS = Config.read()
+            _CONFIG = ConfigInterface.read()
+            if _CONFIG["vbdsd"] is None:
+                VBDSD_Thread.__remove_vbdsd_images()
+                return
 
             if _VBDSD.cam is None:
                 logger.info(f"(Re)connecting to camera")
@@ -304,21 +311,23 @@ class VBDSD_Thread:
                     continue
 
             # reinit if parameter changes
-            new_size = _PARAMS["vbdsd"]["evaluation_size"]
+            new_size = _CONFIG["vbdsd"]["evaluation_size"]
             if status_history.maxsize() != new_size:
                 logger.debug(
-                    "Size of status histroy has changed: "
+                    "Size of status history has changed: "
                     + f"{status_history.maxsize()} -> {new_size}"
                 )
                 status_history.reinitialize(new_size)
 
             # sleep while sun angle is too low
             if Astronomy.get_current_sun_elevation().is_within_bounds(
-                None, _PARAMS["vbdsd"]["min_sun_angle"] * astropy_units.deg
+                None, _CONFIG["vbdsd"]["min_sun_elevation"] * astropy_units.deg
             ):
                 logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                 if current_state != None:
-                    State.update({"vbdsd_indicates_good_conditions": current_state})
+                    StateInterface.update(
+                        {"vbdsd_indicates_good_conditions": current_state}
+                    )
                     current_state = None
                 time.sleep(300)
                 continue
@@ -347,7 +356,7 @@ class VBDSD_Thread:
             # evaluate sun state only if list is filled
             if status_history.size() == status_history.maxsize():
                 score = status_history.sum() / status_history.size()
-                new_state = score > _PARAMS["vbdsd"]["measurement_threshold"]
+                new_state = score > _CONFIG["vbdsd"]["measurement_threshold"]
             else:
                 new_state = None
 
@@ -356,12 +365,12 @@ class VBDSD_Thread:
                     f"State change: {'GOOD' if current_state else 'BAD'}"
                     + f" -> {'GOOD' if new_state else 'BAD'}"
                 )
-                State.update({"vbdsd_indicates_good_conditions": new_state})
+                StateInterface.update({"vbdsd_indicates_good_conditions": new_state})
                 current_state = new_state
 
             # wait rest of loop time
             elapsed_time = time.time() - start_time
-            time_to_wait = _PARAMS["vbdsd"]["seconds_per_interval"] - elapsed_time
+            time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
             if time_to_wait > 0:
                 logger.debug(
                     f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)"

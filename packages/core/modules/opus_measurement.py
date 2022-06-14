@@ -1,12 +1,4 @@
 # ==============================================================================
-# author            : Patrick Aigner
-# email             : patrick.aigner@tum.de
-# date              : 20220421
-# version           : 1.0
-# notes             :
-# license           : -
-# py version        : 3.10
-# ==============================================================================
 # description       :
 # OPUS is the measurement software for the spectrometer EM27/Sun. It is used to
 # start and stop measurements and define measurement or saving parameters.
@@ -17,22 +9,26 @@
 # Later, make an abstract base class that enforces a standard interface
 # to be implemented for any version of OPUS (for later updates)
 
-# TODO: Add option for OPUS MockServer usage
-
 
 import os
 import sys
 import time
-from packages.core.utils.logger import Logger
+from packages.core.utils import Logger, StateInterface, OSInfo
 
+
+# these imports are provided by pywin32
 if sys.platform == "win32":
-    # these imports are provided by pywin32
-    import win32con
-    import win32process
-    import win32ui
-    import dde
+    import win32con  # type: ignore
+    import win32process  # type: ignore
+    import win32ui  # type: ignore
+    import dde  # type: ignore
+
 
 logger = Logger(origin="pyra.core.opus-measurement")
+
+
+class SpectrometerError(Exception):
+    pass
 
 
 class OpusMeasurement:
@@ -41,11 +37,9 @@ class OpusMeasurement:
     established DDE connection.
     """
 
-    def __init__(self, initial_setup: dict, initial_parameters: dict):
-        self._SETUP = initial_setup
-        self._PARAMS = initial_parameters
-        if sys.platform != "win32":
-            print("The OpusMeasurement class can only be tested on windows")
+    def __init__(self, initial_config: dict):
+        self._CONFIG = initial_config
+        if self._CONFIG["general"]["test_mode"]:
             return
 
         # note: dde servers talk to dde servers
@@ -54,10 +48,10 @@ class OpusMeasurement:
         self.conversation = dde.CreateConversation(self.server)
         self.last_cycle_automation_status = 0
 
-    def run(self, new_setup: dict, new_parameters: dict):
-        self._SETUP, self._PARAMS = new_setup, new_parameters
-
-        if sys.platform != "win32":
+    def run(self, new_config: dict):
+        self._CONFIG = new_config
+        if self._CONFIG["general"]["test_mode"]:
+            logger.debug("Skipping OpusMeasurement in test mode")
             return
 
         logger.info("Running OpusMeasurement")
@@ -65,7 +59,7 @@ class OpusMeasurement:
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
-        if self._PARAMS["pyra"]["test_mode"] == 1:
+        if self._CONFIG["general"]["test_mode"]:
             logger.info("Test mode active.")
             return
 
@@ -76,8 +70,22 @@ class OpusMeasurement:
             # returns to give OPUS time to start until next call of run()
             return
 
+        # check EM27 ip connection
+        plc_status = OSInfo.check_connection_status(self._CONFIG["opus"]["em27_ip"])
+        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
+
+        if plc_status == "NO_INFO":
+            raise SpectrometerError("Could not find an active EM27 IP connection.")
+
+        if self.__is_em27_responsive:
+            logger.info("Successful ping to EM27.")
+        else:
+            logger.info("EM27 seems to be disconnected.")
+
         # check for automation state flank changes
-        automation_should_be_running = State.read()["automation_should_be_running"]
+        automation_should_be_running = StateInterface.read()[
+            "automation_should_be_running"
+        ]
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -93,11 +101,6 @@ class OpusMeasurement:
 
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
-
-        if self.__is_em27_connected:
-            logger.info("Successful ping to EM27.")
-        else:
-            logger.info("EM27 seems to be disconnected.")
 
     def __connect_to_dde_opus(self):
         try:
@@ -135,7 +138,7 @@ class OpusMeasurement:
     def __load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._SETUP["opus"]["experiment_path"]
+        full_path = self._CONFIG["opus"]["experiment_path"]
 
         if not self.__test_dde_connection:
             return
@@ -149,7 +152,7 @@ class OpusMeasurement:
     def __start_macro(self):
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._SETUP["opus"]["macro_path"]
+        full_path = self._CONFIG["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -163,7 +166,7 @@ class OpusMeasurement:
     def __stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._SETUP["opus"]["macro_path"]
+        full_path = self._CONFIG["opus"]["macro_path"]
 
         if not self.__test_dde_connection:
             return
@@ -184,8 +187,8 @@ class OpusMeasurement:
         """Destroys the underlying C++ object."""
         self.server.Destroy()
 
-    @property
-    def __is_em27_connected(self):
+    # TODO: is this still needed?
+    def __is_em27_responsive(self):
         """Pings the EM27 and returns:
 
         True -> Connected
@@ -203,9 +206,9 @@ class OpusMeasurement:
         """
         # http://timgolden.me.uk/pywin32-docs/win32process.html
         opus_call = (
-            self._SETUP["opus"]["executable_path"]
+            self._CONFIG["opus"]["executable_path"]
             + " "
-            + self._SETUP["opus"]["executable_parameter"]
+            + self._CONFIG["opus"]["executable_parameter"]
         )
         hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
             None,
@@ -257,7 +260,7 @@ class OpusMeasurement:
         assert self.__opus_application_running
         assert self.__test_dde_connection
 
-        print("__is_em27_connected: ", self.__is_em27_connected)
+        print("__is_em27_connected: ", self.__is_em27_responsive)
 
         self.__load_experiment()
         time.sleep(2)
@@ -267,4 +270,4 @@ class OpusMeasurement:
 
         self.__stop_macro()
 
-        print("__is_em27_connected: ", self.__is_em27_connected)
+        print("__is_em27_connected: ", self.__is_em27_responsive)

@@ -3,8 +3,7 @@ import astropy.time as astropy_time
 
 
 class Astronomy:
-    SETUP = None
-    PARAMS = None
+    CONFIG: dict = None
 
     # TODO: Is "elevation" what this should return?
     @staticmethod
@@ -34,7 +33,7 @@ class Astronomy:
         # set the camtracker config file based on the config JSONs so that the pyra
         # UI can be used to set the stations coordinates.
 
-        with open(Astronomy.SETUP["camtracker"]["config_path"], "r") as f:
+        with open(Astronomy.CONFIG["camtracker"]["config_path"], "r") as f:
             _lines = f.readlines()
 
             # find $1 marker

@@ -1,25 +1,80 @@
-export default function parseNumberTypes(oldValue: any, newValue: any): any {
-    if (typeof oldValue === 'string' || typeof oldValue === 'boolean') {
-        return newValue;
-    }
-    if (typeof oldValue === 'number') {
-        if (new RegExp('^\\d*(\\.\\d+)?$').test(newValue.toString())) {
-            return parseFloat(newValue);
-        } else {
-            return newValue;
-        }
-    }
-    if (typeof oldValue === 'object') {
-        if (oldValue.length !== undefined) {
-            return oldValue.map((v: any, i: number) =>
-                parseNumberTypes(oldValue[i], newValue[i])
-            );
-        } else {
-            const parsedNewValue: any = {};
-            Object.keys(oldValue).forEach((key1) => {
-                parsedNewValue[key1] = parseNumberTypes(oldValue[key1], newValue[key1]);
-            });
-            return parsedNewValue;
-        }
-    }
+import TYPES from './types';
+
+/*
+This transformation is necessary because in the interface when typing numbers,
+the user might want to type in "1.49". I cannot store the dot in a number variable.
+Hence, I need to store it in a string and when passing it to the CLI, this trans-
+formation needs to happen.
+*/
+export default function parseNumberTypes(newConfig: TYPES.config): TYPES.config {
+    return {
+        general: {
+            ...newConfig.general,
+            seconds_per_core_interval: parseFloat(
+                `${newConfig.general.seconds_per_core_interval}`
+            ),
+        },
+        opus: newConfig.opus,
+        error_email: newConfig.error_email,
+        measurement_decision: newConfig.measurement_decision,
+        camtracker: {
+            ...newConfig.camtracker,
+            motor_offset_threshold: parseFloat(
+                `${newConfig.camtracker.motor_offset_threshold}`
+            ),
+        },
+        measurement_triggers: {
+            ...newConfig.measurement_triggers,
+            min_sun_elevation: parseFloat(
+                `${newConfig.measurement_triggers.min_sun_elevation}`
+            ),
+            max_sun_elevation: parseFloat(
+                `${newConfig.measurement_triggers.max_sun_elevation}`
+            ),
+            start_time: {
+                hour: parseFloat(`${newConfig.measurement_triggers.start_time.hour}`),
+                minute: parseFloat(
+                    `${newConfig.measurement_triggers.start_time.minute}`
+                ),
+                second: parseFloat(
+                    `${newConfig.measurement_triggers.start_time.second}`
+                ),
+            },
+            stop_time: {
+                hour: parseFloat(`${newConfig.measurement_triggers.stop_time.hour}`),
+                minute: parseFloat(
+                    `${newConfig.measurement_triggers.stop_time.minute}`
+                ),
+                second: parseFloat(
+                    `${newConfig.measurement_triggers.stop_time.second}`
+                ),
+            },
+        },
+        tum_plc:
+            newConfig.tum_plc === null
+                ? null
+                : {
+                      ...newConfig.tum_plc,
+                      min_power_elevation: parseFloat(
+                          `${newConfig.tum_plc.min_power_elevation}`
+                      ),
+                      version: parseFloat(`${newConfig.tum_plc.version}`),
+                  },
+        vbdsd:
+            newConfig.vbdsd === null
+                ? null
+                : {
+                      camera_id: parseFloat(`${newConfig.vbdsd.camera_id}`),
+                      evaluation_size: parseFloat(`${newConfig.vbdsd.evaluation_size}`),
+                      seconds_per_interval: parseFloat(
+                          `${newConfig.vbdsd.seconds_per_interval}`
+                      ),
+                      measurement_threshold: parseFloat(
+                          `${newConfig.vbdsd.measurement_threshold}`
+                      ),
+                      min_sun_elevation: parseFloat(
+                          `${newConfig.vbdsd.min_sun_elevation}`
+                      ),
+                  },
+    };
 }

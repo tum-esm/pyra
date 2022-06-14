@@ -11,11 +11,24 @@
 
 import snap7
 import time
-from packages.core.utils.astronomy import Astronomy
-from packages.core.utils.json_file_interaction import State
-from packages.core.utils.logger import Logger
+from packages.core.utils import (
+    StateInterface,
+    Logger,
+    OSInfo,
+    Astronomy,
+    STANDARD_PLC_INTERFACES,
+    PLCInterface,
+)
 
 logger = Logger(origin="pyra.core.enclosure-control")
+
+
+class CoverError(Exception):
+    pass
+
+
+class PLCError(Exception):
+    pass
 
 
 class EnclosureControl:
@@ -23,51 +36,84 @@ class EnclosureControl:
     https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
     """
 
-    def __init__(self, initial_setup: dict, initial_parameters: dict):
-        self._SETUP = initial_setup
-        self._PARAMS = initial_parameters
+    def __init__(self, initial_config: dict):
+        self._CONFIG = initial_config
+        if self._CONFIG["general"]["test_mode"]:
+            return
+
+        if self._CONFIG["tum_plc"] is None:
+            logger.debug("Skipping EnclosureControl without a TUM PLC")
+            return
+
+        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG][
+            "tum_plc"
+        ]["version"]
+
         self.plc = snap7.client.Client()
         self.connection = self.plc_connect()
         self.last_cycle_automation_status = 0
-        self.plc_write_bool(self._SETUP["tum_plc"]["control"]["auto_temp_mode"], True)
+        self.plc_write_bool(self._PLC_INTERFACE.control["auto_temp_mode"], True)
 
-    def run(self, new_setup: dict, new_parameters: dict):
-        self._SETUP, self._PARAMS = new_setup, new_parameters
-
-        logger.info("Running EnclosureControl")
-        if not self._SETUP["tum_plc"]["is_present"]:
-            logger.debug("PLC is not present. Skipping Enclosure_Control.run().")
+    def run(self, new_config: dict):
+        self._CONFIG = new_config
+        if self._CONFIG["general"]["test_mode"]:
+            logger.debug("Skipping EnclosureControl in test mode")
+            return
+        if self._CONFIG["tum_plc"] is None:
+            logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
+        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG][
+            "tum_plc"
+        ]["version"]
+
+        logger.info("Running EnclosureControl")
+
+        # check PLC ip connection
+        plc_status = OSInfo.check_connection_status(self._CONFIG["tum_plc"]["ip"])
+        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
+
+        if plc_status == "NO_INFO":
+            raise PLCError("Could not find an active PLC IP connection.")
+
         # check for automation state flank changes
-        automation_should_be_running = State.read()["automation_should_be_running"]
+        automation_should_be_running = StateInterface.read()[
+            "automation_should_be_running"
+        ]
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
+                # TODO: check if that is correct reset handling
+                if self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]):
+                    self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
+                    time.sleep(10)
+
                 self.plc_write_bool(
-                    self._SETUP["tum_plc"]["control"]["sync_to_tracker"]
+                    self._PLC_INTERFACE.control["sync_to_tracker"], True
                 )
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
-                self.plc_write_bool(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
+                self.plc_write_bool(
+                    self._PLC_INTERFACE.control["sync_to_tracker"], False
+                )
+                self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], 0)
                 logger.info("Closing Cover.")
+                self.wait_for_cover_closing()
 
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
 
-        # TODO: Wait before checking again? Since the cover takes some time to move.
         if not automation_should_be_running:
-            if not self._SETUP["tum_plc"]["actors"]["cover_closed"]:
+            if not self._PLC_INTERFACE.actors["cover_closed"]:
                 logger.info("Cover is still open. Trying to close again.")
-                self.plc_write_bool(self._SETUP["tum_plc"]["actors"]["move_cover"], 0)
-
-        # TODO: Trigger user warning if cover does not close?
+                self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], 0)
+                self.wait_for_cover_closing()
 
         # read current state of actors and sensors in enclosure
         current_reading = self.read_state_from_plc()
         logger.info("New continuous readings.")
-        State.update({"enclosure_plc_readings": current_reading})
+        StateInterface.update({"enclosure_plc_readings": current_reading})
 
         # possibly powerup/down spectrometer
         self.manage_spectrometer_power()
@@ -81,21 +127,19 @@ class EnclosureControl:
         """
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
-        min_sun_angle = self._PARAMS["enclosure"]["min_sun_angle"]
+        min_power_elevation = self._CONFIG["tum_plc"]["min_power_elevation"]
         spectrometer_has_power = self.plc_read_bool(
-            self._SETUP["tum_plc"]["power"]["spectrometer"]
+            self._PLC_INTERFACE.power["spectrometer"]
         )
 
         if current_sun_elevation is not None:
-            if (current_sun_elevation > min_sun_angle) and (not spectrometer_has_power):
-                self.plc_write_bool(
-                    self._SETUP["tum_plc"]["power"]["spectrometer"], True
-                )
+            if (current_sun_elevation > min_power_elevation) and (
+                not spectrometer_has_power
+            ):
+                self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], True)
                 logger.info("Powering up the spectrometer.")
             elif spectrometer_has_power:
-                self.plc_write_bool(
-                    self._SETUP["tum_plc"]["power"]["spectrometer"], False
-                )
+                self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], False)
                 logger.info("Powering down the spectrometer.")
 
     def read_state_from_plc(self):
@@ -107,23 +151,23 @@ class EnclosureControl:
         r: list
         """
         return [
-            self.plc_read_int(self._SETUP["tum_plc"]["actors"]["fan_speed"]),
-            self.plc_read_int(self._SETUP["tum_plc"]["actors"]["current_angle"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["control"]["auto_temp_mode"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["control"]["manual_control"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["control"]["manual_temp_mode"]),
-            self.plc_read_int(self._SETUP["tum_plc"]["sensors"]["humidity"]),
-            self.plc_read_int(self._SETUP["tum_plc"]["sensors"]["temperature"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["camera"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["computer"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["cover"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["heater"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["motor_failed"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["rain"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["reset_needed"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["router"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["spectrometer"]),
-            self.plc_read_bool(self._SETUP["tum_plc"]["state"]["ups_alert"]),
+            self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
+            self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"]),
+            self.plc_read_bool(self._PLC_INTERFACE.control["auto_temp_mode"]),
+            self.plc_read_bool(self._PLC_INTERFACE.control["manual_control"]),
+            self.plc_read_bool(self._PLC_INTERFACE.control["manual_temp_mode"]),
+            self.plc_read_int(self._PLC_INTERFACE.sensors["humidity"]),
+            self.plc_read_int(self._PLC_INTERFACE.sensors["temperature"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["camera"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["computer"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["heater"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["motor_failed"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["rain"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["router"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["spectrometer"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["ups_alert"]),
         ]
 
     def plc_connect(self):
@@ -134,7 +178,7 @@ class EnclosureControl:
         True -> connected
         False -> not connected
         """
-        self.plc.connect(self._SETUP["ip"], 0, 1)
+        self.plc.connect(self._CONFIG["tum_plc"]["ip"], 0, 1)
         return self.plc.get_connected()
 
     def plc_disconnect(self):
@@ -163,7 +207,7 @@ class EnclosureControl:
         return self.plc.get_connected()
 
     def plc_read_int(self, action):
-        """Redas an INT value in the PLC database."""
+        """Reads an INT value in the PLC database."""
         assert len(action) == 3
         db_number, start, size = action
 
@@ -216,3 +260,23 @@ class EnclosureControl:
         """Sleeps if cpu is busy."""
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
             time.sleep(2)
+
+    def wait_for_cover_closing(self):
+        """Waits steps of 5s for the enclosure cover to close.
+
+        Raises the custom error CoverError if clover doesn't close in a given
+        period of time.
+        """
+
+        start_time = time.time()
+        loop = True
+
+        while loop:
+            time.sleep(5)
+
+            if self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"]):
+                loop = False
+
+            elapsed_time = time.time() - start_time
+            if elapsed_time > 31:
+                raise CoverError("Enclosure cover might be stuck.")

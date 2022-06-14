@@ -3,16 +3,22 @@ import Toggle from '../components/essential/toggle';
 import ICONS from '../assets/icons';
 import Button from '../components/essential/button';
 import backend from '../utils/backend';
-import { dialog } from '@tauri-apps/api';
+import { dialog, shell } from '@tauri-apps/api';
 
 export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
     const [infoLogs, setInfoLogs] = useState<string>('');
     const [debugLogs, setDebugLogs] = useState<string>('');
 
+    const [loading, setLoading] = useState(true);
+
     async function updateLogs() {
-        setInfoLogs((await backend.readInfoLogs()).reverse().join('\n'));
-        setDebugLogs((await backend.readDebugLogs()).reverse().join('\n'));
+        setLoading(true);
+        const newInfoLogs = (await backend.readInfoLogs()).reverse().join('\n');
+        const newDebugLogs = (await backend.readInfoLogs()).reverse().join('\n');
+        setInfoLogs(newInfoLogs);
+        setDebugLogs(newDebugLogs);
+        setLoading(false);
     }
 
     // TODO: show dialog
@@ -32,40 +38,49 @@ export default function LogTab(props: { visible: boolean }) {
         updateLogs();
     }, []);
 
+    async function openLogsFolder() {
+        await shell.open(`${import.meta.env.VITE_PROJECT_DIR}/logs`);
+    }
+
     return (
         <div
             className={
-                'flex-col w-full h-full p-6 ' + (props.visible ? 'flex ' : 'hidden ')
+                'flex-col w-full h-full pt-4 ' + (props.visible ? 'flex ' : 'hidden ')
             }
         >
-            <div className="flex-row-center gap-x-2">
+            <div className="px-6 mb-4 flex-row-center gap-x-2">
                 <Button
                     onClick={() => {
                         updateLogs();
                     }}
-                    variant="gray"
-                    className="!px-0.5 !py-1 !h-7 "
+                    variant="slate"
+                    className="!px-2"
                 >
-                    <div className="w-6 h-6 fill-gray-700 ">{ICONS.refresh}</div>
+                    {loading && <span className="w-4">...</span>}
+                    {!loading && (
+                        <div className="w-4 h-4 fill-slate-700 ">{ICONS.refresh}</div>
+                    )}
                 </Button>
                 <Toggle
-                    value={logLevel == 'info'}
-                    setValue={(v) => setLogLevel(v ? 'info' : 'debug')}
-                    trueLabel="info"
-                    falseLabel="debug"
+                    value={logLevel}
+                    setValue={(s: any) => setLogLevel(s)}
+                    values={['info', 'debug']}
                 />
                 <div className="flex-grow" />
+                <Button onClick={openLogsFolder} variant="white">
+                    open logs folder
+                </Button>
                 <Button onClick={archiveLogs} variant="red">
                     archive logs
                 </Button>
             </div>
             <pre
                 className={
-                    'w-full !px-3 !py-2 !mt-4 !mb-0 bg-white rounded overflow-y-scroll ' +
-                    'border border-gray-300 shadow-sm'
+                    'w-full !px-6 !py-2 !mb-0 overflow-y-scroll ' +
+                    'border-t border-slate-300 bg-white h-full'
                 }
             >
-                <code className="w-full h-full !text-sm language-log">
+                <code className="w-full h-full !text-xs language-log">
                     {logLevel === 'info' ? infoLogs : debugLogs}
                     {(logLevel === 'info' ? infoLogs : debugLogs)
                         .replace('\n', '')

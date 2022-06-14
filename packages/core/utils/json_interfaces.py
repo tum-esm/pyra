@@ -8,29 +8,32 @@ from packages.core.utils.validation import Validation
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
-SETUP_FILE_PATH = os.path.join(PROJECT_DIR, "config", "setup.json")
-PARAMS_FILE_PATH = os.path.join(PROJECT_DIR, "config", "parameters.json")
-CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", "config.lock")
+CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
+CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 
 RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
 STATE_FILE_PATH = os.path.join(RUNTIME_DATA_PATH, "state.json")
+STATE_LOCK_PATH = os.path.join(RUNTIME_DATA_PATH, ".state.lock")
 VBDSD_IMG_DIR = os.path.join(RUNTIME_DATA_PATH, "vbdsd")
 
 
 # FileLock = Mark, that the config JSONs are being used and the
 # CLI should not interfere. A file "config/config.lock" will be created
 # and the existence of this file will make the next line wait.
-def with_filelock(function):
-    def locked_function(*args, **kwargs):
-        with filelock.FileLock(CONFIG_LOCK_PATH):
-            return function(*args, **kwargs)
+def with_filelock(file_lock_path):
+    def wrapper(function):
+        def locked_function(*args, **kwargs):
+            with filelock.FileLock(file_lock_path):
+                return function(*args, **kwargs)
 
-    return locked_function
+        return locked_function
+
+    return wrapper
 
 
-class State:
+class StateInterface:
     @staticmethod
-    @with_filelock
+    @with_filelock(STATE_LOCK_PATH)
     def initialize():
         # clear runtime_data directory
         if os.path.exists(RUNTIME_DATA_PATH):
@@ -50,13 +53,13 @@ class State:
             )
 
     @staticmethod
-    @with_filelock
+    @with_filelock(STATE_LOCK_PATH)
     def read() -> dict:
         with open(STATE_FILE_PATH, "r") as f:
             return json.load(f)
 
     @staticmethod
-    @with_filelock
+    @with_filelock(STATE_LOCK_PATH)
     def update(update: dict):
         with open(STATE_FILE_PATH, "r") as f:
             _STATE = json.load(f)
@@ -64,17 +67,13 @@ class State:
             json.dump({**_STATE, **update}, f)
 
 
-class Config:
+class ConfigInterface:
     @staticmethod
-    @with_filelock
-    def read() -> tuple[dict]:
-        assert Validation.check_parameters_file()
-        assert Validation.check_setup_file()
-        with open(SETUP_FILE_PATH, "r") as f:
-            _SETUP = json.load(f)
-        with open(PARAMS_FILE_PATH, "r") as f:
-            _PARAMS = json.load(f)
+    @with_filelock(CONFIG_LOCK_PATH)
+    def read() -> dict:
+        assert Validation.check_current_config_file()
+        with open(CONFIG_FILE_PATH, "r") as f:
+            _CONFIG = json.load(f)
 
-        Astronomy.SETUP = _SETUP
-        Astronomy.PARAMS = _PARAMS
-        return _SETUP, _PARAMS
+        Astronomy.CONFIG = _CONFIG
+        return _CONFIG

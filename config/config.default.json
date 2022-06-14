@@ -1,0 +1,42 @@
+{
+    "general": {
+        "seconds_per_core_interval": 30,
+        "test_mode": false
+    },
+    "opus": {
+        "em27_ip": "10.0.0.1",
+        "executable_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe",
+        "executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
+        "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
+        "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx"
+    },
+    "camtracker": {
+        "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt",
+        "executable_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTracker_3_9.exe",
+        "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
+        "sun_intensity_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat",
+        "motor_offset_threshold": 10
+    },
+    "error_email": {
+        "sender_address": "esm-technical-user@gmail.com",
+        "sender_password": "...",
+        "notify_recipients": true,
+        "recipients": "your@mail.com"
+    },
+    "measurement_decision": {
+        "mode": "automatic",
+        "manual_decision_result": false,
+        "cli_decision_result": false
+    },
+    "measurement_triggers": {
+        "consider_time": true,
+        "consider_sun_elevation": true,
+        "consider_vbdsd": false,
+        "start_time": { "hour": 7, "minute": 0, "second": 0 },
+        "stop_time": { "hour": 21, "minute": 0, "second": 0 },
+        "min_sun_elevation": 0.0,
+        "max_sun_elevation": 90.0
+    },
+    "tum_plc": null,
+    "vbdsd": null
+}

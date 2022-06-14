@@ -2,66 +2,92 @@ import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import './styles/index.css';
 
+import backend from './utils/backend';
 import Button from './components/essential/button';
 import Header from './components/header';
-import ConfigTab from './tabs/config-tab';
 import LogTab from './tabs/log-tab';
-import backend from './utils/backend';
+import StatusTab from './tabs/status-tab';
+import TYPES from './utils/types';
+import ConfigTab from './tabs/config-tab';
 
-const tabs = ['Status', 'Setup', 'Parameters', 'Logs', 'Enclosure Controls'];
+const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
 
 function Main() {
-    console.log('RUNNING MAINS');
-    const [activeTabIndex, setActiveTabIndex] = useState(1);
-    const [pyraIsSetUp, setPyraIsSetUp] = useState(false);
-    const [checkingSetup, setCheckingSetup] = useState(true);
-
-    async function updateCliStatus() {
-        setCheckingSetup(true);
-        const status = await backend.isAvailable();
-        setPyraIsSetUp(status);
-        setCheckingSetup(false);
-    }
+    const [activeTab, setActiveTab] = useState('Status');
+    const [backendIntegrity, setBackendIntegrity] = useState<
+        undefined | 'valid' | 'cli is missing' | 'config is invalid'
+    >(undefined);
+    const [centralConfig, setCentralConfig] = useState<TYPES.config | undefined>(
+        undefined
+    );
 
     useEffect(() => {
-        if (!pyraIsSetUp) {
-            updateCliStatus();
-        }
+        loadInitialState();
     }, []);
+
+    async function loadInitialState() {
+        setBackendIntegrity(undefined);
+        setCentralConfig(undefined);
+
+        const pyraCliIsAvailable = await backend.pyraCliIsAvailable();
+        if (!pyraCliIsAvailable) {
+            setBackendIntegrity('cli is missing');
+            return;
+        }
+
+        const p = await backend.getConfig();
+        if (p.stdout.startsWith('file not in a valid json format')) {
+            setBackendIntegrity('config is invalid');
+        } else {
+            setBackendIntegrity('valid');
+            setCentralConfig(JSON.parse(p.stdout));
+        }
+    }
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
-            {!pyraIsSetUp && !checkingSetup && (
-                <main className="flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4">
-                    <p className="max-w-sm text-center">
-                        <pre className="bg-slate-200 mr-1 px-1 py-0.5 rounded-sm font-bold inline">
-                            pyra-cli
-                        </pre>{' '}
-                        has not been found on your system. Please following the
-                        installation instructions on{' '}
+            {(backendIntegrity === 'cli is missing' ||
+                backendIntegrity === 'config is invalid') && (
+                <main className="flex flex-col items-center justify-center w-full h-full bg-slate-100 gap-y-4">
+                    <p className="inline max-w-sm text-center">
+                        {backendIntegrity === 'cli is missing' && (
+                            <>
+                                <pre className="bg-slate-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
+                                    pyra-cli
+                                </pre>{' '}
+                                has not been found on your system.{' '}
+                            </>
+                        )}
+                        {backendIntegrity === 'config is invalid' && (
+                            <>
+                                The file{' '}
+                                <pre className="bg-slate-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
+                                    config.json
+                                </pre>{' '}
+                                is not in a valid JSON format.{' '}
+                            </>
+                        )}
+                        Please following the installation instructions on{' '}
                         <span className="font-bold text-blue-500 underline">
                             https://github.com/tum-esm/pyra
                         </span>
                         .
                     </p>
-                    <Button onClick={updateCliStatus} variant="green">
+                    <Button onClick={loadInitialState} variant="green">
                         retry connection
                     </Button>
                 </main>
             )}
-            {pyraIsSetUp && (
+            {backendIntegrity === 'valid' && centralConfig !== undefined && (
                 <>
-                    <Header {...{ tabs, activeTabIndex, setActiveTabIndex }} />
-                    <main className="flex-grow w-full min-h-0 bg-gray-100">
-                        <ConfigTab
-                            type="setup"
-                            visible={tabs[activeTabIndex] === 'Setup'}
+                    <Header {...{ tabs, activeTab, setActiveTab }} />
+                    <main className="flex-grow w-full min-h-0 bg-slate-75">
+                        <StatusTab
+                            visible={activeTab === 'Status'}
+                            {...{ centralConfig, setCentralConfig }}
                         />
-                        <ConfigTab
-                            type="parameters"
-                            visible={tabs[activeTabIndex] === 'Parameters'}
-                        />
-                        <LogTab visible={tabs[activeTabIndex] === 'Logs'} />
+                        <ConfigTab visible={activeTab === 'Config'} />
+                        <LogTab visible={activeTab === 'Logs'} />
                     </main>
                 </>
             )}

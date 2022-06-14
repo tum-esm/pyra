@@ -10,7 +10,7 @@ export default function LabeledRow(props: {
     const { key2, key3, modified, children } = props;
 
     return (
-        <div className="relative flex">
+        <div className="relative flex mb-6">
             <label className="overflow-hidden text-sm text-left w-[12.5rem] text-slate-700 whitespace-nowrap flex-shrink-0 h-9 leading-9">
                 <strong>{capitalizeConfigKey(key2)}</strong>
                 {key3 !== undefined && '.' + capitalizeConfigKey(key3)}

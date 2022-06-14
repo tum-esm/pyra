@@ -12,13 +12,13 @@ export default function TextInput(props: {
                 value={props.value}
                 onChange={(e) => props.setValue(e.target.value)}
                 className={
-                    'shadow-sm rounded-md border-gray-300 text-sm w-full ' +
+                    'shadow-sm rounded-md border-slate-300 text-sm w-full ' +
                     'focus:ring-blue-500 focus:border-blue-500 ' +
                     (props.small ? 'w-12 text-center h-7 ' : 'flex-grow h-9 ')
                 }
             />
             {props.postfix !== undefined && (
-                <div className="absolute text-sm text-gray-900 -translate-y-[calc(50%-0.5px)] opacity-50 top-1/2 left-3 pointer-events-none whitespace-pre">
+                <div className="absolute text-sm text-slate-900 -translate-y-[calc(50%-0.5px)] opacity-50 top-1/2 left-3 pointer-events-none whitespace-pre">
                     <span className="opacity-0">{props.value}</span> {props.postfix}
                 </div>
             )}
