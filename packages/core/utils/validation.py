@@ -27,7 +27,6 @@ NULLABLE_DICT_SCHEMA = lambda s: {"type": "dict", "schema": s, "nullable": True}
 
 
 class Schemas:
-    sun_elevation = {"type": "number", "min": 0, "max": 90}
     time_dict = {
         "type": "dict",
         "schema": {
@@ -36,23 +35,8 @@ class Schemas:
             "second": {"type": "integer", "min": 0, "max": 59},
         },
     }
-    time_interval = {"type": "number", "min": 5, "max": 600}
-    number = {"type": "number"}
-    integer = {"type": "integer"}
     string = {"type": "string"}
     boolean = {"type": "boolean"}
-    int_list_3 = {
-        "type": "list",
-        "schema": {"type": "integer"},
-        "minlength": 3,
-        "maxlength": 3,
-    }
-    int_list_4 = {
-        "type": "list",
-        "schema": {"type": "integer"},
-        "minlength": 4,
-        "maxlength": 4,
-    }
     ip = {"type": "string", "check_with": _is_valid_ip_adress}
     file = {"type": "string", "check_with": _file_path_exists}
 
@@ -60,7 +44,7 @@ class Schemas:
 CONFIG_FILE_SCHEMA = {
     "general": DICT_SCHEMA(
         {
-            "seconds_per_core_interval": Schemas.time_interval,
+            "seconds_per_core_interval": {"type": "number", "min": 5, "max": 600},
             "test_mode": Schemas.boolean,
         }
     ),
@@ -79,7 +63,7 @@ CONFIG_FILE_SCHEMA = {
             "executable_path": Schemas.file,
             "learn_az_elev_path": Schemas.file,
             "sun_intensity_path": Schemas.file,
-            "motor_offset_threshold": Schemas.number,
+            "motor_offset_threshold": {"type": "number", "min": -360, "max": 360},
         }
     ),
     "error_email": DICT_SCHEMA(
@@ -104,13 +88,13 @@ CONFIG_FILE_SCHEMA = {
             "consider_vbdsd": Schemas.boolean,
             "start_time": Schemas.time_dict,
             "stop_time": Schemas.time_dict,
-            "min_sun_elevation": Schemas.sun_elevation,
-            "max_sun_elevation": Schemas.sun_elevation,
+            "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
+            "max_sun_elevation": {"type": "number", "min": 0, "max": 90},
         }
     ),
     "tum_plc": NULLABLE_DICT_SCHEMA(
         {
-            "min_power_elevation": Schemas.sun_elevation,
+            "min_power_elevation": {"type": "number", "min": 0, "max": 90},
             "ip": Schemas.ip,
             "version": {"type": "integer", "allowed": [1, 2]},
         }
@@ -119,9 +103,9 @@ CONFIG_FILE_SCHEMA = {
         {
             "camera_id": {"type": "integer", "min": 0, "max": 999999},
             "evaluation_size": {"type": "integer", "min": 1, "max": 100},
-            "seconds_per_interval": Schemas.time_interval,
+            "seconds_per_interval": {"type": "number", "min": 5, "max": 600},
             "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
-            "min_sun_elevation": Schemas.sun_elevation,
+            "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
         }
     ),
 }
