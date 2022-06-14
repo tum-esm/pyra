@@ -54,6 +54,11 @@
                             "update",
                             { "validator": "\\{.*\\}" }
                         ]
+                    },
+                    {
+                        "name": "pyra-cli-state-get",
+                        "cmd": ".venv/bin/python",
+                        "args": ["packages/cli/main.py", "state", "get"]
                     }
                 ]
             }

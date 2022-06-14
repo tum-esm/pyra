@@ -3,6 +3,7 @@ import TYPES from '../utils/types';
 
 import PyraCoreStatus from '../components/status/pyra-core-status';
 import MeasurementDecisionStatus from '../components/status/measurement-decision-status';
+import PyraCoreState from '../components/status/pyra-core-state';
 
 export default function StatusTab(props: {
     visible: boolean;
@@ -32,6 +33,7 @@ export default function StatusTab(props: {
                         {...{ centralConfig, setCentralConfig }}
                     />
                     <div className="w-full h-px bg-slate-300" />
+                    <PyraCoreState />
                 </>
             )}
         </div>

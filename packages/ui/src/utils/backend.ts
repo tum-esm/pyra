@@ -58,6 +58,10 @@ const backend = {
         ]);
         return await command.execute();
     },
+    getState: async (): Promise<ChildProcess> => {
+        const command = generateCliInvocation('pyra-cli-state-get', ['state', 'get']);
+        return await command.execute();
+    },
 };
 
 export default backend;
