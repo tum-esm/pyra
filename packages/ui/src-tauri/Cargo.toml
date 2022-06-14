@@ -5,7 +5,7 @@ description = "Pyra UI"
 authors = ["Moritz Makowski <moritz.makowski@tum.de>", "Patrick Aigner <patrick.aigner@tum.de>"]
 license = ""
 repository = "https://github.com/tum-esm/pyra"
-default-run = "app"
+default-run = "pyra-ui"
 edition = "2021"
 rust-version = "1.57"
 

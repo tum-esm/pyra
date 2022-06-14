@@ -19,7 +19,7 @@ export default function MeasurementDecisionStatus(props: {
     if (measurementDecision.mode === 'manual') {
         measurementDecisionResult = measurementDecision.manual_decision_result;
     }
-    // TODO: add cli and automatic decision result
+    // TODO: integrate cli and automatic decision result
 
     async function updateMeasurementDecisionMode(mode: 'automatic' | 'manual' | 'cli') {
         setLoading(true);

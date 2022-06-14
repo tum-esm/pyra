@@ -28,6 +28,7 @@ export default function deepEqual(a: any, b: any): boolean {
     });
 
     // checks if all are true
+    // @ts-ignore
     return reduce(subequality, (prev, curr, i) => prev && curr, true);
 }
 

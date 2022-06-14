@@ -51,8 +51,6 @@ export default function ConfigSectionTumPlc(props: {
         );
     }
 
-    // TODO: revert button (with "previously ...")
-
     return (
         <>
             <Button variant="slate" onClick={setNull}>
