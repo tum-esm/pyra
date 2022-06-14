@@ -81,7 +81,7 @@ function Main() {
             {backendIntegrity === 'valid' && centralConfig !== undefined && (
                 <>
                     <Header {...{ tabs, activeTab, setActiveTab }} />
-                    <main className="flex-grow w-full min-h-0 bg-slate-50">
+                    <main className="flex-grow w-full min-h-0 bg-slate-75">
                         <StatusTab
                             visible={activeTab === 'Status'}
                             {...{ centralConfig, setCentralConfig }}

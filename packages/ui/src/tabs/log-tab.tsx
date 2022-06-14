@@ -3,7 +3,7 @@ import Toggle from '../components/essential/toggle';
 import ICONS from '../assets/icons';
 import Button from '../components/essential/button';
 import backend from '../utils/backend';
-import { dialog } from '@tauri-apps/api';
+import { dialog, shell } from '@tauri-apps/api';
 
 export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -38,6 +38,10 @@ export default function LogTab(props: { visible: boolean }) {
         updateLogs();
     }, []);
 
+    async function openLogsFolder() {
+        await shell.open(`${import.meta.env.VITE_PROJECT_DIR}/logs`);
+    }
+
     return (
         <div
             className={
@@ -63,6 +67,9 @@ export default function LogTab(props: { visible: boolean }) {
                     values={['info', 'debug']}
                 />
                 <div className="flex-grow" />
+                <Button onClick={openLogsFolder} variant="white">
+                    open logs folder
+                </Button>
                 <Button onClick={archiveLogs} variant="red">
                     archive logs
                 </Button>
@@ -70,7 +77,7 @@ export default function LogTab(props: { visible: boolean }) {
             <pre
                 className={
                     'w-full !px-6 !py-2 !mb-0 overflow-y-scroll ' +
-                    'border-t border-slate-300 bg-white'
+                    'border-t border-slate-300 bg-white h-full'
                 }
             >
                 <code className="w-full h-full !text-xs language-log">

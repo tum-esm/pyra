@@ -18,6 +18,7 @@
             },
             "shell": {
                 "execute": true,
+                "open": ".*",
                 "scope": [
                     {
                         "name": "pyra-cli",
