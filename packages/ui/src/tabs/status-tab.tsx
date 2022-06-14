@@ -22,7 +22,8 @@ export default function StatusTab(props: {
     return (
         <div
             className={
-                'flex-col w-full h-full gap-y-4 py-4 ' + (visible ? 'flex ' : 'hidden ')
+                'flex-col w-full h-full overflow-y-scroll gap-y-4 py-4 ' +
+                (visible ? 'flex ' : 'hidden ')
             }
         >
             <PyraCoreStatus {...{ pyraCorePID, setPyraCorePID }} />

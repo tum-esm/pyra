@@ -116,6 +116,37 @@ namespace TYPES {
             min_sun_elevation?: number;
         };
     };
+
+    export type state = {
+        automation_should_be_running: boolean;
+        enclosure_plc_readings: {
+            actors: {
+                fan_speed: null | number;
+                current_angle: null | number;
+            };
+            control: {
+                auto_temp_mode: null | boolean;
+                manual_control: null | boolean;
+                manual_temp_mode: null | boolean;
+            };
+            sensors: {
+                humidity: null | number;
+                temperature: null | number;
+            };
+            state: {
+                camera: null | boolean;
+                computer: null | boolean;
+                cover_closed: null | boolean;
+                heater: null | boolean;
+                motor_failed: null | boolean;
+                rain: null | boolean;
+                reset_needed: null | boolean;
+                router: null | boolean;
+                spectrometer: null | boolean;
+                ups_alert: null | boolean;
+            };
+        };
+    };
 }
 
 export default TYPES;
