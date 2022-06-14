@@ -26,6 +26,33 @@
                         "args": ["packages/cli/main.py"]
                     },
                     {
+                        "name": "pyra-cli-logs-read-info",
+                        "cmd": ".venv/bin/python",
+                        "args": [
+                            "packages/cli/main.py",
+                            "logs",
+                            "read",
+                            "--level",
+                            "INFO"
+                        ]
+                    },
+                    {
+                        "name": "pyra-cli-logs-read-debug",
+                        "cmd": ".venv/bin/python",
+                        "args": [
+                            "packages/cli/main.py",
+                            "logs",
+                            "read",
+                            "--level",
+                            "DEBUG"
+                        ]
+                    },
+                    {
+                        "name": "pyra-cli-logs-archive",
+                        "cmd": ".venv/bin/python",
+                        "args": ["packages/cli/main.py", "logs", "archive"]
+                    },
+                    {
                         "name": "pyra-cli-core-start",
                         "cmd": ".venv/bin/python",
                         "args": ["packages/cli/main.py", "core", "start"]
@@ -78,7 +105,7 @@
                 "icons/icon.icns",
                 "icons/icon.ico"
             ],
-            "identifier": "pyra-4-ui",
+            "identifier": "pyra-ui",
             "longDescription": "",
             "macOS": {
                 "entitlements": null,

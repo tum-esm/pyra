@@ -14,10 +14,22 @@ export default function LogTab(props: { visible: boolean }) {
 
     async function updateLogs() {
         setLoading(true);
-        const newInfoLogs = (await backend.readInfoLogs()).reverse().join('\n');
-        const newDebugLogs = (await backend.readInfoLogs()).reverse().join('\n');
-        setInfoLogs(newInfoLogs);
-        setDebugLogs(newDebugLogs);
+        try {
+            const newInfoLogs = (await backend.readInfoLogs()).stdout
+                .split('\n')
+                .reverse()
+                .join('\n');
+            const newDebugLogs = (await backend.readDebugLogs()).stdout
+                .split('\n')
+                .reverse()
+                .join('\n');
+            setInfoLogs(newInfoLogs);
+            setDebugLogs(newDebugLogs);
+        } catch {
+            // TODO: Add message to queue
+            setInfoLogs('');
+            setDebugLogs('');
+        }
         setLoading(false);
     }
 

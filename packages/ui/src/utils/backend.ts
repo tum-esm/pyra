@@ -1,21 +1,5 @@
 import { Command, ChildProcess } from '@tauri-apps/api/shell';
-import { invoke as invokeTauriCommand } from '@tauri-apps/api/tauri';
-import { trim } from 'lodash';
 import TYPES from './types';
-
-async function invoke(command: string, argument?: object): Promise<any> {
-    /* @ts-ignore */
-    const result = await invokeTauriCommand(command, argument);
-    if (typeof result === 'string') {
-        if (command.includes('json') && command.includes('read')) {
-            return JSON.parse(result);
-        } else {
-            return trim(result.replace(/\n+/g, '\n'), '\n').split('\n');
-        }
-    } else {
-        return result === true;
-    }
-}
 
 const generateCliInvocation = (cmd: string, args: string[]) =>
     new Command(cmd, ['packages/cli/main.py', ...args], {
@@ -23,9 +7,31 @@ const generateCliInvocation = (cmd: string, args: string[]) =>
     });
 
 const backend = {
-    readInfoLogs: async (): Promise<string[]> => await invoke('read_info_logs'),
-    readDebugLogs: async (): Promise<string[]> => await invoke('read_debug_logs'),
-    archiveLogs: async (): Promise<string[]> => await invoke('archive_logs'),
+    readInfoLogs: async (): Promise<ChildProcess> => {
+        const command = generateCliInvocation('pyra-cli-logs-read-info', [
+            'logs',
+            'read',
+            '--level',
+            'INFO',
+        ]);
+        return await command.execute();
+    },
+    readDebugLogs: async (): Promise<ChildProcess> => {
+        const command = generateCliInvocation('pyra-cli-logs-read-debug', [
+            'logs',
+            'read',
+            '--level',
+            'DEBUG',
+        ]);
+        return await command.execute();
+    },
+    archiveLogs: async (): Promise<ChildProcess> => {
+        const command = generateCliInvocation('pyra-cli-logs-archive', [
+            'logs',
+            'archive',
+        ]);
+        return await command.execute();
+    },
     startPyraCore: async (): Promise<ChildProcess> => {
         const command = generateCliInvocation('pyra-cli-core-start', ['core', 'start']);
         return await command.execute();
