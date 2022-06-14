@@ -39,6 +39,9 @@ const backend = {
     pyraCliIsAvailable: async (): Promise<boolean> => {
         const command = generateCliInvocation('pyra-cli', []);
         const p = await command.execute();
+        console.log(
+            JSON.stringify({ p, VITE_PROJECT_DIR: import.meta.env.VITE_PROJECT_DIR })
+        );
         return p.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...');
     },
     checkPyraCoreState: async (): Promise<ChildProcess> => {
