@@ -8,7 +8,7 @@
     },
     "package": {
         "productName": "pyra-ui",
-        "version": "4.0.0-alpha.1"
+        "version": "4.0.0"
     },
     "tauri": {
         "allowlist": {
