@@ -17,11 +17,9 @@ export default function LogTab(props: { visible: boolean }) {
         try {
             const newInfoLogs = (await backend.readInfoLogs()).stdout
                 .split('\n')
-                .reverse()
                 .join('\n');
             const newDebugLogs = (await backend.readDebugLogs()).stdout
                 .split('\n')
-                .reverse()
                 .join('\n');
             setInfoLogs(newInfoLogs);
             setDebugLogs(newDebugLogs);

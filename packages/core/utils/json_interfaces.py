@@ -10,10 +10,10 @@ PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
+STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 
 RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
 STATE_FILE_PATH = os.path.join(RUNTIME_DATA_PATH, "state.json")
-STATE_LOCK_PATH = os.path.join(RUNTIME_DATA_PATH, ".state.lock")
 VBDSD_IMG_DIR = os.path.join(RUNTIME_DATA_PATH, "vbdsd")
 
 

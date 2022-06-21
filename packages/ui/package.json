@@ -6,17 +6,17 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "tauri": "export RUST_BACKTRACE=full && tauri"
+        "tauri": "tauri"
     },
     "dependencies": {
-        "@tauri-apps/api": "1.0.0-rc.7",
+        "@tauri-apps/api": "1.0.1",
         "lodash": "4.17.21",
         "react": "18.1.0",
         "react-dom": "18.1.0"
     },
     "devDependencies": {
         "@tailwindcss/forms": "0.5.2",
-        "@tauri-apps/cli": "1.0.0-rc.14",
+        "@tauri-apps/cli": "1.0.0",
         "@types/lodash": "4.14.182",
         "@types/react": "18.0.12",
         "@types/react-dom": "18.0.5",

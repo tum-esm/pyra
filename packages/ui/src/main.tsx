@@ -25,22 +25,34 @@ function Main() {
         loadInitialState();
     }, []);
 
+    // TODO: Show spinner in undefined state
+    // TODO: watch for changes in config.json or state.json
+
     async function loadInitialState() {
         setBackendIntegrity(undefined);
         setCentralConfig(undefined);
 
-        const pyraCliIsAvailable = await backend.pyraCliIsAvailable();
-        if (!pyraCliIsAvailable) {
-            setBackendIntegrity('cli is missing');
-            return;
-        }
+        console.debug("loading initial state ...")
 
-        const p = await backend.getConfig();
-        if (p.stdout.startsWith('file not in a valid json format')) {
-            setBackendIntegrity('config is invalid');
-        } else {
-            setBackendIntegrity('valid');
-            setCentralConfig(JSON.parse(p.stdout));
+        try {
+            const pyraCliIsAvailable = await backend.pyraCliIsAvailable();
+            console.debug("found pyra-cli");
+            if (!pyraCliIsAvailable) {
+                setBackendIntegrity('cli is missing');
+                return;
+            }
+
+            const p = await backend.getConfig();
+            if (p.stdout.startsWith('file not in a valid json format')) {
+                setBackendIntegrity('config is invalid');
+            } else {
+                // TODO: handle "file not exists error"
+                setBackendIntegrity('valid');
+                setCentralConfig(JSON.parse(p.stdout));
+            }
+        } catch (e) {
+            console.log(`Error while fetching initial state: ${e}`);
+            setBackendIntegrity('cli is missing');
         }
     }
 

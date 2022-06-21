@@ -7,7 +7,8 @@ import psutil
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-INTERPRETER_PATH = os.path.join(PROJECT_DIR, ".venv", "bin", "python")
+# TODO: ".venv/bin" on mac but ".venv/Scripts" on windows
+INTERPRETER_PATH = os.path.join("python")
 SCRIPT_PATH = os.path.join(PROJECT_DIR, "run-pyra-core.py")
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
@@ -18,7 +19,7 @@ def process_is_running():
     for p in psutil.process_iter():
         try:
             arguments = p.cmdline()
-            if (len(arguments) > 0) and (arguments[-1] == SCRIPT_PATH):
+            if (len(arguments) == 2) and (arguments[1] == SCRIPT_PATH):
                 return p.pid
         except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
             pass
@@ -47,6 +48,7 @@ def _start_pyra_core():
     if existing_pid is not None:
         error_handler(f"Background process already exists with PID {existing_pid}")
     else:
+        print( [INTERPRETER_PATH, SCRIPT_PATH])
         p = subprocess.Popen(
             [INTERPRETER_PATH, SCRIPT_PATH],
             stdout=subprocess.PIPE,

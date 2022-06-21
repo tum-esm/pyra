@@ -65,12 +65,12 @@ def run():
             new_current_exceptions = [*current_exceptions]
 
             if new_exception is not None:
-                if type(e).__name__ not in current_exceptions:
-                    new_current_exceptions.append(type(e).__name__)
+                if type(new_exception).__name__ not in current_exceptions:
+                    new_current_exceptions.append(type(new_exception).__name__)
                     ExceptionEmailClient.handle_occured_exception(
-                        _CONFIG["error_email"], e
+                        _CONFIG["error_email"], new_exception
                     )
-                    logger.exception(f"Exception {type(e).__name__} has occured.")
+                    logger.exception(new_exception)
             else:
                 if len(current_exceptions) > 0:
                     new_current_exceptions = []
@@ -82,7 +82,7 @@ def run():
             # if no errors until now
             current_exceptions = [*new_current_exceptions]
         except Exception as e:
-            logger.exception(f"Exception {type(e).__name__} during email sending.")
+            logger.exception(e)
 
         logger.info("Ending Iteration")
 
