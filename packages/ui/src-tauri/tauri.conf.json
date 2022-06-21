@@ -8,7 +8,7 @@
     },
     "package": {
         "productName": "pyra-ui",
-        "version": "4.0.0-alpha.1"
+        "version": "4.0.0"
     },
     "tauri": {
         "allowlist": {
@@ -17,75 +17,14 @@
                 "open": true
             },
             "shell": {
+                "all": true,
                 "execute": true,
                 "open": ".*",
                 "scope": [
                     {
                         "name": "pyra-cli",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py"]
-                    },
-                    {
-                        "name": "pyra-cli-logs-read-info",
-                        "cmd": ".venv/bin/python",
-                        "args": [
-                            "packages/cli/main.py",
-                            "logs",
-                            "read",
-                            "--level",
-                            "INFO"
-                        ]
-                    },
-                    {
-                        "name": "pyra-cli-logs-read-debug",
-                        "cmd": ".venv/bin/python",
-                        "args": [
-                            "packages/cli/main.py",
-                            "logs",
-                            "read",
-                            "--level",
-                            "DEBUG"
-                        ]
-                    },
-                    {
-                        "name": "pyra-cli-logs-archive",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "logs", "archive"]
-                    },
-                    {
-                        "name": "pyra-cli-core-start",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "core", "start"]
-                    },
-                    {
-                        "name": "pyra-cli-core-is-running",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "core", "is-running"]
-                    },
-                    {
-                        "name": "pyra-cli-core-stop",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "core", "stop"]
-                    },
-                    {
-                        "name": "pyra-cli-config-get",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "config", "get"]
-                    },
-                    {
-                        "name": "pyra-cli-config-update",
-                        "cmd": ".venv/bin/python",
-                        "args": [
-                            "packages/cli/main.py",
-                            "config",
-                            "update",
-                            { "validator": "\\{.*\\}" }
-                        ]
-                    },
-                    {
-                        "name": "pyra-cli-state-get",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "state", "get"]
+                        "cmd": "python",
+                        "args": true
                     }
                 ]
             }

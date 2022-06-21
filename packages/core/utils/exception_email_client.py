@@ -15,6 +15,8 @@ class ExceptionEmailClient:
         sender_password = email_config["sender_password"]
         recipients = email_config["recipients"].replace(" ", "").split(",")
 
+        print(sender_email, sender_password, recipients)
+
         message = MIMEMultipart("alternative")
         message["Subject"] = subject
         message["From"] = f"PYRA Technical User <{sender_email}>"
@@ -71,8 +73,8 @@ class ExceptionEmailClient:
             latest_log_lines = f.readlines()
 
         log_line_count = len(latest_log_lines)
-        if log_line_count > 3:
-            latest_log_lines = latest_log_lines[-3:]
+        if log_line_count > 20:
+            latest_log_lines = latest_log_lines[20:]
 
         for index, line in enumerate(latest_log_lines):
             line_number = log_line_count - len(latest_log_lines) + 1 + index

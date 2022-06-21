@@ -11,6 +11,7 @@ export default function Toggle(props: {
             <div className="flex flex-row elevated-panel h-7">
                 {values.map((v) => (
                     <button
+                        key={v}
                         onClick={() => (value !== v ? setValue(v) : {})}
                         className={
                             'first:rounded-l-md last:rounded-r-md w-auto ' +

@@ -37,3 +37,4 @@ packages/ui/node_modules/
 
 # development
 .vscode/
+.idea

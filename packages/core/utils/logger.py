@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import traceback
 import filelock
 
 dir = os.path.dirname
@@ -29,9 +30,10 @@ class Logger:
     def error(self, message: str):
         self._write_log_line("ERROR", message)
 
-    def exception(self, message: str):
+    def exception(self, e: Exception):
         # TODO: Attach traceback to message string
-        self._write_log_line("EXCEPTION", message)
+        tb = "\n".join(traceback.format_exception(e))
+        self._write_log_line("EXCEPTION", f"{type(e).__name__} occured: {tb}")
 
     def _write_log_line(self, level: str, message: str):
         timestamp = datetime.utcnow()
