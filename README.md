@@ -51,3 +51,8 @@ TODO: Find a way to set up autocompletion on the `pyra-cli` command.
 ## Graphical User Interface
 
 _documentation coming soon_
+
+Less Secure Apps have been deactivated.
+https://support.google.com/accounts/answer/6010255?hl=de&visit_id=637914296292859831-802637670&p=less-secure-apps&rd=1
+
+Solution: Use "App passwords", requires 2FA
