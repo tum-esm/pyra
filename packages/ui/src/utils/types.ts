@@ -14,6 +14,7 @@ namespace TYPES {
         general: {
             seconds_per_core_interval: number;
             test_mode: boolean;
+            station_id: string;
         };
         opus: {
             em27_ip: string;
@@ -68,6 +69,7 @@ namespace TYPES {
         general?: {
             seconds_per_core_interval?: number;
             test_mode?: boolean;
+            station_id?: string;
         };
         opus?: {
             em27_ip?: string;

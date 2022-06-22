@@ -25,6 +25,12 @@ export default function ConfigSectionGeneral(props: {
                 setValue={(v: boolean) => addLocalUpdate({ general: { test_mode: v } })}
                 oldValue={centralConfig.general.test_mode}
             />
+            <ConfigElementText
+                key2="station_id"
+                value={localConfig.general.station_id}
+                setValue={(v: string) => addLocalUpdate({ general: { station_id: v } })}
+                oldValue={centralConfig.general.station_id}
+            />
         </>
     );
 }

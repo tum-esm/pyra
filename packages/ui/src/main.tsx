@@ -22,11 +22,10 @@ function Main() {
         undefined
     );
 
-    // useEffect(() => {
-    //     loadInitialState();
-    // }, []);
+    useEffect(() => {
+        loadInitialState();
+    }, []);
 
-    // TODO: Show spinner in undefined state
     // TODO: watch for changes in config.json or state.json
 
     async function loadInitialState() {
