@@ -7,7 +7,7 @@ __pycache__
 # config
 config/config.json
 config/config.original.json
-config/.config.lock
+config/*.lock
 
 # logs
 *.log

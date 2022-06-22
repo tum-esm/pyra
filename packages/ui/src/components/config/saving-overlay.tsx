@@ -4,8 +4,9 @@ export default function SavingOverlay(props: {
     errorMessage: undefined | string;
     saveLocalConfig(): void;
     restoreCentralConfig(): void;
+    isSaving: boolean;
 }) {
-    const { errorMessage, saveLocalConfig, restoreCentralConfig } = props;
+    const { errorMessage, saveLocalConfig, restoreCentralConfig, isSaving } = props;
     return (
         <div className="fixed bottom-0 left-0 z-50 w-full p-3 text-sm font-medium pl-[11.75rem] text-center border-t border-yellow-300 bg-yellow-75 flex-row-right gap-x-2">
             {errorMessage !== undefined && (
@@ -13,11 +14,11 @@ export default function SavingOverlay(props: {
                     {errorMessage}
                 </span>
             )}
-            <Button onClick={restoreCentralConfig} variant="slate">
+            <Button onClick={restoreCentralConfig} variant="slate" disabled={isSaving}>
                 revert
             </Button>
             {errorMessage === undefined && (
-                <Button onClick={saveLocalConfig} variant="slate">
+                <Button onClick={saveLocalConfig} variant="slate" spinner={isSaving}>
                     save
                 </Button>
             )}

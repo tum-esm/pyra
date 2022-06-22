@@ -10,6 +10,7 @@ export default function LogTab(props: { visible: boolean }) {
     const [infoLogs, setInfoLogs] = useState<string>('');
     const [debugLogs, setDebugLogs] = useState<string>('');
 
+    const [archiving, setArchiving] = useState(false);
     const [loading, setLoading] = useState(true);
 
     async function updateLogs() {
@@ -31,7 +32,6 @@ export default function LogTab(props: { visible: boolean }) {
         setLoading(false);
     }
 
-    // TODO: show dialog
     async function archiveLogs() {
         if (
             await dialog.confirm(
@@ -39,7 +39,9 @@ export default function LogTab(props: { visible: boolean }) {
                 'PyRa 4 UI'
             )
         ) {
+            setArchiving(true);
             await backend.archiveLogs();
+            setArchiving(false);
             await updateLogs();
         }
     }
@@ -65,11 +67,10 @@ export default function LogTab(props: { visible: boolean }) {
                     }}
                     variant="slate"
                     className="!px-2"
+                    spinner={loading}
+                    disabled={archiving}
                 >
-                    {loading && <span className="w-4">...</span>}
-                    {!loading && (
-                        <div className="w-4 h-4 fill-slate-700 ">{ICONS.refresh}</div>
-                    )}
+                    <div className="w-4 h-4 fill-slate-700">{ICONS.refresh}</div>
                 </Button>
                 <Toggle
                     value={logLevel}
@@ -80,7 +81,12 @@ export default function LogTab(props: { visible: boolean }) {
                 <Button onClick={openLogsFolder} variant="white">
                     open logs folder
                 </Button>
-                <Button onClick={archiveLogs} variant="red">
+                <Button
+                    onClick={archiveLogs}
+                    variant="red"
+                    spinner={archiving}
+                    disabled={loading}
+                >
                     archive logs
                 </Button>
             </div>

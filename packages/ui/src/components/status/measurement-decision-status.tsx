@@ -5,6 +5,7 @@ import { defaultsDeep } from 'lodash';
 import Button from '../essential/button';
 import Toggle from '../essential/toggle';
 import Ping from '../essential/ping';
+import ICONS from '../../assets/icons';
 
 export default function MeasurementDecisionStatus(props: {
     centralConfig: TYPES.config;
@@ -60,7 +61,11 @@ export default function MeasurementDecisionStatus(props: {
             <div className="text-sm font-normal h-7 flex-row-left">
                 <Ping state={loading ? undefined : measurementDecisionResult} />
                 <span className="ml-2.5 mr-1">Measurements are currently</span>
-                {loading && '...'}
+                {loading && (
+                    <div className="w-4 h-4 text-gray-700 animate-spin">
+                        {ICONS.spinner}
+                    </div>
+                )}
                 {!loading && !measurementDecisionResult && 'not running'}
                 {!loading && measurementDecisionResult && 'running'}
             </div>
@@ -75,7 +80,7 @@ export default function MeasurementDecisionStatus(props: {
                 {measurementDecision.mode !== 'manual' && (
                     <div
                         className={
-                            'h-7 flex-row-center font-light w-full text-slate-500 text-center'
+                            'h-7 flex-row-center font-normal w-full text-slate-500 text-center'
                         }
                     >
                         automated decision
@@ -90,8 +95,13 @@ export default function MeasurementDecisionStatus(props: {
                         }
                         className="w-full"
                         variant={
-                            measurementDecision.manual_decision_result ? 'red' : 'green'
+                            loading
+                                ? 'slate'
+                                : measurementDecision.manual_decision_result
+                                ? 'red'
+                                : 'green'
                         }
+                        spinner={loading}
                     >
                         {measurementDecision.manual_decision_result ? 'stop' : 'start'}
                     </Button>

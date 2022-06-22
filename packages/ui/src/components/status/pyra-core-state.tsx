@@ -5,7 +5,12 @@ import TYPES from '../../utils/types';
 function Table(props: { children: React.ReactNode }) {
     return (
         <div className="w-full">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <div
+                className={
+                    'w-full overflow-hidden rounded-md shadow-sm ' +
+                    'border border-gray-300'
+                }
+            >
                 <table className="min-w-full divide-y divide-gray-300">
                     <tbody className="bg-white divide-y divide-gray-200">
                         {props.children}
@@ -146,7 +151,7 @@ export default function PyraCoreState(props: {}) {
                 stateJSON === undefined &&
                 'state of pyra-core could not be loaded'}
             {!loading && stateJSON !== undefined && (
-                <div className="grid w-full grid-cols-3 gap-x-4">
+                <div className="grid w-full grid-cols-3 gap-x-2">
                     {pss.map((ps) => (
                         <Table>
                             {ps.map((p) => (

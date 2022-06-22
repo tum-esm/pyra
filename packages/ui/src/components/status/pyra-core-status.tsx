@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import ICONS from '../../assets/icons';
 import backend from '../../utils/backend';
 import Button from '../essential/button';
 import Ping from '../essential/ping';
@@ -43,7 +44,12 @@ export default function PyraCoreStatus(props: {
                     state={pyraCorePID === undefined ? undefined : pyraCorePID !== -1}
                 />
                 <span className="ml-2.5 mr-1">pyra-core is</span>
-                {pyraCorePID === undefined && '...'}
+                {pyraCorePID === undefined && (
+                    <div className="w-4 h-4 text-gray-700 animate-spin">
+                        {ICONS.spinner}
+                    </div>
+                )}
+
                 {pyraCorePID !== undefined && pyraCorePID === -1 && 'not running'}
                 {pyraCorePID !== undefined &&
                     pyraCorePID !== -1 &&
@@ -52,7 +58,14 @@ export default function PyraCoreStatus(props: {
             <Button
                 onClick={pyraCorePID === -1 ? startPyraCore : stopPyraCore}
                 className="w-[21rem]"
-                variant={pyraCorePID === -1 ? 'green' : 'red'}
+                variant={
+                    pyraCorePID === undefined
+                        ? 'slate'
+                        : pyraCorePID === -1
+                        ? 'green'
+                        : 'red'
+                }
+                spinner={pyraCorePID === undefined}
             >
                 {pyraCorePID === -1 ? 'start' : 'stop'}
             </Button>

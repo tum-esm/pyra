@@ -1,4 +1,5 @@
 import React from 'react';
+import ICONS from '../../assets/icons';
 
 export default function Button(props: {
     children: React.ReactNode;
@@ -7,8 +8,12 @@ export default function Button(props: {
     disabled?: boolean;
     className?: string;
     dot?: boolean;
+    spinner?: boolean;
 }) {
-    const { children, onClick, variant, className } = props;
+    let { children, onClick, variant, className, spinner, disabled } = props;
+    if (spinner) {
+        disabled = true;
+    }
 
     let colorClasses: string = '';
     let dotColor: string = ' ';
@@ -34,14 +39,15 @@ export default function Button(props: {
     return (
         <button
             type="button"
-            onClick={onClick}
+            onClick={props.disabled ? () => {} : onClick}
             className={
                 'flex-row-center flex-shrink-0 px-4 h-7 ' +
                 'focus:outline-none focus:ring-1 focus:z-20 ' +
                 'focus:border-blue-500 focus:ring-blue-500 ' +
                 'text-sm whitespace-nowrap text-center font-medium ' +
-                'elevated-panel ' +
+                'elevated-panel relative ' +
                 colorClasses +
+                (disabled ? 'cursor-not-allowed ' : 'cursor-pointer ') +
                 className
             }
         >
@@ -50,7 +56,13 @@ export default function Button(props: {
                     className={'w-2 h-2 mr-1.5 rounded-full flex-shrink-0 ' + dotColor}
                 />
             )}
-            {children}
+            {!spinner && children}
+            {spinner && <div className="opacity-0">{children}</div>}
+            {spinner && (
+                <div className="absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
+                    <div className="w-4 h-4 animate-spin">{ICONS.spinner}</div>
+                </div>
+            )}
         </button>
     );
 }

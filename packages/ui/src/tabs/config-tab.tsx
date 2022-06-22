@@ -31,6 +31,8 @@ export default function ConfigTab(props: { visible: boolean }) {
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
     const [activeKey, setActiveKey] = useState<TYPES.configSectionKey>('general');
 
+    const [isSaving, setIsSaving] = useState(false);
+
     async function loadCentralConfig() {
         const content = await backend.getConfig();
         try {
@@ -48,14 +50,17 @@ export default function ConfigTab(props: { visible: boolean }) {
 
     async function saveLocalConfig() {
         if (localConfig !== undefined) {
+            setIsSaving(true);
             const parsedLocalConfig = parseNumberTypes(localConfig);
             let result = await backend.updateConfig(parsedLocalConfig);
 
             if (result.stdout.includes('Updated config file')) {
                 setLocalConfig(parsedLocalConfig);
                 setCentralConfig(parsedLocalConfig);
+                setIsSaving(false);
             } else {
                 setErrorMessage(result.stdout);
+                setIsSaving(false);
             }
         }
     }
@@ -149,6 +154,7 @@ export default function ConfigTab(props: { visible: boolean }) {
                                     errorMessage,
                                     saveLocalConfig,
                                     restoreCentralConfig,
+                                    isSaving,
                                 }}
                             />
                         )}
