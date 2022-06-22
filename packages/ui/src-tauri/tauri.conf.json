@@ -22,8 +22,13 @@
                 "open": ".*",
                 "scope": [
                     {
-                        "name": "pyra-cli",
+                        "name": "system-python",
                         "cmd": "python",
+                        "args": true
+                    },
+                    {
+                        "name": "venv-python",
+                        "cmd": ".venv/bin/python",
                         "args": true
                     }
                 ]
