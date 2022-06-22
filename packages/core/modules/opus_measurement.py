@@ -201,28 +201,21 @@ class OpusMeasurement:
             return False
 
     def __start_opus(self):
-        """Uses win32process frm pywin32 module to start up OPUS
-        Returns pywin32 process information for later usage.
+        """Uses os.startfile() to start up OPUS
+        This simulates a user click on the opus.exe.
         """
-        # http://timgolden.me.uk/pywin32-docs/win32process.html
-        opus_call = (
-            self._CONFIG["opus"]["executable_path"]
-            + " "
-            + self._CONFIG["opus"]["executable_parameter"]
-        )
-        hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
-            None,
-            opus_call,
-            None,
-            None,
-            0,
-            win32con.NORMAL_PRIORITY_CLASS,
-            None,
-            None,
-            win32process.STARTUPINFO(),
+
+        opus_path = self._CONFIG["opus"]["executable_path"]
+
+        # works only > python3.10
+        # without cwd CT will have trouble loading its internal database)
+        os.startfile(
+            os.path.basename(opus_path),
+            cwd=os.path.dirname(opus_path),
+            arguments=self._CONFIG["opus"]["executable_parameter"],
+            show_cmd=2,
         )
 
-        # return (hProcess, hThread, dwProcessId, dwThreadId)
 
     @property
     def __opus_application_running(self):

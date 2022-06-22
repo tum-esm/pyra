@@ -85,12 +85,10 @@ class SunTracking:
             return False
 
     def __start_sun_tracking_automation(self):
-        """Uses win32process frm pywin32 module to start up the CamTracker
-         executable with additional parameter -automation.
+        """Uses os.startfile() to start up the CamTracker
+        executable with additional parameter -automation.
         The paramter - automation will instruct CamTracker to automatically
         move the mirrors to the expected sun position during startup.
-
-         Returns pywin32 process information for later usage.
         """
         # delete stop.txt file in camtracker folder if present
         self.clean_stop_file()
@@ -100,8 +98,8 @@ class SunTracking:
         # works only > python3.10
         # without cwd CT will have trouble loading its internal database)
         os.startfile(
-            path=os.path.filename(ct_path),
-            cwd=os.path.basename(ct_path),
+            os.path.basename(ct_path),
+            cwd=os.path.dirname(ct_path),
             arguments="-autostart",
             show_cmd=2,
         )
