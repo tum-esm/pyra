@@ -48,6 +48,18 @@ const ICONS = {
             <polyline points="11 12 12 12 12 16 13 16"></polyline>
         </SVG>
     ),
+    spinner: (
+        <SVG>
+            <line x1="12" y1="6" x2="12" y2="3"></line>
+            <line x1="16.25" y1="7.75" x2="18.4" y2="5.6"></line>
+            <line x1="18" y1="12" x2="21" y2="12"></line>
+            <line x1="16.25" y1="16.25" x2="18.4" y2="18.4"></line>
+            <line x1="12" y1="18" x2="12" y2="21"></line>
+            <line x1="7.75" y1="16.25" x2="5.6" y2="18.4"></line>
+            <line x1="6" y1="12" x2="3" y2="12"></line>
+            <line x1="7.75" y1="7.75" x2="5.6" y2="5.6"></line>
+        </SVG>
+    ),
 };
 
 export default ICONS;

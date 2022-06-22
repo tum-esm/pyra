@@ -9,6 +9,7 @@ import LogTab from './tabs/log-tab';
 import StatusTab from './tabs/status-tab';
 import TYPES from './utils/types';
 import ConfigTab from './tabs/config-tab';
+import ICONS from './assets/icons';
 
 const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
 
@@ -21,9 +22,9 @@ function Main() {
         undefined
     );
 
-    useEffect(() => {
-        loadInitialState();
-    }, []);
+    // useEffect(() => {
+    //     loadInitialState();
+    // }, []);
 
     // TODO: Show spinner in undefined state
     // TODO: watch for changes in config.json or state.json
@@ -32,11 +33,11 @@ function Main() {
         setBackendIntegrity(undefined);
         setCentralConfig(undefined);
 
-        console.debug("loading initial state ...")
+        console.debug('loading initial state ...');
 
         try {
             const pyraCliIsAvailable = await backend.pyraCliIsAvailable();
-            console.debug("found pyra-cli");
+            console.debug('found pyra-cli');
             if (!pyraCliIsAvailable) {
                 setBackendIntegrity('cli is missing');
                 return;
@@ -58,6 +59,13 @@ function Main() {
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
+            {[backendIntegrity, centralConfig].includes(undefined) && (
+                <main className="w-full h-full flex-row-center">
+                    <div className="w-8 h-8 text-green-600 animate-spin">
+                        {ICONS.spinner}
+                    </div>
+                </main>
+            )}
             {(backendIntegrity === 'cli is missing' ||
                 backendIntegrity === 'config is invalid') && (
                 <main className="flex flex-col items-center justify-center w-full h-full bg-slate-100 gap-y-4">
