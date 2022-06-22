@@ -1,7 +1,8 @@
 {
     "general": {
         "seconds_per_core_interval": 30,
-        "test_mode": false
+        "test_mode": false,
+        "station_id": "..."
     },
     "opus": {
         "em27_ip": "10.0.0.1",

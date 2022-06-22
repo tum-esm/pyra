@@ -46,6 +46,7 @@ CONFIG_FILE_SCHEMA = {
         {
             "seconds_per_core_interval": {"type": "number", "min": 5, "max": 600},
             "test_mode": Schemas.boolean,
+            "station_id": {"type": "string"},
         }
     ),
     "opus": DICT_SCHEMA(

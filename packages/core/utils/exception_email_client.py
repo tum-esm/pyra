@@ -10,10 +10,10 @@ PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
 class ExceptionEmailClient:
     @staticmethod
-    def _send_email(email_config: dict, text: str, html: str, subject: str):
-        sender_email = email_config["sender_address"]
-        sender_password = email_config["sender_password"]
-        recipients = email_config["recipients"].replace(" ", "").split(",")
+    def _send_email(config: dict, text: str, html: str, subject: str):
+        sender_email = config["error_email"]["sender_address"]
+        sender_password = config["error_email"]["sender_password"]
+        recipients = config["error_email"]["recipients"].replace(" ", "").split(",")
 
         print(sender_email, sender_password, recipients)
 
@@ -35,8 +35,8 @@ class ExceptionEmailClient:
             )
 
     @staticmethod
-    def handle_resolved_exception(email_config: dict):
-        if not email_config["notify_recipients"]:
+    def handle_resolved_exception(config: dict):
+        if not config["error_email"]["notify_recipients"]:
             return
 
         # TODO: add instance name
@@ -59,12 +59,13 @@ class ExceptionEmailClient:
             + "</html>"
         )
 
-        subject = "✅ PYRA: all exceptions resolved"
-        ExceptionEmailClient._send_email(email_config, text, html, subject)
+        station_id = config["general"]["station_id"]
+        subject = f'✅ PYRA on "{station_id}": all exceptions resolved'
+        ExceptionEmailClient._send_email(config, text, html, subject)
 
     @staticmethod
-    def handle_occured_exception(email_config: dict, exception: Exception):
-        if not email_config["notify_recipients"]:
+    def handle_occured_exception(config: dict, exception: Exception):
+        if not config["error_email"]["notify_recipients"]:
             return
 
         # TODO: add instance name
@@ -103,5 +104,8 @@ class ExceptionEmailClient:
             + "</html>"
         )
 
-        subject = f'❗️ PYRA: new exception "{type(exception).__name__}"'
-        ExceptionEmailClient._send_email(email_config, text, html, subject)
+        station_id = config["general"]["station_id"]
+        subject = (
+            f'❗️ PYRA on "{station_id}": new exception "{type(exception).__name__}"'
+        )
+        ExceptionEmailClient._send_email(config, text, html, subject)
