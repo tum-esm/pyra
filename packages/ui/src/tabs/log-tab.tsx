@@ -4,6 +4,7 @@ import ICONS from '../assets/icons';
 import Button from '../components/essential/button';
 import backend from '../utils/backend';
 import { dialog, shell } from '@tauri-apps/api';
+import reduceLogLines from '../utils/reduce-log-lines';
 
 export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -16,14 +17,11 @@ export default function LogTab(props: { visible: boolean }) {
     async function updateLogs() {
         setLoading(true);
         try {
-            const newInfoLogs = (await backend.readInfoLogs()).stdout
-                .split('\n')
-                .join('\n');
-            const newDebugLogs = (await backend.readDebugLogs()).stdout
-                .split('\n')
-                .join('\n');
-            setInfoLogs(newInfoLogs);
-            setDebugLogs(newDebugLogs);
+            const newInfoLogsList = (await backend.readInfoLogs()).stdout.split('\n');
+            const newDebugLogsList = (await backend.readDebugLogs()).stdout.split('\n');
+
+            setInfoLogs(reduceLogLines(newInfoLogsList).join('\n'));
+            setDebugLogs(reduceLogLines(newDebugLogsList).join('\n'));
         } catch {
             // TODO: Add message to queue
             setInfoLogs('');
