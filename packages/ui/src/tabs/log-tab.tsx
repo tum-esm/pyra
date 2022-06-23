@@ -63,10 +63,13 @@ export default function LogTab(props: { visible: boolean }) {
     }, [loadingIsPending, loading, updateLogs]);
 
     async function initializeFileWatcher() {
-        await watch(
-            '/Users/moritz/Documents/research/pyra/logs/info.log',
-            { recursive: false },
-            (o) => setLoadingIsPending(o.type === 'Write')
+        let logFilePath = import.meta.env.VITE_PROJECT_DIR + '\\logs\\info.log';
+        if (window.navigator.platform.includes('Mac')) {
+            logFilePath = logFilePath.replace(/\\/g, '/');
+        }
+        console.log({ logFilePath });
+        await watch(logFilePath, { recursive: false }, (o) =>
+            setLoadingIsPending(o.type === 'Write')
         );
     }
 
