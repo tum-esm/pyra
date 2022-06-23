@@ -50,7 +50,7 @@ class SunTracking:
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
         if not StateInterface.read()["vbdsd_indicates_good_conditions"]:
-            if self.__ct_application_running:
+            if self.ct_application_running:
                 self.stop_sun_tracking_automation()
                 logger.info("Stop CamTracker.")
             return
@@ -58,7 +58,7 @@ class SunTracking:
         # main logic for active automation
 
         # start ct if not currently running
-        if not self.__ct_application_running:
+        if not self.ct_application_running:
             self.start_sun_tracking_automation()
             logger.info("Start CamTracker.")
 
@@ -69,7 +69,7 @@ class SunTracking:
             logger.info("Stop CamTracker. Preparing for reinitialization.")
 
     @property
-    def __ct_application_running(self):
+    def ct_application_running(self):
         """Checks if CamTracker is already running by identifying the window.
 
         False if Application is currently not running on OS
@@ -233,23 +233,23 @@ class SunTracking:
         if sys.platform != "win32":
             return
 
-        ct_is_running = self.__ct_application_running
+        ct_is_running = self.ct_application_running
         if not ct_is_running:
             self.start_sun_tracking_automation()
             try_count = 0
             while try_count < 10:
-                if self.__ct_application_running:
+                if self.ct_application_running:
                     break
                 try_count += 1
                 time.sleep(6)
 
-        assert self.__ct_application_running
+        assert self.ct_application_running
 
         # time.sleep(20)
 
         self.stop_sun_tracking_automation()
         time.sleep(10)
 
-        assert not self.__ct_application_running
+        assert not self.ct_application_running
 
         assert False

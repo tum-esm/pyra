@@ -13,14 +13,12 @@ def test_start_up():
     opus = OpusMeasurement(_CONFIG)
     tracking = SunTracking(_CONFIG)
     
-    control.sync_to_tracker(True)
+    control.sync_to_tracker(False)
     time.sleep(2)
-    if not tracking.ct_application_running:
-        tracking.start_sun_tracking_automation()
+    if tracking.ct_application_running:
+        tracking.stop_sun_tracking_automation()
         time.sleep(2)
-    if not opus.opus_application_running:
-        opus.start_opus()
-        time.sleep(2)
-    opus.load_experiment()
-    time.sleep(2)
-    opus.start_macro()
+    if opus.opus_application_running:
+        opus.stop_macro()
+       
+    
