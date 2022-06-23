@@ -1,4 +1,3 @@
-import json
 import subprocess
 import click
 import os
@@ -7,8 +6,11 @@ import psutil
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-# TODO: ".venv/bin" on mac but ".venv/Scripts" on windows
-INTERPRETER_PATH = os.path.join("python")
+INTERPRETER_PATH = (
+    "python"
+    if os.name != "posix"
+    else os.path.join(PROJECT_DIR, ".venv", "bin", "python")
+)
 SCRIPT_PATH = os.path.join(PROJECT_DIR, "run-pyra-core.py")
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
@@ -48,7 +50,7 @@ def _start_pyra_core():
     if existing_pid is not None:
         error_handler(f"Background process already exists with PID {existing_pid}")
     else:
-        print( [INTERPRETER_PATH, SCRIPT_PATH])
+        print([INTERPRETER_PATH, SCRIPT_PATH])
         p = subprocess.Popen(
             [INTERPRETER_PATH, SCRIPT_PATH],
             stdout=subprocess.PIPE,
