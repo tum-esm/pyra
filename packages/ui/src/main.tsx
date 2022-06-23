@@ -13,8 +13,6 @@ import ICONS from './assets/icons';
 
 const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
 
-import { watch, watchImmediate } from 'tauri-plugin-fs-watch-api';
-
 function Main() {
     const [activeTab, setActiveTab] = useState('Status');
     const [backendIntegrity, setBackendIntegrity] = useState<
@@ -26,7 +24,6 @@ function Main() {
 
     useEffect(() => {
         loadInitialState();
-        initializeFileWatchers();
     }, []);
 
     // TODO: watch for changes in config.json or state.json
@@ -57,13 +54,6 @@ function Main() {
             console.log(`Error while fetching initial state: ${e}`);
             setBackendIntegrity('cli is missing');
         }
-    }
-    async function initializeFileWatchers() {
-        const stopWatching = await watch(
-            '/Users/moritz/Documents/research/pyra/README.md',
-            { recursive: true },
-            console.log
-        );
     }
 
     return (

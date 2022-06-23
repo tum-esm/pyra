@@ -5,6 +5,7 @@ import Button from '../components/essential/button';
 import backend from '../utils/backend';
 import { dialog, shell } from '@tauri-apps/api';
 import reduceLogLines from '../utils/reduce-log-lines';
+import { watch } from 'tauri-plugin-fs-watch-api';
 
 export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -12,10 +13,12 @@ export default function LogTab(props: { visible: boolean }) {
     const [debugLogs, setDebugLogs] = useState<string>('');
 
     const [archiving, setArchiving] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [loadingIsPending, setLoadingIsPending] = useState(true);
 
     async function updateLogs() {
         setLoading(true);
+        setLoadingIsPending(false);
         try {
             const newInfoLogsList = (await backend.readInfoLogs()).stdout.split('\n');
             const newDebugLogsList = (await backend.readDebugLogs()).stdout.split('\n');
@@ -26,8 +29,9 @@ export default function LogTab(props: { visible: boolean }) {
             // TODO: Add message to queue
             setInfoLogs('');
             setDebugLogs('');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     async function archiveLogs() {
@@ -44,12 +48,26 @@ export default function LogTab(props: { visible: boolean }) {
         }
     }
 
-    useEffect(() => {
-        updateLogs();
-    }, []);
-
     async function openLogsFolder() {
         await shell.open(`${import.meta.env.VITE_PROJECT_DIR}/logs`);
+    }
+
+    useEffect(() => {
+        initializeFileWatcher();
+    }, []);
+
+    useEffect(() => {
+        if (loadingIsPending && !loading) {
+            updateLogs();
+        }
+    }, [loadingIsPending, loading, updateLogs]);
+
+    async function initializeFileWatcher() {
+        await watch(
+            '/Users/moritz/Documents/research/pyra/logs/info.log',
+            { recursive: false },
+            (o) => setLoadingIsPending(o.type === 'Write')
+        );
     }
 
     return (
@@ -59,22 +77,16 @@ export default function LogTab(props: { visible: boolean }) {
             }
         >
             <div className="px-6 mb-4 flex-row-center gap-x-2">
-                <Button
-                    onClick={() => {
-                        updateLogs();
-                    }}
-                    variant="slate"
-                    className="!px-2"
-                    spinner={loading}
-                    disabled={archiving}
-                >
-                    <div className="w-4 h-4 fill-slate-700">{ICONS.refresh}</div>
-                </Button>
                 <Toggle
                     value={logLevel}
                     setValue={(s: any) => setLogLevel(s)}
                     values={['info', 'debug']}
                 />
+                {loading && (
+                    <div className="w-4 h-4 text-gray-700 animate-spin">
+                        {ICONS.spinner}
+                    </div>
+                )}
                 <div className="flex-grow" />
                 <Button onClick={openLogsFolder} variant="white">
                     open logs folder
@@ -106,5 +118,3 @@ export default function LogTab(props: { visible: boolean }) {
         </div>
     );
 }
-
-// TODO: Figure out how to remove the quotes from the logs inside the html -> in order to have syntax highlighting
