@@ -45,9 +45,9 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
-        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG][
+        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG[
             "tum_plc"
-        ]["version"]
+        ]["version"]]
 
         self.plc = snap7.client.Client()
         self.connection = self.plc_connect()
@@ -63,9 +63,9 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
-        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG][
+        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG[
             "tum_plc"
-        ]["version"]
+        ]["version"]]
 
         logger.info("Running EnclosureControl")
 
@@ -119,6 +119,9 @@ class EnclosureControl:
         self.manage_spectrometer_power()
 
         # TODO: check what resetbutton after rain does (and the auto reset option
+
+    def sync_to_tracker(self, x=True):
+        self.plc_write_bool(self._PLC_INTERFACE.control["sync_to_tracker"], x)
 
     def manage_spectrometer_power(self):
         """

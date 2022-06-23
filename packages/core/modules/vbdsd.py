@@ -61,11 +61,11 @@ class _VBDSD:
         camera, otherwise None will be returned.
         """
         camera_id = _CONFIG["vbdsd"]["camera_id"]
-        _VBDSD.cam = cv.VideoCapture(camera_id)
+        _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         _VBDSD.cam.release()
 
         for _ in range(retries):
-            _VBDSD.cam = cv.VideoCapture(camera_id)
+            _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             time.sleep(1)
             if _VBDSD.cam.isOpened():
                 logger.debug(f"Camera with id {camera_id} is now connected")
@@ -79,8 +79,9 @@ class _VBDSD:
                 _VBDSD.cam.read()
                 _VBDSD.change_exposure()
                 return
-
-        logger.debug(f"Camera with id {camera_id} could not be found")
+        
+        logger.warning(f"Camera with id {camera_id} could not be found")
+        
 
     @staticmethod
     def eval_sun_state(frame):
@@ -314,7 +315,7 @@ class VBDSD_Thread:
             new_size = _CONFIG["vbdsd"]["evaluation_size"]
             if status_history.maxsize() != new_size:
                 logger.debug(
-                    "Size of status history has changed: "
+                    "Size of VBDSD history has changed: "
                     + f"{status_history.maxsize()} -> {new_size}"
                 )
                 status_history.reinitialize(new_size)
@@ -342,8 +343,8 @@ class VBDSD_Thread:
 
             # append sun status to status history
             status_history.append(max(status, 0))
-            logger.debug(f"New status: {status}")
-            logger.debug(f"New status history: {status_history.get()}")
+            logger.debug(f"New VBDSD status: {status}")
+            logger.debug(f"New VBDSD status history: {status_history.get()}")
 
             if frame is not None:
                 img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
