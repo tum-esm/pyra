@@ -54,52 +54,38 @@ function TableRow(props: { label: string; value: React.ReactNode }) {
         </tr>
     );
 }
-export default function PyraCoreState(props: {}) {
-    const [stateJSON, setStateJSON] = useState<TYPES.state | undefined>(undefined);
-    const [loading, setLoading] = useState(false);
-
-    async function loadStateJSON() {
-        setLoading(true);
-        const p = await backend.getState();
-        try {
-            setStateJSON(JSON.parse(p.stdout));
-        } catch {
-            setStateJSON(undefined);
-        }
-        setLoading(false);
-    }
-
-    useEffect(() => {
-        loadStateJSON();
-    }, []);
+export default function EnclosureStatus(props: {
+    centralState: TYPES.state | undefined;
+}) {
+    const { centralState } = props;
 
     const pss = [
         [
             {
                 key: 'PLC',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.state.computer,
+                    centralState?.enclosure_plc_readings.state.computer,
                     true
                 ),
             },
             {
                 key: 'Camera',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.state.camera,
+                    centralState?.enclosure_plc_readings.state.camera,
                     true
                 ),
             },
             {
                 key: 'Router',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.state.router,
+                    centralState?.enclosure_plc_readings.state.router,
                     true
                 ),
             },
             {
                 key: 'EM27',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.state.spectrometer,
+                    centralState?.enclosure_plc_readings.state.spectrometer,
                     true
                 ),
             },
@@ -108,37 +94,37 @@ export default function PyraCoreState(props: {}) {
             {
                 key: 'Fan Speed',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.actors.fan_speed
+                    centralState?.enclosure_plc_readings.actors.fan_speed
                 ),
             },
             {
                 key: 'Current Angle',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.actors.current_angle
+                    centralState?.enclosure_plc_readings.actors.current_angle
                 ),
             },
             {
                 key: 'Humidity',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.sensors.humidity
+                    centralState?.enclosure_plc_readings.sensors.humidity
                 ),
             },
             {
                 key: 'Temperature',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.sensors.temperature
+                    centralState?.enclosure_plc_readings.sensors.temperature
                 ),
             },
         ],
         [
             {
                 key: 'Rain',
-                value: renderProperty(stateJSON?.enclosure_plc_readings.state.rain),
+                value: renderProperty(centralState?.enclosure_plc_readings.state.rain),
             },
             {
                 key: 'Cover Closed',
                 value: renderProperty(
-                    stateJSON?.enclosure_plc_readings.state.cover_closed
+                    centralState?.enclosure_plc_readings.state.cover_closed
                 ),
             },
         ],
@@ -146,11 +132,8 @@ export default function PyraCoreState(props: {}) {
 
     return (
         <div className={'w-full text-sm flex-row-left gap-x-2 px-6'}>
-            {loading && '...'}
-            {!loading &&
-                stateJSON === undefined &&
-                'state of pyra-core could not be loaded'}
-            {!loading && stateJSON !== undefined && (
+            {centralState === undefined && '...'}
+            {centralState !== undefined && (
                 <div className="grid w-full grid-cols-3 gap-x-2">
                     {pss.map((ps) => (
                         <Table>

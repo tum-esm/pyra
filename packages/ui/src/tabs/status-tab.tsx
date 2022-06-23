@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import TYPES from '../utils/types';
 
 import PyraCoreStatus from '../components/status/pyra-core-status';
 import MeasurementDecisionStatus from '../components/status/measurement-decision-status';
-import PyraCoreState from '../components/status/pyra-core-state';
+import EnclosureStatus from '../components/status/enclosure-status';
+import backend from '../utils/backend';
+import { watch } from 'tauri-plugin-fs-watch-api';
 
 export default function StatusTab(props: {
     visible: boolean;
@@ -18,6 +20,41 @@ export default function StatusTab(props: {
 
     // TODO: Move central config to redux store
     // TODO: Pull state and central config in regular time intervals (only when pyra is running)
+
+    const [centralState, setCentralState] = useState(undefined);
+    const [centralStateloadingIsPending, setCentralStateLoadingIsPending] =
+        useState(true);
+
+    async function loadCentralState() {
+        setCentralStateLoadingIsPending(false);
+        const p = await backend.getState();
+        try {
+            setCentralState(JSON.parse(p.stdout));
+        } catch {
+            // TODO: Add message to queue
+        }
+    }
+
+    useEffect(() => {
+        initializeFileWatcher();
+    }, []);
+
+    useEffect(() => {
+        if (centralStateloadingIsPending) {
+            loadCentralState();
+        }
+    }, [centralStateloadingIsPending, loadCentralState]);
+
+    async function initializeFileWatcher() {
+        let stateFilePath =
+            import.meta.env.VITE_PROJECT_DIR + '\\runtime-data\\state.json';
+        if (window.navigator.platform.includes('Mac')) {
+            stateFilePath = stateFilePath.replace(/\\/g, '/');
+        }
+        await watch(stateFilePath, { recursive: false }, (o) =>
+            setCentralStateLoadingIsPending(o.type === 'Write')
+        );
+    }
 
     return (
         <div
@@ -34,7 +71,7 @@ export default function StatusTab(props: {
                         {...{ centralConfig, setCentralConfig }}
                     />
                     <div className="w-full h-px bg-slate-300" />
-                    <PyraCoreState />
+                    <EnclosureStatus centralState={centralState} />
                 </>
             )}
         </div>

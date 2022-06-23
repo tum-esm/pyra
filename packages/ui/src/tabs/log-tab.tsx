@@ -67,7 +67,6 @@ export default function LogTab(props: { visible: boolean }) {
         if (window.navigator.platform.includes('Mac')) {
             logFilePath = logFilePath.replace(/\\/g, '/');
         }
-        console.log({ logFilePath });
         await watch(logFilePath, { recursive: false }, (o) =>
             setLoadingIsPending(o.type === 'Write')
         );
