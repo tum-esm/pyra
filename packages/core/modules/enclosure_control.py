@@ -116,66 +116,8 @@ class EnclosureControl:
         StateInterface.update({"enclosure_plc_readings": current_reading})
 
         # possibly powerup/down spectrometer
-        self.manage_spectrometer_power()
+        self.auto_set_power_spectrometer()
 
-        # TODO: check what resetbutton after rain does (and the auto reset option
-
-    def sync_to_tracker(self, x=True):
-        if self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]):
-            print("reset was needed")
-            self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
-
-        self.plc_write_bool(self._PLC_INTERFACE.control["sync_to_tracker"], x)
-
-    def manage_spectrometer_power(self):
-        """
-        Shuts down spectrometer if the sun angle is too low. Starts up the
-        spectrometer in the morning when minimum angle is satisfied.
-        """
-
-        current_sun_elevation = Astronomy.get_current_sun_elevation()
-        min_power_elevation = self._CONFIG["tum_plc"]["min_power_elevation"]
-        spectrometer_has_power = self.plc_read_bool(
-            self._PLC_INTERFACE.power["spectrometer"]
-        )
-
-        if current_sun_elevation is not None:
-            if (current_sun_elevation > min_power_elevation) and (
-                not spectrometer_has_power
-            ):
-                self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], True)
-                logger.info("Powering up the spectrometer.")
-            elif spectrometer_has_power:
-                self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], False)
-                logger.info("Powering down the spectrometer.")
-
-    def read_state_from_plc(self):
-        """
-        Checks the state of the enclosure by continuously reading sensor and
-        actor output.
-
-        returns
-        r: list
-        """
-        return [
-            self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
-            self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["auto_temp_mode"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["manual_control"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["manual_temp_mode"]),
-            self.plc_read_int(self._PLC_INTERFACE.sensors["humidity"]),
-            self.plc_read_int(self._PLC_INTERFACE.sensors["temperature"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["camera"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["computer"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["heater"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["motor_failed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["rain"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["router"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["spectrometer"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["ups_alert"]),
-        ]
 
     def plc_connect(self):
         """
@@ -212,6 +154,11 @@ class EnclosureControl:
         False -> not connected
         """
         return self.plc.get_connected()
+
+    def cpu_busy_check(self):
+        """Sleeps if cpu is busy."""
+        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
+            time.sleep(2)
 
     def plc_read_int(self, action):
         """Reads an INT value in the PLC database."""
@@ -263,10 +210,66 @@ class EnclosureControl:
         # wait if cpu is still busy
         self.cpu_busy_check()
 
-    def cpu_busy_check(self):
-        """Sleeps if cpu is busy."""
-        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
-            time.sleep(2)
+
+    def set_sync_to_tracker(self, state=True):
+        self.plc_write_bool(self._PLC_INTERFACE.control["sync_to_tracker"], state)
+
+    def set_manual_control(self, state=True):
+        self.plc_write_bool(self._PLC_INTERFACE.control["manual_control"], state)
+
+    def set_auto_temperature(self, state):
+        self.plc_write_bool(self._PLC_INTERFACE.control["auto_temp_mode"], state)
+
+    def set_manual_temperature(self, state):
+        self.plc_write_bool(self._PLC_INTERFACE.control["manual_temp_mode"], state)
+
+    def check_for_rest_needed(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"])
+
+    def reset(self):
+        self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
+
+    def set_power_camera(self, state=True):
+        self.plc_write_bool(self._PLC_INTERFACE.control["camera"], state)
+
+    def read_power_camera(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.power["camera"])
+
+    def set_power_computer(self, state=True):
+        self.plc_write_bool(self._PLC_INTERFACE.control["computer"], state)
+
+    def read_power_computer(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.power["computer"])
+
+    def set_power_heater(self, state=True):
+        self.plc_write_bool(self._PLC_INTERFACE.control["heater"], state)
+
+    def read_power_heater(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.power["heater"])
+
+    def set_power_router(self, state=True):
+        self.plc_write_bool(self._PLC_INTERFACE.control["router"], state)
+
+    def read_power_router(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.power["router"])
+
+    def set_power_spectrometer(self, state=True):
+        self.plc_write_bool(self._PLC_INTERFACE.control["spectrometer"], state)
+
+    def read_power_spectrometer(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.power["spectrometer"])
+
+    def move_cover(self, value):
+        self.set_manual_control(True)
+        self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], value)
+        self.set_manual_control(False)
+
+    def read_current_cover_angle(self):
+        return self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"])
+
+    def check_cover_closed(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"])
+
 
     def wait_for_cover_closing(self):
         """Waits steps of 5s for the enclosure cover to close.
@@ -281,9 +284,61 @@ class EnclosureControl:
         while loop:
             time.sleep(5)
 
-            if self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"]):
+            if self.check_cover_closed():
                 loop = False
 
             elapsed_time = time.time() - start_time
             if elapsed_time > 31:
                 raise CoverError("Enclosure cover might be stuck.")
+
+    def read_state_from_plc(self):
+        """
+        Checks the state of the enclosure by continuously reading sensor and
+        actor output.
+
+        returns
+        r: list
+        """
+        return [
+            self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
+            self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"]),
+            self.plc_read_bool(self._PLC_INTERFACE.control["auto_temp_mode"]),
+            self.plc_read_bool(self._PLC_INTERFACE.control["manual_control"]),
+            self.plc_read_bool(self._PLC_INTERFACE.control["manual_temp_mode"]),
+            self.plc_read_int(self._PLC_INTERFACE.sensors["humidity"]),
+            self.plc_read_int(self._PLC_INTERFACE.sensors["temperature"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["camera"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["computer"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["heater"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["motor_failed"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["rain"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["router"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["spectrometer"]),
+            self.plc_read_bool(self._PLC_INTERFACE.state["ups_alert"]),
+        ]
+
+    def auto_set_power_spectrometer(self):
+        """
+        Shuts down spectrometer if the sun angle is too low. Starts up the
+        spectrometer in the morning when minimum angle is satisfied.
+        """
+
+        current_sun_elevation = Astronomy.get_current_sun_elevation()
+        min_power_elevation = self._CONFIG["tum_plc"]["min_power_elevation"]
+        spectrometer_has_power = self.read_power_spectrometer()
+
+        if current_sun_elevation is not None:
+            if (current_sun_elevation > min_power_elevation) and (
+                not spectrometer_has_power
+            ):
+                self.set_power_spectrometer(True)
+                logger.info("Powering up the spectrometer.")
+            elif spectrometer_has_power:
+                self.set_power_spectrometer(False)
+                logger.info("Powering down the spectrometer.")
+
+
+
+

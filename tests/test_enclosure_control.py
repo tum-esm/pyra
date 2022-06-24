@@ -8,7 +8,7 @@ def test_enclosure_control():
     _CONFIG = ConfigInterface().read()
     control = EnclosureControl(_CONFIG)
     print(control.read_state_from_plc())
-    control.sync_to_tracker(False)
+    control.set_sync_to_tracker(False)
     assert False
 
 """

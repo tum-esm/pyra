@@ -14,7 +14,7 @@ def test_start_up():
     tracking = SunTracking(_CONFIG)
     
 
-    control.sync_to_tracker(True)
+    control.set_sync_to_tracker(True)
     time.sleep(2)
     if not tracking.ct_application_running:
         tracking.start_sun_tracking_automation()
