@@ -2,6 +2,7 @@ export namespace customTypes {
     export type reduxStateConfig = {
         central: config | undefined;
         local: config | undefined;
+        isDiffering: boolean | undefined;
     };
     export type reduxState = {
         config: reduxStateConfig;

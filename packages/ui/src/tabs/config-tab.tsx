@@ -15,14 +15,13 @@ const sectionKeys: customTypes.configSectionKey[] = [
     'vbdsd',
 ];
 export default function ConfigTab(props: { visible: boolean }) {
-    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const localConfig = reduxUtils.useTypedSelector((s) => s.config.local);
+    const configIsDiffering = reduxUtils.useTypedSelector((s) => s.config.isDiffering);
     const dispatch = reduxUtils.useTypedDispatch();
 
-    const setLocalConfig = (c: customTypes.config | undefined) =>
-        dispatch(reduxUtils.configActions.setLocal(c));
     const setConfigs = (c: customTypes.config | undefined) =>
         dispatch(reduxUtils.configActions.setConfigs(c));
+    const resetLocalConfig = () => dispatch(reduxUtils.configActions.resetLocal());
 
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
     const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
@@ -57,16 +56,7 @@ export default function ConfigTab(props: { visible: boolean }) {
         }
     }
 
-    function restoreCentralConfig() {
-        setLocalConfig(centralConfig);
-    }
-
-    const configIsDiffering =
-        localConfig !== undefined &&
-        centralConfig !== undefined &&
-        !functionalUtils.deepEqual(localConfig, centralConfig);
-
-    if (localConfig === undefined || centralConfig === undefined) {
+    if ([localConfig, configIsDiffering].includes(undefined)) {
         return <></>;
     }
 
@@ -119,7 +109,7 @@ export default function ConfigTab(props: { visible: boolean }) {
                         {...{
                             errorMessage,
                             saveLocalConfig,
-                            restoreCentralConfig,
+                            resetLocalConfig,
                             isSaving,
                         }}
                     />

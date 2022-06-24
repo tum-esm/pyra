@@ -3,12 +3,8 @@ import { configComponents, essentialComponents } from '../..';
 import { reduxUtils } from '../../../utils';
 
 export default function ConfigSectionVbdsd() {
-    const centralSectionConfig = reduxUtils.useTypedSelector(
-        (s) => s.config.central?.vbdsd
-    );
-    const localSectionConfig = reduxUtils.useTypedSelector(
-        (s) => s.config.local?.vbdsd
-    );
+    const centralSectionConfig = reduxUtils.useTypedSelector((s) => s.config.central?.vbdsd);
+    const localSectionConfig = reduxUtils.useTypedSelector((s) => s.config.local?.vbdsd);
     const dispatch = reduxUtils.useTypedDispatch();
 
     const update = (c: customTypes.partialConfig) =>
@@ -41,7 +37,7 @@ export default function ConfigSectionVbdsd() {
             <div className="relative space-y-2 text-sm flex-col-left">
                 <div className="space-x-2 text-sm flex-row-left">
                     <span className="whitespace-nowrap">Not configured yet </span>
-                    <essentialComponents.Button variant="slate" onClick={addDefault}>
+                    <essentialComponents.Button variant="white" onClick={addDefault}>
                         set up now
                     </essentialComponents.Button>
                     {centralSectionConfig !== null && (
@@ -63,7 +59,7 @@ export default function ConfigSectionVbdsd() {
 
     return (
         <>
-            <essentialComponents.Button variant="slate" onClick={setNull}>
+            <essentialComponents.Button variant="white" onClick={setNull}>
                 remove configuration
             </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-slate-300" />
@@ -71,11 +67,7 @@ export default function ConfigSectionVbdsd() {
                 key2="camera_id"
                 value={localSectionConfig.camera_id}
                 setValue={(v: number) => update({ vbdsd: { camera_id: v } })}
-                oldValue={
-                    centralSectionConfig !== null
-                        ? centralSectionConfig.camera_id
-                        : 'null'
-                }
+                oldValue={centralSectionConfig !== null ? centralSectionConfig.camera_id : 'null'}
                 numeric
             />
             <configComponents.ConfigElementText
@@ -83,9 +75,7 @@ export default function ConfigSectionVbdsd() {
                 value={localSectionConfig.min_sun_elevation}
                 setValue={(v: number) => update({ vbdsd: { min_sun_elevation: v } })}
                 oldValue={
-                    centralSectionConfig !== null
-                        ? centralSectionConfig.min_sun_elevation
-                        : 'null'
+                    centralSectionConfig !== null ? centralSectionConfig.min_sun_elevation : 'null'
                 }
                 numeric
             />
@@ -105,9 +95,7 @@ export default function ConfigSectionVbdsd() {
                 value={localSectionConfig.evaluation_size}
                 setValue={(v: any) => update({ vbdsd: { evaluation_size: v } })}
                 oldValue={
-                    centralSectionConfig !== null
-                        ? centralSectionConfig.evaluation_size
-                        : 'null'
+                    centralSectionConfig !== null ? centralSectionConfig.evaluation_size : 'null'
                 }
                 numeric
             />

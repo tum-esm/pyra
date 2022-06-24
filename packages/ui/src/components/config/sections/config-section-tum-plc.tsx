@@ -3,12 +3,8 @@ import { configComponents, essentialComponents } from '../..';
 import { reduxUtils } from '../../../utils';
 
 export default function ConfigSectionTumPlc() {
-    const centralSectionConfig = reduxUtils.useTypedSelector(
-        (s) => s.config.central?.tum_plc
-    );
-    const localSectionConfig = reduxUtils.useTypedSelector(
-        (s) => s.config.local?.tum_plc
-    );
+    const centralSectionConfig = reduxUtils.useTypedSelector((s) => s.config.central?.tum_plc);
+    const localSectionConfig = reduxUtils.useTypedSelector((s) => s.config.local?.tum_plc);
     const dispatch = reduxUtils.useTypedDispatch();
 
     const update = (c: customTypes.partialConfig) =>
@@ -39,7 +35,7 @@ export default function ConfigSectionTumPlc() {
             <div className="relative space-y-2 text-sm flex-col-left">
                 <div className="space-x-2 text-sm flex-row-left">
                     <span className="whitespace-nowrap">Not configured yet </span>
-                    <essentialComponents.Button variant="slate" onClick={addDefault}>
+                    <essentialComponents.Button variant="white" onClick={addDefault}>
                         set up now
                     </essentialComponents.Button>
                 </div>
@@ -61,16 +57,14 @@ export default function ConfigSectionTumPlc() {
 
     return (
         <>
-            <essentialComponents.Button variant="slate" onClick={setNull}>
+            <essentialComponents.Button variant="white" onClick={setNull}>
                 remove configuration
             </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-slate-300" />
             <configComponents.ConfigElementText
                 key2="min_power_elevation"
                 value={localSectionConfig.min_power_elevation}
-                setValue={(v: number) =>
-                    update({ tum_plc: { min_power_elevation: v } })
-                }
+                setValue={(v: number) => update({ tum_plc: { min_power_elevation: v } })}
                 oldValue={
                     centralSectionConfig !== null
                         ? centralSectionConfig.min_power_elevation
@@ -81,19 +75,13 @@ export default function ConfigSectionTumPlc() {
                 key2="ip"
                 value={localSectionConfig.ip}
                 setValue={(v: string) => update({ tum_plc: { ip: v } })}
-                oldValue={
-                    centralSectionConfig !== null ? centralSectionConfig.ip : 'null'
-                }
+                oldValue={centralSectionConfig !== null ? centralSectionConfig.ip : 'null'}
             />
             <configComponents.ConfigElementText
                 key2="version"
                 value={localSectionConfig.version}
                 setValue={(v: any) => update({ tum_plc: { version: v } })}
-                oldValue={
-                    centralSectionConfig !== null
-                        ? centralSectionConfig.version
-                        : 'null'
-                }
+                oldValue={centralSectionConfig !== null ? centralSectionConfig.version : 'null'}
             />
         </>
     );
