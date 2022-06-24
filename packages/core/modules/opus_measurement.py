@@ -64,8 +64,8 @@ class OpusMeasurement:
             return
 
         # start OPUS if not currently running
-        if not self.__opus_application_running:
-            self.__start_opus()
+        if not self.opus_application_running:
+            self.start_opus()
             logger.info("Start OPUS.")
             # returns to give OPUS time to start until next call of run()
             return
@@ -89,14 +89,14 @@ class OpusMeasurement:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                self.__load_experiment()
+                self.load_experiment()
                 logger.info("Loading OPUS Experiment.")
                 time.sleep(1)
-                self.__start_macro()
+                self.start_macro()
                 logger.info("Starting OPUS Macro.")
             else:
                 # flank change 1 -> 0: stop macro
-                self.__stop_macro()
+                self.stop_macro()
                 logger.info("Stopping OPUS Macro.")
 
         # save the automation status for the next run
@@ -135,7 +135,7 @@ class OpusMeasurement:
             else:
                 return False
 
-    def __load_experiment(self):
+    def load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         full_path = self._CONFIG["opus"]["experiment_path"]
@@ -149,7 +149,7 @@ class OpusMeasurement:
         else:
             logger.info("Could not load OPUS experiment as expected.")
 
-    def __start_macro(self):
+    def start_macro(self):
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         full_path = self._CONFIG["opus"]["macro_path"]
@@ -163,7 +163,7 @@ class OpusMeasurement:
         else:
             logger.info("Could not start OPUS macro as expected.")
 
-    def __stop_macro(self):
+    def stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         full_path = self._CONFIG["opus"]["macro_path"]
@@ -200,7 +200,7 @@ class OpusMeasurement:
         else:
             return False
 
-    def __start_opus(self):
+    def start_opus(self):
         """Uses os.startfile() to start up OPUS
         This simulates a user click on the opus.exe.
         """
@@ -218,7 +218,7 @@ class OpusMeasurement:
 
 
     @property
-    def __opus_application_running(self):
+    def opus_application_running(self):
         """Checks if OPUS is already running by identifying the window.
 
         False if Application is currently not running on OS
@@ -240,27 +240,27 @@ class OpusMeasurement:
         if sys.platform != "win32":
             return
 
-        opus_is_running = self.__opus_application_running
+        opus_is_running = self.opus_application_running
         if not opus_is_running:
-            self.__start_opus()
+            self.start_opus()
             try_count = 0
             while try_count < 10:
-                if self.__opus_application_running:
+                if self.opus_application_running:
                     break
                 try_count += 1
                 time.sleep(6)
 
-        assert self.__opus_application_running
+        assert self.opus_application_running
         assert self.__test_dde_connection
 
         print("__is_em27_connected: ", self.__is_em27_responsive)
 
-        self.__load_experiment()
+        self.load_experiment()
         time.sleep(2)
 
-        self.__start_macro()
+        self.start_macro()
         time.sleep(10)
 
-        self.__stop_macro()
+        self.stop_macro()
 
         print("__is_em27_connected: ", self.__is_em27_responsive)

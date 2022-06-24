@@ -49,27 +49,27 @@ class SunTracking:
 
         # automation is not active or was deactivated recently
         # TODO: Prüfen ob Flankenwechsel notwendig
-        if not StateInterface.read()["vbdsd_evaluation_is_positive"]:
-            if self.__ct_application_running:
-                self.__stop_sun_tracking_automation()
+        if not StateInterface.read()["vbdsd_indicates_good_conditions"]:
+            if self.ct_application_running:
+                self.stop_sun_tracking_automation()
                 logger.info("Stop CamTracker.")
             return
 
         # main logic for active automation
 
         # start ct if not currently running
-        if not self.__ct_application_running:
-            self.__start_sun_tracking_automation()
+        if not self.ct_application_running:
+            self.start_sun_tracking_automation()
             logger.info("Start CamTracker.")
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
         if not self.__valdiate_tracker_position:
-            self.__stop_sun_tracking_automation()
+            self.stop_sun_tracking_automation()
             logger.info("Stop CamTracker. Preparing for reinitialization.")
 
     @property
-    def __ct_application_running(self):
+    def ct_application_running(self):
         """Checks if CamTracker is already running by identifying the window.
 
         False if Application is currently not running on OS
@@ -84,7 +84,7 @@ class SunTracking:
         except win32ui.error:
             return False
 
-    def __start_sun_tracking_automation(self):
+    def start_sun_tracking_automation(self):
         """Uses os.startfile() to start up the CamTracker
         executable with additional parameter -automation.
         The paramter - automation will instruct CamTracker to automatically
@@ -104,7 +104,7 @@ class SunTracking:
             show_cmd=2,
         )
 
-    def __stop_sun_tracking_automation(self):
+    def stop_sun_tracking_automation(self):
         """Tells the CamTracker application to end program and move mirrors
         to parking position.
 
@@ -233,23 +233,23 @@ class SunTracking:
         if sys.platform != "win32":
             return
 
-        ct_is_running = self.__ct_application_running
+        ct_is_running = self.ct_application_running
         if not ct_is_running:
-            self.__start_sun_tracking_automation()
+            self.start_sun_tracking_automation()
             try_count = 0
             while try_count < 10:
-                if self.__ct_application_running:
+                if self.ct_application_running:
                     break
                 try_count += 1
                 time.sleep(6)
 
-        assert self.__ct_application_running
+        assert self.ct_application_running
 
         # time.sleep(20)
 
-        self.__stop_sun_tracking_automation()
+        self.stop_sun_tracking_automation()
         time.sleep(10)
 
-        assert not self.__ct_application_running
+        assert not self.ct_application_running
 
         assert False

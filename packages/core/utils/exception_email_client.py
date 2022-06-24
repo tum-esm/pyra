@@ -75,8 +75,7 @@ class ExceptionEmailClient:
 
         log_line_count = len(latest_log_lines)
         if log_line_count > 20:
-            latest_log_lines = latest_log_lines[20:]
-
+            latest_log_lines = latest_log_lines[-20:]
         for index, line in enumerate(latest_log_lines):
             line_number = log_line_count - len(latest_log_lines) + 1 + index
             latest_log_lines[index] = f"{line_number} | {line}"
