@@ -14,7 +14,7 @@ export default function Toggle(props: {
                         key={v}
                         onClick={() => (value !== v ? setValue(v) : {})}
                         className={
-                            'first:rounded-l-md last:rounded-r-md w-auto ' +
+                            'first:rounded-l-md last:rounded-r-md ' +
                             'px-3 font-medium flex-row-center text-sm ' +
                             (className !== undefined ? className : '') +
                             ' ' +
@@ -26,7 +26,7 @@ export default function Toggle(props: {
                         <div
                             className={
                                 'w-2 h-2 mr-1.5 rounded-full ' +
-                                (value === v ? 'bg-slate-400 ' : 'bg-slate-300')
+                                (value === v ? 'bg-blue-300 ' : 'bg-slate-200')
                             }
                         />
                         {v}

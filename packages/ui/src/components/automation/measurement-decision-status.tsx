@@ -1,37 +1,40 @@
 import { useState } from 'react';
 import { customTypes } from '../../custom-types';
-import { backend } from '../../utils';
-import { defaultsDeep } from 'lodash';
+import { backend, reduxUtils } from '../../utils';
 import { essentialComponents } from '..';
 import { ICONS } from '../../assets';
 
-export default function MeasurementDecisionStatus(props: {
-    centralConfig: customTypes.config;
-    setCentralConfig(c: customTypes.config): void;
-}) {
-    const { centralConfig, setCentralConfig } = props;
+export default function MeasurementDecisionStatus() {
+    const measurementDecision = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.measurement_decision
+    );
+    const dispatch = reduxUtils.useTypedDispatch();
+    const setConfigsPartial = (c: customTypes.partialConfig) =>
+        dispatch(reduxUtils.configActions.setConfigsPartial(c));
+
     const [loading, setLoading] = useState(false);
 
-    const measurementDecision = centralConfig.measurement_decision;
-
-    let measurementDecisionResult = undefined;
-    if (measurementDecision.mode === 'manual') {
-        measurementDecisionResult = measurementDecision.manual_decision_result;
+    let measurementDecisionResult: boolean | undefined = undefined;
+    switch (measurementDecision?.mode) {
+        case 'manual':
+            measurementDecisionResult = measurementDecision.manual_decision_result;
+            break;
+        case 'cli':
+            measurementDecisionResult = measurementDecision.cli_decision_result;
+            break;
+        case 'automatic':
+            // TODO: Use state.json
+            break;
     }
-    // TODO: integrate cli and automatic decision result
 
     async function updateMeasurementDecisionMode(mode: 'automatic' | 'manual' | 'cli') {
         setLoading(true);
         const update = {
             measurement_decision: { mode, manual_decision_result: false },
         };
-        const newCentralConfig = defaultsDeep(
-            update,
-            JSON.parse(JSON.stringify(centralConfig))
-        );
         const p = await backend.updateConfig(update);
         if (p.stdout.includes('Updated config file')) {
-            setCentralConfig(newCentralConfig);
+            setConfigsPartial(update);
         } else {
             // TODO: add message to queue
         }
@@ -41,33 +44,29 @@ export default function MeasurementDecisionStatus(props: {
     async function updateManualMeasurementDecisionResult(result: boolean) {
         setLoading(true);
         const update = { measurement_decision: { manual_decision_result: result } };
-        const newCentralConfig = defaultsDeep(
-            update,
-            JSON.parse(JSON.stringify(centralConfig))
-        );
         const p = await backend.updateConfig(update);
         if (p.stdout.includes('Updated config file')) {
-            setCentralConfig(newCentralConfig);
+            setConfigsPartial(update);
         } else {
             // TODO: add message to queue
         }
         setLoading(false);
     }
 
+    if (measurementDecision === undefined) {
+        return <></>;
+    }
+
     return (
         <div className={'w-full text-sm flex gap-x-2 px-6'}>
             <div className="text-sm font-normal h-7 flex-row-left">
-                <essentialComponents.Ping
-                    state={loading ? undefined : measurementDecisionResult}
-                />
+                <essentialComponents.Ping state={loading ? undefined : measurementDecisionResult} />
                 <span className="ml-2.5 mr-1">Measurements are currently</span>
                 {loading && (
-                    <div className="w-4 h-4 text-gray-700 animate-spin">
-                        {ICONS.spinner}
-                    </div>
+                    <div className="w-4 h-4 text-gray-700 animate-spin">{ICONS.spinner}</div>
                 )}
-                {!loading && !measurementDecisionResult && 'not running'}
-                {!loading && measurementDecisionResult && 'running'}
+                {!loading && !measurementDecisionResult && <>not running</>}
+                {!loading && measurementDecisionResult && <>running</>}
             </div>
             <div className="flex-grow" />
             <div className="flex-col-center gap-y-2">
@@ -101,7 +100,7 @@ export default function MeasurementDecisionStatus(props: {
                                 ? 'red'
                                 : 'green'
                         }
-                        spinner={loading}
+                        disabled={loading}
                     >
                         {measurementDecision.manual_decision_result ? 'stop' : 'start'}
                     </essentialComponents.Button>

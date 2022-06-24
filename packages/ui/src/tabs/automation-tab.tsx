@@ -19,8 +19,7 @@ export default function AutomationTab(props: {
     // TODO: Pull state and central config in regular time intervals (only when pyra is running)
 
     const [centralState, setCentralState] = useState(undefined);
-    const [centralStateloadingIsPending, setCentralStateLoadingIsPending] =
-        useState(true);
+    const [centralStateloadingIsPending, setCentralStateLoadingIsPending] = useState(true);
 
     async function loadCentralState() {
         setCentralStateLoadingIsPending(false);
@@ -43,8 +42,7 @@ export default function AutomationTab(props: {
     }, [centralStateloadingIsPending, loadCentralState]);
 
     async function initializeFileWatcher() {
-        let stateFilePath =
-            import.meta.env.VITE_PROJECT_DIR + '\\runtime-data\\state.json';
+        let stateFilePath = import.meta.env.VITE_PROJECT_DIR + '\\runtime-data\\state.json';
         if (window.navigator.platform.includes('Mac')) {
             stateFilePath = stateFilePath.replace(/\\/g, '/');
         }
@@ -64,11 +62,7 @@ export default function AutomationTab(props: {
             <div className="w-full h-px bg-slate-300" />
             {pyraCorePID !== undefined && pyraCorePID !== -1 && (
                 <>
-                    <automationComponents.MeasurementDecisionStatus
-                        {...{ centralConfig, setCentralConfig }}
-                    />
-                    <div className="w-full h-px bg-slate-300" />
-                    <automationComponents.EnclosureStatus centralState={centralState} />
+                    <automationComponents.MeasurementDecisionStatus />
                 </>
             )}
         </div>

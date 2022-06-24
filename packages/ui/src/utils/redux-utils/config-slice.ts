@@ -27,6 +27,19 @@ export const configSlice = createSlice({
             state.local = action.payload;
             state.isDiffering = false;
         },
+        setConfigsPartial: (
+            state: customTypes.reduxStateConfig,
+            action: { payload: customTypes.partialConfig }
+        ) => {
+            if (state.local !== undefined && state.central !== undefined) {
+                state.central = defaultsDeep(
+                    action.payload,
+                    JSON.parse(JSON.stringify(state.central))
+                );
+                state.local = defaultsDeep(action.payload, JSON.parse(JSON.stringify(state.local)));
+                state.isDiffering = configIsDiffering(state);
+            }
+        },
         setLocal: (
             state: customTypes.reduxStateConfig,
             action: { payload: customTypes.config | undefined }
