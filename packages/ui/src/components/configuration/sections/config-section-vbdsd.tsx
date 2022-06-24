@@ -1,5 +1,5 @@
 import { customTypes } from '../../../custom-types';
-import { configComponents, essentialComponents } from '../..';
+import { configurationComponents, essentialComponents } from '../..';
 import { reduxUtils } from '../../../utils';
 
 export default function ConfigSectionVbdsd() {
@@ -63,14 +63,14 @@ export default function ConfigSectionVbdsd() {
                 remove configuration
             </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-slate-300" />
-            <configComponents.ConfigElementText
+            <configurationComponents.ConfigElementText
                 key2="camera_id"
                 value={localSectionConfig.camera_id}
                 setValue={(v: number) => update({ vbdsd: { camera_id: v } })}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.camera_id : 'null'}
                 numeric
             />
-            <configComponents.ConfigElementText
+            <configurationComponents.ConfigElementText
                 key2="min_sun_elevation"
                 value={localSectionConfig.min_sun_elevation}
                 setValue={(v: number) => update({ vbdsd: { min_sun_elevation: v } })}
@@ -79,7 +79,7 @@ export default function ConfigSectionVbdsd() {
                 }
                 numeric
             />
-            <configComponents.ConfigElementText
+            <configurationComponents.ConfigElementText
                 key2="seconds_per_interval"
                 value={localSectionConfig.seconds_per_interval}
                 setValue={(v: any) => update({ vbdsd: { seconds_per_interval: v } })}
@@ -90,7 +90,7 @@ export default function ConfigSectionVbdsd() {
                 }
                 numeric
             />
-            <configComponents.ConfigElementText
+            <configurationComponents.ConfigElementText
                 key2="evaluation_size"
                 value={localSectionConfig.evaluation_size}
                 setValue={(v: any) => update({ vbdsd: { evaluation_size: v } })}
@@ -99,7 +99,7 @@ export default function ConfigSectionVbdsd() {
                 }
                 numeric
             />
-            <configComponents.ConfigElementText
+            <configurationComponents.ConfigElementText
                 key2="measurement_threshold"
                 value={localSectionConfig.measurement_threshold}
                 setValue={(v: any) => update({ vbdsd: { measurement_threshold: v } })}

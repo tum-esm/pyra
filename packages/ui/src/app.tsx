@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ICONS } from './assets';
 import { backend, reduxUtils } from './utils';
-import { AutomationTab, ConfigTab, LogTab, ControlTab } from './tabs';
+import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from './tabs';
 import { essentialComponents, Header } from './components';
 import { watch } from 'tauri-plugin-fs-watch-api';
 
-const tabs = ['Automation', 'Config', 'Logs', 'Enclosure Controls'];
+const tabs = ['Overview', 'Automation', 'Configuration', 'Logs', 'Enclosure Controls'];
 
 export default function App() {
     const [activeTab, setActiveTab] = useState('Automation');
@@ -137,10 +137,17 @@ export default function App() {
                 <>
                     <Header {...{ tabs, activeTab, setActiveTab }} />
                     <main className="flex-grow w-full min-h-0 bg-slate-75">
-                        <AutomationTab visible={activeTab === 'Automation'} />
-                        <ConfigTab visible={activeTab === 'Config'} />
-                        <LogTab visible={activeTab === 'Logs'} />
-                        <ControlTab visible={activeTab === 'Enclosure Controls'} />
+                        {[
+                            ['Overview', <OverviewTab />],
+                            ['Automation', <AutomationTab />],
+                            ['Configuration', <ConfigurationTab />],
+                            ['Logs', <LogTab />],
+                            ['Enclosure Controls', <ControlTab />],
+                        ].map((t: any, i) => (
+                            <div key={i} className={activeTab === t[0] ? '' : 'hidden'}>
+                                {t[1]}
+                            </div>
+                        ))}
                     </main>
                 </>
             )}

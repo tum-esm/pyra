@@ -1,5 +1,5 @@
 import { customTypes } from '../../../custom-types';
-import { configComponents, essentialComponents } from '../..';
+import { configurationComponents, essentialComponents } from '../..';
 import { reduxUtils } from '../../../utils';
 
 export default function ConfigSectionTumPlc() {
@@ -61,7 +61,7 @@ export default function ConfigSectionTumPlc() {
                 remove configuration
             </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-slate-300" />
-            <configComponents.ConfigElementText
+            <configurationComponents.ConfigElementText
                 key2="min_power_elevation"
                 value={localSectionConfig.min_power_elevation}
                 setValue={(v: number) => update({ tum_plc: { min_power_elevation: v } })}
@@ -71,13 +71,13 @@ export default function ConfigSectionTumPlc() {
                         : 'null'
                 }
             />
-            <configComponents.ConfigElementText
+            <configurationComponents.ConfigElementText
                 key2="ip"
                 value={localSectionConfig.ip}
                 setValue={(v: string) => update({ tum_plc: { ip: v } })}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.ip : 'null'}
             />
-            <configComponents.ConfigElementText
+            <configurationComponents.ConfigElementText
                 key2="version"
                 value={localSectionConfig.version}
                 setValue={(v: any) => update({ tum_plc: { version: v } })}

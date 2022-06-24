@@ -4,13 +4,12 @@ export default function Header(props: {
     setActiveTab(s: string): void;
 }) {
     return (
-        <header className="z-50 flex flex-row items-center w-full px-2 py-1 shadow bg-slate-900">
+        <header className="z-50 flex flex-row items-center w-full px-2 py-0 shadow h-14 bg-slate-900">
             <h1 className="pl-3 text-2xl font-bold text-center text-white whitespace-nowrap">
-                PyRa{' '}
-                <span className="pl-0.5 font-normal opacity-50">{APP_VERSION}</span>
+                PyRa <span className="pl-0.5 font-normal opacity-50">{APP_VERSION}</span>
             </h1>
             <div className="flex-grow " />
-            <div className="flex flex-wrap justify-center px-4 py-3 gap-x-2 gap-y-2">
+            <div className="flex flex-wrap justify-center px-4 py-2 gap-x-2 gap-y-2">
                 {props.tabs.map((t, i) => (
                     <button
                         key={i}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { backend, functionalUtils, reduxUtils } from '../utils';
 import { customTypes } from '../custom-types';
-import { configComponents } from '../components';
+import { configurationComponents } from '../components';
 
 const sectionKeys: customTypes.configSectionKey[] = [
     'general',
@@ -12,7 +12,7 @@ const sectionKeys: customTypes.configSectionKey[] = [
     'tum_plc',
     'vbdsd',
 ];
-export default function ConfigTab(props: { visible: boolean }) {
+export default function ConfigurationTab() {
     const localConfig = reduxUtils.useTypedSelector((s) => s.config.local);
     const configIsDiffering = reduxUtils.useTypedSelector((s) => s.config.isDiffering);
     const dispatch = reduxUtils.useTypedDispatch();
@@ -59,10 +59,11 @@ export default function ConfigTab(props: { visible: boolean }) {
     }
 
     return (
-        <div className={'w-full h-full relative ' + (props.visible ? 'flex ' : 'hidden ')}>
+        <div className={'w-full h-[calc(100vh-3.5rem)] relative flex flex-row'}>
             <div
                 className={
-                    'bg-white border-r border-slate-300 shadow ' + 'flex flex-col py-3 z-10 w-44'
+                    'bg-white border-r border-slate-300 shadow ' +
+                    'flex flex-col py-3 z-10 w-44 overflow-y-scroll'
                 }
             >
                 {sectionKeys.map((key1, i) => (
@@ -93,17 +94,17 @@ export default function ConfigTab(props: { visible: boolean }) {
                     'z-0 flex-grow h-full p-6 overflow-y-scroll ' + 'flex-col-left relative pb-20'
                 }
             >
-                {activeKey === 'general' && <configComponents.ConfigSectionGeneral />}
-                {activeKey === 'opus' && <configComponents.ConfigSectionOpus />}
-                {activeKey === 'camtracker' && <configComponents.ConfigSectionCamtracker />}
-                {activeKey === 'error_email' && <configComponents.ConfigSectionErrorEmail />}
+                {activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
+                {activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
+                {activeKey === 'camtracker' && <configurationComponents.ConfigSectionCamtracker />}
+                {activeKey === 'error_email' && <configurationComponents.ConfigSectionErrorEmail />}
                 {activeKey === 'measurement_triggers' && (
-                    <configComponents.ConfigSectionMeasurementTriggers />
+                    <configurationComponents.ConfigSectionMeasurementTriggers />
                 )}
-                {activeKey === 'tum_plc' && <configComponents.ConfigSectionTumPlc />}
-                {activeKey === 'vbdsd' && <configComponents.ConfigSectionVbdsd />}
+                {activeKey === 'tum_plc' && <configurationComponents.ConfigSectionTumPlc />}
+                {activeKey === 'vbdsd' && <configurationComponents.ConfigSectionVbdsd />}
                 {configIsDiffering && (
-                    <configComponents.SavingOverlay
+                    <configurationComponents.SavingOverlay
                         {...{
                             errorMessage,
                             saveLocalConfig,

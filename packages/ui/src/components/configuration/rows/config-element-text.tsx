@@ -1,13 +1,9 @@
 import { dialog } from '@tauri-apps/api';
 import { functionalUtils } from '../../../utils';
-import { configComponents, essentialComponents } from '../..';
+import { configurationComponents, essentialComponents } from '../..';
 
 function getPostfix(key: string) {
-    if (
-        key.includes('angle') ||
-        key.includes('threshold') ||
-        key.includes('elevation')
-    ) {
+    if (key.includes('angle') || key.includes('threshold') || key.includes('elevation')) {
         return 'degrees';
     }
     if (key.includes('seconds')) {
@@ -45,20 +41,15 @@ export default function ConfigElementText(props: {
     const hasBeenModified = !functionalUtils.deepEqual(oldValue, value);
 
     return (
-        <configComponents.LabeledRow key2={key2} modified={hasBeenModified}>
+        <configurationComponents.LabeledRow key2={key2} modified={hasBeenModified}>
             <div className="relative w-full flex-row-center gap-x-1">
                 <essentialComponents.TextInput
                     value={value.toString()}
-                    setValue={(v) =>
-                        numeric ? setValue(parseNumericValue(v)) : setValue(v)
-                    }
+                    setValue={(v) => (numeric ? setValue(parseNumericValue(v)) : setValue(v))}
                     postfix={getPostfix(key2)}
                 />
                 {showfileSelector && !disabled && (
-                    <essentialComponents.Button
-                        variant="slate"
-                        onClick={triggerFileSelection}
-                    >
+                    <essentialComponents.Button variant="white" onClick={triggerFileSelection}>
                         select
                     </essentialComponents.Button>
                 )}
@@ -66,6 +57,6 @@ export default function ConfigElementText(props: {
             <essentialComponents.PreviousValue
                 previousValue={hasBeenModified ? `${oldValue}` : undefined}
             />
-        </configComponents.LabeledRow>
+        </configurationComponents.LabeledRow>
     );
 }

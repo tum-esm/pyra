@@ -3,7 +3,7 @@ import { dialog, shell } from '@tauri-apps/api';
 import { backend, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
 
-export default function LogTab(props: { visible: boolean }) {
+export default function LogTab() {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
     const [archiving, setArchiving] = useState(false);
 
@@ -24,7 +24,7 @@ export default function LogTab(props: { visible: boolean }) {
     }
 
     return (
-        <div className={'flex-col w-full h-full pt-4 ' + (props.visible ? 'flex ' : 'hidden ')}>
+        <div className={'flex-col w-full h-full pt-4 '}>
             <div className="px-6 mb-4 flex-row-center gap-x-2">
                 <essentialComponents.Toggle
                     value={logLevel}
