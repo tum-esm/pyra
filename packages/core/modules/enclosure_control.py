@@ -207,13 +207,13 @@ class EnclosureControl:
     def set_manual_control(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control["manual_control"], state)
 
-    def set_auto_temperature(self, state):
+    def set_auto_temperature(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control["auto_temp_mode"], state)
 
-    def set_manual_temperature(self, state):
+    def set_manual_temperature(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control["manual_temp_mode"], state)
 
-    def check_for_reest_needed(self):
+    def check_for_reset_needed(self):
         return self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"])
 
     def reset(self):
@@ -259,6 +259,16 @@ class EnclosureControl:
 
     def check_cover_closed(self):
         return self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"])
+
+    def force_cover_close(self):
+        if self.check_for_reset_needed():
+            self.reset()
+
+        self.set_sync_to_tracker(False)
+        self.set_manual_control(True)
+        self.move_cover(0)
+        self.wait_for_cover_closing()
+        self.set_manual_control(True)
 
 
     def wait_for_cover_closing(self):
