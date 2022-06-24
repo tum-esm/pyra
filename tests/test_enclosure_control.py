@@ -7,39 +7,10 @@ def test_enclosure_control():
     
     _CONFIG = ConfigInterface().read()
     control = EnclosureControl(_CONFIG)
+    print(["fan_speed","current_angle","manual control","manual_temp_mode",
+           "humidity", "temperature", "camera", "computer", "cover_closed",
+           "heater", "motor_failed", "rain", "reset_needed", "router",
+           "spectrometer","ups_alert"])
     print(control.read_states_from_plc())
-    control.set_sync_to_tracker(False)
-    assert False
 
-"""
-def test_em27_power_relay():
-    _CONFIG = ConfigInterface().read()
-    control = EnclosureControl(_CONFIG)
-
-    plc_interface: PLCInterface = STANDARD_PLC_INTERFACES[_CONFIG[
-            "tum_plc"
-        ]["version"]]
-
-    state = control.plc_read_bool(plc_interface.power["spectrometer"])
-
-    if state == True:
-        control.plc_write_bool(plc_interface.power["spectrometer"], False)
-
-    time.sleep(2)
-
-    assert not control.plc_read_bool(plc_interface.power["spectrometer"])
-    assert OSInfo.check_connection_status(_CONFIG["tum_plc"]["ip"]) == "NO_INFO"
-
-    time.sleep(2)
-
-    control.plc_write_bool(plc_interface.power["spectrometer"], True)
-
-    time.sleep(10)
-
-    assert control.plc_read_bool(plc_interface.power["spectrometer"])
-    assert OSInfo.check_connection_status(_CONFIG["tum_plc"]["ip"]) != "NO_INFO"
-
-
-
-
-"""
+    assert(False)

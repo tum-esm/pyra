@@ -286,6 +286,9 @@ class EnclosureControl:
         """
         Checks the state of the enclosure by continuously reading sensor and
         actor output.
+        ["fan_speed","current_angle", "manual control","manual_temp_mode", "humidity", "temperature", "camera",
+        "computer", "cover_closed", "heater", "motor_failed", "rain", "reset_needed", "router", "spectrometer",
+        "ups_alert"]
 
         returns
         r: list
