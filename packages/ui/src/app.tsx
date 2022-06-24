@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { customTypes } from './custom-types';
 import { ICONS } from './assets';
-import { backend } from './utils';
+import { backend, reduxUtils } from './utils';
 import { AutomationTab, ConfigTab, LogTab, ControlTab } from './tabs';
 import { essentialComponents, Header } from './components';
+import { watch } from 'tauri-plugin-fs-watch-api';
 
 const tabs = ['Automation', 'Config', 'Logs', 'Enclosure Controls'];
 
@@ -12,18 +12,17 @@ export default function App() {
     const [backendIntegrity, setBackendIntegrity] = useState<
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
-    const [centralConfig, setCentralConfig] = useState<customTypes.config | undefined>(undefined);
+
+    const dispatch = reduxUtils.useTypedDispatch();
 
     useEffect(() => {
         loadInitialState();
+        fetchLogsFile();
+        initializeLogsFileWatcher();
     }, []);
-
-    // TODO: watch for changes in config.json or state.json
 
     async function loadInitialState() {
         setBackendIntegrity(undefined);
-        setCentralConfig(undefined);
-
         console.debug('loading initial state ...');
 
         try {
@@ -40,7 +39,6 @@ export default function App() {
             } else {
                 // TODO: handle "file not exists error"
                 setBackendIntegrity('valid');
-                setCentralConfig(JSON.parse(p.stdout));
             }
         } catch (e) {
             console.log(`Error while fetching initial state: ${e}`);
@@ -48,9 +46,34 @@ export default function App() {
         }
     }
 
+    async function fetchLogsFile() {
+        dispatch(reduxUtils.logsActions.setLoading(true));
+        try {
+            const newLogLines = (await backend.readDebugLogs()).stdout.split('\n');
+            dispatch(reduxUtils.logsActions.set(newLogLines));
+        } catch {
+            // TODO: Add message to queue
+        } finally {
+            dispatch(reduxUtils.logsActions.setLoading(false));
+        }
+    }
+
+    // TODO: watch for changes in config.json or state.json
+    async function initializeLogsFileWatcher() {
+        let logFilePath = import.meta.env.VITE_PROJECT_DIR + '\\logs\\debug.log';
+        if (window.navigator.platform.includes('Mac')) {
+            logFilePath = logFilePath.replace(/\\/g, '/');
+        }
+        await watch(logFilePath, { recursive: false }, (o) => {
+            if (o.type === 'Write') {
+                fetchLogsFile();
+            }
+        });
+    }
+
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
-            {[backendIntegrity, centralConfig].includes(undefined) && (
+            {backendIntegrity === undefined && (
                 <main className="w-full h-full flex-row-center">
                     <div className="w-8 h-8 text-green-600 animate-spin">{ICONS.spinner}</div>
                 </main>
@@ -87,14 +110,11 @@ export default function App() {
                     </essentialComponents.Button>
                 </main>
             )}
-            {backendIntegrity === 'valid' && centralConfig !== undefined && (
+            {backendIntegrity === 'valid' && (
                 <>
                     <Header {...{ tabs, activeTab, setActiveTab }} />
                     <main className="flex-grow w-full min-h-0 bg-slate-75">
-                        <AutomationTab
-                            visible={activeTab === 'Automation'}
-                            {...{ centralConfig, setCentralConfig }}
-                        />
+                        <AutomationTab visible={activeTab === 'Automation'} />
                         <ConfigTab visible={activeTab === 'Config'} />
                         <LogTab visible={activeTab === 'Logs'} />
                         <ControlTab visible={activeTab === 'Enclosure Controls'} />

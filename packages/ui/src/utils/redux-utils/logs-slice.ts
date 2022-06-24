@@ -7,16 +7,20 @@ export const logsSlice = createSlice({
     initialState: {
         infoLines: [],
         debugLines: [],
-        areEmpty: undefined,
+        empty: undefined,
+        loading: false,
     },
     reducers: {
         set: (state: customTypes.reduxStateLogs, action: { payload: string[] }) => {
             const nonEmptyLines = action.payload.filter((l) => l.replace(/\n /g, '').length > 0);
-            state.areEmpty = nonEmptyLines.length == 0;
+            state.empty = nonEmptyLines.length == 0;
             state.debugLines = functionalUtils.reduceLogLines(nonEmptyLines);
             state.infoLines = functionalUtils
                 .reduceLogLines(nonEmptyLines)
                 .filter((l) => !l.includes('DEBUG'));
+        },
+        setLoading: (state: customTypes.reduxStateLogs, action: { payload: boolean }) => {
+            state.loading = action.payload;
         },
     },
 });

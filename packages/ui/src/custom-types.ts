@@ -7,7 +7,8 @@ export namespace customTypes {
     export type reduxStateLogs = {
         infoLines: string[];
         debugLines: string[];
-        areEmpty: boolean | undefined;
+        empty: boolean | undefined;
+        loading: boolean;
     };
     export type reduxState = {
         config: reduxStateConfig;

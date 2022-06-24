@@ -4,16 +4,12 @@ import { automationComponents } from '../components';
 import { backend } from '../utils';
 import { watch } from 'tauri-plugin-fs-watch-api';
 
-export default function AutomationTab(props: {
-    visible: boolean;
-    centralConfig: customTypes.config;
-    setCentralConfig(c: customTypes.config): void;
-}) {
+export default function AutomationTab(props: { visible: boolean }) {
     // "undefined" indicates that the pyra-core state is currently
     // being checked, "-1" indicates that pyra-core is not running
     const [pyraCorePID, setPyraCorePID] = useState<number | undefined>(undefined);
 
-    const { visible, centralConfig, setCentralConfig } = props;
+    const { visible } = props;
 
     // TODO: Move central config to redux store
     // TODO: Pull state and central config in regular time intervals (only when pyra is running)
