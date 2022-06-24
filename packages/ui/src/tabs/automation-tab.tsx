@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import TYPES from '../utils/types';
 
-import PyraCoreStatus from '../components/status/pyra-core-status';
-import MeasurementDecisionStatus from '../components/status/measurement-decision-status';
-import EnclosureStatus from '../components/status/enclosure-status';
+import { automationComponents } from '../components';
 import backend from '../utils/backend';
 import { watch } from 'tauri-plugin-fs-watch-api';
 
@@ -63,15 +61,15 @@ export default function AutomationTab(props: {
                 (visible ? 'flex ' : 'hidden ')
             }
         >
-            <PyraCoreStatus {...{ pyraCorePID, setPyraCorePID }} />
+            <automationComponents.PyraCoreStatus {...{ pyraCorePID, setPyraCorePID }} />
             <div className="w-full h-px bg-slate-300" />
             {pyraCorePID !== undefined && pyraCorePID !== -1 && (
                 <>
-                    <MeasurementDecisionStatus
+                    <automationComponents.MeasurementDecisionStatus
                         {...{ centralConfig, setCentralConfig }}
                     />
                     <div className="w-full h-px bg-slate-300" />
-                    <EnclosureStatus centralState={centralState} />
+                    <automationComponents.EnclosureStatus centralState={centralState} />
                 </>
             )}
         </div>

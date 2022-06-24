@@ -1,5 +1,3 @@
-import backend from '../../utils/backend';
-import { useState, useEffect } from 'react';
 import TYPES from '../../utils/types';
 
 function Table(props: { children: React.ReactNode }) {
