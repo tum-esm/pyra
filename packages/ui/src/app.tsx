@@ -13,6 +13,10 @@ export default function App() {
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
 
+    const centralConfigTumPlc = reduxUtils.useTypedSelector((s) => s.config.central?.tum_plc);
+    const enclosureControlsIsVisible =
+        centralConfigTumPlc !== null && centralConfigTumPlc !== undefined;
+
     const dispatch = reduxUtils.useTypedDispatch();
 
     useEffect(() => {
@@ -135,19 +139,36 @@ export default function App() {
             )}
             {backendIntegrity === 'valid' && (
                 <>
-                    <Header {...{ tabs, activeTab, setActiveTab }} />
-                    <main className="flex-grow w-full min-h-0 bg-slate-75">
+                    <Header
+                        {...{
+                            tabs: tabs.filter(
+                                (t) => t !== 'Enclosure Controls' || enclosureControlsIsVisible
+                            ),
+                            activeTab,
+                            setActiveTab,
+                        }}
+                    />
+                    <main
+                        className={
+                            'flex-grow w-full bg-slate-75 ' +
+                            'h-[calc(200vh-1.5rem)] overflow-y-scroll'
+                        }
+                    >
                         {[
                             ['Overview', <OverviewTab />],
                             ['Automation', <AutomationTab />],
                             ['Configuration', <ConfigurationTab />],
                             ['Logs', <LogTab />],
-                            ['Enclosure Controls', <ControlTab />],
                         ].map((t: any, i) => (
                             <div key={i} className={activeTab === t[0] ? '' : 'hidden'}>
                                 {t[1]}
                             </div>
                         ))}
+                        {enclosureControlsIsVisible && (
+                            <div className={activeTab === 'Enclosure Controls' ? '' : 'hidden'}>
+                                <ControlTab />
+                            </div>
+                        )}
                     </main>
                 </>
             )}
