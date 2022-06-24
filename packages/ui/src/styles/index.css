@@ -38,6 +38,10 @@
     @apply flex flex-row items-center justify-end;
 }
 
+.flex-row-left-top {
+    @apply flex flex-row items-start justify-start;
+}
+
 .elevated-panel {
     @apply shadow-sm rounded-md bg-white border-gray-300 border;
 }

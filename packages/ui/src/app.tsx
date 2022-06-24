@@ -12,9 +12,7 @@ export default function App() {
     const [backendIntegrity, setBackendIntegrity] = useState<
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
-    const [centralConfig, setCentralConfig] = useState<customTypes.config | undefined>(
-        undefined
-    );
+    const [centralConfig, setCentralConfig] = useState<customTypes.config | undefined>(undefined);
 
     useEffect(() => {
         loadInitialState();
@@ -54,9 +52,7 @@ export default function App() {
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
             {[backendIntegrity, centralConfig].includes(undefined) && (
                 <main className="w-full h-full flex-row-center">
-                    <div className="w-8 h-8 text-green-600 animate-spin">
-                        {ICONS.spinner}
-                    </div>
+                    <div className="w-8 h-8 text-green-600 animate-spin">{ICONS.spinner}</div>
                 </main>
             )}
             {(backendIntegrity === 'cli is missing' ||
@@ -86,10 +82,7 @@ export default function App() {
                         </span>
                         .
                     </p>
-                    <essentialComponents.Button
-                        onClick={loadInitialState}
-                        variant="green"
-                    >
+                    <essentialComponents.Button onClick={loadInitialState} variant="green">
                         retry connection
                     </essentialComponents.Button>
                 </main>
