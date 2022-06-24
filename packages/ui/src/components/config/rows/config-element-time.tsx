@@ -1,7 +1,8 @@
 import TextInput from '../../essential/text-input';
 import LabeledRow from '../labeled-row';
 import PreviousValue from '../../essential/previous-value';
-import deepEqual from '../../../utils/deep-equal';
+
+import { functionalUtils } from '../../../utils';
 
 export default function ConfigElementTime(props: {
     key2: string;
@@ -12,7 +13,7 @@ export default function ConfigElementTime(props: {
 }) {
     const { key2, value, oldValue, setValue, disabled } = props;
 
-    const hasChanged = !deepEqual(value, oldValue);
+    const hasChanged = !functionalUtils.deepEqual(value, oldValue);
 
     function parseNumericValue(v: string): any {
         return `${v}`.replace(/[^\d\.]/g, '');

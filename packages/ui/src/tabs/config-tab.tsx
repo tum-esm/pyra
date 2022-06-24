@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import TYPES from '../utils/types';
-import SavingOverlay from '../components/config/saving-overlay';
 import { defaultsDeep } from 'lodash';
-import deepEqual from '../utils/deep-equal';
-import capitalizeConfigKey from '../utils/capitalize-config-key';
-import parseNumberTypes from '../utils/parse-number-types';
-import backend from '../utils/backend';
+
+import { backend, functionalUtils } from '../utils';
+import TYPES from '../utils/types';
+
+import SavingOverlay from '../components/config/saving-overlay';
 import ConfigSectionGeneral from '../components/config/sections/config-section-general';
 import ConfigSectionOpus from '../components/config/sections/config-section-opus';
 import ConfigSectionCamtracker from '../components/config/sections/config-section-camtracker';
@@ -51,7 +50,7 @@ export default function ConfigTab(props: { visible: boolean }) {
     async function saveLocalConfig() {
         if (localConfig !== undefined) {
             setIsSaving(true);
-            const parsedLocalConfig = parseNumberTypes(localConfig);
+            const parsedLocalConfig = functionalUtils.parseNumberTypes(localConfig);
             let result = await backend.updateConfig(parsedLocalConfig);
 
             if (result.stdout.includes('Updated config file')) {
@@ -78,7 +77,7 @@ export default function ConfigTab(props: { visible: boolean }) {
     const configIsDiffering =
         localConfig !== undefined &&
         centralConfig !== undefined &&
-        !deepEqual(localConfig, centralConfig);
+        !functionalUtils.deepEqual(localConfig, centralConfig);
 
     const sharedSectionProps: any = { localConfig, centralConfig, addLocalUpdate };
 
@@ -108,7 +107,7 @@ export default function ConfigTab(props: { visible: boolean }) {
                                         : 'text-slate-500 hover:bg-slate-150 hover:text-slate-700 ')
                                 }
                             >
-                                {capitalizeConfigKey(key1)}
+                                {functionalUtils.capitalizeConfigKey(key1)}
                                 <div className="flex-grow" />
                                 <div
                                     className={

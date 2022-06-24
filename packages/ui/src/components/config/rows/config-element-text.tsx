@@ -3,7 +3,8 @@ import Button from '../../essential/button';
 import LabeledRow from '../labeled-row';
 import PreviousValue from '../../essential/previous-value';
 import { dialog } from '@tauri-apps/api';
-import deepEqual from '../../../utils/deep-equal';
+
+import { functionalUtils } from '../../../utils';
 
 function getPostfix(key: string) {
     if (
@@ -45,7 +46,7 @@ export default function ConfigElementText(props: {
     }
 
     const showfileSelector = key2.endsWith('_path');
-    const hasBeenModified = !deepEqual(oldValue, value);
+    const hasBeenModified = !functionalUtils.deepEqual(oldValue, value);
 
     return (
         <LabeledRow key2={key2} modified={hasBeenModified}>

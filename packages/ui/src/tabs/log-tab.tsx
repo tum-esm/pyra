@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import Toggle from '../components/essential/toggle';
-import ICONS from '../assets/icons';
-import Button from '../components/essential/button';
-import backend from '../utils/backend';
 import { dialog, shell } from '@tauri-apps/api';
-import reduceLogLines from '../utils/reduce-log-lines';
 import { watch } from 'tauri-plugin-fs-watch-api';
+
+import ICONS from '../assets/icons';
+import { backend, functionalUtils } from '../utils';
+
+import Button from '../components/essential/button';
+import Toggle from '../components/essential/toggle';
 
 export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -23,8 +24,8 @@ export default function LogTab(props: { visible: boolean }) {
             const newInfoLogsList = (await backend.readInfoLogs()).stdout.split('\n');
             const newDebugLogsList = (await backend.readDebugLogs()).stdout.split('\n');
 
-            setInfoLogs(reduceLogLines(newInfoLogsList).join('\n'));
-            setDebugLogs(reduceLogLines(newDebugLogsList).join('\n'));
+            setInfoLogs(functionalUtils.reduceLogLines(newInfoLogsList).join('\n'));
+            setDebugLogs(functionalUtils.reduceLogLines(newDebugLogsList).join('\n'));
         } catch {
             // TODO: Add message to queue
             setInfoLogs('');

@@ -1,4 +1,4 @@
-import TYPES from './types';
+import TYPES from '../types';
 
 /*
 This transformation is necessary because in the interface when typing numbers,

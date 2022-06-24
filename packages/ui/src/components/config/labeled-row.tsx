@@ -1,5 +1,5 @@
 import React from 'react';
-import capitalizeConfigKey from '../../utils/capitalize-config-key';
+import { functionalUtils } from '../../utils';
 
 export default function LabeledRow(props: {
     key2: string;
@@ -12,8 +12,8 @@ export default function LabeledRow(props: {
     return (
         <div className="relative flex mb-6">
             <label className="overflow-hidden text-sm text-left w-[12.5rem] text-slate-700 whitespace-nowrap flex-shrink-0 h-9 leading-9">
-                <strong>{capitalizeConfigKey(key2)}</strong>
-                {key3 !== undefined && '.' + capitalizeConfigKey(key3)}
+                <strong>{functionalUtils.capitalizeConfigKey(key2)}</strong>
+                {key3 !== undefined && '.' + functionalUtils.capitalizeConfigKey(key3)}
             </label>
             <div className="flex-grow space-y-1 flex-col-left">{children}</div>
             {modified && (
