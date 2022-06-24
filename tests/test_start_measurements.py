@@ -9,12 +9,14 @@ import time
 def test_start_up():
     
     _CONFIG = ConfigInterface().read()
-    control = EnclosureControl(_CONFIG)
+    enclosure = EnclosureControl(_CONFIG)
     opus = OpusMeasurement(_CONFIG)
     tracking = SunTracking(_CONFIG)
     
+    if enclosure.check_for_reest_needed():
+        enclosure.reset()
 
-    control.set_sync_to_tracker(True)
+    enclosure.set_sync_to_tracker(True)
     time.sleep(2)
     if not tracking.ct_application_running:
         tracking.start_sun_tracking_automation()
