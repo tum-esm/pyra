@@ -52,7 +52,7 @@ class EnclosureControl:
         self.plc = snap7.client.Client()
         self.connection = self.plc_connect()
         self.last_cycle_automation_status = 0
-        self.plc_write_bool(self._PLC_INTERFACE.control["auto_temp_mode"], True)
+        self.set_auto_temperature(True)
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
@@ -63,9 +63,7 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
-        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG[
-            "tum_plc"
-        ]["version"]]
+        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG["tum_plc"]["version"]]
 
         logger.info("Running EnclosureControl")
 
@@ -77,27 +75,21 @@ class EnclosureControl:
             raise PLCError("Could not find an active PLC IP connection.")
 
         # check for automation state flank changes
-        automation_should_be_running = StateInterface.read()[
-            "automation_should_be_running"
-        ]
+        automation_should_be_running = StateInterface.read()["automation_should_be_running"]
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
                 # TODO: check if that is correct reset handling
-                if self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]):
-                    self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
+                if self.check_for_rest_needed():
+                    self.reset()
                     time.sleep(10)
 
-                self.plc_write_bool(
-                    self._PLC_INTERFACE.control["sync_to_tracker"], True
-                )
+                self.set_sync_to_tracker(True)
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
-                self.plc_write_bool(
-                    self._PLC_INTERFACE.control["sync_to_tracker"], False
-                )
-                self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], 0)
+                self.set_sync_to_tracker(False)
+                self.move_cover(0)
                 logger.info("Closing Cover.")
                 self.wait_for_cover_closing()
 
@@ -105,13 +97,13 @@ class EnclosureControl:
         self.last_cycle_automation_status = automation_should_be_running
 
         if not automation_should_be_running:
-            if not self._PLC_INTERFACE.actors["cover_closed"]:
+            if not self.check_cover_closed():
                 logger.info("Cover is still open. Trying to close again.")
-                self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], 0)
+                self.move_cover(0)
                 self.wait_for_cover_closing()
 
         # read current state of actors and sensors in enclosure
-        current_reading = self.read_state_from_plc()
+        current_reading = self.read_states_from_plc()
         logger.info("New continuous readings.")
         StateInterface.update({"enclosure_plc_readings": current_reading})
 
@@ -210,7 +202,6 @@ class EnclosureControl:
         # wait if cpu is still busy
         self.cpu_busy_check()
 
-
     def set_sync_to_tracker(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control["sync_to_tracker"], state)
 
@@ -291,7 +282,7 @@ class EnclosureControl:
             if elapsed_time > 31:
                 raise CoverError("Enclosure cover might be stuck.")
 
-    def read_state_from_plc(self):
+    def read_states_from_plc(self):
         """
         Checks the state of the enclosure by continuously reading sensor and
         actor output.
