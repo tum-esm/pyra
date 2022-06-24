@@ -8,8 +8,12 @@ def test_cover_movement():
     _PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[_CONFIG["tum_plc"]["version"]]
     enclosure = EnclosureControl(_CONFIG)
 
+    state = enclosure.check_for_rest_needed()
+    print(state)
+
     enclosure.reset()
 
     state = enclosure.check_for_rest_needed()
+    print(state)
 
     assert(False)
