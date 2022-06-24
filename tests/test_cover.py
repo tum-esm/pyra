@@ -9,7 +9,7 @@ def test_cover_movement():
     _PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[_CONFIG["tum_plc"]["version"]]
     enclosure = EnclosureControl(_CONFIG)
     
-    if enclosure.check_for_rest_needed():
+    if enclosure.check_for_reest_needed():
         enclosure.reset()
 
     enclosure.set_sync_to_tracker(False)

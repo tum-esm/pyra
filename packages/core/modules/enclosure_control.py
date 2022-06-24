@@ -79,8 +79,7 @@ class EnclosureControl:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                # TODO: check if that is correct reset handling
-                if self.check_for_rest_needed():
+                if self.check_for_reest_needed():
                     self.reset()
                     time.sleep(10)
 
@@ -214,7 +213,7 @@ class EnclosureControl:
     def set_manual_temperature(self, state):
         self.plc_write_bool(self._PLC_INTERFACE.control["manual_temp_mode"], state)
 
-    def check_for_rest_needed(self):
+    def check_for_reest_needed(self):
         return self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"])
 
     def reset(self):
