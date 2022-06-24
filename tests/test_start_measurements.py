@@ -28,4 +28,4 @@ def test_start_up():
     time.sleep(2)
     opus.start_macro()
 
-    assert(False)
+
