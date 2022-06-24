@@ -121,6 +121,10 @@ class EnclosureControl:
         # TODO: check what resetbutton after rain does (and the auto reset option
 
     def sync_to_tracker(self, x=True):
+        if self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]):
+            print("reset was needed")
+            self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
+
         self.plc_write_bool(self._PLC_INTERFACE.control["sync_to_tracker"], x)
 
     def manage_spectrometer_power(self):

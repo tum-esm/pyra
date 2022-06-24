@@ -41,28 +41,5 @@ def test_em27_power_relay():
 
 
 
-def test_cover_movement():
-    _CONFIG = ConfigInterface().read()
-    control = EnclosureControl(_CONFIG)
 
-    control.plc_write_bool(_CONFIG["tum_plc"]["control"]["sync_to_tracker"], False)
-
-    control.plc_write_int(_CONFIG["tum_plc"]["actors"]["move_cover"], 90)
-    time.sleep(5)
-    assert not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"])
-    assert control.plc_read_int(_CONFIG["tum_plc"]["actors"]["move_cover"]) == 90
-
-    control.plc_write_int(_CONFIG["tum_plc"]["actors"]["move_cover"], 250)
-    time.sleep(5)
-    assert not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"])
-    assert control.plc_read_int(_CONFIG["tum_plc"]["actors"]["move_cover"]) == 90
-
-    control.plc_write_int(_CONFIG["tum_plc"]["actors"]["move_cover"], 160)
-    time.sleep(5)
-    assert not control.plc_read_bool(["tum_plc"]["state"]["cover_closed"])
-    assert control.plc_read_int(_CONFIG["tum_plc"]["actors"]["move_cover"]) == 90
-
-    control.plc_write_int(_CONFIG["tum_plc"]["actors"]["move_cover"], 0)
-    control.wait_for_cover_closing()
-    assert control.plc_read_bool(_CONFIG["tum_plc"]["state"]["cover_closed"])
 """
