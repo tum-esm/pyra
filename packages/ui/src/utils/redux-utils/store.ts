@@ -1,5 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
+import configReducer from './config-slice';
 
 export default configureStore({
-    reducer: {},
+    reducer: {
+        config: configReducer.reducer,
+    },
 });

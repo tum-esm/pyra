@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { customTypes } from './custom-types';
 import { ICONS } from './assets';
 import { backend } from './utils';
-import { AutomationTab, ConfigTab, LogTab } from './tabs';
+import { AutomationTab, ConfigTab, LogTab, ControlTab } from './tabs';
 import { essentialComponents, Header } from './components';
 
 const tabs = ['Automation', 'Config', 'Logs', 'Enclosure Controls'];
@@ -104,6 +104,7 @@ export default function App() {
                         />
                         <ConfigTab visible={activeTab === 'Config'} />
                         <LogTab visible={activeTab === 'Logs'} />
+                        <ControlTab visible={activeTab === 'Enclosure Controls'} />
                     </main>
                 </>
             )}
