@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { defaultsDeep } from 'lodash';
 
-import { backend, functionalUtils } from '../utils';
+import { backend, functionalUtils, reduxUtils } from '../utils';
 import { customTypes } from '../custom-types';
 import { configComponents } from '../components';
 
@@ -15,15 +15,17 @@ const sectionKeys: customTypes.configSectionKey[] = [
     'vbdsd',
 ];
 export default function ConfigTab(props: { visible: boolean }) {
-    const [centralConfig, setCentralConfig] = useState<customTypes.config | undefined>(
-        undefined
-    );
-    const [localConfig, setLocalConfig] = useState<customTypes.config | undefined>(
-        undefined
-    );
+    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
+    const localConfig = reduxUtils.useTypedSelector((s) => s.config.local);
+    const dispatch = reduxUtils.useTypedDispatch();
+
+    const setCentralConfig = (c: customTypes.config | undefined) =>
+        dispatch(reduxUtils.configActions.setCentral(c));
+    const setLocalConfig = (c: customTypes.config | undefined) =>
+        dispatch(reduxUtils.configActions.setLocal(c));
+
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
     const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
-
     const [isSaving, setIsSaving] = useState(false);
 
     async function loadCentralConfig() {
@@ -62,7 +64,7 @@ export default function ConfigTab(props: { visible: boolean }) {
         setLocalConfig(centralConfig);
     }
 
-    function addLocalUpdate(update: object) {
+    function addLocalUpdate(update: customTypes.partialConfig) {
         const newObject = defaultsDeep(update, JSON.parse(JSON.stringify(localConfig)));
         setLocalConfig(newObject);
         setErrorMessage(undefined);
@@ -72,8 +74,6 @@ export default function ConfigTab(props: { visible: boolean }) {
         localConfig !== undefined &&
         centralConfig !== undefined &&
         !functionalUtils.deepEqual(localConfig, centralConfig);
-
-    const sharedSectionProps: any = { localConfig, centralConfig, addLocalUpdate };
 
     return (
         <div
@@ -122,37 +122,37 @@ export default function ConfigTab(props: { visible: boolean }) {
                     >
                         {activeKey === 'general' && (
                             <configComponents.ConfigSectionGeneral
-                                {...sharedSectionProps}
+                                {...{ localConfig, centralConfig, addLocalUpdate }}
                             />
                         )}
                         {activeKey === 'opus' && (
                             <configComponents.ConfigSectionOpus
-                                {...sharedSectionProps}
+                                {...{ localConfig, centralConfig, addLocalUpdate }}
                             />
                         )}
                         {activeKey === 'camtracker' && (
                             <configComponents.ConfigSectionCamtracker
-                                {...sharedSectionProps}
+                                {...{ localConfig, centralConfig, addLocalUpdate }}
                             />
                         )}
                         {activeKey === 'error_email' && (
                             <configComponents.ConfigSectionErrorEmail
-                                {...sharedSectionProps}
+                                {...{ localConfig, centralConfig, addLocalUpdate }}
                             />
                         )}
                         {activeKey === 'measurement_triggers' && (
                             <configComponents.ConfigSectionMeasurementTriggers
-                                {...sharedSectionProps}
+                                {...{ localConfig, centralConfig, addLocalUpdate }}
                             />
                         )}
                         {activeKey === 'tum_plc' && (
                             <configComponents.ConfigSectionTumPlc
-                                {...sharedSectionProps}
+                                {...{ localConfig, centralConfig, addLocalUpdate }}
                             />
                         )}
                         {activeKey === 'vbdsd' && (
                             <configComponents.ConfigSectionVbdsd
-                                {...sharedSectionProps}
+                                {...{ localConfig, centralConfig, addLocalUpdate }}
                             />
                         )}
                         {configIsDiffering && (

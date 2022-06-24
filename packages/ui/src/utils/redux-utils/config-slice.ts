@@ -1,27 +1,24 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-type configType = {
-    value: number;
-};
+import { customTypes } from '../../custom-types';
 
 export const configSlice = createSlice({
     name: 'counter',
     initialState: {
-        value: 0,
+        central: undefined,
+        local: undefined,
     },
     reducers: {
-        increment: (state: configType) => {
-            // Redux Toolkit allows us to write "mutating" logic in reducers. It
-            // doesn't actually mutate the state because it uses the Immer library,
-            // which detects changes to a "draft state" and produces a brand new
-            // immutable state based off those changes
-            state.value += 1;
+        setCentral: (
+            state: customTypes.reduxStateConfig,
+            action: { payload: customTypes.config | undefined }
+        ) => {
+            state.central = action.payload;
         },
-        decrement: (state: configType) => {
-            state.value -= 1;
-        },
-        incrementByAmount: (state: configType, action: { payload: number }) => {
-            state.value += action.payload;
+        setLocal: (
+            state: customTypes.reduxStateConfig,
+            action: { payload: customTypes.config | undefined }
+        ) => {
+            state.local = action.payload;
         },
     },
 });

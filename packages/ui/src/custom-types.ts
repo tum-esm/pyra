@@ -1,6 +1,10 @@
 export namespace customTypes {
+    export type reduxStateConfig = {
+        central: config | undefined;
+        local: config | undefined;
+    };
     export type reduxState = {
-        config: { value: number };
+        config: reduxStateConfig;
     };
     export type intArray3 = [number, number, number];
     export type intArray4 = [number, number, number, number];
