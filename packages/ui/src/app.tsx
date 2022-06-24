@@ -1,7 +1,4 @@
 import { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
-import './styles/index.css';
-
 import backend from './utils/backend';
 import Button from './components/essential/button';
 import Header from './components/header';
@@ -13,7 +10,7 @@ import ICONS from './assets/icons';
 
 const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
 
-function Main() {
+export default function App() {
     const [activeTab, setActiveTab] = useState('Status');
     const [backendIntegrity, setBackendIntegrity] = useState<
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
@@ -113,5 +110,3 @@ function Main() {
         </div>
     );
 }
-
-ReactDOM.render(<Main />, document.getElementById('root'));
