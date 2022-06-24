@@ -12,7 +12,7 @@ function configIsDiffering(state: customTypes.reduxStateConfig) {
 }
 
 export const configSlice = createSlice({
-    name: 'counter',
+    name: 'config',
     initialState: {
         central: undefined,
         local: undefined,

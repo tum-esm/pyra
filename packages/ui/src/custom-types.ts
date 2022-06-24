@@ -4,8 +4,14 @@ export namespace customTypes {
         local: config | undefined;
         isDiffering: boolean | undefined;
     };
+    export type reduxStateLogs = {
+        infoLines: string[];
+        debugLines: string[];
+        areEmpty: boolean | undefined;
+    };
     export type reduxState = {
         config: reduxStateConfig;
+        logs: reduxStateLogs;
     };
     export type intArray3 = [number, number, number];
     export type intArray4 = [number, number, number, number];
