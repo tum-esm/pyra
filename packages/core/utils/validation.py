@@ -98,6 +98,7 @@ CONFIG_FILE_SCHEMA = {
             "min_power_elevation": {"type": "number", "min": 0, "max": 90},
             "ip": Schemas.ip,
             "version": {"type": "integer", "allowed": [1, 2]},
+            "controlled_by_user": {"type": "boolean"},
         }
     ),
     "vbdsd": NULLABLE_DICT_SCHEMA(

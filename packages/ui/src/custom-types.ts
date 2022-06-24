@@ -74,6 +74,7 @@ export namespace customTypes {
             min_power_elevation: number;
             ip: string;
             version: number;
+            controlled_by_user: boolean;
         };
         vbdsd: null | {
             camera_id: number;
@@ -129,6 +130,7 @@ export namespace customTypes {
             min_power_elevation?: number;
             ip?: string;
             version?: number;
+            controlled_by_user?: boolean;
         };
         vbdsd?: null | {
             camera_id?: number;

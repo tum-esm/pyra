@@ -45,9 +45,9 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
-        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG[
-            "tum_plc"
-        ]["version"]]
+        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[
+            self._CONFIG["tum_plc"]["version"]
+        ]
 
         self.plc = snap7.client.Client()
         self.connection = self.plc_connect()
@@ -56,15 +56,22 @@ class EnclosureControl:
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
-        if self._CONFIG["general"]["test_mode"]:
-            logger.debug("Skipping EnclosureControl in test mode")
-            return
         if self._CONFIG["tum_plc"] is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
-        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG["tum_plc"]["version"]]
+        if self._CONFIG["general"]["test_mode"]:
+            logger.debug("Skipping EnclosureControl in test mode")
+            return
+        if self._CONFIG["tum_plc"]["controlled_by_user"]:
+            logger.debug(
+                "Skipping EnclosureControl because enclosure is controlled by user"
+            )
+            return
 
+        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[
+            self._CONFIG["tum_plc"]["version"]
+        ]
         logger.info("Running EnclosureControl")
 
         # check PLC ip connection
@@ -75,7 +82,9 @@ class EnclosureControl:
             raise PLCError("Could not find an active PLC IP connection.")
 
         # check for automation state flank changes
-        automation_should_be_running = StateInterface.read()["automation_should_be_running"]
+        automation_should_be_running = StateInterface.read()[
+            "automation_should_be_running"
+        ]
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -108,7 +117,6 @@ class EnclosureControl:
 
         # possibly powerup/down spectrometer
         self.auto_set_power_spectrometer()
-
 
     def plc_connect(self):
         """
@@ -260,7 +268,6 @@ class EnclosureControl:
     def check_cover_closed(self):
         return self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"])
 
-
     def wait_for_cover_closing(self):
         """Waits steps of 5s for the enclosure cover to close.
 
@@ -331,7 +338,3 @@ class EnclosureControl:
             elif spectrometer_has_power:
                 self.set_power_spectrometer(False)
                 logger.info("Powering down the spectrometer.")
-
-
-
-

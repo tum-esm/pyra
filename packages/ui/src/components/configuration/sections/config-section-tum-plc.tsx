@@ -16,6 +16,7 @@ export default function ConfigSectionTumPlc() {
                 min_power_elevation: 10.0,
                 ip: '10.0.0.4',
                 version: 1,
+                controlled_by_user: false,
             },
         });
     }
