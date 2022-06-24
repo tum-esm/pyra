@@ -1,7 +1,8 @@
-import LabeledRow from './labeled-row';
+import LabeledRow from './rows/labeled-row';
 import SavingOverlay from './saving-overlay';
 import ConfigElementText from './rows/config-element-text';
 import ConfigElementTime from './rows/config-element-time';
+import ConfigElementToggle from './rows/config-element-toggle';
 import ConfigSectionGeneral from './sections/config-section-general';
 import ConfigSectionErrorEmail from './sections/config-section-error-email';
 import ConfigSectionCamtracker from './sections/config-section-camtracker';
@@ -15,6 +16,7 @@ export default {
     SavingOverlay,
     ConfigElementText,
     ConfigElementTime,
+    ConfigElementToggle,
     ConfigSectionCamtracker,
     ConfigSectionErrorEmail,
     ConfigSectionGeneral,

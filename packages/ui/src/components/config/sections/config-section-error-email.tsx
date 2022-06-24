@@ -1,18 +1,17 @@
-import TYPES from '../../../utils/types';
-import ConfigElementText from '../rows/config-element-text';
-import ConfigElementToggle from '../rows/config-element-toggle';
-import ICONS from '../../../assets/icons';
+import { customTypes } from '../../../custom-types';
+import { ICONS } from '../../../assets';
+import { configComponents } from '../..';
 
 export default function ConfigSectionErrorEmail(props: {
-    localConfig: TYPES.config;
+    localConfig: customTypes.config;
     centralConfig: any;
-    addLocalUpdate(v: TYPES.partialConfig): void;
+    addLocalUpdate(v: customTypes.partialConfig): void;
 }) {
     const { localConfig, centralConfig, addLocalUpdate } = props;
 
     return (
         <>
-            <ConfigElementToggle
+            <configComponents.ConfigElementToggle
                 key2="notify_recipients"
                 value={localConfig.error_email.notify_recipients}
                 setValue={(v: boolean) =>
@@ -20,7 +19,7 @@ export default function ConfigSectionErrorEmail(props: {
                 }
                 oldValue={centralConfig.error_email.notify_recipients}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="sender_address"
                 value={localConfig.error_email.sender_address}
                 setValue={(v: string) =>
@@ -28,7 +27,7 @@ export default function ConfigSectionErrorEmail(props: {
                 }
                 oldValue={centralConfig.error_email.sender_address}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="sender_password"
                 value={localConfig.error_email.sender_password}
                 setValue={(v: string) =>
@@ -36,7 +35,7 @@ export default function ConfigSectionErrorEmail(props: {
                 }
                 oldValue={centralConfig.error_email.sender_password}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="recipients"
                 value={localConfig.error_email.recipients}
                 setValue={(v: string) =>

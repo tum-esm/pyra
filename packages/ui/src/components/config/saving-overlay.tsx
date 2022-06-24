@@ -1,4 +1,4 @@
-import Button from '../essential/button';
+import { essentialComponents } from '..';
 
 export default function SavingOverlay(props: {
     errorMessage: undefined | string;
@@ -14,13 +14,21 @@ export default function SavingOverlay(props: {
                     {errorMessage}
                 </span>
             )}
-            <Button onClick={restoreCentralConfig} variant="slate" disabled={isSaving}>
+            <essentialComponents.Button
+                onClick={restoreCentralConfig}
+                variant="slate"
+                disabled={isSaving}
+            >
                 revert
-            </Button>
+            </essentialComponents.Button>
             {errorMessage === undefined && (
-                <Button onClick={saveLocalConfig} variant="slate" spinner={isSaving}>
+                <essentialComponents.Button
+                    onClick={saveLocalConfig}
+                    variant="slate"
+                    spinner={isSaving}
+                >
                     save
-                </Button>
+                </essentialComponents.Button>
             )}
         </div>
     );

@@ -1,5 +1,5 @@
 import React from 'react';
-import ICONS from '../../assets/icons';
+import Spinner from './spinner';
 
 export default function Button(props: {
     children: React.ReactNode;
@@ -60,7 +60,7 @@ export default function Button(props: {
             {spinner && <div className="opacity-0">{children}</div>}
             {spinner && (
                 <div className="absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-                    <div className="w-4 h-4 animate-spin">{ICONS.spinner}</div>
+                    <Spinner />
                 </div>
             )}
         </button>

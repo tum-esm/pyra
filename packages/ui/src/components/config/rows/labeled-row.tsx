@@ -1,5 +1,5 @@
 import React from 'react';
-import { functionalUtils } from '../../utils';
+import { functionalUtils } from '../../../utils';
 
 export default function LabeledRow(props: {
     key2: string;

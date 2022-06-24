@@ -1,4 +1,4 @@
-import TYPES from '../../utils/types';
+import { customTypes } from '../../custom-types';
 
 function Table(props: { children: React.ReactNode }) {
     return (
@@ -53,7 +53,7 @@ function TableRow(props: { label: string; value: React.ReactNode }) {
     );
 }
 export default function EnclosureStatus(props: {
-    centralState: TYPES.state | undefined;
+    centralState: customTypes.state | undefined;
 }) {
     const { centralState } = props;
 

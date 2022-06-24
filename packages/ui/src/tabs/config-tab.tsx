@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { defaultsDeep } from 'lodash';
 
 import { backend, functionalUtils } from '../utils';
-import TYPES from '../utils/types';
+import { customTypes } from '../custom-types';
 import { configComponents } from '../components';
 
-const sectionKeys: TYPES.configSectionKey[] = [
+const sectionKeys: customTypes.configSectionKey[] = [
     'general',
     'opus',
     'camtracker',
@@ -15,12 +15,14 @@ const sectionKeys: TYPES.configSectionKey[] = [
     'vbdsd',
 ];
 export default function ConfigTab(props: { visible: boolean }) {
-    const [centralConfig, setCentralConfig] = useState<TYPES.config | undefined>(
+    const [centralConfig, setCentralConfig] = useState<customTypes.config | undefined>(
         undefined
     );
-    const [localConfig, setLocalConfig] = useState<TYPES.config | undefined>(undefined);
+    const [localConfig, setLocalConfig] = useState<customTypes.config | undefined>(
+        undefined
+    );
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-    const [activeKey, setActiveKey] = useState<TYPES.configSectionKey>('general');
+    const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
 
     const [isSaving, setIsSaving] = useState(false);
 

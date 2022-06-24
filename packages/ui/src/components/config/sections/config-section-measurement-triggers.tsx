@@ -1,18 +1,16 @@
-import TYPES from '../../../utils/types';
-import ConfigElementText from '../rows/config-element-text';
-import ConfigElementToggle from '../rows/config-element-toggle';
-import ConfigElementTime from '../rows/config-element-time';
+import { customTypes } from '../../../custom-types';
+import { configComponents } from '../..';
 
 export default function ConfigSectionMeasurementTriggers(props: {
-    localConfig: TYPES.config;
+    localConfig: customTypes.config;
     centralConfig: any;
-    addLocalUpdate(v: TYPES.partialConfig): void;
+    addLocalUpdate(v: customTypes.partialConfig): void;
 }) {
     const { localConfig, centralConfig, addLocalUpdate } = props;
 
     return (
         <>
-            <ConfigElementToggle
+            <configComponents.ConfigElementToggle
                 key2="consider_time"
                 value={localConfig.measurement_triggers.consider_time}
                 setValue={(v: boolean) =>
@@ -21,7 +19,7 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 oldValue={centralConfig.measurement_triggers.consider_time}
             />
             <div className="h-0 -mt-4" />
-            <ConfigElementToggle
+            <configComponents.ConfigElementToggle
                 key2="consider_sun_elevation"
                 value={localConfig.measurement_triggers.consider_sun_elevation}
                 setValue={(v: boolean) =>
@@ -32,7 +30,7 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 oldValue={centralConfig.measurement_triggers.consider_sun_elevation}
             />
             <div className="h-0 -mt-4" />
-            <ConfigElementToggle
+            <configComponents.ConfigElementToggle
                 key2="consider_vbdsd"
                 value={localConfig.measurement_triggers.consider_vbdsd}
                 setValue={(v: boolean) =>
@@ -41,7 +39,7 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 oldValue={centralConfig.measurement_triggers.consider_vbdsd}
             />
             <div className="w-full h-px mb-6 -mt-2 bg-slate-300" />
-            <ConfigElementTime
+            <configComponents.ConfigElementTime
                 key2="start_time"
                 value={localConfig.measurement_triggers.start_time}
                 setValue={(v) =>
@@ -50,7 +48,7 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 oldValue={centralConfig.measurement_triggers.start_time}
             />
             <div className="h-0 -mt-4" />
-            <ConfigElementTime
+            <configComponents.ConfigElementTime
                 key2="stop_time"
                 value={localConfig.measurement_triggers.stop_time}
                 setValue={(v) =>
@@ -58,7 +56,7 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 }
                 oldValue={centralConfig.measurement_triggers.stop_time}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="min_sun_elevation"
                 value={localConfig.measurement_triggers.min_sun_elevation}
                 setValue={(v: number) =>
@@ -67,7 +65,7 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 oldValue={centralConfig.measurement_triggers.min_sun_elevation}
             />
             <div className="h-0 -mt-4" />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="max_sun_elevation"
                 value={localConfig.measurement_triggers.max_sun_elevation}
                 setValue={(v: number) =>
@@ -75,7 +73,6 @@ export default function ConfigSectionMeasurementTriggers(props: {
                 }
                 oldValue={centralConfig.measurement_triggers.max_sun_elevation}
             />
-            {/* TODO: start time stop time */}
         </>
     );
 }

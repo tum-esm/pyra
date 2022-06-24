@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
 import { dialog, shell } from '@tauri-apps/api';
 import { watch } from 'tauri-plugin-fs-watch-api';
-
-import ICONS from '../assets/icons';
 import { backend, functionalUtils } from '../utils';
-
-import Button from '../components/essential/button';
-import Toggle from '../components/essential/toggle';
+import { essentialComponents } from '../components';
 
 export default function LogTab(props: { visible: boolean }) {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -80,28 +76,24 @@ export default function LogTab(props: { visible: boolean }) {
             }
         >
             <div className="px-6 mb-4 flex-row-center gap-x-2">
-                <Toggle
+                <essentialComponents.Toggle
                     value={logLevel}
                     setValue={(s: any) => setLogLevel(s)}
                     values={['info', 'debug']}
                 />
-                {loading && (
-                    <div className="w-4 h-4 text-gray-700 animate-spin">
-                        {ICONS.spinner}
-                    </div>
-                )}
+                {loading && <essentialComponents.Spinner />}
                 <div className="flex-grow" />
-                <Button onClick={openLogsFolder} variant="white">
+                <essentialComponents.Button onClick={openLogsFolder} variant="white">
                     open logs folder
-                </Button>
-                <Button
+                </essentialComponents.Button>
+                <essentialComponents.Button
                     onClick={archiveLogs}
                     variant="red"
                     spinner={archiving}
                     disabled={loading}
                 >
                     archive logs
-                </Button>
+                </essentialComponents.Button>
             </div>
             <pre
                 className={

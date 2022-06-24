@@ -1,5 +1,3 @@
-import { os } from '@tauri-apps/api';
-
 export default function Header(props: {
     tabs: string[];
     activeTab: string;

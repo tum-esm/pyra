@@ -1,5 +1,5 @@
 import { Command, ChildProcess } from '@tauri-apps/api/shell';
-import TYPES from './types';
+import { customTypes } from '../custom-types';
 
 async function callCLI(args: string[]) {
     return await new Command(
@@ -35,7 +35,9 @@ const backend = {
     getConfig: async (): Promise<ChildProcess> => {
         return await callCLI(['config', 'get']);
     },
-    updateConfig: async (newConfig: TYPES.partialConfig): Promise<ChildProcess> => {
+    updateConfig: async (
+        newConfig: customTypes.partialConfig
+    ): Promise<ChildProcess> => {
         return await callCLI(['config', 'update', JSON.stringify(newConfig)]);
     },
     getState: async (): Promise<ChildProcess> => {

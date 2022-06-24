@@ -1,12 +1,10 @@
-import TYPES from '../../../utils/types';
-import ConfigElementText from '../rows/config-element-text';
-import Button from '../../essential/button';
-import PreviousValue from '../../essential/previous-value';
+import { customTypes } from '../../../custom-types';
+import { configComponents, essentialComponents } from '../..';
 
 export default function ConfigSectionTumPlc(props: {
-    localConfig: TYPES.config;
-    centralConfig: TYPES.config;
-    addLocalUpdate(v: TYPES.partialConfig): void;
+    localConfig: customTypes.config;
+    centralConfig: customTypes.config;
+    addLocalUpdate(v: customTypes.partialConfig): void;
 }) {
     const { localConfig, centralConfig, addLocalUpdate } = props;
 
@@ -31,11 +29,11 @@ export default function ConfigSectionTumPlc(props: {
             <div className="relative space-y-2 text-sm flex-col-left">
                 <div className="space-x-2 text-sm flex-row-left">
                     <span className="whitespace-nowrap">Not configured yet </span>
-                    <Button variant="slate" onClick={addDefault}>
+                    <essentialComponents.Button variant="slate" onClick={addDefault}>
                         set up now
-                    </Button>
+                    </essentialComponents.Button>
                 </div>
-                <PreviousValue
+                <essentialComponents.PreviousValue
                     previousValue={
                         centralConfig.tum_plc !== null
                             ? JSON.stringify(centralConfig.tum_plc)
@@ -53,11 +51,11 @@ export default function ConfigSectionTumPlc(props: {
 
     return (
         <>
-            <Button variant="slate" onClick={setNull}>
+            <essentialComponents.Button variant="slate" onClick={setNull}>
                 remove configuration
-            </Button>
+            </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-slate-300" />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="min_power_elevation"
                 value={localConfig.tum_plc.min_power_elevation}
                 setValue={(v: number) =>
@@ -69,7 +67,7 @@ export default function ConfigSectionTumPlc(props: {
                         : 'null'
                 }
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="ip"
                 value={localConfig.tum_plc.ip}
                 setValue={(v: string) => addLocalUpdate({ tum_plc: { ip: v } })}
@@ -77,7 +75,7 @@ export default function ConfigSectionTumPlc(props: {
                     centralConfig.tum_plc !== null ? centralConfig.tum_plc.ip : 'null'
                 }
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="version"
                 value={localConfig.tum_plc.version}
                 setValue={(v: any) => addLocalUpdate({ tum_plc: { version: v } })}

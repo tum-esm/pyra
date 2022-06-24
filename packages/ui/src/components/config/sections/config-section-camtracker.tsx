@@ -1,16 +1,16 @@
-import TYPES from '../../../utils/types';
-import ConfigElementText from '../rows/config-element-text';
+import { customTypes } from '../../../custom-types';
+import { configComponents } from '../..';
 
 export default function ConfigSectionCamtracker(props: {
-    localConfig: TYPES.config;
+    localConfig: customTypes.config;
     centralConfig: any;
-    addLocalUpdate(v: TYPES.partialConfig): void;
+    addLocalUpdate(v: customTypes.partialConfig): void;
 }) {
     const { localConfig, centralConfig, addLocalUpdate } = props;
 
     return (
         <>
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="config_path"
                 value={localConfig.camtracker.config_path}
                 setValue={(v: string) =>
@@ -18,7 +18,7 @@ export default function ConfigSectionCamtracker(props: {
                 }
                 oldValue={centralConfig.camtracker.config_path}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="executable_path"
                 value={localConfig.camtracker.executable_path}
                 setValue={(v: string) =>
@@ -26,7 +26,7 @@ export default function ConfigSectionCamtracker(props: {
                 }
                 oldValue={centralConfig.camtracker.executable_path}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="executable_path"
                 value={localConfig.camtracker.executable_path}
                 setValue={(v: string) =>
@@ -34,7 +34,7 @@ export default function ConfigSectionCamtracker(props: {
                 }
                 oldValue={centralConfig.camtracker.executable_path}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="learn_az_elev_path"
                 value={localConfig.camtracker.learn_az_elev_path}
                 setValue={(v: string) =>
@@ -42,7 +42,7 @@ export default function ConfigSectionCamtracker(props: {
                 }
                 oldValue={centralConfig.camtracker.learn_az_elev_path}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="motor_offset_threshold"
                 value={localConfig.camtracker.motor_offset_threshold}
                 setValue={(v: number) =>

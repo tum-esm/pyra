@@ -1,4 +1,4 @@
-import TYPES from '../types';
+import { customTypes } from '../../custom-types';
 
 /*
 This transformation is necessary because in the interface when typing numbers,
@@ -6,7 +6,9 @@ the user might want to type in "1.49". I cannot store the dot in a number variab
 Hence, I need to store it in a string and when passing it to the CLI, this trans-
 formation needs to happen.
 */
-export default function parseNumberTypes(newConfig: TYPES.config): TYPES.config {
+export default function parseNumberTypes(
+    newConfig: customTypes.config
+): customTypes.config {
     return {
         general: {
             ...newConfig.general,

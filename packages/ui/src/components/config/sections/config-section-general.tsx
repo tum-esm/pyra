@@ -1,17 +1,16 @@
-import TYPES from '../../../utils/types';
-import ConfigElementText from '../rows/config-element-text';
-import ConfigElementToggle from '../rows/config-element-toggle';
+import { customTypes } from '../../../custom-types';
+import { configComponents } from '../..';
 
 export default function ConfigSectionGeneral(props: {
-    localConfig: TYPES.config;
+    localConfig: customTypes.config;
     centralConfig: any;
-    addLocalUpdate(v: TYPES.partialConfig): void;
+    addLocalUpdate(v: customTypes.partialConfig): void;
 }) {
     const { localConfig, centralConfig, addLocalUpdate } = props;
 
     return (
         <>
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="seconds_per_core_interval"
                 value={localConfig.general.seconds_per_core_interval}
                 setValue={(v: number) =>
@@ -19,13 +18,13 @@ export default function ConfigSectionGeneral(props: {
                 }
                 oldValue={centralConfig.general.seconds_per_core_interval}
             />
-            <ConfigElementToggle
+            <configComponents.ConfigElementToggle
                 key2="test_mode"
                 value={localConfig.general.test_mode}
                 setValue={(v: boolean) => addLocalUpdate({ general: { test_mode: v } })}
                 oldValue={centralConfig.general.test_mode}
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="station_id"
                 value={localConfig.general.station_id}
                 setValue={(v: string) => addLocalUpdate({ general: { station_id: v } })}

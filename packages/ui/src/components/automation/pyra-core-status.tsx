@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
-import ICONS from '../../assets/icons';
-import backend from '../../utils/backend';
-import Button from '../essential/button';
-import Ping from '../essential/ping';
+import { ICONS } from '../../assets';
+import { backend } from '../../utils';
+import { essentialComponents } from '..';
 
 export default function PyraCoreStatus(props: {
     pyraCorePID: number | undefined;
@@ -40,7 +39,7 @@ export default function PyraCoreStatus(props: {
     return (
         <div className={'w-full text-sm flex-row-left gap-x-2 px-6'}>
             <div className="flex-grow text-sm h-7 flex-row-left">
-                <Ping
+                <essentialComponents.Ping
                     state={pyraCorePID === undefined ? undefined : pyraCorePID !== -1}
                 />
                 <span className="ml-2.5 mr-1">pyra-core is</span>
@@ -55,7 +54,7 @@ export default function PyraCoreStatus(props: {
                     pyraCorePID !== -1 &&
                     `running with process ID ${pyraCorePID}`}
             </div>
-            <Button
+            <essentialComponents.Button
                 onClick={pyraCorePID === -1 ? startPyraCore : stopPyraCore}
                 className="w-[21rem]"
                 variant={
@@ -68,7 +67,7 @@ export default function PyraCoreStatus(props: {
                 spinner={pyraCorePID === undefined}
             >
                 {pyraCorePID === -1 ? 'start' : 'stop'}
-            </Button>
+            </essentialComponents.Button>
         </div>
     );
 }

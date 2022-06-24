@@ -1,12 +1,10 @@
-import TYPES from '../../../utils/types';
-import ConfigElementText from '../rows/config-element-text';
-import Button from '../../essential/button';
-import PreviousValue from '../../essential/previous-value';
+import { customTypes } from '../../../custom-types';
+import { configComponents, essentialComponents } from '../..';
 
 export default function ConfigSectionVbdsd(props: {
-    localConfig: TYPES.config;
-    centralConfig: TYPES.config;
-    addLocalUpdate(v: TYPES.partialConfig): void;
+    localConfig: customTypes.config;
+    centralConfig: customTypes.config;
+    addLocalUpdate(v: customTypes.partialConfig): void;
 }) {
     const { localConfig, centralConfig, addLocalUpdate } = props;
 
@@ -33,14 +31,14 @@ export default function ConfigSectionVbdsd(props: {
             <div className="relative space-y-2 text-sm flex-col-left">
                 <div className="space-x-2 text-sm flex-row-left">
                     <span className="whitespace-nowrap">Not configured yet </span>
-                    <Button variant="slate" onClick={addDefault}>
+                    <essentialComponents.Button variant="slate" onClick={addDefault}>
                         set up now
-                    </Button>
+                    </essentialComponents.Button>
                     {centralConfig.vbdsd !== null && (
                         <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
                     )}
                 </div>
-                <PreviousValue
+                <essentialComponents.PreviousValue
                     previousValue={
                         centralConfig.vbdsd !== null
                             ? JSON.stringify(centralConfig.vbdsd)
@@ -55,11 +53,11 @@ export default function ConfigSectionVbdsd(props: {
 
     return (
         <>
-            <Button variant="slate" onClick={setNull}>
+            <essentialComponents.Button variant="slate" onClick={setNull}>
                 remove configuration
-            </Button>
+            </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-slate-300" />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="camera_id"
                 value={localConfig.vbdsd.camera_id}
                 setValue={(v: number) => addLocalUpdate({ vbdsd: { camera_id: v } })}
@@ -70,7 +68,7 @@ export default function ConfigSectionVbdsd(props: {
                 }
                 numeric
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="min_sun_elevation"
                 value={localConfig.vbdsd.min_sun_elevation}
                 setValue={(v: number) =>
@@ -83,7 +81,7 @@ export default function ConfigSectionVbdsd(props: {
                 }
                 numeric
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="seconds_per_interval"
                 value={localConfig.vbdsd.seconds_per_interval}
                 setValue={(v: any) =>
@@ -96,7 +94,7 @@ export default function ConfigSectionVbdsd(props: {
                 }
                 numeric
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="evaluation_size"
                 value={localConfig.vbdsd.evaluation_size}
                 setValue={(v: any) => addLocalUpdate({ vbdsd: { evaluation_size: v } })}
@@ -107,7 +105,7 @@ export default function ConfigSectionVbdsd(props: {
                 }
                 numeric
             />
-            <ConfigElementText
+            <configComponents.ConfigElementText
                 key2="measurement_threshold"
                 value={localConfig.vbdsd.measurement_threshold}
                 setValue={(v: any) =>

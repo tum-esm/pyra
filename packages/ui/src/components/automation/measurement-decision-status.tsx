@@ -1,15 +1,13 @@
 import { useState } from 'react';
-import backend from '../../utils/backend';
-import TYPES from '../../utils/types';
+import { customTypes } from '../../custom-types';
+import { backend } from '../../utils';
 import { defaultsDeep } from 'lodash';
-import Button from '../essential/button';
-import Toggle from '../essential/toggle';
-import Ping from '../essential/ping';
-import ICONS from '../../assets/icons';
+import { essentialComponents } from '..';
+import { ICONS } from '../../assets';
 
 export default function MeasurementDecisionStatus(props: {
-    centralConfig: TYPES.config;
-    setCentralConfig(c: TYPES.config): void;
+    centralConfig: customTypes.config;
+    setCentralConfig(c: customTypes.config): void;
 }) {
     const { centralConfig, setCentralConfig } = props;
     const [loading, setLoading] = useState(false);
@@ -59,7 +57,9 @@ export default function MeasurementDecisionStatus(props: {
     return (
         <div className={'w-full text-sm flex gap-x-2 px-6'}>
             <div className="text-sm font-normal h-7 flex-row-left">
-                <Ping state={loading ? undefined : measurementDecisionResult} />
+                <essentialComponents.Ping
+                    state={loading ? undefined : measurementDecisionResult}
+                />
                 <span className="ml-2.5 mr-1">Measurements are currently</span>
                 {loading && (
                     <div className="w-4 h-4 text-gray-700 animate-spin">
@@ -71,7 +71,7 @@ export default function MeasurementDecisionStatus(props: {
             </div>
             <div className="flex-grow" />
             <div className="flex-col-center gap-y-2">
-                <Toggle
+                <essentialComponents.Toggle
                     value={measurementDecision.mode}
                     values={['automatic', 'manual', 'cli']}
                     className="w-28"
@@ -87,7 +87,7 @@ export default function MeasurementDecisionStatus(props: {
                     </div>
                 )}
                 {measurementDecision.mode === 'manual' && (
-                    <Button
+                    <essentialComponents.Button
                         onClick={() =>
                             updateManualMeasurementDecisionResult(
                                 !measurementDecision.manual_decision_result
@@ -104,7 +104,7 @@ export default function MeasurementDecisionStatus(props: {
                         spinner={loading}
                     >
                         {measurementDecision.manual_decision_result ? 'stop' : 'start'}
-                    </Button>
+                    </essentialComponents.Button>
                 )}
             </div>
         </div>

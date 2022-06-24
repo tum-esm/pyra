@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
-import TYPES from '../utils/types';
-
+import { customTypes } from '../custom-types';
 import { automationComponents } from '../components';
-import backend from '../utils/backend';
+import { backend } from '../utils';
 import { watch } from 'tauri-plugin-fs-watch-api';
 
 export default function AutomationTab(props: {
     visible: boolean;
-    centralConfig: TYPES.config;
-    setCentralConfig(c: TYPES.config): void;
+    centralConfig: customTypes.config;
+    setCentralConfig(c: customTypes.config): void;
 }) {
     // "undefined" indicates that the pyra-core state is currently
     // being checked, "-1" indicates that pyra-core is not running

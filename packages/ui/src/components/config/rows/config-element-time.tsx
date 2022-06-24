@@ -1,8 +1,5 @@
-import TextInput from '../../essential/text-input';
-import LabeledRow from '../labeled-row';
-import PreviousValue from '../../essential/previous-value';
-
 import { functionalUtils } from '../../../utils';
+import { configComponents, essentialComponents } from '../..';
 
 export default function ConfigElementTime(props: {
     key2: string;
@@ -20,9 +17,9 @@ export default function ConfigElementTime(props: {
     }
 
     return (
-        <LabeledRow key2={key2 + ' (h:m:s)'} modified={hasChanged}>
+        <configComponents.LabeledRow key2={key2 + ' (h:m:s)'} modified={hasChanged}>
             <div className="relative flex w-full gap-x-1">
-                <TextInput
+                <essentialComponents.TextInput
                     value={value.hour.toString()}
                     setValue={(v: string) =>
                         setValue({ ...value, hour: parseNumericValue(v) })
@@ -30,7 +27,7 @@ export default function ConfigElementTime(props: {
                     small
                 />
                 :
-                <TextInput
+                <essentialComponents.TextInput
                     value={value.minute.toString()}
                     setValue={(v: any) =>
                         setValue({ ...value, minute: parseNumericValue(v) })
@@ -38,14 +35,14 @@ export default function ConfigElementTime(props: {
                     small
                 />
                 :
-                <TextInput
+                <essentialComponents.TextInput
                     value={value.second.toString()}
                     setValue={(v: any) =>
                         setValue({ ...value, second: parseNumericValue(v) })
                     }
                     small
                 />
-                <PreviousValue
+                <essentialComponents.PreviousValue
                     previousValue={
                         hasChanged
                             ? `${oldValue.hour} : ${oldValue.minute} : ${oldValue.second}`
@@ -53,6 +50,6 @@ export default function ConfigElementTime(props: {
                     }
                 />
             </div>
-        </LabeledRow>
+        </configComponents.LabeledRow>
     );
 }

@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import backend from './utils/backend';
-import Button from './components/essential/button';
-import Header from './components/header';
+import { customTypes } from './custom-types';
+import { ICONS } from './assets';
+import { backend } from './utils';
 import { AutomationTab, ConfigTab, LogTab } from './tabs';
-import TYPES from './utils/types';
-import ICONS from './assets/icons';
+import { essentialComponents, Header } from './components';
 
 const tabs = ['Automation', 'Config', 'Logs', 'Enclosure Controls'];
 
@@ -13,7 +12,7 @@ export default function App() {
     const [backendIntegrity, setBackendIntegrity] = useState<
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
-    const [centralConfig, setCentralConfig] = useState<TYPES.config | undefined>(
+    const [centralConfig, setCentralConfig] = useState<customTypes.config | undefined>(
         undefined
     );
 
@@ -87,9 +86,12 @@ export default function App() {
                         </span>
                         .
                     </p>
-                    <Button onClick={loadInitialState} variant="green">
+                    <essentialComponents.Button
+                        onClick={loadInitialState}
+                        variant="green"
+                    >
                         retry connection
-                    </Button>
+                    </essentialComponents.Button>
                 </main>
             )}
             {backendIntegrity === 'valid' && centralConfig !== undefined && (
