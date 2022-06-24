@@ -20,6 +20,13 @@ export const configSlice = createSlice({
         ) => {
             state.local = action.payload;
         },
+        setConfigs: (
+            state: customTypes.reduxStateConfig,
+            action: { payload: customTypes.config | undefined }
+        ) => {
+            state.central = action.payload;
+            state.local = action.payload;
+        },
     },
 });
 

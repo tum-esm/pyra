@@ -19,29 +19,33 @@ export default function ConfigTab(props: { visible: boolean }) {
     const localConfig = reduxUtils.useTypedSelector((s) => s.config.local);
     const dispatch = reduxUtils.useTypedDispatch();
 
-    const setCentralConfig = (c: customTypes.config | undefined) =>
-        dispatch(reduxUtils.configActions.setCentral(c));
     const setLocalConfig = (c: customTypes.config | undefined) =>
         dispatch(reduxUtils.configActions.setLocal(c));
+    const setConfigs = (c: customTypes.config | undefined) =>
+        dispatch(reduxUtils.configActions.setConfigs(c));
 
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
     const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
     const [isSaving, setIsSaving] = useState(false);
 
+    useEffect(() => {
+        loadCentralConfig();
+    }, []);
+
     async function loadCentralConfig() {
         const content = await backend.getConfig();
         try {
-            const newConfig = JSON.parse(content.stdout);
-            setCentralConfig(newConfig);
-            setLocalConfig(newConfig);
+            setConfigs(JSON.parse(content.stdout));
         } catch {
             console.log(`Output from get-config: ${content.stdout}`);
         }
     }
 
-    useEffect(() => {
-        loadCentralConfig();
-    }, []);
+    function addLocalUpdate(update: customTypes.partialConfig) {
+        const newObject = defaultsDeep(update, JSON.parse(JSON.stringify(localConfig)));
+        setLocalConfig(newObject);
+        setErrorMessage(undefined);
+    }
 
     async function saveLocalConfig() {
         if (localConfig !== undefined) {
@@ -50,8 +54,7 @@ export default function ConfigTab(props: { visible: boolean }) {
             let result = await backend.updateConfig(parsedLocalConfig);
 
             if (result.stdout.includes('Updated config file')) {
-                setLocalConfig(parsedLocalConfig);
-                setCentralConfig(parsedLocalConfig);
+                setConfigs(parsedLocalConfig);
                 setIsSaving(false);
             } else {
                 setErrorMessage(result.stdout);
@@ -62,12 +65,6 @@ export default function ConfigTab(props: { visible: boolean }) {
 
     function restoreCentralConfig() {
         setLocalConfig(centralConfig);
-    }
-
-    function addLocalUpdate(update: customTypes.partialConfig) {
-        const newObject = defaultsDeep(update, JSON.parse(JSON.stringify(localConfig)));
-        setLocalConfig(newObject);
-        setErrorMessage(undefined);
     }
 
     const configIsDiffering =
