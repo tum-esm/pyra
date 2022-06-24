@@ -5,10 +5,10 @@ import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from
 import { essentialComponents, Header } from './components';
 import { watch } from 'tauri-plugin-fs-watch-api';
 
-const tabs = ['Overview', 'Automation', 'Configuration', 'Logs', 'Enclosure Controls'];
+const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState('Automation');
+    const [activeTab, setActiveTab] = useState('Overview');
     const [backendIntegrity, setBackendIntegrity] = useState<
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
@@ -141,9 +141,10 @@ export default function App() {
                 <>
                     <Header
                         {...{
-                            tabs: tabs.filter(
-                                (t) => t !== 'Enclosure Controls' || enclosureControlsIsVisible
-                            ),
+                            tabs: [
+                                ...tabs,
+                                ...(enclosureControlsIsVisible ? ['PLC Controls'] : []),
+                            ],
                             activeTab,
                             setActiveTab,
                         }}
@@ -165,7 +166,7 @@ export default function App() {
                             </div>
                         ))}
                         {enclosureControlsIsVisible && (
-                            <div className={activeTab === 'Enclosure Controls' ? '' : 'hidden'}>
+                            <div className={activeTab === 'PLC Controls' ? '' : 'hidden'}>
                                 <ControlTab />
                             </div>
                         )}

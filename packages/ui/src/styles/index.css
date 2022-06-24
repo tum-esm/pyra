@@ -30,6 +30,10 @@
     @apply flex flex-col items-center justify-center;
 }
 
+.flex-col-left {
+    @apply flex flex-col items-start justify-center;
+}
+
 .flex-row-left {
     @apply flex flex-row items-center justify-start;
 }

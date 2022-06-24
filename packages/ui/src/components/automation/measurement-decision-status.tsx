@@ -35,10 +35,9 @@ function MeasurementTriggerInfo() {
         return <></>;
     }
     return (
-        <div className="w-full px-6 text-xs text-gray-900 flex-row-left-top gap-x-2">
+        <div className="w-full px-6 text-sm text-gray-700 flex-row-left-top gap-x-2">
             <div className="flex-row-center">
-                <div className="w-4 h-4 mr-1 text-gray-600">{ICONS.info}</div>Automatic decision
-                based on:
+                <div className="w-4 h-4 mr-1">{ICONS.info}</div>Automatic decision based on:
             </div>
             <div className="flex flex-col gap-y-1">
                 {[
@@ -79,9 +78,14 @@ function MeasurementTriggerInfo() {
                     ],
                 ].map((row: any, i) => (
                     <div
-                        className={'flex-row-left ' + (row[0] ? 'text-gray-800' : 'text-gray-400')}
+                        className={
+                            'flex-row-left ' +
+                            (row[0]
+                                ? 'text-gray-700 font-semibold'
+                                : 'text-gray-400 line-through font-normal')
+                        }
                     >
-                        <div className="w-24">{row[1]}</div>
+                        <div className="w-28">{row[1]}</div>
                         <div>{row[2]}</div>
                     </div>
                 ))}

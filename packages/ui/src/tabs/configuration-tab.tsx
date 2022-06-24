@@ -89,11 +89,7 @@ export default function ConfigurationTab() {
                     </button>
                 ))}
             </div>
-            <div
-                className={
-                    'z-0 flex-grow h-full p-6 overflow-y-scroll ' + 'flex-col-left relative pb-20'
-                }
-            >
+            <div className={'z-0 flex-grow h-full p-6 overflow-y-scroll relative pb-20'}>
                 {activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
                 {activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
                 {activeKey === 'camtracker' && <configurationComponents.ConfigSectionCamtracker />}
