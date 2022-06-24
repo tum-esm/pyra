@@ -3,15 +3,7 @@ import { defaultsDeep } from 'lodash';
 
 import { backend, functionalUtils } from '../utils';
 import TYPES from '../utils/types';
-
-import SavingOverlay from '../components/config/saving-overlay';
-import ConfigSectionGeneral from '../components/config/sections/config-section-general';
-import ConfigSectionOpus from '../components/config/sections/config-section-opus';
-import ConfigSectionCamtracker from '../components/config/sections/config-section-camtracker';
-import ConfigSectionErrorEmail from '../components/config/sections/config-section-error-email';
-import ConfigSectionMeasurementTriggers from '../components/config/sections/config-section-measurement-triggers';
-import ConfigSectionTumPlc from '../components/config/sections/config-section-tum-plc';
-import ConfigSectionVbdsd from '../components/config/sections/config-section-vbdsd';
+import { configComponents } from '../components';
 
 const sectionKeys: TYPES.configSectionKey[] = [
     'general',
@@ -127,28 +119,42 @@ export default function ConfigTab(props: { visible: boolean }) {
                         }
                     >
                         {activeKey === 'general' && (
-                            <ConfigSectionGeneral {...sharedSectionProps} />
+                            <configComponents.ConfigSectionGeneral
+                                {...sharedSectionProps}
+                            />
                         )}
                         {activeKey === 'opus' && (
-                            <ConfigSectionOpus {...sharedSectionProps} />
+                            <configComponents.ConfigSectionOpus
+                                {...sharedSectionProps}
+                            />
                         )}
                         {activeKey === 'camtracker' && (
-                            <ConfigSectionCamtracker {...sharedSectionProps} />
+                            <configComponents.ConfigSectionCamtracker
+                                {...sharedSectionProps}
+                            />
                         )}
                         {activeKey === 'error_email' && (
-                            <ConfigSectionErrorEmail {...sharedSectionProps} />
+                            <configComponents.ConfigSectionErrorEmail
+                                {...sharedSectionProps}
+                            />
                         )}
                         {activeKey === 'measurement_triggers' && (
-                            <ConfigSectionMeasurementTriggers {...sharedSectionProps} />
+                            <configComponents.ConfigSectionMeasurementTriggers
+                                {...sharedSectionProps}
+                            />
                         )}
                         {activeKey === 'tum_plc' && (
-                            <ConfigSectionTumPlc {...sharedSectionProps} />
+                            <configComponents.ConfigSectionTumPlc
+                                {...sharedSectionProps}
+                            />
                         )}
                         {activeKey === 'vbdsd' && (
-                            <ConfigSectionVbdsd {...sharedSectionProps} />
+                            <configComponents.ConfigSectionVbdsd
+                                {...sharedSectionProps}
+                            />
                         )}
                         {configIsDiffering && (
-                            <SavingOverlay
+                            <configComponents.SavingOverlay
                                 {...{
                                     errorMessage,
                                     saveLocalConfig,

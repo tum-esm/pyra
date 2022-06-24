@@ -2,16 +2,14 @@ import { useEffect, useState } from 'react';
 import backend from './utils/backend';
 import Button from './components/essential/button';
 import Header from './components/header';
-import LogTab from './tabs/log-tab';
-import StatusTab from './tabs/status-tab';
+import { AutomationTab, ConfigTab, LogTab } from './tabs';
 import TYPES from './utils/types';
-import ConfigTab from './tabs/config-tab';
 import ICONS from './assets/icons';
 
-const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
+const tabs = ['Automation', 'Config', 'Logs', 'Enclosure Controls'];
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState('Status');
+    const [activeTab, setActiveTab] = useState('Automation');
     const [backendIntegrity, setBackendIntegrity] = useState<
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
@@ -98,8 +96,8 @@ export default function App() {
                 <>
                     <Header {...{ tabs, activeTab, setActiveTab }} />
                     <main className="flex-grow w-full min-h-0 bg-slate-75">
-                        <StatusTab
-                            visible={activeTab === 'Status'}
+                        <AutomationTab
+                            visible={activeTab === 'Automation'}
                             {...{ centralConfig, setCentralConfig }}
                         />
                         <ConfigTab visible={activeTab === 'Config'} />

@@ -7,7 +7,7 @@ import EnclosureStatus from '../components/status/enclosure-status';
 import backend from '../utils/backend';
 import { watch } from 'tauri-plugin-fs-watch-api';
 
-export default function StatusTab(props: {
+export default function AutomationTab(props: {
     visible: boolean;
     centralConfig: TYPES.config;
     setCentralConfig(c: TYPES.config): void;
