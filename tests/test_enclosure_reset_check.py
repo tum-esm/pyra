@@ -11,6 +11,5 @@ def test_cover_movement():
     enclosure.reset()
 
     state = enclosure.check_for_rest_needed()
-    print(state)
 
     assert(False)
