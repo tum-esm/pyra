@@ -1,15 +1,21 @@
 import { customTypes } from '../../../custom-types';
 import { configComponents, essentialComponents } from '../..';
+import { reduxUtils } from '../../../utils';
 
-export default function ConfigSectionVbdsd(props: {
-    localConfig: customTypes.config;
-    centralConfig: customTypes.config;
-    addLocalUpdate(v: customTypes.partialConfig): void;
-}) {
-    const { localConfig, centralConfig, addLocalUpdate } = props;
+export default function ConfigSectionVbdsd() {
+    const centralSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.vbdsd
+    );
+    const localSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.local?.vbdsd
+    );
+    const dispatch = reduxUtils.useTypedDispatch();
+
+    const update = (c: customTypes.partialConfig) =>
+        dispatch(reduxUtils.configActions.setLocalPartial(c));
 
     function addDefault() {
-        addLocalUpdate({
+        update({
             vbdsd: {
                 camera_id: 0,
                 evaluation_size: 15,
@@ -21,12 +27,16 @@ export default function ConfigSectionVbdsd(props: {
     }
 
     function setNull() {
-        addLocalUpdate({
+        update({
             vbdsd: null,
         });
     }
 
-    if (localConfig.vbdsd === null) {
+    if (localSectionConfig === undefined || centralSectionConfig === undefined) {
+        return <></>;
+    }
+
+    if (localSectionConfig === null) {
         return (
             <div className="relative space-y-2 text-sm flex-col-left">
                 <div className="space-x-2 text-sm flex-row-left">
@@ -34,14 +44,14 @@ export default function ConfigSectionVbdsd(props: {
                     <essentialComponents.Button variant="slate" onClick={addDefault}>
                         set up now
                     </essentialComponents.Button>
-                    {centralConfig.vbdsd !== null && (
+                    {centralSectionConfig !== null && (
                         <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
                     )}
                 </div>
                 <essentialComponents.PreviousValue
                     previousValue={
-                        centralConfig.vbdsd !== null
-                            ? JSON.stringify(centralConfig.vbdsd)
+                        centralSectionConfig !== null
+                            ? JSON.stringify(centralSectionConfig)
                                   .replace(/":/g, '": ')
                                   .replace(/,"/g, ', "')
                             : undefined
@@ -59,61 +69,55 @@ export default function ConfigSectionVbdsd(props: {
             <div className="w-full h-px my-6 bg-slate-300" />
             <configComponents.ConfigElementText
                 key2="camera_id"
-                value={localConfig.vbdsd.camera_id}
-                setValue={(v: number) => addLocalUpdate({ vbdsd: { camera_id: v } })}
+                value={localSectionConfig.camera_id}
+                setValue={(v: number) => update({ vbdsd: { camera_id: v } })}
                 oldValue={
-                    centralConfig.vbdsd !== null
-                        ? centralConfig.vbdsd.camera_id
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.camera_id
                         : 'null'
                 }
                 numeric
             />
             <configComponents.ConfigElementText
                 key2="min_sun_elevation"
-                value={localConfig.vbdsd.min_sun_elevation}
-                setValue={(v: number) =>
-                    addLocalUpdate({ vbdsd: { min_sun_elevation: v } })
-                }
+                value={localSectionConfig.min_sun_elevation}
+                setValue={(v: number) => update({ vbdsd: { min_sun_elevation: v } })}
                 oldValue={
-                    centralConfig.vbdsd !== null
-                        ? centralConfig.vbdsd.min_sun_elevation
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.min_sun_elevation
                         : 'null'
                 }
                 numeric
             />
             <configComponents.ConfigElementText
                 key2="seconds_per_interval"
-                value={localConfig.vbdsd.seconds_per_interval}
-                setValue={(v: any) =>
-                    addLocalUpdate({ vbdsd: { seconds_per_interval: v } })
-                }
+                value={localSectionConfig.seconds_per_interval}
+                setValue={(v: any) => update({ vbdsd: { seconds_per_interval: v } })}
                 oldValue={
-                    centralConfig.vbdsd !== null
-                        ? centralConfig.vbdsd.seconds_per_interval
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.seconds_per_interval
                         : 'null'
                 }
                 numeric
             />
             <configComponents.ConfigElementText
                 key2="evaluation_size"
-                value={localConfig.vbdsd.evaluation_size}
-                setValue={(v: any) => addLocalUpdate({ vbdsd: { evaluation_size: v } })}
+                value={localSectionConfig.evaluation_size}
+                setValue={(v: any) => update({ vbdsd: { evaluation_size: v } })}
                 oldValue={
-                    centralConfig.vbdsd !== null
-                        ? centralConfig.vbdsd.evaluation_size
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.evaluation_size
                         : 'null'
                 }
                 numeric
             />
             <configComponents.ConfigElementText
                 key2="measurement_threshold"
-                value={localConfig.vbdsd.measurement_threshold}
-                setValue={(v: any) =>
-                    addLocalUpdate({ vbdsd: { measurement_threshold: v } })
-                }
+                value={localSectionConfig.measurement_threshold}
+                setValue={(v: any) => update({ vbdsd: { measurement_threshold: v } })}
                 oldValue={
-                    centralConfig.vbdsd !== null
-                        ? centralConfig.vbdsd.measurement_threshold
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.measurement_threshold
                         : 'null'
                 }
                 numeric

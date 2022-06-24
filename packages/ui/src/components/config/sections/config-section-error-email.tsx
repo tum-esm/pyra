@@ -1,47 +1,52 @@
 import { customTypes } from '../../../custom-types';
 import { ICONS } from '../../../assets';
 import { configComponents } from '../..';
+import { reduxUtils } from '../../../utils';
 
-export default function ConfigSectionErrorEmail(props: {
-    localConfig: customTypes.config;
-    centralConfig: any;
-    addLocalUpdate(v: customTypes.partialConfig): void;
-}) {
-    const { localConfig, centralConfig, addLocalUpdate } = props;
+export default function ConfigSectionErrorEmail() {
+    const centralSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.error_email
+    );
+    const localSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.local?.error_email
+    );
+    const dispatch = reduxUtils.useTypedDispatch();
 
+    const update = (c: customTypes.partialConfig) =>
+        dispatch(reduxUtils.configActions.setLocalPartial(c));
+
+    if (localSectionConfig === undefined || centralSectionConfig === undefined) {
+        return <></>;
+    }
     return (
         <>
             <configComponents.ConfigElementToggle
                 key2="notify_recipients"
-                value={localConfig.error_email.notify_recipients}
+                value={localSectionConfig.notify_recipients}
                 setValue={(v: boolean) =>
-                    addLocalUpdate({ error_email: { notify_recipients: v } })
+                    update({ error_email: { notify_recipients: v } })
                 }
-                oldValue={centralConfig.error_email.notify_recipients}
+                oldValue={centralSectionConfig.notify_recipients}
             />
             <configComponents.ConfigElementText
                 key2="sender_address"
-                value={localConfig.error_email.sender_address}
-                setValue={(v: string) =>
-                    addLocalUpdate({ error_email: { sender_address: v } })
-                }
-                oldValue={centralConfig.error_email.sender_address}
+                value={localSectionConfig.sender_address}
+                setValue={(v: string) => update({ error_email: { sender_address: v } })}
+                oldValue={centralSectionConfig.sender_address}
             />
             <configComponents.ConfigElementText
                 key2="sender_password"
-                value={localConfig.error_email.sender_password}
+                value={localSectionConfig.sender_password}
                 setValue={(v: string) =>
-                    addLocalUpdate({ error_email: { sender_password: v } })
+                    update({ error_email: { sender_password: v } })
                 }
-                oldValue={centralConfig.error_email.sender_password}
+                oldValue={centralSectionConfig.sender_password}
             />
             <configComponents.ConfigElementText
                 key2="recipients"
-                value={localConfig.error_email.recipients}
-                setValue={(v: string) =>
-                    addLocalUpdate({ error_email: { recipients: v } })
-                }
-                oldValue={centralConfig.error_email.recipients}
+                value={localSectionConfig.recipients}
+                setValue={(v: string) => update({ error_email: { recipients: v } })}
+                oldValue={centralSectionConfig.recipients}
             />
             <div className="w-full -mt-[1.125rem] pl-[12.5rem] text-xs text-blue-600 flex-row-left gap-x-1">
                 <div className="w-4 h-4 text-blue-400">{ICONS.info}</div>Add multiple

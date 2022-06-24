@@ -1,34 +1,43 @@
 import { customTypes } from '../../../custom-types';
 import { configComponents } from '../..';
+import { reduxUtils } from '../../../utils';
 
-export default function ConfigSectionGeneral(props: {
-    localConfig: customTypes.config;
-    centralConfig: any;
-    addLocalUpdate(v: customTypes.partialConfig): void;
-}) {
-    const { localConfig, centralConfig, addLocalUpdate } = props;
+export default function ConfigSectionGeneral() {
+    const centralSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.general
+    );
+    const localSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.local?.general
+    );
+    const dispatch = reduxUtils.useTypedDispatch();
 
+    const update = (c: customTypes.partialConfig) =>
+        dispatch(reduxUtils.configActions.setLocalPartial(c));
+
+    if (localSectionConfig === undefined || centralSectionConfig === undefined) {
+        return <></>;
+    }
     return (
         <>
             <configComponents.ConfigElementText
                 key2="seconds_per_core_interval"
-                value={localConfig.general.seconds_per_core_interval}
+                value={localSectionConfig.seconds_per_core_interval}
                 setValue={(v: number) =>
-                    addLocalUpdate({ general: { seconds_per_core_interval: v } })
+                    update({ general: { seconds_per_core_interval: v } })
                 }
-                oldValue={centralConfig.general.seconds_per_core_interval}
+                oldValue={centralSectionConfig.seconds_per_core_interval}
             />
             <configComponents.ConfigElementToggle
                 key2="test_mode"
-                value={localConfig.general.test_mode}
-                setValue={(v: boolean) => addLocalUpdate({ general: { test_mode: v } })}
-                oldValue={centralConfig.general.test_mode}
+                value={localSectionConfig.test_mode}
+                setValue={(v: boolean) => update({ general: { test_mode: v } })}
+                oldValue={centralSectionConfig.test_mode}
             />
             <configComponents.ConfigElementText
                 key2="station_id"
-                value={localConfig.general.station_id}
-                setValue={(v: string) => addLocalUpdate({ general: { station_id: v } })}
-                oldValue={centralConfig.general.station_id}
+                value={localSectionConfig.station_id}
+                setValue={(v: string) => update({ general: { station_id: v } })}
+                oldValue={centralSectionConfig.station_id}
             />
         </>
     );

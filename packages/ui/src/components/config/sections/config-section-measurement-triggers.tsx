@@ -1,77 +1,82 @@
 import { customTypes } from '../../../custom-types';
 import { configComponents } from '../..';
+import { reduxUtils } from '../../../utils';
 
-export default function ConfigSectionMeasurementTriggers(props: {
-    localConfig: customTypes.config;
-    centralConfig: any;
-    addLocalUpdate(v: customTypes.partialConfig): void;
-}) {
-    const { localConfig, centralConfig, addLocalUpdate } = props;
+export default function ConfigSectionMeasurementTriggers() {
+    const centralSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.measurement_triggers
+    );
+    const localSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.local?.measurement_triggers
+    );
+    const dispatch = reduxUtils.useTypedDispatch();
 
+    const update = (c: customTypes.partialConfig) =>
+        dispatch(reduxUtils.configActions.setLocalPartial(c));
+
+    if (localSectionConfig === undefined || centralSectionConfig === undefined) {
+        return <></>;
+    }
     return (
         <>
             <configComponents.ConfigElementToggle
                 key2="consider_time"
-                value={localConfig.measurement_triggers.consider_time}
+                value={localSectionConfig.consider_time}
                 setValue={(v: boolean) =>
-                    addLocalUpdate({ measurement_triggers: { consider_time: v } })
+                    update({ measurement_triggers: { consider_time: v } })
                 }
-                oldValue={centralConfig.measurement_triggers.consider_time}
+                oldValue={centralSectionConfig.consider_time}
             />
             <div className="h-0 -mt-4" />
             <configComponents.ConfigElementToggle
                 key2="consider_sun_elevation"
-                value={localConfig.measurement_triggers.consider_sun_elevation}
+                value={localSectionConfig.consider_sun_elevation}
                 setValue={(v: boolean) =>
-                    addLocalUpdate({
+                    update({
                         measurement_triggers: { consider_sun_elevation: v },
                     })
                 }
-                oldValue={centralConfig.measurement_triggers.consider_sun_elevation}
+                oldValue={centralSectionConfig.consider_sun_elevation}
             />
             <div className="h-0 -mt-4" />
             <configComponents.ConfigElementToggle
                 key2="consider_vbdsd"
-                value={localConfig.measurement_triggers.consider_vbdsd}
+                value={localSectionConfig.consider_vbdsd}
                 setValue={(v: boolean) =>
-                    addLocalUpdate({ measurement_triggers: { consider_vbdsd: v } })
+                    update({ measurement_triggers: { consider_vbdsd: v } })
                 }
-                oldValue={centralConfig.measurement_triggers.consider_vbdsd}
+                oldValue={centralSectionConfig.consider_vbdsd}
             />
             <div className="w-full h-px mb-6 -mt-2 bg-slate-300" />
             <configComponents.ConfigElementTime
                 key2="start_time"
-                value={localConfig.measurement_triggers.start_time}
-                setValue={(v) =>
-                    addLocalUpdate({ measurement_triggers: { start_time: v } })
-                }
-                oldValue={centralConfig.measurement_triggers.start_time}
+                value={localSectionConfig.start_time}
+                setValue={(v) => update({ measurement_triggers: { start_time: v } })}
+                oldValue={centralSectionConfig.start_time}
             />
             <div className="h-0 -mt-4" />
             <configComponents.ConfigElementTime
                 key2="stop_time"
-                value={localConfig.measurement_triggers.stop_time}
-                setValue={(v) =>
-                    addLocalUpdate({ measurement_triggers: { stop_time: v } })
-                }
-                oldValue={centralConfig.measurement_triggers.stop_time}
+                value={localSectionConfig.stop_time}
+                setValue={(v) => update({ measurement_triggers: { stop_time: v } })}
+                oldValue={centralSectionConfig.stop_time}
             />
             <configComponents.ConfigElementText
                 key2="min_sun_elevation"
-                value={localConfig.measurement_triggers.min_sun_elevation}
+                value={localSectionConfig.min_sun_elevation}
                 setValue={(v: number) =>
-                    addLocalUpdate({ measurement_triggers: { min_sun_elevation: v } })
+                    update({ measurement_triggers: { min_sun_elevation: v } })
                 }
-                oldValue={centralConfig.measurement_triggers.min_sun_elevation}
+                oldValue={centralSectionConfig.min_sun_elevation}
             />
             <div className="h-0 -mt-4" />
             <configComponents.ConfigElementText
                 key2="max_sun_elevation"
-                value={localConfig.measurement_triggers.max_sun_elevation}
+                value={localSectionConfig.max_sun_elevation}
                 setValue={(v: number) =>
-                    addLocalUpdate({ measurement_triggers: { max_sun_elevation: v } })
+                    update({ measurement_triggers: { max_sun_elevation: v } })
                 }
-                oldValue={centralConfig.measurement_triggers.max_sun_elevation}
+                oldValue={centralSectionConfig.max_sun_elevation}
             />
         </>
     );

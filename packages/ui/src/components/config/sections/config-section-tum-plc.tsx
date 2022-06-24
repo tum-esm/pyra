@@ -1,15 +1,21 @@
 import { customTypes } from '../../../custom-types';
 import { configComponents, essentialComponents } from '../..';
+import { reduxUtils } from '../../../utils';
 
-export default function ConfigSectionTumPlc(props: {
-    localConfig: customTypes.config;
-    centralConfig: customTypes.config;
-    addLocalUpdate(v: customTypes.partialConfig): void;
-}) {
-    const { localConfig, centralConfig, addLocalUpdate } = props;
+export default function ConfigSectionTumPlc() {
+    const centralSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.tum_plc
+    );
+    const localSectionConfig = reduxUtils.useTypedSelector(
+        (s) => s.config.local?.tum_plc
+    );
+    const dispatch = reduxUtils.useTypedDispatch();
+
+    const update = (c: customTypes.partialConfig) =>
+        dispatch(reduxUtils.configActions.setLocalPartial(c));
 
     function addDefault() {
-        addLocalUpdate({
+        update({
             tum_plc: {
                 min_power_elevation: 10.0,
                 ip: '10.0.0.4',
@@ -19,12 +25,16 @@ export default function ConfigSectionTumPlc(props: {
     }
 
     function setNull() {
-        addLocalUpdate({
+        update({
             tum_plc: null,
         });
     }
 
-    if (localConfig.tum_plc === null) {
+    if (localSectionConfig === undefined || centralSectionConfig === undefined) {
+        return <></>;
+    }
+
+    if (localSectionConfig === null) {
         return (
             <div className="relative space-y-2 text-sm flex-col-left">
                 <div className="space-x-2 text-sm flex-row-left">
@@ -35,14 +45,14 @@ export default function ConfigSectionTumPlc(props: {
                 </div>
                 <essentialComponents.PreviousValue
                     previousValue={
-                        centralConfig.tum_plc !== null
-                            ? JSON.stringify(centralConfig.tum_plc)
+                        centralSectionConfig !== null
+                            ? JSON.stringify(centralSectionConfig)
                                   .replace(/":/g, '": ')
                                   .replace(/,"/g, ', "')
                             : undefined
                     }
                 />
-                {centralConfig.tum_plc !== null && (
+                {centralSectionConfig !== null && (
                     <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
                 )}
             </div>
@@ -57,31 +67,31 @@ export default function ConfigSectionTumPlc(props: {
             <div className="w-full h-px my-6 bg-slate-300" />
             <configComponents.ConfigElementText
                 key2="min_power_elevation"
-                value={localConfig.tum_plc.min_power_elevation}
+                value={localSectionConfig.min_power_elevation}
                 setValue={(v: number) =>
-                    addLocalUpdate({ tum_plc: { min_power_elevation: v } })
+                    update({ tum_plc: { min_power_elevation: v } })
                 }
                 oldValue={
-                    centralConfig.tum_plc !== null
-                        ? centralConfig.tum_plc.min_power_elevation
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.min_power_elevation
                         : 'null'
                 }
             />
             <configComponents.ConfigElementText
                 key2="ip"
-                value={localConfig.tum_plc.ip}
-                setValue={(v: string) => addLocalUpdate({ tum_plc: { ip: v } })}
+                value={localSectionConfig.ip}
+                setValue={(v: string) => update({ tum_plc: { ip: v } })}
                 oldValue={
-                    centralConfig.tum_plc !== null ? centralConfig.tum_plc.ip : 'null'
+                    centralSectionConfig !== null ? centralSectionConfig.ip : 'null'
                 }
             />
             <configComponents.ConfigElementText
                 key2="version"
-                value={localConfig.tum_plc.version}
-                setValue={(v: any) => addLocalUpdate({ tum_plc: { version: v } })}
+                value={localSectionConfig.version}
+                setValue={(v: any) => update({ tum_plc: { version: v } })}
                 oldValue={
-                    centralConfig.tum_plc !== null
-                        ? centralConfig.tum_plc.version
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.version
                         : 'null'
                 }
             />

@@ -41,12 +41,6 @@ export default function ConfigTab(props: { visible: boolean }) {
         }
     }
 
-    function addLocalUpdate(update: customTypes.partialConfig) {
-        const newObject = defaultsDeep(update, JSON.parse(JSON.stringify(localConfig)));
-        setLocalConfig(newObject);
-        setErrorMessage(undefined);
-    }
-
     async function saveLocalConfig() {
         if (localConfig !== undefined) {
             setIsSaving(true);
@@ -72,99 +66,65 @@ export default function ConfigTab(props: { visible: boolean }) {
         centralConfig !== undefined &&
         !functionalUtils.deepEqual(localConfig, centralConfig);
 
+    if (localConfig === undefined || centralConfig === undefined) {
+        return <></>;
+    }
+
     return (
-        <div
-            className={
-                'w-full h-full relative ' + (props.visible ? 'flex ' : 'hidden ')
-            }
-        >
-            {centralConfig !== undefined && localConfig !== undefined && (
-                <>
-                    <div
+        <div className={'w-full h-full relative ' + (props.visible ? 'flex ' : 'hidden ')}>
+            <div
+                className={
+                    'bg-white border-r border-slate-300 shadow ' + 'flex flex-col py-3 z-10 w-44'
+                }
+            >
+                {sectionKeys.map((key1, i) => (
+                    <button
+                        key={key1}
+                        onClick={() => setActiveKey(key1)}
                         className={
-                            'bg-white border-r border-slate-300 shadow ' +
-                            'flex flex-col py-3 z-10 w-44'
+                            'px-6 py-2.5 text-base font-semibold text-left ' +
+                            'flex-row-center gap-x-2 ' +
+                            (key1 === activeKey
+                                ? 'bg-blue-200 text-blue-950 '
+                                : 'text-slate-500 hover:bg-slate-150 hover:text-slate-700 ')
                         }
                     >
-                        {sectionKeys.map((key1, i) => (
-                            <button
-                                key={key1}
-                                onClick={() => setActiveKey(key1)}
-                                className={
-                                    'px-6 py-2.5 text-base font-semibold text-left ' +
-                                    'flex-row-center gap-x-2 ' +
-                                    (key1 === activeKey
-                                        ? 'bg-blue-200 text-blue-950 '
-                                        : 'text-slate-500 hover:bg-slate-150 hover:text-slate-700 ')
-                                }
-                            >
-                                {functionalUtils.capitalizeConfigKey(key1)}
-                                <div className="flex-grow" />
-                                <div
-                                    className={
-                                        'w-2 h-2 bg-blue-400 rounded-full ' +
-                                        (key1 === activeKey
-                                            ? 'bg-blue-400 '
-                                            : 'bg-transparent')
-                                    }
-                                />
-                            </button>
-                        ))}
-                    </div>
-                    <div
-                        className={
-                            'z-0 flex-grow h-full p-6 overflow-y-scroll ' +
-                            'flex-col-left relative pb-20'
-                        }
-                    >
-                        {activeKey === 'general' && (
-                            <configComponents.ConfigSectionGeneral
-                                {...{ localConfig, centralConfig, addLocalUpdate }}
-                            />
-                        )}
-                        {activeKey === 'opus' && (
-                            <configComponents.ConfigSectionOpus
-                                {...{ localConfig, centralConfig, addLocalUpdate }}
-                            />
-                        )}
-                        {activeKey === 'camtracker' && (
-                            <configComponents.ConfigSectionCamtracker
-                                {...{ localConfig, centralConfig, addLocalUpdate }}
-                            />
-                        )}
-                        {activeKey === 'error_email' && (
-                            <configComponents.ConfigSectionErrorEmail
-                                {...{ localConfig, centralConfig, addLocalUpdate }}
-                            />
-                        )}
-                        {activeKey === 'measurement_triggers' && (
-                            <configComponents.ConfigSectionMeasurementTriggers
-                                {...{ localConfig, centralConfig, addLocalUpdate }}
-                            />
-                        )}
-                        {activeKey === 'tum_plc' && (
-                            <configComponents.ConfigSectionTumPlc
-                                {...{ localConfig, centralConfig, addLocalUpdate }}
-                            />
-                        )}
-                        {activeKey === 'vbdsd' && (
-                            <configComponents.ConfigSectionVbdsd
-                                {...{ localConfig, centralConfig, addLocalUpdate }}
-                            />
-                        )}
-                        {configIsDiffering && (
-                            <configComponents.SavingOverlay
-                                {...{
-                                    errorMessage,
-                                    saveLocalConfig,
-                                    restoreCentralConfig,
-                                    isSaving,
-                                }}
-                            />
-                        )}
-                    </div>
-                </>
-            )}
+                        {functionalUtils.capitalizeConfigKey(key1)}
+                        <div className="flex-grow" />
+                        <div
+                            className={
+                                'w-2 h-2 bg-blue-400 rounded-full ' +
+                                (key1 === activeKey ? 'bg-blue-400 ' : 'bg-transparent')
+                            }
+                        />
+                    </button>
+                ))}
+            </div>
+            <div
+                className={
+                    'z-0 flex-grow h-full p-6 overflow-y-scroll ' + 'flex-col-left relative pb-20'
+                }
+            >
+                {activeKey === 'general' && <configComponents.ConfigSectionGeneral />}
+                {activeKey === 'opus' && <configComponents.ConfigSectionOpus />}
+                {activeKey === 'camtracker' && <configComponents.ConfigSectionCamtracker />}
+                {activeKey === 'error_email' && <configComponents.ConfigSectionErrorEmail />}
+                {activeKey === 'measurement_triggers' && (
+                    <configComponents.ConfigSectionMeasurementTriggers />
+                )}
+                {activeKey === 'tum_plc' && <configComponents.ConfigSectionTumPlc />}
+                {activeKey === 'vbdsd' && <configComponents.ConfigSectionVbdsd />}
+                {configIsDiffering && (
+                    <configComponents.SavingOverlay
+                        {...{
+                            errorMessage,
+                            saveLocalConfig,
+                            restoreCentralConfig,
+                            isSaving,
+                        }}
+                    />
+                )}
+            </div>
         </div>
     );
 }
