@@ -10,9 +10,14 @@ export namespace customTypes {
         empty: boolean | undefined;
         loading: boolean;
     };
+    export type reduxStateCoreState = {
+        content: coreState | undefined;
+        loading: boolean;
+    };
     export type reduxState = {
         config: reduxStateConfig;
         logs: reduxStateLogs;
+        coreState: reduxStateCoreState;
     };
     export type intArray3 = [number, number, number];
     export type intArray4 = [number, number, number, number];
@@ -134,7 +139,7 @@ export namespace customTypes {
         };
     };
 
-    export type state = {
+    export type coreState = {
         automation_should_be_running: boolean;
         enclosure_plc_readings: {
             actors: {

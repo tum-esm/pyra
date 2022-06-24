@@ -16,12 +16,13 @@ export default function App() {
     const dispatch = reduxUtils.useTypedDispatch();
 
     useEffect(() => {
-        loadInitialState();
+        checkBackendIntegrity();
         fetchLogsFile();
-        initializeLogsFileWatcher();
+        fetchCoreState();
+        initializeFileWatchers();
     }, []);
 
-    async function loadInitialState() {
+    async function checkBackendIntegrity() {
         setBackendIntegrity(undefined);
         console.debug('loading initial state ...');
 
@@ -58,15 +59,37 @@ export default function App() {
         }
     }
 
-    // TODO: watch for changes in config.json or state.json
-    async function initializeLogsFileWatcher() {
+    async function fetchCoreState() {
+        dispatch(reduxUtils.coreStateActions.setLoading(true));
+        try {
+            const newCoreState = JSON.parse((await backend.getState()).stdout);
+            // TODO: Add message to queue if automatic decision changed
+            dispatch(reduxUtils.coreStateActions.set(newCoreState));
+        } catch {
+            // TODO: Add message to queue
+        } finally {
+            dispatch(reduxUtils.coreStateActions.setLoading(false));
+        }
+    }
+
+    // TODO: watch for changes in config.json
+    async function initializeFileWatchers() {
         let logFilePath = import.meta.env.VITE_PROJECT_DIR + '\\logs\\debug.log';
+        let stateFilePath = import.meta.env.VITE_PROJECT_DIR + '\\runtime-data\\state.json';
+
         if (window.navigator.platform.includes('Mac')) {
             logFilePath = logFilePath.replace(/\\/g, '/');
+            stateFilePath = stateFilePath.replace(/\\/g, '/');
         }
+
         await watch(logFilePath, { recursive: false }, (o) => {
             if (o.type === 'Write') {
                 fetchLogsFile();
+            }
+        });
+        await watch(stateFilePath, { recursive: false }, (o) => {
+            if (o.type === 'Write') {
+                fetchCoreState();
             }
         });
     }
@@ -105,7 +128,7 @@ export default function App() {
                         </span>
                         .
                     </p>
-                    <essentialComponents.Button onClick={loadInitialState} variant="green">
+                    <essentialComponents.Button onClick={checkBackendIntegrity} variant="green">
                         retry connection
                     </essentialComponents.Button>
                 </main>

@@ -94,6 +94,9 @@ export default function MeasurementDecisionStatus() {
     const measurementDecision = reduxUtils.useTypedSelector(
         (s) => s.config.central?.measurement_decision
     );
+    const manualMeasurementDecisionResult = reduxUtils.useTypedSelector(
+        (s) => s.coreState.content?.automation_should_be_running
+    );
     const dispatch = reduxUtils.useTypedDispatch();
     const setConfigsPartial = (c: customTypes.partialConfig) =>
         dispatch(reduxUtils.configActions.setConfigsPartial(c));
@@ -109,7 +112,7 @@ export default function MeasurementDecisionStatus() {
             measurementDecisionResult = measurementDecision.cli_decision_result;
             break;
         case 'automatic':
-            // TODO: Use state.json
+            measurementDecisionResult = manualMeasurementDecisionResult;
             break;
     }
 

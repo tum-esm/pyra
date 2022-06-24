@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { defaultsDeep } from 'lodash';
-
 import { backend, functionalUtils, reduxUtils } from '../utils';
 import { customTypes } from '../custom-types';
 import { configComponents } from '../components';

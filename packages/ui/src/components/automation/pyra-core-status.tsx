@@ -24,10 +24,14 @@ export default function PyraCoreStatus(props: {
 
     async function startPyraCore() {
         setPyraCorePID(undefined);
-        const p = await backend.startPyraCore();
-        const pid = parseInt(p.stdout.replace(/[^\d]/g, ''));
-        // TODO: add message to queue
-        setPyraCorePID(pid);
+        try {
+            const p = await backend.startPyraCore();
+            const pid = parseInt(p.stdout.replace(/[^\d]/g, ''));
+            setPyraCorePID(pid);
+        } catch {
+            // TODO: add message to queue
+            setPyraCorePID(undefined);
+        }
     }
 
     async function stopPyraCore() {
@@ -44,9 +48,7 @@ export default function PyraCoreStatus(props: {
                 />
                 <span className="ml-2.5 mr-1">pyra-core is</span>
                 {pyraCorePID === undefined && (
-                    <div className="w-4 h-4 text-gray-700 animate-spin">
-                        {ICONS.spinner}
-                    </div>
+                    <div className="w-4 h-4 text-gray-700 animate-spin">{ICONS.spinner}</div>
                 )}
 
                 {pyraCorePID !== undefined && pyraCorePID === -1 && 'not running'}
@@ -57,13 +59,7 @@ export default function PyraCoreStatus(props: {
             <essentialComponents.Button
                 onClick={pyraCorePID === -1 ? startPyraCore : stopPyraCore}
                 className="w-[21rem]"
-                variant={
-                    pyraCorePID === undefined
-                        ? 'slate'
-                        : pyraCorePID === -1
-                        ? 'green'
-                        : 'red'
-                }
+                variant={pyraCorePID === undefined ? 'slate' : pyraCorePID === -1 ? 'green' : 'red'}
                 spinner={pyraCorePID === undefined}
             >
                 {pyraCorePID === -1 ? 'start' : 'stop'}
