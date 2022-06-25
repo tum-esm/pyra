@@ -47,11 +47,11 @@ def run():
             # Start or stop VBDSD in a thread
             vbdsd_should_be_running = _CONFIG["measurement_triggers"]["consider_vbdsd"]
             if vbdsd_should_be_running and not vbdsd_thread.is_running():
-                vbdsd_thread.start()
                 logger.info("Starting VBDSD Thread")
+                vbdsd_thread.start()
             if not vbdsd_should_be_running and vbdsd_thread.is_running():
-                vbdsd_thread.stop()
                 logger.info("Stopping VBDSD Thread")
+                vbdsd_thread.stop()
         else:
             logger.info("pyra-core in test mode")
             logger.debug("Skipping VBDSD_Thread in test mode")

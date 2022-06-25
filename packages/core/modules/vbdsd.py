@@ -306,10 +306,6 @@ class VBDSD_Thread:
                 VBDSD_Thread.__remove_vbdsd_images()
                 return
 
-            #release cam when process is terminated and connection alive
-            if _VBDSD.cam is not None:
-                signal.signal(signal.SIGTERM, _VBDSD.cam.release())
-
             #init camera connection
             if _VBDSD.cam is None:
                 logger.info(f"Initializing VBDSD camera")
