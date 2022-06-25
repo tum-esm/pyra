@@ -51,22 +51,26 @@ class SunTracking:
         # TODO: Prüfen ob Flankenwechsel notwendig
         if not StateInterface.read()["vbdsd_indicates_good_conditions"]:
             if self.ct_application_running:
-                self.stop_sun_tracking_automation()
                 logger.info("Stop CamTracker.")
+                self.stop_sun_tracking_automation()
             return
 
         # main logic for active automation
 
         # start ct if not currently running
         if not self.ct_application_running:
-            self.start_sun_tracking_automation()
             logger.info("Start CamTracker.")
+            self.start_sun_tracking_automation()
+            #give camtracker one loop time to move to position
+            return
+
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
         if not self.__valdiate_tracker_position:
-            self.stop_sun_tracking_automation()
             logger.info("Stop CamTracker. Preparing for reinitialization.")
+            self.stop_sun_tracking_automation()
+
 
     @property
     def ct_application_running(self):
@@ -219,6 +223,11 @@ class SunTracking:
 
         if None in tracker_status:
             return
+
+        print(tracker_status[3])
+        print(type(tracker_status[3]))
+        print(tracker_status[4])
+        print(type(tracker_status[4]))
 
         elev_offset = float(tracker_status[3])
         az_offeset = float(tracker_status[4])
