@@ -11,8 +11,8 @@ def test_enclosure_control():
            "humidity", "temperature", "camera", "computer", "cover_closed",
            "heater", "motor_failed", "rain", "reset_needed", "router",
            "spectrometer","ups_alert"])
-    #print(control.read_states_from_plc())
+    print(control.read_states_from_plc())
 
-    control.auto_set_power_spectrometer()
+    #control.auto_set_power_spectrometer()
 
     assert(False)
