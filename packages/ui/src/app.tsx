@@ -4,6 +4,7 @@ import { backend, reduxUtils } from './utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from './tabs';
 import { essentialComponents, Header } from './components';
 import { watch } from 'tauri-plugin-fs-watch-api';
+import toast, { resolveValue, Toaster } from 'react-hot-toast';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -98,6 +99,11 @@ export default function App() {
         });
     }
 
+    toast.error(
+        'Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast.'
+    );
+    toast.success('Here is your toast.');
+
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
             {backendIntegrity === undefined && (
@@ -171,6 +177,55 @@ export default function App() {
                             </div>
                         )}
                     </main>
+                    <Toaster
+                        position="bottom-right"
+                        toastOptions={{
+                            duration: 24 * 3600 * 1000,
+                        }}
+                    >
+                        {(t) => {
+                            let typeIconColor = '';
+                            let typeIcon = <></>;
+                            switch (resolveValue(t.type, t)) {
+                                case 'error':
+                                    typeIconColor = 'text-red-400';
+                                    typeIcon = ICONS.alert;
+                                    break;
+                                case 'success':
+                                    typeIconColor = 'text-green-400';
+                                    typeIcon = ICONS.check;
+                                    break;
+                            }
+                            return (
+                                <div
+                                    className={'bg-white rounded-md shadow text-sm flex-row-center'}
+                                    style={{ opacity: t.visible ? 1 : 0 }}
+                                >
+                                    <div
+                                        className={`w-6 h-6 p-1 ml-1 mr-0.5 ${typeIconColor} flex-shrink-0`}
+                                    >
+                                        {typeIcon}
+                                    </div>
+                                    <div
+                                        className={
+                                            'pr-3 py-2 leading-tight text-sm text-slate-700 max-w-md'
+                                        }
+                                    >
+                                        {resolveValue(t.message, t)}
+                                    </div>
+                                    <button
+                                        onClick={() => toast.dismiss(resolveValue(t.id, t))}
+                                        className={
+                                            'h-full flex-row-center rounded-r-md cursor-pointer flex-shrink-0 ' +
+                                            'bg-slate-100 hover:bg-slate-150 text-slate-600'
+                                        }
+                                    >
+                                        <div className="w-6 h-6 mx-1">{ICONS.close}</div>
+                                    </button>
+                                </div>
+                            );
+                        }}
+                    </Toaster>
                 </>
             )}
         </div>
