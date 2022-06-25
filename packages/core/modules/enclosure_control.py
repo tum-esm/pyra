@@ -79,7 +79,7 @@ class EnclosureControl:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                if self.check_for_reest_needed():
+                if self.check_for_reset_needed():
                     self.reset()
                     time.sleep(10)
 

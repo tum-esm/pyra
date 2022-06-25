@@ -13,7 +13,7 @@ def test_start_up():
     opus = OpusMeasurement(_CONFIG)
     tracking = SunTracking(_CONFIG)
     
-    if enclosure.check_for_reest_needed():
+    if enclosure.check_for_reset_needed():
         enclosure.reset()
 
     enclosure.set_sync_to_tracker(True)
