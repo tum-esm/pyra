@@ -3,6 +3,8 @@ import { backend, functionalUtils, reduxUtils } from '../utils';
 import { customTypes } from '../custom-types';
 import { configurationComponents } from '../components';
 import toast from 'react-hot-toast';
+import { diff } from 'deep-diff';
+import { set } from 'lodash';
 
 const sectionKeys: customTypes.configSectionKey[] = [
     'general',
@@ -14,7 +16,9 @@ const sectionKeys: customTypes.configSectionKey[] = [
     'vbdsd',
 ];
 export default function ConfigurationTab() {
+    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const localConfig = reduxUtils.useTypedSelector((s) => s.config.local);
+    const errorMessage = reduxUtils.useTypedSelector((s) => s.config.errorMessage);
     const configIsDiffering = reduxUtils.useTypedSelector((s) => s.config.isDiffering);
     const dispatch = reduxUtils.useTypedDispatch();
 
@@ -24,8 +28,9 @@ export default function ConfigurationTab() {
         dispatch(reduxUtils.configActions.resetLocal());
         setErrorMessage(undefined);
     };
+    const setErrorMessage = (m: string | undefined) =>
+        dispatch(reduxUtils.configActions.setErrorMessage(m));
 
-    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
     const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
     const [isSaving, setIsSaving] = useState(false);
 
@@ -33,7 +38,18 @@ export default function ConfigurationTab() {
         if (localConfig !== undefined) {
             setIsSaving(true);
             const parsedLocalConfig = functionalUtils.parseNumberTypes(localConfig);
-            let result = await backend.updateConfig(parsedLocalConfig);
+            const diffsToCentral = diff(centralConfig, parsedLocalConfig);
+            const minimalConfigUpdate = {};
+            diffsToCentral?.forEach((d) => {
+                if (d.kind === 'E') {
+                    set(
+                        minimalConfigUpdate,
+                        d.path ? d.path.map((x: any) => x.toString()) : [],
+                        d.rhs
+                    );
+                }
+            });
+            let result = await backend.updateConfig(minimalConfigUpdate);
 
             if (result.stdout.includes('Updated config file')) {
                 setConfigs(parsedLocalConfig);

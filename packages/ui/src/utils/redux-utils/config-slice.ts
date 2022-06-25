@@ -17,6 +17,7 @@ export const configSlice = createSlice({
         central: undefined,
         local: undefined,
         isDiffering: undefined,
+        errorMessage: undefined,
     },
     reducers: {
         setConfigs: (
@@ -54,11 +55,18 @@ export const configSlice = createSlice({
             if (state.local !== undefined) {
                 state.local = defaultsDeep(action.payload, JSON.parse(JSON.stringify(state.local)));
                 state.isDiffering = configIsDiffering(state);
+                state.errorMessage = undefined;
             }
         },
         resetLocal: (state: customTypes.reduxStateConfig) => {
             state.local = JSON.parse(JSON.stringify(state.central));
             state.isDiffering = false;
+        },
+        setErrorMessage: (
+            state: customTypes.reduxStateConfig,
+            action: { payload: string | undefined }
+        ) => {
+            state.errorMessage = action.payload;
         },
     },
 });

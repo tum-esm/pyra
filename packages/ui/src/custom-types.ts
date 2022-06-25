@@ -3,6 +3,7 @@ export namespace customTypes {
         central: config | undefined;
         local: config | undefined;
         isDiffering: boolean | undefined;
+        errorMessage: string | undefined;
     };
     export type reduxStateLogs = {
         infoLines: string[];
