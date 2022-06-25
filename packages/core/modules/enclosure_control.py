@@ -305,6 +305,7 @@ class EnclosureControl:
         returns
         r: list
         """
+        #TODO: This functions needs way to long to execute. Solution?
         return [
             self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
             self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"]),
