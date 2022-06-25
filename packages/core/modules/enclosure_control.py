@@ -338,11 +338,11 @@ class EnclosureControl:
         print(current_sun_elevation > min_power_elevation)
 
         if current_sun_elevation is not None:
-            if (current_sun_elevation > min_power_elevation) and (not spectrometer_has_power):
+            if (current_sun_elevation >= min_power_elevation) and (not spectrometer_has_power):
                 #self.set_power_spectrometer(True)
                 print("set power")
                 logger.info("Powering up the spectrometer.")
-            elif spectrometer_has_power:
+            elif (current_sun_elevation < min_power_elevation) and (spectrometer_has_power):
                 #self.set_power_spectrometer(False)
                 print("remove power")
                 logger.info("Powering down the spectrometer.")
