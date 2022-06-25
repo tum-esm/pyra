@@ -11,6 +11,7 @@
 
 import snap7
 import time
+import astropy.units as astropy_units
 from packages.core.utils import (
     StateInterface,
     Logger,
@@ -342,7 +343,7 @@ class EnclosureControl:
 
 
         if current_sun_elevation is not None:
-            if (current_sun_elevation > min_power_elevation) and (
+            if (current_sun_elevation > min_power_elevation * astropy_units.deg) and (
                 not spectrometer_has_power
             ):
                 self.set_power_spectrometer(True)
