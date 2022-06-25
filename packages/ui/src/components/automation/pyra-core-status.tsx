@@ -33,8 +33,6 @@ export default function PyraCoreStatus() {
         }
     }
 
-    console.log(coreProcessPID);
-
     async function stopPyraCore() {
         setCoreProcessPID(undefined);
         await backend.stopPyraCore();

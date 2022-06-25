@@ -3,6 +3,7 @@ import { customTypes } from '../../custom-types';
 import { backend, reduxUtils } from '../../utils';
 import { essentialComponents } from '..';
 import { ICONS } from '../../assets';
+import toast from 'react-hot-toast';
 
 function formatTime(t: { hour: number; minute: number; second: number }) {
     return (
@@ -125,23 +126,29 @@ export default function MeasurementDecisionStatus() {
         const update = {
             measurement_decision: { mode, manual_decision_result: false },
         };
-        const p = await backend.updateConfig(update);
-        if (p.stdout.includes('Updated config file')) {
+        const result = await backend.updateConfig(update);
+        if (result.stdout.includes('Updated config file')) {
             setConfigsPartial(update);
         } else {
-            // TODO: add message to queue
+            console.error(
+                `Could not update config file. processResult = ${JSON.stringify(result)}`
+            );
+            toast.error(`Could not update config file, please look in the console for details`);
         }
         setLoading(false);
     }
 
-    async function updateManualMeasurementDecisionResult(result: boolean) {
+    async function updateManualMeasurementDecisionResult(decisionResult: boolean) {
         setLoading(true);
-        const update = { measurement_decision: { manual_decision_result: result } };
-        const p = await backend.updateConfig(update);
-        if (p.stdout.includes('Updated config file')) {
+        const update = { measurement_decision: { manual_decision_result: decisionResult } };
+        const result = await backend.updateConfig(update);
+        if (result.stdout.includes('Updated config file')) {
             setConfigsPartial(update);
         } else {
-            // TODO: add message to queue
+            console.error(
+                `Could not update config file. processResult = ${JSON.stringify(result)}`
+            );
+            toast.error(`Could not update config file, please look in the console for details`);
         }
         setLoading(false);
     }

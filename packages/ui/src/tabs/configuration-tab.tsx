@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { backend, functionalUtils, reduxUtils } from '../utils';
 import { customTypes } from '../custom-types';
 import { configurationComponents } from '../components';
+import toast from 'react-hot-toast';
 
 const sectionKeys: customTypes.configSectionKey[] = [
     'general',
@@ -46,11 +47,15 @@ export default function ConfigurationTab() {
 
             if (result.stdout.includes('Updated config file')) {
                 setConfigs(parsedLocalConfig);
-                setIsSaving(false);
-            } else {
+            } else if (result.stdout.length !== 0) {
                 setErrorMessage(result.stdout);
-                setIsSaving(false);
+            } else {
+                console.error(
+                    `Could not update config file. processResult = ${JSON.stringify(result)}`
+                );
+                toast.error(`Could not update config file, please look in the console for details`);
             }
+            setIsSaving(false);
         }
     }
 

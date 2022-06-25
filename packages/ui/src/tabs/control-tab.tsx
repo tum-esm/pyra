@@ -3,6 +3,7 @@ import { essentialComponents } from '../components';
 import { useState } from 'react';
 import { customTypes } from '../custom-types';
 import { ICONS } from '../assets';
+import toast from 'react-hot-toast';
 
 export default function ControlTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.content);
@@ -20,11 +21,13 @@ export default function ControlTab() {
         setIsSaving(true);
         const update = { tum_plc: { controlled_by_user: v } };
         let result = await backend.updateConfig(update);
-
-        if (result.stdout.includes('Updated config file')) {
-            setConfigsPartial(update);
+        if (!result.stdout.includes('Updated config file')) {
+            console.error(
+                `Could not update config file. processResult = ${JSON.stringify(result)}`
+            );
+            toast.error(`Could not update config file, please look in the console for details`);
         } else {
-            // TODO: Add message to queue
+            setConfigsPartial(update);
         }
         setIsSaving(false);
     }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { dialog, shell } from '@tauri-apps/api';
 import { backend, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
+import toast from 'react-hot-toast';
 
 export default function LogTab() {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
@@ -17,8 +18,15 @@ export default function LogTab() {
     async function archiveLogs() {
         if (await dialog.confirm('Do you want to archive all current logs?', 'PyRa 4 UI')) {
             setArchiving(true);
-            await backend.archiveLogs();
-            dispatch(reduxUtils.logsActions.set([]));
+            const result = await backend.archiveLogs();
+            if (result.stdout.replace(/[\n\s]*/g, '') === 'done!') {
+                dispatch(reduxUtils.logsActions.set([]));
+            } else {
+                console.error(
+                    `Could not archive log files. processResult = ${JSON.stringify(result)}`
+                );
+                toast.error(`Could not archive log files, please look in the console for details`);
+            }
             setArchiving(false);
         }
     }

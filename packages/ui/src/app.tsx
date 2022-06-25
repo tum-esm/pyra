@@ -15,8 +15,11 @@ export default function App() {
     >(undefined);
 
     const centralConfigTumPlc = reduxUtils.useTypedSelector((s) => s.config.central?.tum_plc);
+    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
     const enclosureControlsIsVisible =
         centralConfigTumPlc !== null && centralConfigTumPlc !== undefined;
+
+    const pyraCoreIsRunning = pyraCorePID !== undefined && pyraCorePID !== -1;
 
     const dispatch = reduxUtils.useTypedDispatch();
 
@@ -65,15 +68,22 @@ export default function App() {
     }
 
     async function fetchCoreState() {
-        dispatch(reduxUtils.coreStateActions.setLoading(true));
-        try {
-            const newCoreState = JSON.parse((await backend.getState()).stdout);
-            // TODO: Add message to queue if automatic decision changed
-            dispatch(reduxUtils.coreStateActions.set(newCoreState));
-        } catch {
-            // TODO: Add message to queue
-        } finally {
-            dispatch(reduxUtils.coreStateActions.setLoading(false));
+        if (pyraCoreIsRunning) {
+            dispatch(reduxUtils.coreStateActions.setLoading(true));
+            const result = await backend.getState();
+            try {
+                const newCoreState = JSON.parse(result.stdout);
+
+                // TODO: Add message to queue if automatic decision changed
+                dispatch(reduxUtils.coreStateActions.set(newCoreState));
+            } catch {
+                console.error(
+                    `Could not fetch core state. processResult = ${JSON.stringify(result)}`
+                );
+                toast.error(`Could not fetch core state, please look in the console for details`);
+            } finally {
+                dispatch(reduxUtils.coreStateActions.setLoading(false));
+            }
         }
     }
 

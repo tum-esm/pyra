@@ -72,6 +72,7 @@ def _archive_logs():
             ) as f:
                 f.writelines(lines)
                 f.write("\n")
+    success_handler("done!")
 
 
 @click.group()
