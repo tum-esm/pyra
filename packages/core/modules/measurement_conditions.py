@@ -14,6 +14,7 @@
 # ==============================================================================
 
 import datetime
+import astropy.units as astropy_units
 from packages.core.utils import Astronomy, StateInterface, Logger, OSInfo
 
 logger = Logger(origin="pyra.core.measurement-conditions")
@@ -79,8 +80,8 @@ class MeasurementConditions:
             # consider sun elevation
             if triggers["consider_sun_elevation"]:
                 current_sun_elevation = Astronomy.get_current_sun_elevation()
-                sun_is_too_low = current_sun_elevation < triggers["min_sun_elevation"]
-                sun_is_too_high = current_sun_elevation > triggers["max_sun_elevation"]
+                sun_is_too_low = current_sun_elevation < triggers["min_sun_elevation"] * astropy_units.deg
+                sun_is_too_high = current_sun_elevation > triggers["max_sun_elevation"] * astropy_units.deg
                 if sun_is_too_low or sun_is_too_high:
                     automation_should_be_running &= False
 
