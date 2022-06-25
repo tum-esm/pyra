@@ -32,6 +32,8 @@ class MeasurementConditions:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
         StateInterface.update({"automation_should_be_running": False})
+        StateInterface.update({"vbdsd_indicates_good_conditions": False})
+
         if self._CONFIG["general"]["test_mode"]:
             return
 
