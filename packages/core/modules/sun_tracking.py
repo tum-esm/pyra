@@ -47,27 +47,24 @@ class SunTracking:
 
         logger.info("Running SunTracking")
 
-        # automation is not active or was deactivated recently
-        # TODO: Prüfen ob Flankenwechsel notwendig
-        if not StateInterface.read()["vbdsd_indicates_good_conditions"]:
-            if self.ct_application_running():
-                logger.info("Stop CamTracker.")
-                self.stop_sun_tracking_automation()
-            return
+        automation_should_be_running = StateInterface.read()[
+            "automation_should_be_running"]
 
         # main logic for active automation
-
-        # start ct if not currently running
-        if not self.ct_application_running():
-            logger.info("Start CamTracker.")
+        if automation_should_be_running and not self.ct_application_running():
+            logger.info("Start CamTracker")
             self.start_sun_tracking_automation()
-            #give camtracker one loop time to move to position
             return
 
+        if not automation_should_be_running and self.ct_application_running():
+            logger.info("Stop CamTracker")
+            self.stop_sun_tracking_automation()
+            return
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
         if not self.valdiate_tracker_position():
+            logger.info("CamTracker Motor Position is over threshold.")
             logger.info("Stop CamTracker. Preparing for reinitialization.")
             self.stop_sun_tracking_automation()
 
