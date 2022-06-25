@@ -273,7 +273,7 @@ class OpusMeasurement:
 
         # sleep while sun angle is too low
         if Astronomy.get_current_sun_elevation().is_within_bounds(
-                None, _CONFIG["vbdsd"]["min_sun_elevation"] * astropy_units.deg
+                None, self._CONFIG["vbdsd"]["min_sun_elevation"] * astropy_units.deg
         ):
             return True
         else:
