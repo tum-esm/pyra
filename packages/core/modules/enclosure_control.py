@@ -11,6 +11,7 @@
 
 import snap7
 import time
+import os
 import astropy.units as astropy_units
 from packages.core.utils import (
     StateInterface,
@@ -68,15 +69,12 @@ class EnclosureControl:
 
         logger.info("Running EnclosureControl")
 
-        #TODO: fix function OSInfo.check_connection_status
-        """function not working right now
         # check PLC ip connection
-        plc_status = OSInfo.check_connection_status(self._CONFIG["tum_plc"]["ip"])
-        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
-
-        if plc_status == "NO_INFO":
+        if self.is_PLC_responsive():
+            logger.debug("The PLC IP connection returned answer via ping.")
+        else:
             raise PLCError("Could not find an active PLC IP connection.")
-        """
+
         # check for automation state flank changes
         automation_should_be_running = StateInterface.read()["automation_should_be_running"]
         if self.last_cycle_automation_status != automation_should_be_running:
@@ -345,6 +343,18 @@ class EnclosureControl:
             elif (current_sun_elevation < min_power_elevation) and (spectrometer_has_power):
                 self.set_power_spectrometer(False)
                 logger.info("Powering down the spectrometer.")
+
+    def is_PLC_responsive(self):
+        """Pings the PLC and returns:
+
+        True -> Connected
+        False -> Not Connected"""
+        response = os.system("ping -n 1 " + self._CONFIG["tum_plc"]["ip"])
+
+        if response == 0:
+            return True
+        else:
+            return False
 
 
 

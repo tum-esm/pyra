@@ -22,7 +22,7 @@ import sys
 import time
 import jdcal
 import datetime
-from packages.core.utils import StateInterface, Logger
+from packages.core.utils import StateInterface, Logger, OSInfo
 
 
 # these imports are provided by pywin32
@@ -75,14 +75,15 @@ class SunTracking:
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
-        # FindWindow(className, windowName)
-        # className: String, The window class name to find, else None
-        # windowName: String, The window name (ie,title) to find, else None
-        try:
-            #TODO: remove hardcoding of name
-            if win32ui.FindWindow(None, "CamTracker 3.9"):
-                return True
-        except win32ui.error:
+
+        ct_path = self._CONFIG["camtracker"]["executable_path"]
+        process_name = os.path.basename(ct_path)
+
+        status = OSInfo.check_process_status(process_name)
+
+        if status == ("running" or "start_pending" or "continue_pending" or "pause_pending" or "paused"):
+            return True
+        else:
             return False
 
     def start_sun_tracking_automation(self):

@@ -189,13 +189,13 @@ class OpusMeasurement:
         """Destroys the underlying C++ object."""
         self.server.Destroy()
 
-    # TODO: is this still needed?
+
     def __is_em27_responsive(self):
         """Pings the EM27 and returns:
 
         True -> Connected
         False -> Not Connected"""
-        response = os.system("ping -n 1 " + self._SETUP["em27"]["ip"])
+        response = os.system("ping -n 1 " + self._CONFIG["em27"]["ip"])
 
         if response == 0:
             return True
