@@ -13,7 +13,8 @@
 import os
 import sys
 import time
-from packages.core.utils import Logger, StateInterface, OSInfo
+import astropy.units as astropy_units
+from packages.core.utils import Logger, StateInterface, OSInfo, Astronomy
 
 
 # these imports are provided by pywin32
@@ -63,12 +64,8 @@ class OpusMeasurement:
             logger.info("Test mode active.")
             return
 
-        # start OPUS if not currently running
-        if not self.opus_application_running:
-            self.start_opus()
-            logger.info("Start OPUS.")
-            # returns to give OPUS time to start until next call of run()
-            return
+        #start or stops opus.exe depending on sun angle
+        self.automated_process_handling()
 
         if self.__is_em27_responsive:
             logger.info("Successful ping to EM27.")
@@ -170,6 +167,19 @@ class OpusMeasurement:
         else:
             logger.info("Could not stop OPUS macro as expected.")
 
+    def close_opus(self):
+        """Closes OPUS via DDE."""
+        self.__connect_to_dde_opus()
+
+        if not self.__test_dde_connection:
+            return
+        answer = self.conversation.Request("CLOSE_OPUS")
+
+        if "OK" in answer:
+            logger.info("Stopped OPUS.exe")
+        else:
+            logger.info("Could not stop OPUS as expected.")
+
     def __shutdown_dde_server(self):
         """Note the underlying DDE object (ie, Server, Topics and Items) are
         not cleaned up by this call.
@@ -210,7 +220,7 @@ class OpusMeasurement:
         )
 
 
-    @property
+
     def opus_application_running(self):
         """Checks if OPUS is already running by identifying the window.
 
@@ -233,17 +243,17 @@ class OpusMeasurement:
         if sys.platform != "win32":
             return
 
-        opus_is_running = self.opus_application_running
+        opus_is_running = self.opus_application_running()
         if not opus_is_running:
             self.start_opus()
             try_count = 0
             while try_count < 10:
-                if self.opus_application_running:
+                if self.opus_application_running():
                     break
                 try_count += 1
                 time.sleep(6)
 
-        assert self.opus_application_running
+        assert self.opus_application_running()
         assert self.__test_dde_connection
 
         print("__is_em27_connected: ", self.__is_em27_responsive)
@@ -257,3 +267,36 @@ class OpusMeasurement:
         self.stop_macro()
 
         print("__is_em27_connected: ", self.__is_em27_responsive)
+
+    def low_sun_angle_present(self):
+        """OPUS closes at the end of the day to start up fresh the next day."""
+
+        # sleep while sun angle is too low
+        if Astronomy.get_current_sun_elevation().is_within_bounds(
+                None, _CONFIG["vbdsd"]["min_sun_elevation"] * astropy_units.deg
+        ):
+            return True
+        else:
+            return False
+
+    def automated_process_handling(self):
+        """Start OPUS.exe if not running and sun angle conditions satisfied.
+        Shuts down OPUS.exe if running and sun angle conditions not satisfied.
+        """
+
+        if not self.low_sun_angle_present():
+            # start OPUS if not currently running
+            if not self.opus_application_running():
+                self.start_opus()
+                logger.info("Start OPUS.")
+                # returns to give OPUS time to start until next call of run()
+                return
+        if self.low_sun_angle_present():
+            #Close OPUS if running
+            if self.opus_application_running():
+                logger.debug("Requesting OPUS night shutdown.")
+                self.close_opus()
+
+
+
+
