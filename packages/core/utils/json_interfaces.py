@@ -68,6 +68,7 @@ class StateInterface:
 
 
 class ConfigInterface:
+    #TODO: initialize config with manual manual_decision_result and cli_decision_result = False
     @staticmethod
     @with_filelock(CONFIG_LOCK_PATH)
     def read() -> dict:
