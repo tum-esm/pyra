@@ -223,31 +223,31 @@ class EnclosureControl:
         self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
 
     def set_power_camera(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["camera"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["camera"], state)
 
     def read_power_camera(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["camera"])
 
     def set_power_computer(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["computer"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["computer"], state)
 
     def read_power_computer(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["computer"])
 
     def set_power_heater(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["heater"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["heater"], state)
 
     def read_power_heater(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["heater"])
 
     def set_power_router(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["router"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["router"], state)
 
     def read_power_router(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["router"])
 
     def set_power_spectrometer(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["spectrometer"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], state)
 
     def read_power_spectrometer(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["spectrometer"])
