@@ -52,11 +52,14 @@ class OSInfo:
         connections = psutil.net_connections(kind="inet4")
 
         for connection in connections:
-            if connection.raddr:
-                if connection.raddr[0] == ip:
+            if connection.laddr:
+                if connection.laddr.ip == ip:
                     return connection.status
-                else:
-                    return "NO_INFO"
+            if connection.raddr:
+                if connection.raddr.ip == ip:
+                    return connection.status
+                
+        return "NO_INFO"
 
     @staticmethod
     def check_system_battery()->float:
