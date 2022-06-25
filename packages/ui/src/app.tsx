@@ -99,11 +99,6 @@ export default function App() {
         });
     }
 
-    toast.error(
-        'Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast. Here is your toast.'
-    );
-    toast.success('Here is your toast.');
-
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
             {backendIntegrity === undefined && (

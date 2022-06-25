@@ -14,10 +14,14 @@ export namespace customTypes {
         content: coreState | undefined;
         loading: boolean;
     };
+    export type reduxStateCoreProcess = {
+        pid: number | undefined;
+    };
     export type reduxState = {
         config: reduxStateConfig;
         logs: reduxStateLogs;
         coreState: reduxStateCoreState;
+        coreProcess: reduxStateCoreProcess;
     };
     export type intArray3 = [number, number, number];
     export type intArray4 = [number, number, number, number];
