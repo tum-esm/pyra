@@ -19,6 +19,7 @@ logger = Logger(origin="pyra.core.main")
 def run():
 
     StateInterface.initialize()
+    #TODO: check .initialize() function. and why the 2 lines below are needed
     StateInterface.update({"automation_should_be_running": False})
     StateInterface.update({"vbdsd_indicates_good_conditions": False})
     _CONFIG = ConfigInterface.read()
