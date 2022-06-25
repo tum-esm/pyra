@@ -288,6 +288,7 @@ class VBDSD_Thread:
     def main(infinite_loop=True):
         global _CONFIG
         _CONFIG = ConfigInterface.read()
+        #delete all temp pictures when vbdsd is deactivated
         if _CONFIG["vbdsd"] is None:
             VBDSD_Thread.__remove_vbdsd_images()
             return
@@ -298,12 +299,14 @@ class VBDSD_Thread:
         while True:
             start_time = time.time()
             _CONFIG = ConfigInterface.read()
+            # delete all temp pictures when vbdsd is deactivated
             if _CONFIG["vbdsd"] is None:
                 VBDSD_Thread.__remove_vbdsd_images()
                 return
 
+            #init camera connection
             if _VBDSD.cam is None:
-                logger.info(f"(Re)connecting to camera")
+                logger.info(f"Initializing VBDSD camera")
                 _VBDSD.init_cam()
 
                 # if connecting was not successful
