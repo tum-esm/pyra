@@ -29,6 +29,7 @@
 
 import multiprocessing
 import os
+import signal
 import shutil
 import time
 import astropy.units as astropy_units
@@ -267,8 +268,6 @@ class VBDSD_Thread:
         Stop the thread, remove all images inside the directory
         "runtime_data/vbdsd" and set the state to 'null'
         """
-        #release cam connection
-        _VBDSD.cam.release()
 
         logger.info("Terminating thread")
         self.__process.terminate()
@@ -306,6 +305,10 @@ class VBDSD_Thread:
             if _CONFIG["vbdsd"] is None:
                 VBDSD_Thread.__remove_vbdsd_images()
                 return
+
+            #release cam when process is terminated and connection alive
+            if _VBDSD.cam is not None:
+                signal.signal(signal.SIGTERM, _VBDSD.cam.release())
 
             #init camera connection
             if _VBDSD.cam is None:
