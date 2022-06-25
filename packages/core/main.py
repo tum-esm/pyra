@@ -19,6 +19,8 @@ logger = Logger(origin="pyra.core.main")
 def run():
 
     StateInterface.initialize()
+    StateInterface.update({"automation_should_be_running": False})
+    StateInterface.update({"vbdsd_indicates_good_conditions": False})
     _CONFIG = ConfigInterface.read()
 
     logger.info(f"started mainloop inside process with PID {os.getpid()}")
