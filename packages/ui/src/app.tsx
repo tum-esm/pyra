@@ -5,6 +5,7 @@ import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from
 import { essentialComponents, Header } from './components';
 import { watch } from 'tauri-plugin-fs-watch-api';
 import toast, { resolveValue, Toaster } from 'react-hot-toast';
+import { customTypes } from './custom-types';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -22,49 +23,62 @@ export default function App() {
     const pyraCoreIsRunning = pyraCorePID !== undefined && pyraCorePID !== -1;
 
     const dispatch = reduxUtils.useTypedDispatch();
+    const setConfigs = (c: customTypes.config | undefined) =>
+        dispatch(reduxUtils.configActions.setConfigs(c));
 
     useEffect(() => {
-        checkBackendIntegrity();
+        loadInitialAppState();
         fetchLogsFile();
         fetchCoreState();
         initializeFileWatchers();
     }, []);
 
-    async function checkBackendIntegrity() {
+    /*
+    1. Check whether pyra-cli is available
+    2. Check whether config can be read
+    3. Possibly add config to reduxStore
+    */
+    async function loadInitialAppState() {
         setBackendIntegrity(undefined);
         console.debug('loading initial state ...');
 
-        try {
-            const pyraCliIsAvailable = await backend.pyraCliIsAvailable();
+        const result = await backend.pyraCliIsAvailable();
+        if (result.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...')) {
             console.debug('found pyra-cli');
-            if (!pyraCliIsAvailable) {
-                setBackendIntegrity('cli is missing');
-                return;
-            }
-
-            const p = await backend.getConfig();
-            if (p.stdout.startsWith('file not in a valid json format')) {
-                setBackendIntegrity('config is invalid');
-            } else {
-                // TODO: handle "file not exists error"
-                setBackendIntegrity('valid');
-            }
-        } catch (e) {
-            console.log(`Error while fetching initial state: ${e}`);
+        } else {
+            console.error(`Could not reach pyra-cli. processResult = ${JSON.stringify(result)}`);
             setBackendIntegrity('cli is missing');
+            return;
+        }
+
+        const result2 = await backend.getConfig();
+        if (result2.stdout.startsWith('file not in a valid json format')) {
+            setBackendIntegrity('config is invalid');
+        } else {
+            try {
+                const newConfig = JSON.parse(result2.stdout);
+                setConfigs(newConfig);
+                setBackendIntegrity('valid');
+            } catch (e) {
+                console.error(
+                    `Could not fetch config file. processResult = ${JSON.stringify(result2)}`
+                );
+                setBackendIntegrity('config is invalid');
+            }
         }
     }
 
     async function fetchLogsFile() {
         dispatch(reduxUtils.logsActions.setLoading(true));
-        try {
-            const newLogLines = (await backend.readDebugLogs()).stdout.split('\n');
+        const result = await backend.readDebugLogs();
+        if (result.code === 0) {
+            const newLogLines = result.stdout.split('\n');
             dispatch(reduxUtils.logsActions.set(newLogLines));
-        } catch {
-            // TODO: Add message to queue
-        } finally {
-            dispatch(reduxUtils.logsActions.setLoading(false));
+        } else {
+            console.error(`Could not fetch log files. processResult = ${JSON.stringify(result)}`);
+            toast.error('Could not fetch log files - details in the console');
         }
+        dispatch(reduxUtils.logsActions.setLoading(false));
     }
 
     async function fetchCoreState() {
@@ -73,8 +87,6 @@ export default function App() {
             const result = await backend.getState();
             try {
                 const newCoreState = JSON.parse(result.stdout);
-
-                // TODO: Add message to queue if automatic decision changed
                 dispatch(reduxUtils.coreStateActions.set(newCoreState));
             } catch {
                 console.error(
@@ -143,7 +155,7 @@ export default function App() {
                         </span>
                         .
                     </p>
-                    <essentialComponents.Button onClick={checkBackendIntegrity} variant="green">
+                    <essentialComponents.Button onClick={loadInitialAppState} variant="green">
                         retry connection
                     </essentialComponents.Button>
                 </main>

@@ -57,7 +57,8 @@ export const configSlice = createSlice({
             }
         },
         resetLocal: (state: customTypes.reduxStateConfig) => {
-            state.local = state.central;
+            state.local = JSON.parse(JSON.stringify(state.central));
+            state.isDiffering = false;
         },
     },
 });

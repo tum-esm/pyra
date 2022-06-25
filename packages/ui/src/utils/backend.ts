@@ -22,9 +22,8 @@ const backend = {
     startPyraCore: async (): Promise<ChildProcess> => {
         return await callCLI(['core', 'start']);
     },
-    pyraCliIsAvailable: async (): Promise<boolean> => {
-        const p = await callCLI([]);
-        return p.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...');
+    pyraCliIsAvailable: async (): Promise<ChildProcess> => {
+        return await callCLI([]);
     },
     checkPyraCoreState: async (): Promise<ChildProcess> => {
         return await callCLI(['core', 'is-running']);
@@ -35,9 +34,7 @@ const backend = {
     getConfig: async (): Promise<ChildProcess> => {
         return await callCLI(['config', 'get']);
     },
-    updateConfig: async (
-        newConfig: customTypes.partialConfig
-    ): Promise<ChildProcess> => {
+    updateConfig: async (newConfig: customTypes.partialConfig): Promise<ChildProcess> => {
         return await callCLI(['config', 'update', JSON.stringify(newConfig)]);
     },
     getState: async (): Promise<ChildProcess> => {

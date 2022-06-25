@@ -1,4 +1,5 @@
 import json
+import shutil
 import click
 import os
 import sys
@@ -6,6 +7,7 @@ import filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+DEFAULT_CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.default.json")
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 
@@ -50,16 +52,14 @@ def update_dict_rec(old_dict, new_dict):
 @click.command(help="Read the current config.json file.")
 @with_filelock
 def _get_config():
-    try:
-        assert os.path.isfile(CONFIG_FILE_PATH), "file does not exist"
-        with open(CONFIG_FILE_PATH, "r") as f:
-            try:
-                content = json.load(f)
-            except:
-                raise AssertionError("file not in a valid json format")
-        click.echo(json.dumps(content))
-    except AssertionError as e:
-        error_handler(e)
+    if not os.path.isfile(CONFIG_FILE_PATH):
+        shutil.copyfile(DEFAULT_CONFIG_FILE_PATH, CONFIG_FILE_PATH)
+    with open(CONFIG_FILE_PATH, "r") as f:
+        try:
+            content = json.load(f)
+        except:
+            raise AssertionError("file not in a valid json format")
+    click.echo(json.dumps(content))
 
 
 @click.command(

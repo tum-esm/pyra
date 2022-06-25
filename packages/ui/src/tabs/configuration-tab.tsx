@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { backend, functionalUtils, reduxUtils } from '../utils';
 import { customTypes } from '../custom-types';
 import { configurationComponents } from '../components';
@@ -20,24 +20,14 @@ export default function ConfigurationTab() {
 
     const setConfigs = (c: customTypes.config | undefined) =>
         dispatch(reduxUtils.configActions.setConfigs(c));
-    const resetLocalConfig = () => dispatch(reduxUtils.configActions.resetLocal());
+    const resetLocalConfig = () => {
+        dispatch(reduxUtils.configActions.resetLocal());
+        setErrorMessage(undefined);
+    };
 
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
     const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
     const [isSaving, setIsSaving] = useState(false);
-
-    useEffect(() => {
-        loadCentralConfig();
-    }, []);
-
-    async function loadCentralConfig() {
-        const content = await backend.getConfig();
-        try {
-            setConfigs(JSON.parse(content.stdout));
-        } catch {
-            console.log(`Output from get-config: ${content.stdout}`);
-        }
-    }
 
     async function saveLocalConfig() {
         if (localConfig !== undefined) {
