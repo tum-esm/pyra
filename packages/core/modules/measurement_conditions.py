@@ -72,6 +72,7 @@ class MeasurementConditions:
 
         if decision["mode"] == "manual":
             automation_should_be_running = decision["manual_decision_result"]
+            #TODO: If automation is already running use this as the starting point
 
         if decision["mode"] == "cli":
             automation_should_be_running = decision["cli_decision_result"]
