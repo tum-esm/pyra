@@ -91,15 +91,15 @@ class OpusMeasurement:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                self.load_experiment()
                 logger.info("Loading OPUS Experiment.")
+                self.load_experiment()
                 time.sleep(1)
-                self.start_macro()
                 logger.info("Starting OPUS Macro.")
+                self.start_macro()
             else:
                 # flank change 1 -> 0: stop macro
-                self.stop_macro()
                 logger.info("Stopping OPUS Macro.")
+                self.stop_macro()
 
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
