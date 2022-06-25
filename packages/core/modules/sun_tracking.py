@@ -58,7 +58,7 @@ class SunTracking:
         # main logic for active automation
 
         # start ct if not currently running
-        if not self.ct_application_running:
+        if not self.ct_application_running():
             logger.info("Start CamTracker.")
             self.start_sun_tracking_automation()
             #give camtracker one loop time to move to position
@@ -67,12 +67,11 @@ class SunTracking:
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
-        if not self.valdiate_tracker_position:
+        if not self.valdiate_tracker_position():
             logger.info("Stop CamTracker. Preparing for reinitialization.")
             self.stop_sun_tracking_automation()
 
 
-    @property
     def ct_application_running(self):
         """Checks if CamTracker is already running by identifying the window.
 
@@ -210,7 +209,7 @@ class SunTracking:
             # returns either 'good' or 'bad'
             return sun_intensity
 
-    @property
+
     def valdiate_tracker_position(self):
         """Reads motor offsets and compares it with defined threshold.
 
