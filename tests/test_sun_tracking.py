@@ -8,6 +8,6 @@ def test_ct_measurement():
     # print(control.continuous_readings())
     # assert(False)
 
-    instance.test_setup()
+    assert(instance.test_setup)
 
     assert False
