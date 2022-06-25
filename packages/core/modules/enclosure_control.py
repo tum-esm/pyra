@@ -331,8 +331,8 @@ class EnclosureControl:
         spectrometer in the morning when minimum angle is satisfied.
         """
 
-        current_sun_elevation = Astronomy.get_current_sun_elevation() * astropy_units.deg
-        min_power_elevation = self._CONFIG["tum_plc"]["min_power_elevation"]
+        current_sun_elevation = Astronomy.get_current_sun_elevation()
+        min_power_elevation = self._CONFIG["tum_plc"]["min_power_elevation"] * astropy_units.deg
         spectrometer_has_power = self.read_power_spectrometer()
 
         print(current_sun_elevation)
