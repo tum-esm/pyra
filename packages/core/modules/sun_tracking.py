@@ -220,8 +220,8 @@ class SunTracking:
         if None in tracker_status:
             return
 
-        elev_offset = tracker_status[3]
-        az_offeset = tracker_status[4]
+        elev_offset = int(tracker_status[3])
+        az_offeset = int(tracker_status[4])
         threshold = self._CONFIG["camtracker"]["motor_offset_threshold"]
 
         if (elev_offset > threshold) or (az_offeset > threshold):
