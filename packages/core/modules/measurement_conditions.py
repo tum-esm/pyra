@@ -66,6 +66,7 @@ class MeasurementConditions:
         # raises error if system battery is below 20%
         OSInfo.validate_system_battery()
 
+        #TODO: Move measurement_decision to state.json and reset it with core start
         decision = self._CONFIG["measurement_decision"]
         triggers = self._CONFIG["measurement_triggers"]
 
