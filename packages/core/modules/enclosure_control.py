@@ -335,12 +335,7 @@ class EnclosureControl:
         min_power_elevation = self._CONFIG["tum_plc"]["min_power_elevation"] * astropy_units.deg
         spectrometer_has_power = self.read_power_spectrometer()
 
-        print(current_sun_elevation)
-        print(type(current_sun_elevation))
-
-        print(min_power_elevation)
-        print(type(min_power_elevation))
-
+        print(current_sun_elevation > min_power_elevation)
 
         if current_sun_elevation is not None:
             if (current_sun_elevation > min_power_elevation) and (
