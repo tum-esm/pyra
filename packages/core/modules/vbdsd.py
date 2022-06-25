@@ -61,6 +61,7 @@ class _VBDSD:
         camera, otherwise None will be returned.
         """
         camera_id = _CONFIG["vbdsd"]["camera_id"]
+        
         _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         _VBDSD.cam.release()
 
