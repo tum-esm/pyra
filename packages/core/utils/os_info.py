@@ -49,6 +49,8 @@ class OSInfo:
         and returns status i.e. ESTABLISHED, CLOSED, SYN_SENT
         returns NO_INFO if IP is not found.
         """
+        #TODO: function is not working as expected. Needs revision.
+
         connections = psutil.net_connections(kind="inet4")
 
         for connection in connections:
@@ -58,7 +60,7 @@ class OSInfo:
             if connection.raddr:
                 if connection.raddr.ip == ip:
                     return connection.status
-                
+
         return "NO_INFO"
 
     @staticmethod

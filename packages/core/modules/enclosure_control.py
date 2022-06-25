@@ -71,7 +71,7 @@ class EnclosureControl:
 
         # check PLC ip connection
         if self.is_PLC_responsive():
-            logger.debug("The PLC IP connection returned answer via ping.")
+            logger.debug("Successful ping to PLC.")
         else:
             raise PLCError("Could not find an active PLC IP connection.")
 

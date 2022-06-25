@@ -70,15 +70,6 @@ class OpusMeasurement:
             # returns to give OPUS time to start until next call of run()
             return
 
-        # TODO: fix function OSInfo.check_connection_status
-        """
-        # check EM27 ip connection
-        plc_status = OSInfo.check_connection_status(self._CONFIG["opus"]["em27_ip"])
-        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
-
-        if plc_status == "NO_INFO":
-            raise SpectrometerError("Could not find an active EM27 IP connection.")
-        """
         if self.__is_em27_responsive:
             logger.info("Successful ping to EM27.")
         else:
