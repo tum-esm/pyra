@@ -13,4 +13,6 @@ def test_enclosure_control():
            "spectrometer","ups_alert"])
     print(control.read_states_from_plc())
 
+    control.auto_set_power_spectrometer()
+
     assert(False)
