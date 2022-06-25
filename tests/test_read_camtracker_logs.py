@@ -12,4 +12,6 @@ def test_ct_measurement():
 
     print(log_line)
 
+    instance.valdiate_tracker_position()
+
     assert False

@@ -67,7 +67,7 @@ class SunTracking:
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
-        if not self.__valdiate_tracker_position:
+        if not self.valdiate_tracker_position:
             logger.info("Stop CamTracker. Preparing for reinitialization.")
             self.stop_sun_tracking_automation()
 
@@ -211,7 +211,7 @@ class SunTracking:
             return sun_intensity
 
     @property
-    def __valdiate_tracker_position(self):
+    def valdiate_tracker_position(self):
         """Reads motor offsets and compares it with defined threshold.
 
         Returns
