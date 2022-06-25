@@ -267,6 +267,9 @@ class VBDSD_Thread:
         Stop the thread, remove all images inside the directory
         "runtime_data/vbdsd" and set the state to 'null'
         """
+        #release cam connection
+        _VBDSD.cam.release()
+
         logger.info("Terminating thread")
         self.__process.terminate()
 
