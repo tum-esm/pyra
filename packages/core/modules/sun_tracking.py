@@ -223,10 +223,6 @@ class SunTracking:
         if None in tracker_status:
             return
 
-        print(tracker_status[3])
-        print(type(tracker_status[3]))
-        print(tracker_status[4])
-        print(type(tracker_status[4]))
 
         elev_offset = float(tracker_status[3])
         az_offeset = float(tracker_status[4])
