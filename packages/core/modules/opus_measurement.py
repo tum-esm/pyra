@@ -178,7 +178,7 @@ class OpusMeasurement:
         if "OK" in answer:
             logger.info("Stopped OPUS.exe")
         else:
-            logger.info("Could not stop OPUS as expected.")
+            logger.info("No response for OPUS.exe close request.")
 
     def __shutdown_dde_server(self):
         """Note the underlying DDE object (ie, Server, Topics and Items) are
