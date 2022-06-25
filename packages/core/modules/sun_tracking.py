@@ -133,7 +133,7 @@ class SunTracking:
         if os.path.exists(stop_file_path):
             os.remove(stop_file_path)
 
-    def __read_ct_log_learn_az_elev(self):
+    def read_ct_log_learn_az_elev(self):
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
 
         Returns a list of string parameter:
@@ -215,7 +215,7 @@ class SunTracking:
         False -> CamTracker lost sun position
         """
 
-        tracker_status = self.__read_ct_log_learn_az_elev()
+        tracker_status = self.read_ct_log_learn_az_elev()
 
         if None in tracker_status:
             return
