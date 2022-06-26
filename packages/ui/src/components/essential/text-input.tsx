@@ -12,7 +12,7 @@ export default function TextInput(props: {
                 value={props.value}
                 onChange={(e) => props.setValue(e.target.value)}
                 className={
-                    'shadow-sm rounded-md border-slate-300 text-sm w-full ' +
+                    'shadow-sm rounded-md border-slate-250 text-sm w-full ' +
                     'focus:ring-blue-500 focus:border-blue-500 ' +
                     (props.small ? 'w-12 text-center h-7 ' : 'flex-grow h-9 ')
                 }

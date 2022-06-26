@@ -24,8 +24,8 @@ export const configSlice = createSlice({
             state: customTypes.reduxStateConfig,
             action: { payload: customTypes.config | undefined }
         ) => {
-            state.central = action.payload;
-            state.local = action.payload;
+            state.central = JSON.parse(JSON.stringify(action.payload));
+            state.local = JSON.parse(JSON.stringify(action.payload));
             state.isDiffering = false;
         },
         setConfigsPartial: (
@@ -34,10 +34,13 @@ export const configSlice = createSlice({
         ) => {
             if (state.local !== undefined && state.central !== undefined) {
                 state.central = defaultsDeep(
-                    action.payload,
+                    JSON.parse(JSON.stringify(action.payload)),
                     JSON.parse(JSON.stringify(state.central))
                 );
-                state.local = defaultsDeep(action.payload, JSON.parse(JSON.stringify(state.local)));
+                state.local = defaultsDeep(
+                    JSON.parse(JSON.stringify(action.payload)),
+                    JSON.parse(JSON.stringify(state.local))
+                );
                 state.isDiffering = configIsDiffering(state);
             }
         },
@@ -45,7 +48,7 @@ export const configSlice = createSlice({
             state: customTypes.reduxStateConfig,
             action: { payload: customTypes.config | undefined }
         ) => {
-            state.local = action.payload;
+            state.local = JSON.parse(JSON.stringify(action.payload));
             state.isDiffering = configIsDiffering(state);
         },
         setLocalPartial: (
@@ -53,7 +56,10 @@ export const configSlice = createSlice({
             action: { payload: customTypes.partialConfig }
         ) => {
             if (state.local !== undefined) {
-                state.local = defaultsDeep(action.payload, JSON.parse(JSON.stringify(state.local)));
+                state.local = defaultsDeep(
+                    JSON.parse(JSON.stringify(action.payload)),
+                    JSON.parse(JSON.stringify(state.local))
+                );
                 state.isDiffering = configIsDiffering(state);
                 state.errorMessage = undefined;
             }
@@ -66,7 +72,7 @@ export const configSlice = createSlice({
             state: customTypes.reduxStateConfig,
             action: { payload: string | undefined }
         ) => {
-            state.errorMessage = action.payload;
+            state.errorMessage = JSON.parse(JSON.stringify(action.payload));
         },
     },
 });

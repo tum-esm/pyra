@@ -225,6 +225,14 @@ export default function App() {
         }
     }, [fileWatcherChecksums]);
 
+    // Fetch PLC State via CLI when PLC is controlled by user
+    useEffect(() => {
+        if (centralConfig?.tum_plc?.controlled_by_user) {
+            const interval = undefined; // TODO: Fetch plc state via cli
+            return () => clearInterval(interval);
+        }
+    }, [centralConfig?.tum_plc?.controlled_by_user]);
+
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
             {backendIntegrity === undefined && (
@@ -309,27 +317,29 @@ export default function App() {
                             let typeIcon = <></>;
                             switch (resolveValue(t.type, t)) {
                                 case 'error':
-                                    typeIconColor = 'text-red-400';
+                                    typeIconColor = 'text-red-300';
                                     typeIcon = ICONS.alert;
                                     break;
                                 case 'success':
-                                    typeIconColor = 'text-green-400';
+                                    typeIconColor = 'text-green-300';
                                     typeIcon = ICONS.check;
                                     break;
                             }
                             return (
                                 <div
-                                    className={'bg-white rounded-md shadow text-sm flex-row-center'}
+                                    className={
+                                        'bg-gray-900 rounded-md shadow text-sm flex-row-center overflow-hidden'
+                                    }
                                     style={{ opacity: t.visible ? 1 : 0 }}
                                 >
                                     <div
-                                        className={`w-6 h-6 p-1 ml-1 mr-0.5 ${typeIconColor} flex-shrink-0`}
+                                        className={`w-6 h-6 p-0.5 ml-1.5 mr-1 ${typeIconColor} flex-shrink-0`}
                                     >
                                         {typeIcon}
                                     </div>
                                     <div
                                         className={
-                                            'pr-3 py-2 leading-tight text-sm text-slate-700 max-w-md'
+                                            'pr-3 py-2 leading-tight text-sm text-gray-200 max-w-md'
                                         }
                                     >
                                         {resolveValue(t.message, t)}
@@ -337,8 +347,8 @@ export default function App() {
                                     <button
                                         onClick={() => toast.dismiss(resolveValue(t.id, t))}
                                         className={
-                                            'h-full flex-row-center rounded-r-md cursor-pointer flex-shrink-0 ' +
-                                            'bg-slate-100 hover:bg-slate-150 text-slate-600'
+                                            'h-full flex-row-center cursor-pointer flex-shrink-0 ' +
+                                            'bg-gray-800 hover:bg-gray-700 text-gray-200'
                                         }
                                     >
                                         <div className="w-6 h-6 mx-1">{ICONS.close}</div>

@@ -24,7 +24,7 @@ export default function Button(props: {
             break;
         case 'slate':
             colorClasses =
-                'elevated-panel text-slate-600 !bg-slate-150 hover:!bg-slate-200 hover:text-slate-950 ';
+                'elevated-panel text-slate-600 !bg-slate-75 hover:!bg-slate-200 hover:text-slate-950 ';
             dotColor = 'bg-slate-300 ';
             break;
         case 'green':
@@ -37,7 +37,8 @@ export default function Button(props: {
             break;
         case 'flat-blue':
             colorClasses =
-                'bg-blue-75 rounded-md text-blue-800 ' + 'hover:bg-blue-150 hover:text-blue-950 ';
+                'bg-green-100 rounded-md text-green-800 ' +
+                'hover:bg-blue-150 hover:text-blue-950 border border-green-300 ';
             dotColor = 'bg-blue-300 ';
             break;
     }
@@ -52,7 +53,7 @@ export default function Button(props: {
                 'text-sm whitespace-nowrap text-center font-medium ' +
                 'relative ' +
                 colorClasses +
-                (disabled ? 'cursor-not-allowed ' : 'cursor-pointer ') +
+                (disabled ? ' cursor-not-allowed ' : ' cursor-pointer ') +
                 className
             }
         >

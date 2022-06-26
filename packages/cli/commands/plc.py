@@ -26,15 +26,15 @@ def get_enclosure():
     enclosure = None
 
     try:
-        assert _CONFIG["tum_plc"] is not None, "plc not configured"
-        assert _CONFIG["tum_plc"]["controlled_by_user"], "plc is controlled by automation"
+        assert _CONFIG["tum_plc"] is not None, "PLC not configured"
+        assert _CONFIG["tum_plc"]["controlled_by_user"], "PLC is controlled by automation"
         enclosure = EnclosureControl(_CONFIG)
         if not enclosure.plc_connect():
             raise TimeOutException()
     except AssertionError as e:
-        error_handler(f"Failed: {e}")
+        error_handler(f"{e}")
     except TimeOutException:
-        error_handler("Failed: Could not reach PLC")
+        error_handler("Could not reach PLC")
 
     return enclosure
 

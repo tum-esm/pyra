@@ -40,6 +40,12 @@ const backend = {
     getState: async (): Promise<ChildProcess> => {
         return await callCLI(['state', 'get']);
     },
+    readFromPLC: async (): Promise<ChildProcess> => {
+        return await callCLI(['plc', 'read']);
+    },
+    writeToPLC: async (command: string[]): Promise<ChildProcess> => {
+        return await callCLI(['plc', ...command]);
+    },
 };
 
 export default backend;

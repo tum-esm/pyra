@@ -16,12 +16,13 @@ const customColors = {
         900: '#1e3a8a',
         950: '#0f1d45',
     },
-    slate: {
+    gray: {
         50: '#f8fafc',
         75: '#f4f7fa',
         100: '#f1f5f9',
         150: '#e9eef4',
         200: '#e2e8f0',
+        250: '#d6dee8',
         300: '#cbd5e1',
         350: '#afbccc',
         400: '#94a3b8',

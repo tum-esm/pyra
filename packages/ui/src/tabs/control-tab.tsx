@@ -1,7 +1,7 @@
 import { backend, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
 import { useState } from 'react';
-import { customTypes } from '../custom-types';
+import { customTypes, coreState } from '../custom-types';
 import { ICONS } from '../assets';
 import toast from 'react-hot-toast';
 
@@ -27,7 +27,7 @@ function VariableBlock(props: {
                 <div className="flex-grow flex-col-right gap-y-1">
                     {props.actions.map((a) => (
                         <essentialComponents.Button
-                            variant="flat-blue"
+                            variant="slate"
                             onClick={a.callback}
                             key={a.label}
                             spinner={a.spinner}
@@ -51,10 +51,15 @@ export default function ControlTab() {
     const setConfigsPartial = (c: customTypes.partialConfig) =>
         dispatch(reduxUtils.configActions.setConfigsPartial(c));
 
-    const [isSaving, setIsSaving] = useState(false);
+    const setCoreStatePartial = (c: customTypes.partialCoreState) =>
+        dispatch(reduxUtils.coreStateActions.setPartial(c));
+
+    const [isLoadingManualToggle, setIsLoadingManualToggle] = useState(false);
+    const [isLoadingReset, setIsLoadingReset] = useState(false);
+    const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
 
     async function setPlcIsControlledByUser(v: boolean) {
-        setIsSaving(true);
+        setIsLoadingManualToggle(true);
         const update = { tum_plc: { controlled_by_user: v } };
         let result = await backend.updateConfig(update);
         if (!result.stdout.includes('Updated config file')) {
@@ -65,7 +70,29 @@ export default function ControlTab() {
         } else {
             setConfigsPartial(update);
         }
-        setIsSaving(false);
+        setIsLoadingManualToggle(false);
+    }
+
+    async function runPlcWriteCommand(command: string[]) {
+        const result = await backend.writeToPLC(command);
+        if (result.stdout.replace(/[\n\s]*/g, '') !== 'Ok') {
+            if (result.code === 0) {
+                toast.error(`Could not write to PLC: ${result.stdout}`);
+            } else {
+                toast.error('Could not write to PLC - details in console');
+                console.error(`Could not write to PLC, processResults = ${JSON.stringify(result)}`);
+            }
+            throw '';
+        }
+    }
+
+    async function reset() {
+        setIsLoadingReset(true);
+        try {
+            await runPlcWriteCommand(['write-reset']);
+            setCoreStatePartial({ enclosure_plc_readings: { state: { reset_needed: false } } });
+        } catch {}
+        setIsLoadingReset(false);
     }
 
     if (coreState === undefined || plcIsControlledByUser === undefined) {
@@ -80,8 +107,8 @@ export default function ControlTab() {
                     values={['user', 'automation']}
                     setValue={(v) => setPlcIsControlledByUser(v === 'user')}
                 />
-                {isSaving && <essentialComponents.Spinner />}
-                {!isSaving && (
+                {isLoadingManualToggle && <essentialComponents.Spinner />}
+                {!isLoadingManualToggle && (
                     <div className="text-sm text-gray-500 flex-row-center">
                         <div className="w-4 h-4 mr-1">{ICONS.info}</div>
                         {plcIsControlledByUser && 'The automation will skip all PLC related logic'}
@@ -107,7 +134,7 @@ export default function ControlTab() {
                                 : 'No',
                         },
                     ]}
-                    actions={[{ label: 'reset now', callback: () => {}, spinner: false }]}
+                    actions={[{ label: 'reset now', callback: reset, spinner: isLoadingReset }]}
                 />
                 <VariableBlock
                     label="Rain Detection"

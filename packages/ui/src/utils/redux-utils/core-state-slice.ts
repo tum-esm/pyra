@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { defaultsDeep } from 'lodash';
 import { customTypes } from '../../custom-types';
 
 export const coreStateSlice = createSlice({
@@ -13,6 +14,15 @@ export const coreStateSlice = createSlice({
             action: { payload: customTypes.coreState }
         ) => {
             state.content = JSON.parse(JSON.stringify(action.payload));
+        },
+        setPartial: (
+            state: customTypes.reduxStateCoreState,
+            action: { payload: customTypes.partialCoreState }
+        ) => {
+            state.content = defaultsDeep(
+                JSON.parse(JSON.stringify(action.payload)),
+                JSON.parse(JSON.stringify(state.content))
+            );
         },
         setLoading: (state: customTypes.reduxStateCoreState, action: { payload: boolean }) => {
             state.loading = action.payload;
