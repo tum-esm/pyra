@@ -57,6 +57,14 @@ export default function ControlTab() {
     const [isLoadingManualToggle, setIsLoadingManualToggle] = useState(false);
     const [isLoadingReset, setIsLoadingReset] = useState(false);
     const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
+    const [isLoadingSyncTotracker, setIsLoadingSyncTotracker] = useState(false);
+    const [isLoadingAutoTemperature, setIsLoadingAutoTemperature] = useState(false);
+
+    const [isLoadingPowerHeater, setIsLoadingPowerHeater] = useState(false);
+    const [isLoadingPowerCamera, setIsLoadingPowerCamera] = useState(false);
+    const [isLoadingPowerRouter, setIsLoadingPowerRouter] = useState(false);
+    const [isLoadingPowerSpectrometer, setIsLoadingPowerSpectrometer] = useState(false);
+    const [isLoadingPowerComputer, setIsLoadingPowerComputer] = useState(false);
 
     async function setPlcIsControlledByUser(v: boolean) {
         setIsLoadingManualToggle(true);
@@ -108,9 +116,104 @@ export default function ControlTab() {
         });
     }
 
+    // TODO: implement UI for "move to angle"
+    // TODO: connect UI for "move to angle"
+
+    async function toggleSyncToTracker() {
+        if (coreState !== undefined) {
+            const newValue = !coreState.enclosure_plc_readings.control.sync_to_tracker;
+            await runPlcWriteCommand(
+                ['write-sync-to-tracker', JSON.stringify(newValue)],
+                setIsLoadingSyncTotracker,
+                {
+                    control: { sync_to_tracker: newValue },
+                }
+            );
+        }
+    }
+
+    async function toggleAutoTemperature() {
+        if (coreState !== undefined) {
+            const newValue = !coreState.enclosure_plc_readings.control.auto_temp_mode;
+            await runPlcWriteCommand(
+                ['write-auto-temperature', JSON.stringify(newValue)],
+                setIsLoadingAutoTemperature,
+                {
+                    control: { auto_temp_mode: newValue },
+                }
+            );
+        }
+    }
+
+    async function togglePowerHeater() {
+        if (coreState !== undefined) {
+            const newValue = !coreState.enclosure_plc_readings.power.heater;
+            await runPlcWriteCommand(
+                ['write-power-heater', JSON.stringify(newValue)],
+                setIsLoadingPowerHeater,
+                {
+                    power: { heater: newValue },
+                }
+            );
+        }
+    }
+
+    async function togglePowerCamera() {
+        if (coreState !== undefined) {
+            const newValue = !coreState.enclosure_plc_readings.power.camera;
+            await runPlcWriteCommand(
+                ['write-power-heater', JSON.stringify(newValue)],
+                setIsLoadingPowerCamera,
+                {
+                    power: { heater: newValue },
+                }
+            );
+        }
+    }
+
+    async function togglePowerRouter() {
+        if (coreState !== undefined) {
+            const newValue = !coreState.enclosure_plc_readings.power.router;
+            await runPlcWriteCommand(
+                ['write-power-router', JSON.stringify(newValue)],
+                setIsLoadingPowerRouter,
+                {
+                    power: { router: newValue },
+                }
+            );
+        }
+    }
+
+    async function togglePowerSpectrometer() {
+        if (coreState !== undefined) {
+            const newValue = !coreState.enclosure_plc_readings.power.spectrometer;
+            await runPlcWriteCommand(
+                ['write-power-spectrometer', JSON.stringify(newValue)],
+                setIsLoadingPowerSpectrometer,
+                {
+                    power: { spectrometer: newValue },
+                }
+            );
+        }
+    }
+
+    async function togglePowerComputer() {
+        if (coreState !== undefined) {
+            const newValue = coreState.enclosure_plc_readings.power.computer;
+            await runPlcWriteCommand(
+                ['write-power-computer', JSON.stringify(newValue)],
+                setIsLoadingPowerComputer,
+                {
+                    power: { computer: newValue },
+                }
+            );
+        }
+    }
+
     if (coreState === undefined || plcIsControlledByUser === undefined) {
         return <></>;
     }
+
     return (
         <div className={'w-full relative px-6 py-6 flex-col-left gap-y-4'}>
             <div className="flex-row-left gap-x-2">
@@ -191,8 +294,8 @@ export default function ControlTab() {
                             label: coreState.enclosure_plc_readings.control.sync_to_tracker
                                 ? 'do not sync to tracker'
                                 : 'sync to tracker',
-                            callback: () => {},
-                            spinner: false,
+                            callback: toggleSyncToTracker,
+                            spinner: isLoadingSyncTotracker,
                         },
                     ]}
                 />
@@ -227,15 +330,15 @@ export default function ControlTab() {
                             label: coreState.enclosure_plc_readings.control.auto_temp_mode
                                 ? 'disable auto temperature'
                                 : 'enable auto temperature',
-                            callback: () => {},
-                            spinner: false,
+                            callback: toggleAutoTemperature,
+                            spinner: isLoadingAutoTemperature,
                         },
                         {
                             label: coreState.enclosure_plc_readings.power.heater
                                 ? 'disable heater power'
                                 : 'enable heater power',
-                            callback: () => {},
-                            spinner: false,
+                            callback: togglePowerHeater,
+                            spinner: isLoadingPowerHeater,
                         },
                     ]}
                 />
@@ -270,29 +373,29 @@ export default function ControlTab() {
                             label: coreState.enclosure_plc_readings.power.camera
                                 ? 'disable camera power'
                                 : 'enable camera power',
-                            callback: () => {},
-                            spinner: false,
+                            callback: togglePowerCamera,
+                            spinner: isLoadingPowerCamera,
                         },
                         {
                             label: coreState.enclosure_plc_readings.power.router
                                 ? 'disable router power'
                                 : 'enable router power',
-                            callback: () => {},
-                            spinner: false,
+                            callback: togglePowerRouter,
+                            spinner: isLoadingPowerRouter,
                         },
                         {
                             label: coreState.enclosure_plc_readings.power.spectrometer
                                 ? 'disable spectrometer power'
                                 : 'enable spectrometer power',
-                            callback: () => {},
-                            spinner: false,
+                            callback: togglePowerSpectrometer,
+                            spinner: isLoadingPowerSpectrometer,
                         },
                         {
                             label: coreState.enclosure_plc_readings.power.computer
                                 ? 'disable computer power'
                                 : 'enable computer power',
-                            callback: () => {},
-                            spinner: false,
+                            callback: togglePowerComputer,
+                            spinner: isLoadingPowerComputer,
                         },
                     ]}
                 />
