@@ -149,31 +149,40 @@ export namespace customTypes {
     export type coreState = {
         automation_should_be_running: boolean;
         enclosure_plc_readings: {
-            actors: {
-                fan_speed: null | number;
-                current_angle: null | number;
-            };
-            control: {
-                auto_temp_mode: null | boolean;
-                manual_control: null | boolean;
-                manual_temp_mode: null | boolean;
-            };
-            sensors: {
-                humidity: null | number;
-                temperature: null | number;
-            };
-            state: {
-                camera: null | boolean;
-                computer: null | boolean;
-                cover_closed: null | boolean;
-                heater: null | boolean;
-                motor_failed: null | boolean;
-                rain: null | boolean;
-                reset_needed: null | boolean;
-                router: null | boolean;
-                spectrometer: null | boolean;
-                ups_alert: null | boolean;
-            };
+            "actors": {
+                "fan_speed": number,
+                "current_angle": number
+            },
+            "control": {
+                "auto_temp_mode": boolean,
+                "manual_control": boolean,
+                "manual_temp_mode": boolean,
+                "sync_to_tracker": boolean
+            },
+            "sensors": {
+                "humidity": number,
+                "temperature": number
+            },
+            "state": {
+                "cover_closed": boolean,
+                "motor_failed": boolean,
+                "rain": boolean,
+                "reset_needed": boolean,
+                "ups_alert": boolean
+            },
+            "power": {
+                "camera": boolean,
+                "computer": boolean,
+                "heater": boolean,
+                "router": boolean,
+                "spectrometer": boolean
+            },
+            "connections": {
+                "camera": boolean,
+                "computer": boolean,
+                "heater": boolean,
+                "router": boolean,
+                "spectrometer": boolean
+            }
         };
-    };
 }
