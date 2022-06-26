@@ -7,7 +7,7 @@
         "distDir": "../dist"
     },
     "package": {
-        "productName": "pyra-ui",
+        "productName": "Pyra UI",
         "version": "4.0.1"
     },
     "tauri": {
@@ -88,7 +88,7 @@
             {
                 "fullscreen": false,
                 "resizable": true,
-                "title": "Pyra 4 UI",
+                "title": "Pyra UI",
                 "height": 500,
                 "minHeight": 500,
                 "width": 900,
