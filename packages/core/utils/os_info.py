@@ -89,5 +89,5 @@ class OSInfo:
         for p in psutil.process_iter():
             if p.name() == process_name:
                 return p.status()
-            else:
-                return "not_found"
+            
+        return "not_found"

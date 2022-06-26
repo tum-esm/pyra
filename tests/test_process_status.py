@@ -9,8 +9,11 @@ def test_ct_measurement():
     # print(control.continuous_readings())
     # assert(False)
 
-    process_name =
+    process_name = "CamTracker_3_9_2015_02_03.exe"
+    
     status = OSInfo.check_process_status(process_name)
+
+    print(status)
 
 
     assert False
