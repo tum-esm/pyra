@@ -5,6 +5,42 @@ import { customTypes } from '../custom-types';
 import { ICONS } from '../assets';
 import toast from 'react-hot-toast';
 
+function VariableBlock(props: {
+    label: string;
+    variables: { key: string; value: string | number }[];
+    actions: { label: string; callback: () => void; spinner: boolean }[];
+}) {
+    return (
+        <div className="relative flex overflow-hidden elevated-panel">
+            <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-white rounded-l bg-slate-900 flex-row-center">
+                {props.label}
+            </div>
+            <div className="flex-grow py-3 pl-4 pr-3 flex-row-left gap-x-4">
+                <div className="flex-col-left gap-y-0.5">
+                    {props.variables.map((v) => (
+                        <div key={v.key} className="flex-row-center whitespace-nowrap">
+                            <div className="w-40">{v.key}:</div>{' '}
+                            <span className="font-semibold">{v.value}</span>
+                        </div>
+                    ))}
+                </div>
+                <div className="flex-grow flex-col-right gap-y-1">
+                    {props.actions.map((a) => (
+                        <essentialComponents.Button
+                            variant="flat-blue"
+                            onClick={a.callback}
+                            key={a.label}
+                            spinner={a.spinner}
+                            className="w-52"
+                        >
+                            {a.label}
+                        </essentialComponents.Button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
 export default function ControlTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.content);
     const plcIsControlledByUser = reduxUtils.useTypedSelector(
@@ -54,41 +90,166 @@ export default function ControlTab() {
                 )}
             </div>
             <div className="w-full h-px my-0 bg-slate-300" />
-            <div className="flex flex-col w-full text-sm gap-y-4">
-                <div className="relative flex overflow-hidden elevated-panel">
-                    <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-white rounded-l bg-slate-900 flex-row-center">
-                        Errors
-                    </div>
-                    <div className="flex-grow px-4 py-2 flex-row-left gap-x-4">
-                        <div className="flex-col-left">
-                            <div>
-                                Reset needed:{' '}
-                                <span className="text-base font-medium">
-                                    {coreState.enclosure_plc_readings.state.reset_needed
-                                        ? 'Yes'
-                                        : 'No'}
-                                </span>
-                            </div>
-                            <div>
-                                Motor failed:{' '}
-                                <span className="text-base font-medium">
-                                    {coreState.enclosure_plc_readings.state.motor_failed
-                                        ? 'Yes'
-                                        : 'No'}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex-grow flex-col-right">
-                            <essentialComponents.Button
-                                variant="flat-blue"
-                                onClick={() => {}}
-                                spinner
-                            >
-                                reset now
-                            </essentialComponents.Button>
-                        </div>
-                    </div>
-                </div>
+            <div className="flex flex-col w-full text-sm gap-y-2">
+                <VariableBlock
+                    label="Errors"
+                    variables={[
+                        {
+                            key: 'Reset needed',
+                            value: coreState.enclosure_plc_readings.state.reset_needed
+                                ? 'Yes'
+                                : 'No',
+                        },
+                        {
+                            key: 'Motor failed',
+                            value: coreState.enclosure_plc_readings.state.motor_failed
+                                ? 'Yes'
+                                : 'No',
+                        },
+                    ]}
+                    actions={[{ label: 'reset now', callback: () => {}, spinner: false }]}
+                />
+                <VariableBlock
+                    label="Rain Detection"
+                    variables={[
+                        {
+                            key: 'Cover is closed',
+                            value: coreState.enclosure_plc_readings.state.cover_closed
+                                ? 'Yes'
+                                : 'No',
+                        },
+                        {
+                            key: 'Rain detected',
+                            value: coreState.enclosure_plc_readings.state.rain ? 'Yes' : 'No',
+                        },
+                    ]}
+                    actions={[{ label: 'force cover close', callback: () => {}, spinner: false }]}
+                />
+                <VariableBlock
+                    label="Cover Angle"
+                    variables={[
+                        {
+                            key: 'Current cover angle',
+                            value: `${coreState.enclosure_plc_readings.actors.current_angle} °`,
+                        },
+                        {
+                            key: 'Sync to CamTracker',
+                            value: coreState.enclosure_plc_readings.control.sync_to_tracker
+                                ? 'Yes'
+                                : 'No',
+                        },
+                    ]}
+                    actions={[
+                        { label: 'move to angle', callback: () => {}, spinner: false },
+                        {
+                            label: coreState.enclosure_plc_readings.control.sync_to_tracker
+                                ? 'do not sync to tracker'
+                                : 'sync to tracker',
+                            callback: () => {},
+                            spinner: false,
+                        },
+                    ]}
+                />
+                <VariableBlock
+                    label="Temperature"
+                    variables={[
+                        {
+                            key: 'Temperature',
+                            value: `${coreState.enclosure_plc_readings.sensors.temperature} °C`,
+                        },
+                        {
+                            key: 'Humidity',
+                            value: `${coreState.enclosure_plc_readings.sensors.humidity} %`,
+                        },
+                        {
+                            key: 'Fan Speed',
+                            value: `${coreState.enclosure_plc_readings.actors.fan_speed} %`,
+                        },
+                        {
+                            key: 'Auto temperature',
+                            value: coreState.enclosure_plc_readings.control.auto_temp_mode
+                                ? 'Yes'
+                                : 'No',
+                        },
+                        {
+                            key: 'Heater power',
+                            value: coreState.enclosure_plc_readings.power.heater ? 'Yes' : 'No',
+                        },
+                    ]}
+                    actions={[
+                        {
+                            label: coreState.enclosure_plc_readings.control.auto_temp_mode
+                                ? 'disable auto temperature'
+                                : 'enable auto temperature',
+                            callback: () => {},
+                            spinner: false,
+                        },
+                        {
+                            label: coreState.enclosure_plc_readings.power.heater
+                                ? 'disable heater power'
+                                : 'enable heater power',
+                            callback: () => {},
+                            spinner: false,
+                        },
+                    ]}
+                />
+                <VariableBlock
+                    label="Power"
+                    variables={[
+                        {
+                            key: 'UPS alert',
+                            value: coreState.enclosure_plc_readings.state.ups_alert ? 'Yes' : 'No',
+                        },
+                        {
+                            key: 'Camera Power',
+                            value: coreState.enclosure_plc_readings.power.camera ? 'Yes' : 'No',
+                        },
+                        {
+                            key: 'Router Power',
+                            value: coreState.enclosure_plc_readings.power.router ? 'Yes' : 'No',
+                        },
+                        {
+                            key: 'Spectrometer Power',
+                            value: coreState.enclosure_plc_readings.power.spectrometer
+                                ? 'Yes'
+                                : 'No',
+                        },
+                        {
+                            key: 'Computer Power',
+                            value: coreState.enclosure_plc_readings.power.computer ? 'Yes' : 'No',
+                        },
+                    ]}
+                    actions={[
+                        {
+                            label: coreState.enclosure_plc_readings.power.camera
+                                ? 'disable camera power'
+                                : 'enable camera power',
+                            callback: () => {},
+                            spinner: false,
+                        },
+                        {
+                            label: coreState.enclosure_plc_readings.power.router
+                                ? 'disable router power'
+                                : 'enable router power',
+                            callback: () => {},
+                            spinner: false,
+                        },
+                        {
+                            label: coreState.enclosure_plc_readings.power.spectrometer
+                                ? 'disable spectrometer power'
+                                : 'enable spectrometer power',
+                            callback: () => {},
+                            spinner: false,
+                        },
+                        {
+                            label: coreState.enclosure_plc_readings.power.computer
+                                ? 'disable computer power'
+                                : 'enable computer power',
+                            callback: () => {},
+                            spinner: false,
+                        },
+                    ]}
+                />
             </div>
         </div>
     );

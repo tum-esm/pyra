@@ -37,7 +37,7 @@ export default function Button(props: {
             break;
         case 'flat-blue':
             colorClasses =
-                'bg-blue-100 rounded-md text-blue-900 ' + 'hover:bg-blue-150 hover:text-blue-950 ';
+                'bg-blue-75 rounded-md text-blue-800 ' + 'hover:bg-blue-150 hover:text-blue-950 ';
             dotColor = 'bg-blue-300 ';
             break;
     }
