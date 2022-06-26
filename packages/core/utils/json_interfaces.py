@@ -46,7 +46,27 @@ class StateInterface:
             json.dump(
                 {
                     "vbdsd_indicates_good_conditions": None,
-                    "enclosure_plc_readings": [],
+                    "enclosure_plc_readings": {
+                        "actors": {"fan_speed": None, "current_angle": None},
+                        "control": {
+                            "auto_temp_mode": None,
+                            "manual_control": None,
+                            "manual_temp_mode": None,
+                        },
+                        "sensors": {"humidity": None, "temperature": None},
+                        "state": {
+                            "camera": None,
+                            "computer": None,
+                            "cover_closed": None,
+                            "heater": None,
+                            "motor_failed": None,
+                            "rain": None,
+                            "reset_needed": None,
+                            "router": None,
+                            "spectrometer": None,
+                            "ups_alert": None,
+                        },
+                    },
                     "automation_should_be_running": False,
                 },
                 f,

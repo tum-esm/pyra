@@ -310,25 +310,51 @@ class EnclosureControl:
         r: list
         """
         # TODO: This functions needs way to long to execute. Solution?
-        return [
-            self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
-            self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["auto_temp_mode"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["manual_control"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["manual_temp_mode"]),
-            self.plc_read_int(self._PLC_INTERFACE.sensors["humidity"]),
-            self.plc_read_int(self._PLC_INTERFACE.sensors["temperature"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["camera"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["computer"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["heater"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["motor_failed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["rain"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["router"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["spectrometer"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["ups_alert"]),
-        ]
+        return {
+            "actors": {
+                "fan_speed": self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
+                "current_angle": self.plc_read_int(
+                    self._PLC_INTERFACE.actors["current_angle"]
+                ),
+            },
+            "control": {
+                "auto_temp_mode": self.plc_read_bool(
+                    self._PLC_INTERFACE.control["auto_temp_mode"]
+                ),
+                "manual_control": self.plc_read_bool(
+                    self._PLC_INTERFACE.control["manual_control"]
+                ),
+                "manual_temp_mode": self.plc_read_bool(
+                    self._PLC_INTERFACE.control["manual_temp_mode"]
+                ),
+            },
+            "sensors": {
+                "humidity": self.plc_read_int(self._PLC_INTERFACE.sensors["humidity"]),
+                "temperature": self.plc_read_int(
+                    self._PLC_INTERFACE.sensors["temperature"]
+                ),
+            },
+            "state": {
+                "camera": self.plc_read_bool(self._PLC_INTERFACE.state["camera"]),
+                "computer": self.plc_read_bool(self._PLC_INTERFACE.state["computer"]),
+                "cover_closed": self.plc_read_bool(
+                    self._PLC_INTERFACE.state["cover_closed"]
+                ),
+                "heater": self.plc_read_bool(self._PLC_INTERFACE.state["heater"]),
+                "motor_failed": self.plc_read_bool(
+                    self._PLC_INTERFACE.state["motor_failed"]
+                ),
+                "rain": self.plc_read_bool(self._PLC_INTERFACE.state["rain"]),
+                "reset_needed": self.plc_read_bool(
+                    self._PLC_INTERFACE.state["reset_needed"]
+                ),
+                "router": self.plc_read_bool(self._PLC_INTERFACE.state["router"]),
+                "spectrometer": self.plc_read_bool(
+                    self._PLC_INTERFACE.state["spectrometer"]
+                ),
+                "ups_alert": self.plc_read_bool(self._PLC_INTERFACE.state["ups_alert"]),
+            },
+        }
 
     def auto_set_power_spectrometer(self):
         """
