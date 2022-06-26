@@ -105,7 +105,19 @@ def _write_plc_close_cover():
     try:
         enclosure = get_enclosure()
         enclosure.force_cover_close()
+        success_handler("Ok")
+    except (AssertionError, CoverError) as e:
+        error_handler(f"Failed: {e}")
 
+
+def set_boolean_plc_state(state, setResolver):
+    try:
+        assert state in ["true", "false"], 'state has to be either "true" or "false"'
+
+        enclosure = get_enclosure()
+        setResolver(enclosure)(state == "true")
+
+        # TODO: wait until plc state has actually changed
         success_handler("Ok")
     except (AssertionError, CoverError) as e:
         error_handler(f"Failed: {e}")
@@ -114,38 +126,43 @@ def _write_plc_close_cover():
 @click.command(help="Run plc function 'set_sync_to_tracker()'")
 @click.argument("state")
 def _write_plc_sync_to_tracker(state):
-    try:
-        assert state in ["true", "false"], 'state has to be either "true" or "false"'
-
-        enclosure = get_enclosure()
-        enclosure.set_sync_to_tracker(state == "true")
-
-        # TODO: wait until plc state has actually changed
-        success_handler("Ok")
-    except (AssertionError, CoverError) as e:
-        error_handler(f"Failed: {e}")
+    set_boolean_plc_state(state, lambda e: e.set_sync_to_tracker)
 
 
 @click.command(help="Run plc function 'set_auto_temperature()'")
 @click.argument("state")
 def _write_plc_auto_temperature(state):
-    try:
-        assert state in ["true", "false"], 'state has to be either "true" or "false"'
-
-        enclosure = get_enclosure()
-        enclosure.set_auto_temperature(state == "true")
-
-        # TODO: wait until plc state has actually changed
-        success_handler("Ok")
-    except (AssertionError, CoverError) as e:
-        error_handler(f"Failed: {e}")
+    set_boolean_plc_state(state, lambda e: e.set_auto_temperature)
 
 
-# TODO: _write_plc_heater_power
-# TODO: _write_plc_camera_power
-# TODO: _write_plc_router_power
-# TODO: _write_plc_spectrometer_power
-# TODO: _write_plc_computer_power
+@click.command(help="Run plc function 'set_power_heater()'")
+@click.argument("state")
+def _write_plc_power_heater(state):
+    set_boolean_plc_state(state, lambda e: e.set_power_heater)
+
+
+@click.command(help="Run plc function 'set_power_heater()'")
+@click.argument("state")
+def _write_plc_power_camera(state):
+    set_boolean_plc_state(state, lambda e: e.set_power_camera)
+
+
+@click.command(help="Run plc function 'set_power_router()'")
+@click.argument("state")
+def _write_plc_power_router(state):
+    set_boolean_plc_state(state, lambda e: e.set_power_router)
+
+
+@click.command(help="Run plc function 'set_power_spectrometer()'")
+@click.argument("state")
+def _write_plc_power_spectrometer(state):
+    set_boolean_plc_state(state, lambda e: e.set_power_spectrometer)
+
+
+@click.command(help="Run plc function 'set_power_computer()'")
+@click.argument("state")
+def _write_plc_power_computer(state):
+    set_boolean_plc_state(state, lambda e: e.set_power_computer)
 
 
 @click.group()
@@ -159,3 +176,8 @@ plc_command_group.add_command(_write_plc_move_cover, name="write-move-cover")
 plc_command_group.add_command(_write_plc_close_cover, name="write-close-cover")
 plc_command_group.add_command(_write_plc_sync_to_tracker, name="sync-to-tracker")
 plc_command_group.add_command(_write_plc_auto_temperature, name="auto-temperature")
+plc_command_group.add_command(_write_plc_power_heater, name="power-heater")
+plc_command_group.add_command(_write_plc_power_camera, name="power-camera")
+plc_command_group.add_command(_write_plc_power_router, name="power-router")
+plc_command_group.add_command(_write_plc_power_spectrometer, name="power-spectrometer")
+plc_command_group.add_command(_write_plc_power_computer, name="power-computer")
