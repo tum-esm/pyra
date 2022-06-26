@@ -66,43 +66,58 @@ class MeasurementConditions:
         # raises error if system battery is below 20%
         OSInfo.validate_system_battery()
 
-        #TODO: Move measurement_decision to state.json and reset it with core start
+
         decision = self._CONFIG["measurement_decision"]
         triggers = self._CONFIG["measurement_triggers"]
 
         if decision["mode"] == "manual":
             automation_should_be_running = decision["manual_decision_result"]
-            #TODO: If automation is already running use this as the starting point
+            logger.info("Decision mode for measurements switched to manual.")
 
         if decision["mode"] == "cli":
             automation_should_be_running = decision["cli_decision_result"]
+            logger.info("Decision mode for measurements switched to cli.")
 
         if decision["mode"] == "automatic":
-            automation_should_be_running = True
+            logger.info("Decision mode for measurements switched to automatic.")
+            #needs to be false or it stays true, if no triggeres are considered.
+            automation_should_be_running = False
+
 
             # consider sun elevation
             if triggers["consider_sun_elevation"]:
+                logger.info("Sun elevation as a trigger is evaluated.")
                 current_sun_elevation = Astronomy.get_current_sun_elevation()
-                sun_is_too_low = current_sun_elevation < triggers["min_sun_elevation"] * astropy_units.deg
-                sun_is_too_high = current_sun_elevation > triggers["max_sun_elevation"] * astropy_units.deg
-                if sun_is_too_low or sun_is_too_high:
-                    automation_should_be_running &= False
+                sun_above_threshold = current_sun_elevation > triggers["min_sun_elevation"] * astropy_units.deg
+                if sun_above_threshold:
+                    logger.debug("Sun angle is above threshold.")
+                    automation_should_be_running = True
+                if not sun_above_threshold:
+                    logger.debug("Sun angle is below threshold.")
+                    automation_should_be_running = False
 
             # consider daytime
             if triggers["consider_time"]:
+                logger.info("Time as a trigger is considered.")
                 current_time, start_time, end_time = get_times_from_tuples(triggers)
-                time_is_too_early = current_time < start_time
-                time_is_too_late = current_time > end_time
-                if time_is_too_early or time_is_too_late:
-                    automation_should_be_running &= False
+                if current_time > start_time and current_time < end_time:
+                    logger.debug("Time conditions are fulfilled.")
+                    automation_should_be_running = True
+                if current_time < start_time or current_time > end_time:
+                    logger.debug("Time conditions are not fulfilled.")
+                    automation_should_be_running = False
 
             # consider evaluation from the VBDSD
             if triggers["consider_vbdsd"] and (self._CONFIG["vbdsd"] is not None):
+                logger.info("VBDSD as a trigger is considered.")
                 # Don't consider VBDSD if it does not have enough
                 # images yet, which will result in a state of "None"
+                if StateInterface.read()["vbdsd_indicates_good_conditions"] == True:
+                    logger.debug("VBDSD indicates good sun conditions.")
+                    automation_should_be_running = True
                 if StateInterface.read()["vbdsd_indicates_good_conditions"] == False:
-                    automation_should_be_running &= False
+                    logger.debug("VBDSD indicates bad sun conditions.")
+                    automation_should_be_running = False
 
-        StateInterface.update(
-            {"automation_should_be_running": automation_should_be_running}
-        )
+        logger.info("Automation should be running for this run is set to: {}.".format(automation_should_be_running))
+        StateInterface.update({"automation_should_be_running": automation_should_be_running})
