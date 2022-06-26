@@ -63,10 +63,11 @@ class SunTracking:
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
-        if not self.valdiate_tracker_position():
-            logger.info("CamTracker Motor Position is over threshold.")
-            logger.info("Stop CamTracker. Preparing for reinitialization.")
-            self.stop_sun_tracking_automation()
+        if self.ct_application_running():
+            if not self.valdiate_tracker_position():
+                logger.info("CamTracker Motor Position is over threshold.")
+                logger.info("Stop CamTracker. Preparing for reinitialization.")
+                self.stop_sun_tracking_automation()
 
 
     def ct_application_running(self):
