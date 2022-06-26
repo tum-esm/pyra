@@ -119,5 +119,5 @@ class MeasurementConditions:
                     logger.debug("VBDSD indicates bad sun conditions.")
                     automation_should_be_running = False
 
-        logger.info("Automation should be running for this run is set to: {}.".format(automation_should_be_running))
+        logger.info("Measurements should be running is set to: {}.".format(automation_should_be_running))
         StateInterface.update({"automation_should_be_running": automation_should_be_running})
