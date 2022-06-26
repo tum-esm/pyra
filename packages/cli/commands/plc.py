@@ -3,7 +3,7 @@ import time
 import click
 import os
 import sys
-from packages.core.modules.enclosure_control import EnclosureControl
+from packages.core.modules.enclosure_control import CoverError, EnclosureControl
 from packages.core.utils.json_interfaces import ConfigInterface
 
 dir = os.path.dirname
@@ -66,7 +66,7 @@ def _write_plc_reset():
 
         success_handler("Ok")
     except AssertionError as e:
-        error_handler(e)
+        error_handler(f"Failed: {e}")
 
 
 @click.command(help="Run plc function 'move_cover()'")
@@ -97,13 +97,50 @@ def _write_plc_move_cover(angle):
 
         success_handler("Ok")
     except AssertionError as e:
-        error_handler(e)
+        error_handler(f"Failed: {e}")
 
 
-# TODO: _write_plc_force_cover_close
-# TODO: _write_plc_move_cover
-# TODO: _write_plc_sync_to_tracker
-# TODO: _write_plc_auto_temperature
+@click.command(help="Run plc function 'force_cover_close()'")
+def _write_plc_close_cover():
+    try:
+        enclosure = get_enclosure()
+        enclosure.force_cover_close()
+
+        success_handler("Ok")
+    except (AssertionError, CoverError) as e:
+        error_handler(f"Failed: {e}")
+
+
+@click.command(help="Run plc function 'set_sync_to_tracker()'")
+@click.argument("state")
+def _write_plc_sync_to_tracker(state):
+    try:
+        assert state in ["true", "false"], 'state has to be either "true" or "false"'
+
+        enclosure = get_enclosure()
+        enclosure.set_sync_to_tracker(state == "true")
+
+        # TODO: wait until plc state has actually changed
+        success_handler("Ok")
+    except (AssertionError, CoverError) as e:
+        error_handler(f"Failed: {e}")
+
+
+@click.command(help="Run plc function 'set_auto_temperature()'")
+@click.argument("state")
+def _write_plc_auto_temperature(state):
+    try:
+        assert state in ["true", "false"], 'state has to be either "true" or "false"'
+
+        enclosure = get_enclosure()
+        enclosure.set_auto_temperature(state == "true")
+
+        # TODO: wait until plc state has actually changed
+        success_handler("Ok")
+    except (AssertionError, CoverError) as e:
+        error_handler(f"Failed: {e}")
+
+
 # TODO: _write_plc_heater_power
 # TODO: _write_plc_camera_power
 # TODO: _write_plc_router_power
@@ -119,3 +156,6 @@ def plc_command_group():
 plc_command_group.add_command(_read_plc, name="read")
 plc_command_group.add_command(_write_plc_reset, name="write-reset")
 plc_command_group.add_command(_write_plc_move_cover, name="write-move-cover")
+plc_command_group.add_command(_write_plc_close_cover, name="write-close-cover")
+plc_command_group.add_command(_write_plc_sync_to_tracker, name="sync-to-tracker")
+plc_command_group.add_command(_write_plc_auto_temperature, name="auto-temperature")
