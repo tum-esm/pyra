@@ -1,4 +1,4 @@
-from packages.core.utils import ConfigInterface
+from packages.core.utils import ConfigInterface, OSInfo
 from packages.core.modules.sun_tracking import SunTracking
 import time
 
@@ -9,8 +9,8 @@ def test_ct_measurement():
     # print(control.continuous_readings())
     # assert(False)
 
-    for _ in range(5):
-        print(instance.ct_application_running())
-        time.sleep(2)
+    process_name =
+    status = OSInfo.check_process_status(process_name)
+
 
     assert False
