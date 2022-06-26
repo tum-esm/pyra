@@ -71,15 +71,15 @@ class MeasurementConditions:
         triggers = self._CONFIG["measurement_triggers"]
 
         if decision["mode"] == "manual":
+            logger.debug("Decision mode for measurements is: Manual.")
             automation_should_be_running = decision["manual_decision_result"]
-            logger.info("Decision mode for measurements switched to manual.")
 
         if decision["mode"] == "cli":
+            logger.debug("Decision mode for measurements is: CLI.")
             automation_should_be_running = decision["cli_decision_result"]
-            logger.info("Decision mode for measurements switched to cli.")
 
         if decision["mode"] == "automatic":
-            logger.info("Decision mode for measurements switched to automatic.")
+            logger.debug("Decision mode for measurements is: Automatic.")
             #needs to be false or it stays true, if no triggeres are considered.
             automation_should_be_running = False
 
