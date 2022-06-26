@@ -4,6 +4,7 @@ import click
 import os
 import sys
 from packages.core.modules.enclosure_control import CoverError, EnclosureControl
+from packages.core.utils.enforce_timeout import TimeOutException
 from packages.core.utils.json_interfaces import ConfigInterface
 
 dir = os.path.dirname
@@ -21,10 +22,21 @@ Validation.logging_handler = error_handler
 
 def get_enclosure():
     _CONFIG = ConfigInterface.read()
-    assert not _CONFIG["general"]["test_mode"], "plc not accessible in test mode"
-    assert _CONFIG["tum_plc"] is not None, "plc not configured"
-    assert _CONFIG["tum_plc"]["controlled_by_user"], "plc is controlled by automation"
-    return EnclosureControl(_CONFIG)
+    _CONFIG["general"]["test_mode"] = False
+    enclosure = None
+
+    try:
+        assert _CONFIG["tum_plc"] is not None, "plc not configured"
+        assert _CONFIG["tum_plc"]["controlled_by_user"], "plc is controlled by automation"
+        enclosure = EnclosureControl(_CONFIG)
+        if not enclosure.plc_connect():
+            raise TimeOutException()
+    except AssertionError as e:
+        error_handler(f"Failed: {e}")
+    except TimeOutException:
+        error_handler("Failed: Could not reach PLC")
+
+    return enclosure
 
 
 # TODO: reduced readings: Only the non-toggable properties
@@ -45,17 +57,16 @@ def get_enclosure():
     + '"rain_detected", "current_cover_angle", "temperature", "fan_speed"',
 )
 def _read_plc(no_indent, reduced):
-    try:
-        enclosure = get_enclosure()
+    enclosure = get_enclosure()
+    if enclosure is not None:
         plc_readings = enclosure.read_states_from_plc(reduced=reduced)
         success_handler(json.dumps(plc_readings, indent=(None if no_indent else 2)))
-    except AssertionError as e:
-        error_handler(e)
 
 
 @click.command(help="Run plc function 'reset()'")
 def _write_plc_reset():
-    try:
+    enclosure = get_enclosure()
+    if enclosure is not None:
         enclosure = get_enclosure()
         enclosure.reset()
 
@@ -67,22 +78,19 @@ def _write_plc_reset():
             if not enclosure.check_for_reset_needed():
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
-
         success_handler("Ok")
-    except AssertionError as e:
-        error_handler(f"Failed: {e}")
 
 
 @click.command(help="Run plc function 'move_cover()'")
 @click.argument("angle")
 def _write_plc_move_cover(angle):
-    try:
+    enclosure = get_enclosure()
+    if enclosure is not None:
         new_cover_angle = int("".join([c for c in str(angle) if c.isnumeric() or c == "."]))
         assert (new_cover_angle == 0) or (
             new_cover_angle >= 110 and new_cover_angle <= 250
         ), "angle has to be 0° or between 110° and 250°"
 
-        enclosure = get_enclosure()
         enclosure.move_cover(angle)
 
         # waiting until cover is at this angle
@@ -98,32 +106,24 @@ def _write_plc_move_cover(angle):
             ), f"Cover took too long to move, latest cover angle: {current_cover_angle}"
 
         success_handler("Ok")
-    except AssertionError as e:
-        error_handler(f"Failed: {e}")
 
 
 @click.command(help="Run plc function 'force_cover_close()'")
 def _write_plc_close_cover():
-    try:
-        enclosure = get_enclosure()
+    enclosure = get_enclosure()
+    if enclosure is not None:
         # TODO: set controlled_by_user to true
         enclosure.force_cover_close()
         success_handler("Ok")
-    except (AssertionError, CoverError) as e:
-        error_handler(f"Failed: {e}")
 
 
 def set_boolean_plc_state(state, setResolver):
-    try:
+    enclosure = get_enclosure()
+    if enclosure is not None:
         assert state in ["true", "false"], 'state has to be either "true" or "false"'
-
-        enclosure = get_enclosure()
         setResolver(enclosure)(state == "true")
-
-        # TODO: wait until plc state has actually changed
+        # TODO: Make sure that plc state has actually changed (inside enclosure code)
         success_handler("Ok")
-    except (AssertionError, CoverError) as e:
-        error_handler(f"Failed: {e}")
 
 
 @click.command(help="Run plc function 'set_sync_to_tracker()'")

@@ -19,6 +19,7 @@ from packages.core.utils import (
     Astronomy,
     STANDARD_PLC_INTERFACES,
     PLCInterface,
+    with_timeout,
 )
 
 logger = Logger(origin="pyra.core.enclosure-control")
@@ -65,9 +66,7 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl in test mode")
             return
         if self._CONFIG["tum_plc"]["controlled_by_user"]:
-            logger.debug(
-                "Skipping EnclosureControl because enclosure is controlled by user"
-            )
+            logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
             return
 
         self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[
@@ -82,9 +81,7 @@ class EnclosureControl:
             raise PLCError("Could not find an active PLC IP connection.")
 
         # check for automation state flank changes
-        automation_should_be_running = StateInterface.read()[
-            "automation_should_be_running"
-        ]
+        automation_should_be_running = StateInterface.read()["automation_should_be_running"]
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -118,6 +115,7 @@ class EnclosureControl:
         # possibly powerup/down spectrometer
         self.auto_set_power_spectrometer()
 
+    @with_timeout(3)
     def plc_connect(self):
         """
         Connects to the PLC Snap7
@@ -319,12 +317,8 @@ class EnclosureControl:
             "control": {
                 "auto_temp_mode": _get_bool(self._PLC_INTERFACE.control.auto_temp_mode),
                 "manual_control": _get_bool(self._PLC_INTERFACE.control.manual_control),
-                "manual_temp_mode": _get_bool(
-                    self._PLC_INTERFACE.control.manual_temp_mode
-                ),
-                "sync_to_tracker": _get_bool(
-                    self._PLC_INTERFACE.control.sync_to_tracker
-                ),
+                "manual_temp_mode": _get_bool(self._PLC_INTERFACE.control.manual_temp_mode),
+                "sync_to_tracker": _get_bool(self._PLC_INTERFACE.control.sync_to_tracker),
             },
             "sensors": {
                 "humidity": _get_int(self._PLC_INTERFACE.sensors.humidity),
@@ -370,14 +364,10 @@ class EnclosureControl:
         print(current_sun_elevation > min_power_elevation)
 
         if current_sun_elevation is not None:
-            if (current_sun_elevation >= min_power_elevation) and (
-                not spectrometer_has_power
-            ):
+            if (current_sun_elevation >= min_power_elevation) and (not spectrometer_has_power):
                 self.set_power_spectrometer(True)
                 logger.info("Powering up the spectrometer.")
-            elif (current_sun_elevation < min_power_elevation) and (
-                spectrometer_has_power
-            ):
+            elif (current_sun_elevation < min_power_elevation) and (spectrometer_has_power):
                 self.set_power_spectrometer(False)
                 logger.info("Powering down the spectrometer.")
 
