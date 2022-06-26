@@ -332,9 +332,8 @@ class VBDSD_Thread:
             ):
                 logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                 if current_state != None:
-                    StateInterface.update(
-                        {"vbdsd_indicates_good_conditions": False}
-                    )
+                    StateInterface.update({"vbdsd_indicates_good_conditions": False})
+                    VBDSD_Thread.__remove_vbdsd_images()
                     current_state = None
                 time.sleep(300)
                 continue
