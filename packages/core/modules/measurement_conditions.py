@@ -83,7 +83,6 @@ class MeasurementConditions:
             #needs to be false or it stays true, if no triggeres are considered.
             automation_should_be_running = False
 
-
             # consider sun elevation
             if triggers["consider_sun_elevation"]:
                 logger.info("Sun elevation as a trigger is evaluated.")
