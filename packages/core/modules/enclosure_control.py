@@ -155,14 +155,16 @@ class EnclosureControl:
         return self.plc.get_connected()
 
     def cpu_busy_check(self):
-        """Sleeps if cpu is busy."""
+        """Wait until CPU is not busy anymore."""
+        time.sleep(0.2)
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
-            time.sleep(2)
+            time.sleep(1)
 
     def plc_read_int(self, action):
         """Reads an INT value in the PLC database."""
         assert len(action) == 3
         db_number, start, size = action
+        print(f"reading int: action={action}")
 
         msg = self.plc.db_read(db_number, start, size)
         value = snap7.util.get_int(msg, 0)
@@ -188,6 +190,7 @@ class EnclosureControl:
         """Reads a BOOL value in the PLC database."""
         assert len(action) == 4
         db_number, start, size, bool_index = action
+        print(f"reading bool: action={action}")
 
         msg = self.plc.db_read(db_number, start, size)
         value = snap7.util.get_bool(msg, 0, bool_index)
@@ -209,6 +212,8 @@ class EnclosureControl:
         # wait if cpu is still busy
         self.cpu_busy_check()
 
+    # PLC.CONTROL SETTERS
+
     def set_sync_to_tracker(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control.sync_to_tracker, state)
 
@@ -221,52 +226,32 @@ class EnclosureControl:
     def set_manual_temperature(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control.manual_temp_mode, state)
 
-    def check_for_reset_needed(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.state.reset_needed)
-
     def reset(self):
         self.plc_write_bool(self._PLC_INTERFACE.control.reset, False)
+
+    # PLC.POWER SETTERS
 
     def set_power_camera(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.power.camera, state)
 
-    def read_power_camera(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power.camera)
-
     def set_power_computer(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.power.computer, state)
-
-    def read_power_computer(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power.computer)
 
     def set_power_heater(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.power.heater, state)
 
-    def read_power_heater(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power.heater)
-
     def set_power_router(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.power.router, state)
-
-    def read_power_router(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power.router)
 
     def set_power_spectrometer(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.power.spectrometer, state)
 
-    def read_power_spectrometer(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power.spectrometer)
+    # PLC.ACTORS SETTERS
 
     def move_cover(self, value: int):
         self.set_manual_control(True)
         self.plc_write_int(self._PLC_INTERFACE.actors.move_cover, value)
         self.set_manual_control(False)
-
-    def read_current_cover_angle(self):
-        return self.plc_read_int(self._PLC_INTERFACE.actors.current_angle)
-
-    def check_cover_closed(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.state.cover_closed)
 
     def force_cover_close(self):
         if self.check_for_reset_needed():
@@ -298,60 +283,77 @@ class EnclosureControl:
             if elapsed_time > 31:
                 raise CoverError("Enclosure cover might be stuck.")
 
+    # PLC GETTERS
+
+    def check_cover_closed(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.state.cover_closed)
+
+    def check_for_reset_needed(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.state.reset_needed)
+
     def read_states_from_plc(self) -> dict:
         """
         Checks the state of the enclosure by continuously reading sensor and
         actor output.
-        ["fan_speed","current_angle", "manual control","manual_temp_mode", "humidity", "temperature", "camera",
-        "computer", "cover_closed", "heater", "motor_failed", "rain", "reset_needed", "router", "spectrometer",
-        "ups_alert"]
         """
-        # TODO: This functions needs way to long to execute. Solution?
+
+        plc_db_content = {}
+        plc_db_content[8] = self.plc.db_read(8, 0, 25)
+        self.cpu_busy_check()
+        plc_db_content[25] = self.plc.db_read(25, 0, 9)
+        self.cpu_busy_check()
+        plc_db_content[3] = self.plc.db_read(3, 0, 5)
+        self.cpu_busy_check()
+
+        def _get_int(spec: list[int]):
+            return snap7.util.get_int(plc_db_content[spec[0]], spec[1])
+
+        def _get_bool(spec: list[int]):
+            return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[2])
+
         return {
             "actors": {
-                "fan_speed": self.plc_read_int(self._PLC_INTERFACE.actors.fan_speed),
-                "current_angle": self.plc_read_int(
-                    self._PLC_INTERFACE.actors.current_angle
-                ),
+                "fan_speed": _get_int(self._PLC_INTERFACE.actors.fan_speed),
+                "current_angle": _get_int(self._PLC_INTERFACE.actors.current_angle),
             },
             "control": {
-                "auto_temp_mode": self.plc_read_bool(
-                    self._PLC_INTERFACE.control.auto_temp_mode
-                ),
-                "manual_control": self.plc_read_bool(
-                    self._PLC_INTERFACE.control.manual_control
-                ),
-                "manual_temp_mode": self.plc_read_bool(
+                "auto_temp_mode": _get_bool(self._PLC_INTERFACE.control.auto_temp_mode),
+                "manual_control": _get_bool(self._PLC_INTERFACE.control.manual_control),
+                "manual_temp_mode": _get_bool(
                     self._PLC_INTERFACE.control.manual_temp_mode
+                ),
+                "sync_to_tracker": _get_bool(
+                    self._PLC_INTERFACE.control.sync_to_tracker
                 ),
             },
             "sensors": {
-                "humidity": self.plc_read_int(self._PLC_INTERFACE.sensors.humidity),
-                "temperature": self.plc_read_int(
-                    self._PLC_INTERFACE.sensors.temperature
-                ),
+                "humidity": _get_int(self._PLC_INTERFACE.sensors.humidity),
+                "temperature": _get_int(self._PLC_INTERFACE.sensors.temperature),
             },
             "state": {
-                "camera": self.plc_read_bool(self._PLC_INTERFACE.state.camera),
-                "computer": self.plc_read_bool(self._PLC_INTERFACE.state.computer),
-                "cover_closed": self.plc_read_bool(
-                    self._PLC_INTERFACE.state.cover_closed
-                ),
-                "heater": self.plc_read_bool(self._PLC_INTERFACE.state.heater),
-                "motor_failed": self.plc_read_bool(
-                    self._PLC_INTERFACE.state.motor_failed
-                ),
-                "rain": self.plc_read_bool(self._PLC_INTERFACE.state.rain),
-                "reset_needed": self.plc_read_bool(
-                    self._PLC_INTERFACE.state.reset_needed
-                ),
-                "router": self.plc_read_bool(self._PLC_INTERFACE.state.router),
-                "spectrometer": self.plc_read_bool(
-                    self._PLC_INTERFACE.state.spectrometer
-                ),
-                "ups_alert": self.plc_read_bool(self._PLC_INTERFACE.state.ups_alert),
+                "cover_closed": _get_bool(self._PLC_INTERFACE.state.cover_closed),
+                "motor_failed": _get_bool(self._PLC_INTERFACE.state.motor_failed),
+                "rain": _get_bool(self._PLC_INTERFACE.state.rain),
+                "reset_needed": _get_bool(self._PLC_INTERFACE.state.reset_needed),
+                "ups_alert": _get_bool(self._PLC_INTERFACE.state.ups_alert),
+            },
+            "power": {
+                "camera": _get_bool(self._PLC_INTERFACE.power.camera),
+                "computer": _get_bool(self._PLC_INTERFACE.power.computer),
+                "heater": _get_bool(self._PLC_INTERFACE.power.heater),
+                "router": _get_bool(self._PLC_INTERFACE.power.router),
+                "spectrometer": _get_bool(self._PLC_INTERFACE.power.spectrometer),
+            },
+            "connections": {
+                "camera": _get_bool(self._PLC_INTERFACE.connections.camera),
+                "computer": _get_bool(self._PLC_INTERFACE.connections.computer),
+                "heater": _get_bool(self._PLC_INTERFACE.connections.heater),
+                "router": _get_bool(self._PLC_INTERFACE.connections.router),
+                "spectrometer": _get_bool(self._PLC_INTERFACE.connections.spectrometer),
             },
         }
+
+    # -------------------------------------------------------------------------
 
     def auto_set_power_spectrometer(self):
         """

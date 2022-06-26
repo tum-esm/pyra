@@ -40,10 +40,16 @@ def get_enclosure():
 @click.option(
     "--no-indent", is_flag=True, help="Do not print the JSON in an indented manner"
 )
-def _read_plc(no_indent):
+@click.option(
+    "--reduced",
+    is_flag=True,
+    help='Only read the properties "reset_needed", "motor_failed", "cover_is_open", '
+    + '"rain_detected", "current_cover_angle", "temperature", "fan_speed"',
+)
+def _read_plc(no_indent, reduced):
     try:
         enclosure = get_enclosure()
-        plc_readings = enclosure.read_states_from_plc()
+        plc_readings = enclosure.read_states_from_plc(reduced=reduced)
         success_handler(json.dumps(plc_readings, indent=(None if no_indent else 2)))
     except AssertionError as e:
         error_handler(e)
