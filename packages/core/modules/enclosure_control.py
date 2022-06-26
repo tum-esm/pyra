@@ -84,6 +84,8 @@ class EnclosureControl:
                     self.reset()
                     time.sleep(10)
 
+                #TODO: add a check of the rain sensor before opening the cover
+
                 self.set_sync_to_tracker(True)
                 logger.info("Syncing Cover to Tracker.")
             else:
