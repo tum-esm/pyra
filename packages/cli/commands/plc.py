@@ -37,9 +37,7 @@ def get_enclosure():
 # * fan_speed
 # Benefit: Speedup! Only 7 instead of 17 plc-read operations
 @click.command(help="Read current state from plc.")
-@click.option(
-    "--no-indent", is_flag=True, help="Do not print the JSON in an indented manner"
-)
+@click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
 @click.option(
     "--reduced",
     is_flag=True,
@@ -79,9 +77,7 @@ def _write_plc_reset():
 @click.argument("angle")
 def _write_plc_move_cover(angle):
     try:
-        new_cover_angle = int(
-            "".join([c for c in str(angle) if c.isnumeric() or c == "."])
-        )
+        new_cover_angle = int("".join([c for c in str(angle) if c.isnumeric() or c == "."]))
         assert (new_cover_angle == 0) or (
             new_cover_angle >= 110 and new_cover_angle <= 250
         ), "angle has to be 0° or between 110° and 250°"
@@ -110,6 +106,7 @@ def _write_plc_move_cover(angle):
 def _write_plc_close_cover():
     try:
         enclosure = get_enclosure()
+        # TODO: set controlled_by_user to true
         enclosure.force_cover_close()
         success_handler("Ok")
     except (AssertionError, CoverError) as e:
@@ -180,10 +177,10 @@ plc_command_group.add_command(_read_plc, name="read")
 plc_command_group.add_command(_write_plc_reset, name="write-reset")
 plc_command_group.add_command(_write_plc_move_cover, name="write-move-cover")
 plc_command_group.add_command(_write_plc_close_cover, name="write-close-cover")
-plc_command_group.add_command(_write_plc_sync_to_tracker, name="sync-to-tracker")
-plc_command_group.add_command(_write_plc_auto_temperature, name="auto-temperature")
-plc_command_group.add_command(_write_plc_power_heater, name="power-heater")
-plc_command_group.add_command(_write_plc_power_camera, name="power-camera")
-plc_command_group.add_command(_write_plc_power_router, name="power-router")
-plc_command_group.add_command(_write_plc_power_spectrometer, name="power-spectrometer")
-plc_command_group.add_command(_write_plc_power_computer, name="power-computer")
+plc_command_group.add_command(_write_plc_sync_to_tracker, name="write-sync-to-tracker")
+plc_command_group.add_command(_write_plc_auto_temperature, name="write-auto-temperature")
+plc_command_group.add_command(_write_plc_power_heater, name="write-power-heater")
+plc_command_group.add_command(_write_plc_power_camera, name="write-power-camera")
+plc_command_group.add_command(_write_plc_power_router, name="write-power-router")
+plc_command_group.add_command(_write_plc_power_spectrometer, name="write-power-spectrometer")
+plc_command_group.add_command(_write_plc_power_computer, name="write-power-computer")

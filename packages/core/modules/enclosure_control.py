@@ -309,7 +309,7 @@ class EnclosureControl:
             return snap7.util.get_int(plc_db_content[spec[0]], spec[1])
 
         def _get_bool(spec: list[int]):
-            return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[2])
+            return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])
 
         return {
             "actors": {

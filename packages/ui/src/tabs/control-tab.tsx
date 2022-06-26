@@ -38,14 +38,11 @@ export default function ControlTab() {
     return (
         <div className={'w-full relative px-6 py-6 flex-col-left gap-y-4'}>
             <div className="flex-row-left gap-x-2">
+                <div>PLC is controlled by:</div>
                 <essentialComponents.Toggle
-                    value={
-                        plcIsControlledByUser
-                            ? 'PLC is controlled by user'
-                            : 'PLC is controlled by automation'
-                    }
-                    values={['PLC is controlled by user', 'PLC is controlled by automation']}
-                    setValue={(v) => setPlcIsControlledByUser(v === 'PLC is controlled by user')}
+                    value={plcIsControlledByUser ? 'user' : 'automation'}
+                    values={['user', 'automation']}
+                    setValue={(v) => setPlcIsControlledByUser(v === 'user')}
                 />
                 {isSaving && <essentialComponents.Spinner />}
                 {!isSaving && (

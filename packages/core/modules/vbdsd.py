@@ -131,9 +131,7 @@ class _VBDSD:
             cv.circle(img_b, center, radius - 20, 0, 15)
             cv.circle(frame, center, radius, 255, 5)
 
-        contours, hierarchy = cv.findContours(
-            img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE
-        )
+        contours, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
         ppi_contour = None
         ppi = -1
@@ -142,9 +140,7 @@ class _VBDSD:
             for i in range(len(contours)):
                 if cv.contourArea(contours[i]) > 2000:
                     x, y, w, h = cv.boundingRect(contours[i])
-                    if float(w) == float(
-                        h
-                    ):  # Use constraints to find the projection plane
+                    if float(w) == float(h):  # Use constraints to find the projection plane
                         ppi_contour = contours[i]  # Save contour
                         ppi = i
 
@@ -255,6 +251,7 @@ class VBDSD_Thread:
         Start a thread using the multiprocessing library
         """
         logger.info("Starting thread")
+        # TODO: Start a thread instead of a process
         self.__process = multiprocessing.Process(target=VBDSD_Thread.main)
         self.__process.start()
 
@@ -376,9 +373,7 @@ class VBDSD_Thread:
             elapsed_time = time.time() - start_time
             time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
             if time_to_wait > 0:
-                logger.debug(
-                    f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)"
-                )
+                logger.debug(f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)")
                 time.sleep(time_to_wait)
 
             if not infinite_loop:

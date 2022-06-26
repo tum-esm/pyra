@@ -100,7 +100,7 @@ export default function MeasurementDecisionStatus() {
     const measurementDecision = reduxUtils.useTypedSelector(
         (s) => s.config.central?.measurement_decision
     );
-    const manualMeasurementDecisionResult = reduxUtils.useTypedSelector(
+    const automaticMeasurementDecisionResult = reduxUtils.useTypedSelector(
         (s) => s.coreState.content?.automation_should_be_running
     );
     const dispatch = reduxUtils.useTypedDispatch();
@@ -118,7 +118,7 @@ export default function MeasurementDecisionStatus() {
             measurementDecisionResult = measurementDecision.cli_decision_result;
             break;
         case 'automatic':
-            measurementDecisionResult = manualMeasurementDecisionResult;
+            measurementDecisionResult = automaticMeasurementDecisionResult;
             break;
     }
 
@@ -141,6 +141,7 @@ export default function MeasurementDecisionStatus() {
 
     async function updateManualMeasurementDecisionResult(decisionResult: boolean) {
         setLoading(true);
+        // TODO: take automaticMeasurementDecisionResult into account
         const update = { measurement_decision: { manual_decision_result: decisionResult } };
         const result = await backend.updateConfig(update);
         if (result.stdout.includes('Updated config file')) {

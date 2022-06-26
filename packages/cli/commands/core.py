@@ -7,9 +7,7 @@ import psutil
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 INTERPRETER_PATH = (
-    "python"
-    if os.name != "posix"
-    else os.path.join(PROJECT_DIR, ".venv", "bin", "python")
+    "python" if os.name != "posix" else os.path.join(PROJECT_DIR, ".venv", "bin", "python")
 )
 SCRIPT_PATH = os.path.join(PROJECT_DIR, "run-pyra-core.py")
 
@@ -42,8 +40,7 @@ def terminate_processes():
 
 
 @click.command(
-    help="Start pyra-core as a background process. "
-    + "Prevents spawning multiple processes"
+    help="Start pyra-core as a background process. " + "Prevents spawning multiple processes"
 )
 def _start_pyra_core():
     existing_pid = process_is_running()
@@ -69,6 +66,8 @@ def _stop_pyra_core():
             f"Terminated {len(termination_pids)} background "
             + f"processe(s) with PID(s) {termination_pids}"
         )
+
+        # TODO: teardown routine
 
 
 @click.command(help="Checks whether the pyra-core background process is running")
