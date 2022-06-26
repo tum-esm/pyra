@@ -257,7 +257,7 @@ class EnclosureControl:
     def read_power_spectrometer(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power.spectrometer)
 
-    def move_cover(self, value):
+    def move_cover(self, value: int):
         self.set_manual_control(True)
         self.plc_write_int(self._PLC_INTERFACE.actors.move_cover, value)
         self.set_manual_control(False)

@@ -23,6 +23,7 @@ def get_enclosure():
     _CONFIG = ConfigInterface.read()
     assert not _CONFIG["general"]["test_mode"], "plc not accessible in test mode"
     assert _CONFIG["tum_plc"] is not None, "plc not configured"
+    assert _CONFIG["tum_plc"]["controlled_by_user"], "plc is controlled by automation"
     return EnclosureControl(_CONFIG)
 
 
@@ -75,6 +76,10 @@ def _write_plc_move_cover(angle):
         new_cover_angle = int(
             "".join([c for c in str(angle) if c.isnumeric() or c == "."])
         )
+        assert (new_cover_angle == 0) or (
+            new_cover_angle >= 110 and new_cover_angle <= 250
+        ), "angle has to be 0° or between 110° and 250°"
+
         enclosure = get_enclosure()
         enclosure.move_cover(angle)
 
@@ -83,9 +88,12 @@ def _write_plc_move_cover(angle):
         while True:
             time.sleep(2)
             running_time += 2
-            if abs(new_cover_angle - enclosure.read_current_cover_angle()) <= 3:
+            current_cover_angle = enclosure.read_current_cover_angle()
+            if abs(new_cover_angle - current_cover_angle) <= 3:
                 break
-            assert running_time <= 20, "cover took too long to move"
+            assert (
+                running_time <= 20
+            ), f"Cover took too long to move, latest cover angle: {current_cover_angle}"
 
         success_handler("Ok")
     except AssertionError as e:
