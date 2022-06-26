@@ -298,16 +298,13 @@ class EnclosureControl:
             if elapsed_time > 31:
                 raise CoverError("Enclosure cover might be stuck.")
 
-    def read_states_from_plc(self):
+    def read_states_from_plc(self) -> dict:
         """
         Checks the state of the enclosure by continuously reading sensor and
         actor output.
         ["fan_speed","current_angle", "manual control","manual_temp_mode", "humidity", "temperature", "camera",
         "computer", "cover_closed", "heater", "motor_failed", "rain", "reset_needed", "router", "spectrometer",
         "ups_alert"]
-
-        returns
-        r: list
         """
         # TODO: This functions needs way to long to execute. Solution?
         return {
