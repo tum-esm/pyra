@@ -14,6 +14,7 @@
         "allowlist": {
             "dialog": {
                 "confirm": true,
+                "message": true,
                 "open": true
             },
             "shell": {
@@ -29,6 +30,16 @@
                     {
                         "name": "venv-python",
                         "cmd": ".venv/bin/python",
+                        "args": true
+                    },
+                    {
+                        "name": "md5-mac",
+                        "cmd": "md5",
+                        "args": true
+                    },
+                    {
+                        "name": "md5-windows",
+                        "cmd": "md5sum",
                         "args": true
                     }
                 ]

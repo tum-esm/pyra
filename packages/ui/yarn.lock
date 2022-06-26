@@ -327,13 +327,6 @@
   dependencies:
     mini-svg-data-uri "^1.2.3"
 
-"@tauri-apps/api@1.0.0-rc.2":
-  version "1.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-1.0.0-rc.2.tgz#bac494a6b8868e05f86184d2ee1ccc8477470363"
-  integrity sha512-JhUDCJpfxmf/S1R+yHmJGsher4CGi07Qv4fYeucB7naeFZ7yTQe7S1CHKUZaRYpurGSdwOF3my9k0LyGmpAGYw==
-  dependencies:
-    type-fest "2.12.0"
-
 "@tauri-apps/api@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-1.0.1.tgz#f516cf3b83139312141123c08f1d75260274da50"
@@ -1260,13 +1253,6 @@ tailwindcss@3.1.2:
     quick-lru "^5.1.1"
     resolve "^1.22.0"
 
-"tauri-plugin-fs-watch-api@github:tauri-apps/tauri-plugin-fs-watch":
-  version "0.0.0"
-  resolved "https://codeload.github.com/tauri-apps/tauri-plugin-fs-watch/tar.gz/9ece132409a14a0e5e0f954a295024c451a3ec8e"
-  dependencies:
-    "@tauri-apps/api" "1.0.0-rc.2"
-    tslib "^2.3.1"
-
 tilg@0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/tilg/-/tilg-0.1.1.tgz#22dfcd5ce81a305faba9a7285f555c1e09b72afb"
@@ -1283,16 +1269,6 @@ to-regex-range@^5.0.1:
   integrity sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==
   dependencies:
     is-number "^7.0.0"
-
-tslib@^2.3.1:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
-  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
-
-type-fest@2.12.0:
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.12.0.tgz#ce342f58cab9114912f54b493d60ab39c3fc82b6"
-  integrity sha512-Qe5GRT+n/4GoqCNGGVp5Snapg1Omq3V7irBJB3EaKsp7HWDo5Gv2d/67gfNyV+d5EXD+x/RF5l1h4yJ7qNkcGA==
 
 type-fest@2.13.1:
   version "2.13.1"

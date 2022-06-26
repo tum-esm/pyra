@@ -36,7 +36,7 @@ def with_filelock(function):
 )
 @with_filelock
 def _get_state(no_indent):
-    if not os.path.isdir(STATE_FILE_PATH):
+    if not os.path.isfile(STATE_FILE_PATH):
         StateInterface.initialize()
 
     with open(STATE_FILE_PATH, "r") as f:

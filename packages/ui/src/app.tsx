@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ICONS } from './assets';
 import { backend, reduxUtils } from './utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from './tabs';
 import { essentialComponents, Header } from './components';
-import { watch } from 'tauri-plugin-fs-watch-api';
 import toast, { resolveValue, Toaster } from 'react-hot-toast';
+import { diff } from 'deep-diff';
+import { customTypes } from './custom-types';
+import { dialog } from '@tauri-apps/api';
+import { Command } from '@tauri-apps/api/shell';
+import { first } from 'lodash';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -16,32 +20,55 @@ export default function App() {
 
     const [coreStateShouldBeLoaded, setCoreStateShouldBeLoaded] = useState(true);
     const [logsShouldBeLoaded, setLogsShouldBeLoaded] = useState(true);
+    const [configShouldBeLoaded, setConfigShouldBeLoaded] = useState(false);
 
-    const centralConfigTumPlc = reduxUtils.useTypedSelector((s) => s.config.central?.tum_plc);
+    const [fileWatcherChecksums, setFileWatcherChecksums] = useState<{
+        logs: string | undefined;
+        state: string | undefined;
+        config: string | undefined;
+    }>({
+        logs: '',
+        state: '',
+        config: '',
+    });
+
+    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
     const enclosureControlsIsVisible =
-        centralConfigTumPlc !== null && centralConfigTumPlc !== undefined;
-
+        centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
     const pyraCoreIsRunning = pyraCorePID !== undefined && pyraCorePID !== -1;
-
     const dispatch = reduxUtils.useTypedDispatch();
 
     useEffect(() => {
         loadInitialAppState().catch(console.error);
-        startFileWatchers().catch(console.error);
+        startFileWatchers();
     }, []);
 
     useEffect(() => {
+        const watchInterval = setInterval(startFileWatchers, 2000);
+        return () => clearInterval(watchInterval);
+    }, [fileWatcherChecksums]);
+
+    useEffect(() => {
         if (logsShouldBeLoaded) {
+            setLogsShouldBeLoaded(false);
             fetchLogsFile().catch(console.error);
         }
     }, [fetchLogsFile, logsShouldBeLoaded]);
 
     useEffect(() => {
         if (coreStateShouldBeLoaded) {
+            setCoreStateShouldBeLoaded(false);
             fetchCoreState().catch(console.error);
         }
-    }, [fetchLogsFile, coreStateShouldBeLoaded]);
+    }, [fetchCoreState, coreStateShouldBeLoaded]);
+
+    useEffect(() => {
+        if (configShouldBeLoaded) {
+            setConfigShouldBeLoaded(false);
+            fetchConfig().catch(console.error);
+        }
+    }, [fetchConfig, configShouldBeLoaded, centralConfig]);
 
     /*
     1. Check whether pyra-cli is available
@@ -92,47 +119,116 @@ export default function App() {
     }
 
     async function fetchCoreState() {
+        dispatch(reduxUtils.coreStateActions.setLoading(true));
+        const result = await backend.getState();
+        if (result.code !== 0) {
+            console.error(`Could not fetch core state. processResult = ${JSON.stringify(result)}`);
+            toast.error(`Could not fetch core state, please look in the console for details`);
+        } else {
+            const newCoreState = JSON.parse(result.stdout);
+            dispatch(reduxUtils.coreStateActions.set(newCoreState));
+        }
+        dispatch(reduxUtils.coreStateActions.setLoading(false));
+    }
+
+    async function fetchConfig() {
         if (pyraCoreIsRunning) {
-            dispatch(reduxUtils.coreStateActions.setLoading(true));
-            const result = await backend.getState();
-            try {
-                const newCoreState = JSON.parse(result.stdout);
-                console.log({ newCoreState });
-                dispatch(reduxUtils.coreStateActions.set(newCoreState));
-            } catch {
+            const result = await backend.getConfig();
+            if (result.code !== 0) {
                 console.error(
                     `Could not fetch core state. processResult = ${JSON.stringify(result)}`
                 );
                 toast.error(`Could not fetch core state, please look in the console for details`);
-            } finally {
-                dispatch(reduxUtils.coreStateActions.setLoading(false));
+                return;
+            }
+
+            const newCentralConfig: customTypes.config = JSON.parse(result.stdout);
+            const diffsToCentral = diff(centralConfig, newCentralConfig);
+            if (diffsToCentral === undefined) {
+                return;
+            }
+
+            // measurement_decision.cli_decision_result is allowed to change
+            // changing any other property from somewhere else than the UI requires
+            // a reload of the window
+            const reloadIsRequired =
+                diffsToCentral.filter(
+                    (d) =>
+                        d.kind === 'E' &&
+                        d.path?.join('.') !== 'measurement_decision.cli_decision_result'
+                ).length > 0;
+
+            if (reloadIsRequired) {
+                dialog
+                    .message('The config.json file has been modified. Reload required', 'PyRa 4 UI')
+                    .then(() => window.location.reload());
+            } else {
+                dispatch(reduxUtils.configActions.setConfigsPartial(newCentralConfig));
             }
         }
     }
 
-    // TODO: watch for changes in config.json
-    async function startFileWatchers() {
-        let logFilePath = import.meta.env.VITE_PROJECT_DIR + '\\logs\\debug.log';
-        let stateFilePath = import.meta.env.VITE_PROJECT_DIR + '\\runtime-data\\state.json';
-
+    const startFileWatchers = useCallback(async () => {
+        let cmd = 'md5-windows';
+        let filepaths = ['logs\\debug.log', 'runtime-data\\state.json', 'config\\config.json'];
         if (window.navigator.platform.includes('Mac')) {
-            logFilePath = logFilePath.replace(/\\/g, '/');
-            stateFilePath = stateFilePath.replace(/\\/g, '/');
+            cmd = 'md5-mac';
+            filepaths = filepaths.map((p) => p.replace('\\', '/'));
         }
 
-        await watch(logFilePath, { recursive: false }, (o) => {
-            if (o.type === 'NoticeWrite') {
-                console.log('detected change in log files');
-                setLogsShouldBeLoaded(true);
-            }
-        });
-        await watch(stateFilePath, { recursive: false }, (o) => {
-            if (o.type === 'NoticeWrite') {
-                console.log('detected change in core state file');
-                setCoreStateShouldBeLoaded(true);
-            }
-        });
-    }
+        const result = await new Command(cmd, filepaths, {
+            cwd: import.meta.env.VITE_PROJECT_DIR,
+        }).execute();
+
+        if (result.code !== 0) {
+            toast.error('File watcher is not working - details in console');
+            console.error(`File watcher is not working, processResult = ${JSON.stringify(result)}`);
+            return;
+        }
+
+        const getLine = (indicator: string) =>
+            first(result.stdout.split('\n').filter((line) => line.includes(indicator)));
+
+        let checksumsChanged = false;
+
+        const newLogsChecksum = getLine('debug.log');
+        if (newLogsChecksum !== fileWatcherChecksums.logs) {
+            setLogsShouldBeLoaded(true);
+            checksumsChanged = true;
+            console.log('change in log files detected');
+        }
+
+        const newStateChecksum = getLine('state.json');
+        if (newStateChecksum !== fileWatcherChecksums.state) {
+            setCoreStateShouldBeLoaded(true);
+            checksumsChanged = true;
+            console.log('change in core state file detected');
+        }
+
+        const newConfigChecksum = getLine('config.json');
+        if (newConfigChecksum !== fileWatcherChecksums.config) {
+            setConfigShouldBeLoaded(true);
+            checksumsChanged = true;
+            console.log('change in config file detected');
+        }
+
+        if (checksumsChanged) {
+            console.log({
+                old: fileWatcherChecksums,
+                new: {
+                    logs: newLogsChecksum,
+                    state: newStateChecksum,
+                    config: newConfigChecksum,
+                },
+            });
+
+            setFileWatcherChecksums({
+                logs: newLogsChecksum,
+                state: newStateChecksum,
+                config: newConfigChecksum,
+            });
+        }
+    }, [fileWatcherChecksums]);
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
