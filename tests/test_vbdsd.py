@@ -1,11 +1,12 @@
-from packages.core.modules import vbdsd
+from packages.core.modules.vbdsd import VBDSD_Thread
+import time
 
-def test_cam():
-    cam = vbdsd._VBDSD()
-    cam.init_cam()
     
-"""
 def test_vbdsd():
-    vbdsd.main(infinite_loop=False)
-    assert False
-"""
+    """Pictures are saved in C:\pyra-4\runtime-data\vbdsd"""
+    vbdsd = VBDSD_Thread()
+    vbdsd.start()
+    time.sleep(30)
+    vbdsd.stop()
+    
+

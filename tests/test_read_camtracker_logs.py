@@ -8,6 +8,10 @@ def test_ct_measurement():
     # print(control.continuous_readings())
     # assert(False)
 
-    assert(instance.test_setup)
+    log_line = instance.read_ct_log_learn_az_elev()
+
+    print(log_line)
+
+    instance.valdiate_tracker_position()
 
     assert False

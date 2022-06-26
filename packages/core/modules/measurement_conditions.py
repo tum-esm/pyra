@@ -14,6 +14,7 @@
 # ==============================================================================
 
 import datetime
+import astropy.units as astropy_units
 from packages.core.utils import Astronomy, StateInterface, Logger, OSInfo
 
 logger = Logger(origin="pyra.core.measurement-conditions")
@@ -30,6 +31,7 @@ def get_times_from_tuples(triggers: any):
 class MeasurementConditions:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
+
         if self._CONFIG["general"]["test_mode"]:
             return
 
@@ -64,11 +66,13 @@ class MeasurementConditions:
         # raises error if system battery is below 20%
         OSInfo.validate_system_battery()
 
+        # TODO: Move measurement_decision to state.json and reset it with core start
         decision = self._CONFIG["measurement_decision"]
         triggers = self._CONFIG["measurement_triggers"]
 
         if decision["mode"] == "manual":
             automation_should_be_running = decision["manual_decision_result"]
+            # TODO: If automation is already running use this as the starting point
 
         if decision["mode"] == "cli":
             automation_should_be_running = decision["cli_decision_result"]
@@ -79,8 +83,14 @@ class MeasurementConditions:
             # consider sun elevation
             if triggers["consider_sun_elevation"]:
                 current_sun_elevation = Astronomy.get_current_sun_elevation()
-                sun_is_too_low = current_sun_elevation < triggers["min_sun_elevation"]
-                sun_is_too_high = current_sun_elevation > triggers["max_sun_elevation"]
+                sun_is_too_low = (
+                    current_sun_elevation
+                    < triggers["min_sun_elevation"] * astropy_units.deg
+                )
+                sun_is_too_high = (
+                    current_sun_elevation
+                    > triggers["max_sun_elevation"] * astropy_units.deg
+                )
                 if sun_is_too_low or sun_is_too_high:
                     automation_should_be_running &= False
 

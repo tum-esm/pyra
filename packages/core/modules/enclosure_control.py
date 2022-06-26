@@ -11,10 +11,11 @@
 
 import snap7
 import time
+import os
+import astropy.units as astropy_units
 from packages.core.utils import (
     StateInterface,
     Logger,
-    OSInfo,
     Astronomy,
     STANDARD_PLC_INTERFACES,
     PLCInterface,
@@ -75,10 +76,9 @@ class EnclosureControl:
         logger.info("Running EnclosureControl")
 
         # check PLC ip connection
-        plc_status = OSInfo.check_connection_status(self._CONFIG["tum_plc"]["ip"])
-        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
-
-        if plc_status == "NO_INFO":
+        if self.is_PLC_responsive():
+            logger.debug("Successful ping to PLC.")
+        else:
             raise PLCError("Could not find an active PLC IP connection.")
 
         # check for automation state flank changes
@@ -88,7 +88,7 @@ class EnclosureControl:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                if self.check_for_reest_needed():
+                if self.check_for_reset_needed():
                     self.reset()
                     time.sleep(10)
 
@@ -215,44 +215,44 @@ class EnclosureControl:
     def set_manual_control(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control["manual_control"], state)
 
-    def set_auto_temperature(self, state):
+    def set_auto_temperature(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control["auto_temp_mode"], state)
 
-    def set_manual_temperature(self, state):
+    def set_manual_temperature(self, state=True):
         self.plc_write_bool(self._PLC_INTERFACE.control["manual_temp_mode"], state)
 
-    def check_for_reest_needed(self):
+    def check_for_reset_needed(self):
         return self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"])
 
     def reset(self):
         self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
 
     def set_power_camera(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["camera"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["camera"], state)
 
     def read_power_camera(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["camera"])
 
     def set_power_computer(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["computer"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["computer"], state)
 
     def read_power_computer(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["computer"])
 
     def set_power_heater(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["heater"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["heater"], state)
 
     def read_power_heater(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["heater"])
 
     def set_power_router(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["router"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["router"], state)
 
     def read_power_router(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["router"])
 
     def set_power_spectrometer(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["spectrometer"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], state)
 
     def read_power_spectrometer(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["spectrometer"])
@@ -267,6 +267,16 @@ class EnclosureControl:
 
     def check_cover_closed(self):
         return self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"])
+
+    def force_cover_close(self):
+        if self.check_for_reset_needed():
+            self.reset()
+
+        self.set_sync_to_tracker(False)
+        self.set_manual_control(True)
+        self.move_cover(0)
+        self.wait_for_cover_closing()
+        self.set_manual_control(True)
 
     def wait_for_cover_closing(self):
         """Waits steps of 5s for the enclosure cover to close.
@@ -299,6 +309,7 @@ class EnclosureControl:
         returns
         r: list
         """
+        # TODO: This functions needs way to long to execute. Solution?
         return [
             self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
             self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"]),
@@ -326,15 +337,33 @@ class EnclosureControl:
         """
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
-        min_power_elevation = self._CONFIG["tum_plc"]["min_power_elevation"]
+        min_power_elevation = (
+            self._CONFIG["tum_plc"]["min_power_elevation"] * astropy_units.deg
+        )
         spectrometer_has_power = self.read_power_spectrometer()
 
+        print(current_sun_elevation > min_power_elevation)
+
         if current_sun_elevation is not None:
-            if (current_sun_elevation > min_power_elevation) and (
+            if (current_sun_elevation >= min_power_elevation) and (
                 not spectrometer_has_power
             ):
                 self.set_power_spectrometer(True)
                 logger.info("Powering up the spectrometer.")
-            elif spectrometer_has_power:
+            elif (current_sun_elevation < min_power_elevation) and (
+                spectrometer_has_power
+            ):
                 self.set_power_spectrometer(False)
                 logger.info("Powering down the spectrometer.")
+
+    def is_PLC_responsive(self):
+        """Pings the PLC and returns:
+
+        True -> Connected
+        False -> Not Connected"""
+        response = os.system("ping -n 1 " + self._CONFIG["tum_plc"]["ip"])
+
+        if response == 0:
+            return True
+        else:
+            return False

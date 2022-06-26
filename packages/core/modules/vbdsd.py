@@ -61,6 +61,7 @@ class _VBDSD:
         camera, otherwise None will be returned.
         """
         camera_id = _CONFIG["vbdsd"]["camera_id"]
+
         _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         _VBDSD.cam.release()
 
@@ -79,9 +80,8 @@ class _VBDSD:
                 _VBDSD.cam.read()
                 _VBDSD.change_exposure()
                 return
-        
+
         logger.warning(f"Camera with id {camera_id} could not be found")
-        
 
     @staticmethod
     def eval_sun_state(frame):
@@ -266,6 +266,7 @@ class VBDSD_Thread:
         Stop the thread, remove all images inside the directory
         "runtime_data/vbdsd" and set the state to 'null'
         """
+
         logger.info("Terminating thread")
         self.__process.terminate()
 
@@ -287,6 +288,7 @@ class VBDSD_Thread:
     def main(infinite_loop=True):
         global _CONFIG
         _CONFIG = ConfigInterface.read()
+        # delete all temp pictures when vbdsd is deactivated
         if _CONFIG["vbdsd"] is None:
             VBDSD_Thread.__remove_vbdsd_images()
             return
@@ -297,12 +299,14 @@ class VBDSD_Thread:
         while True:
             start_time = time.time()
             _CONFIG = ConfigInterface.read()
+            # delete all temp pictures when vbdsd is deactivated
             if _CONFIG["vbdsd"] is None:
                 VBDSD_Thread.__remove_vbdsd_images()
                 return
 
+            # init camera connection
             if _VBDSD.cam is None:
-                logger.info(f"(Re)connecting to camera")
+                logger.info(f"Initializing VBDSD camera")
                 _VBDSD.init_cam()
 
                 # if connecting was not successful
@@ -326,9 +330,8 @@ class VBDSD_Thread:
             ):
                 logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                 if current_state != None:
-                    StateInterface.update(
-                        {"vbdsd_indicates_good_conditions": current_state}
-                    )
+                    StateInterface.update({"vbdsd_indicates_good_conditions": False})
+                    VBDSD_Thread.__remove_vbdsd_images()
                     current_state = None
                 time.sleep(300)
                 continue

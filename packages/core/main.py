@@ -19,6 +19,9 @@ logger = Logger(origin="pyra.core.main")
 def run():
 
     StateInterface.initialize()
+    # TODO: check .initialize() function. and why the 2 lines below are needed
+    StateInterface.update({"automation_should_be_running": False})
+    StateInterface.update({"vbdsd_indicates_good_conditions": False})
     _CONFIG = ConfigInterface.read()
 
     logger.info(f"started mainloop inside process with PID {os.getpid()}")
@@ -47,8 +50,10 @@ def run():
             # Start or stop VBDSD in a thread
             vbdsd_should_be_running = _CONFIG["measurement_triggers"]["consider_vbdsd"]
             if vbdsd_should_be_running and not vbdsd_thread.is_running():
+                logger.info("Starting VBDSD Thread")
                 vbdsd_thread.start()
             if not vbdsd_should_be_running and vbdsd_thread.is_running():
+                logger.info("Stopping VBDSD Thread")
                 vbdsd_thread.stop()
         else:
             logger.info("pyra-core in test mode")

@@ -22,7 +22,7 @@ import sys
 import time
 import jdcal
 import datetime
-from packages.core.utils import StateInterface, Logger
+from packages.core.utils import StateInterface, Logger, OSInfo
 
 
 # these imports are provided by pywin32
@@ -47,41 +47,50 @@ class SunTracking:
 
         logger.info("Running SunTracking")
 
-        # automation is not active or was deactivated recently
-        # TODO: Prüfen ob Flankenwechsel notwendig
-        if not StateInterface.read()["vbdsd_indicates_good_conditions"]:
-            if self.ct_application_running:
-                self.stop_sun_tracking_automation()
-                logger.info("Stop CamTracker.")
-            return
+        automation_should_be_running = StateInterface.read()[
+            "automation_should_be_running"
+        ]
 
         # main logic for active automation
-
-        # start ct if not currently running
-        if not self.ct_application_running:
+        if automation_should_be_running and not self.ct_application_running():
+            logger.info("Start CamTracker")
             self.start_sun_tracking_automation()
-            logger.info("Start CamTracker.")
+            return
+
+        if not automation_should_be_running and self.ct_application_running():
+            logger.info("Stop CamTracker")
+            self.stop_sun_tracking_automation()
+            return
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
-        if not self.__valdiate_tracker_position:
-            self.stop_sun_tracking_automation()
-            logger.info("Stop CamTracker. Preparing for reinitialization.")
+        if self.ct_application_running():
+            if not self.valdiate_tracker_position():
+                logger.info("CamTracker Motor Position is over threshold.")
+                logger.info("Stop CamTracker. Preparing for reinitialization.")
+                self.stop_sun_tracking_automation()
 
-    @property
     def ct_application_running(self):
         """Checks if CamTracker is already running by identifying the window.
 
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
-        # FindWindow(className, windowName)
-        # className: String, The window class name to find, else None
-        # windowName: String, The window name (ie,title) to find, else None
-        try:
-            if win32ui.FindWindow(None, "CamTracker 3.9"):
-                return True
-        except win32ui.error:
+
+        ct_path = self._CONFIG["camtracker"]["executable_path"]
+        process_name = os.path.basename(ct_path)
+
+        status = OSInfo.check_process_status(process_name)
+
+        if status == (
+            "running"
+            or "start_pending"
+            or "continue_pending"
+            or "pause_pending"
+            or "paused"
+        ):
+            return True
+        else:
             return False
 
     def start_sun_tracking_automation(self):
@@ -133,7 +142,7 @@ class SunTracking:
         if os.path.exists(stop_file_path):
             os.remove(stop_file_path)
 
-    def __read_ct_log_learn_az_elev(self):
+    def read_ct_log_learn_az_elev(self):
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
 
         Returns a list of string parameter:
@@ -206,8 +215,7 @@ class SunTracking:
             # returns either 'good' or 'bad'
             return sun_intensity
 
-    @property
-    def __valdiate_tracker_position(self):
+    def valdiate_tracker_position(self):
         """Reads motor offsets and compares it with defined threshold.
 
         Returns
@@ -215,14 +223,14 @@ class SunTracking:
         False -> CamTracker lost sun position
         """
 
-        tracker_status = self.__read_ct_log_learn_az_elev()
+        tracker_status = self.read_ct_log_learn_az_elev()
 
         if None in tracker_status:
             return
 
-        elev_offset = tracker_status[3]
-        az_offeset = tracker_status[4]
-        threshold = self._CONFIG["camtracker"]["motor_offset_threshold"]
+        elev_offset = float(tracker_status[3])
+        az_offeset = float(tracker_status[4])
+        threshold = float(self._CONFIG["camtracker"]["motor_offset_threshold"])
 
         if (elev_offset > threshold) or (az_offeset > threshold):
             return False

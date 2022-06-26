@@ -1,4 +1,5 @@
-from packages.core.utils import ConfigInterface
+import os
+from packages.core.utils import ConfigInterface, OSInfo
 from packages.core.modules.sun_tracking import SunTracking
 
 
@@ -8,6 +9,11 @@ def test_ct_measurement():
     # print(control.continuous_readings())
     # assert(False)
 
-    assert(instance.test_setup)
+    ct_path = _CONFIG["camtracker"]["executable_path"]
+    process_name = os.path.basename(ct_path)
+
+    status = OSInfo.check_process_status(process_name)
+
+    print(status)
 
     assert False
