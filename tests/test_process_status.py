@@ -9,7 +9,8 @@ def test_ct_measurement():
     # print(control.continuous_readings())
     # assert(False)
 
-    process_name = "CamTracker_3_9_2015_02_03.exe"
+    ct_path = self._CONFIG["camtracker"]["executable_path"]
+    process_name = os.path.basename(ct_path)
     
     status = OSInfo.check_process_status(process_name)
 
