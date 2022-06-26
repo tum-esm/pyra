@@ -146,85 +146,89 @@ export namespace customTypes {
         };
     };
 
+    export type enclosurePlcReadings = {
+        actors: {
+            fan_speed: number;
+            current_angle: number;
+        };
+        control: {
+            auto_temp_mode: boolean;
+            manual_control: boolean;
+            manual_temp_mode: boolean;
+            sync_to_tracker: boolean;
+        };
+        sensors: {
+            humidity: number;
+            temperature: number;
+        };
+        state: {
+            cover_closed: boolean;
+            motor_failed: boolean;
+            rain: boolean;
+            reset_needed: boolean;
+            ups_alert: boolean;
+        };
+        power: {
+            camera: boolean;
+            computer: boolean;
+            heater: boolean;
+            router: boolean;
+            spectrometer: boolean;
+        };
+        connections: {
+            camera: boolean;
+            computer: boolean;
+            heater: boolean;
+            router: boolean;
+            spectrometer: boolean;
+        };
+    };
+
+    export type partialEnclosurePlcReadings = {
+        actors?: {
+            fan_speed?: number;
+            current_angle?: number;
+        };
+        control?: {
+            auto_temp_mode?: boolean;
+            manual_control?: boolean;
+            manual_temp_mode?: boolean;
+            sync_to_tracker?: boolean;
+        };
+        sensors?: {
+            humidity?: number;
+            temperature?: number;
+        };
+        state?: {
+            cover_closed?: boolean;
+            motor_failed?: boolean;
+            rain?: boolean;
+            reset_needed?: boolean;
+            ups_alert?: boolean;
+        };
+        power?: {
+            camera?: boolean;
+            computer?: boolean;
+            heater?: boolean;
+            router?: boolean;
+            spectrometer?: boolean;
+        };
+        connections?: {
+            camera?: boolean;
+            computer?: boolean;
+            heater?: boolean;
+            router?: boolean;
+            spectrometer?: boolean;
+        };
+    };
+
     export type coreState = {
         automation_should_be_running: boolean;
-        enclosure_plc_readings: {
-            actors: {
-                fan_speed: number;
-                current_angle: number;
-            };
-            control: {
-                auto_temp_mode: boolean;
-                manual_control: boolean;
-                manual_temp_mode: boolean;
-                sync_to_tracker: boolean;
-            };
-            sensors: {
-                humidity: number;
-                temperature: number;
-            };
-            state: {
-                cover_closed: boolean;
-                motor_failed: boolean;
-                rain: boolean;
-                reset_needed: boolean;
-                ups_alert: boolean;
-            };
-            power: {
-                camera: boolean;
-                computer: boolean;
-                heater: boolean;
-                router: boolean;
-                spectrometer: boolean;
-            };
-            connections: {
-                camera: boolean;
-                computer: boolean;
-                heater: boolean;
-                router: boolean;
-                spectrometer: boolean;
-            };
-        };
+        enclosure_plc_readings: enclosurePlcReadings;
     };
 
     export type partialCoreState = {
         automation_should_be_running?: boolean;
-        enclosure_plc_readings?: {
-            actors?: {
-                fan_speed?: number;
-                current_angle?: number;
-            };
-            control?: {
-                auto_temp_mode?: boolean;
-                manual_control?: boolean;
-                manual_temp_mode?: boolean;
-                sync_to_tracker?: boolean;
-            };
-            sensors?: {
-                humidity?: number;
-                temperature?: number;
-            };
-            state?: {
-                cover_closed?: boolean;
-                motor_failed?: boolean;
-                rain?: boolean;
-                reset_needed?: boolean;
-                ups_alert?: boolean;
-            };
-            power?: {
-                camera?: boolean;
-                computer?: boolean;
-                heater?: boolean;
-                router?: boolean;
-                spectrometer?: boolean;
-            };
-            connections?: {
-                camera?: boolean;
-                computer?: boolean;
-                heater?: boolean;
-                router?: boolean;
-                spectrometer?: boolean;
-            };
-        };
+        enclosure_plc_readings?: partialEnclosurePlcReadings;
     };
 }

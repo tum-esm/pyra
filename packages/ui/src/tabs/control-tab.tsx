@@ -1,7 +1,7 @@
 import { backend, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
 import { useState } from 'react';
-import { customTypes, coreState } from '../custom-types';
+import { customTypes } from '../custom-types';
 import { ICONS } from '../assets';
 import toast from 'react-hot-toast';
 
@@ -73,7 +73,12 @@ export default function ControlTab() {
         setIsLoadingManualToggle(false);
     }
 
-    async function runPlcWriteCommand(command: string[]) {
+    async function runPlcWriteCommand(
+        command: string[],
+        setLoading: (l: boolean) => void,
+        stateUpdateIfSuccessful: customTypes.partialEnclosurePlcReadings
+    ) {
+        setLoading(true);
         const result = await backend.writeToPLC(command);
         if (result.stdout.replace(/[\n\s]*/g, '') !== 'Ok') {
             if (result.code === 0) {
@@ -82,17 +87,25 @@ export default function ControlTab() {
                 toast.error('Could not write to PLC - details in console');
                 console.error(`Could not write to PLC, processResults = ${JSON.stringify(result)}`);
             }
+            setLoading(false);
             throw '';
+        } else {
+            setCoreStatePartial({ enclosure_plc_readings: stateUpdateIfSuccessful });
+            setLoading(false);
         }
     }
 
     async function reset() {
-        setIsLoadingReset(true);
-        try {
-            await runPlcWriteCommand(['write-reset']);
-            setCoreStatePartial({ enclosure_plc_readings: { state: { reset_needed: false } } });
-        } catch {}
-        setIsLoadingReset(false);
+        await runPlcWriteCommand(['write-reset'], setIsLoadingReset, {
+            state: { reset_needed: false },
+        });
+    }
+
+    async function closeCover() {
+        await runPlcWriteCommand(['write-close-cover'], setIsLoadingCloseCover, {
+            state: { cover_closed: true },
+            actors: { current_angle: 0 },
+        });
     }
 
     if (coreState === undefined || plcIsControlledByUser === undefined) {
@@ -150,7 +163,13 @@ export default function ControlTab() {
                             value: coreState.enclosure_plc_readings.state.rain ? 'Yes' : 'No',
                         },
                     ]}
-                    actions={[{ label: 'force cover close', callback: () => {}, spinner: false }]}
+                    actions={[
+                        {
+                            label: 'force cover close',
+                            callback: closeCover,
+                            spinner: isLoadingCloseCover,
+                        },
+                    ]}
                 />
                 <VariableBlock
                     label="Cover Angle"
