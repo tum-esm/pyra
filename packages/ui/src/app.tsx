@@ -5,7 +5,6 @@ import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from
 import { essentialComponents, Header } from './components';
 import { watch } from 'tauri-plugin-fs-watch-api';
 import toast, { resolveValue, Toaster } from 'react-hot-toast';
-import { customTypes } from './custom-types';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -15,6 +14,9 @@ export default function App() {
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
 
+    const [coreStateShouldBeLoaded, setCoreStateShouldBeLoaded] = useState(true);
+    const [logsShouldBeLoaded, setLogsShouldBeLoaded] = useState(true);
+
     const centralConfigTumPlc = reduxUtils.useTypedSelector((s) => s.config.central?.tum_plc);
     const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
     const enclosureControlsIsVisible =
@@ -23,15 +25,23 @@ export default function App() {
     const pyraCoreIsRunning = pyraCorePID !== undefined && pyraCorePID !== -1;
 
     const dispatch = reduxUtils.useTypedDispatch();
-    const setConfigs = (c: customTypes.config | undefined) =>
-        dispatch(reduxUtils.configActions.setConfigs(c));
 
     useEffect(() => {
-        loadInitialAppState();
-        fetchLogsFile();
-        fetchCoreState();
-        initializeFileWatchers();
+        loadInitialAppState().catch(console.error);
+        startFileWatchers().catch(console.error);
     }, []);
+
+    useEffect(() => {
+        if (logsShouldBeLoaded) {
+            fetchLogsFile().catch(console.error);
+        }
+    }, [fetchLogsFile, logsShouldBeLoaded]);
+
+    useEffect(() => {
+        if (coreStateShouldBeLoaded) {
+            fetchCoreState().catch(console.error);
+        }
+    }, [fetchLogsFile, coreStateShouldBeLoaded]);
 
     /*
     1. Check whether pyra-cli is available
@@ -57,7 +67,7 @@ export default function App() {
         } else {
             try {
                 const newConfig = JSON.parse(result2.stdout);
-                setConfigs(newConfig);
+                dispatch(reduxUtils.configActions.setConfigs(newConfig));
                 setBackendIntegrity('valid');
             } catch (e) {
                 console.error(
@@ -87,6 +97,7 @@ export default function App() {
             const result = await backend.getState();
             try {
                 const newCoreState = JSON.parse(result.stdout);
+                console.log({ newCoreState });
                 dispatch(reduxUtils.coreStateActions.set(newCoreState));
             } catch {
                 console.error(
@@ -100,7 +111,7 @@ export default function App() {
     }
 
     // TODO: watch for changes in config.json
-    async function initializeFileWatchers() {
+    async function startFileWatchers() {
         let logFilePath = import.meta.env.VITE_PROJECT_DIR + '\\logs\\debug.log';
         let stateFilePath = import.meta.env.VITE_PROJECT_DIR + '\\runtime-data\\state.json';
 
@@ -110,13 +121,15 @@ export default function App() {
         }
 
         await watch(logFilePath, { recursive: false }, (o) => {
-            if (o.type === 'Write') {
-                fetchLogsFile();
+            if (o.type === 'NoticeWrite') {
+                console.log('detected change in log files');
+                setLogsShouldBeLoaded(true);
             }
         });
         await watch(stateFilePath, { recursive: false }, (o) => {
-            if (o.type === 'Write') {
-                fetchCoreState();
+            if (o.type === 'NoticeWrite') {
+                console.log('detected change in core state file');
+                setCoreStateShouldBeLoaded(true);
             }
         });
     }

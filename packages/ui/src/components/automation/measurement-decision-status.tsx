@@ -79,6 +79,7 @@ function MeasurementTriggerInfo() {
                     ],
                 ].map((row: any, i) => (
                     <div
+                        key={i}
                         className={
                             'flex-row-left ' +
                             (row[0]
@@ -165,11 +166,15 @@ export default function MeasurementDecisionStatus() {
                         state={loading ? undefined : measurementDecisionResult}
                     />
                     <span className="ml-2.5 mr-1">Measurements are currently</span>
-                    {loading && (
+                    {(loading || measurementDecisionResult === undefined) && (
                         <div className="w-4 h-4 text-gray-700 animate-spin">{ICONS.spinner}</div>
                     )}
-                    {!loading && !measurementDecisionResult && <>not running</>}
-                    {!loading && measurementDecisionResult && <>running</>}
+                    {!(loading || measurementDecisionResult === undefined) && (
+                        <>
+                            {!measurementDecisionResult && <>not running</>}
+                            {measurementDecisionResult && <>running</>}
+                        </>
+                    )}
                 </div>
                 <div className="flex-grow" />
                 <div className="flex-col-center gap-y-2">

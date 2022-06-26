@@ -12,7 +12,7 @@ export const coreStateSlice = createSlice({
             state: customTypes.reduxStateCoreState,
             action: { payload: customTypes.coreState }
         ) => {
-            state.content = action.payload;
+            state.content = JSON.parse(JSON.stringify(action.payload));
         },
         setLoading: (state: customTypes.reduxStateCoreState, action: { payload: boolean }) => {
             state.loading = action.payload;
