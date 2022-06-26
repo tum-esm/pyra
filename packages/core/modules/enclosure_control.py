@@ -210,63 +210,63 @@ class EnclosureControl:
         self.cpu_busy_check()
 
     def set_sync_to_tracker(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["sync_to_tracker"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.control.sync_to_tracker, state)
 
     def set_manual_control(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["manual_control"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.control.manual_control, state)
 
     def set_auto_temperature(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["auto_temp_mode"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.control.auto_temp_mode, state)
 
     def set_manual_temperature(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.control["manual_temp_mode"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.control.manual_temp_mode, state)
 
     def check_for_reset_needed(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"])
+        return self.plc_read_bool(self._PLC_INTERFACE.state.reset_needed)
 
     def reset(self):
-        self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
+        self.plc_write_bool(self._PLC_INTERFACE.control.reset, False)
 
     def set_power_camera(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.power["camera"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power.camera, state)
 
     def read_power_camera(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power["camera"])
+        return self.plc_read_bool(self._PLC_INTERFACE.power.camera)
 
     def set_power_computer(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.power["computer"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power.computer, state)
 
     def read_power_computer(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power["computer"])
+        return self.plc_read_bool(self._PLC_INTERFACE.power.computer)
 
     def set_power_heater(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.power["heater"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power.heater, state)
 
     def read_power_heater(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power["heater"])
+        return self.plc_read_bool(self._PLC_INTERFACE.power.heater)
 
     def set_power_router(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.power["router"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power.router, state)
 
     def read_power_router(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power["router"])
+        return self.plc_read_bool(self._PLC_INTERFACE.power.router)
 
     def set_power_spectrometer(self, state=True):
-        self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], state)
+        self.plc_write_bool(self._PLC_INTERFACE.power.spectrometer, state)
 
     def read_power_spectrometer(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.power["spectrometer"])
+        return self.plc_read_bool(self._PLC_INTERFACE.power.spectrometer)
 
     def move_cover(self, value):
         self.set_manual_control(True)
-        self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], value)
+        self.plc_write_int(self._PLC_INTERFACE.actors.move_cover, value)
         self.set_manual_control(False)
 
     def read_current_cover_angle(self):
-        return self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"])
+        return self.plc_read_int(self._PLC_INTERFACE.actors.current_angle)
 
     def check_cover_closed(self):
-        return self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"])
+        return self.plc_read_bool(self._PLC_INTERFACE.state.cover_closed)
 
     def force_cover_close(self):
         if self.check_for_reset_needed():
@@ -309,47 +309,47 @@ class EnclosureControl:
         # TODO: This functions needs way to long to execute. Solution?
         return {
             "actors": {
-                "fan_speed": self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
+                "fan_speed": self.plc_read_int(self._PLC_INTERFACE.actors.fan_speed),
                 "current_angle": self.plc_read_int(
-                    self._PLC_INTERFACE.actors["current_angle"]
+                    self._PLC_INTERFACE.actors.current_angle
                 ),
             },
             "control": {
                 "auto_temp_mode": self.plc_read_bool(
-                    self._PLC_INTERFACE.control["auto_temp_mode"]
+                    self._PLC_INTERFACE.control.auto_temp_mode
                 ),
                 "manual_control": self.plc_read_bool(
-                    self._PLC_INTERFACE.control["manual_control"]
+                    self._PLC_INTERFACE.control.manual_control
                 ),
                 "manual_temp_mode": self.plc_read_bool(
-                    self._PLC_INTERFACE.control["manual_temp_mode"]
+                    self._PLC_INTERFACE.control.manual_temp_mode
                 ),
             },
             "sensors": {
-                "humidity": self.plc_read_int(self._PLC_INTERFACE.sensors["humidity"]),
+                "humidity": self.plc_read_int(self._PLC_INTERFACE.sensors.humidity),
                 "temperature": self.plc_read_int(
-                    self._PLC_INTERFACE.sensors["temperature"]
+                    self._PLC_INTERFACE.sensors.temperature
                 ),
             },
             "state": {
-                "camera": self.plc_read_bool(self._PLC_INTERFACE.state["camera"]),
-                "computer": self.plc_read_bool(self._PLC_INTERFACE.state["computer"]),
+                "camera": self.plc_read_bool(self._PLC_INTERFACE.state.camera),
+                "computer": self.plc_read_bool(self._PLC_INTERFACE.state.computer),
                 "cover_closed": self.plc_read_bool(
-                    self._PLC_INTERFACE.state["cover_closed"]
+                    self._PLC_INTERFACE.state.cover_closed
                 ),
-                "heater": self.plc_read_bool(self._PLC_INTERFACE.state["heater"]),
+                "heater": self.plc_read_bool(self._PLC_INTERFACE.state.heater),
                 "motor_failed": self.plc_read_bool(
-                    self._PLC_INTERFACE.state["motor_failed"]
+                    self._PLC_INTERFACE.state.motor_failed
                 ),
-                "rain": self.plc_read_bool(self._PLC_INTERFACE.state["rain"]),
+                "rain": self.plc_read_bool(self._PLC_INTERFACE.state.rain),
                 "reset_needed": self.plc_read_bool(
-                    self._PLC_INTERFACE.state["reset_needed"]
+                    self._PLC_INTERFACE.state.reset_needed
                 ),
-                "router": self.plc_read_bool(self._PLC_INTERFACE.state["router"]),
+                "router": self.plc_read_bool(self._PLC_INTERFACE.state.router),
                 "spectrometer": self.plc_read_bool(
-                    self._PLC_INTERFACE.state["spectrometer"]
+                    self._PLC_INTERFACE.state.spectrometer
                 ),
-                "ups_alert": self.plc_read_bool(self._PLC_INTERFACE.state["ups_alert"]),
+                "ups_alert": self.plc_read_bool(self._PLC_INTERFACE.state.ups_alert),
             },
         }
 
