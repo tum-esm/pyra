@@ -89,6 +89,7 @@ class MeasurementConditions:
                 logger.info("Sun elevation as a trigger is evaluated.")
                 current_sun_elevation = Astronomy.get_current_sun_elevation()
                 sun_above_threshold = current_sun_elevation > triggers["min_sun_elevation"] * astropy_units.deg
+                #TODO: remove max_sun_elevation as not needed
                 if sun_above_threshold:
                     logger.debug("Sun angle is above threshold.")
                     automation_should_be_running = True
