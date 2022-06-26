@@ -132,39 +132,36 @@ export default function App() {
     }
 
     async function fetchConfig() {
-        if (pyraCoreIsRunning) {
-            const result = await backend.getConfig();
-            if (result.code !== 0) {
-                console.error(
-                    `Could not fetch core state. processResult = ${JSON.stringify(result)}`
-                );
-                toast.error(`Could not fetch core state, please look in the console for details`);
-                return;
-            }
+        const result = await backend.getConfig();
+        if (result.code !== 0) {
+            console.error(`Could not fetch core state. processResult = ${JSON.stringify(result)}`);
+            toast.error(`Could not fetch core state, please look in the console for details`);
+            return;
+        }
 
-            const newCentralConfig: customTypes.config = JSON.parse(result.stdout);
-            const diffsToCentral = diff(centralConfig, newCentralConfig);
-            if (diffsToCentral === undefined) {
-                return;
-            }
+        const newCentralConfig: customTypes.config = JSON.parse(result.stdout);
+        const diffsToCentral = diff(centralConfig, newCentralConfig);
+        console.log({ centralConfig, newCentralConfig, diffsToCentral });
+        if (diffsToCentral === undefined) {
+            return;
+        }
 
-            // measurement_decision.cli_decision_result is allowed to change
-            // changing any other property from somewhere else than the UI requires
-            // a reload of the window
-            const reloadIsRequired =
-                diffsToCentral.filter(
-                    (d) =>
-                        d.kind === 'E' &&
-                        d.path?.join('.') !== 'measurement_decision.cli_decision_result'
-                ).length > 0;
+        // measurement_decision.cli_decision_result is allowed to change
+        // changing any other property from somewhere else than the UI requires
+        // a reload of the window
+        const reloadIsRequired =
+            diffsToCentral.filter(
+                (d) =>
+                    d.kind === 'E' &&
+                    d.path?.join('.') !== 'measurement_decision.cli_decision_result'
+            ).length > 0;
 
-            if (reloadIsRequired) {
-                dialog
-                    .message('The config.json file has been modified. Reload required', 'PyRa 4 UI')
-                    .then(() => window.location.reload());
-            } else {
-                dispatch(reduxUtils.configActions.setConfigsPartial(newCentralConfig));
-            }
+        if (reloadIsRequired) {
+            dialog
+                .message('The config.json file has been modified. Reload required', 'PyRa 4 UI')
+                .then(() => window.location.reload());
+        } else {
+            dispatch(reduxUtils.configActions.setConfigsPartial(newCentralConfig));
         }
     }
 
@@ -193,35 +190,33 @@ export default function App() {
 
         const newLogsChecksum = getLine('debug.log');
         if (newLogsChecksum !== fileWatcherChecksums.logs) {
-            setLogsShouldBeLoaded(true);
+            if (fileWatcherChecksums.logs !== '') {
+                setLogsShouldBeLoaded(true);
+                console.log('change in log files detected');
+            }
             checksumsChanged = true;
-            console.log('change in log files detected');
         }
 
         const newStateChecksum = getLine('state.json');
         if (newStateChecksum !== fileWatcherChecksums.state) {
-            setCoreStateShouldBeLoaded(true);
+            if (fileWatcherChecksums.state !== '') {
+                setCoreStateShouldBeLoaded(true);
+                console.log('change in core state file detected');
+            }
             checksumsChanged = true;
-            console.log('change in core state file detected');
         }
 
         const newConfigChecksum = getLine('config.json');
         if (newConfigChecksum !== fileWatcherChecksums.config) {
-            setConfigShouldBeLoaded(true);
+            if (fileWatcherChecksums.config !== '') {
+                // wait 2 second to make sure all state changes have propagated
+                setTimeout(() => setConfigShouldBeLoaded(true), 2000);
+                console.log('change in config file detected');
+            }
             checksumsChanged = true;
-            console.log('change in config file detected');
         }
 
         if (checksumsChanged) {
-            console.log({
-                old: fileWatcherChecksums,
-                new: {
-                    logs: newLogsChecksum,
-                    state: newStateChecksum,
-                    config: newConfigChecksum,
-                },
-            });
-
             setFileWatcherChecksums({
                 logs: newLogsChecksum,
                 state: newStateChecksum,
