@@ -3,12 +3,12 @@ import { ICONS } from './assets';
 import { backend, reduxUtils } from './utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from './tabs';
 import { essentialComponents, Header } from './components';
-import toast, { resolveValue, Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { diff } from 'deep-diff';
 import { customTypes } from './custom-types';
-import { dialog } from '@tauri-apps/api';
-import { Command } from '@tauri-apps/api/shell';
+import { dialog, shell } from '@tauri-apps/api';
 import { first } from 'lodash';
+import MessageQueue from './components/message-queue';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -18,8 +18,8 @@ export default function App() {
         undefined | 'valid' | 'cli is missing' | 'config is invalid'
     >(undefined);
 
-    const [coreStateShouldBeLoaded, setCoreStateShouldBeLoaded] = useState(true);
     const [logsShouldBeLoaded, setLogsShouldBeLoaded] = useState(true);
+    const [coreStateShouldBeLoaded, setCoreStateShouldBeLoaded] = useState(false);
     const [configShouldBeLoaded, setConfigShouldBeLoaded] = useState(false);
 
     const [fileWatcherChecksums, setFileWatcherChecksums] = useState<{
@@ -34,6 +34,7 @@ export default function App() {
 
     const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
+    const coreState = reduxUtils.useTypedSelector((s) => s.coreState.content);
     const enclosureControlsIsVisible =
         centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
     const pyraCoreIsRunning = pyraCorePID !== undefined && pyraCorePID !== -1;
@@ -41,16 +42,16 @@ export default function App() {
 
     useEffect(() => {
         loadInitialAppState().catch(console.error);
-        startFileWatchers();
     }, []);
 
     useEffect(() => {
-        const watchInterval = setInterval(startFileWatchers, 2000);
+        const watchInterval = setInterval(detectFileChanges, 2000);
         return () => clearInterval(watchInterval);
     }, [fileWatcherChecksums]);
 
     useEffect(() => {
         if (logsShouldBeLoaded) {
+            console.log('loading logs');
             setLogsShouldBeLoaded(false);
             fetchLogsFile().catch(console.error);
         }
@@ -58,13 +59,15 @@ export default function App() {
 
     useEffect(() => {
         if (coreStateShouldBeLoaded) {
+            console.log('loading core state');
             setCoreStateShouldBeLoaded(false);
             fetchCoreState().catch(console.error);
         }
-    }, [fetchCoreState, coreStateShouldBeLoaded]);
+    }, [coreStateShouldBeLoaded]);
 
     useEffect(() => {
         if (configShouldBeLoaded) {
+            console.log('loading config');
             setConfigShouldBeLoaded(false);
             fetchConfig().catch(console.error);
         }
@@ -118,18 +121,28 @@ export default function App() {
         dispatch(reduxUtils.logsActions.setLoading(false));
     }
 
-    async function fetchCoreState() {
+    const fetchCoreState = useCallback(async () => {
         dispatch(reduxUtils.coreStateActions.setLoading(true));
-        const result = await backend.getState();
+        let result: shell.ChildProcess;
+        if (pyraCoreIsRunning && centralConfig?.tum_plc?.controlled_by_user === false) {
+            result = await backend.getState();
+        } else {
+            result = await backend.readFromPLC();
+        }
+
         if (result.code !== 0) {
             console.error(`Could not fetch core state. processResult = ${JSON.stringify(result)}`);
             toast.error(`Could not fetch core state, please look in the console for details`);
         } else {
-            const newCoreState = JSON.parse(result.stdout);
-            dispatch(reduxUtils.coreStateActions.set(newCoreState));
+            try {
+                const newCoreState = JSON.parse(result.stdout);
+                dispatch(reduxUtils.coreStateActions.set(newCoreState));
+            } catch {
+                toast.error(`Could not fetch core state: ${result.stdout}`);
+            }
         }
         dispatch(reduxUtils.coreStateActions.setLoading(false));
-    }
+    }, [pyraCoreIsRunning, centralConfig]);
 
     async function fetchConfig() {
         const result = await backend.getConfig();
@@ -165,7 +178,7 @@ export default function App() {
         }
     }
 
-    const startFileWatchers = useCallback(async () => {
+    const detectFileChanges = useCallback(async () => {
         let cmd = 'md5-windows';
         let filepaths = ['logs\\debug.log', 'runtime-data\\state.json', 'config\\config.json'];
         if (window.navigator.platform.includes('Mac')) {
@@ -173,7 +186,7 @@ export default function App() {
             filepaths = filepaths.map((p) => p.replace('\\', '/'));
         }
 
-        const result = await new Command(cmd, filepaths, {
+        const result = await new shell.Command(cmd, filepaths, {
             cwd: import.meta.env.VITE_PROJECT_DIR,
         }).execute();
 
@@ -227,11 +240,21 @@ export default function App() {
 
     // Fetch PLC State via CLI when PLC is controlled by user
     useEffect(() => {
-        if (centralConfig?.tum_plc?.controlled_by_user) {
-            const interval = undefined; // TODO: Fetch plc state via cli
-            return () => clearInterval(interval);
+        if (centralConfig !== undefined && pyraCorePID !== undefined) {
+            if (centralConfig.tum_plc !== null) {
+                if (coreState === undefined) {
+                    setCoreStateShouldBeLoaded(true);
+                }
+
+                // load stuff directly from PLC if pyraCore is not running
+                // or user has set the PLC interaction to manual
+                if (!pyraCoreIsRunning || centralConfig.tum_plc.controlled_by_user === true) {
+                    const watchInterval = setInterval(() => setCoreStateShouldBeLoaded(true), 5000);
+                    return () => clearInterval(watchInterval);
+                }
+            }
         }
-    }, [centralConfig?.tum_plc?.controlled_by_user]);
+    }, [coreState, pyraCorePID, centralConfig]);
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
@@ -306,57 +329,7 @@ export default function App() {
                             </div>
                         )}
                     </main>
-                    <Toaster
-                        position="bottom-right"
-                        toastOptions={{
-                            duration: 24 * 3600 * 1000,
-                        }}
-                    >
-                        {(t) => {
-                            let typeIconColor = '';
-                            let typeIcon = <></>;
-                            switch (resolveValue(t.type, t)) {
-                                case 'error':
-                                    typeIconColor = 'text-red-300';
-                                    typeIcon = ICONS.alert;
-                                    break;
-                                case 'success':
-                                    typeIconColor = 'text-green-300';
-                                    typeIcon = ICONS.check;
-                                    break;
-                            }
-                            return (
-                                <div
-                                    className={
-                                        'bg-gray-900 rounded-md shadow text-sm flex-row-center overflow-hidden'
-                                    }
-                                    style={{ opacity: t.visible ? 1 : 0 }}
-                                >
-                                    <div
-                                        className={`w-6 h-6 p-0.5 ml-1.5 mr-1 ${typeIconColor} flex-shrink-0`}
-                                    >
-                                        {typeIcon}
-                                    </div>
-                                    <div
-                                        className={
-                                            'pr-3 py-2 leading-tight text-sm text-gray-200 max-w-md'
-                                        }
-                                    >
-                                        {resolveValue(t.message, t)}
-                                    </div>
-                                    <button
-                                        onClick={() => toast.dismiss(resolveValue(t.id, t))}
-                                        className={
-                                            'h-full flex-row-center cursor-pointer flex-shrink-0 ' +
-                                            'bg-gray-800 hover:bg-gray-700 text-gray-200'
-                                        }
-                                    >
-                                        <div className="w-6 h-6 mx-1">{ICONS.close}</div>
-                                    </button>
-                                </div>
-                            );
-                        }}
-                    </Toaster>
+                    <MessageQueue />
                 </>
             )}
         </div>

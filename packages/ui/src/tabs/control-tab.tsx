@@ -266,7 +266,7 @@ export default function ControlTab() {
         }
     }
 
-    if (coreState === undefined || plcIsControlledByUser === undefined) {
+    if (plcIsControlledByUser === undefined) {
         return <></>;
     }
 
@@ -290,183 +290,208 @@ export default function ControlTab() {
             </div>
             <div className="w-full h-px my-0 bg-gray-300" />
             <div className="flex flex-col w-full text-sm gap-y-2">
-                <VariableBlock
-                    label="Errors"
-                    buttonsAreDisabled={buttonsAreDisabled}
-                    variables={[
-                        {
-                            key: 'Reset needed',
-                            value: coreState.enclosure_plc_readings.state.reset_needed
-                                ? 'Yes'
-                                : 'No',
-                        },
-                        {
-                            key: 'Motor failed',
-                            value: coreState.enclosure_plc_readings.state.motor_failed
-                                ? 'Yes'
-                                : 'No',
-                        },
-                    ]}
-                    actions={[{ label: 'reset now', callback: reset, spinner: isLoadingReset }]}
-                />
-                <VariableBlock
-                    label="Rain Detection"
-                    buttonsAreDisabled={buttonsAreDisabled}
-                    variables={[
-                        {
-                            key: 'Cover is closed',
-                            value: coreState.enclosure_plc_readings.state.cover_closed
-                                ? 'Yes'
-                                : 'No',
-                        },
-                        {
-                            key: 'Rain detected',
-                            value: coreState.enclosure_plc_readings.state.rain ? 'Yes' : 'No',
-                        },
-                    ]}
-                    actions={[
-                        {
-                            label: 'force cover close',
-                            callback: closeCover,
-                            spinner: isLoadingCloseCover,
-                        },
-                    ]}
-                />
-                <VariableBlock
-                    label="Cover Angle"
-                    buttonsAreDisabled={buttonsAreDisabled}
-                    variables={[
-                        {
-                            key: 'Current cover angle',
-                            value: `${coreState.enclosure_plc_readings.actors.current_angle} °`,
-                        },
-                        {
-                            key: 'Sync to CamTracker',
-                            value: coreState.enclosure_plc_readings.control.sync_to_tracker
-                                ? 'Yes'
-                                : 'No',
-                        },
-                    ]}
-                    actions={[
-                        {
-                            label: 'move to angle',
-                            callback: moveCover,
-                            spinner: isLoadingMoveCover,
-                            variant: 'numeric',
-                            initialValue: coreState.enclosure_plc_readings.actors.current_angle,
-                            postfix: '°',
-                        },
-                        {
-                            label: coreState.enclosure_plc_readings.control.sync_to_tracker
-                                ? 'do not sync to tracker'
-                                : 'sync to tracker',
-                            callback: toggleSyncToTracker,
-                            spinner: isLoadingSyncTotracker,
-                        },
-                    ]}
-                />
-                <VariableBlock
-                    label="Temperature"
-                    buttonsAreDisabled={buttonsAreDisabled}
-                    variables={[
-                        {
-                            key: 'Temperature',
-                            value: `${coreState.enclosure_plc_readings.sensors.temperature} °C`,
-                        },
-                        {
-                            key: 'Humidity',
-                            value: `${coreState.enclosure_plc_readings.sensors.humidity} %`,
-                        },
-                        {
-                            key: 'Fan Speed',
-                            value: `${coreState.enclosure_plc_readings.actors.fan_speed} %`,
-                        },
-                        {
-                            key: 'Auto temperature',
-                            value: coreState.enclosure_plc_readings.control.auto_temp_mode
-                                ? 'Yes'
-                                : 'No',
-                        },
-                        {
-                            key: 'Heater power',
-                            value: coreState.enclosure_plc_readings.power.heater ? 'Yes' : 'No',
-                        },
-                    ]}
-                    actions={[
-                        {
-                            label: coreState.enclosure_plc_readings.control.auto_temp_mode
-                                ? 'disable auto temperature'
-                                : 'enable auto temperature',
-                            callback: toggleAutoTemperature,
-                            spinner: isLoadingAutoTemperature,
-                        },
-                        {
-                            label: coreState.enclosure_plc_readings.power.heater
-                                ? 'disable heater power'
-                                : 'enable heater power',
-                            callback: togglePowerHeater,
-                            spinner: isLoadingPowerHeater,
-                        },
-                    ]}
-                />
-                <VariableBlock
-                    label="Power"
-                    buttonsAreDisabled={buttonsAreDisabled}
-                    variables={[
-                        {
-                            key: 'UPS alert',
-                            value: coreState.enclosure_plc_readings.state.ups_alert ? 'Yes' : 'No',
-                        },
-                        {
-                            key: 'Camera Power',
-                            value: coreState.enclosure_plc_readings.power.camera ? 'Yes' : 'No',
-                        },
-                        {
-                            key: 'Router Power',
-                            value: coreState.enclosure_plc_readings.power.router ? 'Yes' : 'No',
-                        },
-                        {
-                            key: 'Spectrometer Power',
-                            value: coreState.enclosure_plc_readings.power.spectrometer
-                                ? 'Yes'
-                                : 'No',
-                        },
-                        {
-                            key: 'Computer Power',
-                            value: coreState.enclosure_plc_readings.power.computer ? 'Yes' : 'No',
-                        },
-                    ]}
-                    actions={[
-                        {
-                            label: coreState.enclosure_plc_readings.power.camera
-                                ? 'disable camera power'
-                                : 'enable camera power',
-                            callback: togglePowerCamera,
-                            spinner: isLoadingPowerCamera,
-                        },
-                        {
-                            label: coreState.enclosure_plc_readings.power.router
-                                ? 'disable router power'
-                                : 'enable router power',
-                            callback: togglePowerRouter,
-                            spinner: isLoadingPowerRouter,
-                        },
-                        {
-                            label: coreState.enclosure_plc_readings.power.spectrometer
-                                ? 'disable spectrometer power'
-                                : 'enable spectrometer power',
-                            callback: togglePowerSpectrometer,
-                            spinner: isLoadingPowerSpectrometer,
-                        },
-                        {
-                            label: coreState.enclosure_plc_readings.power.computer
-                                ? 'disable computer power'
-                                : 'enable computer power',
-                            callback: togglePowerComputer,
-                            spinner: isLoadingPowerComputer,
-                        },
-                    ]}
-                />
+                {coreState === undefined && (
+                    <div className="flex-row-center gap-x-1.5">
+                        <essentialComponents.Spinner />
+                        loading PLC state
+                    </div>
+                )}
+                {coreState !== undefined && (
+                    <>
+                        <VariableBlock
+                            label="Errors"
+                            buttonsAreDisabled={buttonsAreDisabled}
+                            variables={[
+                                {
+                                    key: 'Reset needed',
+                                    value: coreState.enclosure_plc_readings.state.reset_needed
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'Motor failed',
+                                    value: coreState.enclosure_plc_readings.state.motor_failed
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                            ]}
+                            actions={[
+                                { label: 'reset now', callback: reset, spinner: isLoadingReset },
+                            ]}
+                        />
+                        <VariableBlock
+                            label="Rain Detection"
+                            buttonsAreDisabled={buttonsAreDisabled}
+                            variables={[
+                                {
+                                    key: 'Cover is closed',
+                                    value: coreState.enclosure_plc_readings.state.cover_closed
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'Rain detected',
+                                    value: coreState.enclosure_plc_readings.state.rain
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                            ]}
+                            actions={[
+                                {
+                                    label: 'force cover close',
+                                    callback: closeCover,
+                                    spinner: isLoadingCloseCover,
+                                },
+                            ]}
+                        />
+                        <VariableBlock
+                            label="Cover Angle"
+                            buttonsAreDisabled={buttonsAreDisabled}
+                            variables={[
+                                {
+                                    key: 'Current cover angle',
+                                    value: `${coreState.enclosure_plc_readings.actors.current_angle} °`,
+                                },
+                                {
+                                    key: 'Sync to CamTracker',
+                                    value: coreState.enclosure_plc_readings.control.sync_to_tracker
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                            ]}
+                            actions={[
+                                {
+                                    label: 'move to angle',
+                                    callback: moveCover,
+                                    spinner: isLoadingMoveCover,
+                                    variant: 'numeric',
+                                    initialValue:
+                                        coreState.enclosure_plc_readings.actors.current_angle,
+                                    postfix: '°',
+                                },
+                                {
+                                    label: coreState.enclosure_plc_readings.control.sync_to_tracker
+                                        ? 'do not sync to tracker'
+                                        : 'sync to tracker',
+                                    callback: toggleSyncToTracker,
+                                    spinner: isLoadingSyncTotracker,
+                                },
+                            ]}
+                        />
+                        <VariableBlock
+                            label="Temperature"
+                            buttonsAreDisabled={buttonsAreDisabled}
+                            variables={[
+                                {
+                                    key: 'Temperature',
+                                    value: `${coreState.enclosure_plc_readings.sensors.temperature} °C`,
+                                },
+                                {
+                                    key: 'Humidity',
+                                    value: `${coreState.enclosure_plc_readings.sensors.humidity} %`,
+                                },
+                                {
+                                    key: 'Fan Speed',
+                                    value: `${coreState.enclosure_plc_readings.actors.fan_speed} %`,
+                                },
+                                {
+                                    key: 'Auto temperature',
+                                    value: coreState.enclosure_plc_readings.control.auto_temp_mode
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'Heater power',
+                                    value: coreState.enclosure_plc_readings.power.heater
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                            ]}
+                            actions={[
+                                {
+                                    label: coreState.enclosure_plc_readings.control.auto_temp_mode
+                                        ? 'disable auto temperature'
+                                        : 'enable auto temperature',
+                                    callback: toggleAutoTemperature,
+                                    spinner: isLoadingAutoTemperature,
+                                },
+                                {
+                                    label: coreState.enclosure_plc_readings.power.heater
+                                        ? 'disable heater power'
+                                        : 'enable heater power',
+                                    callback: togglePowerHeater,
+                                    spinner: isLoadingPowerHeater,
+                                },
+                            ]}
+                        />
+                        <VariableBlock
+                            label="Power"
+                            buttonsAreDisabled={buttonsAreDisabled}
+                            variables={[
+                                {
+                                    key: 'UPS alert',
+                                    value: coreState.enclosure_plc_readings.state.ups_alert
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'Camera Power',
+                                    value: coreState.enclosure_plc_readings.power.camera
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'Router Power',
+                                    value: coreState.enclosure_plc_readings.power.router
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'Spectrometer Power',
+                                    value: coreState.enclosure_plc_readings.power.spectrometer
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'Computer Power',
+                                    value: coreState.enclosure_plc_readings.power.computer
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                            ]}
+                            actions={[
+                                {
+                                    label: coreState.enclosure_plc_readings.power.camera
+                                        ? 'disable camera power'
+                                        : 'enable camera power',
+                                    callback: togglePowerCamera,
+                                    spinner: isLoadingPowerCamera,
+                                },
+                                {
+                                    label: coreState.enclosure_plc_readings.power.router
+                                        ? 'disable router power'
+                                        : 'enable router power',
+                                    callback: togglePowerRouter,
+                                    spinner: isLoadingPowerRouter,
+                                },
+                                {
+                                    label: coreState.enclosure_plc_readings.power.spectrometer
+                                        ? 'disable spectrometer power'
+                                        : 'enable spectrometer power',
+                                    callback: togglePowerSpectrometer,
+                                    spinner: isLoadingPowerSpectrometer,
+                                },
+                                {
+                                    label: coreState.enclosure_plc_readings.power.computer
+                                        ? 'disable computer power'
+                                        : 'enable computer power',
+                                    callback: togglePowerComputer,
+                                    spinner: isLoadingPowerComputer,
+                                },
+                            ]}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );
