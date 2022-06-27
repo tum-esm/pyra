@@ -21,13 +21,9 @@ export default function App() {
     const [coreStateShouldBeLoaded, setCoreStateShouldBeLoaded] = useState(false);
     const [configShouldBeLoaded, setConfigShouldBeLoaded] = useState(false);
 
-    const [fileWatcherChecksums, setFileWatcherChecksums] = useState<{
-        logs: string | undefined;
-        state: string | undefined;
-        config: string | undefined;
-    }>({
+    const [fileWatcherChecksums, setFileWatcherChecksums] = useState({
         logs: '',
-        state: '',
+        coreState: '',
         config: '',
     });
 
@@ -40,11 +36,21 @@ export default function App() {
     const dispatch = reduxUtils.useTypedDispatch();
 
     useEffect(() => {
-        loadInitialAppState().catch(console.error);
+        fetchUtils.initialAppState(dispatch, setBackendIntegrity).catch(console.error);
     }, []);
 
     useEffect(() => {
-        const watchInterval = setInterval(detectFileChanges, 2000);
+        const watchInterval = setInterval(
+            () =>
+                fetchUtils.detectFileChanges(
+                    fileWatcherChecksums,
+                    setLogsShouldBeLoaded,
+                    setCoreStateShouldBeLoaded,
+                    setConfigShouldBeLoaded,
+                    setFileWatcherChecksums
+                ),
+            2000
+        );
         return () => clearInterval(watchInterval);
     }, [fileWatcherChecksums]);
 
@@ -52,9 +58,9 @@ export default function App() {
         if (logsShouldBeLoaded) {
             console.log('loading logs');
             setLogsShouldBeLoaded(false);
-            fetchLogsFile().catch(console.error);
+            fetchUtils.logs(dispatch).catch(console.error);
         }
-    }, [fetchLogsFile, logsShouldBeLoaded]);
+    }, [logsShouldBeLoaded]);
 
     useEffect(() => {
         if (
@@ -75,114 +81,6 @@ export default function App() {
             fetchUtils.config(dispatch, centralConfig).catch(console.error);
         }
     }, [configShouldBeLoaded, centralConfig]);
-
-    /*
-    1. Check whether pyra-cli is available
-    2. Check whether config can be read
-    3. Possibly add config to reduxStore
-    */
-    async function loadInitialAppState() {
-        setBackendIntegrity(undefined);
-        console.debug('loading initial state ...');
-
-        const result = await fetchUtils.backend.pyraCliIsAvailable();
-        if (result.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...')) {
-            console.debug('found pyra-cli');
-        } else {
-            console.error(`Could not reach pyra-cli. processResult = ${JSON.stringify(result)}`);
-            setBackendIntegrity('cli is missing');
-            return;
-        }
-
-        const result2 = await fetchUtils.backend.getConfig();
-        if (result2.stdout.startsWith('file not in a valid json format')) {
-            setBackendIntegrity('config is invalid');
-        } else {
-            try {
-                const newConfig = JSON.parse(result2.stdout);
-                dispatch(reduxUtils.configActions.setConfigs(newConfig));
-                setBackendIntegrity('valid');
-            } catch (e) {
-                console.error(
-                    `Could not fetch config file. processResult = ${JSON.stringify(result2)}`
-                );
-                setBackendIntegrity('config is invalid');
-            }
-        }
-    }
-
-    async function fetchLogsFile() {
-        dispatch(reduxUtils.logsActions.setLoading(true));
-        const result = await fetchUtils.backend.readDebugLogs();
-        if (result.code === 0) {
-            const newLogLines = result.stdout.split('\n');
-            dispatch(reduxUtils.logsActions.set(newLogLines));
-        } else {
-            console.error(`Could not fetch log files. processResult = ${JSON.stringify(result)}`);
-            toast.error('Could not fetch log files - details in the console');
-        }
-        dispatch(reduxUtils.logsActions.setLoading(false));
-    }
-
-    const detectFileChanges = useCallback(async () => {
-        let cmd = 'md5-windows';
-        let filepaths = ['logs\\debug.log', 'runtime-data\\state.json', 'config\\config.json'];
-        if (window.navigator.platform.includes('Mac')) {
-            cmd = 'md5-mac';
-            filepaths = filepaths.map((p) => p.replace('\\', '/'));
-        }
-
-        const result = await new shell.Command(cmd, filepaths, {
-            cwd: import.meta.env.VITE_PROJECT_DIR,
-        }).execute();
-
-        if (result.code !== 0) {
-            toast.error('File watcher is not working - details in console');
-            console.error(`File watcher is not working, processResult = ${JSON.stringify(result)}`);
-            return;
-        }
-
-        const getLine = (indicator: string) =>
-            first(result.stdout.split('\n').filter((line) => line.includes(indicator)));
-
-        let checksumsChanged = false;
-
-        const newLogsChecksum = getLine('debug.log');
-        if (newLogsChecksum !== fileWatcherChecksums.logs) {
-            if (fileWatcherChecksums.logs !== '') {
-                setLogsShouldBeLoaded(true);
-                console.log('change in log files detected');
-            }
-            checksumsChanged = true;
-        }
-
-        const newStateChecksum = getLine('state.json');
-        if (newStateChecksum !== fileWatcherChecksums.state) {
-            if (fileWatcherChecksums.state !== '') {
-                setCoreStateShouldBeLoaded(true);
-                console.log('change in core state file detected');
-            }
-            checksumsChanged = true;
-        }
-
-        const newConfigChecksum = getLine('config.json');
-        if (newConfigChecksum !== fileWatcherChecksums.config) {
-            if (fileWatcherChecksums.config !== '') {
-                // wait 2 second to make sure all state changes have propagated
-                setTimeout(() => setConfigShouldBeLoaded(true), 2000);
-                console.log('change in config file detected');
-            }
-            checksumsChanged = true;
-        }
-
-        if (checksumsChanged) {
-            setFileWatcherChecksums({
-                logs: newLogsChecksum,
-                state: newStateChecksum,
-                config: newConfigChecksum,
-            });
-        }
-    }, [fileWatcherChecksums]);
 
     // Fetch PLC State via CLI when PLC is controlled by user
     useEffect(() => {
@@ -212,7 +110,10 @@ export default function App() {
             {(backendIntegrity === 'cli is missing' ||
                 backendIntegrity === 'config is invalid') && (
                 <structuralComponents.DisconnectedScreen
-                    {...{ backendIntegrity, loadInitialAppState }}
+                    backendIntegrity={backendIntegrity}
+                    loadInitialAppState={() =>
+                        fetchUtils.initialAppState(dispatch, setBackendIntegrity)
+                    }
                 />
             )}
             {backendIntegrity === 'valid' && (
