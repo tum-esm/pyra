@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ICONS } from './assets';
-import { backend, reduxUtils } from './utils';
+import { fetchUtils, reduxUtils } from './utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from './tabs';
 import { essentialComponents, structuralComponents } from './components';
 import toast from 'react-hot-toast';
@@ -81,7 +81,7 @@ export default function App() {
         setBackendIntegrity(undefined);
         console.debug('loading initial state ...');
 
-        const result = await backend.pyraCliIsAvailable();
+        const result = await fetchUtils.backend.pyraCliIsAvailable();
         if (result.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...')) {
             console.debug('found pyra-cli');
         } else {
@@ -90,7 +90,7 @@ export default function App() {
             return;
         }
 
-        const result2 = await backend.getConfig();
+        const result2 = await fetchUtils.backend.getConfig();
         if (result2.stdout.startsWith('file not in a valid json format')) {
             setBackendIntegrity('config is invalid');
         } else {
@@ -109,7 +109,7 @@ export default function App() {
 
     async function fetchLogsFile() {
         dispatch(reduxUtils.logsActions.setLoading(true));
-        const result = await backend.readDebugLogs();
+        const result = await fetchUtils.backend.readDebugLogs();
         if (result.code === 0) {
             const newLogLines = result.stdout.split('\n');
             dispatch(reduxUtils.logsActions.set(newLogLines));
@@ -124,9 +124,9 @@ export default function App() {
         dispatch(reduxUtils.coreStateActions.setLoading(true));
         let result: shell.ChildProcess;
         if (pyraCoreIsRunning && centralConfig?.tum_plc?.controlled_by_user === false) {
-            result = await backend.getState();
+            result = await fetchUtils.backend.getState();
         } else {
-            result = await backend.readFromPLC();
+            result = await fetchUtils.backend.readFromPLC();
         }
 
         if (result.code !== 0) {
@@ -144,7 +144,7 @@ export default function App() {
     }, [pyraCoreIsRunning, centralConfig]);
 
     async function fetchConfig() {
-        const result = await backend.getConfig();
+        const result = await fetchUtils.backend.getConfig();
         if (result.code !== 0) {
             console.error(`Could not fetch core state. processResult = ${JSON.stringify(result)}`);
             toast.error(`Could not fetch core state, please look in the console for details`);

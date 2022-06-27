@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { backend, functionalUtils, reduxUtils } from '../utils';
+import { fetchUtils, functionalUtils, reduxUtils } from '../utils';
 import { customTypes } from '../custom-types';
 import { configurationComponents } from '../components';
 import toast from 'react-hot-toast';
@@ -49,7 +49,7 @@ export default function ConfigurationTab() {
                     );
                 }
             });
-            let result = await backend.updateConfig(minimalConfigUpdate);
+            let result = await fetchUtils.backend.updateConfig(minimalConfigUpdate);
 
             if (result.stdout.includes('Updated config file')) {
                 setConfigs(parsedLocalConfig);

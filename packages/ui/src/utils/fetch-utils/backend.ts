@@ -1,5 +1,5 @@
 import { Command, ChildProcess } from '@tauri-apps/api/shell';
-import { customTypes } from '../custom-types';
+import { customTypes } from '../../custom-types';
 
 async function callCLI(args: string[]) {
     return await new Command(

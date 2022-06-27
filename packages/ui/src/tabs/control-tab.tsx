@@ -1,4 +1,4 @@
-import { backend, reduxUtils } from '../utils';
+import { fetchUtils, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
 import { useState } from 'react';
 import { customTypes } from '../custom-types';
@@ -110,7 +110,7 @@ export default function ControlTab() {
     async function setPlcIsControlledByUser(v: boolean) {
         setIsLoadingManualToggle(true);
         const update = { tum_plc: { controlled_by_user: v } };
-        let result = await backend.updateConfig(update);
+        let result = await fetchUtils.backend.updateConfig(update);
         if (!result.stdout.includes('Updated config file')) {
             console.error(
                 `Could not update config file. processResult = ${JSON.stringify(result)}`
@@ -128,7 +128,7 @@ export default function ControlTab() {
         stateUpdateIfSuccessful: customTypes.partialEnclosurePlcReadings
     ) {
         setLoading(true);
-        const result = await backend.writeToPLC(command);
+        const result = await fetchUtils.backend.writeToPLC(command);
         if (result.stdout.replace(/[\n\s]*/g, '') !== 'Ok') {
             if (result.code === 0) {
                 toast.error(`Could not write to PLC: ${result.stdout}`);
