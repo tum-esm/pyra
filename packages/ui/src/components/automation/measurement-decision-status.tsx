@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { customTypes } from '../../custom-types';
-import { backend, reduxUtils } from '../../utils';
+import { fetchUtils, reduxUtils } from '../../utils';
 import { essentialComponents } from '..';
 import { ICONS } from '../../assets';
 import toast from 'react-hot-toast';
@@ -127,7 +127,7 @@ export default function MeasurementDecisionStatus() {
         const update = {
             measurement_decision: { mode, manual_decision_result: false },
         };
-        const result = await backend.updateConfig(update);
+        const result = await fetchUtils.backend.updateConfig(update);
         if (result.stdout.includes('Updated config file')) {
             setConfigsPartial(update);
         } else {
@@ -143,7 +143,7 @@ export default function MeasurementDecisionStatus() {
         setLoading(true);
         // TODO: take automaticMeasurementDecisionResult into account
         const update = { measurement_decision: { manual_decision_result: decisionResult } };
-        const result = await backend.updateConfig(update);
+        const result = await fetchUtils.backend.updateConfig(update);
         if (result.stdout.includes('Updated config file')) {
             setConfigsPartial(update);
         } else {

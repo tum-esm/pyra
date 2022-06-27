@@ -366,7 +366,7 @@ export default function ControlTab() {
                                     spinner: isLoadingMoveCover,
                                     variant: 'numeric',
                                     initialValue:
-                                        coreState.enclosure_plc_readings.actors.current_angle,
+                                        coreState.enclosure_plc_readings.actors.current_angle || 0,
                                     postfix: '°',
                                 },
                                 {

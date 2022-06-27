@@ -1,13 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ICONS } from './assets';
 import { fetchUtils, reduxUtils } from './utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from './tabs';
-import { essentialComponents, structuralComponents } from './components';
-import toast from 'react-hot-toast';
-import { diff } from 'deep-diff';
-import { customTypes } from './custom-types';
-import { dialog, shell } from '@tauri-apps/api';
-import { first } from 'lodash';
+import { structuralComponents } from './components';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -37,7 +32,9 @@ export default function App() {
 
     useEffect(() => {
         fetchUtils.initialAppState(dispatch, setBackendIntegrity).catch(console.error);
-    }, []);
+    }, [dispatch, setBackendIntegrity]);
+
+    console.log({ backendIntegrity });
 
     useEffect(() => {
         const watchInterval = setInterval(
@@ -52,7 +49,7 @@ export default function App() {
             2000
         );
         return () => clearInterval(watchInterval);
-    }, [fileWatcherChecksums]);
+    }, [dispatch, fileWatcherChecksums]);
 
     useEffect(() => {
         if (logsShouldBeLoaded) {
@@ -60,7 +57,7 @@ export default function App() {
             setLogsShouldBeLoaded(false);
             fetchUtils.logs(dispatch).catch(console.error);
         }
-    }, [logsShouldBeLoaded]);
+    }, [dispatch, logsShouldBeLoaded]);
 
     useEffect(() => {
         if (
@@ -72,7 +69,7 @@ export default function App() {
             setCoreStateShouldBeLoaded(false);
             fetchUtils.coreState(dispatch, centralConfig, pyraCoreIsRunning).catch(console.error);
         }
-    }, [coreStateShouldBeLoaded, centralConfig, pyraCoreIsRunning]);
+    }, [dispatch, coreStateShouldBeLoaded, centralConfig, pyraCoreIsRunning]);
 
     useEffect(() => {
         if (configShouldBeLoaded && centralConfig !== undefined) {
@@ -80,22 +77,16 @@ export default function App() {
             setConfigShouldBeLoaded(false);
             fetchUtils.config(dispatch, centralConfig).catch(console.error);
         }
-    }, [configShouldBeLoaded, centralConfig]);
+    }, [dispatch, configShouldBeLoaded, centralConfig]);
 
     // Fetch PLC State via CLI when PLC is controlled by user
     useEffect(() => {
         if (centralConfig !== undefined && pyraCorePID !== undefined) {
-            if (centralConfig.tum_plc !== null) {
-                if (coreState === undefined) {
-                    setCoreStateShouldBeLoaded(true);
-                }
-
-                // load stuff directly from PLC if pyraCore is not running
-                // or user has set the PLC interaction to manual
-                if (!pyraCoreIsRunning || centralConfig.tum_plc.controlled_by_user === true) {
-                    const watchInterval = setInterval(() => setCoreStateShouldBeLoaded(true), 5000);
-                    return () => clearInterval(watchInterval);
-                }
+            // load stuff directly from PLC if pyraCore is not running
+            // or user has set the PLC interaction to manual
+            if (!pyraCoreIsRunning || centralConfig.tum_plc?.controlled_by_user === true) {
+                const watchInterval = setInterval(() => setCoreStateShouldBeLoaded(true), 5000);
+                return () => clearInterval(watchInterval);
             }
         }
     }, [coreState, pyraCorePID, centralConfig]);

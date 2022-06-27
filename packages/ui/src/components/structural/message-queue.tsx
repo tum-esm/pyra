@@ -1,7 +1,22 @@
 import { ICONS } from '../../assets';
-import toast, { resolveValue, Toaster } from 'react-hot-toast';
+import toast, { resolveValue, Toaster, useToasterStore } from 'react-hot-toast';
+import { useEffect } from 'react';
+import { minBy } from 'lodash';
 
 export default function MessageQueue() {
+    const { toasts, pausedAt } = useToasterStore();
+
+    console.log({ toasts });
+
+    useEffect(() => {
+        if (toasts.length > 4) {
+            const oldestToast = minBy(toasts, (t) => t.createdAt);
+            if (oldestToast !== undefined) {
+                toast.dismiss(oldestToast.id);
+            }
+        }
+    }, [toasts.length]);
+
     return (
         <Toaster
             position="bottom-right"

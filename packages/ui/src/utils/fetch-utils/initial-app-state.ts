@@ -25,16 +25,21 @@ async function initialAppState(
     }
 
     const result2 = await backend.getConfig();
+    const result3 = await backend.getState();
     if (result2.stdout.startsWith('file not in a valid json format')) {
         setBackendIntegrity('config is invalid');
     } else {
         try {
             const newConfig = JSON.parse(result2.stdout);
+            const newCoreState = JSON.parse(result3.stdout);
             dispatch(reduxUtils.configActions.setConfigs(newConfig));
+            dispatch(reduxUtils.coreStateActions.set(newCoreState));
             setBackendIntegrity('valid');
         } catch (e) {
             console.error(
-                `Could not fetch config file. processResult = ${JSON.stringify(result2)}`
+                `Could not fetch config file. configProcessResult = ` +
+                    `${JSON.stringify(result2)}, coreStateProcessResult ` +
+                    `= ${JSON.stringify(result3)}`
             );
             setBackendIntegrity('config is invalid');
         }

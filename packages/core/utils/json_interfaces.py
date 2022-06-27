@@ -47,24 +47,40 @@ class StateInterface:
                 {
                     "vbdsd_indicates_good_conditions": None,
                     "enclosure_plc_readings": {
-                        "actors": {"fan_speed": None, "current_angle": None},
+                        "actors": {
+                            "fan_speed": None,
+                            "current_angle": None,
+                        },
                         "control": {
                             "auto_temp_mode": None,
                             "manual_control": None,
                             "manual_temp_mode": None,
+                            "sync_to_tracker": None,
                         },
-                        "sensors": {"humidity": None, "temperature": None},
+                        "sensors": {
+                            "humidity": None,
+                            "temperature": None,
+                        },
                         "state": {
-                            "camera": None,
-                            "computer": None,
                             "cover_closed": None,
-                            "heater": None,
                             "motor_failed": None,
                             "rain": None,
                             "reset_needed": None,
+                            "ups_alert": None,
+                        },
+                        "power": {
+                            "camera": None,
+                            "computer": None,
+                            "heater": None,
                             "router": None,
                             "spectrometer": None,
-                            "ups_alert": None,
+                        },
+                        "connections": {
+                            "camera": None,
+                            "computer": None,
+                            "heater": None,
+                            "router": None,
+                            "spectrometer": None,
                         },
                     },
                     "automation_should_be_running": False,

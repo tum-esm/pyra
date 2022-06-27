@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { backend, reduxUtils } from '../../utils';
+import { fetchUtils, reduxUtils } from '../../utils';
 import { essentialComponents } from '..';
 
 export default function PyraCoreStatus() {
@@ -9,7 +9,7 @@ export default function PyraCoreStatus() {
         dispatch(reduxUtils.coreProcessActions.set({ pid }));
 
     async function updatePyraCoreIsRunning() {
-        const p = await backend.checkPyraCoreState();
+        const p = await fetchUtils.backend.checkPyraCoreState();
         if (p.stdout.includes('pyra-core is running with PID')) {
             const pid = parseInt(p.stdout.replace(/[^\d]/g, ''));
             setCoreProcessPID(pid);
@@ -24,7 +24,7 @@ export default function PyraCoreStatus() {
     async function startPyraCore() {
         setCoreProcessPID(undefined);
         try {
-            const p = await backend.startPyraCore();
+            const p = await fetchUtils.backend.startPyraCore();
             const pid = parseInt(p.stdout.replace(/[^\d]/g, ''));
             setCoreProcessPID(pid);
         } catch {
@@ -35,7 +35,7 @@ export default function PyraCoreStatus() {
 
     async function stopPyraCore() {
         setCoreProcessPID(undefined);
-        await backend.stopPyraCore();
+        await fetchUtils.backend.stopPyraCore();
         setCoreProcessPID(-1);
     }
 

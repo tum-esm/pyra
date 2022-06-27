@@ -9,7 +9,7 @@ from packages.core.utils.json_interfaces import StateInterface
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
-STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "runtime-data", ".state.lock")
+STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 
 
 sys.path.append(PROJECT_DIR)
@@ -31,9 +31,7 @@ def with_filelock(function):
 
 
 @click.command(help="Read the current state.json file.")
-@click.option(
-    "--no-indent", is_flag=True, help="Do not print the JSON in an indented manner"
-)
+@click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
 @with_filelock
 def _get_state(no_indent):
     if not os.path.isfile(STATE_FILE_PATH):

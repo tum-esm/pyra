@@ -20,7 +20,7 @@ async function detectFileChanges(
         cwd: import.meta.env.VITE_PROJECT_DIR,
     }).execute();
 
-    if (result.code !== 0) {
+    if (result.code !== 0 && !result.stderr.includes('state.json: No such file')) {
         toast.error('File watcher is not working - details in console');
         console.error(`File watcher is not working, processResult = ${JSON.stringify(result)}`);
         return;

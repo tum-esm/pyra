@@ -14,6 +14,7 @@ export const coreStateSlice = createSlice({
             action: { payload: customTypes.coreState }
         ) => {
             state.content = JSON.parse(JSON.stringify(action.payload));
+            state.loading = false;
         },
         setPartial: (
             state: customTypes.reduxStateCoreState,
