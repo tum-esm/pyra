@@ -43,7 +43,7 @@ export default function ConfigSectionMeasurementTriggers() {
                 setValue={(v: boolean) => update({ measurement_triggers: { consider_vbdsd: v } })}
                 oldValue={centralSectionConfig.consider_vbdsd}
             />
-            <div className="w-full h-px mb-6 -mt-2 bg-slate-300" />
+            <div className="w-full h-px mb-6 -mt-2 bg-gray-300" />
             <configurationComponents.ConfigElementTime
                 key2="start_time"
                 value={localSectionConfig.start_time}

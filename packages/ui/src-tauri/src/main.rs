@@ -3,11 +3,8 @@
   windows_subsystem = "windows"
 )]
 
-use tauri_plugin_fs_watch::Watcher;
-
 fn main() {
   tauri::Builder::default()
-    .plugin(Watcher::default())
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

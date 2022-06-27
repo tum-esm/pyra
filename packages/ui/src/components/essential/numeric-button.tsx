@@ -29,7 +29,7 @@ export default function NumericButton(props: {
             />
             <Button
                 onClick={() => onClick(value)}
-                variant="slate"
+                variant="gray"
                 className="flex-grow"
                 disabled={props.disabled}
                 spinner={props.spinner}

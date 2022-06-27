@@ -4,7 +4,7 @@ export default function Header(props: {
     setActiveTab(s: string): void;
 }) {
     return (
-        <header className="z-50 flex flex-row items-center flex-shrink-0 w-full px-2 py-0 shadow h-14 bg-slate-900">
+        <header className="z-50 flex flex-row items-center flex-shrink-0 w-full px-2 py-0 bg-gray-900 shadow h-14">
             <h1 className="pl-3 text-2xl font-bold text-center text-white whitespace-nowrap">
                 PyRa <span className="pl-0.5 font-normal opacity-50">{APP_VERSION}</span>
             </h1>
@@ -16,8 +16,8 @@ export default function Header(props: {
                         className={
                             'px-3 py-1 rounded font-medium cursor-pointer text-base ' +
                             (t === props.activeTab
-                                ? 'bg-slate-600 text-white '
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200')
+                                ? 'bg-gray-600 text-white '
+                                : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200')
                         }
                         onClick={() => props.setActiveTab(t)}
                     >

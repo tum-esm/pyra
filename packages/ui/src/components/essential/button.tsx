@@ -4,7 +4,7 @@ import Spinner from './spinner';
 export default function Button(props: {
     children: React.ReactNode;
     onClick(): void;
-    variant: 'white' | 'green' | 'red' | 'slate' | 'flat-blue';
+    variant: 'white' | 'green' | 'red' | 'gray' | 'flat-blue';
     disabled?: boolean;
     className?: string;
     dot?: boolean;
@@ -22,7 +22,7 @@ export default function Button(props: {
             colorClasses = 'elevated-panel text-gray-800 hover:bg-gray-150 hover:text-gray-900 ';
             dotColor = 'bg-gray-300 ';
             break;
-        case 'slate':
+        case 'gray':
             colorClasses = 'elevated-panel ';
             if (props.disabled) {
                 colorClasses += 'text-gray-400 !bg-gray-100 ';

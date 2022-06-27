@@ -188,7 +188,7 @@ export default function MeasurementDecisionStatus() {
                     {measurementDecision.mode !== 'manual' && (
                         <div
                             className={
-                                'h-7 flex-row-center font-normal w-full text-slate-500 text-center'
+                                'h-7 flex-row-center font-normal w-full text-gray-500 text-center'
                             }
                         >
                             automated decision
@@ -204,7 +204,7 @@ export default function MeasurementDecisionStatus() {
                             className="w-full"
                             variant={
                                 loading
-                                    ? 'slate'
+                                    ? 'gray'
                                     : measurementDecision.manual_decision_result
                                     ? 'red'
                                     : 'green'

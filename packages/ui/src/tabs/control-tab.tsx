@@ -23,7 +23,7 @@ function VariableBlock(props: {
 }) {
     return (
         <div className="relative flex overflow-hidden elevated-panel">
-            <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-white rounded-l bg-slate-900 flex-row-center">
+            <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-white bg-gray-900 rounded-l flex-row-center">
                 {props.label}
             </div>
             <div className="flex-grow py-3 pl-4 pr-3 flex-row-left gap-x-4">
@@ -39,7 +39,7 @@ function VariableBlock(props: {
                     {props.actions.map((a) =>
                         a.variant === undefined ? (
                             <essentialComponents.Button
-                                variant="slate"
+                                variant="gray"
                                 onClick={a.callback}
                                 key={a.label}
                                 spinner={a.spinner}
@@ -288,7 +288,7 @@ export default function ControlTab() {
                     </div>
                 )}
             </div>
-            <div className="w-full h-px my-0 bg-slate-300" />
+            <div className="w-full h-px my-0 bg-gray-300" />
             <div className="flex flex-col w-full text-sm gap-y-2">
                 <VariableBlock
                     label="Errors"

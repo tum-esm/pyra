@@ -242,11 +242,11 @@ export default function App() {
             )}
             {(backendIntegrity === 'cli is missing' ||
                 backendIntegrity === 'config is invalid') && (
-                <main className="flex flex-col items-center justify-center w-full h-full bg-slate-100 gap-y-4">
+                <main className="flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4">
                     <p className="inline max-w-sm text-center">
                         {backendIntegrity === 'cli is missing' && (
                             <>
-                                <pre className="bg-slate-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
+                                <pre className="bg-gray-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
                                     pyra-cli
                                 </pre>{' '}
                                 has not been found on your system.{' '}
@@ -255,7 +255,7 @@ export default function App() {
                         {backendIntegrity === 'config is invalid' && (
                             <>
                                 The file{' '}
-                                <pre className="bg-slate-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
+                                <pre className="bg-gray-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
                                     config.json
                                 </pre>{' '}
                                 is not in a valid JSON format.{' '}
@@ -286,7 +286,7 @@ export default function App() {
                     />
                     <main
                         className={
-                            'flex-grow w-full bg-slate-75 ' +
+                            'flex-grow w-full bg-gray-75 ' +
                             'h-[calc(200vh-1.5rem)] overflow-y-scroll'
                         }
                     >

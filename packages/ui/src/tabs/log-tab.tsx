@@ -56,7 +56,7 @@ export default function LogTab() {
             <pre
                 className={
                     'w-full !px-6 !py-2 !mb-0 overflow-y-scroll ' +
-                    'border-t border-slate-300 bg-white h-full'
+                    'border-t border-gray-300 bg-white h-full'
                 }
             >
                 <code className="w-full h-full !text-xs language-log">

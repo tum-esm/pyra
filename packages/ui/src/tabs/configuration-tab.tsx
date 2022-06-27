@@ -73,7 +73,7 @@ export default function ConfigurationTab() {
         <div className={'w-full h-[calc(100vh-3.5rem)] relative flex flex-row'}>
             <div
                 className={
-                    'bg-white border-r border-slate-300 shadow ' +
+                    'bg-white border-r border-gray-300 shadow ' +
                     'flex flex-col py-3 z-10 w-44 overflow-y-scroll'
                 }
             >
@@ -86,7 +86,7 @@ export default function ConfigurationTab() {
                             'flex-row-center gap-x-2 ' +
                             (key1 === activeKey
                                 ? 'bg-blue-200 text-blue-950 '
-                                : 'text-slate-500 hover:bg-slate-150 hover:text-slate-700 ')
+                                : 'text-gray-500 hover:bg-gray-150 hover:text-gray-700 ')
                         }
                     >
                         {functionalUtils.capitalizeConfigKey(key1)}

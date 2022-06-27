@@ -58,7 +58,7 @@ export default function PyraCoreStatus() {
                 onClick={coreProcessPID === -1 ? startPyraCore : stopPyraCore}
                 className="w-[21rem]"
                 variant={
-                    coreProcessPID === undefined ? 'slate' : coreProcessPID === -1 ? 'green' : 'red'
+                    coreProcessPID === undefined ? 'gray' : coreProcessPID === -1 ? 'green' : 'red'
                 }
                 spinner={coreProcessPID === undefined}
             >

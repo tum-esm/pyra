@@ -15,7 +15,7 @@ export default function SavingOverlay(props: {
             )}
             <essentialComponents.Button
                 onClick={resetLocalConfig}
-                variant="slate"
+                variant="gray"
                 disabled={isSaving}
             >
                 revert
@@ -23,7 +23,7 @@ export default function SavingOverlay(props: {
             {errorMessage === undefined && (
                 <essentialComponents.Button
                     onClick={saveLocalConfig}
-                    variant="slate"
+                    variant="gray"
                     spinner={isSaving}
                 >
                     save

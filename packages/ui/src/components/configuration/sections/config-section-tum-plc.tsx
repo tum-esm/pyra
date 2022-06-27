@@ -61,7 +61,7 @@ export default function ConfigSectionTumPlc() {
             <essentialComponents.Button variant="white" onClick={setNull}>
                 remove configuration
             </essentialComponents.Button>
-            <div className="w-full h-px my-6 bg-slate-300" />
+            <div className="w-full h-px my-6 bg-gray-300" />
             <configurationComponents.ConfigElementText
                 key2="min_power_elevation"
                 value={localSectionConfig.min_power_elevation}
