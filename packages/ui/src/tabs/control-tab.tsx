@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 function VariableBlock(props: {
     label: string;
     variables: { key: string; value: string | number }[];
+    buttonsAreDisabled: boolean;
     actions: (
         | {
               label: string;
@@ -43,6 +44,7 @@ function VariableBlock(props: {
                                 key={a.label}
                                 spinner={a.spinner}
                                 className="w-52"
+                                disabled={props.buttonsAreDisabled}
                             >
                                 {a.label}
                             </essentialComponents.Button>
@@ -54,6 +56,7 @@ function VariableBlock(props: {
                                 spinner={a.spinner}
                                 className="w-52"
                                 postfix={a.postfix}
+                                disabled={props.buttonsAreDisabled}
                             >
                                 {a.label}
                             </essentialComponents.NumericButton>
@@ -89,6 +92,20 @@ export default function ControlTab() {
     const [isLoadingPowerRouter, setIsLoadingPowerRouter] = useState(false);
     const [isLoadingPowerSpectrometer, setIsLoadingPowerSpectrometer] = useState(false);
     const [isLoadingPowerComputer, setIsLoadingPowerComputer] = useState(false);
+
+    const buttonsAreDisabled =
+        !plcIsControlledByUser ||
+        isLoadingManualToggle ||
+        isLoadingReset ||
+        isLoadingCloseCover ||
+        isLoadingMoveCover ||
+        isLoadingSyncTotracker ||
+        isLoadingAutoTemperature ||
+        isLoadingPowerHeater ||
+        isLoadingPowerCamera ||
+        isLoadingPowerRouter ||
+        isLoadingPowerSpectrometer ||
+        isLoadingPowerComputer;
 
     async function setPlcIsControlledByUser(v: boolean) {
         setIsLoadingManualToggle(true);
@@ -275,6 +292,7 @@ export default function ControlTab() {
             <div className="flex flex-col w-full text-sm gap-y-2">
                 <VariableBlock
                     label="Errors"
+                    buttonsAreDisabled={buttonsAreDisabled}
                     variables={[
                         {
                             key: 'Reset needed',
@@ -293,6 +311,7 @@ export default function ControlTab() {
                 />
                 <VariableBlock
                     label="Rain Detection"
+                    buttonsAreDisabled={buttonsAreDisabled}
                     variables={[
                         {
                             key: 'Cover is closed',
@@ -315,6 +334,7 @@ export default function ControlTab() {
                 />
                 <VariableBlock
                     label="Cover Angle"
+                    buttonsAreDisabled={buttonsAreDisabled}
                     variables={[
                         {
                             key: 'Current cover angle',
@@ -347,6 +367,7 @@ export default function ControlTab() {
                 />
                 <VariableBlock
                     label="Temperature"
+                    buttonsAreDisabled={buttonsAreDisabled}
                     variables={[
                         {
                             key: 'Temperature',
@@ -390,6 +411,7 @@ export default function ControlTab() {
                 />
                 <VariableBlock
                     label="Power"
+                    buttonsAreDisabled={buttonsAreDisabled}
                     variables={[
                         {
                             key: 'UPS alert',

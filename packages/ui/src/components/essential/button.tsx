@@ -19,13 +19,17 @@ export default function Button(props: {
     let dotColor: string = ' ';
     switch (variant) {
         case 'white':
-            colorClasses = 'elevated-panel text-slate-800 hover:bg-slate-150 hover:text-slate-900 ';
-            dotColor = 'bg-slate-300 ';
+            colorClasses = 'elevated-panel text-gray-800 hover:bg-gray-150 hover:text-gray-900 ';
+            dotColor = 'bg-gray-300 ';
             break;
         case 'slate':
-            colorClasses =
-                'elevated-panel text-slate-600 !bg-slate-75 hover:!bg-slate-200 hover:text-slate-950 ';
-            dotColor = 'bg-slate-300 ';
+            colorClasses = 'elevated-panel ';
+            if (props.disabled) {
+                colorClasses += 'text-gray-400 !bg-gray-100 ';
+            } else {
+                colorClasses += 'text-gray-700 !bg-gray-75 hover:!bg-gray-200 hover:text-gray-950 ';
+            }
+            dotColor = 'bg-gray-300 ';
             break;
         case 'green':
             colorClasses = 'elevated-panel text-green-700 hover:bg-green-50 hover:text-green-900 ';
