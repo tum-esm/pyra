@@ -65,6 +65,7 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
+
         self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG["tum_plc"]["version"]]
 
         logger.info("Running EnclosureControl")
@@ -84,9 +85,8 @@ class EnclosureControl:
                     self.reset()
                     time.sleep(10)
 
-                #TODO: add a check of the rain sensor before opening the cover
-
-                self.set_sync_to_tracker(True)
+                if not self.is_raining():
+                    self.set_sync_to_tracker(True)
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
@@ -252,10 +252,21 @@ class EnclosureControl:
     def read_power_spectrometer(self):
         return self.plc_read_bool(self._PLC_INTERFACE.power["spectrometer"])
 
+    def is_raining(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.state["rain"])
+
     def move_cover(self, value):
-        self.set_manual_control(True)
-        self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], value)
-        self.set_manual_control(False)
+        # always allow to close cover
+        if value == 0:
+            self.set_manual_control(True)
+            self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], 0)
+            self.set_manual_control(False)
+
+        #rain check for all other values
+        if not self.is_raining():
+            self.set_manual_control(True)
+            self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], value)
+            self.set_manual_control(False)
 
     def read_current_cover_angle(self):
         return self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"])
