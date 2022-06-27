@@ -279,7 +279,6 @@ class EnclosureControl:
             self.reset()
 
         self.set_sync_to_tracker(False)
-        self.set_manual_control(True)
         self.move_cover(0)
         self.wait_for_cover_closing()
         self.set_manual_control(True)
