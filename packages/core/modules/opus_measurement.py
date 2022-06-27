@@ -73,15 +73,10 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        automation_should_be_running = StateInterface.read()[
-            "automation_should_be_running"
-        ]
+        automation_should_be_running = StateInterface.read()["automation_should_be_running"]
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                logger.info("Loading OPUS Experiment.")
-                self.load_experiment()
-                time.sleep(1)
                 logger.info("Starting OPUS Macro.")
                 self.start_macro()
             else:
@@ -284,12 +279,19 @@ class OpusMeasurement:
         if not self.low_sun_angle_present():
             # start OPUS if not currently running
             if not self.opus_application_running():
-                self.start_opus()
                 logger.info("Start OPUS.")
+                self.start_opus()
+                time.sleep(10)
+                logger.info("Loading OPUS Experiment.")
+                self.load_experiment()
                 # returns to give OPUS time to start until next call of run()
                 return
         if self.low_sun_angle_present():
             # Close OPUS if running
             if self.opus_application_running():
                 logger.debug("Requesting OPUS night shutdown.")
+                # CLOSE_OPUS needs all macros closed to work. stop_macro() is
+                # called just in case
+                self.stop_macro()
+                time.sleep(5)
                 self.close_opus()

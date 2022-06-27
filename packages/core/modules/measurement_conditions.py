@@ -70,39 +70,59 @@ class MeasurementConditions:
         triggers = self._CONFIG["measurement_triggers"]
 
         if decision["mode"] == "manual":
+            logger.debug("Decision mode for measurements is: Manual.")
             automation_should_be_running = decision["manual_decision_result"]
 
         if decision["mode"] == "cli":
+            logger.debug("Decision mode for measurements is: CLI.")
             automation_should_be_running = decision["cli_decision_result"]
 
         if decision["mode"] == "automatic":
-            automation_should_be_running = True
+            logger.debug("Decision mode for measurements is: Automatic.")
+            # needs to be false or it stays true, if no triggeres are considered.
+            automation_should_be_running = False
 
             # consider sun elevation
             if triggers["consider_sun_elevation"]:
+                logger.info("Sun elevation as a trigger is evaluated.")
                 current_sun_elevation = Astronomy.get_current_sun_elevation()
-                sun_is_too_low = (
-                    current_sun_elevation < triggers["min_sun_elevation"] * astropy_units.deg
+                sun_above_threshold = (
+                    current_sun_elevation > triggers["min_sun_elevation"] * astropy_units.deg
                 )
-                sun_is_too_high = (
-                    current_sun_elevation > triggers["max_sun_elevation"] * astropy_units.deg
-                )
-                if sun_is_too_low or sun_is_too_high:
-                    automation_should_be_running &= False
+                # TODO: remove max_sun_elevation as not needed
+                if sun_above_threshold:
+                    logger.debug("Sun angle is above threshold.")
+                    automation_should_be_running = True
+                else:
+                    logger.debug("Sun angle is below threshold.")
+                    automation_should_be_running = False
 
             # consider daytime
             if triggers["consider_time"]:
+                logger.info("Time as a trigger is considered.")
                 current_time, start_time, end_time = get_times_from_tuples(triggers)
-                time_is_too_early = current_time < start_time
-                time_is_too_late = current_time > end_time
-                if time_is_too_early or time_is_too_late:
-                    automation_should_be_running &= False
+                if current_time > start_time and current_time < end_time:
+                    logger.debug("Time conditions are fulfilled.")
+                    automation_should_be_running = True
+                if current_time < start_time or current_time > end_time:
+                    logger.debug("Time conditions are not fulfilled.")
+                    automation_should_be_running = False
 
             # consider evaluation from the VBDSD
             if triggers["consider_vbdsd"] and (self._CONFIG["vbdsd"] is not None):
+                logger.info("VBDSD as a trigger is considered.")
                 # Don't consider VBDSD if it does not have enough
                 # images yet, which will result in a state of "None"
+                if StateInterface.read()["vbdsd_indicates_good_conditions"] == True:
+                    logger.debug("VBDSD indicates good sun conditions.")
+                    automation_should_be_running = True
                 if StateInterface.read()["vbdsd_indicates_good_conditions"] == False:
-                    automation_should_be_running &= False
+                    logger.debug("VBDSD indicates bad sun conditions.")
+                    automation_should_be_running = False
 
+        logger.info(
+            "Measurements should be running is set to: {}.".format(
+                automation_should_be_running
+            )
+        )
         StateInterface.update({"automation_should_be_running": automation_should_be_running})
