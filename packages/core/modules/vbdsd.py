@@ -239,6 +239,7 @@ class _VBDSD:
             exp = -12 + diff
 
         _VBDSD.cam.set(15, exp)
+        logger.debug("Changed camera exposure to {}".format(exp))
         _VBDSD.cam.read()
         time.sleep(0.2)
 
