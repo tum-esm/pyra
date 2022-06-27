@@ -1,4 +1,4 @@
-import { ICONS } from '../assets';
+import { ICONS } from '../../assets';
 import toast, { resolveValue, Toaster } from 'react-hot-toast';
 
 export default function MessageQueue() {

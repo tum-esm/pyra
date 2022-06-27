@@ -2,13 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { ICONS } from './assets';
 import { backend, reduxUtils } from './utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from './tabs';
-import { essentialComponents, Header } from './components';
+import { essentialComponents, structuralComponents } from './components';
 import toast from 'react-hot-toast';
 import { diff } from 'deep-diff';
 import { customTypes } from './custom-types';
 import { dialog, shell } from '@tauri-apps/api';
 import { first } from 'lodash';
-import MessageQueue from './components/message-queue';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -265,39 +264,13 @@ export default function App() {
             )}
             {(backendIntegrity === 'cli is missing' ||
                 backendIntegrity === 'config is invalid') && (
-                <main className="flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4">
-                    <p className="inline max-w-sm text-center">
-                        {backendIntegrity === 'cli is missing' && (
-                            <>
-                                <pre className="bg-gray-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
-                                    pyra-cli
-                                </pre>{' '}
-                                has not been found on your system.{' '}
-                            </>
-                        )}
-                        {backendIntegrity === 'config is invalid' && (
-                            <>
-                                The file{' '}
-                                <pre className="bg-gray-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
-                                    config.json
-                                </pre>{' '}
-                                is not in a valid JSON format.{' '}
-                            </>
-                        )}
-                        Please following the installation instructions on{' '}
-                        <span className="font-bold text-blue-500 underline">
-                            https://github.com/tum-esm/pyra
-                        </span>
-                        .
-                    </p>
-                    <essentialComponents.Button onClick={loadInitialAppState} variant="green">
-                        retry connection
-                    </essentialComponents.Button>
-                </main>
+                <structuralComponents.DisconnectedScreen
+                    {...{ backendIntegrity, loadInitialAppState }}
+                />
             )}
             {backendIntegrity === 'valid' && (
                 <>
-                    <Header
+                    <structuralComponents.Header
                         {...{
                             tabs: [
                                 ...tabs,
@@ -329,7 +302,7 @@ export default function App() {
                             </div>
                         )}
                     </main>
-                    <MessageQueue />
+                    <structuralComponents.MessageQueue />
                 </>
             )}
         </div>
