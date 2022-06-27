@@ -57,20 +57,24 @@ export default function App() {
     }, [fetchLogsFile, logsShouldBeLoaded]);
 
     useEffect(() => {
-        if (coreStateShouldBeLoaded) {
+        if (
+            coreStateShouldBeLoaded &&
+            centralConfig !== undefined &&
+            pyraCoreIsRunning !== undefined
+        ) {
             console.log('loading core state');
             setCoreStateShouldBeLoaded(false);
-            fetchCoreState().catch(console.error);
+            fetchUtils.coreState(dispatch, centralConfig, pyraCoreIsRunning).catch(console.error);
         }
-    }, [coreStateShouldBeLoaded]);
+    }, [coreStateShouldBeLoaded, centralConfig, pyraCoreIsRunning]);
 
     useEffect(() => {
-        if (configShouldBeLoaded) {
+        if (configShouldBeLoaded && centralConfig !== undefined) {
             console.log('loading config');
             setConfigShouldBeLoaded(false);
-            fetchConfig().catch(console.error);
+            fetchUtils.config(dispatch, centralConfig).catch(console.error);
         }
-    }, [fetchConfig, configShouldBeLoaded, centralConfig]);
+    }, [configShouldBeLoaded, centralConfig]);
 
     /*
     1. Check whether pyra-cli is available
@@ -118,63 +122,6 @@ export default function App() {
             toast.error('Could not fetch log files - details in the console');
         }
         dispatch(reduxUtils.logsActions.setLoading(false));
-    }
-
-    const fetchCoreState = useCallback(async () => {
-        dispatch(reduxUtils.coreStateActions.setLoading(true));
-        let result: shell.ChildProcess;
-        if (pyraCoreIsRunning && centralConfig?.tum_plc?.controlled_by_user === false) {
-            result = await fetchUtils.backend.getState();
-        } else {
-            result = await fetchUtils.backend.readFromPLC();
-        }
-
-        if (result.code !== 0) {
-            console.error(`Could not fetch core state. processResult = ${JSON.stringify(result)}`);
-            toast.error(`Could not fetch core state, please look in the console for details`);
-        } else {
-            try {
-                const newCoreState = JSON.parse(result.stdout);
-                dispatch(reduxUtils.coreStateActions.set(newCoreState));
-            } catch {
-                toast.error(`Could not fetch core state: ${result.stdout}`);
-            }
-        }
-        dispatch(reduxUtils.coreStateActions.setLoading(false));
-    }, [pyraCoreIsRunning, centralConfig]);
-
-    async function fetchConfig() {
-        const result = await fetchUtils.backend.getConfig();
-        if (result.code !== 0) {
-            console.error(`Could not fetch core state. processResult = ${JSON.stringify(result)}`);
-            toast.error(`Could not fetch core state, please look in the console for details`);
-            return;
-        }
-
-        const newCentralConfig: customTypes.config = JSON.parse(result.stdout);
-        const diffsToCentral = diff(centralConfig, newCentralConfig);
-        console.log({ centralConfig, newCentralConfig, diffsToCentral });
-        if (diffsToCentral === undefined) {
-            return;
-        }
-
-        // measurement_decision.cli_decision_result is allowed to change
-        // changing any other property from somewhere else than the UI requires
-        // a reload of the window
-        const reloadIsRequired =
-            diffsToCentral.filter(
-                (d) =>
-                    d.kind === 'E' &&
-                    d.path?.join('.') !== 'measurement_decision.cli_decision_result'
-            ).length > 0;
-
-        if (reloadIsRequired) {
-            dialog
-                .message('The config.json file has been modified. Reload required', 'PyRa 4 UI')
-                .then(() => window.location.reload());
-        } else {
-            dispatch(reduxUtils.configActions.setConfigsPartial(newCentralConfig));
-        }
     }
 
     const detectFileChanges = useCallback(async () => {
