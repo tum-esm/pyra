@@ -1,4 +1,5 @@
 import Button from './button';
+import NumericButton from './numeric-button';
 import Ping from './ping';
 import PreviousValue from './previous-value';
 import TextInput from './text-input';
@@ -7,6 +8,7 @@ import Spinner from './spinner';
 
 export default {
     Button,
+    NumericButton,
     Ping,
     PreviousValue,
     TextInput,

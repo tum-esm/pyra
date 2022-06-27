@@ -14,11 +14,11 @@ export default function TextInput(props: {
                 className={
                     'shadow-sm rounded-md border-slate-250 text-sm w-full ' +
                     'focus:ring-blue-500 focus:border-blue-500 ' +
-                    (props.small ? 'w-12 text-center h-7 ' : 'flex-grow h-9 ')
+                    (props.small ? 'w-14 h-7 px-2 ' : 'flex-grow h-9 ')
                 }
             />
             {props.postfix !== undefined && (
-                <div className="absolute text-sm text-slate-900 -translate-y-[calc(50%-0.5px)] opacity-50 top-1/2 left-3 pointer-events-none whitespace-pre">
+                <div className="absolute text-sm text-slate-900 -translate-y-[calc(50%-0.5px)] opacity-50 top-1/2 left-2 pointer-events-none whitespace-pre max-w-[calc(100%-1rem)] overflow-hidden">
                     <span className="opacity-0">{props.value}</span> {props.postfix}
                 </div>
             )}

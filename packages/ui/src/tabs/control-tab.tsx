@@ -8,7 +8,17 @@ import toast from 'react-hot-toast';
 function VariableBlock(props: {
     label: string;
     variables: { key: string; value: string | number }[];
-    actions: { label: string; callback: () => void; spinner: boolean }[];
+    actions: (
+        | {
+              label: string;
+              callback: (value: number) => void;
+              spinner: boolean;
+              variant: 'numeric';
+              initialValue: number;
+              postfix?: string;
+          }
+        | { label: string; callback: () => void; spinner: boolean; variant?: undefined }
+    )[];
 }) {
     return (
         <div className="relative flex overflow-hidden elevated-panel">
@@ -25,17 +35,30 @@ function VariableBlock(props: {
                     ))}
                 </div>
                 <div className="flex-grow flex-col-right gap-y-1">
-                    {props.actions.map((a) => (
-                        <essentialComponents.Button
-                            variant="slate"
-                            onClick={a.callback}
-                            key={a.label}
-                            spinner={a.spinner}
-                            className="w-52"
-                        >
-                            {a.label}
-                        </essentialComponents.Button>
-                    ))}
+                    {props.actions.map((a) =>
+                        a.variant === undefined ? (
+                            <essentialComponents.Button
+                                variant="slate"
+                                onClick={a.callback}
+                                key={a.label}
+                                spinner={a.spinner}
+                                className="w-52"
+                            >
+                                {a.label}
+                            </essentialComponents.Button>
+                        ) : (
+                            <essentialComponents.NumericButton
+                                initialValue={a.initialValue}
+                                onClick={a.callback}
+                                key={a.label}
+                                spinner={a.spinner}
+                                className="w-52"
+                                postfix={a.postfix}
+                            >
+                                {a.label}
+                            </essentialComponents.NumericButton>
+                        )
+                    )}
                 </div>
             </div>
         </div>
@@ -57,6 +80,7 @@ export default function ControlTab() {
     const [isLoadingManualToggle, setIsLoadingManualToggle] = useState(false);
     const [isLoadingReset, setIsLoadingReset] = useState(false);
     const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
+    const [isLoadingMoveCover, setIsLoadingMoveCover] = useState(false);
     const [isLoadingSyncTotracker, setIsLoadingSyncTotracker] = useState(false);
     const [isLoadingAutoTemperature, setIsLoadingAutoTemperature] = useState(false);
 
@@ -114,6 +138,21 @@ export default function ControlTab() {
             state: { cover_closed: true },
             actors: { current_angle: 0 },
         });
+    }
+
+    async function moveCover(angle: number) {
+        if (angle === 0 || (angle >= 110 && angle <= 250)) {
+            await runPlcWriteCommand(
+                ['write-move-cover', angle.toString()],
+                setIsLoadingMoveCover,
+                {
+                    state: { cover_closed: angle === 0 },
+                    actors: { current_angle: angle },
+                }
+            );
+        } else {
+            toast.error(`Angle has to be either 0 or between 110° and 250°`);
+        }
     }
 
     // TODO: implement UI for "move to angle"
@@ -289,7 +328,14 @@ export default function ControlTab() {
                         },
                     ]}
                     actions={[
-                        { label: 'move to angle', callback: () => {}, spinner: false },
+                        {
+                            label: 'move to angle',
+                            callback: moveCover,
+                            spinner: isLoadingMoveCover,
+                            variant: 'numeric',
+                            initialValue: coreState.enclosure_plc_readings.actors.current_angle,
+                            postfix: '°',
+                        },
                         {
                             label: coreState.enclosure_plc_readings.control.sync_to_tracker
                                 ? 'do not sync to tracker'
