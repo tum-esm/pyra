@@ -78,7 +78,7 @@ class _VBDSD:
                 _VBDSD.cam.set(11, 64)  # contrast
                 _VBDSD.cam.set(12, 0)  # saturation
                 _VBDSD.cam.set(14, 0)  # gain
-                _VBDSD.cam.read() #throw away first picture
+                _VBDSD.cam.read()  #throw away first picture
                 _VBDSD.change_exposure()
                 return
         
@@ -95,7 +95,7 @@ class _VBDSD:
             _VBDSD.cam.set(11, 64)  # contrast
             _VBDSD.cam.set(12, 0)  # saturation
             _VBDSD.cam.set(14, 0)  # gain
-            _VBDSD.cam.read() #throw away first picture
+            _VBDSD.cam.read()  #throw away first picture
 
     @staticmethod
     def eval_sun_state(frame):
