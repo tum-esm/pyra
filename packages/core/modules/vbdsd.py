@@ -84,7 +84,8 @@ class _VBDSD:
         
         logger.warning(f"Camera with id {camera_id} could not be found")
 
-    def reinit_settings(self):
+    @staticmethod
+    def reinit_settings():
         if _VBDSD.cam.isOpened():
             logger.debug(f"Reset Camera settings for next day.")
             _VBDSD.cam.set(3, 1280)  # width
