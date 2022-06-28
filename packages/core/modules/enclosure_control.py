@@ -65,6 +65,10 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
+        #TODO: replace this once DB read is merged
+        self.cover_closed = self.check_cover_closed()
+        self.rain_present = self.is_raining()
+
 
         self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG["tum_plc"]["version"]]
 
@@ -85,7 +89,7 @@ class EnclosureControl:
                     self.reset()
                     time.sleep(10)
 
-                if not self.is_raining():
+                if not self.rain_present:
                     self.set_sync_to_tracker(True)
                 logger.info("Syncing Cover to Tracker.")
             else:
@@ -98,8 +102,8 @@ class EnclosureControl:
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
 
-        if not automation_should_be_running & (not self.is_raining()):
-            if not self.check_cover_closed():
+        if not automation_should_be_running & (not self.rain_present):
+            if not self.cover_closed:
                 logger.info("Cover is still open. Trying to close again.")
                 self.move_cover(0)
                 self.wait_for_cover_closing()
@@ -260,7 +264,7 @@ class EnclosureControl:
         logger.debug("Received request to move cover to position {} degrees.".format(value))
 
         #rain check before moving cover. PLC will deny cover requests during rain anyway
-        if not self.is_raining():
+        if not self.rain_present:
             self.set_manual_control(True)
             self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], value)
             self.set_manual_control(False)
@@ -296,7 +300,7 @@ class EnclosureControl:
         while loop:
             time.sleep(5)
 
-            if self.check_cover_closed():
+            if self.cover_closed:
                 loop = False
 
             elapsed_time = time.time() - start_time
