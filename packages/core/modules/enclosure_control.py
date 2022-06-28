@@ -98,6 +98,7 @@ class EnclosureControl:
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
 
+        #TODO: This went into an error during rain, as PLC cpu was blocking commands to move cover due to rain
         if not automation_should_be_running:
             if not self.check_cover_closed():
                 logger.info("Cover is still open. Trying to close again.")
