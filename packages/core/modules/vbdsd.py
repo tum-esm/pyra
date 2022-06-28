@@ -308,6 +308,9 @@ class VBDSD_Thread:
             VBDSD_Thread.__remove_vbdsd_images()
             return
 
+        #for testing
+        _VBDSD.reinit_settings()
+
         status_history = RingList(_CONFIG["vbdsd"]["evaluation_size"])
         current_state = None
 
