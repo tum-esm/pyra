@@ -151,6 +151,7 @@ class EnclosureControl:
 
     def cpu_busy_check(self):
         """Sleeps if cpu is busy."""
+        time.sleep(0.2)
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
             time.sleep(2)
 
