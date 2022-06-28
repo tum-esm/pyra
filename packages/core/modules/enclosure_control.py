@@ -65,10 +65,11 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
-        #TODO: replace this once DB read is merged
+        # TODO: replace this once DB read is merged
         self.cover_closed = self.check_cover_closed()
         self.rain_present = self.is_raining()
         self.spectrometer_has_power = self.read_power_spectrometer()
+        self.reset_needed = self.check_for_reset_needed()
 
 
         self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG["tum_plc"]["version"]]
@@ -86,7 +87,7 @@ class EnclosureControl:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                if self.check_for_reset_needed():
+                if self.reset_needed:
                     self.reset()
                     time.sleep(10)
 
@@ -285,8 +286,6 @@ class EnclosureControl:
         self.set_sync_to_tracker(False)
         self.move_cover(0)
         self.wait_for_cover_closing()
-        self.set_manual_control(True)
-
 
     def wait_for_cover_closing(self):
         """Waits steps of 5s for the enclosure cover to close.
