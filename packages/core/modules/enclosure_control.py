@@ -98,8 +98,7 @@ class EnclosureControl:
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
 
-        #TODO: This went into an error during rain, as PLC cpu was blocking commands to move cover due to rain
-        if not automation_should_be_running:
+        if not automation_should_be_running & (not self.is_raining()):
             if not self.check_cover_closed():
                 logger.info("Cover is still open. Trying to close again.")
                 self.move_cover(0)
@@ -257,17 +256,15 @@ class EnclosureControl:
         return self.plc_read_bool(self._PLC_INTERFACE.state["rain"])
 
     def move_cover(self, value):
-        # always allow to close cover
-        if value == 0:
-            self.set_manual_control(True)
-            self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], 0)
-            self.set_manual_control(False)
+        logger.debug("Received request to move cover to position {} degrees.".format(value))
 
-        #rain check for all other values
+        #rain check before moving cover. PLC will deny cover requests during rain anyway
         if not self.is_raining():
             self.set_manual_control(True)
             self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], value)
             self.set_manual_control(False)
+        else:
+            logger.debug("Denied to move cover due to rain detected.")
 
     def read_current_cover_angle(self):
         return self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"])
