@@ -97,7 +97,6 @@ class _VBDSD:
             _VBDSD.cam.set(14, 0)  # gain
             _VBDSD.cam.read() #throw away first picture
             return
-        
 
     @staticmethod
     def eval_sun_state(frame):
