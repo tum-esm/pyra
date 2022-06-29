@@ -300,7 +300,7 @@ class EnclosureControl:
         while loop:
             time.sleep(5)
 
-            if self.cover_closed:
+            if self.check_cover_closed():
                 loop = False
 
             elapsed_time = time.time() - start_time
