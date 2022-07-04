@@ -79,8 +79,15 @@ class MeasurementConditions:
 
         if decision["mode"] == "automatic":
             logger.debug("Decision mode for measurements is: Automatic.")
-            # needs to be false or it stays true, if no triggeres are considered.
-            automation_should_be_running = False
+            if (
+                triggers["consider_sun_elevation"]
+                or triggers["consider_time"]
+                or (triggers["consider_vbdsd"] and (self._CONFIG["vbdsd"] is not None))
+            ):
+                # Will be set to be false below if at least one trigger decides to
+                automation_should_be_running = True
+            else:
+                automation_should_be_running = False
 
             # consider sun elevation
             if triggers["consider_sun_elevation"]:
@@ -92,10 +99,10 @@ class MeasurementConditions:
                 # TODO: remove max_sun_elevation as not needed
                 if sun_above_threshold:
                     logger.debug("Sun angle is above threshold.")
-                    automation_should_be_running = True
-                else:
+
+                if not sun_above_threshold:
                     logger.debug("Sun angle is below threshold.")
-                    automation_should_be_running = False
+                    automation_should_be_running &= False
 
             # consider daytime
             if triggers["consider_time"]:
@@ -103,10 +110,9 @@ class MeasurementConditions:
                 current_time, start_time, end_time = get_times_from_tuples(triggers)
                 if current_time > start_time and current_time < end_time:
                     logger.debug("Time conditions are fulfilled.")
-                    automation_should_be_running = True
                 if current_time < start_time or current_time > end_time:
                     logger.debug("Time conditions are not fulfilled.")
-                    automation_should_be_running = False
+                    automation_should_be_running &= False
 
             # consider evaluation from the VBDSD
             if triggers["consider_vbdsd"] and (self._CONFIG["vbdsd"] is not None):
@@ -115,10 +121,9 @@ class MeasurementConditions:
                 # images yet, which will result in a state of "None"
                 if StateInterface.read()["vbdsd_indicates_good_conditions"] == True:
                     logger.debug("VBDSD indicates good sun conditions.")
-                    automation_should_be_running = True
                 if StateInterface.read()["vbdsd_indicates_good_conditions"] == False:
                     logger.debug("VBDSD indicates bad sun conditions.")
-                    automation_should_be_running = False
+                    automation_should_be_running &= False
 
         logger.info(
             "Measurements should be running is set to: {}.".format(

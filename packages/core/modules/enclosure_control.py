@@ -69,6 +69,12 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
             return
 
+        # TODO: replace this once DB read is merged
+        self.cover_closed = self.check_cover_closed()
+        self.rain_present = self.is_raining()
+        self.spectrometer_has_power = self.read_power_spectrometer()
+        self.reset_needed = self.check_for_reset_needed()
+
         self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[
             self._CONFIG["tum_plc"]["version"]
         ]
@@ -85,13 +91,11 @@ class EnclosureControl:
         if self.last_cycle_automation_status != automation_should_be_running:
             if automation_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                if self.check_for_reset_needed():
+                if self.reset_needed:
                     self.reset()
                     time.sleep(10)
-
-                # TODO: add a check of the rain sensor before opening the cover
-
-                self.set_sync_to_tracker(True)
+                if not self.rain_present:
+                    self.set_sync_to_tracker(True)
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
@@ -103,8 +107,8 @@ class EnclosureControl:
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
 
-        if not automation_should_be_running:
-            if not self.check_cover_closed():
+        if (not automation_should_be_running) & (not self.rain_present):
+            if not self.cover_closed:
                 logger.info("Cover is still open. Trying to close again.")
                 self.move_cover(0)
                 self.wait_for_cover_closing()
@@ -155,7 +159,7 @@ class EnclosureControl:
         return self.plc.get_connected()
 
     def cpu_busy_check(self):
-        """Wait until CPU is not busy anymore."""
+        """Sleeps if cpu is busy."""
         time.sleep(0.2)
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
             time.sleep(1)
@@ -248,20 +252,27 @@ class EnclosureControl:
 
     # PLC.ACTORS SETTERS
 
-    def move_cover(self, value: int):
-        self.set_manual_control(True)
-        self.plc_write_int(self._PLC_INTERFACE.actors.move_cover, value)
-        self.set_manual_control(False)
+    def is_raining(self):
+        return self.plc_read_bool(self._PLC_INTERFACE.state["rain"])
+
+    def move_cover(self, value):
+        logger.debug("Received request to move cover to position {} degrees.".format(value))
+
+        # rain check before moving cover. PLC will deny cover requests during rain anyway
+        if not self.rain_present:
+            self.set_manual_control(True)
+            self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], value)
+            self.set_manual_control(False)
+        else:
+            logger.debug("Denied to move cover due to rain detected.")
 
     def force_cover_close(self):
         if self.check_for_reset_needed():
             self.reset()
 
         self.set_sync_to_tracker(False)
-        self.set_manual_control(True)
         self.move_cover(0)
         self.wait_for_cover_closing()
-        self.set_manual_control(True)
 
     def wait_for_cover_closing(self):
         """Waits steps of 5s for the enclosure cover to close.
@@ -361,15 +372,16 @@ class EnclosureControl:
         min_power_elevation = (
             self._CONFIG["tum_plc"]["min_power_elevation"] * astropy_units.deg
         )
-        spectrometer_has_power = self.read_power_spectrometer()
-
-        print(current_sun_elevation > min_power_elevation)
 
         if current_sun_elevation is not None:
-            if (current_sun_elevation >= min_power_elevation) and (not spectrometer_has_power):
+            if (current_sun_elevation >= min_power_elevation) and (
+                not self.spectrometer_has_power
+            ):
                 self.set_power_spectrometer(True)
                 logger.info("Powering up the spectrometer.")
-            elif (current_sun_elevation < min_power_elevation) and (spectrometer_has_power):
+            elif (current_sun_elevation < min_power_elevation) and (
+                self.spectrometer_has_power
+            ):
                 self.set_power_spectrometer(False)
                 logger.info("Powering down the spectrometer.")
 

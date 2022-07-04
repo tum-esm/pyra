@@ -77,11 +77,24 @@ class _VBDSD:
                 _VBDSD.cam.set(11, 64)  # contrast
                 _VBDSD.cam.set(12, 0)  # saturation
                 _VBDSD.cam.set(14, 0)  # gain
-                _VBDSD.cam.read()
+                _VBDSD.cam.read()  # throw away first picture
                 _VBDSD.change_exposure()
                 return
 
         logger.warning(f"Camera with id {camera_id} could not be found")
+
+    @staticmethod
+    def reinit_settings():
+        if _VBDSD.cam.isOpened():
+            logger.debug(f"Reset Camera settings for next day.")
+            _VBDSD.cam.set(3, 1280)  # width
+            _VBDSD.cam.set(4, 720)  # height
+            _VBDSD.cam.set(15, -12)  # exposure
+            _VBDSD.cam.set(10, 64)  # brightness
+            _VBDSD.cam.set(11, 64)  # contrast
+            _VBDSD.cam.set(12, 0)  # saturation
+            _VBDSD.cam.set(14, 0)  # gain
+            _VBDSD.cam.read()  # throw away first picture
 
     @staticmethod
     def eval_sun_state(frame):
@@ -220,6 +233,7 @@ class _VBDSD:
             exp = -12 + diff
 
         _VBDSD.cam.set(15, exp)
+        logger.debug("Changed camera exposure to {}".format(exp))
         _VBDSD.cam.read()
         time.sleep(0.2)
 
@@ -330,6 +344,8 @@ class VBDSD_Thread:
                     StateInterface.update({"vbdsd_indicates_good_conditions": False})
                     VBDSD_Thread.__remove_vbdsd_images()
                     current_state = None
+                    # reinit for next day
+                    _VBDSD.reinit_settings()
                 time.sleep(300)
                 continue
 
