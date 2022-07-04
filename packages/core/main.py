@@ -43,6 +43,7 @@ def run():
         try:
             _CONFIG = ConfigInterface.read()
         except AssertionError:
+            # TODO: log "invalid config"
             time.sleep(30)
             continue
 
@@ -72,9 +73,7 @@ def run():
             if new_exception is not None:
                 if type(new_exception).__name__ not in current_exceptions:
                     new_current_exceptions.append(type(new_exception).__name__)
-                    ExceptionEmailClient.handle_occured_exception(
-                        _CONFIG, new_exception
-                    )
+                    ExceptionEmailClient.handle_occured_exception(_CONFIG, new_exception)
                     logger.exception(new_exception)
             else:
                 if len(current_exceptions) > 0:
