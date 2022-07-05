@@ -41,7 +41,7 @@ from packages.core.utils import (
     Astronomy,
 )
 
-logger = Logger(origin="pyra.core.vbdsd")
+logger = Logger(origin="vbdsd")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))

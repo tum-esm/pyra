@@ -12,7 +12,7 @@
 import time
 from packages.core.utils import StateInterface, Logger, Astronomy, PLCError, PLCInterface
 
-logger = Logger(origin="pyra.core.enclosure-control")
+logger = Logger(origin="enclosure-control")
 
 
 class CoverError(Exception):

@@ -13,7 +13,7 @@ from packages.core.utils import (
 # everything should be logged to the log files and no exception
 # should go missing
 
-logger = Logger(origin="pyra.core.main")
+logger = Logger(origin="main")
 
 
 def run():

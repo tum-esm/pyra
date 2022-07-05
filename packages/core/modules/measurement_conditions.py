@@ -16,7 +16,7 @@
 import datetime
 from packages.core.utils import Astronomy, StateInterface, Logger, OSInterface
 
-logger = Logger(origin="pyra.core.measurement-conditions")
+logger = Logger(origin="measurement-conditions")
 
 
 def get_times_from_tuples(triggers: any):

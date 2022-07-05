@@ -30,7 +30,7 @@ if sys.platform == "win32":
     import win32ui  # type: ignore
 
 
-logger = Logger(origin="pyra.core.sun-tracking")
+logger = Logger(origin="sun-tracking")
 
 
 class SunTracking:

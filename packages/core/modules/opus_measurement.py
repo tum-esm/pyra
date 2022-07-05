@@ -24,7 +24,7 @@ if sys.platform == "win32":
     import dde  # type: ignore
 
 
-logger = Logger(origin="pyra.core.opus-measurement")
+logger = Logger(origin="opus-measurement")
 
 
 class SpectrometerError(Exception):
