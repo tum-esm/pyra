@@ -94,7 +94,7 @@ class EnclosureControl:
 
         # read current state of actors and sensors in enclosure
         logger.info("New continuous readings.")
-        StateInterface.update({"enclosure_plc_readings": self.plc_state})
+        StateInterface.update({"enclosure_plc_readings": self.plc_state.to_dict()})
 
         # possibly powerup/down spectrometer
         self.auto_set_power_spectrometer()

@@ -2,8 +2,7 @@ import json
 import os
 import shutil
 import filelock
-from packages.core.utils.astronomy import Astronomy
-from packages.core.utils.validation import Validation
+from packages.core.utils import Astronomy, Validation, EMPTY_PLC_STATE
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -46,44 +45,8 @@ class StateInterface:
             json.dump(
                 {
                     "vbdsd_indicates_good_conditions": None,
-                    "enclosure_plc_readings": {
-                        "actors": {
-                            "fan_speed": None,
-                            "current_angle": None,
-                        },
-                        "control": {
-                            "auto_temp_mode": None,
-                            "manual_control": None,
-                            "manual_temp_mode": None,
-                            "sync_to_tracker": None,
-                        },
-                        "sensors": {
-                            "humidity": None,
-                            "temperature": None,
-                        },
-                        "state": {
-                            "cover_closed": None,
-                            "motor_failed": None,
-                            "rain": None,
-                            "reset_needed": None,
-                            "ups_alert": None,
-                        },
-                        "power": {
-                            "camera": None,
-                            "computer": None,
-                            "heater": None,
-                            "router": None,
-                            "spectrometer": None,
-                        },
-                        "connections": {
-                            "camera": None,
-                            "computer": None,
-                            "heater": None,
-                            "router": None,
-                            "spectrometer": None,
-                        },
-                    },
                     "automation_should_be_running": False,
+                    "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
                 },
                 f,
             )

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+import dataclasses
 import snap7
 import time
 import os
@@ -14,54 +14,54 @@ class PLCError(Exception):
     pass
 
 
-@dataclass
+@dataclasses.dataclass
 class PLCActorsState:
-    current_angle: int
-    fan_speed: int
+    current_angle: int = None
+    fan_speed: int = None
 
 
-@dataclass
+@dataclasses.dataclass
 class PLCControlState:
-    auto_temp_mode: bool
-    manual_control: bool
-    manual_temp_mode: bool
-    sync_to_tracker: bool
+    auto_temp_mode: bool = None
+    manual_control: bool = None
+    manual_temp_mode: bool = None
+    sync_to_tracker: bool = None
 
 
-@dataclass
+@dataclasses.dataclass
 class PLCSensorsState:
-    humidity: int
-    temperature: int
+    humidity: int = None
+    temperature: int = None
 
 
-@dataclass
+@dataclasses.dataclass
 class PLCStateState:
-    cover_closed: bool
-    motor_failed: bool
-    rain: bool
-    reset_needed: bool
-    ups_alert: bool
+    cover_closed: bool = None
+    motor_failed: bool = None
+    rain: bool = None
+    reset_needed: bool = None
+    ups_alert: bool = None
 
 
-@dataclass
+@dataclasses.dataclass
 class PLCPowerState:
-    camera: bool
-    computer: bool
-    heater: bool
-    router: bool
-    spectrometer: bool
+    camera: bool = None
+    computer: bool = None
+    heater: bool = None
+    router: bool = None
+    spectrometer: bool = None
 
 
-@dataclass
+@dataclasses.dataclass
 class PLCConnectionsState:
-    camera: bool
-    computer: bool
-    heater: bool
-    router: bool
-    spectrometer: bool
+    camera: bool = None
+    computer: bool = None
+    heater: bool = None
+    router: bool = None
+    spectrometer: bool = None
 
 
-@dataclass
+@dataclasses.dataclass
 class PLCState:
     actors: PLCActorsState
     control: PLCControlState
@@ -69,6 +69,25 @@ class PLCState:
     state: PLCStateState
     power: PLCPowerState
     connections: PLCConnectionsState
+
+    def to_dict(self):
+        out = {}
+        for field in dataclasses.fields(self):
+            field_value = getattr(self, field.name)
+            if field_value is not None:
+                field_value = getattr(self, field.name).__dict__
+            out[field.name] = field_value
+        return out
+
+
+EMPTY_PLC_STATE = PLCState(
+    actors=PLCActorsState(),
+    control=PLCControlState(),
+    sensors=PLCSensorsState(),
+    state=PLCStateState(),
+    power=PLCPowerState(),
+    connections=PLCConnectionsState(),
+)
 
 
 class PLCInterface:
