@@ -3,9 +3,8 @@ import time
 import click
 import os
 import sys
-from packages.core.modules.enclosure_control import CoverError, EnclosureControl
-from packages.core.utils.enforce_timeout import TimeOutException
-from packages.core.utils.json_interfaces import ConfigInterface
+from packages.core.modules.enclosure_control import EnclosureControl, CoverError, PLCError
+from packages.core.utils import ConfigInterface, PLCInterface, PLCError
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -19,6 +18,8 @@ error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
 Validation.logging_handler = error_handler
 
+# TODO: Refactor for new PLC code structure
+
 
 def get_enclosure():
     _CONFIG = ConfigInterface.read()
@@ -30,11 +31,11 @@ def get_enclosure():
         assert _CONFIG["tum_plc"]["controlled_by_user"], "PLC is controlled by automation"
         enclosure = EnclosureControl(_CONFIG)
         if not enclosure.plc_connect():
-            raise TimeOutException()
+            raise PLCError()
     except AssertionError as e:
         error_handler(f"{e}")
-    except TimeOutException:
-        error_handler("Could not reach PLC")
+    except PLCError:
+        error_handler("Could not connect to PLC")
 
     return enclosure
 

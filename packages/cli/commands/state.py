@@ -4,7 +4,7 @@ import os
 import sys
 import filelock
 
-from packages.core.utils.json_interfaces import StateInterface
+from packages.core.utils import StateInterface
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))

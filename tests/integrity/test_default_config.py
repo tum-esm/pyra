@@ -1,6 +1,6 @@
 import json
 import os
-from packages.core.utils.validation import Validation
+from packages.core.utils.interfaces.config_validation import Validation
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))

@@ -2,10 +2,8 @@ import dataclasses
 import snap7
 import time
 import os
-from packages.core.utils import (
-    Logger,
-    STANDARD_PLC_API_SPECIFICATIONS,
-)
+from packages.core.utils import Logger
+from .plc_specification import PLC_SPECIFICATION_VERSIONS
 
 logger = Logger(origin="pyra.core.enclosure-control")
 
@@ -93,7 +91,7 @@ EMPTY_PLC_STATE = PLCState(
 class PLCInterface:
     def __init__(self, config: dict):
         self.config = config
-        self.api_spec = STANDARD_PLC_API_SPECIFICATIONS[config["tum_plc"]["version"]]
+        self.specification = PLC_SPECIFICATION_VERSIONS[config["tum_plc"]["version"]]
 
         self.plc = snap7.client.Client()
         self.connect()
@@ -138,13 +136,13 @@ class PLCInterface:
         return os.system("ping -n 1 " + self._CONFIG["tum_plc"]["ip"]) == 0
 
     # def rain_is_detected(self) -> bool:
-    #    return self._read_bool(self.api_spec.state.rain)
+    #    return self._read_bool(self.specification.state.rain)
 
     def cover_is_closed(self) -> bool:
-        return self._read_bool(self.api_spec.state.cover_closed)
+        return self._read_bool(self.specification.state.cover_closed)
 
     # def reset_is_needed(self) -> bool:
-    #    return self._read_bool(self.api_spec.state.reset_needed)
+    #    return self._read_bool(self.specification.state.reset_needed)
 
     def read(self) -> PLCState:
         """
@@ -167,39 +165,39 @@ class PLCInterface:
 
         return PLCState(
             actors=PLCActorsState(
-                fan_speed=_get_int(self.api_spec.actors.fan_speed),
-                current_angle=_get_int(self.api_spec.actors.current_angle),
+                fan_speed=_get_int(self.specification.actors.fan_speed),
+                current_angle=_get_int(self.specification.actors.current_angle),
             ),
             control=PLCControlState(
-                auto_temp_mode=_get_bool(self.api_spec.control.auto_temp_mode),
-                manual_control=_get_bool(self.api_spec.control.manual_control),
-                manual_temp_mode=_get_bool(self.api_spec.control.manual_temp_mode),
-                sync_to_tracker=_get_bool(self.api_spec.control.sync_to_tracker),
+                auto_temp_mode=_get_bool(self.specification.control.auto_temp_mode),
+                manual_control=_get_bool(self.specification.control.manual_control),
+                manual_temp_mode=_get_bool(self.specification.control.manual_temp_mode),
+                sync_to_tracker=_get_bool(self.specification.control.sync_to_tracker),
             ),
             sensors=PLCSensorsState(
-                humidity=_get_int(self.api_spec.sensors.humidity),
-                temperature=_get_int(self.api_spec.sensors.temperature),
+                humidity=_get_int(self.specification.sensors.humidity),
+                temperature=_get_int(self.specification.sensors.temperature),
             ),
             state=PLCStateState(
-                cover_closed=_get_bool(self.api_spec.state.cover_closed),
-                motor_failed=_get_bool(self.api_spec.state.motor_failed),
-                rain=_get_bool(self.api_spec.state.rain),
-                reset_needed=_get_bool(self.api_spec.state.reset_needed),
-                ups_alert=_get_bool(self.api_spec.state.ups_alert),
+                cover_closed=_get_bool(self.specification.state.cover_closed),
+                motor_failed=_get_bool(self.specification.state.motor_failed),
+                rain=_get_bool(self.specification.state.rain),
+                reset_needed=_get_bool(self.specification.state.reset_needed),
+                ups_alert=_get_bool(self.specification.state.ups_alert),
             ),
             power=PLCPowerState(
-                camera=_get_bool(self.api_spec.power.camera),
-                computer=_get_bool(self.api_spec.power.computer),
-                heater=_get_bool(self.api_spec.power.heater),
-                router=_get_bool(self.api_spec.power.router),
-                spectrometer=_get_bool(self.api_spec.power.spectrometer),
+                camera=_get_bool(self.specification.power.camera),
+                computer=_get_bool(self.specification.power.computer),
+                heater=_get_bool(self.specification.power.heater),
+                router=_get_bool(self.specification.power.router),
+                spectrometer=_get_bool(self.specification.power.spectrometer),
             ),
             connections=PLCConnectionsState(
-                camera=_get_bool(self.api_spec.connections.camera),
-                computer=_get_bool(self.api_spec.connections.computer),
-                heater=_get_bool(self.api_spec.connections.heater),
-                router=_get_bool(self.api_spec.connections.router),
-                spectrometer=_get_bool(self.api_spec.connections.spectrometer),
+                camera=_get_bool(self.specification.connections.camera),
+                computer=_get_bool(self.specification.connections.computer),
+                heater=_get_bool(self.specification.connections.heater),
+                router=_get_bool(self.specification.connections.router),
+                spectrometer=_get_bool(self.specification.connections.spectrometer),
             ),
         )
 
@@ -263,37 +261,37 @@ class PLCInterface:
     # PLC.POWER SETTERS
 
     def set_power_camera(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.power.camera, new_state)
+        self._write_bool(self.specification.power.camera, new_state)
 
     def set_power_computer(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.power.computer, new_state)
+        self._write_bool(self.specification.power.computer, new_state)
 
     def set_power_heater(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.power.heater, new_state)
+        self._write_bool(self.specification.power.heater, new_state)
 
     def set_power_router(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.power.router, new_state)
+        self._write_bool(self.specification.power.router, new_state)
 
     def set_power_spectrometer(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.power.spectrometer, new_state)
+        self._write_bool(self.specification.power.spectrometer, new_state)
 
     # PLC.CONTROL SETTERS
 
     def set_sync_to_tracker(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.control.sync_to_tracker, new_state)
+        self._write_bool(self.specification.control.sync_to_tracker, new_state)
 
     def set_manual_control(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.control.manual_control, new_state)
+        self._write_bool(self.specification.control.manual_control, new_state)
 
     def set_auto_temperature(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.control.auto_temp_mode, new_state)
+        self._write_bool(self.specification.control.auto_temp_mode, new_state)
 
     def set_manual_temperature(self, new_state: bool) -> None:
-        self._write_bool(self.api_spec.control.manual_temp_mode, new_state)
+        self._write_bool(self.specification.control.manual_temp_mode, new_state)
 
     def reset(self) -> None:
-        self._write_bool(self.api_spec.control.reset, False)
+        self._write_bool(self.specification.control.reset, False)
 
     # PLC.ACTORS SETTERS
     def set_cover_angle(self, value: int) -> None:
-        self._write_int(self.api_spec.actors.move_cover, value)
+        self._write_int(self.specification.actors.move_cover, value)

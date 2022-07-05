@@ -1,9 +1,12 @@
-from .validation import Validation
+# TODO: Move the following functionality into a subdirectory "functions"
 from .logger import Logger
 from .ring_list import RingList
 from .astronomy import Astronomy
-from .json_interfaces import ConfigInterface, StateInterface
-from .os_info import OSInfo
 from .exception_email_client import ExceptionEmailClient
-from .plc_api_specification import STANDARD_PLC_API_SPECIFICATIONS, PLCAPISpecification
-from .plc_interface import PLCError, PLCInterface, EMPTY_PLC_STATE
+
+# TODO: Refactor OSInfo naming like the other interfaces
+from .os_info import OSInfo
+
+from .interfaces.plc_interface import PLCInterface, PLCError
+from .interfaces.config_interface import ConfigInterface
+from .interfaces.state_interface import StateInterface

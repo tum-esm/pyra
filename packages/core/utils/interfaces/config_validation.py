@@ -26,7 +26,7 @@ DICT_SCHEMA = lambda s: {"type": "dict", "schema": s}
 NULLABLE_DICT_SCHEMA = lambda s: {"type": "dict", "schema": s, "nullable": True}
 
 
-class Schemas:
+class _Schemas:
     time_dict = {
         "type": "dict",
         "schema": {
@@ -45,50 +45,50 @@ CONFIG_FILE_SCHEMA = {
     "general": DICT_SCHEMA(
         {
             "seconds_per_core_interval": {"type": "number", "min": 5, "max": 600},
-            "test_mode": Schemas.boolean,
+            "test_mode": _Schemas.boolean,
             "station_id": {"type": "string"},
         }
     ),
     "opus": DICT_SCHEMA(
         {
-            "em27_ip": Schemas.ip,
-            "executable_path": Schemas.file,
-            "executable_parameter": Schemas.string,
-            "experiment_path": Schemas.file,
-            "macro_path": Schemas.file,
+            "em27_ip": _Schemas.ip,
+            "executable_path": _Schemas.file,
+            "executable_parameter": _Schemas.string,
+            "experiment_path": _Schemas.file,
+            "macro_path": _Schemas.file,
         }
     ),
     "camtracker": DICT_SCHEMA(
         {
-            "config_path": Schemas.file,
-            "executable_path": Schemas.file,
-            "learn_az_elev_path": Schemas.file,
-            "sun_intensity_path": Schemas.file,
+            "config_path": _Schemas.file,
+            "executable_path": _Schemas.file,
+            "learn_az_elev_path": _Schemas.file,
+            "sun_intensity_path": _Schemas.file,
             "motor_offset_threshold": {"type": "number", "min": -360, "max": 360},
         }
     ),
     "error_email": DICT_SCHEMA(
         {
-            "sender_address": Schemas.string,
-            "sender_password": Schemas.string,
-            "notify_recipients": Schemas.boolean,
-            "recipients": Schemas.string,
+            "sender_address": _Schemas.string,
+            "sender_password": _Schemas.string,
+            "notify_recipients": _Schemas.boolean,
+            "recipients": _Schemas.string,
         }
     ),
     "measurement_decision": DICT_SCHEMA(
         {
             "mode": {"type": "string", "allowed": ["automatic", "manual", "cli"]},
-            "manual_decision_result": Schemas.boolean,
-            "cli_decision_result": Schemas.boolean,
+            "manual_decision_result": _Schemas.boolean,
+            "cli_decision_result": _Schemas.boolean,
         }
     ),
     "measurement_triggers": DICT_SCHEMA(
         {
-            "consider_time": Schemas.boolean,
-            "consider_sun_elevation": Schemas.boolean,
-            "consider_vbdsd": Schemas.boolean,
-            "start_time": Schemas.time_dict,
-            "stop_time": Schemas.time_dict,
+            "consider_time": _Schemas.boolean,
+            "consider_sun_elevation": _Schemas.boolean,
+            "consider_vbdsd": _Schemas.boolean,
+            "start_time": _Schemas.time_dict,
+            "stop_time": _Schemas.time_dict,
             "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
             "max_sun_elevation": {"type": "number", "min": 0, "max": 90},
         }
@@ -96,7 +96,7 @@ CONFIG_FILE_SCHEMA = {
     "tum_plc": NULLABLE_DICT_SCHEMA(
         {
             "min_power_elevation": {"type": "number", "min": 0, "max": 90},
-            "ip": Schemas.ip,
+            "ip": _Schemas.ip,
             "version": {"type": "integer", "allowed": [1, 2]},
             "controlled_by_user": {"type": "boolean"},
         }
@@ -117,7 +117,7 @@ class CerberusException(Exception):
     pass
 
 
-class Validation:
+class ConfigValidation:
     logging_handler = Logger().error
 
     @staticmethod
@@ -141,10 +141,10 @@ class Validation:
                 except:
                     raise AssertionError("file not in a valid json format")
 
-            Validation.check(content_object, partial_validation=False)
+            ConfigValidation.check(content_object, partial_validation=False)
             return True
         except Exception as e:
-            Validation.logging_handler(f"Error in current config file: {e}")
+            ConfigValidation.logging_handler(f"Error in current config file: {e}")
             return False
 
     @staticmethod
@@ -155,8 +155,8 @@ class Validation:
             except:
                 raise AssertionError("content not in a valid json format")
 
-            Validation.check(content_object, partial_validation=True)
+            ConfigValidation.check(content_object, partial_validation=True)
             return True
         except Exception as e:
-            Validation.logging_handler(f"Error in new config string: {e}")
+            ConfigValidation.logging_handler(f"Error in new config string: {e}")
             return False

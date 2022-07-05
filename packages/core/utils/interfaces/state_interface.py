@@ -2,7 +2,7 @@ import json
 import os
 import shutil
 import filelock
-from packages.core.utils import Astronomy, Validation, EMPTY_PLC_STATE
+from .plc_interface import EMPTY_PLC_STATE
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -64,15 +64,3 @@ class StateInterface:
             _STATE = json.load(f)
         with open(STATE_FILE_PATH, "w") as f:
             json.dump({**_STATE, **update}, f)
-
-
-class ConfigInterface:
-    @staticmethod
-    @with_filelock(CONFIG_LOCK_PATH)
-    def read() -> dict:
-        assert Validation.check_current_config_file()
-        with open(CONFIG_FILE_PATH, "r") as f:
-            _CONFIG = json.load(f)
-
-        Astronomy.CONFIG = _CONFIG
-        return _CONFIG

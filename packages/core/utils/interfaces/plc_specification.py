@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class PLCActorsAPISpecification:
+class PLCActorsSpecification:
     current_angle: list[int]
     fan_speed: list[int]
     move_cover: list[int]
@@ -10,7 +10,7 @@ class PLCActorsAPISpecification:
 
 
 @dataclass
-class PLCControlAPISpecification:
+class PLCControlSpecification:
     auto_temp_mode: list[int]
     manual_control: list[int]
     manual_temp_mode: list[int]
@@ -19,13 +19,13 @@ class PLCControlAPISpecification:
 
 
 @dataclass
-class PLCSensorsAPISpecification:
+class PLCSensorsSpecification:
     humidity: list[int]
     temperature: list[int]
 
 
 @dataclass
-class PLCStateAPISpecification:
+class PLCStateSpecification:
     cover_closed: list[int]
     motor_failed: list[int]
     rain: list[int]
@@ -34,7 +34,7 @@ class PLCStateAPISpecification:
 
 
 @dataclass
-class PLCPowerAPISpecification:
+class PLCPowerSpecification:
     camera: list[int]
     computer: list[int]
     heater: list[int]
@@ -43,7 +43,7 @@ class PLCPowerAPISpecification:
 
 
 @dataclass
-class PLCConnectionsAPISpecification:
+class PLCConnectionsSpecification:
     camera: list[int]
     computer: list[int]
     heater: list[int]
@@ -52,49 +52,49 @@ class PLCConnectionsAPISpecification:
 
 
 @dataclass
-class PLCAPISpecification:
-    actors: PLCActorsAPISpecification
-    control: PLCControlAPISpecification
-    sensors: PLCSensorsAPISpecification
-    state: PLCStateAPISpecification
-    power: PLCPowerAPISpecification
-    connections: PLCConnectionsAPISpecification
+class PLCSpecification:
+    actors: PLCActorsSpecification
+    control: PLCControlSpecification
+    sensors: PLCSensorsSpecification
+    state: PLCStateSpecification
+    power: PLCPowerSpecification
+    connections: PLCConnectionsSpecification
 
 
 # TODO: Add correct variables for PLC
 
 
-STANDARD_PLC_API_SPECIFICATIONS: dict[int, PLCAPISpecification] = {
-    1: PLCAPISpecification(
-        actors=PLCActorsAPISpecification(
+PLC_SPECIFICATION_VERSIONS: dict[int, PLCSpecification] = {
+    1: PLCSpecification(
+        actors=PLCActorsSpecification(
             current_angle=[25, 6, 2],
             fan_speed=[8, 18, 2],
             move_cover=[25, 8, 2],
             nominal_angle=[25, 8, 2],
         ),
-        control=PLCControlAPISpecification(
+        control=PLCControlSpecification(
             auto_temp_mode=[8, 24, 1, 2],
             manual_control=[8, 24, 1, 5],
             manual_temp_mode=[8, 24, 1, 3],
             reset=[3, 4, 1, 5],
             sync_to_tracker=[8, 16, 1, 0],
         ),
-        sensors=PLCSensorsAPISpecification(humidity=[8, 22, 2], temperature=[8, 20, 2]),
-        state=PLCStateAPISpecification(
+        sensors=PLCSensorsSpecification(humidity=[8, 22, 2], temperature=[8, 20, 2]),
+        state=PLCStateSpecification(
             cover_closed=[25, 2, 1, 2],
             motor_failed=[8, 12, 1, 3],
             rain=[8, 6, 1, 0],
             reset_needed=[3, 2, 1, 2],
             ups_alert=[8, 0, 1, 1],
         ),
-        power=PLCPowerAPISpecification(
+        power=PLCPowerSpecification(
             camera=[8, 16, 1, 2],
             computer=[8, 16, 1, 6],
             heater=[8, 16, 1, 5],
             router=[8, 16, 1, 3],
             spectrometer=[8, 16, 1, 1],
         ),
-        connections=PLCConnectionsAPISpecification(
+        connections=PLCConnectionsSpecification(
             camera=[8, 14, 1, 6],
             computer=[8, 14, 1, 3],
             heater=[8, 14, 1, 1],
@@ -102,36 +102,36 @@ STANDARD_PLC_API_SPECIFICATIONS: dict[int, PLCAPISpecification] = {
             spectrometer=[8, 14, 1, 0],
         ),
     ),
-    2: PLCAPISpecification(
-        actors=PLCActorsAPISpecification(
+    2: PLCSpecification(
+        actors=PLCActorsSpecification(
             current_angle=[25, 6, 2],
             fan_speed=[8, 18, 2],
             move_cover=[25, 8, 2],
             nominal_angle=[25, 8, 2],
         ),
-        control=PLCControlAPISpecification(
+        control=PLCControlSpecification(
             auto_temp_mode=[8, 24, 1, 2],
             manual_control=[8, 24, 1, 5],
             manual_temp_mode=[8, 24, 1, 3],
             reset=[3, 4, 1, 5],
             sync_to_tracker=[8, 16, 1, 0],
         ),
-        sensors=PLCSensorsAPISpecification(humidity=[8, 22, 2], temperature=[8, 20, 2]),
-        state=PLCStateAPISpecification(
+        sensors=PLCSensorsSpecification(humidity=[8, 22, 2], temperature=[8, 20, 2]),
+        state=PLCStateSpecification(
             cover_closed=[25, 2, 1, 2],
             motor_failed=[8, 12, 1, 3],
             rain=[8, 6, 1, 0],
             reset_needed=[3, 2, 1, 2],
             ups_alert=[8, 0, 1, 1],
         ),
-        power=PLCPowerAPISpecification(
+        power=PLCPowerSpecification(
             camera=[8, 16, 1, 2],
             computer=[8, 16, 1, 6],
             heater=[8, 16, 1, 5],
             router=[8, 16, 1, 3],
             spectrometer=[8, 16, 1, 1],
         ),
-        connections=PLCConnectionsAPISpecification(
+        connections=PLCConnectionsSpecification(
             camera=[8, 14, 1, 6],
             computer=[8, 14, 1, 3],
             heater=[8, 14, 1, 1],
