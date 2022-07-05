@@ -1,14 +1,3 @@
-# author            : Patrick Aigner
-# email             : patrick.aigner@tum.de
-# date              : 20220421
-# version           : 1.0
-# notes             :
-# license           : -
-# py version        : 3.10
-# ==============================================================================
-# description       :
-# ==============================================================================
-
 import time
 from packages.core.utils import StateInterface, Logger, Astronomy, PLCError, PLCInterface
 
@@ -80,7 +69,7 @@ class EnclosureControl:
                 self.plc_interface.set_sync_to_tracker(False)
                 self.move_cover(0)
                 logger.info("Closing Cover.")
-                self.wait_for_cover_closing()
+                self.wait_for_cover_closing(throw_error=False)
 
         # save the automation status for the next run
         self.last_cycle_automation_status = automation_should_be_running
@@ -88,7 +77,7 @@ class EnclosureControl:
         if (not automation_should_be_running) & (not self.plc_state.state.rain):
             if not self.plc_state.state.cover_closed:
                 logger.info("Cover is still open. Trying to close again.")
-                self.move_cover(0)
+                self.force_cover_close()
                 self.wait_for_cover_closing()
 
         # read current state of actors and sensors in enclosure
@@ -121,7 +110,7 @@ class EnclosureControl:
         self.plc_interface.set_manual_control(False)
         self.wait_for_cover_closing()
 
-    def wait_for_cover_closing(self) -> None:
+    def wait_for_cover_closing(self, throw_error=True) -> None:
         """Waits steps of 5s for the enclosure cover to close.
 
         Raises the custom error CoverError if clover doesn't close in a given
@@ -129,7 +118,6 @@ class EnclosureControl:
         """
 
         start_time = time.time()
-
         while True:
             time.sleep(5)
 
@@ -138,7 +126,9 @@ class EnclosureControl:
 
             elapsed_time = time.time() - start_time
             if elapsed_time > 31:
-                raise CoverError("Enclosure cover might be stuck.")
+                if throw_error:
+                    raise CoverError("Enclosure cover might be stuck.")
+                break
 
     def auto_set_power_spectrometer(self) -> None:
         """
