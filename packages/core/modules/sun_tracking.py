@@ -78,14 +78,13 @@ class SunTracking:
         ct_path = self._CONFIG["camtracker"]["executable_path"]
         process_name = os.path.basename(ct_path)
 
-        status = OSInterface.check_process_status(process_name)
-
-        if status == (
-            "running" or "start_pending" or "continue_pending" or "pause_pending" or "paused"
-        ):
-            return True
-        else:
-            return False
+        return OSInterface.get_process_status(process_name) in [
+            "running",
+            "start_pending",
+            "continue_pending",
+            "pause_pending",
+            "paused",
+        ]
 
     def start_sun_tracking_automation(self):
         """Uses os.startfile() to start up the CamTracker

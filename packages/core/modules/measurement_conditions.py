@@ -31,9 +31,6 @@ class MeasurementConditions:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
 
-        if self._CONFIG["general"]["test_mode"]:
-            return
-
     def run(self, new_config: dict):
         self._CONFIG = new_config
         if self._CONFIG["general"]["test_mode"]:

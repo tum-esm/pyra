@@ -31,6 +31,7 @@ def run():
         modules.enclosure_control.EnclosureControl(_CONFIG),
         modules.sun_tracking.SunTracking(_CONFIG),
         modules.opus_measurement.OpusMeasurement(_CONFIG),
+        modules.system_checks.SystemChecks(_CONFIG),
     ]
     vbdsd_thread = modules.vbdsd.VBDSD_Thread()
 
