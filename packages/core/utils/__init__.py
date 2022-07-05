@@ -4,9 +4,7 @@ from .ring_list import RingList
 from .astronomy import Astronomy
 from .exception_email_client import ExceptionEmailClient
 
-# TODO: Refactor OSInfo naming like the other interfaces
-from .os_info import OSInfo
-
-from .interfaces.plc_interface import PLCInterface, PLCError
-from .interfaces.config_interface import ConfigInterface
-from .interfaces.state_interface import StateInterface
+from .interfaces import PLCInterface, PLCError
+from .interfaces import ConfigInterface
+from .interfaces import StateInterface
+from .interfaces import OSInterface, LowEnergyError, StorageError

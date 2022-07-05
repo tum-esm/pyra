@@ -22,7 +22,7 @@ import sys
 import time
 import jdcal
 import datetime
-from packages.core.utils import StateInterface, Logger, OSInfo
+from packages.core.utils import StateInterface, Logger, OSInterface
 
 
 # these imports are provided by pywin32
@@ -47,9 +47,7 @@ class SunTracking:
 
         logger.info("Running SunTracking")
 
-        automation_should_be_running = StateInterface.read()[
-            "automation_should_be_running"
-        ]
+        automation_should_be_running = StateInterface.read()["automation_should_be_running"]
 
         # main logic for active automation
         if automation_should_be_running and not self.ct_application_running():
@@ -80,14 +78,10 @@ class SunTracking:
         ct_path = self._CONFIG["camtracker"]["executable_path"]
         process_name = os.path.basename(ct_path)
 
-        status = OSInfo.check_process_status(process_name)
+        status = OSInterface.check_process_status(process_name)
 
         if status == (
-            "running"
-            or "start_pending"
-            or "continue_pending"
-            or "pause_pending"
-            or "paused"
+            "running" or "start_pending" or "continue_pending" or "pause_pending" or "paused"
         ):
             return True
         else:
@@ -122,9 +116,7 @@ class SunTracking:
         """
 
         # create stop.txt file in camtracker folder
-        camtracker_directory = os.path.dirname(
-            self._CONFIG["camtracker"]["executable_path"]
-        )
+        camtracker_directory = os.path.dirname(self._CONFIG["camtracker"]["executable_path"])
 
         f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
         f.close()
@@ -134,9 +126,7 @@ class SunTracking:
         This file needs to be removed after CamTracker shutdown.
         """
 
-        camtracker_directory = os.path.dirname(
-            self._CONFIG["camtracker"]["executable_path"]
-        )
+        camtracker_directory = os.path.dirname(self._CONFIG["camtracker"]["executable_path"])
         stop_file_path = os.path.join(camtracker_directory, "stop.txt")
 
         if os.path.exists(stop_file_path):

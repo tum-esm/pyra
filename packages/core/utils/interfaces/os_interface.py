@@ -10,7 +10,7 @@ class StorageError(Exception):
     pass
 
 
-class OSInfo:
+class OSInterface:
     @staticmethod
     def check_cpu_usage() -> list:
         """returns cpu_percent for all cores -> list [cpu1%, cpu2%,...]"""
@@ -39,7 +39,7 @@ class OSInfo:
     @staticmethod
     def validate_disk_space():
         """Raises an error if the diskspace is less than 10%"""
-        if OSInfo.check_disk_space() > 90:
+        if OSInterface.check_disk_space() > 90:
             raise StorageError(
                 "Disk space is less than 10%. This is bad for the OS stability."
             )
@@ -73,7 +73,7 @@ class OSInfo:
     @staticmethod
     def validate_system_battery():
         """Raises LowEnergyError if system battery runs lower than 20%."""
-        if OSInfo.check_system_battery() < 20.0:
+        if OSInterface.check_system_battery() < 20.0:
             raise LowEnergyError(
                 "The battery of the system is below 20%. Please check the power supply."
             )

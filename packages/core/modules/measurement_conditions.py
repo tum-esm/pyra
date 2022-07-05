@@ -15,7 +15,7 @@
 
 import datetime
 import astropy.units as astropy_units
-from packages.core.utils import Astronomy, StateInterface, Logger, OSInfo
+from packages.core.utils import Astronomy, StateInterface, Logger, OSInterface
 
 logger = Logger(origin="pyra.core.measurement-conditions")
 
@@ -43,28 +43,30 @@ class MeasurementConditions:
 
         logger.info("Running MeasurementConditions")
 
+        # TODO: Move system state checks into their own module
+
         # check os system stability
-        ans = OSInfo.check_cpu_usage()
+        ans = OSInterface.check_cpu_usage()
         logger.debug("Current CPU usage for all cores is {}%.".format(ans))
 
-        ans = OSInfo.check_average_system_load()
+        ans = OSInterface.check_average_system_load()
         logger.info(
             "The average system load in the past 1/5/15 minutes was" " {}.".format(ans)
         )
 
-        ans = OSInfo.check_memory_usage()
+        ans = OSInterface.check_memory_usage()
         logger.debug("Current v_memory usage for the system is {}.".format(ans))
 
-        ans = OSInfo.time_since_os_boot()
+        ans = OSInterface.time_since_os_boot()
         logger.debug("The system is running since {}.".format(ans))
 
-        ans = OSInfo.check_disk_space()
+        ans = OSInterface.check_disk_space()
         logger.debug("The disk is currently filled with {}%.".format(ans))
 
         # raises error if disk_space is below 10%
-        OSInfo.validate_disk_space()
+        OSInterface.validate_disk_space()
         # raises error if system battery is below 20%
-        OSInfo.validate_system_battery()
+        OSInterface.validate_system_battery()
 
         decision = self._CONFIG["measurement_decision"]
         triggers = self._CONFIG["measurement_triggers"]

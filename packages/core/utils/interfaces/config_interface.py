@@ -26,6 +26,9 @@ def with_filelock(file_lock_path):
     return wrapper
 
 
+# TODO: Make config interface statically typed
+
+
 class ConfigInterface:
     @staticmethod
     @with_filelock(CONFIG_LOCK_PATH)
