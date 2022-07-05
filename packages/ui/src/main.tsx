@@ -6,23 +6,37 @@ import Dashboard from './components/structural/dashboard';
 
 export default function Main() {
     const [backendIntegrity, setBackendIntegrity] = useState<
-        undefined | 'valid' | 'cli is missing' | 'config is invalid'
+        undefined | 'valid' | 'cli is missing' | 'config is invalid' | 'pyra-core is not running'
     >(undefined);
 
     const dispatch = reduxUtils.useTypedDispatch();
 
-    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
-    const pyraCoreIsRunning = pyraCorePID !== undefined && pyraCorePID !== -1;
+    const setPyraCorePID = (pid: number | undefined) =>
+        dispatch(reduxUtils.coreProcessActions.set({ pid }));
+
+    async function startPyraCore() {
+        console.log('bo');
+        setPyraCorePID(undefined);
+        try {
+            const p = await fetchUtils.backend.startPyraCore();
+            const pid = parseInt(p.stdout.replace(/[^\d]/g, ''));
+            console.log(p.stdout);
+            setPyraCorePID(pid);
+            setBackendIntegrity('valid');
+        } catch {
+            // TODO: add message to queue
+            setPyraCorePID(undefined);
+        }
+    }
 
     useEffect(() => {
         fetchUtils.initialAppState(dispatch, setBackendIntegrity).catch(console.error);
     }, []);
 
-    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
-    let enclosureControlsIsVisible =
-        centralConfig === undefined ? undefined : centralConfig.tum_plc !== null;
-    // TODO: show "reload required" popup if "enclosureControlsIsVisible" changes
-    // to true or false
+    // TODO: show "reload required" popup if "enclosureControlsIsVisible" changes to true or false
+    //const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
+    //let enclosureControlsIsVisible =
+    //    centralConfig === undefined ? undefined : centralConfig.tum_plc !== null;
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
@@ -31,17 +45,16 @@ export default function Main() {
                     <div className="w-8 h-8 text-green-600 animate-spin">{ICONS.spinner}</div>
                 </main>
             )}
-            {(backendIntegrity === 'cli is missing' ||
-                backendIntegrity === 'config is invalid') && (
+            {backendIntegrity !== undefined && backendIntegrity !== 'valid' && (
                 <structuralComponents.DisconnectedScreen
                     backendIntegrity={backendIntegrity}
                     loadInitialAppState={() =>
                         fetchUtils.initialAppState(dispatch, setBackendIntegrity)
                     }
+                    startPyraCore={startPyraCore}
                 />
             )}
-            {backendIntegrity === 'valid' && !pyraCoreIsRunning && 'start pyra core button'}
-            {backendIntegrity === 'valid' && pyraCoreIsRunning && <Dashboard />}
+            {backendIntegrity === 'valid' && <Dashboard />}
         </div>
     );
 }

@@ -1,37 +1,55 @@
 import { essentialComponents } from '..';
 
+const linkToInstallationInstructions = (
+    <>
+        Please following the installation instructions on{' '}
+        <span className="font-bold text-blue-500 underline">https://github.com/tum-esm/pyra</span>.
+    </>
+);
+
 export default function DisconnectedScreen(props: {
-    backendIntegrity: undefined | 'valid' | 'cli is missing' | 'config is invalid';
+    backendIntegrity:
+        | undefined
+        | 'cli is missing'
+        | 'config is invalid'
+        | 'pyra-core is not running';
     loadInitialAppState(): void;
+    startPyraCore(): void;
 }) {
+    const { backendIntegrity } = props;
+
     return (
         <main className="flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4">
-            <p className="inline max-w-sm text-center">
-                {props.backendIntegrity === 'cli is missing' && (
+            <div className="inline max-w-sm text-center">
+                {backendIntegrity === 'cli is missing' && (
                     <>
-                        <pre className="bg-gray-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
-                            pyra-cli
-                        </pre>{' '}
-                        has not been found on your system.{' '}
+                        <strong>pyra-cli</strong> has not been found on your system.{' '}
+                        {linkToInstallationInstructions}
                     </>
                 )}
-                {props.backendIntegrity === 'config is invalid' && (
+                {backendIntegrity === 'config is invalid' && (
                     <>
-                        The file{' '}
-                        <pre className="bg-gray-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
-                            config.json
-                        </pre>{' '}
-                        is not in a valid JSON format.{' '}
+                        The file <strong>config.json</strong> is not in a valid JSON format.{' '}
+                        {linkToInstallationInstructions}
                     </>
                 )}
-                Please following the installation instructions on{' '}
-                <span className="font-bold text-blue-500 underline">
-                    https://github.com/tum-esm/pyra
-                </span>
-                .
-            </p>
-            <essentialComponents.Button onClick={props.loadInitialAppState} variant="green">
-                retry connection
+                {backendIntegrity === 'pyra-core is not running' && (
+                    <>
+                        <strong>pyra-core</strong> is not running.
+                    </>
+                )}
+            </div>
+            <essentialComponents.Button
+                onClick={
+                    backendIntegrity === 'pyra-core is not running'
+                        ? props.startPyraCore
+                        : props.loadInitialAppState
+                }
+                variant="green"
+            >
+                {backendIntegrity === 'pyra-core is not running'
+                    ? 'start pyra-core'
+                    : 'retry connection'}
             </essentialComponents.Button>
         </main>
     );
