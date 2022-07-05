@@ -1,142 +1,280 @@
 from dataclasses import dataclass
+import snap7
+import time
+import os
+from packages.core.utils import (
+    Logger,
+    STANDARD_PLC_API_SPECIFICATIONS,
+)
+
+logger = Logger(origin="pyra.core.enclosure-control")
+
+
+class PLCError(Exception):
+    pass
 
 
 @dataclass
-class PLCActorsInterface:
-    current_angle: list[int]
-    fan_speed: list[int]
-    move_cover: list[int]
-    nominal_angle: list[int]
+class PLCActorsState:
+    current_angle: int
+    fan_speed: int
 
 
 @dataclass
-class PLCControlInterface:
-    auto_temp_mode: list[int]
-    manual_control: list[int]
-    manual_temp_mode: list[int]
-    reset: list[int]
-    sync_to_tracker: list[int]
+class PLCControlState:
+    auto_temp_mode: bool
+    manual_control: bool
+    manual_temp_mode: bool
+    sync_to_tracker: bool
 
 
 @dataclass
-class PLCSensorsInterface:
-    humidity: list[int]
-    temperature: list[int]
+class PLCSensorsState:
+    humidity: int
+    temperature: int
 
 
 @dataclass
-class PLCStateInterface:
-    cover_closed: list[int]
-    motor_failed: list[int]
-    rain: list[int]
-    reset_needed: list[int]
-    ups_alert: list[int]
+class PLCStateState:
+    cover_closed: bool
+    motor_failed: bool
+    rain: bool
+    reset_needed: bool
+    ups_alert: bool
 
 
 @dataclass
-class PLCPowerInterface:
-    camera: list[int]
-    computer: list[int]
-    heater: list[int]
-    router: list[int]
-    spectrometer: list[int]
+class PLCPowerState:
+    camera: bool
+    computer: bool
+    heater: bool
+    router: bool
+    spectrometer: bool
 
 
 @dataclass
-class PLCConnectionsInterface:
-    camera: list[int]
-    computer: list[int]
-    heater: list[int]
-    router: list[int]
-    spectrometer: list[int]
+class PLCConnectionsState:
+    camera: bool
+    computer: bool
+    heater: bool
+    router: bool
+    spectrometer: bool
 
 
 @dataclass
+class PLCState:
+    actors: PLCActorsState
+    control: PLCControlState
+    sensors: PLCSensorsState
+    state: PLCStateState
+    power: PLCPowerState
+    connections: PLCConnectionsState
+
+
 class PLCInterface:
-    actors: PLCActorsInterface
-    control: PLCControlInterface
-    sensors: PLCSensorsInterface
-    state: PLCStateInterface
-    power: PLCPowerInterface
-    connections: PLCConnectionsInterface
+    def __init__(self, config: dict):
+        self.config = config
+        self.api_spec = STANDARD_PLC_API_SPECIFICATIONS[config["tum_plc"]["version"]]
 
+        self.plc = snap7.client.Client()
+        self.connect()
 
-# TODO: Add correct variables for PLC
+    # CONNECTION
 
+    def update_config(self, new_config: dict):
+        if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
+            logger.debug("PLC ip has changed, reconnecting now")
+            self.disconnect()
+            self.config = new_config
+            self.connect()
+        else:
+            self.config = new_config()
 
-STANDARD_PLC_INTERFACES: dict[int, PLCInterface] = {
-    1: PLCInterface(
-        actors=PLCActorsInterface(
-            current_angle=[25, 6, 2],
-            fan_speed=[8, 18, 2],
-            move_cover=[25, 8, 2],
-            nominal_angle=[25, 8, 2],
-        ),
-        control=PLCControlInterface(
-            auto_temp_mode=[8, 24, 1, 2],
-            manual_control=[8, 24, 1, 5],
-            manual_temp_mode=[8, 24, 1, 3],
-            reset=[3, 4, 1, 5],
-            sync_to_tracker=[8, 16, 1, 0],
-        ),
-        sensors=PLCSensorsInterface(humidity=[8, 22, 2], temperature=[8, 20, 2]),
-        state=PLCStateInterface(
-            cover_closed=[25, 2, 1, 2],
-            motor_failed=[8, 12, 1, 3],
-            rain=[8, 6, 1, 0],
-            reset_needed=[3, 2, 1, 2],
-            ups_alert=[8, 0, 1, 1],
-        ),
-        power=PLCPowerInterface(
-            camera=[8, 16, 1, 2],
-            computer=[8, 16, 1, 6],
-            heater=[8, 16, 1, 5],
-            router=[8, 16, 1, 3],
-            spectrometer=[8, 16, 1, 1],
-        ),
-        connections=PLCConnectionsInterface(
-            camera=[8, 14, 1, 6],
-            computer=[8, 14, 1, 3],
-            heater=[8, 14, 1, 1],
-            router=[8, 14, 1, 2],
-            spectrometer=[8, 14, 1, 0],
-        ),
-    ),
-    2: PLCInterface(
-        actors=PLCActorsInterface(
-            current_angle=[25, 6, 2],
-            fan_speed=[8, 18, 2],
-            move_cover=[25, 8, 2],
-            nominal_angle=[25, 8, 2],
-        ),
-        control=PLCControlInterface(
-            auto_temp_mode=[8, 24, 1, 2],
-            manual_control=[8, 24, 1, 5],
-            manual_temp_mode=[8, 24, 1, 3],
-            reset=[3, 4, 1, 5],
-            sync_to_tracker=[8, 16, 1, 0],
-        ),
-        sensors=PLCSensorsInterface(humidity=[8, 22, 2], temperature=[8, 20, 2]),
-        state=PLCStateInterface(
-            cover_closed=[25, 2, 1, 2],
-            motor_failed=[8, 12, 1, 3],
-            rain=[8, 6, 1, 0],
-            reset_needed=[3, 2, 1, 2],
-            ups_alert=[8, 0, 1, 1],
-        ),
-        power=PLCPowerInterface(
-            camera=[8, 16, 1, 2],
-            computer=[8, 16, 1, 6],
-            heater=[8, 16, 1, 5],
-            router=[8, 16, 1, 3],
-            spectrometer=[8, 16, 1, 1],
-        ),
-        connections=PLCConnectionsInterface(
-            camera=[8, 14, 1, 6],
-            computer=[8, 14, 1, 3],
-            heater=[8, 14, 1, 1],
-            router=[8, 14, 1, 2],
-            spectrometer=[8, 14, 1, 0],
-        ),
-    ),
-}
+    def connect(self) -> None:
+        """
+        Connects to the PLC Snap7
+        """
+        self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
+
+        if not self.is_connected():
+            raise PLCError("Could not connect to PLC")
+
+    def disconnect(self) -> None:
+        """
+        Disconnects from the PLC Snap7
+        """
+        self.plc.disconnect()
+
+        if self.is_connected():
+            raise PLCError("Could not disconnect from PLC")
+
+    def is_connected(self) -> bool:
+        """
+        Checks whether PLC is connected
+        """
+        return self.plc.get_connected()
+
+    def is_responsive(self) -> bool:
+        """Pings the PLC"""
+        return os.system("ping -n 1 " + self._CONFIG["tum_plc"]["ip"]) == 0
+
+    # def rain_is_detected(self) -> bool:
+    #    return self._read_bool(self.api_spec.state.rain)
+
+    def cover_is_closed(self) -> bool:
+        return self._read_bool(self.api_spec.state.cover_closed)
+
+    # def reset_is_needed(self) -> bool:
+    #    return self._read_bool(self.api_spec.state.reset_needed)
+
+    def read(self) -> PLCState:
+        """
+        Read the whole state of the PLC
+        """
+
+        plc_db_content = {}
+        plc_db_content[8] = self.plc.db_read(8, 0, 25)
+        self._sleep_while_cpu_is_busy()
+        plc_db_content[25] = self.plc.db_read(25, 0, 9)
+        self._sleep_while_cpu_is_busy()
+        plc_db_content[3] = self.plc.db_read(3, 0, 5)
+        self._sleep_while_cpu_is_busy()
+
+        def _get_int(spec: list[int]) -> int:
+            return snap7.util.get_int(plc_db_content[spec[0]], spec[1])
+
+        def _get_bool(spec: list[int]) -> bool:
+            return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])
+
+        return PLCState(
+            actors=PLCActorsState(
+                fan_speed=_get_int(self.api_spec.actors.fan_speed),
+                current_angle=_get_int(self.api_spec.actors.current_angle),
+            ),
+            control=PLCControlState(
+                auto_temp_mode=_get_bool(self.api_spec.control.auto_temp_mode),
+                manual_control=_get_bool(self.api_spec.control.manual_control),
+                manual_temp_mode=_get_bool(self.api_spec.control.manual_temp_mode),
+                sync_to_tracker=_get_bool(self.api_spec.control.sync_to_tracker),
+            ),
+            sensors=PLCSensorsState(
+                humidity=_get_int(self.api_spec.sensors.humidity),
+                temperature=_get_int(self.api_spec.sensors.temperature),
+            ),
+            state=PLCStateState(
+                cover_closed=_get_bool(self.api_spec.state.cover_closed),
+                motor_failed=_get_bool(self.api_spec.state.motor_failed),
+                rain=_get_bool(self.api_spec.state.rain),
+                reset_needed=_get_bool(self.api_spec.state.reset_needed),
+                ups_alert=_get_bool(self.api_spec.state.ups_alert),
+            ),
+            power=PLCPowerState(
+                camera=_get_bool(self.api_spec.power.camera),
+                computer=_get_bool(self.api_spec.power.computer),
+                heater=_get_bool(self.api_spec.power.heater),
+                router=_get_bool(self.api_spec.power.router),
+                spectrometer=_get_bool(self.api_spec.power.spectrometer),
+            ),
+            connections=PLCConnectionsState(
+                camera=_get_bool(self.api_spec.connections.camera),
+                computer=_get_bool(self.api_spec.connections.computer),
+                heater=_get_bool(self.api_spec.connections.heater),
+                router=_get_bool(self.api_spec.connections.router),
+                spectrometer=_get_bool(self.api_spec.connections.spectrometer),
+            ),
+        )
+
+    # TODO: figure out why "with_timeout" doesn't work on windows
+    def _sleep_while_cpu_is_busy(self) -> None:
+        time.sleep(0.2)
+        while str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
+            time.sleep(1)
+
+    def _read_int(self, action: list[int]) -> int:
+        """Reads an INT value in the PLC database."""
+        assert len(action) == 3
+        db_number, start, size = action
+        print(f"reading int: action={action}")
+
+        msg = self.plc.db_read(db_number, start, size)
+        value = snap7.util.get_int(msg, 0)
+
+        # wait if cpu is still busy
+        self._sleep_while_cpu_is_busy()
+
+        return value
+
+    def _write_int(self, action: list[int], value: int) -> None:
+        """Changes an INT value in the PLC database."""
+        assert len(action) == 3
+        db_number, start, size = action
+
+        msg = bytearray(size)
+        snap7.util.set_int(msg, 0, value)
+        self.plc.db_write(db_number, start, msg)
+
+        self._sleep_while_cpu_is_busy()
+
+    def _read_bool(self, action: list[int]) -> bool:
+        """Reads a BOOL value in the PLC database."""
+        assert len(action) == 4
+        db_number, start, size, bool_index = action
+        print(f"reading bool: action={action}")
+
+        msg = self.plc.db_read(db_number, start, size)
+        value = snap7.util.get_bool(msg, 0, bool_index)
+
+        # wait if cpu is still busy
+        self._sleep_while_cpu_is_busy()
+
+        return value
+
+    def _write_bool(self, action: list[int], value: bool) -> None:
+        """Changes a BOOL value in the PLC database."""
+        assert len(action) == 4
+        db_number, start, size, bool_index = action
+
+        msg = self.plc.db_read(db_number, start, size)
+        snap7.util.set_bool(msg, 0, bool_index, value)
+        self.plc.db_write(db_number, start, msg)
+
+        # wait if cpu is still busy
+        self._sleep_while_cpu_is_busy()
+
+    # PLC.POWER SETTERS
+
+    def set_power_camera(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.power.camera, new_state)
+
+    def set_power_computer(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.power.computer, new_state)
+
+    def set_power_heater(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.power.heater, new_state)
+
+    def set_power_router(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.power.router, new_state)
+
+    def set_power_spectrometer(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.power.spectrometer, new_state)
+
+    # PLC.CONTROL SETTERS
+
+    def set_sync_to_tracker(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.control.sync_to_tracker, new_state)
+
+    def set_manual_control(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.control.manual_control, new_state)
+
+    def set_auto_temperature(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.control.auto_temp_mode, new_state)
+
+    def set_manual_temperature(self, new_state: bool) -> None:
+        self._write_bool(self.api_spec.control.manual_temp_mode, new_state)
+
+    def reset(self) -> None:
+        self._write_bool(self.api_spec.control.reset, False)
+
+    # PLC.ACTORS SETTERS
+    def set_cover_angle(self, value: int) -> None:
+        self._write_int(self.api_spec.actors.move_cover, value)
