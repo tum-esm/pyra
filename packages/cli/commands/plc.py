@@ -10,13 +10,8 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 
-
-sys.path.append(PROJECT_DIR)
-from packages.core.utils import Validation
-
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
-Validation.logging_handler = error_handler
 
 # TODO: Refactor for new PLC code structure
 

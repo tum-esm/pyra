@@ -13,11 +13,11 @@ CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 
 
 sys.path.append(PROJECT_DIR)
-from packages.core.utils import Validation
+from packages.core.utils import ConfigValidation
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
-Validation.logging_handler = error_handler
+ConfigValidation.logging_handler = error_handler
 
 # FileLock = Mark, that the config JSONs are being used and the
 # CLI should not interfere. A file "config/config.lock" will be created
@@ -70,7 +70,7 @@ def _get_config():
 @with_filelock
 def _update_config(content: str):
     # The validation itself might print stuff using the error_handler
-    if not Validation.check_partial_config_string(content):
+    if not ConfigValidation.check_partial_config_string(content):
         return
     new_partial_json = json.loads(content)
 
@@ -90,7 +90,7 @@ def _update_config(content: str):
 @with_filelock
 def _validate_current_config():
     # The validation itself might print stuff using the error_handler
-    if Validation.check_current_config_file():
+    if ConfigValidation.check_current_config_file():
         success_handler(f"Current config file is valid")
 
 
