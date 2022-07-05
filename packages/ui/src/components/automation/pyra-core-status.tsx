@@ -25,6 +25,7 @@ export default function PyraCoreStatus() {
                 onClick={stopPyraCore}
                 className="w-[21rem]"
                 variant={'red'}
+                spinner={pyraCorePID === undefined}
             >
                 stop
             </essentialComponents.Button>

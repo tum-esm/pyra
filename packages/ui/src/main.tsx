@@ -14,6 +14,14 @@ export default function Main() {
     const setPyraCorePID = (pid: number | undefined) =>
         dispatch(reduxUtils.coreProcessActions.set({ pid }));
 
+    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
+
+    useEffect(() => {
+        if (pyraCorePID === -1 && backendIntegrity == 'valid') {
+            setBackendIntegrity('pyra-core is not running');
+        }
+    }, [backendIntegrity, pyraCorePID]);
+
     async function startPyraCore() {
         console.log('bo');
         setPyraCorePID(undefined);

@@ -20,6 +20,8 @@ async function config(dispatch: any, centralConfig: customTypes.config) {
         return;
     }
 
+    // TODO: move this into new config load function
+
     // measurement_decision.cli_decision_result is allowed to change
     // changing any other property from somewhere else than the UI requires
     // a reload of the window

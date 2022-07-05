@@ -1,4 +1,5 @@
 import { essentialComponents } from '..';
+import { reduxUtils } from '../../utils';
 
 const linkToInstallationInstructions = (
     <>
@@ -17,6 +18,7 @@ export default function DisconnectedScreen(props: {
     startPyraCore(): void;
 }) {
     const { backendIntegrity } = props;
+    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
 
     return (
         <main className="flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4">
@@ -46,6 +48,9 @@ export default function DisconnectedScreen(props: {
                         : props.loadInitialAppState
                 }
                 variant="green"
+                spinner={
+                    backendIntegrity === 'pyra-core is not running' && pyraCorePID === undefined
+                }
             >
                 {backendIntegrity === 'pyra-core is not running'
                     ? 'start pyra-core'
