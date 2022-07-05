@@ -73,6 +73,8 @@ export default function ControlTab() {
         (s) => s.config.central?.tum_plc?.controlled_by_user
     );
 
+    console.log({ coreState });
+
     const dispatch = reduxUtils.useTypedDispatch();
     const setConfigsPartial = (c: customTypes.partialConfig) =>
         dispatch(reduxUtils.configActions.setConfigsPartial(c));

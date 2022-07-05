@@ -8,7 +8,7 @@ export const logsSlice = createSlice({
         infoLines: [],
         debugLines: [],
         empty: undefined,
-        loading: false,
+        loading: true,
     },
     reducers: {
         set: (state: customTypes.reduxStateLogs, action: { payload: string[] }) => {

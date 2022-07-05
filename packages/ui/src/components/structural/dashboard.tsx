@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchUtils, reduxUtils } from '../../utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
-import { structuralComponents } from '../../components';
+import { essentialComponents, structuralComponents } from '../../components';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -39,7 +39,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (rawConfigFileContent !== undefined) {
-            dispatch(reduxUtils.coreStateActions.set(JSON.parse(rawConfigFileContent)));
+            dispatch(reduxUtils.configActions.setConfigs(JSON.parse(rawConfigFileContent)));
         }
     }, [rawConfigFileContent]);
 
@@ -61,6 +61,11 @@ export default function Dashboard() {
         return () => clearInterval(watchInterval);
     }, [coreState, pyraCorePID, centralConfig]);*/
 
+    const coreStateContent = reduxUtils.useTypedSelector((s) => s.coreState.content);
+    const logsAreEmpty = reduxUtils.useTypedSelector((s) => s.logs.empty);
+    const initialFileContentsAreLoading =
+        coreStateContent === undefined || logsAreEmpty === undefined;
+
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
             <structuralComponents.Header
@@ -75,20 +80,25 @@ export default function Dashboard() {
                     'flex-grow w-full bg-gray-75 ' + 'h-[calc(200vh-1.5rem)] overflow-y-scroll'
                 }
             >
-                {[
-                    ['Overview', <OverviewTab />],
-                    ['Automation', <AutomationTab />],
-                    ['Configuration', <ConfigurationTab />],
-                    ['Logs', <LogTab />],
-                ].map((t: any, i) => (
-                    <div key={i} className={activeTab === t[0] ? '' : 'hidden'}>
-                        {t[1]}
-                    </div>
-                ))}
-                {enclosureControlsIsVisible && (
-                    <div className={activeTab === 'PLC Controls' ? '' : 'hidden'}>
-                        <ControlTab />
-                    </div>
+                {initialFileContentsAreLoading && <essentialComponents.Spinner />}
+                {!initialFileContentsAreLoading && (
+                    <>
+                        {[
+                            ['Overview', <OverviewTab />],
+                            ['Automation', <AutomationTab />],
+                            ['Configuration', <ConfigurationTab />],
+                            ['Logs', <LogTab />],
+                        ].map((t: any, i) => (
+                            <div key={i} className={activeTab === t[0] ? '' : 'hidden'}>
+                                {t[1]}
+                            </div>
+                        ))}
+                        {enclosureControlsIsVisible && (
+                            <div className={activeTab === 'PLC Controls' ? '' : 'hidden'}>
+                                <ControlTab />
+                            </div>
+                        )}
+                    </>
                 )}
             </main>
             <structuralComponents.MessageQueue />

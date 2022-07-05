@@ -6,7 +6,7 @@ export const coreStateSlice = createSlice({
     name: 'coreState',
     initialState: {
         content: undefined,
-        loading: false,
+        loading: true,
     },
     reducers: {
         set: (
