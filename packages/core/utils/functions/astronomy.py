@@ -5,7 +5,6 @@ import astropy.time as astropy_time
 class Astronomy:
     CONFIG: dict = None
 
-    # TODO: Is "elevation" what this should return?
     @staticmethod
     def get_current_sun_elevation():
         """calc_sun_angle_deg(location loc): Computes and returns the current sun
@@ -29,10 +28,6 @@ class Astronomy:
         tracker_position as a python list
         """
 
-        # TODO: Coordinates are set inside the camtracker config file. Maybe we can
-        # set the camtracker config file based on the config JSONs so that the pyra
-        # UI can be used to set the stations coordinates.
-
         with open(Astronomy.CONFIG["camtracker"]["config_path"], "r") as f:
             _lines = f.readlines()
 
@@ -46,10 +41,7 @@ class Astronomy:
 
             # (latitude, longitude, altitude)
             return tuple(
-                [
-                    float(_lines[_marker_line_index + n].replace("\n", ""))
-                    for n in [1, 2, 3]
-                ]
+                [float(_lines[_marker_line_index + n].replace("\n", "")) for n in [1, 2, 3]]
             )
 
     @staticmethod
