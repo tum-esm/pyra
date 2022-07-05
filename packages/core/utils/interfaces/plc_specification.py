@@ -62,7 +62,7 @@ class PLCSpecification:
 
 
 # TODO: Add correct variables for PLC
-
+# TODO: Think of a better naming for this class/file
 
 PLC_SPECIFICATION_VERSIONS: dict[int, PLCSpecification] = {
     1: PLCSpecification(

@@ -102,11 +102,12 @@ class PLCInterface:
         if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
             logger.debug("PLC ip has changed, reconnecting now")
             self.disconnect()
-            self.config = new_config
-            self.connect()
-        else:
-            self.config = new_config()
 
+        self.config = new_config
+        if not self.is_connected():
+            self.connect()
+
+    # TODO: make method private
     def connect(self) -> None:
         """
         Connects to the PLC Snap7
@@ -216,7 +217,6 @@ class PLCInterface:
         msg = self.plc.db_read(db_number, start, size)
         value = snap7.util.get_int(msg, 0)
 
-        # wait if cpu is still busy
         self._sleep_while_cpu_is_busy()
 
         return value
@@ -241,7 +241,6 @@ class PLCInterface:
         msg = self.plc.db_read(db_number, start, size)
         value = snap7.util.get_bool(msg, 0, bool_index)
 
-        # wait if cpu is still busy
         self._sleep_while_cpu_is_busy()
 
         return value
@@ -255,7 +254,6 @@ class PLCInterface:
         snap7.util.set_bool(msg, 0, bool_index, value)
         self.plc.db_write(db_number, start, msg)
 
-        # wait if cpu is still busy
         self._sleep_while_cpu_is_busy()
 
     # PLC.POWER SETTERS

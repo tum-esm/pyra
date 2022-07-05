@@ -1,18 +1,3 @@
-# ==============================================================================
-# author            : Patrick Aigner
-# email             : patrick.aigner@tum.de
-# date              : 20220421
-# version           : 1.0
-# notes             :
-# license           : -
-# py version        : 3.10
-# ==============================================================================
-# description       :
-# Measurement conditions checks for start and stop conditions that are set in
-# the parameters json file. It can check for environmental conditions like sun
-# status, temporal conditions like current time, or manual user input.
-# ==============================================================================
-
 from packages.core.utils import Logger, OSInterface
 
 logger = Logger(origin="system-checks")
