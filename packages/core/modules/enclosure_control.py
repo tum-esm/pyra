@@ -40,7 +40,7 @@ class EnclosureControl:
         # This state is read once per mainloop
         self.plc_state = self.plc_interface.read()
 
-    def run(self, new_config: dict):
+    def run(self, new_config: dict) -> None:
         self.config = new_config
         if self.config["tum_plc"] is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
@@ -100,7 +100,7 @@ class EnclosureControl:
 
     # PLC.ACTORS SETTERS
 
-    def move_cover(self, value):
+    def move_cover(self, value) -> None:
         logger.debug(f"Received request to move cover to position {value} degrees.")
 
         # rain check before moving cover. PLC will deny cover requests during rain anyway
@@ -111,7 +111,7 @@ class EnclosureControl:
             self.plc_interface.set_cover_angle(value)
             self.plc_interface.set_manual_control(False)
 
-    def force_cover_close(self):
+    def force_cover_close(self) -> None:
         if self.plc_state.state.reset_needed:
             self.plc_interface.reset()
 
@@ -121,7 +121,7 @@ class EnclosureControl:
         self.plc_interface.set_manual_control(False)
         self.wait_for_cover_closing()
 
-    def wait_for_cover_closing(self):
+    def wait_for_cover_closing(self) -> None:
         """Waits steps of 5s for the enclosure cover to close.
 
         Raises the custom error CoverError if clover doesn't close in a given
@@ -140,7 +140,7 @@ class EnclosureControl:
             if elapsed_time > 31:
                 raise CoverError("Enclosure cover might be stuck.")
 
-    def auto_set_power_spectrometer(self):
+    def auto_set_power_spectrometer(self) -> None:
         """
         Shuts down spectrometer if the sun angle is too low. Starts up the
         spectrometer in the morning when minimum angle is satisfied.
@@ -151,13 +151,11 @@ class EnclosureControl:
             self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
         )
 
-        # TODO: bind self.spectrometer_has_power to plc-read function
-
         if current_sun_elevation is not None:
             sun_is_above_minimum = current_sun_elevation >= min_power_elevation
-            if sun_is_above_minimum and (not self.spectrometer_has_power):
+            if sun_is_above_minimum and (not self.plc_state.power.spectrometer):
                 self.plc_interface.set_power_spectrometer(True)
                 logger.info("Powering up the spectrometer.")
-            if (not sun_is_above_minimum) and self.spectrometer_has_power:
+            if (not sun_is_above_minimum) and self.plc_state.power.spectrometer:
                 self.plc_interface.set_power_spectrometer(False)
                 logger.info("Powering down the spectrometer.")
