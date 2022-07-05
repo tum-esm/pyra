@@ -1,8 +1,9 @@
 import json
 import os
 import shutil
-import filelock
+
 from .plc_interface import EMPTY_PLC_STATE
+from packages.core.utils import with_filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -16,24 +17,14 @@ STATE_FILE_PATH = os.path.join(RUNTIME_DATA_PATH, "state.json")
 VBDSD_IMG_DIR = os.path.join(RUNTIME_DATA_PATH, "vbdsd")
 
 
-# FileLock = Mark, that the config JSONs are being used and the
-# CLI should not interfere. A file "config/config.lock" will be created
-# and the existence of this file will make the next line wait.
-def with_filelock(file_lock_path):
-    def wrapper(function):
-        def locked_function(*args, **kwargs):
-            with filelock.FileLock(file_lock_path):
-                return function(*args, **kwargs)
-
-        return locked_function
-
-    return wrapper
+# TODO: Rename as CoreStateInterface
+# TODO: Make Interface responses statically typed
 
 
 class StateInterface:
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def initialize():
+    def initialize() -> None:
         # clear runtime_data directory
         if os.path.exists(RUNTIME_DATA_PATH):
             shutil.rmtree(RUNTIME_DATA_PATH)

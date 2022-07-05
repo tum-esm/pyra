@@ -1,7 +1,7 @@
 import json
 import os
 import cerberus
-from packages.core.utils.logger import Logger
+from packages.core.utils import Logger
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))

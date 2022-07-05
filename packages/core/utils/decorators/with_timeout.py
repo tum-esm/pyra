@@ -1,7 +1,7 @@
 import signal
 import time
 
-# Used example from https://code-maven.com/python-timeout
+# Derived from https://code-maven.com/python-timeout
 
 
 class TimeOutException(Exception):
