@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { fetchUtils, reduxUtils } from '../../utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
 import { essentialComponents, structuralComponents } from '../../components';
+import { customTypes } from '../../custom-types';
+import { diff } from 'deep-diff';
+import { dialog } from '@tauri-apps/api';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -39,7 +42,30 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (rawConfigFileContent !== undefined) {
-            dispatch(reduxUtils.configActions.setConfigs(JSON.parse(rawConfigFileContent)));
+            const newCentralConfig: customTypes.config = JSON.parse(rawConfigFileContent);
+            const diffsToCentral = diff(centralConfig, newCentralConfig);
+            console.log({ centralConfig, newCentralConfig, diffsToCentral });
+            if (diffsToCentral === undefined) {
+                return;
+            }
+
+            // measurement_decision.cli_decision_result is allowed to change
+            // changing any other property from somewhere else than the UI requires
+            // a reload of the window
+            const reloadIsRequired =
+                diffsToCentral.filter(
+                    (d) =>
+                        d.kind === 'E' &&
+                        d.path?.join('.') !== 'measurement_decision.cli_decision_result'
+                ).length > 0;
+
+            if (reloadIsRequired) {
+                dialog
+                    .message('The config.json file has been modified. Reload required', 'PyRa 4 UI')
+                    .then(() => window.location.reload());
+            } else {
+                dispatch(reduxUtils.configActions.setConfigsPartial(newCentralConfig));
+            }
         }
     }, [rawConfigFileContent]);
 
