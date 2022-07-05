@@ -31,7 +31,6 @@ import multiprocessing
 import os
 import shutil
 import time
-import astropy.units as astropy_units
 import cv2 as cv
 import numpy as np
 from packages.core.utils import (
@@ -223,11 +222,11 @@ class _VBDSD:
 
         current_sun_angle = Astronomy.get_current_sun_elevation()
 
-        if current_sun_angle < 4 * astropy_units.deg:
+        if current_sun_angle < 4 * Astronomy.units.deg:
             exp = -9 + diff
-        elif current_sun_angle < 6 * astropy_units.deg:
+        elif current_sun_angle < 6 * Astronomy.units.deg:
             exp = -10 + diff
-        elif current_sun_angle < 10 * astropy_units.deg:
+        elif current_sun_angle < 10 * Astronomy.units.deg:
             exp = -11 + diff
         else:
             exp = -12 + diff
@@ -337,7 +336,7 @@ class VBDSD_Thread:
 
             # sleep while sun angle is too low
             if Astronomy.get_current_sun_elevation().is_within_bounds(
-                None, _CONFIG["vbdsd"]["min_sun_elevation"] * astropy_units.deg
+                None, _CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
             ):
                 logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                 if current_state != None:

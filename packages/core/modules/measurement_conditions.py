@@ -14,7 +14,6 @@
 # ==============================================================================
 
 import datetime
-import astropy.units as astropy_units
 from packages.core.utils import Astronomy, StateInterface, Logger, OSInterface
 
 logger = Logger(origin="pyra.core.measurement-conditions")
@@ -96,7 +95,7 @@ class MeasurementConditions:
                 logger.info("Sun elevation as a trigger is evaluated.")
                 current_sun_elevation = Astronomy.get_current_sun_elevation()
                 sun_above_threshold = (
-                    current_sun_elevation > triggers["min_sun_elevation"] * astropy_units.deg
+                    current_sun_elevation > triggers["min_sun_elevation"] * Astronomy.units.deg
                 )
                 # TODO: remove max_sun_elevation as not needed
                 if sun_above_threshold:

@@ -10,7 +10,6 @@
 # ==============================================================================
 
 import time
-import astropy.units as astropy_units
 from packages.core.utils import StateInterface, Logger, Astronomy, PLCError, PLCInterface
 
 logger = Logger(origin="pyra.core.enclosure-control")
@@ -148,7 +147,9 @@ class EnclosureControl:
         """
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
-        min_power_elevation = self.config["tum_plc"]["min_power_elevation"] * astropy_units.deg
+        min_power_elevation = (
+            self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
+        )
 
         # TODO: bind self.spectrometer_has_power to plc-read function
 

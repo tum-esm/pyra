@@ -1,9 +1,11 @@
 import astropy.coordinates as astropy_coordinates
 import astropy.time as astropy_time
+import astropy.units as astropy_units
 
 
 class Astronomy:
     CONFIG: dict = None
+    units = astropy_units
 
     @staticmethod
     def get_current_sun_elevation():

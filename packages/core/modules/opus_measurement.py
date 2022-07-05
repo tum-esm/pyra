@@ -13,7 +13,6 @@
 import os
 import sys
 import time
-import astropy.units as astropy_units
 from packages.core.utils import Logger, StateInterface, Astronomy
 
 
@@ -265,7 +264,7 @@ class OpusMeasurement:
 
         # sleep while sun angle is too low
         if Astronomy.get_current_sun_elevation().is_within_bounds(
-            None, self._CONFIG["vbdsd"]["min_sun_elevation"] * astropy_units.deg
+            None, self._CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
         ):
             return True
         else:
