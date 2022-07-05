@@ -121,7 +121,7 @@ class Validation:
     logging_handler = Logger().error
 
     @staticmethod
-    def _check(
+    def check(
         content_object: dict,
         partial_validation: bool = False,
     ):
@@ -141,7 +141,7 @@ class Validation:
                 except:
                     raise AssertionError("file not in a valid json format")
 
-            Validation._check(content_object, partial_validation=False)
+            Validation.check(content_object, partial_validation=False)
             return True
         except Exception as e:
             Validation.logging_handler(f"Error in current config file: {e}")
@@ -155,7 +155,7 @@ class Validation:
             except:
                 raise AssertionError("content not in a valid json format")
 
-            Validation._check(content_object, partial_validation=True)
+            Validation.check(content_object, partial_validation=True)
             return True
         except Exception as e:
             Validation.logging_handler(f"Error in new config string: {e}")
