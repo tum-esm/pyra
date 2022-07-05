@@ -41,6 +41,11 @@
                         "name": "md5-windows",
                         "cmd": "md5sum",
                         "args": true
+                    },
+                    {
+                        "name": "cat",
+                        "cmd": "cat",
+                        "args": true
                     }
                 ]
             }

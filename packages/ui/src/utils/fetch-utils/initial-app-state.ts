@@ -15,34 +15,25 @@ async function initialAppState(
     setBackendIntegrity(undefined);
     console.debug('loading initial state ...');
 
-    const result = await backend.pyraCliIsAvailable();
-    if (result.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...')) {
+    const result1 = await backend.pyraCliIsAvailable();
+    if (result1.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...')) {
         console.debug('found pyra-cli');
     } else {
-        console.error(`Could not reach pyra-cli. processResult = ${JSON.stringify(result)}`);
+        console.error(`Could not reach pyra-cli. processResult = ${JSON.stringify(result1)}`);
         setBackendIntegrity('cli is missing');
         return;
     }
 
     const result2 = await backend.getConfig();
-    const result3 = await backend.getState();
-    if (result2.stdout.startsWith('file not in a valid json format')) {
+    try {
+        const newConfig = JSON.parse(result2.stdout);
+        dispatch(reduxUtils.configActions.setConfigs(newConfig));
+        setBackendIntegrity('valid');
+    } catch (e) {
+        console.error(
+            `Could not fetch config file. configProcessResult = ${JSON.stringify(result2)}`
+        );
         setBackendIntegrity('config is invalid');
-    } else {
-        try {
-            const newConfig = JSON.parse(result2.stdout);
-            const newCoreState = JSON.parse(result3.stdout);
-            dispatch(reduxUtils.configActions.setConfigs(newConfig));
-            dispatch(reduxUtils.coreStateActions.set(newCoreState));
-            setBackendIntegrity('valid');
-        } catch (e) {
-            console.error(
-                `Could not fetch config file. configProcessResult = ` +
-                    `${JSON.stringify(result2)}, coreStateProcessResult ` +
-                    `= ${JSON.stringify(result3)}`
-            );
-            setBackendIntegrity('config is invalid');
-        }
     }
 }
 

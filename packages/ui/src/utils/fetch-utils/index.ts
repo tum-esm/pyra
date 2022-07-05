@@ -4,6 +4,7 @@ import coreState from './core-state';
 import detectFileChanges from './detect-changes';
 import logs from './logs';
 import initialAppState from './initial-app-state';
+import useFileWatcher from './use-file-watcher';
 
 export default {
     backend,
@@ -12,4 +13,5 @@ export default {
     detectFileChanges,
     logs,
     initialAppState,
+    useFileWatcher,
 };
