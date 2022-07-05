@@ -5,7 +5,7 @@ from packages.core.utils import Astronomy, with_filelock
 from .config_validation import ConfigValidation
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")

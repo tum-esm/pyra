@@ -4,7 +4,6 @@ from .functions import Astronomy
 from .functions import ExceptionEmailClient
 
 from .decorators import with_filelock
-from .decorators import with_timeout
 
 from .interfaces import ConfigInterface, ConfigValidation
 from .interfaces import StateInterface

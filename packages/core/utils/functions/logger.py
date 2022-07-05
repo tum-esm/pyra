@@ -4,7 +4,7 @@ import traceback
 import filelock
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 INFO_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "info.log")
 DEBUG_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "debug.log")
 LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")

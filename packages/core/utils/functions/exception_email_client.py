@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 import traceback
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 
 
 class ExceptionEmailClient:
@@ -104,7 +104,5 @@ class ExceptionEmailClient:
         )
 
         station_id = config["general"]["station_id"]
-        subject = (
-            f'❗️ PYRA on "{station_id}": new exception "{type(exception).__name__}"'
-        )
+        subject = f'❗️ PYRA on "{station_id}": new exception "{type(exception).__name__}"'
         ExceptionEmailClient._send_email(config, text, html, subject)

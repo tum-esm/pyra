@@ -2,6 +2,7 @@ import signal
 import time
 
 # Derived from https://code-maven.com/python-timeout
+# TODO: figure out why this doesn't work on windows
 
 
 class TimeOutException(Exception):
