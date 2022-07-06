@@ -3,7 +3,7 @@ import shutil
 import click
 import os
 import sys
-import filelock
+from packages.core.utils import with_filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -18,16 +18,6 @@ from packages.core.utils import ConfigValidation
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
 ConfigValidation.logging_handler = error_handler
-
-# FileLock = Mark, that the config JSONs are being used and the
-# CLI should not interfere. A file "config/config.lock" will be created
-# and the existence of this file will make the next line wait.
-def with_filelock(function):
-    def locked_function(*args, **kwargs):
-        with filelock.FileLock(CONFIG_LOCK_PATH):
-            return function(*args, **kwargs)
-
-    return locked_function
 
 
 def update_dict_rec(old_dict, new_dict):
@@ -50,7 +40,7 @@ def update_dict_rec(old_dict, new_dict):
 
 
 @click.command(help="Read the current config.json file.")
-@with_filelock
+@with_filelock(CONFIG_LOCK_PATH)
 def _get_config():
     if not os.path.isfile(CONFIG_FILE_PATH):
         shutil.copyfile(DEFAULT_CONFIG_FILE_PATH, CONFIG_FILE_PATH)
@@ -67,7 +57,7 @@ def _get_config():
     help=f"Set config. Pass the JSON directly or via a file path. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation.",
 )
 @click.argument("content", default="{}")
-@with_filelock
+@with_filelock(CONFIG_LOCK_PATH)
 def _update_config(content: str):
     # The validation itself might print stuff using the error_handler
     if not ConfigValidation.check_partial_config_string(content):
@@ -87,7 +77,7 @@ def _update_config(content: str):
 @click.command(
     help=f"Validate the current config.json file.\n\nThe required schema can be found in the documentation."
 )
-@with_filelock
+@with_filelock(CONFIG_LOCK_PATH)
 def _validate_current_config():
     # The validation itself might print stuff using the error_handler
     if ConfigValidation.check_current_config_file():

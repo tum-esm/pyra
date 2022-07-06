@@ -1,10 +1,7 @@
 import json
 import click
 import os
-import sys
-import filelock
-
-from packages.core.utils import StateInterface
+from packages.core.utils import StateInterface, with_filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -14,20 +11,10 @@ STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
 
-# FileLock = Mark, that the config JSONs are being used and the
-# CLI should not interfere. A file "config/config.lock" will be created
-# and the existence of this file will make the next line wait.
-def with_filelock(function):
-    def locked_function(*args, **kwargs):
-        with filelock.FileLock(STATE_LOCK_PATH):
-            return function(*args, **kwargs)
-
-    return locked_function
-
 
 @click.command(help="Read the current state.json file.")
 @click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
-@with_filelock
+@with_filelock(STATE_LOCK_PATH)
 def _get_state(no_indent):
     if not os.path.isfile(STATE_FILE_PATH):
         StateInterface.initialize()
