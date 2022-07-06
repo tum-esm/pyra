@@ -3,14 +3,15 @@ import time
 from typing import Callable
 import click
 import os
-import sys
-from packages.core.modules.enclosure_control import EnclosureControl, CoverError, PLCError
+from packages.core.modules.enclosure_control import CoverError
 from packages.core.utils import ConfigInterface, PLCInterface, PLCError
-from packages.core.utils.interfaces import plc_interface
+from packages.core.utils import with_filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
+CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
+CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
@@ -92,11 +93,21 @@ def _write_plc_move_cover(angle):
         success_handler("Ok")
 
 
+@with_filelock(CONFIG_LOCK_PATH)
+def enable_user_control_in_config():
+    with open(CONFIG_FILE_PATH, "r") as f:
+        config: dict = json.load(f)
+    config["tum_plc"]["controlled_by_user"] = True
+    with open(CONFIG_FILE_PATH, "w") as f:
+        json.dump(config, f)
+
+
 @click.command(help="Run plc function 'force_cover_close()'")
 def _write_plc_close_cover():
+    enable_user_control_in_config()
+
     plc_interface = get_plc_interface()
     if plc_interface is not None:
-        # TODO: set controlled_by_user to true
         plc_interface.set_sync_to_tracker(False)
         plc_interface.set_manual_control(True)
         plc_interface.set_cover_angle(0)
