@@ -27,9 +27,10 @@
 # ==============================================================================
 
 
-import multiprocessing
 import os
+import queue
 import shutil
+from threading import Thread
 import time
 import cv2 as cv
 import numpy as np
@@ -257,19 +258,19 @@ class _VBDSD:
 
 class VBDSD_Thread:
     def __init__(self):
-        self.__process = None
+        self.__thread = None
+        self.__shared_queue = queue.Queue()
 
     def start(self):
         """
         Start a thread using the multiprocessing library
         """
         logger.info("Starting thread")
-        # TODO: Start a thread instead of a process
-        self.__process = multiprocessing.Process(target=VBDSD_Thread.main)
-        self.__process.start()
+        self.__thread = Thread(target=VBDSD_Thread.main, args=(self.__shared_queue,))
+        self.__thread.start()
 
     def is_running(self):
-        return self.__process is not None
+        return self.__thread is not None
 
     def stop(self):
         """
@@ -277,8 +278,11 @@ class VBDSD_Thread:
         "runtime_data/vbdsd" and set the state to 'null'
         """
 
-        logger.info("Terminating thread")
-        self.__process.terminate()
+        logger.info("Sending termination signal")
+        self.__shared_queue.put("stop")
+
+        logger.info("Waiting for thread to terminate")
+        self.__thread.join()
 
         logger.debug("Removing all images")
         VBDSD_Thread.__remove_vbdsd_images()
@@ -286,7 +290,7 @@ class VBDSD_Thread:
         logger.debug('Setting state to "null"')
         StateInterface.update({"vbdsd_indicates_good_conditions": None})
 
-        self.__process = None
+        self.__thread = None
 
     @staticmethod
     def __remove_vbdsd_images():
@@ -295,7 +299,7 @@ class VBDSD_Thread:
         os.mkdir(IMG_DIR)
 
     @staticmethod
-    def main(infinite_loop=True):
+    def main(shared_queue: queue.Queue, infinite_loop=True):
         global _CONFIG
         _CONFIG = ConfigInterface.read()
         # delete all temp pictures when vbdsd is deactivated
@@ -307,6 +311,14 @@ class VBDSD_Thread:
         current_state = None
 
         while True:
+
+            # Check for termination
+            try:
+                if shared_queue.get(block=False) == "stop":
+                    break
+            except queue.Empty:
+                pass
+
             start_time = time.time()
             _CONFIG = ConfigInterface.read()
             # delete all temp pictures when vbdsd is deactivated
