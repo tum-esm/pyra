@@ -5,41 +5,47 @@ import { essentialComponents, structuralComponents } from '../../components';
 import { customTypes } from '../../custom-types';
 import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
+import backend from '../../utils/fetch-utils/backend';
+import toast from 'react-hot-toast';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Overview');
-
     const [rawLogFileContent, logFileIsLoading] = fetchUtils.useFileWatcher('logs\\debug.log', 2);
     const [rawCoreStateFileContent, coreStateFileIsLoading] = fetchUtils.useFileWatcher(
         'runtime-data\\state.json',
         2
     );
     const [rawConfigFileContent, _] = fetchUtils.useFileWatcher('config\\config.json', 2);
-
     const dispatch = reduxUtils.useTypedDispatch();
 
+    // add coreState loading=true to redux when file change has been detected
     useEffect(() => {
         dispatch(reduxUtils.logsActions.setLoading(logFileIsLoading));
     }, [logFileIsLoading]);
 
+    // add coreState loading=true to redux when file change has been detected
     useEffect(() => {
         dispatch(reduxUtils.coreStateActions.setLoading(coreStateFileIsLoading));
     }, [coreStateFileIsLoading]);
 
+    // load logs when logs/debug.log has changed
     useEffect(() => {
         if (rawLogFileContent !== undefined) {
             dispatch(reduxUtils.logsActions.set(rawLogFileContent.split('\n')));
         }
     }, [rawLogFileContent]);
 
+    // load coreState when runtime-data/state.json has changed
     useEffect(() => {
         if (rawCoreStateFileContent !== undefined) {
             dispatch(reduxUtils.coreStateActions.set(JSON.parse(rawCoreStateFileContent)));
         }
     }, [rawCoreStateFileContent]);
 
+    // load config when config/config.json has changed
+    // check, whether a reload is required
     useEffect(() => {
         if (rawConfigFileContent !== undefined) {
             const newCentralConfig: customTypes.config = JSON.parse(rawConfigFileContent);
@@ -73,19 +79,34 @@ export default function Dashboard() {
     const enclosureControlsIsVisible =
         centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
 
-    /*
-    // TODO: Fetch PLC State via CLI when PLC is controlled by user
+    // fetch PLC State via CLI when PLC is controlled by user
     useEffect(() => {
         let watchInterval: NodeJS.Timer | undefined = undefined;
-        if (centralConfig !== undefined && pyraCorePID !== undefined) {
-            // load stuff directly from PLC if pyraCore is not running
-            // or user has set the PLC interaction to manual
-            if (!pyraCoreIsRunning || centralConfig.tum_plc?.controlled_by_user === true) {
-                watchInterval = setInterval(() => setCoreStateShouldBeLoaded(true), 5000);
-            }
+        // load stuff directly from PLC if user has set the PLC interaction to manual
+        if (centralConfig?.tum_plc?.controlled_by_user) {
+            watchInterval = setInterval(async () => {
+                dispatch(reduxUtils.coreStateActions.setLoading(true));
+                const result = await backend.readFromPLC();
+                if (result.code !== 0) {
+                    console.error(
+                        `Could not fetch core state. processResult = ${JSON.stringify(result)}`
+                    );
+                    toast.error(
+                        `Could not fetch core state, please look in the console for details`
+                    );
+                } else {
+                    try {
+                        const newCoreState = JSON.parse(result.stdout);
+                        dispatch(reduxUtils.coreStateActions.set(newCoreState));
+                    } catch {
+                        toast.error(`Could not fetch core state: ${result.stdout}`);
+                    }
+                }
+                dispatch(reduxUtils.coreStateActions.setLoading(false));
+            }, 5000);
         }
         return () => clearInterval(watchInterval);
-    }, [coreState, pyraCorePID, centralConfig]);*/
+    }, [centralConfig]);
 
     const coreStateContent = reduxUtils.useTypedSelector((s) => s.coreState.content);
     const logsAreEmpty = reduxUtils.useTypedSelector((s) => s.logs.empty);
