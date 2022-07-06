@@ -142,8 +142,11 @@ class PLCInterface:
     def cover_is_closed(self) -> bool:
         return self._read_bool(self.specification.state.cover_closed)
 
-    # def reset_is_needed(self) -> bool:
-    #    return self._read_bool(self.specification.state.reset_needed)
+    def reset_is_needed(self) -> bool:
+        return self._read_bool(self.specification.state.reset_needed)
+
+    def get_cover_angle(self) -> int:
+        return self._read_int(self.specification.actors.current_angle)
 
     def read(self) -> PLCState:
         """
@@ -260,32 +263,41 @@ class PLCInterface:
 
     def set_power_camera(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.camera, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     def set_power_computer(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.computer, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     def set_power_heater(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.heater, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     def set_power_router(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.router, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     def set_power_spectrometer(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.spectrometer, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     # PLC.CONTROL SETTERS
 
     def set_sync_to_tracker(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.sync_to_tracker, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     def set_manual_control(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_control, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     def set_auto_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.auto_temp_mode, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     def set_manual_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_temp_mode, new_state)
+        # TODO: Make sure that plc state has actually changed
 
     def reset(self) -> None:
         self._write_bool(self.specification.control.reset, False)

@@ -45,6 +45,7 @@ async function initialAppState(
 
     const result3 = await backend.checkPyraCoreState();
     if (!result3.stdout.includes('pyra-core is running with PID')) {
+        dispatch(reduxUtils.coreProcessActions.set({ pid: -1 }));
         setBackendIntegrity('pyra-core is not running');
         return;
     }
