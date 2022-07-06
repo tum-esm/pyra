@@ -48,8 +48,8 @@ function MeasurementTriggerInfo() {
                         <>
                             {measurementTriggers.consider_time
                                 ? `from ${formatTime(
-                                      measurementTriggers.start_time
-                                  )} to ${formatTime(measurementTriggers.stop_time)}`
+                                    measurementTriggers.start_time
+                                )} to ${formatTime(measurementTriggers.stop_time)}`
                                 : 'ignored'}
                         </>,
                     ],
@@ -70,11 +70,6 @@ function MeasurementTriggerInfo() {
                             {measurementTriggers.consider_vbdsd && centralConfigVBDSD === null && (
                                 <span className="text-red-500 uppercase">not configured!</span>
                             )}
-                            {measurementTriggers.consider_vbdsd &&
-                                centralConfigVBDSD !== null &&
-                                `from ${formatTime(measurementTriggers.start_time)} to ${formatTime(
-                                    measurementTriggers.stop_time
-                                )}`}
                         </>,
                     ],
                 ].map((row: any, i) => (
@@ -206,8 +201,8 @@ export default function MeasurementDecisionStatus() {
                                 loading
                                     ? 'gray'
                                     : measurementDecision.manual_decision_result
-                                    ? 'red'
-                                    : 'green'
+                                        ? 'red'
+                                        : 'green'
                             }
                             disabled={loading}
                         >

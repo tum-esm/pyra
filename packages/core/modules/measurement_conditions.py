@@ -5,10 +5,11 @@ logger = Logger(origin="measurement-conditions")
 
 
 def get_times_from_tuples(triggers: any):
+
     now = datetime.datetime.now()
     current_time = datetime.time(now.hour, now.minute, now.second)
-    start_time = datetime.time(*triggers["start_time"])
-    end_time = datetime.time(*triggers["stop_time"])
+    start_time = datetime.time(**triggers["start_time"])
+    end_time = datetime.time(**triggers["stop_time"])
     return current_time, start_time, end_time
 
 
