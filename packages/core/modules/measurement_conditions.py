@@ -78,13 +78,13 @@ class MeasurementConditions:
             logger.info("VBDSD as a trigger is considered.")
             vbdsd_result = StateInterface.read()["vbdsd_indicates_good_conditions"]
 
-            # Don't consider VBDSD if it does not have enough
-            # images yet, which will result in a state of "None"
-            if vbdsd_result is not None:
-                logger.debug(
-                    f"VBDSD indicates {'good' if vbdsd_result else 'bad'} sun conditions."
-                )
-                if not vbdsd_result:
-                    return False
+            if vbdsd_result is None:
+                logger.debug(f"VBDSD does not nave enough images yet.")
+                return False
+
+            logger.debug(
+                f"VBDSD indicates {'good' if vbdsd_result else 'bad'} sun conditions."
+            )
+            return vbdsd_result
 
         return True

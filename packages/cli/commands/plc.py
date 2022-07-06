@@ -128,7 +128,7 @@ def set_boolean_plc_state(
 
 
 @click.command(help="Run plc function 'set_sync_to_tracker()'")
-@click.argument("state", help='Pass either "true" or "false"')
+@click.argument("state")
 def _write_plc_sync_to_tracker(state):
     set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
 

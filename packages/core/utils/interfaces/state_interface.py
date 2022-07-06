@@ -40,6 +40,7 @@ class StateInterface:
                     "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
                 },
                 f,
+                indent=4,
             )
 
     @staticmethod
@@ -54,4 +55,4 @@ class StateInterface:
         with open(STATE_FILE_PATH, "r") as f:
             _STATE = json.load(f)
         with open(STATE_FILE_PATH, "w") as f:
-            json.dump({**_STATE, **update}, f)
+            json.dump({**_STATE, **update}, f, indent=4)

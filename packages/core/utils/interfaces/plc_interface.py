@@ -134,7 +134,7 @@ class PLCInterface:
 
     def is_responsive(self) -> bool:
         """Pings the PLC"""
-        return os.system("ping -n 1 " + self._CONFIG["tum_plc"]["ip"]) == 0
+        return os.system("ping -n 1 " + self.config["tum_plc"]["ip"]) == 0
 
     # def rain_is_detected(self) -> bool:
     #    return self._read_bool(self.specification.state.rain)
@@ -208,8 +208,8 @@ class PLCInterface:
     # TODO: figure out why "with_timeout" doesn't work on windows
     def _sleep_while_cpu_is_busy(self) -> None:
         time.sleep(0.2)
-        while str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
-            time.sleep(1)
+        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
+            time.sleep(1.5)
 
     def _read_int(self, action: list[int]) -> int:
         """Reads an INT value in the PLC database."""
