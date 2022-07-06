@@ -86,9 +86,9 @@ def _write_plc_move_cover(angle):
         ), "angle has to be 0° or between 110° and 250°"
 
         plc_interface.set_manual_control(True)
-        plc_interface.set_cover_angle(angle)
+        plc_interface.set_cover_angle(new_cover_angle)
         plc_interface.set_manual_control(False)
-        wait_until_cover_is_at_angle(plc_interface, angle)
+        wait_until_cover_is_at_angle(plc_interface, new_cover_angle)
 
         success_handler("Ok")
 

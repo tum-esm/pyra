@@ -56,6 +56,7 @@ def _start_pyra_core():
         success_handler(f"Started background process with PID {p.pid}")
 
 
+# TODO: Add shutdown routine (close cover, etc.)
 @click.command(help="Stop the pyra-core background process")
 def _stop_pyra_core():
     termination_pids = terminate_processes()
