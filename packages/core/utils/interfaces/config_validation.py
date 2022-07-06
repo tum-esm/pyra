@@ -108,6 +108,7 @@ CONFIG_FILE_SCHEMA = {
             "seconds_per_interval": {"type": "number", "min": 5, "max": 600},
             "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
             "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
+            "save_images": _Schemas.boolean,
         }
     ),
 }

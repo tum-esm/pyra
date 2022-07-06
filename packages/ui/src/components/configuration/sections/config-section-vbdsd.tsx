@@ -18,6 +18,7 @@ export default function ConfigSectionVbdsd() {
                 seconds_per_interval: 6,
                 measurement_threshold: 0.6,
                 min_sun_elevation: 11.0,
+                save_images: false,
             },
         });
     }
@@ -109,6 +110,12 @@ export default function ConfigSectionVbdsd() {
                         : 'null'
                 }
                 numeric
+            />
+            <configurationComponents.ConfigElementToggle
+                key2="save_images"
+                value={localSectionConfig.save_images}
+                setValue={(v: boolean) => update({ vbdsd: { save_images: v } })}
+                oldValue={centralSectionConfig?.save_images === true}
             />
         </>
     );

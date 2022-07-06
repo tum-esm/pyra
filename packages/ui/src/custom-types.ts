@@ -87,6 +87,7 @@ export namespace customTypes {
             seconds_per_interval: number;
             measurement_threshold: number;
             min_sun_elevation: number;
+            save_images: boolean;
         };
     };
 
@@ -143,6 +144,7 @@ export namespace customTypes {
             seconds_per_interval?: number;
             measurement_threshold?: number;
             min_sun_elevation?: number;
+            save_images?: boolean;
         };
     };
 

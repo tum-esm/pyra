@@ -361,13 +361,16 @@ class VBDSD_Thread:
             logger.debug(f"New VBDSD status: {status}")
             logger.debug(f"New VBDSD status history: {status_history.get()}")
 
-            if frame is not None:
-                img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
-                img_path = os.path.join(IMG_DIR, img_name)
-                cv.imwrite(img_path, frame)
-                logger.debug(f"Saving image to: {img_path}")
-            else:
+            if frame is None:
                 logger.debug(f"Could not take image")
+            else:
+                if _CONFIG["vbdsd"]["save_images"]:
+                    img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
+                    img_path = os.path.join(IMG_DIR, img_name)
+                    cv.imwrite(img_path, frame)
+                    logger.debug(f"Saving image to: {img_path}")
+                else:
+                    logger.debug(f"Skipping image saving")
 
             # evaluate sun state only if list is filled
             if status_history.size() == status_history.maxsize():
