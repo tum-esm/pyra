@@ -19,9 +19,6 @@ logger = Logger(origin="main")
 def run():
 
     StateInterface.initialize()
-    # TODO: check .initialize() function. and why the 2 lines below are needed
-    StateInterface.update({"automation_should_be_running": False})
-    StateInterface.update({"vbdsd_indicates_good_conditions": False})
     _CONFIG = ConfigInterface.read()
 
     logger.info(f"started mainloop inside process with PID {os.getpid()}")
@@ -44,18 +41,19 @@ def run():
         try:
             _CONFIG = ConfigInterface.read()
         except AssertionError:
-            # TODO: log "invalid config"
-            time.sleep(30)
+            logger.error("Invalid config, waiting 20 seconds")
+            time.sleep(20)
             continue
 
         if not _CONFIG["general"]["test_mode"]:
             # Start or stop VBDSD in a thread
-            vbdsd_should_be_running = _CONFIG["measurement_triggers"]["consider_vbdsd"]
+            vbdsd_should_be_running = (
+                _CONFIG["vbdsd"] is not None
+                and _CONFIG["measurement_triggers"]["consider_vbdsd"]
+            )
             if vbdsd_should_be_running and not vbdsd_thread.is_running():
-                logger.info("Starting VBDSD Thread")
                 vbdsd_thread.start()
             if not vbdsd_should_be_running and vbdsd_thread.is_running():
-                logger.info("Stopping VBDSD Thread")
                 vbdsd_thread.stop()
         else:
             logger.info("pyra-core in test mode")
