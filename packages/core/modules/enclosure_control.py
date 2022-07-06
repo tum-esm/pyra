@@ -8,6 +8,10 @@ class CoverError(Exception):
     pass
 
 
+class MotorFailedError(Exception):
+    pass
+
+
 class EnclosureControl:
     """
     https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
@@ -47,6 +51,16 @@ class EnclosureControl:
         self.plc_interface.update_config(self.config)
         self.plc_state = self.plc_interface.read()
 
+        # read current state of actors and sensors in enclosure
+        logger.info("New continuous readings.")
+        StateInterface.update({"enclosure_plc_readings": self.plc_state.to_dict()})
+
+        # possibly powerup/down spectrometer
+        self.auto_set_power_spectrometer()
+
+        if self.plc_state.state.motor_failed:
+            raise MotorFailedError("URGENT: stop all actions, check cover in person")
+
         # check PLC ip connection
         if self.plc_interface.is_responsive():
             logger.debug("Successful ping to PLC.")
@@ -79,13 +93,6 @@ class EnclosureControl:
                 logger.info("Cover is still open. Trying to close again.")
                 self.force_cover_close()
                 self.wait_for_cover_closing()
-
-        # read current state of actors and sensors in enclosure
-        logger.info("New continuous readings.")
-        StateInterface.update({"enclosure_plc_readings": self.plc_state.to_dict()})
-
-        # possibly powerup/down spectrometer
-        self.auto_set_power_spectrometer()
 
     # PLC.ACTORS SETTERS
 

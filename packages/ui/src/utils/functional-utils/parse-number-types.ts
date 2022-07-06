@@ -56,27 +56,28 @@ export default function parseNumberTypes(
             newConfig.tum_plc === null
                 ? null
                 : {
-                      ...newConfig.tum_plc,
-                      min_power_elevation: parseFloat(
-                          `${newConfig.tum_plc.min_power_elevation}`
-                      ),
-                      version: parseFloat(`${newConfig.tum_plc.version}`),
-                  },
+                    ...newConfig.tum_plc,
+                    min_power_elevation: parseFloat(
+                        `${newConfig.tum_plc.min_power_elevation}`
+                    ),
+                    version: parseFloat(`${newConfig.tum_plc.version}`),
+                },
         vbdsd:
             newConfig.vbdsd === null
                 ? null
                 : {
-                      camera_id: parseFloat(`${newConfig.vbdsd.camera_id}`),
-                      evaluation_size: parseFloat(`${newConfig.vbdsd.evaluation_size}`),
-                      seconds_per_interval: parseFloat(
-                          `${newConfig.vbdsd.seconds_per_interval}`
-                      ),
-                      measurement_threshold: parseFloat(
-                          `${newConfig.vbdsd.measurement_threshold}`
-                      ),
-                      min_sun_elevation: parseFloat(
-                          `${newConfig.vbdsd.min_sun_elevation}`
-                      ),
-                  },
+                    camera_id: parseFloat(`${newConfig.vbdsd.camera_id}`),
+                    evaluation_size: parseFloat(`${newConfig.vbdsd.evaluation_size}`),
+                    seconds_per_interval: parseFloat(
+                        `${newConfig.vbdsd.seconds_per_interval}`
+                    ),
+                    measurement_threshold: parseFloat(
+                        `${newConfig.vbdsd.measurement_threshold}`
+                    ),
+                    min_sun_elevation: parseFloat(
+                        `${newConfig.vbdsd.min_sun_elevation}`
+                    ),
+                    save_images: newConfig.vbdsd.save_images
+                },
     };
 }

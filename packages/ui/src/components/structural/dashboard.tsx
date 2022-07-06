@@ -12,12 +12,14 @@ const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Overview');
-    const [rawLogFileContent, logFileIsLoading] = fetchUtils.useFileWatcher('logs\\debug.log', 2);
+    const [rawLogFileContent, logFileIsLoading] = fetchUtils.useFileWatcher('logs\\debug.log', 10);
     const [rawCoreStateFileContent, coreStateFileIsLoading] = fetchUtils.useFileWatcher(
         'runtime-data\\state.json',
-        2
+        10
     );
-    const [rawConfigFileContent, _] = fetchUtils.useFileWatcher('config\\config.json', 2);
+
+
+    const [rawConfigFileContent, _] = fetchUtils.useFileWatcher('config\\config.json', 10);
     const dispatch = reduxUtils.useTypedDispatch();
 
     // add coreState loading=true to redux when file change has been detected
@@ -50,7 +52,6 @@ export default function Dashboard() {
         if (rawConfigFileContent !== undefined) {
             const newCentralConfig: customTypes.config = JSON.parse(rawConfigFileContent);
             const diffsToCentral = diff(centralConfig, newCentralConfig);
-            console.log({ centralConfig, newCentralConfig, diffsToCentral });
             if (diffsToCentral === undefined) {
                 return;
             }
@@ -97,7 +98,7 @@ export default function Dashboard() {
                 } else {
                     try {
                         const newCoreState = JSON.parse(result.stdout);
-                        dispatch(reduxUtils.coreStateActions.set(newCoreState));
+                        dispatch(reduxUtils.coreStateActions.setPartial({ enclosure_plc_readings: newCoreState }));
                     } catch {
                         toast.error(`Could not fetch core state: ${result.stdout}`);
                     }

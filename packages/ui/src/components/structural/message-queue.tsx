@@ -6,8 +6,6 @@ import { minBy } from 'lodash';
 export default function MessageQueue() {
     const { toasts, pausedAt } = useToasterStore();
 
-    console.log({ toasts });
-
     useEffect(() => {
         if (toasts.length > 4) {
             const oldestToast = minBy(toasts, (t) => t.createdAt);

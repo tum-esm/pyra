@@ -11,19 +11,19 @@ function VariableBlock(props: {
     buttonsAreDisabled: boolean;
     actions: (
         | {
-              label: string;
-              callback: (value: number) => void;
-              spinner: boolean;
-              variant: 'numeric';
-              initialValue: number;
-              postfix?: string;
-          }
+            label: string;
+            callback: (value: number) => void;
+            spinner: boolean;
+            variant: 'numeric';
+            initialValue: number;
+            postfix?: string;
+        }
         | { label: string; callback: () => void; spinner: boolean; variant?: undefined }
     )[];
 }) {
     return (
         <div className="relative flex overflow-hidden elevated-panel">
-            <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-white bg-gray-900 rounded-l flex-row-center">
+            <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-gray-300 rounded-l flex-row-center">
                 {props.label}
             </div>
             <div className="flex-grow py-3 pl-4 pr-3 flex-row-left gap-x-4">
@@ -72,8 +72,6 @@ export default function ControlTab() {
     const plcIsControlledByUser = reduxUtils.useTypedSelector(
         (s) => s.config.central?.tum_plc?.controlled_by_user
     );
-
-    console.log({ coreState });
 
     const dispatch = reduxUtils.useTypedDispatch();
     const setConfigsPartial = (c: customTypes.partialConfig) =>
@@ -174,9 +172,6 @@ export default function ControlTab() {
         }
     }
 
-    // TODO: implement UI for "move to angle"
-    // TODO: connect UI for "move to angle"
-
     async function toggleSyncToTracker() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.control.sync_to_tracker;
@@ -272,6 +267,8 @@ export default function ControlTab() {
         return <></>;
     }
 
+    console.log({ p: coreState });
+
     return (
         <div className={'w-full relative px-6 py-6 flex-col-left gap-y-4'}>
             <div className="flex-row-left gap-x-2">
@@ -313,6 +310,12 @@ export default function ControlTab() {
                                 {
                                     key: 'Motor failed',
                                     value: coreState.enclosure_plc_readings.state.motor_failed
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'UPS alert',
+                                    value: coreState.enclosure_plc_readings.state.ups_alert
                                         ? 'Yes'
                                         : 'No',
                                 },
@@ -381,7 +384,7 @@ export default function ControlTab() {
                             ]}
                         />
                         <VariableBlock
-                            label="Temperature"
+                            label="Climate"
                             buttonsAreDisabled={buttonsAreDisabled}
                             variables={[
                                 {
@@ -401,13 +404,7 @@ export default function ControlTab() {
                                     value: coreState.enclosure_plc_readings.control.auto_temp_mode
                                         ? 'Yes'
                                         : 'No',
-                                },
-                                {
-                                    key: 'Heater power',
-                                    value: coreState.enclosure_plc_readings.power.heater
-                                        ? 'Yes'
-                                        : 'No',
-                                },
+                                }
                             ]}
                             actions={[
                                 {
@@ -416,26 +413,13 @@ export default function ControlTab() {
                                         : 'enable auto temperature',
                                     callback: toggleAutoTemperature,
                                     spinner: isLoadingAutoTemperature,
-                                },
-                                {
-                                    label: coreState.enclosure_plc_readings.power.heater
-                                        ? 'disable heater power'
-                                        : 'enable heater power',
-                                    callback: togglePowerHeater,
-                                    spinner: isLoadingPowerHeater,
-                                },
+                                }
                             ]}
                         />
                         <VariableBlock
                             label="Power"
                             buttonsAreDisabled={buttonsAreDisabled}
                             variables={[
-                                {
-                                    key: 'UPS alert',
-                                    value: coreState.enclosure_plc_readings.state.ups_alert
-                                        ? 'Yes'
-                                        : 'No',
-                                },
                                 {
                                     key: 'Camera Power',
                                     value: coreState.enclosure_plc_readings.power.camera
@@ -457,6 +441,12 @@ export default function ControlTab() {
                                 {
                                     key: 'Computer Power',
                                     value: coreState.enclosure_plc_readings.power.computer
+                                        ? 'Yes'
+                                        : 'No',
+                                },
+                                {
+                                    key: 'Heater power',
+                                    value: coreState.enclosure_plc_readings.power.heater
                                         ? 'Yes'
                                         : 'No',
                                 },
@@ -489,6 +479,13 @@ export default function ControlTab() {
                                         : 'enable computer power',
                                     callback: togglePowerComputer,
                                     spinner: isLoadingPowerComputer,
+                                },
+                                {
+                                    label: coreState.enclosure_plc_readings.power.heater
+                                        ? 'disable heater power'
+                                        : 'enable heater power',
+                                    callback: togglePowerHeater,
+                                    spinner: isLoadingPowerHeater,
                                 },
                             ]}
                         />
