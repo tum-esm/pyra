@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 import traceback
 import filelock
+import socketio
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
@@ -17,6 +18,7 @@ LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")
 class Logger:
     def __init__(self, origin="pyra.core"):
         self.origin = origin
+        self.sio = socketio.Client()
 
     def debug(self, message: str):
         self._write_log_line("DEBUG", message)
@@ -45,4 +47,11 @@ class Logger:
                 with open(INFO_LOG_FILE, "a") as f2:
                     f2.write(log_string)
 
-        # TODO: Push update to socket-messages queue
+        if not self.sio.connected:
+            try:
+                self.sio.connect("http://localhost:5001")
+            except:
+                pass
+
+        if self.sio.connected:
+            self.sio.emit("new_log_line", log_string)
