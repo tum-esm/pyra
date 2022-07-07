@@ -1,12 +1,16 @@
+from threading import Thread
 import eventlet
 import socketio
+from packages.core.utils import Logger
 
 sio = socketio.Server()
 app = socketio.WSGIApp(sio)
+logger = Logger(origin="server")
 
 
 @sio.event
 def register_as_pyra_ui(sid):
+    logger.info("pyra-ui client connected")
     sio.enter_room(sid, "pyra-ui")
     # TODO: Emit initial config
     # TODO: Emit initial logs
@@ -29,8 +33,17 @@ def new_core_state(sid, data):
 
 @sio.event
 def disconnect(sid):
+    logger.info("pyra-ui client disconnected")
     sio.leave_room(sid, "pyra-ui")
 
 
-if __name__ == "__main__":
-    eventlet.wsgi.server(eventlet.listen(("", 5000)), app)
+class Server_Thread:
+    @staticmethod
+    def start():
+        logger.info("Starting thread")
+        thread = Thread(target=Server_Thread.main)
+        thread.start()
+
+    @staticmethod
+    def main():
+        eventlet.wsgi.server(eventlet.listen(("", 5000)), app)
