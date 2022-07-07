@@ -56,3 +56,5 @@ class StateInterface:
             _STATE = json.load(f)
         with open(STATE_FILE_PATH, "w") as f:
             json.dump({**_STATE, **update}, f, indent=4)
+
+        # TODO: Push update to socket-messages queue

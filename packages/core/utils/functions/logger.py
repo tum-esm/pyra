@@ -44,3 +44,5 @@ class Logger:
             if level != "DEBUG":
                 with open(INFO_LOG_FILE, "a") as f2:
                     f2.write(log_string)
+
+        # TODO: Push update to socket-messages queue

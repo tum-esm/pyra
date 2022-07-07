@@ -42,9 +42,6 @@ class EnclosureControl:
         if self.config["general"]["test_mode"]:
             logger.debug("Skipping EnclosureControl in test mode")
             return
-        if self.config["tum_plc"]["controlled_by_user"]:
-            logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
-            return
 
         logger.info("Running EnclosureControl")
 
@@ -54,6 +51,10 @@ class EnclosureControl:
         # read current state of actors and sensors in enclosure
         logger.info("New continuous readings.")
         StateInterface.update({"enclosure_plc_readings": self.plc_state.to_dict()})
+
+        if self.config["tum_plc"]["controlled_by_user"]:
+            logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
+            return
 
         # possibly powerup/down spectrometer
         self.auto_set_power_spectrometer()

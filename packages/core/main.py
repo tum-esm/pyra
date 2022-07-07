@@ -34,6 +34,8 @@ def run():
 
     current_exceptions = []
 
+    # TODO: Start socket-server
+
     while True:
         start_time = time.time()
         logger.info("Starting Iteration")
