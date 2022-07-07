@@ -1,7 +1,4 @@
-import os
 from packages.core.utils import ConfigInterface, ExceptionEmailClient
-
-PROJECT_DIR = os.path.abspath(__file__)
 
 
 def test_emailing():
