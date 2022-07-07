@@ -5,46 +5,47 @@ import './styles/index.css';
 import { reduxUtils } from './utils';
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
-import { take } from 'lodash';
-
-const socket = io('http://localhost:5001');
+import { last } from 'lodash';
 
 function SocketTester() {
-    const [isConnected, setIsConnected] = useState(socket.connected);
+    const [isConnected, setIsConnected] = useState(false);
     const [logLines, setLogLines] = useState<string[]>([]);
+    const [socket, setSocket] = useState<any>(undefined);
 
     useEffect(() => {
-        socket.connect();
-        socket.emit('register_as_pyra_ui');
-        return () => {
-            socket.disconnect();
-        };
+        const newSocket = io(`http://localhost:5001`);
+        setSocket(newSocket);
     }, []);
 
     useEffect(() => {
-        socket.on('connect', () => {
-            setIsConnected(true);
-        });
+        if (socket !== undefined) {
+            socket.on('connect', () => {
+                setIsConnected(true);
+            });
 
-        socket.on('disconnect', () => {
-            setIsConnected(false);
-        });
+            socket.on('disconnect', () => {
+                setIsConnected(false);
+            });
 
-        socket.on('connect_error', (err) => {
-            console.log(`connect_error due to ${err}`);
-        });
+            socket.on('new_log_lines', (newLogLines: string[]) => {
+                if (logLines.length > 0) {
+                    const currentLastLogTime: any = last(logLines)?.slice(0, 26);
+                    const newLastLogTime: any = last(newLogLines)?.slice(0, 26);
+                    if (newLastLogTime > currentLastLogTime) {
+                        setLogLines(newLogLines);
+                    }
+                } else {
+                    setLogLines(newLogLines);
+                }
+            });
 
-        socket.on('new_log_lines', (data) => {
-            const newLogLines = data;
-            setLogLines(newLogLines);
-        });
-
-        return () => {
-            socket.off('connect');
-            socket.off('disconnect');
-            socket.off('new_log_line');
-        };
-    }, []);
+            return () => {
+                socket.off('connect');
+                socket.off('disconnect');
+                socket.off('new_log_lines');
+            };
+        }
+    }, [socket, logLines]);
 
     return (
         <div className="p-2 flex-col-left gap-y-1">
