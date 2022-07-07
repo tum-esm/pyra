@@ -2,10 +2,10 @@ import json
 import subprocess
 import os
 from deepdiff import DeepDiff
-from .fixtures import original_config
+from ..fixtures import original_config
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(os.path.abspath(__file__)))
+PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 INTERPRETER_PATH = os.path.join(PROJECT_DIR, ".venv", "bin", "python")
 PYRA_CLI_PATH = os.path.join(PROJECT_DIR, "packages", "cli", "main.py")
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
@@ -42,9 +42,7 @@ def test_get_config(original_config):
     config_object_1 = json.loads(stdout)
 
     # get config from file
-    assert_config_file_content(
-        config_object_1, "output from cli does not match file content"
-    )
+    assert_config_file_content(config_object_1, "output from cli does not match file content")
 
 
 def test_validate_current_config(original_config):
@@ -99,9 +97,7 @@ def test_update_config(original_config):
         assert "Updated config file" in stdout
         original_config = transform(original_config, index)
 
-        assert_config_file_content(
-            original_config, "config.json did not update as expected"
-        )
+        assert_config_file_content(original_config, "config.json did not update as expected")
 
 
 def test_add_default_config(original_config):
@@ -109,7 +105,7 @@ def test_add_default_config(original_config):
     cases = {"vbdsd": None, "tum_plc": None}
 
     for c in cases:
-        with open(os.path.join(PROJECT_DIR, "config", f"{c}.default.json"), "r") as f:
+        with open(os.path.join(PROJECT_DIR, "config", f"{c}.config.default.json"), "r") as f:
             cases[c] = json.load(f)
 
     for c in cases:
@@ -120,7 +116,7 @@ def test_add_default_config(original_config):
     assert_config_file_content(original_config, "config.json is in an unexpected state")
 
     for c in cases:
-        stdout = run_cli_command(["config", "add-default", c])
+        stdout = run_cli_command(["config", "update", json.dumps({c: cases[c]})])
         assert "Updated config file" in stdout
         original_config[c] = cases[c]
         assert_config_file_content(

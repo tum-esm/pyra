@@ -47,7 +47,6 @@ def _start_pyra_core():
     if existing_pid is not None:
         error_handler(f"Background process already exists with PID {existing_pid}")
     else:
-        print([INTERPRETER_PATH, SCRIPT_PATH])
         p = subprocess.Popen(
             [INTERPRETER_PATH, SCRIPT_PATH],
             stdout=subprocess.PIPE,
