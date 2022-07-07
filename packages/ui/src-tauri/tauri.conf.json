@@ -97,7 +97,7 @@
                 "height": 500,
                 "minHeight": 500,
                 "width": 900,
-                "minWidth": 900,
+                "minWidth": 400,
                 "center": true
             }
         ]

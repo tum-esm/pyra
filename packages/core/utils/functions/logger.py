@@ -16,6 +16,9 @@ LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")
 
 
 class Logger:
+    last_iterations_log_lines: list[str] = []
+    this_iterations_log_lines: list[str] = []
+
     def __init__(self, origin="pyra.core"):
         self.origin = origin
         self.sio = socketio.Client()
@@ -47,6 +50,14 @@ class Logger:
                 with open(INFO_LOG_FILE, "a") as f2:
                     f2.write(log_string)
 
+        if "started mainloop inside process with PID " is log_string:
+            Logger.last_iterations_log_lines = []
+            Logger.this_iterations_log_lines = []
+        elif "Starting Iteration" in log_string:
+            Logger.last_iterations_log_lines = [*Logger.this_iterations_log_lines]
+            Logger.this_iterations_log_lines = []
+        Logger.this_iterations_log_lines.append(log_string)
+
         if not self.sio.connected:
             try:
                 self.sio.connect("http://localhost:5001")
@@ -54,4 +65,8 @@ class Logger:
                 pass
 
         if self.sio.connected:
-            self.sio.emit("new_log_line", log_string)
+            # the log lines from the last 2 iterations
+            current_log_lines = (
+                Logger.last_iterations_log_lines + Logger.this_iterations_log_lines
+            )
+            self.sio.emit("new_log_lines", current_log_lines)

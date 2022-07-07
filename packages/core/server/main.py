@@ -3,7 +3,7 @@ import eventlet
 import socketio
 from packages.core.utils import Logger
 
-sio = socketio.Server()
+sio = socketio.Server(cors_allowed_origins=["http://localhost:3000"])
 app = socketio.WSGIApp(sio)
 logger = Logger(origin="server")
 
@@ -22,8 +22,8 @@ def register_as_pyra_ui(sid):
 
 
 @sio.event
-def new_log_line(sid, data):
-    sio.emit("new_log_line", data, room="pyra-ui")
+def new_log_lines(sid, data):
+    sio.emit("new_log_lines", data, room="pyra-ui")
 
 
 @sio.event
@@ -33,7 +33,7 @@ def new_core_state(sid, data):
 
 @sio.event
 def disconnect(sid):
-    logger.info("pyra-ui client disconnected")
+    logger.info(f"pyra-ui client disconnected, rooms = {sio.rooms(sid)}")
     sio.leave_room(sid, "pyra-ui")
 
 
