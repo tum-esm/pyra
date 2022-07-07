@@ -18,7 +18,7 @@ class SystemChecks:
         average_system_load = OSInterface.get_average_system_load()
         logger.info(
             "The average system load in the past 1/5/15 "
-            + f"minutes was {average_system_load}."
+            + f"minutes was {'/'.join([str(round(l)) + '%' for l in average_system_load])}."
         )
 
         memory_usage = OSInterface.get_memory_usage()

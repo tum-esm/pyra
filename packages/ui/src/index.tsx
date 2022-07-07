@@ -71,7 +71,7 @@ function SocketTester() {
 
 function RenderedLogLine(props: { l: string }) {
     if (props.l.includes('EXCEPTION')) {
-        return <pre>{props.l}</pre>;
+        return <pre className="font-bold text-red-700">{props.l}</pre>;
     }
 
     let l = props.l.replace(/\n/g, '');
@@ -89,22 +89,24 @@ function RenderedLogLine(props: { l: string }) {
                 textStyle = 'text-gray-900 font-semibold';
                 break;
             case 'WARNING':
-            case 'EXCEPTION':
+            case 'CRITICAL':
             case 'ERROR':
                 textStyle = 'text-red-700 font-bold';
                 break;
         }
 
         return (
-            <div className={`flex-row-left gap-x-2 ${textStyle} whitespace-nowrap`}>
-                <span>{timeSection}</span>
-                <span>-</span>
-                <span className="w-48">{sourceSection}</span>
-                <span>-</span>
-                <span className="w-16">{typeSection}</span>
-                <span>-</span>
-                <span>{messageSection}</span>
-            </div>
+            <>
+                {messageSection.includes('Starting Iteration') && (
+                    <div className="flex-shrink-0 h-px my-1 bg-gray-250 w-[calc(100%+1rem)] -ml-2 first:hidden" />
+                )}
+                <div className={`flex-row-left gap-x-3 ${textStyle} whitespace-nowrap`}>
+                    <span>{timeSection}</span>
+                    <span className="w-44">{sourceSection}</span>
+                    <span className="w-12">{typeSection}</span>
+                    <span>{messageSection}</span>
+                </div>
+            </>
         );
     } catch {
         return <></>;
