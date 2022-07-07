@@ -1,6 +1,7 @@
 import os
 import time
 from packages.core import modules
+from packages.core.server import Server_Thread
 from packages.core.utils import (
     ConfigInterface,
     StateInterface,
@@ -32,9 +33,10 @@ def run():
     ]
     vbdsd_thread = modules.vbdsd.VBDSD_Thread()
 
-    current_exceptions = []
+    server_thread = Server_Thread()
+    server_thread.start()
 
-    # TODO: Start socket-server
+    current_exceptions = []
 
     while True:
         start_time = time.time()
