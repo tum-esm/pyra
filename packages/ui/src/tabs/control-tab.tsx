@@ -11,13 +11,13 @@ function VariableBlock(props: {
     buttonsAreDisabled: boolean;
     actions: (
         | {
-            label: string;
-            callback: (value: number) => void;
-            spinner: boolean;
-            variant: 'numeric';
-            initialValue: number;
-            postfix?: string;
-        }
+              label: string;
+              callback: (value: number) => void;
+              spinner: boolean;
+              variant: 'numeric';
+              initialValue: number;
+              postfix?: string;
+          }
         | { label: string; callback: () => void; spinner: boolean; variant?: undefined }
     )[];
 }) {
@@ -68,7 +68,7 @@ function VariableBlock(props: {
     );
 }
 export default function ControlTab() {
-    const coreState = reduxUtils.useTypedSelector((s) => s.coreState.content);
+    const coreState = reduxUtils.useTypedSelector((s) => s.coreState);
     const plcIsControlledByUser = reduxUtils.useTypedSelector(
         (s) => s.config.central?.tum_plc?.controlled_by_user
     );
@@ -173,7 +173,7 @@ export default function ControlTab() {
     }
 
     async function toggleSyncToTracker() {
-        if (coreState !== undefined) {
+        if (coreState !== null) {
             const newValue = !coreState.enclosure_plc_readings.control.sync_to_tracker;
             await runPlcWriteCommand(
                 ['write-sync-to-tracker', JSON.stringify(newValue)],
@@ -186,7 +186,7 @@ export default function ControlTab() {
     }
 
     async function toggleAutoTemperature() {
-        if (coreState !== undefined) {
+        if (coreState !== null) {
             const newValue = !coreState.enclosure_plc_readings.control.auto_temp_mode;
             await runPlcWriteCommand(
                 ['write-auto-temperature', JSON.stringify(newValue)],
@@ -199,7 +199,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerHeater() {
-        if (coreState !== undefined) {
+        if (coreState !== null) {
             const newValue = !coreState.enclosure_plc_readings.power.heater;
             await runPlcWriteCommand(
                 ['write-power-heater', JSON.stringify(newValue)],
@@ -212,7 +212,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerCamera() {
-        if (coreState !== undefined) {
+        if (coreState !== null) {
             const newValue = !coreState.enclosure_plc_readings.power.camera;
             await runPlcWriteCommand(
                 ['write-power-heater', JSON.stringify(newValue)],
@@ -225,7 +225,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerRouter() {
-        if (coreState !== undefined) {
+        if (coreState !== null) {
             const newValue = !coreState.enclosure_plc_readings.power.router;
             await runPlcWriteCommand(
                 ['write-power-router', JSON.stringify(newValue)],
@@ -238,7 +238,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerSpectrometer() {
-        if (coreState !== undefined) {
+        if (coreState !== null) {
             const newValue = !coreState.enclosure_plc_readings.power.spectrometer;
             await runPlcWriteCommand(
                 ['write-power-spectrometer', JSON.stringify(newValue)],
@@ -251,7 +251,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerComputer() {
-        if (coreState !== undefined) {
+        if (coreState !== null) {
             const newValue = coreState.enclosure_plc_readings.power.computer;
             await runPlcWriteCommand(
                 ['write-power-computer', JSON.stringify(newValue)],
@@ -289,13 +289,13 @@ export default function ControlTab() {
             </div>
             <div className="w-full h-px my-0 bg-gray-300" />
             <div className="flex flex-col w-full text-sm gap-y-2">
-                {coreState === undefined && (
+                {coreState === null && (
                     <div className="flex-row-center gap-x-1.5">
                         <essentialComponents.Spinner />
                         loading PLC state
                     </div>
                 )}
-                {coreState !== undefined && (
+                {coreState !== null && (
                     <>
                         <VariableBlock
                             label="Errors"
@@ -404,7 +404,7 @@ export default function ControlTab() {
                                     value: coreState.enclosure_plc_readings.control.auto_temp_mode
                                         ? 'Yes'
                                         : 'No',
-                                }
+                                },
                             ]}
                             actions={[
                                 {
@@ -413,7 +413,7 @@ export default function ControlTab() {
                                         : 'enable auto temperature',
                                     callback: toggleAutoTemperature,
                                     spinner: isLoadingAutoTemperature,
-                                }
+                                },
                             ]}
                         />
                         <VariableBlock

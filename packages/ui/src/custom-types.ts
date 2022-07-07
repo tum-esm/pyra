@@ -6,15 +6,10 @@ export namespace customTypes {
         errorMessage: string | undefined;
     };
     export type reduxStateLogs = {
-        infoLines: string[];
-        debugLines: string[];
-        empty: boolean | undefined;
-        loading: boolean;
+        infoLines: string[] | undefined;
+        debugLines: string[] | undefined;
     };
-    export type reduxStateCoreState = {
-        content: coreState | undefined;
-        loading: boolean;
-    };
+    export type reduxStateCoreState = coreState | null;
     export type reduxStateCoreProcess = {
         pid: number | undefined;
     };

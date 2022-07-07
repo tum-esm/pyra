@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import './styles/index.css';
-//import Main from './main';
+import Main from './main';
 import { reduxUtils } from './utils';
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
@@ -117,6 +117,6 @@ function RenderedLogLine(props: { l: string }) {
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <Provider store={reduxUtils.store}>
-        <SocketTester />
+        <Main />
     </Provider>
 );

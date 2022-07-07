@@ -48,8 +48,8 @@ function MeasurementTriggerInfo() {
                         <>
                             {measurementTriggers.consider_time
                                 ? `from ${formatTime(
-                                    measurementTriggers.start_time
-                                )} to ${formatTime(measurementTriggers.stop_time)}`
+                                      measurementTriggers.start_time
+                                  )} to ${formatTime(measurementTriggers.stop_time)}`
                                 : 'ignored'}
                         </>,
                     ],
@@ -96,7 +96,7 @@ export default function MeasurementDecisionStatus() {
         (s) => s.config.central?.measurement_decision
     );
     const automaticMeasurementDecisionResult = reduxUtils.useTypedSelector(
-        (s) => s.coreState.content?.automation_should_be_running
+        (s) => s.coreState?.automation_should_be_running
     );
     const dispatch = reduxUtils.useTypedDispatch();
     const setConfigsPartial = (c: customTypes.partialConfig) =>
@@ -201,8 +201,8 @@ export default function MeasurementDecisionStatus() {
                                 loading
                                     ? 'gray'
                                     : measurementDecision.manual_decision_result
-                                        ? 'red'
-                                        : 'green'
+                                    ? 'red'
+                                    : 'green'
                             }
                             disabled={loading}
                         >

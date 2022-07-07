@@ -8,7 +8,8 @@ export default function LogTab() {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
     const [archiving, setArchiving] = useState(false);
 
-    const logsState = reduxUtils.useTypedSelector((s) => s.logs);
+    const debugLogLines = reduxUtils.useTypedSelector((s) => s.logs.debugLines);
+    const infoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
     const dispatch = reduxUtils.useTypedDispatch();
 
     async function openLogsFolder() {
@@ -31,6 +32,8 @@ export default function LogTab() {
         }
     }
 
+    const logsAreLoading = debugLogLines === undefined || infoLogLines === undefined;
+
     return (
         <div className={'flex-col w-full h-full pt-4 '}>
             <div className="px-6 mb-4 flex-row-center gap-x-2">
@@ -39,30 +42,27 @@ export default function LogTab() {
                     setValue={(s: any) => setLogLevel(s)}
                     values={['info', 'debug']}
                 />
-                {logsState.loading && <essentialComponents.Spinner />}
+                {logsAreLoading && <essentialComponents.Spinner />}
                 <div className="flex-grow" />
                 <essentialComponents.Button onClick={openLogsFolder} variant="white">
                     open logs folder
                 </essentialComponents.Button>
-                <essentialComponents.Button
-                    onClick={archiveLogs}
-                    variant="red"
-                    spinner={archiving}
-                    disabled={logsState.loading}
-                >
+                <essentialComponents.Button onClick={archiveLogs} variant="red" spinner={archiving}>
                     archive logs
                 </essentialComponents.Button>
             </div>
             <pre
                 className={
                     'w-full !px-6 !py-2 !mb-0 overflow-y-scroll ' +
-                    'border-t border-gray-300 bg-white h-full'
+                    'border-t border-gray-300 bg-white flex-grow'
                 }
             >
-                <code className="w-full h-full !text-xs language-log">
-                    {(logLevel === 'info' ? logsState.infoLines : logsState.debugLines).join('\n')}
-                    {logsState.empty && <strong>logs are empty</strong>}
-                </code>
+                {!logsAreLoading && (
+                    <code className="w-full h-full !text-xs language-log">
+                        {(logLevel === 'info' ? infoLogLines : debugLogLines).join('\n')}
+                        {debugLogLines.length == 0 && <strong>logs are empty</strong>}
+                    </code>
+                )}
             </pre>
         </div>
     );

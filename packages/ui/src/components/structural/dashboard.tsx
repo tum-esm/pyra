@@ -7,44 +7,55 @@ import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
 import backend from '../../utils/fetch-utils/backend';
 import toast from 'react-hot-toast';
+import socketIOClient from 'socket.io-client';
+import { last } from 'lodash';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Overview');
-    const [rawLogFileContent, logFileIsLoading] = fetchUtils.useFileWatcher('logs\\debug.log', 10);
-    const [rawCoreStateFileContent, coreStateFileIsLoading] = fetchUtils.useFileWatcher(
-        'runtime-data\\state.json',
-        10
-    );
+    const [socket, setSocket] = useState<any>(undefined);
 
+    useEffect(() => {
+        const newSocket = socketIOClient(`http://localhost:5001`);
+        setSocket(newSocket);
+    }, []);
 
-    const [rawConfigFileContent, _] = fetchUtils.useFileWatcher('config\\config.json', 10);
     const dispatch = reduxUtils.useTypedDispatch();
+    const logLines = reduxUtils.useTypedSelector((s) => s.logs.debugLines);
 
-    // add coreState loading=true to redux when file change has been detected
     useEffect(() => {
-        dispatch(reduxUtils.logsActions.setLoading(logFileIsLoading));
-    }, [logFileIsLoading]);
+        if (socket !== undefined) {
+            socket.on('connect', () => {
+                console.log('socket is connected');
+            });
 
-    // add coreState loading=true to redux when file change has been detected
-    useEffect(() => {
-        dispatch(reduxUtils.coreStateActions.setLoading(coreStateFileIsLoading));
-    }, [coreStateFileIsLoading]);
+            socket.on('disconnect', () => {
+                console.log('socket is disconnected');
+            });
 
-    // load logs when logs/debug.log has changed
-    useEffect(() => {
-        if (rawLogFileContent !== undefined) {
-            dispatch(reduxUtils.logsActions.set(rawLogFileContent.split('\n')));
+            socket.on('new_log_lines', (newLogLines: string[]) => {
+                if (logLines && logLines.length > 0) {
+                    const currentLastLogTime: any = last(logLines)?.slice(0, 26);
+                    const newLastLogTime: any = last(newLogLines)?.slice(0, 26);
+                    if (newLastLogTime > currentLastLogTime) {
+                        dispatch(reduxUtils.logsActions.set(newLogLines));
+                    }
+                } else {
+                    dispatch(reduxUtils.logsActions.set(newLogLines));
+                }
+            });
+
+            return () => {
+                socket.off('connect');
+                socket.off('disconnect');
+                socket.off('new_log_lines');
+            };
         }
-    }, [rawLogFileContent]);
+    }, [socket, logLines]);
 
-    // load coreState when runtime-data/state.json has changed
-    useEffect(() => {
-        if (rawCoreStateFileContent !== undefined) {
-            dispatch(reduxUtils.coreStateActions.set(JSON.parse(rawCoreStateFileContent)));
-        }
-    }, [rawCoreStateFileContent]);
+    /*
+    const [rawConfigFileContent, _] = fetchUtils.useFileWatcher('config\\config.json', 10);
 
     // load config when config/config.json has changed
     // check, whether a reload is required
@@ -74,45 +85,11 @@ export default function Dashboard() {
                 dispatch(reduxUtils.configActions.setConfigsPartial(newCentralConfig));
             }
         }
-    }, [rawConfigFileContent]);
+    }, [rawConfigFileContent]);*/
 
     const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const enclosureControlsIsVisible =
         centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
-
-    // fetch PLC State via CLI when PLC is controlled by user
-    useEffect(() => {
-        let watchInterval: NodeJS.Timer | undefined = undefined;
-        // load stuff directly from PLC if user has set the PLC interaction to manual
-        if (centralConfig?.tum_plc?.controlled_by_user) {
-            watchInterval = setInterval(async () => {
-                dispatch(reduxUtils.coreStateActions.setLoading(true));
-                const result = await backend.readFromPLC();
-                if (result.code !== 0) {
-                    console.error(
-                        `Could not fetch core state. processResult = ${JSON.stringify(result)}`
-                    );
-                    toast.error(
-                        `Could not fetch core state, please look in the console for details`
-                    );
-                } else {
-                    try {
-                        const newCoreState = JSON.parse(result.stdout);
-                        dispatch(reduxUtils.coreStateActions.setPartial({ enclosure_plc_readings: newCoreState }));
-                    } catch {
-                        toast.error(`Could not fetch core state: ${result.stdout}`);
-                    }
-                }
-                dispatch(reduxUtils.coreStateActions.setLoading(false));
-            }, 5000);
-        }
-        return () => clearInterval(watchInterval);
-    }, [centralConfig]);
-
-    const coreStateContent = reduxUtils.useTypedSelector((s) => s.coreState.content);
-    const logsAreEmpty = reduxUtils.useTypedSelector((s) => s.logs.empty);
-    const initialFileContentsAreLoading =
-        coreStateContent === undefined || logsAreEmpty === undefined;
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
@@ -128,25 +105,20 @@ export default function Dashboard() {
                     'flex-grow w-full bg-gray-75 ' + 'h-[calc(200vh-1.5rem)] overflow-y-scroll'
                 }
             >
-                {initialFileContentsAreLoading && <essentialComponents.Spinner />}
-                {!initialFileContentsAreLoading && (
-                    <>
-                        {[
-                            ['Overview', <OverviewTab />],
-                            ['Automation', <AutomationTab />],
-                            ['Configuration', <ConfigurationTab />],
-                            ['Logs', <LogTab />],
-                        ].map((t: any, i) => (
-                            <div key={i} className={activeTab === t[0] ? '' : 'hidden'}>
-                                {t[1]}
-                            </div>
-                        ))}
-                        {enclosureControlsIsVisible && (
-                            <div className={activeTab === 'PLC Controls' ? '' : 'hidden'}>
-                                <ControlTab />
-                            </div>
-                        )}
-                    </>
+                {[
+                    ['Overview', <OverviewTab />],
+                    ['Automation', <AutomationTab />],
+                    ['Configuration', <ConfigurationTab />],
+                    ['Logs', <LogTab />],
+                ].map((t: any, i) => (
+                    <div key={i} className={activeTab === t[0] ? '' : 'hidden'}>
+                        {t[1]}
+                    </div>
+                ))}
+                {enclosureControlsIsVisible && (
+                    <div className={activeTab === 'PLC Controls' ? '' : 'hidden'}>
+                        <ControlTab />
+                    </div>
                 )}
             </main>
             <structuralComponents.MessageQueue />
