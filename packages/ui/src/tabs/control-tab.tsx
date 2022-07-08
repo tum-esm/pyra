@@ -11,13 +11,13 @@ function VariableBlock(props: {
     buttonsAreDisabled: boolean;
     actions: (
         | {
-              label: string;
-              callback: (value: number) => void;
-              spinner: boolean;
-              variant: 'numeric';
-              initialValue: number;
-              postfix?: string;
-          }
+            label: string;
+            callback: (value: number) => void;
+            spinner: boolean;
+            variant: 'numeric';
+            initialValue: number;
+            postfix?: string;
+        }
         | { label: string; callback: () => void; spinner: boolean; variant?: undefined }
     )[];
 }) {
@@ -218,10 +218,10 @@ export default function ControlTab() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.camera;
             await runPlcWriteCommand(
-                ['write-power-heater', JSON.stringify(newValue)],
+                ['write-power-camera', JSON.stringify(newValue)],
                 setIsLoadingPowerCamera,
                 {
-                    power: { heater: newValue },
+                    power: { camera: newValue },
                 }
             );
         }

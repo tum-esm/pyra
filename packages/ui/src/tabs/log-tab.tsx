@@ -101,7 +101,7 @@ export default function LogTab() {
             </div>
             <pre
                 className={
-                    'w-full !px-4 !py-2 !mb-0 overflow-x-scroll ' +
+                    'w-full !px-4 !py-2 !mb-0 overflow-x-auto ' +
                     'border-t border-gray-300 bg-white flex-grow'
                 }
             >

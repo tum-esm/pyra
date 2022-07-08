@@ -215,7 +215,6 @@ class PLCInterface:
         """Reads an INT value in the PLC database."""
         assert len(action) == 3
         db_number, start, size = action
-        print(f"reading int: action={action}")
 
         msg = self.plc.db_read(db_number, start, size)
         value = snap7.util.get_int(msg, 0)
@@ -239,7 +238,6 @@ class PLCInterface:
         """Reads a BOOL value in the PLC database."""
         assert len(action) == 4
         db_number, start, size, bool_index = action
-        print(f"reading bool: action={action}")
 
         msg = self.plc.db_read(db_number, start, size)
         value = snap7.util.get_bool(msg, 0, bool_index)

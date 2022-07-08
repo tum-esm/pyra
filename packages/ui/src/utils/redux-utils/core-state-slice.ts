@@ -22,7 +22,7 @@ export const coreStateSlice = createSlice({
             if (state.body !== undefined) {
                 state.body = defaultsDeep(
                     JSON.parse(JSON.stringify(action.payload)),
-                    JSON.parse(JSON.stringify(state))
+                    JSON.parse(JSON.stringify(state.body))
                 );
             } else {
                 console.warn('Cannot coreState.setPartial with a null state');
