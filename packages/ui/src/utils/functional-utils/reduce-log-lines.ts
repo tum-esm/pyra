@@ -10,7 +10,8 @@ export default function reduceLogLines(logLines: string[]) {
         if (line.includes('Starting Iteration')) {
             foundIterationStarts += 1;
         }
-        if (foundIterationStarts == 2) {
+        if (foundIterationStarts == 10) {
+            reducedLogLines.push('More log lines inside logs folder ...');
             break;
         }
     }

@@ -6,6 +6,9 @@ import toast from 'react-hot-toast';
 import { drop } from 'lodash';
 
 function RenderedLogLine(props: { l: string }) {
+    if (props.l == 'More log lines inside logs folder ...') {
+        return <pre className="font-light text-gray-500">{props.l}</pre>;
+    }
     if (props.l.includes('EXCEPTION')) {
         return <pre className="font-bold text-red-700">{props.l}</pre>;
     }

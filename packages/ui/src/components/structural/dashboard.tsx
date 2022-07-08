@@ -24,16 +24,27 @@ export default function Dashboard() {
     const dispatch = reduxUtils.useTypedDispatch();
 
     useEffect(() => {
-        async function updateStateFile() {
+        async function fetchStateFile() {
             const fileContent = await readTextFile('research/pyra/runtime-data/state.json', {
                 dir: BaseDirectory.Document,
             });
-            console.log('new core state');
             dispatch(reduxUtils.coreStateActions.set(JSON.parse(fileContent)));
         }
 
-        const interval = setInterval(updateStateFile, 5000);
-        return () => clearInterval(interval);
+        async function fetchLogFile() {
+            const fileContent = await readTextFile('research/pyra/logs/debug.log', {
+                dir: BaseDirectory.Document,
+            });
+            dispatch(reduxUtils.logsActions.set(fileContent.split('\n')));
+        }
+
+        const interval1 = setInterval(fetchStateFile, 5000);
+        const interval2 = setInterval(fetchLogFile, 5000);
+
+        return () => {
+            clearInterval(interval1);
+            clearInterval(interval2);
+        };
     }, [dispatch]);
 
     /*useEffect(() => {
