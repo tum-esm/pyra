@@ -19,6 +19,7 @@ class EnclosureControl:
 
     def __init__(self, initial_config: dict):
         self.config = initial_config
+        self.initialized = False
         if self.config["general"]["test_mode"]:
             return
 
@@ -26,12 +27,15 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
+        self._initialize()
+
+        
+
+    def _initialize(self):
         self.plc_interface = PLCInterface(self.config)
         self.plc_interface.set_auto_temperature(True)
         self.last_cycle_automation_status = 0
-
-        # This state is read once per mainloop
-        self.plc_state = self.plc_interface.read()
+        self.initialized = True
 
     def run(self, new_config: dict) -> None:
         self.config = new_config
@@ -44,6 +48,9 @@ class EnclosureControl:
             return
 
         logger.info("Running EnclosureControl")
+
+        if not self.initialized:
+            self._initialize()
 
         self.plc_interface.update_config(self.config)
         self.plc_state = self.plc_interface.read()
