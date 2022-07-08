@@ -1,4 +1,5 @@
 from packages.core.utils import Logger, OSInterface
+from packages.core.utils.interfaces.state_interface import StateInterface
 
 logger = Logger(origin="system-checks")
 
@@ -36,4 +37,18 @@ class SystemChecks:
         # raises error if system battery is below 20%
         OSInterface.validate_system_battery()
 
-        # TODO: Write system state into state.json
+        StateInterface.update(
+            {
+                "os_state": {
+                    "average_system_load": {
+                        "last_1_minute": round(average_system_load[0]),
+                        "last_5_minutes": round(average_system_load[1]),
+                        "last_15_minutes": round(average_system_load[2]),
+                    },
+                    "cpu_usage": cpu_usage,
+                    "memory_usage": memory_usage,
+                    "last_boot_time": last_boot_time,
+                    "filled_disk_space_fraction": disk_space,
+                }
+            }
+        )

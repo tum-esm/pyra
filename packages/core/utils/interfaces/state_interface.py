@@ -36,6 +36,17 @@ class StateInterface:
             "vbdsd_indicates_good_conditions": None,
             "automation_should_be_running": False,
             "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
+            "os_state": {
+                "average_system_load": {
+                    "last_1_minute": None,
+                    "last_5_minutes": None,
+                    "last_15_minutes": None,
+                },
+                "cpu_usage": None,
+                "memory_usage": None,
+                "last_boot_time": None,
+                "filled_disk_space_fraction": None,
+            },
         }
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
