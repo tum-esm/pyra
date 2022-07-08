@@ -68,7 +68,7 @@ function VariableBlock(props: {
     );
 }
 export default function ControlTab() {
-    const coreState = reduxUtils.useTypedSelector((s) => s.coreState);
+    const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
     const plcIsControlledByUser = reduxUtils.useTypedSelector(
         (s) => s.config.central?.tum_plc?.controlled_by_user
     );
@@ -176,7 +176,7 @@ export default function ControlTab() {
     }
 
     async function toggleSyncToTracker() {
-        if (coreState !== null) {
+        if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.control.sync_to_tracker;
             await runPlcWriteCommand(
                 ['write-sync-to-tracker', JSON.stringify(newValue)],
@@ -189,7 +189,7 @@ export default function ControlTab() {
     }
 
     async function toggleAutoTemperature() {
-        if (coreState !== null) {
+        if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.control.auto_temp_mode;
             await runPlcWriteCommand(
                 ['write-auto-temperature', JSON.stringify(newValue)],
@@ -202,7 +202,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerHeater() {
-        if (coreState !== null) {
+        if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.heater;
             await runPlcWriteCommand(
                 ['write-power-heater', JSON.stringify(newValue)],
@@ -215,7 +215,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerCamera() {
-        if (coreState !== null) {
+        if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.camera;
             await runPlcWriteCommand(
                 ['write-power-heater', JSON.stringify(newValue)],
@@ -228,7 +228,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerRouter() {
-        if (coreState !== null) {
+        if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.router;
             await runPlcWriteCommand(
                 ['write-power-router', JSON.stringify(newValue)],
@@ -241,7 +241,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerSpectrometer() {
-        if (coreState !== null) {
+        if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.spectrometer;
             await runPlcWriteCommand(
                 ['write-power-spectrometer', JSON.stringify(newValue)],
@@ -254,7 +254,7 @@ export default function ControlTab() {
     }
 
     async function togglePowerComputer() {
-        if (coreState !== null) {
+        if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.computer;
             await runPlcWriteCommand(
                 ['write-power-computer', JSON.stringify(newValue)],
@@ -297,13 +297,13 @@ export default function ControlTab() {
                         No PLC connection when pyra is in test mode
                     </div>
                 )}
-                {!pyraIsInTestMode && coreState === null && (
+                {!pyraIsInTestMode && coreState === undefined && (
                     <div className="flex-row-center gap-x-1.5">
                         <essentialComponents.Spinner />
                         loading PLC state
                     </div>
                 )}
-                {coreState !== null && (
+                {!pyraIsInTestMode && coreState !== undefined && (
                     <>
                         <VariableBlock
                             label="Errors"

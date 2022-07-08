@@ -4,23 +4,28 @@ import { customTypes } from '../../custom-types';
 
 export const coreStateSlice = createSlice({
     name: 'coreState',
-    initialState: null,
+    initialState: {
+        body: undefined,
+    },
     reducers: {
         set: (
             state: customTypes.reduxStateCoreState,
             action: { payload: customTypes.coreState }
         ) => {
-            state = JSON.parse(JSON.stringify(action.payload));
+            console.log('ELO');
+            state.body = JSON.parse(JSON.stringify(action.payload));
         },
         setPartial: (
             state: customTypes.reduxStateCoreState,
             action: { payload: customTypes.partialCoreState }
         ) => {
-            if (state !== null) {
-                state = defaultsDeep(
+            if (state.body !== undefined) {
+                state.body = defaultsDeep(
                     JSON.parse(JSON.stringify(action.payload)),
                     JSON.parse(JSON.stringify(state))
                 );
+            } else {
+                console.warn('Cannot coreState.setPartial with a null state');
             }
         },
     },

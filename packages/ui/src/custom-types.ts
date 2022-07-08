@@ -9,7 +9,7 @@ export namespace customTypes {
         infoLines: string[] | undefined;
         debugLines: string[] | undefined;
     };
-    export type reduxStateCoreState = coreState | null;
+    export type reduxStateCoreState = { body: coreState | undefined };
     export type reduxStateCoreProcess = {
         pid: number | undefined;
     };
@@ -219,10 +219,23 @@ export namespace customTypes {
         };
     };
 
+    export type OSState = {
+        average_system_load: {
+            last_1_minute: number | null;
+            last_5_minutes: number | null;
+            last_15_minutes: number | null;
+        };
+        cpu_usage: number | null;
+        memory_usage: number | null;
+        last_boot_time: string | null;
+        filled_disk_space_fraction: number | null;
+    };
+
     export type coreState = {
         vbdsd_indicates_good_conditions: boolean | null;
         automation_should_be_running: boolean;
         enclosure_plc_readings: enclosurePlcReadings;
+        os_state: OSState;
     };
 
     export type partialCoreState = {

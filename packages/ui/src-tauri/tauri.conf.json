@@ -31,22 +31,15 @@
                         "name": "venv-python",
                         "cmd": ".venv/bin/python",
                         "args": true
-                    },
-                    {
-                        "name": "md5-mac",
-                        "cmd": "md5",
-                        "args": true
-                    },
-                    {
-                        "name": "md5-windows",
-                        "cmd": "md5sum",
-                        "args": true
-                    },
-                    {
-                        "name": "cat",
-                        "cmd": "cat",
-                        "args": true
                     }
+                ]
+            },
+            "fs": {
+                "readFile": true,
+                "scope": [
+                    "$DOCUMENT/research/pyra/logs/debug.log",
+                    "$DOCUMENT/research/pyra/config/config.json",
+                    "$DOCUMENT/research/pyra/runtime-data/state.json"
                 ]
             }
         },

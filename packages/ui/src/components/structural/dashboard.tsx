@@ -9,22 +9,34 @@ import backend from '../../utils/fetch-utils/backend';
 import toast from 'react-hot-toast';
 import socketIOClient from 'socket.io-client';
 import { last } from 'lodash';
+import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Overview');
-    const [socket, setSocket] = useState<any>(undefined);
-
+    /*
     useEffect(() => {
         const newSocket = socketIOClient(`http://localhost:5001`);
         setSocket(newSocket);
-    }, []);
+    }, []);*/
 
     const dispatch = reduxUtils.useTypedDispatch();
-    const logLines = reduxUtils.useTypedSelector((s) => s.logs.debugLines);
 
     useEffect(() => {
+        async function updateStateFile() {
+            const fileContent = await readTextFile('research/pyra/runtime-data/state.json', {
+                dir: BaseDirectory.Document,
+            });
+            console.log('new core state');
+            dispatch(reduxUtils.coreStateActions.set(JSON.parse(fileContent)));
+        }
+
+        const interval = setInterval(updateStateFile, 5000);
+        return () => clearInterval(interval);
+    }, [dispatch]);
+
+    /*useEffect(() => {
         if (socket !== undefined) {
             socket.on('connect', () => {
                 console.log('socket is connected');
@@ -60,7 +72,7 @@ export default function Dashboard() {
             };
         }
     }, [socket, logLines]);
-
+  
     useEffect(() => {
         if (socket !== undefined) {
             socket.on('new_core_state', (newCoreState: customTypes.coreState) => {
@@ -73,7 +85,7 @@ export default function Dashboard() {
         }
     }, [socket]);
 
-    /*
+    
     const [rawConfigFileContent, _] = fetchUtils.useFileWatcher('config\\config.json', 10);
 
     // load config when config/config.json has changed
