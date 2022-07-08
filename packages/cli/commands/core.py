@@ -34,9 +34,42 @@ def terminate_processes():
             if (len(arguments) > 0) and (arguments[-1] == SCRIPT_PATH):
                 termination_pids.append(p.pid)
                 p.terminate()
+            elif "gunicorn" in "".join(arguments):
+                p.terminate()
         except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
             pass
     return termination_pids
+
+
+def start_server_process():
+    # terminate all old instances (required if core was not stopped properly)
+    for p in psutil.process_iter():
+        try:
+            assert "gunicorn" in "".join(p.cmdline())
+            p.terminate()
+        except (
+            psutil.AccessDenied,
+            psutil.ZombieProcess,
+            psutil.NoSuchProcess,
+            AssertionError,
+        ):
+            pass
+    # start a new background process for the server
+    p = subprocess.Popen(
+        [
+            "gunicorn",
+            "-w",
+            "1",
+            "--threads",
+            "100",
+            "main:app",
+            "-b",
+            "localhost:5001",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=os.path.join(PROJECT_DIR, "packages", "server"),
+    )
 
 
 @click.command(
@@ -47,6 +80,7 @@ def _start_pyra_core():
     if existing_pid is not None:
         error_handler(f"Background process already exists with PID {existing_pid}")
     else:
+        start_server_process()
         p = subprocess.Popen(
             [INTERPRETER_PATH, SCRIPT_PATH],
             stdout=subprocess.PIPE,

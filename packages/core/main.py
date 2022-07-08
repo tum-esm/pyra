@@ -1,7 +1,6 @@
 import os
 import time
 from packages.core import modules
-from packages.core.server import Server_Thread
 from packages.core.utils import (
     ConfigInterface,
     StateInterface,
@@ -32,9 +31,6 @@ def run():
         modules.system_checks.SystemChecks(_CONFIG),
     ]
     vbdsd_thread = modules.vbdsd.VBDSD_Thread()
-
-    server_thread = Server_Thread()
-    server_thread.start()
 
     current_exceptions = []
 
