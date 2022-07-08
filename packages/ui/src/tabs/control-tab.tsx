@@ -252,7 +252,7 @@ export default function ControlTab() {
 
     async function togglePowerComputer() {
         if (coreState !== null) {
-            const newValue = coreState.enclosure_plc_readings.power.computer;
+            const newValue = !coreState.enclosure_plc_readings.power.computer;
             await runPlcWriteCommand(
                 ['write-power-computer', JSON.stringify(newValue)],
                 setIsLoadingPowerComputer,

@@ -145,39 +145,39 @@ export namespace customTypes {
 
     export type enclosurePlcReadings = {
         actors: {
-            fan_speed: number;
-            current_angle: number;
+            fan_speed: number | null;
+            current_angle: number | null;
         };
         control: {
-            auto_temp_mode: boolean;
-            manual_control: boolean;
-            manual_temp_mode: boolean;
-            sync_to_tracker: boolean;
+            auto_temp_mode: boolean | null;
+            manual_control: boolean | null;
+            manual_temp_mode: boolean | null;
+            sync_to_tracker: boolean | null;
         };
         sensors: {
-            humidity: number;
-            temperature: number;
+            humidity: number | null;
+            temperature: number | null;
         };
         state: {
-            cover_closed: boolean;
-            motor_failed: boolean;
-            rain: boolean;
-            reset_needed: boolean;
-            ups_alert: boolean;
+            cover_closed: boolean | null;
+            motor_failed: boolean | null;
+            rain: boolean | null;
+            reset_needed: boolean | null;
+            ups_alert: boolean | null;
         };
         power: {
-            camera: boolean;
-            computer: boolean;
-            heater: boolean;
-            router: boolean;
-            spectrometer: boolean;
+            camera: boolean | null;
+            computer: boolean | null;
+            heater: boolean | null;
+            router: boolean | null;
+            spectrometer: boolean | null;
         };
         connections: {
-            camera: boolean;
-            computer: boolean;
-            heater: boolean;
-            router: boolean;
-            spectrometer: boolean;
+            camera: boolean | null;
+            computer: boolean | null;
+            heater: boolean | null;
+            router: boolean | null;
+            spectrometer: boolean | null;
         };
     };
 
@@ -220,6 +220,7 @@ export namespace customTypes {
     };
 
     export type coreState = {
+        vbdsd_indicates_good_conditions: boolean | null;
         automation_should_be_running: boolean;
         enclosure_plc_readings: enclosurePlcReadings;
     };

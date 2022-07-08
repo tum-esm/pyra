@@ -34,6 +34,15 @@ export default function Dashboard() {
                 console.log('socket is disconnected');
             });
 
+            return () => {
+                socket.off('connect');
+                socket.off('disconnect');
+            };
+        }
+    }, [socket]);
+
+    useEffect(() => {
+        if (socket !== undefined) {
             socket.on('new_log_lines', (newLogLines: string[]) => {
                 if (logLines && logLines.length > 0) {
                     const currentLastLogTime: any = last(logLines)?.slice(0, 26);
@@ -47,12 +56,22 @@ export default function Dashboard() {
             });
 
             return () => {
-                socket.off('connect');
-                socket.off('disconnect');
                 socket.off('new_log_lines');
             };
         }
     }, [socket, logLines]);
+
+    useEffect(() => {
+        if (socket !== undefined) {
+            socket.on('new_core_state', (newCoreState: customTypes.coreState) => {
+                dispatch(reduxUtils.coreStateActions.set(newCoreState));
+            });
+
+            return () => {
+                socket.off('new_core_state');
+            };
+        }
+    }, [socket]);
 
     /*
     const [rawConfigFileContent, _] = fetchUtils.useFileWatcher('config\\config.json', 10);
