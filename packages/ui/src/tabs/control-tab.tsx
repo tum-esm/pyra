@@ -72,6 +72,9 @@ export default function ControlTab() {
     const plcIsControlledByUser = reduxUtils.useTypedSelector(
         (s) => s.config.central?.tum_plc?.controlled_by_user
     );
+    const pyraIsInTestMode = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.general.test_mode
+    );
 
     const dispatch = reduxUtils.useTypedDispatch();
     const setConfigsPartial = (c: customTypes.partialConfig) =>
@@ -289,7 +292,12 @@ export default function ControlTab() {
             </div>
             <div className="w-full h-px my-0 bg-gray-300" />
             <div className="flex flex-col w-full text-sm gap-y-2">
-                {coreState === null && (
+                {pyraIsInTestMode && (
+                    <div className="flex-row-center">
+                        No PLC connection when pyra is in test mode
+                    </div>
+                )}
+                {!pyraIsInTestMode && coreState === null && (
                     <div className="flex-row-center gap-x-1.5">
                         <essentialComponents.Spinner />
                         loading PLC state
