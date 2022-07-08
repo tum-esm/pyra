@@ -25,15 +25,15 @@ export default function Dashboard() {
 
     useEffect(() => {
         async function fetchStateFile() {
-            const fileContent = await readTextFile('research/pyra/runtime-data/state.json', {
-                dir: BaseDirectory.Document,
+            const fileContent = await readTextFile('pyra-4\\runtime-data\\state.json', {
+                dir: BaseDirectory.Download,
             });
             dispatch(reduxUtils.coreStateActions.set(JSON.parse(fileContent)));
         }
 
         async function fetchLogFile() {
-            const fileContent = await readTextFile('research/pyra/logs/debug.log', {
-                dir: BaseDirectory.Document,
+            const fileContent = await readTextFile('pyra-4\\logs\\debug.log', {
+                dir: BaseDirectory.Download,
             });
             dispatch(reduxUtils.logsActions.set(fileContent.split('\n')));
         }

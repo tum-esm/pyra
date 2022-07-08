@@ -53,14 +53,3 @@
 .elevated-panel {
     @apply shadow-sm rounded-md bg-white border-gray-250 border;
 }
-
-* {
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
-}
-
-*::-webkit-scrollbar {
-    display: none;
-}

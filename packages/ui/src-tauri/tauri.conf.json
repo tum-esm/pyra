@@ -37,9 +37,12 @@
             "fs": {
                 "readFile": true,
                 "scope": [
-                    "$DOCUMENT/research/pyra/logs/debug.log",
-                    "$DOCUMENT/research/pyra/config/config.json",
-                    "$DOCUMENT/research/pyra/runtime-data/state.json"
+                    "$DOWNLOAD/pyra-4/logs/debug.log",
+                    "$DOWNLOAD\\pyra-4\\logs\\debug.log",
+                    "$DOWNLOAD/pyra-4/config/config.json",
+                    "$DOWNLOAD\\pyra-\\config\\config.json",
+                    "$DOWNLOAD/pyra-4/runtime-data/state.json",
+                    "$DOWNLOAD\\/pyra-4\\runtime-data\\state.json"
                 ]
             }
         },
