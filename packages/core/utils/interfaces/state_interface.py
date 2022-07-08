@@ -2,6 +2,8 @@ import json
 import os
 import shutil
 
+import socketio
+
 from .plc_interface import EMPTY_PLC_STATE
 from packages.core.utils import with_filelock
 
@@ -20,8 +22,21 @@ VBDSD_IMG_DIR = os.path.join(RUNTIME_DATA_PATH, "vbdsd")
 # TODO: Rename as CoreStateInterface
 # TODO: Make Interface responses statically typed
 
+sio = socketio.Client()
+
 
 class StateInterface:
+    @staticmethod
+    def emit_state_to_socket(new_state: dict):
+        if not sio.connected:
+            try:
+                sio.connect("http://localhost:5001")
+            except:
+                pass
+
+        if sio.connected:
+            sio.emit("new_core_state", new_state)
+
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
     def initialize() -> None:
@@ -32,16 +47,15 @@ class StateInterface:
         os.mkdir(VBDSD_IMG_DIR)
 
         # write initial state.json file
+        new_state = {
+            "vbdsd_indicates_good_conditions": None,
+            "automation_should_be_running": False,
+            "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
+        }
         with open(STATE_FILE_PATH, "w") as f:
-            json.dump(
-                {
-                    "vbdsd_indicates_good_conditions": None,
-                    "automation_should_be_running": False,
-                    "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
-                },
-                f,
-                indent=4,
-            )
+            json.dump(new_state, f, indent=4)
+
+        StateInterface.emit_state_to_socket(new_state)
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
@@ -53,8 +67,10 @@ class StateInterface:
     @with_filelock(STATE_LOCK_PATH)
     def update(update: dict):
         with open(STATE_FILE_PATH, "r") as f:
-            _STATE = json.load(f)
-        with open(STATE_FILE_PATH, "w") as f:
-            json.dump({**_STATE, **update}, f, indent=4)
+            current_state = json.load(f)
 
-        # TODO: Push update to socket-messages queue
+        new_state = {**current_state, **update}
+        with open(STATE_FILE_PATH, "w") as f:
+            json.dump(new_state, f, indent=4)
+
+        StateInterface.emit_state_to_socket(new_state)
