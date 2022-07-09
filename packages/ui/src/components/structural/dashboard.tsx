@@ -1,113 +1,47 @@
 import { useEffect, useState } from 'react';
-import { fetchUtils, reduxUtils } from '../../utils';
+import { reduxUtils } from '../../utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
-import { essentialComponents, structuralComponents } from '../../components';
+import { structuralComponents } from '../../components';
 import { customTypes } from '../../custom-types';
 import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
-import backend from '../../utils/fetch-utils/backend';
-import toast from 'react-hot-toast';
-import socketIOClient from 'socket.io-client';
-import { last } from 'lodash';
-import { readTextFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { readTextFile } from '@tauri-apps/api/fs';
+import { join, downloadDir } from '@tauri-apps/api/path';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Overview');
-    /*
-    useEffect(() => {
-        const newSocket = socketIOClient(`http://localhost:5001`);
-        setSocket(newSocket);
-    }, []);*/
 
     const dispatch = reduxUtils.useTypedDispatch();
 
     useEffect(() => {
         async function fetchStateFile() {
-            const fileContent = await readTextFile('pyra-4\\runtime-data\\state.json', {
-                dir: BaseDirectory.Download,
+            const projectDirPath =
+                import.meta.env.VITE_PROJECT_DIR || (await join(await downloadDir(), 'pyra-4'));
+            const fileContent = await readTextFile(await join('runtime-data', 'state.json'), {
+                dir: projectDirPath,
             });
             dispatch(reduxUtils.coreStateActions.set(JSON.parse(fileContent)));
         }
 
         async function fetchLogFile() {
-            const fileContent = await readTextFile('pyra-4\\logs\\debug.log', {
-                dir: BaseDirectory.Download,
+            const projectDirPath =
+                import.meta.env.VITE_PROJECT_DIR || (await join(await downloadDir(), 'pyra-4'));
+            const fileContent = await readTextFile(await join('logs', 'debug.log'), {
+                dir: projectDirPath,
             });
             dispatch(reduxUtils.logsActions.set(fileContent.split('\n')));
         }
 
-        const interval1 = setInterval(fetchStateFile, 5000);
-        const interval2 = setInterval(fetchLogFile, 5000);
-
-        return () => {
-            clearInterval(interval1);
-            clearInterval(interval2);
-        };
-    }, [dispatch]);
-
-    /*useEffect(() => {
-        if (socket !== undefined) {
-            socket.on('connect', () => {
-                console.log('socket is connected');
+        async function fetchConfigFile() {
+            const projectDirPath =
+                import.meta.env.VITE_PROJECT_DIR || (await join(await downloadDir(), 'pyra-4'));
+            const fileContent = await readTextFile(await join('config', 'config.json'), {
+                dir: projectDirPath,
             });
-
-            socket.on('disconnect', () => {
-                console.log('socket is disconnected');
-            });
-
-            return () => {
-                socket.off('connect');
-                socket.off('disconnect');
-            };
-        }
-    }, [socket]);
-
-    useEffect(() => {
-        if (socket !== undefined) {
-            socket.on('new_log_lines', (newLogLines: string[]) => {
-                if (logLines && logLines.length > 0) {
-                    const currentLastLogTime: any = last(logLines)?.slice(0, 26);
-                    const newLastLogTime: any = last(newLogLines)?.slice(0, 26);
-                    if (newLastLogTime > currentLastLogTime) {
-                        dispatch(reduxUtils.logsActions.set(newLogLines));
-                    }
-                } else {
-                    dispatch(reduxUtils.logsActions.set(newLogLines));
-                }
-            });
-
-            return () => {
-                socket.off('new_log_lines');
-            };
-        }
-    }, [socket, logLines]);
-  
-    useEffect(() => {
-        if (socket !== undefined) {
-            socket.on('new_core_state', (newCoreState: customTypes.coreState) => {
-                dispatch(reduxUtils.coreStateActions.set(newCoreState));
-            });
-
-            return () => {
-                socket.off('new_core_state');
-            };
-        }
-    }, [socket]);
-
-    
-    const [rawConfigFileContent, _] = fetchUtils.useFileWatcher('config\\config.json', 10);
-
-    // load config when config/config.json has changed
-    // check, whether a reload is required
-    useEffect(() => {
-        if (rawConfigFileContent !== undefined) {
-            const newCentralConfig: customTypes.config = JSON.parse(rawConfigFileContent);
-            const diffsToCentral = diff(centralConfig, newCentralConfig);
-            if (diffsToCentral === undefined) {
-                return;
-            }
+            const newCentralConfig: customTypes.config = JSON.parse(fileContent);
+            const diffsToCentral = diff(centralConfig, newCentralConfig) || [];
 
             // measurement_decision.cli_decision_result is allowed to change
             // changing any other property from somewhere else than the UI requires
@@ -124,10 +58,24 @@ export default function Dashboard() {
                     .message('The config.json file has been modified. Reload required', 'PyRa 4 UI')
                     .then(() => window.location.reload());
             } else {
-                dispatch(reduxUtils.configActions.setConfigsPartial(newCentralConfig));
+                dispatch(reduxUtils.configActions.setConfigs(newCentralConfig));
             }
         }
-    }, [rawConfigFileContent]);*/
+
+        // fetch these files once right away
+        fetchStateFile();
+        fetchLogFile();
+
+        const interval1 = setInterval(fetchStateFile, 5000);
+        const interval2 = setInterval(fetchLogFile, 5000);
+        const interval3 = setInterval(fetchConfigFile, 5000);
+
+        return () => {
+            clearInterval(interval1);
+            clearInterval(interval2);
+            clearInterval(interval3);
+        };
+    }, [dispatch]);
 
     const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const enclosureControlsIsVisible =

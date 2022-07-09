@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { minBy } from 'lodash';
 
 export default function MessageQueue() {
-    const { toasts, pausedAt } = useToasterStore();
+    const { toasts } = useToasterStore();
 
     useEffect(() => {
         if (toasts.length > 4) {
