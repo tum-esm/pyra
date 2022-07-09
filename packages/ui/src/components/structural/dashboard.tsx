@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { reduxUtils } from '../../utils';
+import { fetchUtils, reduxUtils } from '../../utils';
 import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
 import { structuralComponents } from '../../components';
 import { customTypes } from '../../custom-types';
 import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
-import { readTextFile } from '@tauri-apps/api/fs';
-import { join, documentDir } from '@tauri-apps/api/path';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -17,29 +15,17 @@ export default function Dashboard() {
 
     useEffect(() => {
         async function fetchStateFile() {
-            const projectDirPath =
-                import.meta.env.VITE_PROJECT_DIR || (await join(await documentDir(), 'pyra-4'));
-            const fileContent = await readTextFile(await join('runtime-data', 'state.json'), {
-                dir: projectDirPath,
-            });
+            const fileContent = await fetchUtils.getFileContent('runtime-data/state.json');
             dispatch(reduxUtils.coreStateActions.set(JSON.parse(fileContent)));
         }
 
         async function fetchLogFile() {
-            const projectDirPath =
-                import.meta.env.VITE_PROJECT_DIR || (await join(await documentDir(), 'pyra-4'));
-            const fileContent = await readTextFile(await join('logs', 'debug.log'), {
-                dir: projectDirPath,
-            });
+            const fileContent = await fetchUtils.getFileContent('logs/debug.log');
             dispatch(reduxUtils.logsActions.set(fileContent.split('\n')));
         }
 
         async function fetchConfigFile() {
-            const projectDirPath =
-                import.meta.env.VITE_PROJECT_DIR || (await join(await documentDir(), 'pyra-4'));
-            const fileContent = await readTextFile(await join('config', 'config.json'), {
-                dir: projectDirPath,
-            });
+            const fileContent = await fetchUtils.getFileContent('config/config.json');
             const newCentralConfig: customTypes.config = JSON.parse(fileContent);
             const diffsToCentral = diff(centralConfig, newCentralConfig) || [];
 

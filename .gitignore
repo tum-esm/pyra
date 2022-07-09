@@ -8,6 +8,7 @@ __pycache__
 config/config.json
 config/config.original.json
 config/*.lock
+.env
 
 # logs
 *.log

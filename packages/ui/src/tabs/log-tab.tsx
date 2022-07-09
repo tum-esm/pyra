@@ -4,7 +4,7 @@ import { fetchUtils, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
 import toast from 'react-hot-toast';
 import { drop } from 'lodash';
-import { documentDir, join } from '@tauri-apps/api/path';
+import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
 
 function RenderedLogLine(props: { l: string }) {
     if (props.l == 'More log lines inside logs folder ...') {
@@ -62,9 +62,22 @@ export default function LogTab() {
     const dispatch = reduxUtils.useTypedDispatch();
 
     async function openLogsFolder() {
-        const projectDirPath =
-            import.meta.env.VITE_PROJECT_DIR || (await join(await documentDir(), 'pyra-4'));
-        await shell.open(await join(projectDirPath, 'logs'));
+        let baseDir = await documentDir();
+        let filePath = await join('pyra-4', 'logs', 'debug.log');
+        switch (import.meta.env.VITE_ENVIRONMENT) {
+            // on my personal machine
+            case 'development-moritz':
+                filePath = await join('research', filePath);
+                break;
+
+            // on the R19 laptop the Documents folder is a network directory
+            // hence, we cannot use that one since some script do not run there
+            case 'development-R19':
+                baseDir = await downloadDir();
+                break;
+        }
+
+        await shell.open(await join(baseDir, filePath));
     }
 
     async function archiveLogs() {
