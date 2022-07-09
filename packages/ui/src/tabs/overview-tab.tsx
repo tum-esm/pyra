@@ -1,3 +1,4 @@
+import { findLastIndex, slice } from 'lodash';
 import { reduxUtils } from '../utils';
 
 export default function OverviewTab() {
@@ -7,17 +8,28 @@ export default function OverviewTab() {
     // TODO: Implement measurement state
     // TODO: Implement plc readings + close cover
     // TODO: Implement system stats
-    // TODO: Implement last iterations logs
+
+    const allInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
+    const currentInfoLogLines =
+        allInfoLogLines === undefined ? ['...'] : allInfoLogLines.slice(-10);
 
     return (
-        <div className={'flex-col-center w-full h-full overflow-y-scroll gap-y-4 py-4 px-6'}>
+        <div className={'flex-col-center w-full h-full overflow-y-scroll gap-y-4 pt-8 pb-12 px-6'}>
             <div>pyra core state </div>
             <div>measurement state </div>
             <div className="w-full h-px bg-gray-300" />
             <div>plc readings, force close cover button </div>
             <div>system stats: {JSON.stringify(coreState)}</div>
             <div className="w-full h-px bg-gray-300" />
-            <div>last iterations info logs</div>
+            <div className="w-full font-medium">Last 10 log lines:</div>
+            <pre
+                className={
+                    'w-full !px-4 !py-2 !mb-0 overflow-x-auto bg-white flex-grow ' +
+                    'border border-gray-250 shadow-sm rounded-md -mt-2'
+                }
+            >
+                <code className="w-full h-full !text-xs">{currentInfoLogLines.join('\n')}</code>
+            </pre>
         </div>
     );
 }
