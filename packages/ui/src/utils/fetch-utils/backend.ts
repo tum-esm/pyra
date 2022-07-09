@@ -1,10 +1,10 @@
 import { Command, ChildProcess } from '@tauri-apps/api/shell';
 import { customTypes } from '../../custom-types';
-import { downloadDir, join } from '@tauri-apps/api/path';
+import { documentDir, join } from '@tauri-apps/api/path';
 
 async function callCLI(args: string[]) {
     let projectDirPath =
-        import.meta.env.VITE_PROJECT_DIR || (await join(await downloadDir(), 'pyra-4'));
+        import.meta.env.VITE_PROJECT_DIR || (await join(await documentDir(), 'pyra-4'));
     let pyraCLIEntrypoint = await join('packages', 'cli', 'main.py');
 
     return await new Command(import.meta.env.VITE_PYTHON_VARIANT, [pyraCLIEntrypoint, ...args], {

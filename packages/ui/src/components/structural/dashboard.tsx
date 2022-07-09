@@ -6,7 +6,7 @@ import { customTypes } from '../../custom-types';
 import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
 import { readTextFile } from '@tauri-apps/api/fs';
-import { join, downloadDir } from '@tauri-apps/api/path';
+import { join, documentDir } from '@tauri-apps/api/path';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -18,7 +18,7 @@ export default function Dashboard() {
     useEffect(() => {
         async function fetchStateFile() {
             const projectDirPath =
-                import.meta.env.VITE_PROJECT_DIR || (await join(await downloadDir(), 'pyra-4'));
+                import.meta.env.VITE_PROJECT_DIR || (await join(await documentDir(), 'pyra-4'));
             const fileContent = await readTextFile(await join('runtime-data', 'state.json'), {
                 dir: projectDirPath,
             });
@@ -27,7 +27,7 @@ export default function Dashboard() {
 
         async function fetchLogFile() {
             const projectDirPath =
-                import.meta.env.VITE_PROJECT_DIR || (await join(await downloadDir(), 'pyra-4'));
+                import.meta.env.VITE_PROJECT_DIR || (await join(await documentDir(), 'pyra-4'));
             const fileContent = await readTextFile(await join('logs', 'debug.log'), {
                 dir: projectDirPath,
             });
@@ -36,7 +36,7 @@ export default function Dashboard() {
 
         async function fetchConfigFile() {
             const projectDirPath =
-                import.meta.env.VITE_PROJECT_DIR || (await join(await downloadDir(), 'pyra-4'));
+                import.meta.env.VITE_PROJECT_DIR || (await join(await documentDir(), 'pyra-4'));
             const fileContent = await readTextFile(await join('config', 'config.json'), {
                 dir: projectDirPath,
             });
