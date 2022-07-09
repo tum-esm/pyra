@@ -19,7 +19,7 @@ class SystemChecks:
         average_system_load = OSInterface.get_average_system_load()
         logger.info(
             "The average system load in the past 1/5/15 "
-            + f"minutes was {'/'.join([str(round(l)) + '%' for l in average_system_load])}."
+            + f"minutes was {'/'.join([str(round(l*100)) + '%' for l in average_system_load])}."
         )
 
         memory_usage = OSInterface.get_memory_usage()
@@ -41,9 +41,9 @@ class SystemChecks:
             {
                 "os_state": {
                     "average_system_load": {
-                        "last_1_minute": round(average_system_load[0]),
-                        "last_5_minutes": round(average_system_load[1]),
-                        "last_15_minutes": round(average_system_load[2]),
+                        "last_1_minute": round(average_system_load[0] * 100),
+                        "last_5_minutes": round(average_system_load[1] * 100),
+                        "last_15_minutes": round(average_system_load[2] * 100),
                     },
                     "cpu_usage": cpu_usage,
                     "memory_usage": memory_usage,
