@@ -13,6 +13,8 @@ function RenderedLogLine(props: { l: string }) {
     if (props.l.includes('EXCEPTION')) {
         return <pre className="font-bold text-red-700">{props.l}</pre>;
     }
+    // FIXME: Debug traceback rendering
+    // TODO: Highlight traceback lines with
 
     let l = props.l.replace(/\n/g, '');
 
@@ -34,6 +36,8 @@ function RenderedLogLine(props: { l: string }) {
                 textStyle = 'text-red-700 font-bold';
                 break;
         }
+
+        // TODO: Highlight "starting mainloop" with a background color
 
         return (
             <>
@@ -97,6 +101,10 @@ export default function LogTab() {
     }
 
     const logsAreLoading = debugLogLines === undefined || infoLogLines === undefined;
+
+    // TODO: Make min-window-size larger
+    // TODO: Add "live" | "paused" toggle
+    // TODO: Toggle between log times: "2 iterations" | "3 minutes" | "15 minutes" | "60 minutes"
 
     return (
         <div className={'flex-col w-full h-full pt-4 '}>

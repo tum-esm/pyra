@@ -68,7 +68,7 @@ class ExceptionEmailClient:
         if not config["error_email"]["notify_recipients"]:
             return
 
-        # TODO: add instance name
+        # TODO: Add pyra-4 commit sha.
 
         with open(f"{PROJECT_DIR}/logs/info.log") as f:
             latest_log_lines = f.readlines()

@@ -11,13 +11,13 @@ function VariableBlock(props: {
     buttonsAreDisabled: boolean;
     actions: (
         | {
-            label: string;
-            callback: (value: number) => void;
-            spinner: boolean;
-            variant: 'numeric';
-            initialValue: number;
-            postfix?: string;
-        }
+              label: string;
+              callback: (value: number) => void;
+              spinner: boolean;
+              variant: 'numeric';
+              initialValue: number;
+              postfix?: string;
+          }
         | { label: string; callback: () => void; spinner: boolean; variant?: undefined }
     )[];
 }) {
@@ -75,6 +75,8 @@ export default function ControlTab() {
     const pyraIsInTestMode = reduxUtils.useTypedSelector(
         (s) => s.config.central?.general.test_mode
     );
+
+    // TODO: Improve row alignment -> align buttons and corresp. values + connecting line
 
     const dispatch = reduxUtils.useTypedDispatch();
     const setConfigsPartial = (c: customTypes.partialConfig) =>
