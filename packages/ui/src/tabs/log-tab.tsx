@@ -4,6 +4,7 @@ import { fetchUtils, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
 import toast from 'react-hot-toast';
 import { drop } from 'lodash';
+import { downloadDir, join } from '@tauri-apps/api/path';
 
 function RenderedLogLine(props: { l: string }) {
     if (props.l == 'More log lines inside logs folder ...') {
@@ -61,7 +62,9 @@ export default function LogTab() {
     const dispatch = reduxUtils.useTypedDispatch();
 
     async function openLogsFolder() {
-        await shell.open(`${import.meta.env.VITE_PROJECT_DIR}/logs`);
+        const projectDirPath =
+            import.meta.env.VITE_PROJECT_DIR || (await join(await downloadDir(), 'pyra-4'));
+        await shell.open(await join(projectDirPath, 'logs'));
     }
 
     async function archiveLogs() {
