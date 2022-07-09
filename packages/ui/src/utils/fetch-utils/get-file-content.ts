@@ -3,11 +3,11 @@ import { BaseDirectory, join } from '@tauri-apps/api/path';
 
 async function getFileContent(filePath: string) {
     let baseDir = BaseDirectory.Document;
-    filePath = await join('pyra-4', ...filePath.split('/'));
+    let absoluteFilePath = await join('pyra-4', ...filePath.split('/'));
     switch (import.meta.env.VITE_ENVIRONMENT) {
         // on my personal machine
         case 'development-moritz':
-            filePath = await join('research', filePath);
+            absoluteFilePath = await join('research', 'pyra', ...filePath.split('/'));
             break;
 
         // on the R19 laptop the Documents folder is a network directory
@@ -16,7 +16,8 @@ async function getFileContent(filePath: string) {
             baseDir = BaseDirectory.Download;
             break;
     }
-    return await readTextFile(filePath, { dir: baseDir });
+    console.debug(`Reading file: "${absoluteFilePath}" in directory "${baseDir}"`);
+    return await readTextFile(absoluteFilePath, { dir: baseDir });
 }
 
 export default getFileContent;
