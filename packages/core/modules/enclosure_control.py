@@ -29,8 +29,6 @@ class EnclosureControl:
 
         self._initialize()
 
-        
-
     def _initialize(self):
         self.plc_interface = PLCInterface(self.config)
         self.plc_interface.set_auto_temperature(True)
