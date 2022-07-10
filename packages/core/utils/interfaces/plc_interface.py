@@ -113,39 +113,38 @@ class PLCInterface:
         self.specification = PLC_SPECIFICATION_VERSIONS[config["tum_plc"]["version"]]
 
         self.plc = snap7.client.Client()
-        self.connect()
+        self._connect()
 
     # CONNECTION
 
     def update_config(self, new_config: dict):
         if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
             logger.debug("PLC ip has changed, reconnecting now")
-            self.disconnect()
+            self._disconnect()
 
         self.config = new_config
-        if not self.is_connected():
-            self.connect()
+        if not self._is_connected():
+            self._connect()
 
-    # TODO: make method private
-    def connect(self) -> None:
+    def _connect(self) -> None:
         """
         Connects to the PLC Snap7
         """
         self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
 
-        if not self.is_connected():
+        if not self._is_connected():
             raise PLCError("Could not connect to PLC")
 
-    def disconnect(self) -> None:
+    def _disconnect(self) -> None:
         """
         Disconnects from the PLC Snap7
         """
         self.plc.disconnect()
 
-        if self.is_connected():
+        if self._is_connected():
             raise PLCError("Could not disconnect from PLC")
 
-    def is_connected(self) -> bool:
+    def _is_connected(self) -> bool:
         """
         Checks whether PLC is connected
         """
