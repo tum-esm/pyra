@@ -54,6 +54,7 @@ def _write_plc_reset():
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
+                # TODO: Write update to StateInterface
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
         success_handler("Ok")
@@ -67,6 +68,7 @@ def wait_until_cover_is_at_angle(plc_interface: PLCInterface, new_cover_angle, t
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
+            # TODO: Write update to StateInterface
             break
 
         if running_time > timeout:
@@ -173,6 +175,17 @@ def _write_plc_power_computer(state):
 def plc_command_group():
     pass
 
+
+# TODO: rename "write-reset" to "reset"
+# TODO: rename "write-move-cover" to "set-cover-angle"
+# TODO: rename "write-close-cover" to "close-cover"
+# TODO: rename "write-sync-to-tracker" to "set-sync-to-tracker"
+# TODO: rename "write-auto-temperature" to "set-auto-temperature"
+# TODO: rename "write-power-heater" to "set-heater-power"
+# TODO: rename "write-power-camera" to "set-camera-power"
+# TODO: rename "write-power-router" to "set-router-power"
+# TODO: rename "write-power-spectrometer" to "set-spectrometer-power"
+# TODO: rename "write-power-computer" to "set-computer-power"
 
 plc_command_group.add_command(_read_plc, name="read")
 plc_command_group.add_command(_write_plc_reset, name="write-reset")

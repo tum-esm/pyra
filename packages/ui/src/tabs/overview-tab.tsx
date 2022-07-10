@@ -1,4 +1,3 @@
-import { findLastIndex, slice } from 'lodash';
 import { reduxUtils } from '../utils';
 
 export default function OverviewTab() {
@@ -12,6 +11,8 @@ export default function OverviewTab() {
     const allInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
     const currentInfoLogLines =
         allInfoLogLines === undefined ? ['...'] : allInfoLogLines.slice(-10);
+
+    // TODO: Improve rendering of log lines (reuse rendering logs from logs tab)
 
     return (
         <div className={'flex-col-center w-full h-full overflow-y-scroll gap-y-4 pt-8 pb-12 px-6'}>
