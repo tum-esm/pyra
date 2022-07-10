@@ -3,6 +3,7 @@ import snap7
 import time
 import os
 from packages.core.utils import Logger
+from packages.core.utils.interfaces.state_interface import StateInterface
 from .plc_specification import PLC_SPECIFICATION_VERSIONS
 
 logger = Logger(origin="pyra.core.enclosure-control")
@@ -205,7 +206,6 @@ class PLCInterface:
             ),
         )
 
-    # TODO: figure out why "with_timeout" doesn't work on windows
     def _sleep_while_cpu_is_busy(self) -> None:
         time.sleep(0.2)
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
@@ -263,31 +263,33 @@ class PLCInterface:
         self._write_bool(self.specification.power.camera, new_state)
         if self._read_bool(self.specification.power.camera) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update({"enclosure_plc_readings": {"power": {"camera": new_state}}})
 
     def set_power_computer(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.computer, new_state)
         if self._read_bool(self.specification.power.computer) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update({"enclosure_plc_readings": {"power": {"computer": new_state}}})
 
     def set_power_heater(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.heater, new_state)
         if self._read_bool(self.specification.power.heater) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update({"enclosure_plc_readings": {"power": {"heater": new_state}}})
 
     def set_power_router(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.router, new_state)
         if self._read_bool(self.specification.power.router) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update({"enclosure_plc_readings": {"power": {"router": new_state}}})
 
     def set_power_spectrometer(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.spectrometer, new_state)
         if self._read_bool(self.specification.power.spectrometer) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update(
+            {"enclosure_plc_readings": {"power": {"spectrometer": new_state}}}
+        )
 
     # PLC.CONTROL SETTERS
 
@@ -295,25 +297,33 @@ class PLCInterface:
         self._write_bool(self.specification.control.sync_to_tracker, new_state)
         if self._read_bool(self.specification.control.sync_to_tracker) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update(
+            {"enclosure_plc_readings": {"control": {"sync_to_tracker": new_state}}}
+        )
 
     def set_manual_control(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_control, new_state)
         if self._read_bool(self.specification.control.manual_control) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update(
+            {"enclosure_plc_readings": {"control": {"manual_control": new_state}}}
+        )
 
     def set_auto_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.auto_temp_mode, new_state)
         if self._read_bool(self.specification.control.auto_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update(
+            {"enclosure_plc_readings": {"control": {"auto_temp_mode": new_state}}}
+        )
 
     def set_manual_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_temp_mode, new_state)
         if self._read_bool(self.specification.control.manual_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
-        # TODO: Write update to StateInterface
+        StateInterface.update(
+            {"enclosure_plc_readings": {"control": {"manual_temp_mode": new_state}}}
+        )
 
     def reset(self) -> None:
         self._write_bool(self.specification.control.reset, False)

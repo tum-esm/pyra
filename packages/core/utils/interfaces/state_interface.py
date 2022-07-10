@@ -18,7 +18,27 @@ VBDSD_IMG_DIR = os.path.join(RUNTIME_DATA_PATH, "vbdsd")
 
 
 # TODO: Rename as CoreStateInterface
-# TODO: Make Interface responses statically typed
+
+
+def update_dict_rec(old_object, new_object):
+    if old_object is None or new_object is None:
+        return new_object
+
+    if type(old_object) == dict:
+        assert type(new_object) == dict
+        updated_dict = {}
+        for key in old_object.keys():
+            if key in new_object:
+                updated_dict[key] = update_dict_rec(old_object[key], new_object[key])
+            else:
+                updated_dict[key] = old_object[key]
+        return updated_dict
+    else:
+        if type(old_object) in [int, float]:
+            assert type(new_object) in [int, float]
+        else:
+            assert type(old_object) == type(new_object)
+        return new_object
 
 
 class StateInterface:
@@ -63,6 +83,6 @@ class StateInterface:
         with open(STATE_FILE_PATH, "r") as f:
             current_state = json.load(f)
 
-        new_state = {**current_state, **update}
+        new_state = update_dict_rec(current_state, update)
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)

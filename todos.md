@@ -3,7 +3,7 @@
 -   [x] Add live/paused logic
 -   [x] Improve row alignment in control tab
 -   [x] Remove unused UIcode (sort config keys, ...)
--   [ ] In PLCInterface write updates to StateInterface
+-   [x] In PLCInterface write updates to StateInterface
 -   [ ] In cli.plc write updates to StateInterface
 -   [ ] When over 70 minutes archive logs older than 60 minutes
 -   [x] remove triggers.max_sun_elevation as not needed

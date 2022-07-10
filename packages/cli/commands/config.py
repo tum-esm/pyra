@@ -20,23 +20,25 @@ success_handler = lambda text: click.echo(click.style(text, fg="green"))
 ConfigValidation.logging_handler = error_handler
 
 
-def update_dict_rec(old_dict, new_dict):
-    if old_dict is None or new_dict is None:
-        return new_dict
-    if type(old_dict) not in [int, float] and type(new_dict) not in [int, float]:
-        assert type(old_dict) == type(
-            new_dict
-        ), f"{old_dict} = {type(old_dict)} -> {new_dict} = {type(new_dict)}"
-    if type(old_dict) == dict:
+def update_dict_rec(old_object, new_object):
+    if old_object is None or new_object is None:
+        return new_object
+
+    if type(old_object) == dict:
+        assert type(new_object) == dict
         updated_dict = {}
-        for key in old_dict.keys():
-            if key in new_dict:
-                updated_dict[key] = update_dict_rec(old_dict[key], new_dict[key])
+        for key in old_object.keys():
+            if key in new_object:
+                updated_dict[key] = update_dict_rec(old_object[key], new_object[key])
             else:
-                updated_dict[key] = old_dict[key]
+                updated_dict[key] = old_object[key]
         return updated_dict
     else:
-        return new_dict
+        if type(old_object) in [int, float]:
+            assert type(new_object) in [int, float]
+        else:
+            assert type(old_object) == type(new_object)
+        return new_object
 
 
 @click.command(help="Read the current config.json file.")
