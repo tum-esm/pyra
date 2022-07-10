@@ -47,13 +47,14 @@ class SunTracking:
             self.stop_sun_tracking_automation()
             return
 
+        # TODO: This triggers to fast if cycle duration is too low
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
-        if self.ct_application_running():
-            if not self.valdiate_tracker_position():
-                logger.info("CamTracker Motor Position is over threshold.")
-                logger.info("Stop CamTracker. Preparing for reinitialization.")
-                self.stop_sun_tracking_automation()
+        # if self.ct_application_running():
+        #    if not self.valdiate_tracker_position():
+        #        logger.info("CamTracker Motor Position is over threshold.")
+        #        logger.info("Stop CamTracker. Preparing for reinitialization.")
+        #        self.stop_sun_tracking_automation()
 
     def ct_application_running(self):
         """Checks if CamTracker is already running by identifying the window.

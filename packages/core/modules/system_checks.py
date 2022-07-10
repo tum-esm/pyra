@@ -20,7 +20,7 @@ class SystemChecks:
         # On my (Moritz) mac it returns 15-20% system load when the activity monitor
         # returns about 5-10% of system load.
         average_system_load = OSInterface.get_average_system_load()
-        logger.info(
+        logger.debug(
             "The average system load in the past 1/5/15 "
             + f"minutes was {'/'.join([str(round(l*100)) + '%' for l in average_system_load])}."
         )
