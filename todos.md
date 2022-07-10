@@ -7,9 +7,8 @@
 -   [ ] In cli.plc write updates to StateInterface
 -   [ ] When over 70 minutes archive logs older than 60 minutes
 -   [x] remove triggers.max_sun_elevation as not needed
--   [ ] Add commit sha and pyra version to emails
+-   [x] Add commit sha and pyra version to emails
 -   [ ] Add last 2 iterations log lines to emails
--   [ ] Style log lines in emails
 -   [ ] Add teardown routine cli.core
 -   [ ] Add time logic
 -   [ ] Test stuff (incl. time-toggle performance) on enclosure

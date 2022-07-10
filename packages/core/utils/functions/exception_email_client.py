@@ -89,7 +89,6 @@ class ExceptionEmailClient:
         commit_sha = get_commit_sha()
 
         # TODO: Use last 2 iterations debug logs
-        # TODO: Style loglines: spacing + light coloring of debug lines
 
         with open(f"{PROJECT_DIR}/logs/info.log") as f:
             latest_log_lines = f.readlines()
