@@ -16,8 +16,6 @@ CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
 
-# TODO: Refactor for new PLC code structure
-
 
 def get_plc_interface():
     config = ConfigInterface.read()
@@ -35,7 +33,7 @@ def get_plc_interface():
 
 @click.command(help="Read current state from plc.")
 @click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
-def _read_plc(no_indent):
+def _read(no_indent):
     plc_interface = get_plc_interface()
     if plc_interface is not None:
         plc_readings = plc_interface.read()
@@ -43,7 +41,7 @@ def _read_plc(no_indent):
 
 
 @click.command(help="Run plc function 'reset()'")
-def _write_plc_reset():
+def _reset():
     plc_interface = get_plc_interface()
     if plc_interface is not None:
         plc_interface.reset()
@@ -79,7 +77,7 @@ def wait_until_cover_is_at_angle(plc_interface: PLCInterface, new_cover_angle, t
 
 @click.command(help="Run plc function 'move_cover()'")
 @click.argument("angle")
-def _write_plc_move_cover(angle):
+def _set_cover_angle(angle):
     plc_interface = get_plc_interface()
     if plc_interface is not None:
         new_cover_angle = int("".join([c for c in str(angle) if c.isnumeric() or c == "."]))
@@ -105,7 +103,7 @@ def enable_user_control_in_config():
 
 
 @click.command(help="Run plc function 'force_cover_close()'")
-def _write_plc_close_cover():
+def _close_cover():
     enable_user_control_in_config()
 
     plc_interface = get_plc_interface()
@@ -131,43 +129,43 @@ def set_boolean_plc_state(
 
 @click.command(help="Run plc function 'set_sync_to_tracker()'")
 @click.argument("state")
-def _write_plc_sync_to_tracker(state):
+def _set_sync_to_tracker(state):
     set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
 
 
 @click.command(help="Run plc function 'set_auto_temperature()'")
 @click.argument("state")
-def _write_plc_auto_temperature(state):
+def _set_auto_temperature(state):
     set_boolean_plc_state(state, lambda p: p.set_auto_temperature)
 
 
 @click.command(help="Run plc function 'set_power_heater()'")
 @click.argument("state")
-def _write_plc_power_heater(state):
+def _set_heater_power(state):
     set_boolean_plc_state(state, lambda p: p.set_power_heater)
 
 
 @click.command(help="Run plc function 'set_power_heater()'")
 @click.argument("state")
-def _write_plc_power_camera(state):
+def _set_camera_power(state):
     set_boolean_plc_state(state, lambda p: p.set_power_camera)
 
 
 @click.command(help="Run plc function 'set_power_router()'")
 @click.argument("state")
-def _write_plc_power_router(state):
+def _set_router_power(state):
     set_boolean_plc_state(state, lambda p: p.set_power_router)
 
 
 @click.command(help="Run plc function 'set_power_spectrometer()'")
 @click.argument("state")
-def _write_plc_power_spectrometer(state):
+def _set_spectrometer_power(state):
     set_boolean_plc_state(state, lambda p: p.set_power_spectrometer)
 
 
 @click.command(help="Run plc function 'set_power_computer()'")
 @click.argument("state")
-def _write_plc_power_computer(state):
+def _set_computer_power(state):
     set_boolean_plc_state(state, lambda p: plc_command_group.set_power_computer)
 
 
@@ -176,25 +174,14 @@ def plc_command_group():
     pass
 
 
-# TODO: rename "write-reset" to "reset"
-# TODO: rename "write-move-cover" to "set-cover-angle"
-# TODO: rename "write-close-cover" to "close-cover"
-# TODO: rename "write-sync-to-tracker" to "set-sync-to-tracker"
-# TODO: rename "write-auto-temperature" to "set-auto-temperature"
-# TODO: rename "write-power-heater" to "set-heater-power"
-# TODO: rename "write-power-camera" to "set-camera-power"
-# TODO: rename "write-power-router" to "set-router-power"
-# TODO: rename "write-power-spectrometer" to "set-spectrometer-power"
-# TODO: rename "write-power-computer" to "set-computer-power"
-
-plc_command_group.add_command(_read_plc, name="read")
-plc_command_group.add_command(_write_plc_reset, name="write-reset")
-plc_command_group.add_command(_write_plc_move_cover, name="write-move-cover")
-plc_command_group.add_command(_write_plc_close_cover, name="write-close-cover")
-plc_command_group.add_command(_write_plc_sync_to_tracker, name="write-sync-to-tracker")
-plc_command_group.add_command(_write_plc_auto_temperature, name="write-auto-temperature")
-plc_command_group.add_command(_write_plc_power_heater, name="write-power-heater")
-plc_command_group.add_command(_write_plc_power_camera, name="write-power-camera")
-plc_command_group.add_command(_write_plc_power_router, name="write-power-router")
-plc_command_group.add_command(_write_plc_power_spectrometer, name="write-power-spectrometer")
-plc_command_group.add_command(_write_plc_power_computer, name="write-power-computer")
+plc_command_group.add_command(_read, name="read")
+plc_command_group.add_command(_reset, name="reset")
+plc_command_group.add_command(_set_cover_angle, name="set-cover-angle")
+plc_command_group.add_command(_close_cover, name="close-cover")
+plc_command_group.add_command(_set_sync_to_tracker, name="set-sync-to-tracker")
+plc_command_group.add_command(_set_auto_temperature, name="set-auto-temperature")
+plc_command_group.add_command(_set_heater_power, name="set-heater-power")
+plc_command_group.add_command(_set_camera_power, name="set-camera-power")
+plc_command_group.add_command(_set_router_power, name="set-router-power")
+plc_command_group.add_command(_set_spectrometer_power, name="set-spectrometer-power")
+plc_command_group.add_command(_set_computer_power, name="set-computer-power")
