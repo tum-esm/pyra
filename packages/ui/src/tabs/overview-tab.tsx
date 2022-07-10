@@ -1,4 +1,5 @@
 import { reduxUtils } from '../utils';
+import { essentialComponents } from '../components';
 
 export default function OverviewTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
@@ -12,8 +13,6 @@ export default function OverviewTab() {
     const currentInfoLogLines =
         allInfoLogLines === undefined ? ['...'] : allInfoLogLines.slice(-10);
 
-    // TODO: Improve rendering of log lines (reuse rendering logs from logs tab)
-
     return (
         <div className={'flex-col-center w-full h-full overflow-y-scroll gap-y-4 pt-8 pb-12 px-6'}>
             <div>pyra core state </div>
@@ -25,11 +24,15 @@ export default function OverviewTab() {
             <div className="w-full font-medium">Last 10 log lines:</div>
             <pre
                 className={
-                    'w-full !px-4 !py-2 !mb-0 overflow-x-auto bg-white flex-grow ' +
+                    'w-full py-2 !mb-0 overflow-x-auto bg-white flex-grow ' +
                     'border border-gray-250 shadow-sm rounded-md -mt-2'
                 }
             >
-                <code className="w-full h-full !text-xs">{currentInfoLogLines.join('\n')}</code>
+                <code className="w-full h-full !text-xs">
+                    {currentInfoLogLines.map((l, i) => (
+                        <essentialComponents.LogLine key={`${i} ${l}`} text={l} />
+                    ))}
+                </code>
             </pre>
         </div>
     );

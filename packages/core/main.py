@@ -21,7 +21,7 @@ def run():
     StateInterface.initialize()
     _CONFIG = ConfigInterface.read()
 
-    logger.info(f"started mainloop inside process with PID {os.getpid()}")
+    logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
 
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_CONFIG),
@@ -36,7 +36,7 @@ def run():
 
     while True:
         start_time = time.time()
-        logger.info("Starting Iteration")
+        logger.info("Starting iteration")
 
         try:
             _CONFIG = ConfigInterface.read()
@@ -85,7 +85,7 @@ def run():
         except Exception as e:
             logger.exception(e)
 
-        logger.info("Ending Iteration")
+        logger.info("Ending iteration")
 
         # wait rest of loop time
         elapsed_time = time.time() - start_time
