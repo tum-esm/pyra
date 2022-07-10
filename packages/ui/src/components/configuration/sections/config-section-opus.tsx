@@ -16,31 +16,31 @@ export default function ConfigSectionOpus() {
     return (
         <>
             <configurationComponents.ConfigElementText
-                key2="em27_ip"
+                title="EM27 IP"
                 value={localSectionConfig.em27_ip}
                 setValue={(v: string) => update({ opus: { em27_ip: v } })}
                 oldValue={centralSectionConfig.em27_ip}
             />
             <configurationComponents.ConfigElementText
-                key2="executable_path"
+                title="Executable Path"
                 value={localSectionConfig.executable_path}
                 setValue={(v: string) => update({ opus: { executable_path: v } })}
                 oldValue={centralSectionConfig.executable_path}
             />
             <configurationComponents.ConfigElementText
-                key2="executable_parameter"
+                title="Executable Parameter"
                 value={localSectionConfig.executable_parameter}
                 setValue={(v: string) => update({ opus: { executable_parameter: v } })}
                 oldValue={centralSectionConfig.executable_parameter}
             />
             <configurationComponents.ConfigElementText
-                key2="experiment_path"
+                title="Experiment Path"
                 value={localSectionConfig.experiment_path}
                 setValue={(v: string) => update({ opus: { experiment_path: v } })}
                 oldValue={centralSectionConfig.experiment_path}
             />
             <configurationComponents.ConfigElementText
-                key2="macro_path"
+                title="Macro Path"
                 value={localSectionConfig.macro_path}
                 setValue={(v: string) => update({ opus: { macro_path: v } })}
                 oldValue={centralSectionConfig.macro_path}

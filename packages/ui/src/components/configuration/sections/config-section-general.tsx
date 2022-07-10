@@ -16,19 +16,19 @@ export default function ConfigSectionGeneral() {
     return (
         <>
             <configurationComponents.ConfigElementText
-                key2="seconds_per_core_interval"
+                title="Seconds Per Core Interval"
                 value={localSectionConfig.seconds_per_core_interval}
                 setValue={(v: number) => update({ general: { seconds_per_core_interval: v } })}
                 oldValue={centralSectionConfig.seconds_per_core_interval}
             />
             <configurationComponents.ConfigElementToggle
-                key2="test_mode"
+                title="Test Mode"
                 value={localSectionConfig.test_mode}
                 setValue={(v: boolean) => update({ general: { test_mode: v } })}
                 oldValue={centralSectionConfig.test_mode}
             />
             <configurationComponents.ConfigElementText
-                key2="station_id"
+                title="Station ID"
                 value={localSectionConfig.station_id}
                 setValue={(v: string) => update({ general: { station_id: v } })}
                 oldValue={centralSectionConfig.station_id}

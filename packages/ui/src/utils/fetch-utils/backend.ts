@@ -30,12 +30,6 @@ async function callCLI(args: string[]) {
 }
 
 const backend = {
-    readInfoLogs: async (): Promise<ChildProcess> => {
-        return await callCLI(['logs', 'read', '--level', 'INFO']);
-    },
-    readDebugLogs: async (): Promise<ChildProcess> => {
-        return await callCLI(['logs', 'read', '--level', 'DEBUG']);
-    },
     archiveLogs: async (): Promise<ChildProcess> => {
         return await callCLI(['logs', 'archive']);
     },
@@ -56,12 +50,6 @@ const backend = {
     },
     updateConfig: async (newConfig: customTypes.partialConfig): Promise<ChildProcess> => {
         return await callCLI(['config', 'update', JSON.stringify(newConfig)]);
-    },
-    getState: async (): Promise<ChildProcess> => {
-        return await callCLI(['state', 'get']);
-    },
-    readFromPLC: async (): Promise<ChildProcess> => {
-        return await callCLI(['plc', 'read']);
     },
     writeToPLC: async (command: string[]): Promise<ChildProcess> => {
         return await callCLI(['plc', ...command]);

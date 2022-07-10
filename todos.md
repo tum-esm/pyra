@@ -4,7 +4,7 @@
 -   [ ] Add time logic
 -   [ ] Check time performance on enclosure
 -   [ ] Improve row alignment in control tab
--   [ ] Remove unused code (sort config keys, ...)
+-   [x] Remove unused UIcode (sort config keys, ...)
 -   [ ] In PLCInterface write updates to StateInterface
 -   [ ] In cli.plc write updates to StateInterface
 -   [ ] When over 70 minutes archive logs older than 60 minutes

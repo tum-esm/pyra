@@ -17,25 +17,25 @@ export default function ConfigSectionErrorEmail() {
     return (
         <>
             <configurationComponents.ConfigElementToggle
-                key2="notify_recipients"
+                title="Notify Recipients"
                 value={localSectionConfig.notify_recipients}
                 setValue={(v: boolean) => update({ error_email: { notify_recipients: v } })}
                 oldValue={centralSectionConfig.notify_recipients}
             />
             <configurationComponents.ConfigElementText
-                key2="sender_address"
+                title="Sender Address"
                 value={localSectionConfig.sender_address}
                 setValue={(v: string) => update({ error_email: { sender_address: v } })}
                 oldValue={centralSectionConfig.sender_address}
             />
             <configurationComponents.ConfigElementText
-                key2="sender_password"
+                title="Sender Password"
                 value={localSectionConfig.sender_password}
                 setValue={(v: string) => update({ error_email: { sender_password: v } })}
                 oldValue={centralSectionConfig.sender_password}
             />
             <configurationComponents.ConfigElementText
-                key2="recipients"
+                title="Recipients"
                 value={localSectionConfig.recipients}
                 setValue={(v: string) => update({ error_email: { recipients: v } })}
                 oldValue={centralSectionConfig.recipients}

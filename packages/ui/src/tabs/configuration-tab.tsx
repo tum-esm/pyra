@@ -6,14 +6,14 @@ import toast from 'react-hot-toast';
 import { diff } from 'deep-diff';
 import { set } from 'lodash';
 
-const sectionKeys: customTypes.configSectionKey[] = [
-    'general',
-    'opus',
-    'camtracker',
-    'error_email',
-    'measurement_triggers',
-    'tum_plc',
-    'vbdsd',
+const sections: { key: customTypes.configSectionKey; label: string }[] = [
+    { key: 'general', label: 'General' },
+    { key: 'opus', label: 'OPUS' },
+    { key: 'camtracker', label: 'CamTracker' },
+    { key: 'error_email', label: 'Error Email' },
+    { key: 'measurement_triggers', label: 'Triggers' },
+    { key: 'tum_plc', label: 'TUM PLC' },
+    { key: 'vbdsd', label: 'VBDSD' },
 ];
 export default function ConfigurationTab() {
     const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
@@ -77,24 +77,24 @@ export default function ConfigurationTab() {
                     'flex flex-col py-3 z-10 w-44 overflow-y-scroll'
                 }
             >
-                {sectionKeys.map((key1, i) => (
+                {sections.map((section) => (
                     <button
-                        key={key1}
-                        onClick={() => setActiveKey(key1)}
+                        key={section.key}
+                        onClick={() => setActiveKey(section.key)}
                         className={
                             'px-6 py-2.5 text-base font-semibold text-left ' +
                             'flex-row-center gap-x-2 ' +
-                            (key1 === activeKey
+                            (section.key === activeKey
                                 ? 'bg-blue-200 text-blue-950 '
                                 : 'text-gray-500 hover:bg-gray-150 hover:text-gray-700 ')
                         }
                     >
-                        {functionalUtils.capitalizeConfigKey(key1)}
+                        {section.label}
                         <div className="flex-grow" />
                         <div
                             className={
                                 'w-2 h-2 bg-blue-400 rounded-full ' +
-                                (key1 === activeKey ? 'bg-blue-400 ' : 'bg-transparent')
+                                (section.key === activeKey ? 'bg-blue-400 ' : 'bg-transparent')
                             }
                         />
                     </button>

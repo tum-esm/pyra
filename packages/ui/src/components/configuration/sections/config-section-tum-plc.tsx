@@ -63,7 +63,7 @@ export default function ConfigSectionTumPlc() {
             </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-gray-300" />
             <configurationComponents.ConfigElementText
-                key2="min_power_elevation"
+                title="Min. Power Elevation"
                 value={localSectionConfig.min_power_elevation}
                 setValue={(v: number) => update({ tum_plc: { min_power_elevation: v } })}
                 oldValue={
@@ -73,13 +73,13 @@ export default function ConfigSectionTumPlc() {
                 }
             />
             <configurationComponents.ConfigElementText
-                key2="ip"
+                title="IP"
                 value={localSectionConfig.ip}
                 setValue={(v: string) => update({ tum_plc: { ip: v } })}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.ip : 'null'}
             />
             <configurationComponents.ConfigElementText
-                key2="version"
+                title="Version"
                 value={localSectionConfig.version}
                 setValue={(v: any) => update({ tum_plc: { version: v } })}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.version : 'null'}

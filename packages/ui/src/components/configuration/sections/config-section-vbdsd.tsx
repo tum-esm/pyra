@@ -65,14 +65,14 @@ export default function ConfigSectionVbdsd() {
             </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-gray-300" />
             <configurationComponents.ConfigElementText
-                key2="camera_id"
+                title="Camera ID"
                 value={localSectionConfig.camera_id}
                 setValue={(v: number) => update({ vbdsd: { camera_id: v } })}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.camera_id : 'null'}
                 numeric
             />
             <configurationComponents.ConfigElementText
-                key2="min_sun_elevation"
+                title="Min. Sun Elevation"
                 value={localSectionConfig.min_sun_elevation}
                 setValue={(v: number) => update({ vbdsd: { min_sun_elevation: v } })}
                 oldValue={
@@ -81,7 +81,7 @@ export default function ConfigSectionVbdsd() {
                 numeric
             />
             <configurationComponents.ConfigElementText
-                key2="seconds_per_interval"
+                title="Seconds Per Interval"
                 value={localSectionConfig.seconds_per_interval}
                 setValue={(v: any) => update({ vbdsd: { seconds_per_interval: v } })}
                 oldValue={
@@ -92,7 +92,7 @@ export default function ConfigSectionVbdsd() {
                 numeric
             />
             <configurationComponents.ConfigElementText
-                key2="evaluation_size"
+                title="Evaluation Size"
                 value={localSectionConfig.evaluation_size}
                 setValue={(v: any) => update({ vbdsd: { evaluation_size: v } })}
                 oldValue={
@@ -101,7 +101,7 @@ export default function ConfigSectionVbdsd() {
                 numeric
             />
             <configurationComponents.ConfigElementText
-                key2="measurement_threshold"
+                title="Measurement Threshold"
                 value={localSectionConfig.measurement_threshold}
                 setValue={(v: any) => update({ vbdsd: { measurement_threshold: v } })}
                 oldValue={
@@ -112,7 +112,7 @@ export default function ConfigSectionVbdsd() {
                 numeric
             />
             <configurationComponents.ConfigElementToggle
-                key2="save_images"
+                title="Save Images"
                 value={localSectionConfig.save_images}
                 setValue={(v: boolean) => update({ vbdsd: { save_images: v } })}
                 oldValue={centralSectionConfig?.save_images === true}

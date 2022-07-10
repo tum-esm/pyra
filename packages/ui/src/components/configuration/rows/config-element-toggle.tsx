@@ -1,15 +1,15 @@
 import { configurationComponents, essentialComponents } from '../..';
 
 export default function ConfigElementToggle(props: {
-    key2: string;
+    title: string;
     value: boolean;
     oldValue: boolean;
     setValue(v: boolean): void;
 }) {
-    const { key2, value, oldValue, setValue } = props;
+    const { title, value, oldValue, setValue } = props;
 
     return (
-        <configurationComponents.LabeledRow key2={key2} modified={value !== oldValue}>
+        <configurationComponents.LabeledRow title={title} modified={value !== oldValue}>
             <essentialComponents.Toggle
                 value={value ? 'yes' : 'no'}
                 values={['yes', 'no']}

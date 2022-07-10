@@ -16,31 +16,31 @@ export default function ConfigSectionCamtracker() {
     return (
         <>
             <configurationComponents.ConfigElementText
-                key2="config_path"
+                title="Config Path"
                 value={localSectionConfig.config_path}
                 setValue={(v: string) => update({ camtracker: { config_path: v } })}
                 oldValue={centralSectionConfig.config_path}
             />
             <configurationComponents.ConfigElementText
-                key2="executable_path"
+                title="Executable Path"
                 value={localSectionConfig.executable_path}
                 setValue={(v: string) => update({ camtracker: { executable_path: v } })}
                 oldValue={centralSectionConfig.executable_path}
             />
             <configurationComponents.ConfigElementText
-                key2="executable_path"
+                title="Executable Path"
                 value={localSectionConfig.executable_path}
                 setValue={(v: string) => update({ camtracker: { executable_path: v } })}
                 oldValue={centralSectionConfig.executable_path}
             />
             <configurationComponents.ConfigElementText
-                key2="learn_az_elev_path"
+                title='"learn_az_elev" Path'
                 value={localSectionConfig.learn_az_elev_path}
                 setValue={(v: string) => update({ camtracker: { learn_az_elev_path: v } })}
                 oldValue={centralSectionConfig.learn_az_elev_path}
             />
             <configurationComponents.ConfigElementText
-                key2="motor_offset_threshold"
+                title="Motor Offset Threshold"
                 value={localSectionConfig.motor_offset_threshold}
                 setValue={(v: number) => update({ camtracker: { motor_offset_threshold: v } })}
                 oldValue={centralSectionConfig.motor_offset_threshold}
