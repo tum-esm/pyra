@@ -69,7 +69,7 @@ class OpusMeasurement:
         self.automated_process_handling()
 
         if self.__is_em27_responsive:
-            logger.info("Successful ping to EM27.")
+            logger.debug("Successful ping to EM27.")
         else:
             logger.info("EM27 seems to be disconnected.")
 
