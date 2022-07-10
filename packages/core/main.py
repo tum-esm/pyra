@@ -65,6 +65,7 @@ def run():
                 module.run(_CONFIG)
         except Exception as e:
             new_exception = e
+            logger.exception(new_exception)
 
         try:
             new_current_exceptions = [*current_exceptions]
@@ -73,7 +74,6 @@ def run():
                 if type(new_exception).__name__ not in current_exceptions:
                     new_current_exceptions.append(type(new_exception).__name__)
                     ExceptionEmailClient.handle_occured_exception(_CONFIG, new_exception)
-                    logger.exception(new_exception)
             else:
                 if len(current_exceptions) > 0:
                     new_current_exceptions = []
