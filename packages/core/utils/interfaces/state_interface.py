@@ -31,10 +31,11 @@ class StateInterface:
         os.mkdir(RUNTIME_DATA_PATH)
         os.mkdir(VBDSD_IMG_DIR)
 
+        # TODO: rename "automation_should_be_running" to "measurements_should_be_running"
         # write initial state.json file
         new_state = {
             "vbdsd_indicates_good_conditions": None,
-            "automation_should_be_running": False,
+            "measurements_should_be_running": False,
             "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
             "os_state": {
                 "average_system_load": {

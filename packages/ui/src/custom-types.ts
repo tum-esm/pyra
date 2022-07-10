@@ -233,13 +233,13 @@ export namespace customTypes {
 
     export type coreState = {
         vbdsd_indicates_good_conditions: boolean | null;
-        automation_should_be_running: boolean;
+        measurements_should_be_running: boolean;
         enclosure_plc_readings: enclosurePlcReadings;
         os_state: OSState;
     };
 
     export type partialCoreState = {
-        automation_should_be_running?: boolean;
+        measurements_should_be_running?: boolean;
         enclosure_plc_readings?: partialEnclosurePlcReadings;
     };
 }

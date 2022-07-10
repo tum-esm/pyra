@@ -9,7 +9,7 @@ export default function OverviewTab() {
         (s) => s.config.central?.measurement_decision
     );
     const automaticMeasurementDecisionResult = reduxUtils.useTypedSelector(
-        (s) => s.coreState.body?.automation_should_be_running
+        (s) => s.coreState.body?.measurements_should_be_running
     );
     let measurementDecisionResult: boolean | undefined = undefined;
     switch (measurementDecision?.mode) {
@@ -24,8 +24,6 @@ export default function OverviewTab() {
             break;
     }
 
-    // TODO: Implement core state
-    // TODO: Implement measurement state
     // TODO: Implement plc readings + close cover
     // TODO: Implement system stats
 

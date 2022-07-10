@@ -28,16 +28,18 @@ class MeasurementConditions:
         logger.debug(f"Decision mode for measurements is: {decision['mode']}.")
 
         if decision["mode"] == "manual":
-            automation_should_be_running = decision["manual_decision_result"]
+            measurements_should_be_running = decision["manual_decision_result"]
         if decision["mode"] == "cli":
-            automation_should_be_running = decision["cli_decision_result"]
+            measurements_should_be_running = decision["cli_decision_result"]
         if decision["mode"] == "automatic":
-            automation_should_be_running = self._get_automatic_decision()
+            measurements_should_be_running = self._get_automatic_decision()
 
         logger.info(
-            f"Measurements should be running is set to: {automation_should_be_running}."
+            f"Measurements should be running is set to: {measurements_should_be_running}."
         )
-        StateInterface.update({"automation_should_be_running": automation_should_be_running})
+        StateInterface.update(
+            {"measurements_should_be_running": measurements_should_be_running}
+        )
 
     def _get_automatic_decision(self) -> bool:
         triggers = self._CONFIG["measurement_triggers"]

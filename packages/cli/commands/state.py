@@ -23,8 +23,9 @@ def _get_state(no_indent):
         try:
             state_content = json.load(f)
             assert isinstance(state_content, dict)
-            assert isinstance(state_content["automation_should_be_running"], bool)
+            assert isinstance(state_content["measurements_should_be_running"], bool)
             assert isinstance(state_content["enclosure_plc_readings"], dict)
+            assert isinstance(state_content["os_state"], dict)
         except:
             raise AssertionError("file not in a valid json format")
 

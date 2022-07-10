@@ -74,9 +74,11 @@ class EnclosureControl:
             raise PLCError("Could not find an active PLC IP connection.")
 
         # check for automation state flank changes
-        automation_should_be_running = StateInterface.read()["automation_should_be_running"]
-        if self.last_cycle_automation_status != automation_should_be_running:
-            if automation_should_be_running:
+        measurements_should_be_running = StateInterface.read()[
+            "measurements_should_be_running"
+        ]
+        if self.last_cycle_automation_status != measurements_should_be_running:
+            if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
                 if self.plc_state.state.reset_needed:
                     self.plc_interface.reset()
@@ -92,9 +94,9 @@ class EnclosureControl:
                 self.wait_for_cover_closing(throw_error=False)
 
         # save the automation status for the next run
-        self.last_cycle_automation_status = automation_should_be_running
+        self.last_cycle_automation_status = measurements_should_be_running
 
-        if (not automation_should_be_running) & (not self.plc_state.state.rain):
+        if (not measurements_should_be_running) & (not self.plc_state.state.rain):
             if not self.plc_state.state.cover_closed:
                 logger.info("Cover is still open. Trying to close again.")
                 self.force_cover_close()

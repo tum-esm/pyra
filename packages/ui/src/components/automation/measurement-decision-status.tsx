@@ -96,7 +96,7 @@ export default function MeasurementDecisionStatus() {
         (s) => s.config.central?.measurement_decision
     );
     const automaticMeasurementDecisionResult = reduxUtils.useTypedSelector(
-        (s) => s.coreState.body?.automation_should_be_running
+        (s) => s.coreState.body?.measurements_should_be_running
     );
     const dispatch = reduxUtils.useTypedDispatch();
     const setConfigsPartial = (c: customTypes.partialConfig) =>
