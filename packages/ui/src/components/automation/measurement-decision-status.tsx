@@ -48,8 +48,8 @@ function MeasurementTriggerInfo() {
                         <>
                             {measurementTriggers.consider_time
                                 ? `from ${formatTime(
-                                    measurementTriggers.start_time
-                                )} to ${formatTime(measurementTriggers.stop_time)}`
+                                      measurementTriggers.start_time
+                                  )} to ${formatTime(measurementTriggers.stop_time)}`
                                 : 'ignored'}
                         </>,
                     ],
@@ -119,9 +119,23 @@ export default function MeasurementDecisionStatus() {
 
     async function updateMeasurementDecisionMode(mode: 'automatic' | 'manual' | 'cli') {
         setLoading(true);
-        const update = {
-            measurement_decision: { mode, manual_decision_result: false },
-        };
+        let update: customTypes.partialConfig;
+        if (mode === 'manual') {
+            // when switching from cli/automatic to manual, the
+            // measurements should continue running/not running
+            update = {
+                measurement_decision: {
+                    mode,
+                    manual_decision_result: automaticMeasurementDecisionResult || false,
+                },
+            };
+        } else {
+            // when switching to automatic the current measurement decision will be kept anyways
+            // when switching to cli mode, the decision in the config will be used right away
+            update = {
+                measurement_decision: { mode },
+            };
+        }
         const result = await fetchUtils.backend.updateConfig(update);
         if (result.stdout.includes('Updated config file')) {
             setConfigsPartial(update);
@@ -136,7 +150,6 @@ export default function MeasurementDecisionStatus() {
 
     async function updateManualMeasurementDecisionResult(decisionResult: boolean) {
         setLoading(true);
-        // TODO: take automaticMeasurementDecisionResult into account
         const update = { measurement_decision: { manual_decision_result: decisionResult } };
         const result = await fetchUtils.backend.updateConfig(update);
         if (result.stdout.includes('Updated config file')) {
@@ -201,8 +214,8 @@ export default function MeasurementDecisionStatus() {
                                 loading
                                     ? 'gray'
                                     : measurementDecision.manual_decision_result
-                                        ? 'red'
-                                        : 'green'
+                                    ? 'red'
+                                    : 'green'
                             }
                             disabled={loading}
                         >
