@@ -10,11 +10,14 @@ const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Overview');
+    const [initialFetchTriggered, setInitialFetchTriggered] = useState(false);
 
     const dispatch = reduxUtils.useTypedDispatch();
     const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const enclosureControlsIsVisible =
         centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
+
+    const fetchLogUpdates = reduxUtils.useTypedSelector((s) => s.logs.fetchUpdates);
 
     useEffect(() => {
         async function fetchStateFile() {
@@ -23,13 +26,17 @@ export default function Dashboard() {
         }
 
         async function fetchLogFile() {
-            const fileContent = await fetchUtils.getFileContent('logs/debug.log');
-            dispatch(reduxUtils.logsActions.set(fileContent.split('\n')));
+            if (fetchLogUpdates) {
+                const fileContent = await fetchUtils.getFileContent('logs/debug.log');
+                dispatch(reduxUtils.logsActions.set(fileContent.split('\n')));
+            }
         }
 
-        // fetch these files once right away
-        fetchStateFile();
-        fetchLogFile();
+        if (!initialFetchTriggered) {
+            fetchStateFile();
+            fetchLogFile();
+            setInitialFetchTriggered(true);
+        }
 
         const interval1 = setInterval(fetchStateFile, 5000);
         const interval2 = setInterval(fetchLogFile, 5000);
@@ -38,7 +45,7 @@ export default function Dashboard() {
             clearInterval(interval1);
             clearInterval(interval2);
         };
-    }, [dispatch]);
+    }, [dispatch, fetchLogUpdates, initialFetchTriggered]);
 
     useEffect(() => {
         async function fetchConfigFile() {

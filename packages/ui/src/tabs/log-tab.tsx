@@ -11,6 +11,9 @@ export default function LogTab() {
 
     const debugLogLines = reduxUtils.useTypedSelector((s) => s.logs.debugLines);
     const infoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
+    const fetchUpdates = reduxUtils.useTypedSelector((s) => s.logs.fetchUpdates);
+    const setFetchUpdates = (f: boolean) => dispatch(reduxUtils.logsActions.setFetchUpdates(f));
+
     const dispatch = reduxUtils.useTypedDispatch();
 
     async function openLogsFolder() {
@@ -51,12 +54,12 @@ export default function LogTab() {
     const logsAreLoading = debugLogLines === undefined || infoLogLines === undefined;
 
     // TODO: Make min-window-size larger
-    // TODO: Add "live" | "paused" toggle
     // TODO: Toggle between log times: "2 iterations" | "3 minutes" | "15 minutes" | "60 minutes"
 
     return (
         <div className={'flex-col w-full h-full pt-4 '}>
             <div className="px-6 mb-4 flex-row-center gap-x-2">
+                <essentialComponents.LiveSwitch isLive={fetchUpdates} toggle={setFetchUpdates} />
                 <essentialComponents.Toggle
                     value={logLevel}
                     setValue={(s: any) => setLogLevel(s)}

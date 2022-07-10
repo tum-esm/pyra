@@ -7,6 +7,7 @@ export const logsSlice = createSlice({
     initialState: {
         infoLines: undefined,
         debugLines: undefined,
+        fetchUpdates: true,
     },
     reducers: {
         set: (state: customTypes.reduxStateLogs, action: { payload: string[] }) => {
@@ -15,6 +16,9 @@ export const logsSlice = createSlice({
             state.infoLines = functionalUtils
                 .reduceLogLines(nonEmptyLines)
                 .filter((l) => !l.includes(' - DEBUG - '));
+        },
+        setFetchUpdates: (state: customTypes.reduxStateLogs, action: { payload: boolean }) => {
+            state.fetchUpdates = action.payload;
         },
     },
 });

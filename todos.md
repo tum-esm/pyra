@@ -1,6 +1,6 @@
 # Tasks
 
--   [ ] Add live/paused logic
+-   [x] Add live/paused logic
 -   [ ] Add time logic
 -   [ ] Check time performance on enclosure
 -   [ ] Improve row alignment in control tab
@@ -13,6 +13,9 @@
 -   [ ] Add last 2 iterations log lines to emails
 -   [ ] Style log lines in emails
 -   [ ] Add teardown routine cli.core
+-   [ ] Test stuff on enclosure
+-   [ ] Merge into main
+-   [ ] Create 4.0.2 Release
 
 # Add Issues for
 

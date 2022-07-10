@@ -7,17 +7,11 @@ export default function Ping(props: { state: boolean | undefined }) {
         color = 'bg-red-500';
     }
     return (
-        <div className="relative h-2.5 w-2.5">
+        <div className="relative w-2 h-2">
             {props.state === true && (
-                <div
-                    className={
-                        'absolute w-full h-full rounded-full animate-ping ' + color
-                    }
-                />
+                <div className={'absolute w-full h-full rounded-full animate-ping ' + color} />
             )}
-            <div
-                className={'absolute w-full h-full rounded-full opacity-70 ' + color}
-            />
+            <div className={'absolute w-full h-full rounded-full opacity-70 ' + color} />
         </div>
     );
 }

@@ -219,7 +219,7 @@ export default function OverviewTab() {
                 className={
                     'w-full !mb-0 bg-white flex-grow text-xs ' +
                     'border border-gray-250 shadow-sm rounded-md -mt-2 ' +
-                    'font-mono '
+                    'font-mono overflow-hidden'
                 }
             >
                 {currentInfoLogLines.map((l, i) => (

@@ -1,4 +1,5 @@
 import Button from './button';
+import LiveSwitch from './live-switch';
 import LogLine from './log-line';
 import NumericButton from './numeric-button';
 import Ping from './ping';
@@ -9,6 +10,7 @@ import Spinner from './spinner';
 
 export default {
     Button,
+    LiveSwitch,
     LogLine,
     NumericButton,
     Ping,

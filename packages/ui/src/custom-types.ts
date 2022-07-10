@@ -8,6 +8,7 @@ export namespace customTypes {
     export type reduxStateLogs = {
         infoLines: string[] | undefined;
         debugLines: string[] | undefined;
+        fetchUpdates: boolean;
     };
     export type reduxStateCoreState = { body: coreState | undefined };
     export type reduxStateCoreProcess = {
