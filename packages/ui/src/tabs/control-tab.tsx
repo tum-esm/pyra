@@ -5,6 +5,20 @@ import { customTypes } from '../custom-types';
 import { ICONS } from '../assets';
 import toast from 'react-hot-toast';
 
+function renderBoolValue(value: boolean | null) {
+    if (value === null) {
+        return '-';
+    }
+    return value ? 'Yes' : 'No';
+}
+
+function renderStringValue(value: string | number | null, postfix: string) {
+    if (value === null) {
+        return '-';
+    }
+    return `${value} ${postfix}`;
+}
+
 function VariableBlock(props: {
     label: string;
     variables: { key: string; value: string | number }[];
@@ -23,7 +37,7 @@ function VariableBlock(props: {
 }) {
     return (
         <div className="relative flex overflow-hidden elevated-panel">
-            <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-gray-300 rounded-l flex-row-center">
+            <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-gray-100 border-r border-gray-200 rounded-l flex-row-center">
                 {props.label}
             </div>
             <div className="flex-grow py-3 pl-4 pr-3 flex-row-left gap-x-4">
@@ -299,7 +313,7 @@ export default function ControlTab() {
                         loading PLC state
                     </div>
                 )}
-                {!pyraIsInTestMode && coreState !== undefined && (
+                {pyraIsInTestMode && coreState !== undefined && (
                     <>
                         <VariableBlock
                             label="Errors"
@@ -307,21 +321,21 @@ export default function ControlTab() {
                             variables={[
                                 {
                                     key: 'Reset needed',
-                                    value: coreState.enclosure_plc_readings.state.reset_needed
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.state.reset_needed
+                                    ),
                                 },
                                 {
                                     key: 'Motor failed',
-                                    value: coreState.enclosure_plc_readings.state.motor_failed
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.state.motor_failed
+                                    ),
                                 },
                                 {
                                     key: 'UPS alert',
-                                    value: coreState.enclosure_plc_readings.state.ups_alert
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.state.ups_alert
+                                    ),
                                 },
                             ]}
                             actions={[
@@ -334,15 +348,15 @@ export default function ControlTab() {
                             variables={[
                                 {
                                     key: 'Cover is closed',
-                                    value: coreState.enclosure_plc_readings.state.cover_closed
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.state.cover_closed
+                                    ),
                                 },
                                 {
                                     key: 'Rain detected',
-                                    value: coreState.enclosure_plc_readings.state.rain
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.state.rain
+                                    ),
                                 },
                             ]}
                             actions={[
@@ -359,13 +373,16 @@ export default function ControlTab() {
                             variables={[
                                 {
                                     key: 'Current cover angle',
-                                    value: `${coreState.enclosure_plc_readings.actors.current_angle} °`,
+                                    value: renderStringValue(
+                                        coreState.enclosure_plc_readings.actors.current_angle,
+                                        '°'
+                                    ),
                                 },
                                 {
                                     key: 'Sync to CamTracker',
-                                    value: coreState.enclosure_plc_readings.control.sync_to_tracker
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.control.sync_to_tracker
+                                    ),
                                 },
                             ]}
                             actions={[
@@ -393,21 +410,30 @@ export default function ControlTab() {
                             variables={[
                                 {
                                     key: 'Temperature',
-                                    value: `${coreState.enclosure_plc_readings.sensors.temperature} °C`,
+                                    value: renderStringValue(
+                                        coreState.enclosure_plc_readings.sensors.temperature,
+                                        ' °C'
+                                    ),
                                 },
                                 {
                                     key: 'Humidity',
-                                    value: `${coreState.enclosure_plc_readings.sensors.humidity} %`,
+                                    value: renderStringValue(
+                                        coreState.enclosure_plc_readings.sensors.humidity,
+                                        '%'
+                                    ),
                                 },
                                 {
                                     key: 'Fan Speed',
-                                    value: `${coreState.enclosure_plc_readings.actors.fan_speed} %`,
+                                    value: renderStringValue(
+                                        coreState.enclosure_plc_readings.actors.fan_speed,
+                                        '%'
+                                    ),
                                 },
                                 {
                                     key: 'Auto temperature',
-                                    value: coreState.enclosure_plc_readings.control.auto_temp_mode
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.control.auto_temp_mode
+                                    ),
                                 },
                             ]}
                             actions={[
@@ -426,33 +452,33 @@ export default function ControlTab() {
                             variables={[
                                 {
                                     key: 'Camera Power',
-                                    value: coreState.enclosure_plc_readings.power.camera
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.power.camera
+                                    ),
                                 },
                                 {
                                     key: 'Router Power',
-                                    value: coreState.enclosure_plc_readings.power.router
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.power.router
+                                    ),
                                 },
                                 {
                                     key: 'Spectrometer Power',
-                                    value: coreState.enclosure_plc_readings.power.spectrometer
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.power.spectrometer
+                                    ),
                                 },
                                 {
                                     key: 'Computer Power',
-                                    value: coreState.enclosure_plc_readings.power.computer
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.power.computer
+                                    ),
                                 },
                                 {
                                     key: 'Heater power',
-                                    value: coreState.enclosure_plc_readings.power.heater
-                                        ? 'Yes'
-                                        : 'No',
+                                    value: renderBoolValue(
+                                        coreState.enclosure_plc_readings.power.heater
+                                    ),
                                 },
                             ]}
                             actions={[
