@@ -4,7 +4,7 @@ from typing import Callable
 import click
 import os
 from packages.core.modules.enclosure_control import CoverError
-from packages.core.utils import ConfigInterface, PLCInterface, PLCError
+from packages.core.utils import StateInterface, ConfigInterface, PLCInterface, PLCError
 from packages.core.utils import with_filelock
 
 dir = os.path.dirname
@@ -52,7 +52,9 @@ def _reset():
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
-                # TODO: Write update to StateInterface
+                StateInterface.update(
+                    {"enclosure_plc_readings": {"state": {"reset_needed": False}}}
+                )
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
         success_handler("Ok")
@@ -66,7 +68,14 @@ def wait_until_cover_is_at_angle(plc_interface: PLCInterface, new_cover_angle, t
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
-            # TODO: Write update to StateInterface
+            StateInterface.update(
+                {
+                    "enclosure_plc_readings": {
+                        "actors": {"current_angle": new_cover_angle},
+                        "state": {"cover_closed": new_cover_angle == 0},
+                    }
+                }
+            )
             break
 
         if running_time > timeout:
