@@ -8,9 +8,10 @@
 -   [ ] When over 70 minutes archive logs older than 60 minutes
 -   [x] remove triggers.max_sun_elevation as not needed
 -   [x] Add commit sha and pyra version to emails
--   [ ] Add last 2 iterations log lines to emails
+-   [x] Add last 2 iterations log lines to emails
 -   [ ] Add teardown routine cli.core
 -   [ ] Add time logic
+
 -   [ ] Test stuff (incl. time-toggle performance) on enclosure
 -   [ ] Merge into main
 -   [ ] Create 4.0.2 Release

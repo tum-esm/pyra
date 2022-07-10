@@ -88,17 +88,17 @@ class ExceptionEmailClient:
         pyra_version = get_pyra_version()
         commit_sha = get_commit_sha()
 
-        # TODO: Use last 2 iterations debug logs
-
         with open(f"{PROJECT_DIR}/logs/info.log") as f:
             latest_log_lines = f.readlines()
 
-        log_line_count = len(latest_log_lines)
-        if log_line_count > 20:
-            latest_log_lines = latest_log_lines[-20:]
-        for index, line in enumerate(latest_log_lines):
-            line_number = log_line_count - len(latest_log_lines) + 1 + index
-            latest_log_lines[index] = f"{line_number} | {line}"
+        log_lines_in_email: list[str] = []
+        included_iterations = 0
+        for l in latest_log_lines[::-1]:
+            if ("Starting iteration" in l) or ("Starting mainloop" in l):
+                included_iterations += 1
+            log_lines_in_email.append(l)
+            if included_iterations == 2:
+                break
 
         tb = "\n".join(traceback.format_exception(exception))
         logs = "".join(latest_log_lines)
