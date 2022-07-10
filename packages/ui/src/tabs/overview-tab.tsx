@@ -1,6 +1,9 @@
-import { reduxUtils } from '../utils';
+import { fetchUtils, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
 import ICONS from '../assets/icons';
+import { useState } from 'react';
+import { customTypes } from '../custom-types';
+import toast from 'react-hot-toast';
 
 export default function OverviewTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
@@ -25,7 +28,42 @@ export default function OverviewTab() {
             break;
     }
 
-    // TODO: Implement plc readings + close cover
+    const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
+    const dispatch = reduxUtils.useTypedDispatch();
+    const setCoreStatePartial = (c: customTypes.partialCoreState) =>
+        dispatch(reduxUtils.coreStateActions.setPartial(c));
+
+    // reused function from control-tab
+    async function runPlcWriteCommand(
+        command: string[],
+        setLoading: (l: boolean) => void,
+        stateUpdateIfSuccessful: customTypes.partialEnclosurePlcReadings
+    ) {
+        setLoading(true);
+        const result = await fetchUtils.backend.writeToPLC(command);
+        if (result.stdout.replace(/[\n\s]*/g, '') !== 'Ok') {
+            if (result.code === 0) {
+                toast.error(`Could not write to PLC: ${result.stdout}`);
+            } else {
+                toast.error('Could not write to PLC - details in console');
+                console.error(`Could not write to PLC, processResults = ${JSON.stringify(result)}`);
+            }
+            setLoading(false);
+            throw '';
+        } else {
+            setCoreStatePartial({ enclosure_plc_readings: stateUpdateIfSuccessful });
+            setLoading(false);
+        }
+    }
+
+    // reused function from control-tab
+    async function closeCover() {
+        await runPlcWriteCommand(['close-cover'], setIsLoadingCloseCover, {
+            state: { cover_closed: true },
+            actors: { current_angle: 0 },
+        });
+    }
+
     // TODO: Implement system stats
 
     const allInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
@@ -107,8 +145,9 @@ export default function OverviewTab() {
                         ))}
                         <essentialComponents.Button
                             variant="red"
-                            onClick={() => {}}
+                            onClick={closeCover}
                             className="w-full mt-1"
+                            spinner={isLoadingCloseCover}
                         >
                             force cover close
                         </essentialComponents.Button>

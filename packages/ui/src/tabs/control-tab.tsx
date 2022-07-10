@@ -268,8 +268,6 @@ export default function ControlTab() {
         return <></>;
     }
 
-    console.log({ p: coreState });
-
     return (
         <div className={'w-full relative px-6 py-6 flex-col-left gap-y-4'}>
             <div className="flex-row-left gap-x-2">
