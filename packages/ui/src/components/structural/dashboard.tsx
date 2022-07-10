@@ -12,6 +12,9 @@ export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Overview');
 
     const dispatch = reduxUtils.useTypedDispatch();
+    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
+    const enclosureControlsIsVisible =
+        centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
 
     useEffect(() => {
         async function fetchStateFile() {
@@ -24,6 +27,20 @@ export default function Dashboard() {
             dispatch(reduxUtils.logsActions.set(fileContent.split('\n')));
         }
 
+        // fetch these files once right away
+        fetchStateFile();
+        fetchLogFile();
+
+        const interval1 = setInterval(fetchStateFile, 5000);
+        const interval2 = setInterval(fetchLogFile, 5000);
+
+        return () => {
+            clearInterval(interval1);
+            clearInterval(interval2);
+        };
+    }, [dispatch]);
+
+    useEffect(() => {
         async function fetchConfigFile() {
             const fileContent = await fetchUtils.getFileContent('config/config.json');
             const newCentralConfig: customTypes.config = JSON.parse(fileContent);
@@ -44,28 +61,23 @@ export default function Dashboard() {
                     .message('The config.json file has been modified. Reload required', 'PyRa 4 UI')
                     .then(() => window.location.reload());
             } else {
-                dispatch(reduxUtils.configActions.setConfigs(newCentralConfig));
+                dispatch(
+                    reduxUtils.configActions.setConfigsPartial({
+                        measurement_decision: {
+                            cli_decision_result:
+                                newCentralConfig.measurement_decision.cli_decision_result,
+                        },
+                    })
+                );
             }
         }
 
-        // fetch these files once right away
-        fetchStateFile();
-        fetchLogFile();
-
-        const interval1 = setInterval(fetchStateFile, 5000);
-        const interval2 = setInterval(fetchLogFile, 5000);
         const interval3 = setInterval(fetchConfigFile, 5000);
 
         return () => {
-            clearInterval(interval1);
-            clearInterval(interval2);
             clearInterval(interval3);
         };
-    }, [dispatch]);
-
-    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
-    const enclosureControlsIsVisible =
-        centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
+    }, [dispatch, centralConfig]);
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">

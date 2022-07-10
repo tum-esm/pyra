@@ -15,8 +15,6 @@ class ExceptionEmailClient:
         sender_password = config["error_email"]["sender_password"]
         recipients = config["error_email"]["recipients"].replace(" ", "").split(",")
 
-        print(sender_email, sender_password, recipients)
-
         message = MIMEMultipart("alternative")
         message["Subject"] = subject
         message["From"] = f"PYRA Technical User <{sender_email}>"

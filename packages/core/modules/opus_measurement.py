@@ -251,8 +251,6 @@ class OpusMeasurement:
         assert self.opus_application_running()
         assert self.__test_dde_connection
 
-        print("__is_em27_connected: ", self.__is_em27_responsive)
-
         self.load_experiment()
         time.sleep(2)
 
@@ -260,8 +258,6 @@ class OpusMeasurement:
         time.sleep(10)
 
         self.stop_macro()
-
-        print("__is_em27_connected: ", self.__is_em27_responsive)
 
     def low_sun_angle_present(self):
         """OPUS closes at the end of the day to start up fresh the next day."""

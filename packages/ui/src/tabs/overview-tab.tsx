@@ -64,8 +64,6 @@ export default function OverviewTab() {
         });
     }
 
-    // TODO: Implement system stats
-
     const allInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
     const currentInfoLogLines =
         allInfoLogLines === undefined ? ['...'] : allInfoLogLines.slice(-10);
@@ -136,7 +134,7 @@ export default function OverviewTab() {
                 <div className="flex flex-row items-start justify-start w-full">
                     <div
                         className={
-                            'flex-col items-start justify-start pr-2 text-sm gap-y-1 h-full ' +
+                            'flex-col items-start justify-start pr-3 text-sm gap-y-1 h-full ' +
                             'border-r border-gray-300 min-w-[16rem]'
                         }
                     >
@@ -176,21 +174,21 @@ export default function OverviewTab() {
                         <essentialComponents.Button
                             variant="red"
                             onClick={closeCover}
-                            className="w-full mt-1"
+                            className="w-full mt-1.5"
                             spinner={isLoadingCloseCover}
                         >
                             force cover close
                         </essentialComponents.Button>
                     </div>
-                    <div className="flex-col items-start justify-start pl-2 text-sm">
+                    <div className="flex-col items-start justify-start pl-3 text-sm">
                         {[
-                            {
-                                label: 'Used disk space',
-                                value: coreState.os_state.filled_disk_space_fraction,
-                            },
                             {
                                 label: 'Last boot time',
                                 value: coreState.os_state.last_boot_time,
+                            },
+                            {
+                                label: 'Disk space usage',
+                                value: coreState.os_state.filled_disk_space_fraction,
                             },
                             {
                                 label: 'CPU cores usage',
@@ -201,8 +199,8 @@ export default function OverviewTab() {
                                 value: coreState.os_state.memory_usage,
                             },
                         ].map((s) => (
-                            <div className="w-full pl-2 flex-row-left">
-                                <div className="w-32">{s.label}</div>
+                            <div className="w-full flex-row-left">
+                                <div className="w-32">{s.label}:</div>
                                 <div>
                                     {renderStateValue(s.value, {
                                         trueLabel: 'Yes',
@@ -217,18 +215,17 @@ export default function OverviewTab() {
             )}
             <div className="w-full h-px bg-gray-300" />
             <div className="w-full pl-2 -mb-1 text-sm font-medium">Last 10 log lines:</div>
-            <pre
+            <div
                 className={
-                    'w-full py-2 !mb-0 overflow-x-auto bg-white flex-grow ' +
-                    'border border-gray-250 shadow-sm rounded-md -mt-2'
+                    'w-full !mb-0 bg-white flex-grow text-xs ' +
+                    'border border-gray-250 shadow-sm rounded-md -mt-2 ' +
+                    'font-mono '
                 }
             >
-                <code className="w-full h-full !text-xs">
-                    {currentInfoLogLines.map((l, i) => (
-                        <essentialComponents.LogLine key={`${i} ${l}`} text={l} />
-                    ))}
-                </code>
-            </pre>
+                {currentInfoLogLines.map((l, i) => (
+                    <essentialComponents.LogLine key={`${i} ${l}`} text={l} />
+                ))}
+            </div>
         </div>
     );
 }

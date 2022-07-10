@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Tuple
 import cerberus
 from packages.core.utils import Logger
 
@@ -118,8 +119,11 @@ class CerberusException(Exception):
     pass
 
 
+logger = Logger(origin="config-validation")
+
+
 class ConfigValidation:
-    logging_handler = Logger().error
+    logging_handler = logger.error
 
     @staticmethod
     def check(
@@ -133,7 +137,7 @@ class ConfigValidation:
         # Add assertions that cannot be done with cerberus here
 
     @staticmethod
-    def check_current_config_file():
+    def check_current_config_file() -> Tuple[bool, str]:
         try:
             assert os.path.isfile(CONFIG_FILE_PATH), "file does not exist"
             with open(CONFIG_FILE_PATH, "r") as f:
@@ -143,10 +147,10 @@ class ConfigValidation:
                     raise AssertionError("file not in a valid json format")
 
             ConfigValidation.check(content_object, partial_validation=False)
-            return True
+            return True, ""
         except Exception as e:
             ConfigValidation.logging_handler(f"Error in current config file: {e}")
-            return False
+            return False, e
 
     @staticmethod
     def check_partial_config_string(content: str):

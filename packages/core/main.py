@@ -17,11 +17,16 @@ logger = Logger(origin="main")
 
 
 def run():
-
     StateInterface.initialize()
-    _CONFIG = ConfigInterface.read()
-
     logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
+
+    while True:
+        try:
+            _CONFIG = ConfigInterface.read()
+            break
+        except AssertionError as e:
+            logger.error(f"Invalid config, waiting 10 seconds")
+            time.sleep(10)
 
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_CONFIG),
@@ -40,9 +45,9 @@ def run():
 
         try:
             _CONFIG = ConfigInterface.read()
-        except AssertionError:
-            logger.error("Invalid config, waiting 20 seconds")
-            time.sleep(20)
+        except AssertionError as e:
+            logger.error(f"Invalid config, waiting 10 seconds")
+            time.sleep(10)
             continue
 
         if not _CONFIG["general"]["test_mode"]:

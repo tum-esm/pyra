@@ -5,7 +5,7 @@ export default function LogLine(props: { text: string }) {
         const textStyle =
             text === 'More log lines inside logs folder ...'
                 ? 'text-gray-400'
-                : 'text-red-700 bg-red-100 ';
+                : 'text-red-700 bg-red-75 ';
         return <div className={`font-light px-4 py-0.5 ${textStyle}`}>{text}</div>;
     }
 
@@ -24,29 +24,34 @@ export default function LogLine(props: { text: string }) {
         case 'CRITICAL':
         case 'ERROR':
         case 'EXCEPTION':
-            textStyle = 'font-bold text-red-700 bg-red-100 ';
+            textStyle = 'font-bold text-red-700 bg-red-75 ';
             break;
         default:
             textStyle = 'font-medium text-gray-800';
     }
 
     return (
-        <div
-            className={
-                `flex-row-left gap-x-3 ${textStyle} px-4 py-0.5 flex-shrink-0 ` +
-                `first:border-t-0 first:mt-0 first:pt-0.5 w-full ` +
-                (logMessage.includes('Starting iteration')
-                    ? 'border-t border-gray-300 pt-2 mt-2 '
-                    : ' ') +
-                (logMessage.includes('Starting mainloop')
-                    ? 'border-t border-gray-300 pt-2 mt-2 bg bg-teal-100 font-bold text-teal-700 '
-                    : ' ')
-            }
-        >
-            <div className="flex-shrink-0">{timeStamp}</div>
-            <div className="flex-shrink-0 w-44">{logSource}</div>
-            <div className="flex-shrink-0 min-w-[3rem]">{logType}</div>
-            <div className="flex-shrink-0 pr-4">{logMessage}</div>
-        </div>
+        <>
+            {(logMessage.includes('Starting mainloop') ||
+                logMessage.includes('Starting iteration') ||
+                logMessage.includes('Error in current config file')) && (
+                <hr className="w-full my-1.5 bg-gray-300 first:hidden h-px" />
+            )}
+            <div
+                className={
+                    'flex flex-row items-start justify-start leading-tight ' +
+                    `gap-x-3 ${textStyle} pl-4 py-0.5 flex-shrink-0 ` +
+                    `w-full !break-all first-of-type:pt-2 last-of-type:pb-2 ` +
+                    (logMessage.includes('Starting mainloop')
+                        ? ' bg-teal-100 font-bold text-teal-700 '
+                        : ' ')
+                }
+            >
+                <div className="flex-shrink-0">{timeStamp}</div>
+                <div className="flex-shrink-0 w-44">{logSource}</div>
+                <div className="flex-shrink-0 min-w-[3rem]">{logType}</div>
+                <div className="flex-grow pr-4 ">{logMessage}</div>
+            </div>
+        </>
     );
 }

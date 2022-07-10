@@ -1,7 +1,6 @@
 import subprocess
 import click
 import os
-
 import psutil
 
 dir = os.path.dirname
@@ -57,7 +56,6 @@ def _start_pyra_core():
         success_handler(f"Started background process with PID {p.pid}")
 
 
-# TODO: Add shutdown routine (close cover, etc.)
 @click.command(help="Stop the pyra-core background process")
 def _stop_pyra_core():
     termination_pids = terminate_processes()
@@ -69,7 +67,7 @@ def _stop_pyra_core():
             + f"processe(s) with PID(s) {termination_pids}"
         )
 
-        # TODO: teardown routine
+        # TODO: Add teardown routine (close cover, etc.)
 
 
 @click.command(help="Checks whether the pyra-core background process is running")

@@ -71,21 +71,21 @@ export default function LogTab() {
                     archive logs
                 </essentialComponents.Button>
             </div>
-            <pre
+            <div
                 className={
-                    'w-full !py-2 !mb-0 overflow-x-auto ' +
-                    'border-t border-gray-300 bg-white flex-grow'
+                    'w-full !py-2 !mb-0 font-mono text-xs ' +
+                    'border-t border-gray-250 bg-white flex-grow'
                 }
             >
                 {!logsAreLoading && (
-                    <code className="w-full h-full text-xs flex-col-left">
+                    <>
                         {(logLevel === 'info' ? infoLogLines : debugLogLines).map((l, i) => (
                             <essentialComponents.LogLine text={l} key={`${i} ${l}`} />
                         ))}
                         {debugLogLines.length == 0 && <strong>logs are empty</strong>}
-                    </code>
+                    </>
                 )}
-            </pre>
+            </div>
         </div>
     );
 }

@@ -80,7 +80,8 @@ def _update_config(content: str):
 @with_filelock(CONFIG_LOCK_PATH)
 def _validate_current_config():
     # The validation itself might print stuff using the error_handler
-    if ConfigValidation.check_current_config_file():
+    file_is_valid, _ = ConfigValidation.check_current_config_file()
+    if file_is_valid:
         success_handler(f"Current config file is valid")
 
 

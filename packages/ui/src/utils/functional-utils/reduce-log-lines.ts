@@ -7,10 +7,10 @@ export default function reduceLogLines(logLines: string[]) {
         if (line.includes('Starting mainloop inside process with PID')) {
             break;
         }
-        if (line.includes('Starting iteration')) {
+        if (line.includes('Starting iteration') || line.includes('Error in current config file')) {
             foundIterationStarts += 1;
         }
-        if (foundIterationStarts == 10) {
+        if (foundIterationStarts == 6) {
             reducedLogLines.push('More log lines inside logs folder ...');
             break;
         }
