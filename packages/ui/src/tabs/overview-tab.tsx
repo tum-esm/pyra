@@ -70,6 +70,25 @@ export default function OverviewTab() {
     const currentInfoLogLines =
         allInfoLogLines === undefined ? ['...'] : allInfoLogLines.slice(-10);
 
+    function renderStateValue(
+        value: null | boolean | number | string | number[],
+        options: { trueLabel: string; falseLabel: string; numberAppendix: string }
+    ) {
+        if (value === null) {
+            return '-';
+        }
+        if (typeof value === 'boolean') {
+            return value ? options.trueLabel : options.falseLabel;
+        }
+        if (typeof value === 'string') {
+            return value;
+        }
+        if (typeof value === 'object') {
+            return value.map((v) => `${v}%`).join(' | ');
+        }
+        return `${value} ${options.numberAppendix}`;
+    }
+
     return (
         <div className={'flex-col-center w-full h-full overflow-y-scroll gap-y-4 pt-4 pb-12 px-6'}>
             <div className="w-full text-sm h-7 flex-row-left">
@@ -114,8 +133,13 @@ export default function OverviewTab() {
                     </div>
                 )}
             {coreState !== undefined && (
-                <div className="grid w-full grid-cols-2 divide-x divide-gray-300">
-                    <div className="pr-2 text-sm flex-col-left gap-y-1">
+                <div className="flex flex-row items-start justify-start w-full">
+                    <div
+                        className={
+                            'flex-col items-start justify-start pr-2 text-sm gap-y-1 h-full ' +
+                            'border-r border-gray-300 min-w-[16rem]'
+                        }
+                    >
                         {[
                             {
                                 label: 'Temperature',
@@ -140,7 +164,13 @@ export default function OverviewTab() {
                         ].map((s) => (
                             <div className="w-full pl-2 flex-row-left">
                                 <div className="w-32">{s.label}:</div>
-                                <div>{s.value || '-'}</div>
+                                <div className="min-w-[2rem]">
+                                    {renderStateValue(s.value, {
+                                        trueLabel: 'Yes',
+                                        falseLabel: 'No',
+                                        numberAppendix: '°C',
+                                    })}
+                                </div>
                             </div>
                         ))}
                         <essentialComponents.Button
@@ -152,12 +182,41 @@ export default function OverviewTab() {
                             force cover close
                         </essentialComponents.Button>
                     </div>
-                    <div className="pl-2 flex-col-left">fghj</div>
+                    <div className="flex-col items-start justify-start pl-2 text-sm">
+                        {[
+                            {
+                                label: 'Used disk space',
+                                value: coreState.os_state.filled_disk_space_fraction,
+                            },
+                            {
+                                label: 'Last boot time',
+                                value: coreState.os_state.last_boot_time,
+                            },
+                            {
+                                label: 'CPU cores usage',
+                                value: coreState.os_state.cpu_usage,
+                            },
+                            {
+                                label: 'Memory usage',
+                                value: coreState.os_state.memory_usage,
+                            },
+                        ].map((s) => (
+                            <div className="w-full pl-2 flex-row-left">
+                                <div className="w-32">{s.label}</div>
+                                <div>
+                                    {renderStateValue(s.value, {
+                                        trueLabel: 'Yes',
+                                        falseLabel: 'No',
+                                        numberAppendix: '%',
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
-            <div>system stats: {JSON.stringify(coreState)}</div>
             <div className="w-full h-px bg-gray-300" />
-            <div className="w-full font-medium">Last 10 log lines:</div>
+            <div className="w-full pl-2 -mb-1 text-sm font-medium">Last 10 log lines:</div>
             <pre
                 className={
                     'w-full py-2 !mb-0 overflow-x-auto bg-white flex-grow ' +
