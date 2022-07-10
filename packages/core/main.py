@@ -8,11 +8,6 @@ from packages.core.utils import (
     ExceptionEmailClient,
 )
 
-
-# TODO: Figure out, where the program could get stuck. In the end,
-# everything should be logged to the log files and no exception
-# should go missing
-
 logger = Logger(origin="main")
 
 

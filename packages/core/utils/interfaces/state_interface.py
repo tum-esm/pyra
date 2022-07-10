@@ -31,7 +31,6 @@ class StateInterface:
         os.mkdir(RUNTIME_DATA_PATH)
         os.mkdir(VBDSD_IMG_DIR)
 
-        # TODO: rename "automation_should_be_running" to "measurements_should_be_running"
         # write initial state.json file
         new_state = {
             "vbdsd_indicates_good_conditions": None,

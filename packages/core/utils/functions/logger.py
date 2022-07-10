@@ -34,7 +34,6 @@ class Logger:
         self._write_log_line("ERROR", message)
 
     def exception(self, e: Exception):
-        # TODO: Attach traceback to message string
         tb = "\n".join(traceback.format_exception(e))
         self._write_log_line("EXCEPTION", f"{type(e).__name__} occured: {tb}")
 
