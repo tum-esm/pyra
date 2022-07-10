@@ -1,7 +1,7 @@
 # Tasks
 
 -   [x] Add live/paused logic
--   [ ] Improve row alignment in control tab
+-   [x] Improve row alignment in control tab
 -   [x] Remove unused UIcode (sort config keys, ...)
 -   [ ] In PLCInterface write updates to StateInterface
 -   [ ] In cli.plc write updates to StateInterface
