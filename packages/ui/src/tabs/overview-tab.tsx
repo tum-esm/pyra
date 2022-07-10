@@ -5,6 +5,25 @@ export default function OverviewTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
     const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
 
+    const measurementDecision = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.measurement_decision
+    );
+    const automaticMeasurementDecisionResult = reduxUtils.useTypedSelector(
+        (s) => s.coreState.body?.automation_should_be_running
+    );
+    let measurementDecisionResult: boolean | undefined = undefined;
+    switch (measurementDecision?.mode) {
+        case 'manual':
+            measurementDecisionResult = measurementDecision.manual_decision_result;
+            break;
+        case 'cli':
+            measurementDecisionResult = measurementDecision.cli_decision_result;
+            break;
+        case 'automatic':
+            measurementDecisionResult = automaticMeasurementDecisionResult;
+            break;
+    }
+
     // TODO: Implement core state
     // TODO: Implement measurement state
     // TODO: Implement plc readings + close cover
@@ -22,7 +41,22 @@ export default function OverviewTab() {
                     pyra-core is running with process ID {pyraCorePID}
                 </span>
             </div>
-            <div>measurement state </div>
+            <div className="w-full -mt-2 text-sm font-normal flex-row-left">
+                <essentialComponents.Ping state={measurementDecisionResult} />
+                <span className="ml-2.5 mr-1">Measurements are currently</span>
+                {measurementDecisionResult === undefined && <essentialComponents.Spinner />}
+                {!(measurementDecisionResult === undefined) && (
+                    <>
+                        {!measurementDecisionResult && <>not running</>}
+                        {measurementDecisionResult && <>running</>}
+                    </>
+                )}
+                {measurementDecision?.mode !== undefined && (
+                    <strong className="ml-1 font-semibold">
+                        ({measurementDecision.mode} mode)
+                    </strong>
+                )}
+            </div>
             <div className="w-full h-px bg-gray-300" />
             <div>plc readings, force close cover button </div>
             <div>system stats: {JSON.stringify(coreState)}</div>
