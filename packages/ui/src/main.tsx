@@ -23,12 +23,10 @@ export default function Main() {
     }, [backendIntegrity, pyraCorePID]);
 
     async function startPyraCore() {
-        console.log('bo');
         setPyraCorePID(undefined);
         try {
             const p = await fetchUtils.backend.startPyraCore();
             const pid = parseInt(p.stdout.replace(/[^\d]/g, ''));
-            console.log(p.stdout);
             setPyraCorePID(pid);
             setBackendIntegrity('valid');
         } catch {

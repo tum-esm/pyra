@@ -1,12 +1,32 @@
 import { Command, ChildProcess } from '@tauri-apps/api/shell';
 import { customTypes } from '../../custom-types';
+import { documentDir, join, downloadDir } from '@tauri-apps/api/path';
 
 async function callCLI(args: string[]) {
-    return await new Command(
-        import.meta.env.VITE_PYTHON_VARIANT,
-        [import.meta.env.VITE_PYRA_CLI_ENTRYPOINT, ...args],
-        { cwd: import.meta.env.VITE_PROJECT_DIR }
-    ).execute();
+    let projectDirPath = await join(await documentDir(), 'pyra-4');
+    switch (import.meta.env.VITE_ENVIRONMENT) {
+        // on my personal machine
+        case 'development-moritz':
+            projectDirPath = await join(await documentDir(), 'research', 'pyra');
+            break;
+
+        // on the R19 laptop the Documents folder is a network directory
+        // hence, we cannot use that one since some script do not run there
+        case 'development-R19':
+            projectDirPath = await join(await downloadDir(), 'pyra-4');
+            break;
+    }
+
+    let pythonInterpreter =
+        import.meta.env.VITE_ENVIRONMENT === 'development-moritz' ? 'venv-python' : 'system-python';
+    let pyraCLIEntrypoint = await join('packages', 'cli', 'main.py');
+
+    const commandString = [pythonInterpreter, pyraCLIEntrypoint, ...args].join(' ');
+    console.debug(`Running shell command: "${commandString}" in directory "${projectDirPath}"`);
+
+    return await new Command(pythonInterpreter, [pyraCLIEntrypoint, ...args], {
+        cwd: projectDirPath,
+    }).execute();
 }
 
 const backend = {

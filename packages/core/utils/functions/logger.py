@@ -14,10 +14,10 @@ LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")
 # manually. Doesn't really make a performance difference
 
 
-class Logger:
-    last_iterations_log_lines: list[str] = []
-    this_iterations_log_lines: list[str] = []
+# TODO: When over 70 minutes of logs: archive the lines older than 60 minutes.
 
+
+class Logger:
     def __init__(self, origin="pyra.core"):
         self.origin = origin
 

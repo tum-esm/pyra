@@ -33,14 +33,19 @@ class OpusMeasurement:
 
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
+        self.initialized = False
         if self._CONFIG["general"]["test_mode"]:
             return
 
+        self._initialize()
+
+    def _initialize(self):
         # note: dde servers talk to dde servers
         self.server = dde.CreateServer()
         self.server.Create("Client")
         self.conversation = dde.CreateConversation(self.server)
         self.last_cycle_automation_status = 0
+        self.initialized = True
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
@@ -57,6 +62,9 @@ class OpusMeasurement:
             logger.info("Test mode active.")
             return
 
+        if not self.initialized:
+            self._initialize()
+
         # start or stops opus.exe depending on sun angle
         self.automated_process_handling()
 
@@ -66,9 +74,11 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        automation_should_be_running = StateInterface.read()["automation_should_be_running"]
-        if self.last_cycle_automation_status != automation_should_be_running:
-            if automation_should_be_running:
+        measurements_should_be_running = StateInterface.read()[
+            "measurements_should_be_running"
+        ]
+        if self.last_cycle_automation_status != measurements_should_be_running:
+            if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
                 logger.info("Starting OPUS Macro.")
                 self.start_macro()
@@ -78,7 +88,7 @@ class OpusMeasurement:
                 self.stop_macro()
 
         # save the automation status for the next run
-        self.last_cycle_automation_status = automation_should_be_running
+        self.last_cycle_automation_status = measurements_should_be_running
 
     def __connect_to_dde_opus(self):
         try:

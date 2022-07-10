@@ -11,13 +11,13 @@ function VariableBlock(props: {
     buttonsAreDisabled: boolean;
     actions: (
         | {
-            label: string;
-            callback: (value: number) => void;
-            spinner: boolean;
-            variant: 'numeric';
-            initialValue: number;
-            postfix?: string;
-        }
+              label: string;
+              callback: (value: number) => void;
+              spinner: boolean;
+              variant: 'numeric';
+              initialValue: number;
+              postfix?: string;
+          }
         | { label: string; callback: () => void; spinner: boolean; variant?: undefined }
     )[];
 }) {
@@ -75,6 +75,8 @@ export default function ControlTab() {
     const pyraIsInTestMode = reduxUtils.useTypedSelector(
         (s) => s.config.central?.general.test_mode
     );
+
+    // TODO: Improve row alignment -> align buttons and corresp. values + connecting line
 
     const dispatch = reduxUtils.useTypedDispatch();
     const setConfigsPartial = (c: customTypes.partialConfig) =>
@@ -148,13 +150,13 @@ export default function ControlTab() {
     }
 
     async function reset() {
-        await runPlcWriteCommand(['write-reset'], setIsLoadingReset, {
+        await runPlcWriteCommand(['reset'], setIsLoadingReset, {
             state: { reset_needed: false },
         });
     }
 
     async function closeCover() {
-        await runPlcWriteCommand(['write-close-cover'], setIsLoadingCloseCover, {
+        await runPlcWriteCommand(['close-cover'], setIsLoadingCloseCover, {
             state: { cover_closed: true },
             actors: { current_angle: 0 },
         });
@@ -162,14 +164,10 @@ export default function ControlTab() {
 
     async function moveCover(angle: number) {
         if (angle === 0 || (angle >= 110 && angle <= 250)) {
-            await runPlcWriteCommand(
-                ['write-move-cover', angle.toString()],
-                setIsLoadingMoveCover,
-                {
-                    state: { cover_closed: angle === 0 },
-                    actors: { current_angle: angle },
-                }
-            );
+            await runPlcWriteCommand(['set-cover-angle', angle.toString()], setIsLoadingMoveCover, {
+                state: { cover_closed: angle === 0 },
+                actors: { current_angle: angle },
+            });
         } else {
             toast.error(`Angle has to be either 0 or between 110° and 250°`);
         }
@@ -179,7 +177,7 @@ export default function ControlTab() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.control.sync_to_tracker;
             await runPlcWriteCommand(
-                ['write-sync-to-tracker', JSON.stringify(newValue)],
+                ['set-sync-to-tracker', JSON.stringify(newValue)],
                 setIsLoadingSyncTotracker,
                 {
                     control: { sync_to_tracker: newValue },
@@ -192,7 +190,7 @@ export default function ControlTab() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.control.auto_temp_mode;
             await runPlcWriteCommand(
-                ['write-auto-temperature', JSON.stringify(newValue)],
+                ['set-auto-temperature', JSON.stringify(newValue)],
                 setIsLoadingAutoTemperature,
                 {
                     control: { auto_temp_mode: newValue },
@@ -205,7 +203,7 @@ export default function ControlTab() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.heater;
             await runPlcWriteCommand(
-                ['write-power-heater', JSON.stringify(newValue)],
+                ['set-heater-power', JSON.stringify(newValue)],
                 setIsLoadingPowerHeater,
                 {
                     power: { heater: newValue },
@@ -218,7 +216,7 @@ export default function ControlTab() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.camera;
             await runPlcWriteCommand(
-                ['write-power-camera', JSON.stringify(newValue)],
+                ['set-camera-power', JSON.stringify(newValue)],
                 setIsLoadingPowerCamera,
                 {
                     power: { camera: newValue },
@@ -231,7 +229,7 @@ export default function ControlTab() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.router;
             await runPlcWriteCommand(
-                ['write-power-router', JSON.stringify(newValue)],
+                ['set-router-power', JSON.stringify(newValue)],
                 setIsLoadingPowerRouter,
                 {
                     power: { router: newValue },
@@ -244,7 +242,7 @@ export default function ControlTab() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.spectrometer;
             await runPlcWriteCommand(
-                ['write-power-spectrometer', JSON.stringify(newValue)],
+                ['set-spectrometer-power', JSON.stringify(newValue)],
                 setIsLoadingPowerSpectrometer,
                 {
                     power: { spectrometer: newValue },
@@ -257,7 +255,7 @@ export default function ControlTab() {
         if (coreState !== undefined) {
             const newValue = !coreState.enclosure_plc_readings.power.computer;
             await runPlcWriteCommand(
-                ['write-power-computer', JSON.stringify(newValue)],
+                ['set-computer-power', JSON.stringify(newValue)],
                 setIsLoadingPowerComputer,
                 {
                     power: { computer: newValue },
@@ -269,8 +267,6 @@ export default function ControlTab() {
     if (plcIsControlledByUser === undefined) {
         return <></>;
     }
-
-    console.log({ p: coreState });
 
     return (
         <div className={'w-full relative px-6 py-6 flex-col-left gap-y-4'}>

@@ -32,15 +32,17 @@ class SunTracking:
 
         logger.info("Running SunTracking")
 
-        automation_should_be_running = StateInterface.read()["automation_should_be_running"]
+        measurements_should_be_running = StateInterface.read()[
+            "measurements_should_be_running"
+        ]
 
         # main logic for active automation
-        if automation_should_be_running and not self.ct_application_running():
+        if measurements_should_be_running and not self.ct_application_running():
             logger.info("Start CamTracker")
             self.start_sun_tracking_automation()
             return
 
-        if not automation_should_be_running and self.ct_application_running():
+        if not measurements_should_be_running and self.ct_application_running():
             logger.info("Stop CamTracker")
             self.stop_sun_tracking_automation()
             return

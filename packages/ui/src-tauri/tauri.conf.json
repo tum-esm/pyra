@@ -8,7 +8,7 @@
     },
     "package": {
         "productName": "Pyra UI",
-        "version": "4.0.1"
+        "version": "4.0.2"
     },
     "tauri": {
         "allowlist": {
@@ -34,15 +34,18 @@
                     }
                 ]
             },
+            "path": {
+                "all": true
+            },
             "fs": {
                 "readFile": true,
                 "scope": [
-                    "$DOWNLOAD/pyra-4/logs/debug.log",
-                    "$DOWNLOAD\\pyra-4\\logs\\debug.log",
-                    "$DOWNLOAD/pyra-4/config/config.json",
-                    "$DOWNLOAD\\pyra-\\config\\config.json",
-                    "$DOWNLOAD/pyra-4/runtime-data/state.json",
-                    "$DOWNLOAD\\/pyra-4\\runtime-data\\state.json"
+                    "$DOWNLOAD/*/pyra*/logs/debug.log",
+                    "$DOCUMENT/*/pyra*/logs/debug.log",
+                    "$DOWNLOAD/*/pyra*/config/config.json",
+                    "$DOCUMENT/*/pyra*/config/config.json",
+                    "$DOWNLOAD/*/pyra*/runtime-data/state.json",
+                    "$DOCUMENT/*/pyra*/runtime-data/state.json"
                 ]
             }
         },

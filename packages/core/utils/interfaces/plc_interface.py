@@ -263,26 +263,31 @@ class PLCInterface:
         self._write_bool(self.specification.power.camera, new_state)
         if self._read_bool(self.specification.power.camera) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     def set_power_computer(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.computer, new_state)
         if self._read_bool(self.specification.power.computer) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     def set_power_heater(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.heater, new_state)
         if self._read_bool(self.specification.power.heater) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     def set_power_router(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.router, new_state)
         if self._read_bool(self.specification.power.router) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     def set_power_spectrometer(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.spectrometer, new_state)
         if self._read_bool(self.specification.power.spectrometer) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     # PLC.CONTROL SETTERS
 
@@ -290,21 +295,25 @@ class PLCInterface:
         self._write_bool(self.specification.control.sync_to_tracker, new_state)
         if self._read_bool(self.specification.control.sync_to_tracker) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     def set_manual_control(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_control, new_state)
         if self._read_bool(self.specification.control.manual_control) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     def set_auto_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.auto_temp_mode, new_state)
         if self._read_bool(self.specification.control.auto_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     def set_manual_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_temp_mode, new_state)
         if self._read_bool(self.specification.control.manual_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
+        # TODO: Write update to StateInterface
 
     def reset(self) -> None:
         self._write_bool(self.specification.control.reset, False)
