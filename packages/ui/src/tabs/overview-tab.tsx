@@ -3,6 +3,7 @@ import { essentialComponents } from '../components';
 
 export default function OverviewTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
+    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
 
     // TODO: Implement core state
     // TODO: Implement measurement state
@@ -14,8 +15,13 @@ export default function OverviewTab() {
         allInfoLogLines === undefined ? ['...'] : allInfoLogLines.slice(-10);
 
     return (
-        <div className={'flex-col-center w-full h-full overflow-y-scroll gap-y-4 pt-8 pb-12 px-6'}>
-            <div>pyra core state </div>
+        <div className={'flex-col-center w-full h-full overflow-y-scroll gap-y-4 pt-4 pb-12 px-6'}>
+            <div className="w-full text-sm h-7 flex-row-left">
+                <essentialComponents.Ping state={true} />
+                <span className="ml-2.5 mr-1">
+                    pyra-core is running with process ID {pyraCorePID}
+                </span>
+            </div>
             <div>measurement state </div>
             <div className="w-full h-px bg-gray-300" />
             <div>plc readings, force close cover button </div>
