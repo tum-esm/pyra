@@ -21,62 +21,67 @@ function renderStringValue(value: string | number | null, postfix: string) {
 
 function VariableBlock(props: {
     label: string;
-    variables: { key: string; value: string | number }[];
-    buttonsAreDisabled: boolean;
-    actions: (
-        | {
-              label: string;
-              callback: (value: number) => void;
-              spinner: boolean;
-              variant: 'numeric';
-              initialValue: number;
-              postfix?: string;
-          }
-        | { label: string; callback: () => void; spinner: boolean; variant?: undefined }
-    )[];
+    disabled: boolean;
+    rows: {
+        variable: { key: string; value: string | number };
+        action?:
+            | {
+                  label: string;
+                  callback: (value: number) => void;
+                  spinner: boolean;
+                  variant: 'numeric';
+                  initialValue: number;
+                  postfix?: string;
+              }
+            | { label: string; callback: () => void; spinner: boolean; variant?: undefined };
+    }[];
 }) {
     return (
         <div className="relative flex overflow-hidden elevated-panel">
             <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-gray-100 border-r border-gray-200 rounded-l flex-row-center">
                 {props.label}
             </div>
-            <div className="flex-grow py-3 pl-4 pr-3 flex-row-left gap-x-4">
-                <div className="flex-col-left gap-y-0.5">
-                    {props.variables.map((v) => (
-                        <div key={v.key} className="flex-row-center whitespace-nowrap">
-                            <div className="w-40">{v.key}:</div>{' '}
-                            <span className="font-semibold">{v.value}</span>
+            <div className="flex-grow py-3 pl-4 pr-3 flex-col-left gap-x-4">
+                {props.rows.map((r, i) => (
+                    <div className="w-full flex-row-left h-7" key={i}>
+                        <div className="flex-row-center whitespace-nowrap">
+                            <div className="w-40">{r.variable.key}:</div>{' '}
+                            <span className="w-12 font-semibold text-right">
+                                {r.variable.value}
+                            </span>
                         </div>
-                    ))}
-                </div>
-                <div className="flex-grow flex-col-right gap-y-1">
-                    {props.actions.map((a) =>
-                        a.variant === undefined ? (
-                            <essentialComponents.Button
-                                variant="gray"
-                                onClick={a.callback}
-                                key={a.label}
-                                spinner={a.spinner}
-                                className="w-52"
-                                disabled={props.buttonsAreDisabled}
-                            >
-                                {a.label}
-                            </essentialComponents.Button>
-                        ) : (
-                            <essentialComponents.NumericButton
-                                initialValue={a.initialValue}
-                                onClick={a.callback}
-                                key={a.label}
-                                spinner={a.spinner}
-                                className="w-52"
-                                postfix={a.postfix}
-                                disabled={props.buttonsAreDisabled}
-                            >
-                                {a.label}
-                            </essentialComponents.NumericButton>
-                        )
-                    )}
-                </div>
+                        {r.action && (
+                            <>
+                                <div className="flex-grow h-0 mx-4 border-t border-gray-300" />
+                                {r.action.variant === undefined && (
+                                    <essentialComponents.Button
+                                        variant="gray"
+                                        onClick={r.action.callback}
+                                        key={r.action.label}
+                                        spinner={r.action.spinner}
+                                        className="w-52"
+                                        disabled={props.disabled}
+                                    >
+                                        {r.action.label}
+                                    </essentialComponents.Button>
+                                )}{' '}
+                                {r.action.variant !== undefined && (
+                                    <essentialComponents.NumericButton
+                                        initialValue={r.action.initialValue}
+                                        onClick={r.action.callback}
+                                        key={r.action.label}
+                                        spinner={r.action.spinner}
+                                        className="w-52"
+                                        postfix={r.action.postfix}
+                                        disabled={props.disabled}
+                                    >
+                                        {r.action.label}
+                                    </essentialComponents.NumericButton>
+                                )}
+                            </>
+                        )}
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -317,31 +322,40 @@ export default function ControlTab() {
                     <>
                         <VariableBlock
                             label="Errors"
-                            buttonsAreDisabled={buttonsAreDisabled}
-                            variables={[
+                            disabled={buttonsAreDisabled}
+                            rows={[
                                 {
-                                    key: 'Reset needed',
-                                    value: renderBoolValue(
-                                        coreState.enclosure_plc_readings.state.reset_needed
-                                    ),
+                                    variable: {
+                                        key: 'Reset needed',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.state.reset_needed
+                                        ),
+                                    },
+                                    action: {
+                                        label: 'reset now',
+                                        callback: reset,
+                                        spinner: isLoadingReset,
+                                    },
                                 },
                                 {
-                                    key: 'Motor failed',
-                                    value: renderBoolValue(
-                                        coreState.enclosure_plc_readings.state.motor_failed
-                                    ),
+                                    variable: {
+                                        key: 'Motor failed',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.state.motor_failed
+                                        ),
+                                    },
                                 },
                                 {
-                                    key: 'UPS alert',
-                                    value: renderBoolValue(
-                                        coreState.enclosure_plc_readings.state.ups_alert
-                                    ),
+                                    variable: {
+                                        key: 'Motor failed',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.state.motor_failed
+                                        ),
+                                    },
                                 },
-                            ]}
-                            actions={[
-                                { label: 'reset now', callback: reset, spinner: isLoadingReset },
                             ]}
                         />
+                        {/*
                         <VariableBlock
                             label="Rain Detection"
                             buttonsAreDisabled={buttonsAreDisabled}
@@ -518,7 +532,7 @@ export default function ControlTab() {
                                     spinner: isLoadingPowerHeater,
                                 },
                             ]}
-                        />
+                        />*/}
                     </>
                 )}
             </div>
