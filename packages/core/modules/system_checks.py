@@ -17,7 +17,7 @@ class SystemChecks:
         logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
 
         average_system_load = OSInterface.get_average_system_load()
-        logger.info(
+        logger.debug(
             "The average system load in the past 1/5/15 "
             + f"minutes was {'/'.join([str(round(l)) + '%' for l in average_system_load])}."
         )
