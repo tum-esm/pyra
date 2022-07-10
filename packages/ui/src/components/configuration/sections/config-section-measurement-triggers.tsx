@@ -63,13 +63,6 @@ export default function ConfigSectionMeasurementTriggers() {
                 setValue={(v: number) => update({ measurement_triggers: { min_sun_elevation: v } })}
                 oldValue={centralSectionConfig.min_sun_elevation}
             />
-            <div className="h-0 -mt-4" />
-            <configurationComponents.ConfigElementText
-                title="Max. Sun Elevation"
-                value={localSectionConfig.max_sun_elevation}
-                setValue={(v: number) => update({ measurement_triggers: { max_sun_elevation: v } })}
-                oldValue={centralSectionConfig.max_sun_elevation}
-            />
         </>
     );
 }

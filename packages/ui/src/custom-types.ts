@@ -69,7 +69,6 @@ export namespace customTypes {
             start_time: { hour: number; minute: number; second: number };
             stop_time: { hour: number; minute: number; second: number };
             min_sun_elevation: number;
-            max_sun_elevation: number;
         };
         tum_plc: null | {
             min_power_elevation: number;
@@ -126,7 +125,6 @@ export namespace customTypes {
             start_time?: { hour?: number; minute?: number; second?: number };
             stop_time?: { hour?: number; minute?: number; second?: number };
             min_sun_elevation?: number;
-            max_sun_elevation?: number;
         };
         tum_plc?: null | {
             min_power_elevation?: number;

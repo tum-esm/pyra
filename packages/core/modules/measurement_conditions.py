@@ -61,11 +61,9 @@ class MeasurementConditions:
             sun_above_threshold = (
                 current_sun_elevation > triggers["min_sun_elevation"] * Astronomy.units.deg
             )
-            # TODO: remove max_sun_elevation as not needed
             if sun_above_threshold:
                 logger.debug("Sun angle is above threshold.")
-
-            if not sun_above_threshold:
+            else:
                 logger.debug("Sun angle is below threshold.")
                 return False
 

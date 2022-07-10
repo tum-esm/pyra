@@ -58,7 +58,7 @@ function MeasurementTriggerInfo() {
                         'Sun Elevation',
                         <>
                             {measurementTriggers.consider_sun_elevation
-                                ? `from ${measurementTriggers.min_sun_elevation}° to ${measurementTriggers.max_sun_elevation}°`
+                                ? `>= ${measurementTriggers.min_sun_elevation}°`
                                 : 'ignored'}
                         </>,
                     ],

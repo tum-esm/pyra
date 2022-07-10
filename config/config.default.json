@@ -35,8 +35,7 @@
         "consider_vbdsd": false,
         "start_time": { "hour": 7, "minute": 0, "second": 0 },
         "stop_time": { "hour": 21, "minute": 0, "second": 0 },
-        "min_sun_elevation": 0.0,
-        "max_sun_elevation": 90.0
+        "min_sun_elevation": 0.0
     },
     "tum_plc": null,
     "vbdsd": null

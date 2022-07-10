@@ -91,7 +91,6 @@ CONFIG_FILE_SCHEMA = {
             "start_time": _Schemas.time_dict,
             "stop_time": _Schemas.time_dict,
             "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
-            "max_sun_elevation": {"type": "number", "min": 0, "max": 90},
         }
     ),
     "tum_plc": NULLABLE_DICT_SCHEMA(
