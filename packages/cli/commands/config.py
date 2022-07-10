@@ -3,7 +3,7 @@ import shutil
 import click
 import os
 import sys
-from packages.core.utils import with_filelock
+from packages.core.utils import with_filelock, update_dict_recursively
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -18,27 +18,6 @@ from packages.core.utils import ConfigValidation
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
 ConfigValidation.logging_handler = error_handler
-
-
-def update_dict_rec(old_object, new_object):
-    if old_object is None or new_object is None:
-        return new_object
-
-    if type(old_object) == dict:
-        assert type(new_object) == dict
-        updated_dict = {}
-        for key in old_object.keys():
-            if key in new_object:
-                updated_dict[key] = update_dict_rec(old_object[key], new_object[key])
-            else:
-                updated_dict[key] = old_object[key]
-        return updated_dict
-    else:
-        if type(old_object) in [int, float]:
-            assert type(new_object) in [int, float]
-        else:
-            assert type(old_object) == type(new_object)
-        return new_object
 
 
 @click.command(help="Read the current config.json file.")
@@ -69,7 +48,7 @@ def _update_config(content: str):
     with open(CONFIG_FILE_PATH, "r") as f:
         current_json: dict = json.load(f)
 
-    merged_json = update_dict_rec(current_json, new_partial_json)
+    merged_json = update_dict_recursively(current_json, new_partial_json)
     with open(CONFIG_FILE_PATH, "w") as f:
         json.dump(merged_json, f)
 

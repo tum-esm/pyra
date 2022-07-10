@@ -1,12 +1,14 @@
 import dataclasses
+import json
 import snap7
 import time
 import os
-from packages.core.utils import Logger
-from packages.core.utils.interfaces.state_interface import StateInterface
+from packages.core.utils import Logger, with_filelock, update_dict_recursively
 from .plc_specification import PLC_SPECIFICATION_VERSIONS
 
 logger = Logger(origin="pyra.core.enclosure-control")
+dir = os.path.dirname
+PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 
 
 class PLCError(Exception):
@@ -87,6 +89,22 @@ EMPTY_PLC_STATE = PLCState(
     power=PLCPowerState(),
     connections=PLCConnectionsState(),
 )
+
+
+# This duplication is required in order top prevent circular imports
+STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
+RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
+STATE_FILE_PATH = os.path.join(RUNTIME_DATA_PATH, "state.json")
+
+
+@with_filelock(STATE_LOCK_PATH)
+def update_state_file(update: dict):
+    with open(STATE_FILE_PATH, "r") as f:
+        current_state = json.load(f)
+
+    new_state = update_dict_recursively(current_state, update)
+    with open(STATE_FILE_PATH, "w") as f:
+        json.dump(new_state, f, indent=4)
 
 
 class PLCInterface:
@@ -263,33 +281,31 @@ class PLCInterface:
         self._write_bool(self.specification.power.camera, new_state)
         if self._read_bool(self.specification.power.camera) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update({"enclosure_plc_readings": {"power": {"camera": new_state}}})
+        update_state_file({"enclosure_plc_readings": {"power": {"camera": new_state}}})
 
     def set_power_computer(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.computer, new_state)
         if self._read_bool(self.specification.power.computer) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update({"enclosure_plc_readings": {"power": {"computer": new_state}}})
+        update_state_file({"enclosure_plc_readings": {"power": {"computer": new_state}}})
 
     def set_power_heater(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.heater, new_state)
         if self._read_bool(self.specification.power.heater) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update({"enclosure_plc_readings": {"power": {"heater": new_state}}})
+        update_state_file({"enclosure_plc_readings": {"power": {"heater": new_state}}})
 
     def set_power_router(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.router, new_state)
         if self._read_bool(self.specification.power.router) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update({"enclosure_plc_readings": {"power": {"router": new_state}}})
+        update_state_file({"enclosure_plc_readings": {"power": {"router": new_state}}})
 
     def set_power_spectrometer(self, new_state: bool) -> None:
         self._write_bool(self.specification.power.spectrometer, new_state)
         if self._read_bool(self.specification.power.spectrometer) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update(
-            {"enclosure_plc_readings": {"power": {"spectrometer": new_state}}}
-        )
+        update_state_file({"enclosure_plc_readings": {"power": {"spectrometer": new_state}}})
 
     # PLC.CONTROL SETTERS
 
@@ -297,7 +313,7 @@ class PLCInterface:
         self._write_bool(self.specification.control.sync_to_tracker, new_state)
         if self._read_bool(self.specification.control.sync_to_tracker) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update(
+        update_state_file(
             {"enclosure_plc_readings": {"control": {"sync_to_tracker": new_state}}}
         )
 
@@ -305,7 +321,7 @@ class PLCInterface:
         self._write_bool(self.specification.control.manual_control, new_state)
         if self._read_bool(self.specification.control.manual_control) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update(
+        update_state_file(
             {"enclosure_plc_readings": {"control": {"manual_control": new_state}}}
         )
 
@@ -313,7 +329,7 @@ class PLCInterface:
         self._write_bool(self.specification.control.auto_temp_mode, new_state)
         if self._read_bool(self.specification.control.auto_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update(
+        update_state_file(
             {"enclosure_plc_readings": {"control": {"auto_temp_mode": new_state}}}
         )
 
@@ -321,7 +337,7 @@ class PLCInterface:
         self._write_bool(self.specification.control.manual_temp_mode, new_state)
         if self._read_bool(self.specification.control.manual_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
-        StateInterface.update(
+        update_state_file(
             {"enclosure_plc_readings": {"control": {"manual_temp_mode": new_state}}}
         )
 

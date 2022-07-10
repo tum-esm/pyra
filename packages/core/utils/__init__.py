@@ -2,6 +2,8 @@ from .functions import Logger
 from .functions import RingList
 from .functions import Astronomy
 from .functions import ExceptionEmailClient
+from .functions import ExceptionEmailClient
+from .functions import update_dict_recursively
 
 from .decorators import with_filelock
 
