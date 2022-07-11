@@ -7,13 +7,14 @@
         "distDir": "../dist"
     },
     "package": {
-        "productName": "pyra-ui",
-        "version": "4.0.0"
+        "productName": "Pyra UI",
+        "version": "4.0.2"
     },
     "tauri": {
         "allowlist": {
             "dialog": {
                 "confirm": true,
+                "message": true,
                 "open": true
             },
             "shell": {
@@ -22,10 +23,35 @@
                 "open": ".*",
                 "scope": [
                     {
-                        "name": "pyra-cli",
+                        "name": "system-python",
                         "cmd": "python",
                         "args": true
+                    },
+                    {
+                        "name": "venv-python",
+                        "cmd": ".venv/bin/python",
+                        "args": true
                     }
+                ]
+            },
+            "path": {
+                "all": true
+            },
+            "fs": {
+                "readFile": true,
+                "scope": [
+                    "$DOWNLOAD/*/pyra-4/logs/debug.log",
+                    "$DOWNLOAD\\pyra-4\\logs\\debug.log",
+                    "$DOCUMENT/*/pyra-4/logs/debug.log",
+                    "$DOCUMENT\\pyra-4\\logs\\debug.log",
+                    "$DOWNLOAD/*/pyra-4/config/config.json",
+                    "$DOWNLOAD\\pyra-4\\config\\config.json",
+                    "$DOCUMENT/*/pyra-4/config/config.json",
+                    "$DOCUMENT\\pyra-4\\config\\config.json",
+                    "$DOWNLOAD/*/pyra-4/runtime-data/state.json",
+                    "$DOWNLOAD\\pyra-4\\runtime-data\\state.json",
+                    "$DOCUMENT/*/pyra-4/runtime-data/state.json",
+                    "$DOCUMENT\\pyra-4\\runtime-data\\state.json"
                 ]
             }
         },
@@ -72,11 +98,11 @@
             {
                 "fullscreen": false,
                 "resizable": true,
-                "title": "Pyra 4 UI",
-                "height": 500,
-                "minHeight": 500,
-                "width": 900,
-                "minWidth": 900,
+                "title": "Pyra UI",
+                "height": 620,
+                "minHeight": 620,
+                "width": 1000,
+                "minWidth": 1000,
                 "center": true
             }
         ]

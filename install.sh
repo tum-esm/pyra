@@ -5,4 +5,4 @@ poetry install
 
 cp config/config.default.json config/config.json
 
-# TODO: Download executable and put it in the project directory
+# TODO: Download pyra-ui executable and put it in the project directory

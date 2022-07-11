@@ -1,15 +1,21 @@
-import json
 import subprocess
+import time
 import click
 import os
-
 import psutil
+from packages.core.modules.enclosure_control import EnclosureControl
+from packages.core.modules.opus_measurement import OpusMeasurement
+from packages.core.modules.sun_tracking import SunTracking
+from packages.core.utils import ConfigInterface
+from packages.core.utils.interfaces.plc_interface import PLCInterface
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-# TODO: ".venv/bin" on mac but ".venv/Scripts" on windows
-INTERPRETER_PATH = os.path.join("python")
-SCRIPT_PATH = os.path.join(PROJECT_DIR, "run-pyra-core.py")
+INTERPRETER_PATH = (
+    "python" if os.name != "posix" else os.path.join(PROJECT_DIR, ".venv", "bin", "python")
+)
+CORE_SCRIPT_PATH = os.path.join(PROJECT_DIR, "run-pyra-core.py")
+SERVER_SCRIPT_PATH = os.path.join(PROJECT_DIR, "packages", "server", "main.py")
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))
 success_handler = lambda text: click.echo(click.style(text, fg="green"))
@@ -19,7 +25,7 @@ def process_is_running():
     for p in psutil.process_iter():
         try:
             arguments = p.cmdline()
-            if (len(arguments) == 2) and (arguments[1] == SCRIPT_PATH):
+            if (len(arguments) == 2) and (arguments[1] == CORE_SCRIPT_PATH):
                 return p.pid
         except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
             pass
@@ -31,26 +37,25 @@ def terminate_processes():
     for p in psutil.process_iter():
         try:
             arguments = p.cmdline()
-            if (len(arguments) > 0) and (arguments[-1] == SCRIPT_PATH):
-                termination_pids.append(p.pid)
-                p.terminate()
+            if len(arguments) > 0:
+                if arguments[-1] == CORE_SCRIPT_PATH:
+                    termination_pids.append(p.pid)
+                    p.terminate()
         except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess):
             pass
     return termination_pids
 
 
 @click.command(
-    help="Start pyra-core as a background process. "
-    + "Prevents spawning multiple processes"
+    help="Start pyra-core as a background process. " + "Prevents spawning multiple processes"
 )
 def _start_pyra_core():
     existing_pid = process_is_running()
     if existing_pid is not None:
         error_handler(f"Background process already exists with PID {existing_pid}")
     else:
-        print( [INTERPRETER_PATH, SCRIPT_PATH])
         p = subprocess.Popen(
-            [INTERPRETER_PATH, SCRIPT_PATH],
+            [INTERPRETER_PATH, CORE_SCRIPT_PATH],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -64,9 +69,24 @@ def _stop_pyra_core():
         error_handler("No active process to be terminated")
     else:
         success_handler(
-            f"Terminated {len(termination_pids)} background "
+            f"Terminated pyra-core {len(termination_pids)} background "
             + f"processe(s) with PID(s) {termination_pids}"
         )
+
+        config = ConfigInterface().read()
+        enclosure = EnclosureControl(config)
+        tracking = SunTracking(config)
+        opus = OpusMeasurement(config)
+
+        enclosure.force_cover_close()
+        time.sleep(2)
+        if tracking.ct_application_running:
+            tracking.stop_sun_tracking_automation()
+            time.sleep(2)
+        if opus.opus_application_running:
+            opus.stop_macro()
+
+        success_handler("Stopped the measurement process")
 
 
 @click.command(help="Checks whether the pyra-core background process is running")

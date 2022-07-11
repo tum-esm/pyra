@@ -1,6 +1,6 @@
 [package]
 name = "pyra-ui"
-version = "4.0.0"
+version = "4.0.1"
 description = "Pyra UI"
 authors = ["Moritz Makowski <moritz.makowski@tum.de>", "Patrick Aigner <patrick.aigner@tum.de>"]
 license = ""
@@ -17,7 +17,7 @@ tauri-build = { version = "1.0.0", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.0.0", features = ["devtools", "dialog-confirm", "dialog-open", "shell-all"] }
+tauri = { version = "1.0.0", features = ["devtools", "dialog-confirm", "dialog-message", "dialog-open", "fs-read-file", "path-all", "shell-all"] }
 
 [features]
 # by default Tauri runs in production mode

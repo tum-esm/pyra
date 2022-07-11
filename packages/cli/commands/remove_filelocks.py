@@ -3,8 +3,6 @@ import os
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
-STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "runtime-data", ".state.lock")
 
 
 error_handler = lambda text: click.echo(click.style(text, fg="red"))

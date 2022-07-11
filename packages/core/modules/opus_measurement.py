@@ -1,19 +1,7 @@
-# ==============================================================================
-# description       :
-# OPUS is the measurement software for the spectrometer EM27/Sun. It is used to
-# start and stop measurements and define measurement or saving parameters.
-# ==============================================================================
-
-# TODO: Implement this for our version of OPUS
-
-# Later, make an abstract base class that enforces a standard interface
-# to be implemented for any version of OPUS (for later updates)
-
-
 import os
 import sys
 import time
-from packages.core.utils import Logger, StateInterface, OSInfo
+from packages.core.utils import Logger, StateInterface, Astronomy
 
 
 # these imports are provided by pywin32
@@ -24,7 +12,7 @@ if sys.platform == "win32":
     import dde  # type: ignore
 
 
-logger = Logger(origin="pyra.core.opus-measurement")
+logger = Logger(origin="opus-measurement")
 
 
 class SpectrometerError(Exception):
@@ -39,14 +27,19 @@ class OpusMeasurement:
 
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
+        self.initialized = False
         if self._CONFIG["general"]["test_mode"]:
             return
 
+        self._initialize()
+
+    def _initialize(self):
         # note: dde servers talk to dde servers
         self.server = dde.CreateServer()
         self.server.Create("Client")
         self.conversation = dde.CreateConversation(self.server)
         self.last_cycle_automation_status = 0
+        self.initialized = True
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
@@ -63,44 +56,33 @@ class OpusMeasurement:
             logger.info("Test mode active.")
             return
 
-        # start OPUS if not currently running
-        if not self.__opus_application_running:
-            self.__start_opus()
-            logger.info("Start OPUS.")
-            # returns to give OPUS time to start until next call of run()
-            return
+        if not self.initialized:
+            self._initialize()
 
-        # check EM27 ip connection
-        plc_status = OSInfo.check_connection_status(self._CONFIG["opus"]["em27_ip"])
-        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
-
-        if plc_status == "NO_INFO":
-            raise SpectrometerError("Could not find an active EM27 IP connection.")
+        # start or stops opus.exe depending on sun angle
+        self.automated_process_handling()
 
         if self.__is_em27_responsive:
-            logger.info("Successful ping to EM27.")
+            logger.debug("Successful ping to EM27.")
         else:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        automation_should_be_running = StateInterface.read()[
-            "automation_should_be_running"
+        measurements_should_be_running = StateInterface.read()[
+            "measurements_should_be_running"
         ]
-        if self.last_cycle_automation_status != automation_should_be_running:
-            if automation_should_be_running:
+        if self.last_cycle_automation_status != measurements_should_be_running:
+            if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                self.__load_experiment()
-                logger.info("Loading OPUS Experiment.")
-                time.sleep(1)
-                self.__start_macro()
                 logger.info("Starting OPUS Macro.")
+                self.start_macro()
             else:
                 # flank change 1 -> 0: stop macro
-                self.__stop_macro()
                 logger.info("Stopping OPUS Macro.")
+                self.stop_macro()
 
         # save the automation status for the next run
-        self.last_cycle_automation_status = automation_should_be_running
+        self.last_cycle_automation_status = measurements_should_be_running
 
     def __connect_to_dde_opus(self):
         try:
@@ -135,7 +117,7 @@ class OpusMeasurement:
             else:
                 return False
 
-    def __load_experiment(self):
+    def load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         full_path = self._CONFIG["opus"]["experiment_path"]
@@ -149,7 +131,7 @@ class OpusMeasurement:
         else:
             logger.info("Could not load OPUS experiment as expected.")
 
-    def __start_macro(self):
+    def start_macro(self):
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         full_path = self._CONFIG["opus"]["macro_path"]
@@ -163,7 +145,7 @@ class OpusMeasurement:
         else:
             logger.info("Could not start OPUS macro as expected.")
 
-    def __stop_macro(self):
+    def stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         full_path = self._CONFIG["opus"]["macro_path"]
@@ -177,6 +159,19 @@ class OpusMeasurement:
         else:
             logger.info("Could not stop OPUS macro as expected.")
 
+    def close_opus(self):
+        """Closes OPUS via DDE."""
+        self.__connect_to_dde_opus()
+
+        if not self.__test_dde_connection:
+            return
+        answer = self.conversation.Request("CLOSE_OPUS")
+
+        if "OK" in answer:
+            logger.info("Stopped OPUS.exe")
+        else:
+            logger.info("No response for OPUS.exe close request.")
+
     def __shutdown_dde_server(self):
         """Note the underlying DDE object (ie, Server, Topics and Items) are
         not cleaned up by this call.
@@ -187,45 +182,35 @@ class OpusMeasurement:
         """Destroys the underlying C++ object."""
         self.server.Destroy()
 
-    # TODO: is this still needed?
     def __is_em27_responsive(self):
         """Pings the EM27 and returns:
 
         True -> Connected
         False -> Not Connected"""
-        response = os.system("ping -n 1 " + self._SETUP["em27"]["ip"])
+        response = os.system("ping -n 1 " + self._CONFIG["em27"]["ip"])
 
         if response == 0:
             return True
         else:
             return False
 
-    def __start_opus(self):
-        """Uses win32process frm pywin32 module to start up OPUS
-        Returns pywin32 process information for later usage.
+    def start_opus(self):
+        """Uses os.startfile() to start up OPUS
+        This simulates a user click on the opus.exe.
         """
-        # http://timgolden.me.uk/pywin32-docs/win32process.html
-        opus_call = (
-            self._CONFIG["opus"]["executable_path"]
-            + " "
-            + self._CONFIG["opus"]["executable_parameter"]
-        )
-        hProcess, hThread, dwProcessId, dwThreadId = win32process.CreateProcess(
-            None,
-            opus_call,
-            None,
-            None,
-            0,
-            win32con.NORMAL_PRIORITY_CLASS,
-            None,
-            None,
-            win32process.STARTUPINFO(),
+
+        opus_path = self._CONFIG["opus"]["executable_path"]
+
+        # works only > python3.10
+        # without cwd CT will have trouble loading its internal database)
+        os.startfile(
+            os.path.basename(opus_path),
+            cwd=os.path.dirname(opus_path),
+            arguments=self._CONFIG["opus"]["executable_parameter"],
+            show_cmd=2,
         )
 
-        # return (hProcess, hThread, dwProcessId, dwThreadId)
-
-    @property
-    def __opus_application_running(self):
+    def opus_application_running(self):
         """Checks if OPUS is already running by identifying the window.
 
         False if Application is currently not running on OS
@@ -247,27 +232,59 @@ class OpusMeasurement:
         if sys.platform != "win32":
             return
 
-        opus_is_running = self.__opus_application_running
+        opus_is_running = self.opus_application_running()
         if not opus_is_running:
-            self.__start_opus()
+            self.start_opus()
             try_count = 0
             while try_count < 10:
-                if self.__opus_application_running:
+                if self.opus_application_running():
                     break
                 try_count += 1
                 time.sleep(6)
 
-        assert self.__opus_application_running
+        assert self.opus_application_running()
         assert self.__test_dde_connection
 
-        print("__is_em27_connected: ", self.__is_em27_responsive)
-
-        self.__load_experiment()
+        self.load_experiment()
         time.sleep(2)
 
-        self.__start_macro()
+        self.start_macro()
         time.sleep(10)
 
-        self.__stop_macro()
+        self.stop_macro()
 
-        print("__is_em27_connected: ", self.__is_em27_responsive)
+    def low_sun_angle_present(self):
+        """OPUS closes at the end of the day to start up fresh the next day."""
+
+        # sleep while sun angle is too low
+        if Astronomy.get_current_sun_elevation().is_within_bounds(
+            None, self._CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
+        ):
+            return True
+        else:
+            return False
+
+    def automated_process_handling(self):
+        """Start OPUS.exe if not running and sun angle conditions satisfied.
+        Shuts down OPUS.exe if running and sun angle conditions not satisfied.
+        """
+
+        if not self.low_sun_angle_present():
+            # start OPUS if not currently running
+            if not self.opus_application_running():
+                logger.info("Start OPUS.")
+                self.start_opus()
+                time.sleep(10)
+                logger.info("Loading OPUS Experiment.")
+                self.load_experiment()
+                # returns to give OPUS time to start until next call of run()
+                return
+        if self.low_sun_angle_present():
+            # Close OPUS if running
+            if self.opus_application_running():
+                logger.debug("Requesting OPUS night shutdown.")
+                # CLOSE_OPUS needs all macros closed to work. stop_macro() is
+                # called just in case
+                self.stop_macro()
+                time.sleep(5)
+                self.close_opus()

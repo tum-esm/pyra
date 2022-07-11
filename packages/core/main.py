@@ -8,26 +8,27 @@ from packages.core.utils import (
     ExceptionEmailClient,
 )
 
-
-# TODO: Figure out, where the program could get stuck. In the end,
-# everything should be logged to the log files and no exception
-# should go missing
-
-logger = Logger(origin="pyra.core.main")
+logger = Logger(origin="main")
 
 
 def run():
-
     StateInterface.initialize()
-    _CONFIG = ConfigInterface.read()
+    logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
 
-    logger.info(f"started mainloop inside process with PID {os.getpid()}")
+    while True:
+        try:
+            _CONFIG = ConfigInterface.read()
+            break
+        except AssertionError as e:
+            logger.error(f"Invalid config, waiting 10 seconds")
+            time.sleep(10)
 
     _modules = [
         modules.measurement_conditions.MeasurementConditions(_CONFIG),
         modules.enclosure_control.EnclosureControl(_CONFIG),
         modules.sun_tracking.SunTracking(_CONFIG),
         modules.opus_measurement.OpusMeasurement(_CONFIG),
+        modules.system_checks.SystemChecks(_CONFIG),
     ]
     vbdsd_thread = modules.vbdsd.VBDSD_Thread()
 
@@ -35,17 +36,21 @@ def run():
 
     while True:
         start_time = time.time()
-        logger.info("Starting Iteration")
+        logger.info("Starting iteration")
 
         try:
             _CONFIG = ConfigInterface.read()
-        except AssertionError:
-            time.sleep(30)
+        except AssertionError as e:
+            logger.error(f"Invalid config, waiting 10 seconds")
+            time.sleep(10)
             continue
 
         if not _CONFIG["general"]["test_mode"]:
             # Start or stop VBDSD in a thread
-            vbdsd_should_be_running = _CONFIG["measurement_triggers"]["consider_vbdsd"]
+            vbdsd_should_be_running = (
+                _CONFIG["vbdsd"] is not None
+                and _CONFIG["measurement_triggers"]["consider_vbdsd"]
+            )
             if vbdsd_should_be_running and not vbdsd_thread.is_running():
                 vbdsd_thread.start()
             if not vbdsd_should_be_running and vbdsd_thread.is_running():
@@ -60,6 +65,7 @@ def run():
                 module.run(_CONFIG)
         except Exception as e:
             new_exception = e
+            logger.exception(new_exception)
 
         try:
             new_current_exceptions = [*current_exceptions]
@@ -67,16 +73,11 @@ def run():
             if new_exception is not None:
                 if type(new_exception).__name__ not in current_exceptions:
                     new_current_exceptions.append(type(new_exception).__name__)
-                    ExceptionEmailClient.handle_occured_exception(
-                        _CONFIG["error_email"], new_exception
-                    )
-                    logger.exception(new_exception)
+                    ExceptionEmailClient.handle_occured_exception(_CONFIG, new_exception)
             else:
                 if len(current_exceptions) > 0:
                     new_current_exceptions = []
-                    ExceptionEmailClient.handle_resolved_exception(
-                        _CONFIG["error_email"]
-                    )
+                    ExceptionEmailClient.handle_resolved_exception(_CONFIG)
                     logger.info(f"All exceptions have been resolved.")
 
             # if no errors until now
@@ -84,7 +85,7 @@ def run():
         except Exception as e:
             logger.exception(e)
 
-        logger.info("Ending Iteration")
+        logger.info("Ending iteration")
 
         # wait rest of loop time
         elapsed_time = time.time() - start_time

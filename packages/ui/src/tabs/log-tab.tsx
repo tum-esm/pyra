@@ -1,106 +1,110 @@
-import { useEffect, useState } from 'react';
-import Toggle from '../components/essential/toggle';
-import ICONS from '../assets/icons';
-import Button from '../components/essential/button';
-import backend from '../utils/backend';
+import { useMemo, useState } from 'react';
 import { dialog, shell } from '@tauri-apps/api';
+import { fetchUtils, functionalUtils, reduxUtils } from '../utils';
+import { essentialComponents } from '../components';
+import toast from 'react-hot-toast';
+import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
 
-export default function LogTab(props: { visible: boolean }) {
+export default function LogTab() {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
-    const [infoLogs, setInfoLogs] = useState<string>('');
-    const [debugLogs, setDebugLogs] = useState<string>('');
+    const [archiving, setArchiving] = useState(false);
 
-    const [loading, setLoading] = useState(true);
+    const dispatch = reduxUtils.useTypedDispatch();
 
-    async function updateLogs() {
-        setLoading(true);
-        try {
-            const newInfoLogs = (await backend.readInfoLogs()).stdout
-                .split('\n')
-                .join('\n');
-            const newDebugLogs = (await backend.readDebugLogs()).stdout
-                .split('\n')
-                .join('\n');
-            setInfoLogs(newInfoLogs);
-            setDebugLogs(newDebugLogs);
-        } catch {
-            // TODO: Add message to queue
-            setInfoLogs('');
-            setDebugLogs('');
+    const fetchUpdates = reduxUtils.useTypedSelector((s) => s.logs.fetchUpdates);
+    const setFetchUpdates = (f: boolean) => dispatch(reduxUtils.logsActions.setFetchUpdates(f));
+
+    const renderedLogScope = reduxUtils.useTypedSelector((s) => s.logs.renderedLogScope);
+    const setRenderedLogScope = (f: '3 iterations' | '5 minutes') =>
+        dispatch(reduxUtils.logsActions.setRenderedLogScope(f));
+
+    const debugLogLines = reduxUtils.useTypedSelector((s) => s.logs.debugLines);
+    const infoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
+
+    const renderedLogLines: string[] | undefined = useMemo(() => {
+        if (debugLogLines === undefined || infoLogLines === undefined) {
+            return undefined;
         }
-        setLoading(false);
-    }
-
-    // TODO: show dialog
-    async function archiveLogs() {
-        if (
-            await dialog.confirm(
-                'Do you want to archive all current logs?',
-                'PyRa 4 UI'
-            )
-        ) {
-            await backend.archiveLogs();
-            await updateLogs();
+        let leveledLines = logLevel === 'info' ? infoLogLines : debugLogLines;
+        if (renderedLogScope === '3 iterations') {
+            leveledLines = functionalUtils.reduceLogLines(leveledLines, '3 iterations');
         }
-    }
-
-    useEffect(() => {
-        updateLogs();
-    }, []);
+        return leveledLines;
+    }, [debugLogLines, infoLogLines, logLevel, renderedLogScope]);
 
     async function openLogsFolder() {
-        await shell.open(`${import.meta.env.VITE_PROJECT_DIR}/logs`);
+        let baseDir = await documentDir();
+        let filePath = await join('pyra-4', 'logs');
+        switch (import.meta.env.VITE_ENVIRONMENT) {
+            // on my personal machine
+            case 'development-moritz':
+                filePath = await join('research', 'pyra', 'logs');
+                break;
+
+            // on the R19 laptop the Documents folder is a network directory
+            // hence, we cannot use that one since some script do not run there
+            case 'development-R19':
+                baseDir = await downloadDir();
+                break;
+        }
+
+        await shell.open(await join(baseDir, filePath));
+    }
+
+    async function archiveLogs() {
+        if (await dialog.confirm('Do you want to archive all current logs?', 'PyRa 4 UI')) {
+            setArchiving(true);
+            const result = await fetchUtils.backend.archiveLogs();
+            if (result.stdout.replace(/[\n\s]*/g, '') === 'done!') {
+                dispatch(reduxUtils.logsActions.set([]));
+            } else {
+                console.error(
+                    `Could not archive log files. processResult = ${JSON.stringify(result)}`
+                );
+                toast.error(`Could not archive log files, please look in the console for details`);
+            }
+            setArchiving(false);
+        }
     }
 
     return (
-        <div
-            className={
-                'flex-col w-full h-full pt-4 ' + (props.visible ? 'flex ' : 'hidden ')
-            }
-        >
+        <div className={'flex flex-col w-full h-[calc(100vh-3.5rem)] pt-4 overflow-hidden '}>
             <div className="px-6 mb-4 flex-row-center gap-x-2">
-                <Button
-                    onClick={() => {
-                        updateLogs();
-                    }}
-                    variant="slate"
-                    className="!px-2"
-                >
-                    {loading && <span className="w-4">...</span>}
-                    {!loading && (
-                        <div className="w-4 h-4 fill-slate-700 ">{ICONS.refresh}</div>
-                    )}
-                </Button>
-                <Toggle
+                <essentialComponents.LiveSwitch isLive={fetchUpdates} toggle={setFetchUpdates} />
+                <essentialComponents.Toggle
                     value={logLevel}
                     setValue={(s: any) => setLogLevel(s)}
                     values={['info', 'debug']}
                 />
+                <essentialComponents.Toggle
+                    value={renderedLogScope}
+                    setValue={setRenderedLogScope}
+                    values={['3 iterations', '5 minutes']}
+                />
+                {renderedLogLines === undefined && <essentialComponents.Spinner />}
                 <div className="flex-grow" />
-                <Button onClick={openLogsFolder} variant="white">
+                <essentialComponents.Button onClick={openLogsFolder} variant="white">
                     open logs folder
-                </Button>
-                <Button onClick={archiveLogs} variant="red">
+                </essentialComponents.Button>
+                <essentialComponents.Button onClick={archiveLogs} variant="red" spinner={archiving}>
                     archive logs
-                </Button>
+                </essentialComponents.Button>
             </div>
-            <pre
+            <div
                 className={
-                    'w-full !px-6 !py-2 !mb-0 overflow-y-scroll ' +
-                    'border-t border-slate-300 bg-white h-full'
+                    'w-full !py-2 !mb-0 font-mono text-xs overflow-y-scroll ' +
+                    'border-t border-gray-250 bg-whites flex-grow bg-white'
                 }
             >
-                <code className="w-full h-full !text-xs language-log">
-                    {logLevel === 'info' ? infoLogs : debugLogs}
-                    {(logLevel === 'info' ? infoLogs : debugLogs)
-                        .replace('\n', '')
-                        .replace(' ', '').length === 0 && (
-                        <strong>logs are empty</strong>
-                    )}
-                </code>
-            </pre>
+                {renderedLogLines !== undefined && (
+                    <>
+                        {renderedLogLines.map((l, i) => (
+                            <essentialComponents.LogLine text={l} key={`${i} ${l}`} />
+                        ))}
+                        {renderedLogLines.length == 0 && <strong>logs are empty</strong>}
+                    </>
+                )}
+            </div>
         </div>
     );
 }
-
-// TODO: Figure out how to remove the quotes from the logs inside the html -> in order to have syntax highlighting
