@@ -69,7 +69,7 @@ def _stop_pyra_core():
         error_handler("No active process to be terminated")
     else:
         success_handler(
-            f"Terminated pyra-core {len(termination_pids)} background "
+            f"Terminated {len(termination_pids)} pyra-core background "
             + f"processe(s) with PID(s) {termination_pids}"
         )
 
