@@ -40,12 +40,18 @@
             "fs": {
                 "readFile": true,
                 "scope": [
-                    "$DOWNLOAD/*/pyra*/logs/debug.log",
-                    "$DOCUMENT/*/pyra*/logs/debug.log",
-                    "$DOWNLOAD/*/pyra*/config/config.json",
-                    "$DOCUMENT/*/pyra*/config/config.json",
-                    "$DOWNLOAD/*/pyra*/runtime-data/state.json",
-                    "$DOCUMENT/*/pyra*/runtime-data/state.json"
+                    "$DOWNLOAD/*/pyra-4/logs/debug.log",
+                    "$DOWNLOAD\\pyra-4\\logs\\debug.log",
+                    "$DOCUMENT/*/pyra-4/logs/debug.log",
+                    "$DOCUMENT\\pyra-4\\logs\\debug.log",
+                    "$DOWNLOAD/*/pyra-4/config/config.json",
+                    "$DOWNLOAD\\pyra-4\\config\\config.json",
+                    "$DOCUMENT/*/pyra-4/config/config.json",
+                    "$DOCUMENT\\pyra-4\\config\\config.json",
+                    "$DOWNLOAD/*/pyra-4/runtime-data/state.json",
+                    "$DOWNLOAD\\pyra-4\\runtime-data\\state.json",
+                    "$DOCUMENT/*/pyra-4/runtime-data/state.json",
+                    "$DOCUMENT\\pyra-4\\runtime-data\\state.json"
                 ]
             }
         },
