@@ -12,7 +12,7 @@ export const logsSlice = createSlice({
     },
     reducers: {
         set: (state: customTypes.reduxStateLogs, action: { payload: string[] }) => {
-            const nonEmptyLines = action.payload.filter((l) => l.replace(/\n /g, '').length > 0);
+            const nonEmptyLines = action.payload.map(l => l.replace(/(\n|\r)/g, "")).filter((l) => l.length > 0);
             const lastFiveMinuteLines = functionalUtils.reduceLogLines(nonEmptyLines, '5 minutes');
             state.debugLines = lastFiveMinuteLines;
             state.infoLines = lastFiveMinuteLines.filter((l) => !l.includes(' - DEBUG - '));
