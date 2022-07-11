@@ -21,7 +21,7 @@ logger = Logger(origin="sun-tracking")
 class SunTracking:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
-        self.last_start_time = None
+        self.last_start_time = time.time()
         if self._CONFIG["general"]["test_mode"]:
             return
 
@@ -51,13 +51,10 @@ class SunTracking:
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
-        if all(
-            [
-                self.ct_application_running(),
-                self.last_start_time is not None,
-                (time.time() - self.last_start_time) > 300,
-                not self.validate_tracker_position(),
-            ]
+        if (
+            self.ct_application_running()
+            and (time.time() - self.last_start_time) > 300
+            and not self.validate_tracker_position()
         ):
             logger.info("CamTracker Motor Position is over threshold.")
             logger.info("Stop CamTracker. Preparing for reinitialization.")
