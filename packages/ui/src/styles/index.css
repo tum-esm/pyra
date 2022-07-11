@@ -30,6 +30,14 @@
     @apply flex flex-col items-center justify-center;
 }
 
+.flex-col-left {
+    @apply flex flex-col items-start justify-center;
+}
+
+.flex-col-right {
+    @apply flex flex-col items-end justify-center;
+}
+
 .flex-row-left {
     @apply flex flex-row items-center justify-start;
 }
@@ -38,6 +46,10 @@
     @apply flex flex-row items-center justify-end;
 }
 
+.flex-row-left-top {
+    @apply flex flex-row items-start justify-start;
+}
+
 .elevated-panel {
-    @apply shadow-sm rounded-md bg-white border-gray-300 border;
+    @apply shadow-sm rounded-md bg-white border-gray-250 border;
 }

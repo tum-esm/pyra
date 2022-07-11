@@ -7,7 +7,8 @@ __pycache__
 # config
 config/config.json
 config/config.original.json
-config/.config.lock
+config/*.lock
+.env
 
 # logs
 *.log
@@ -37,3 +38,5 @@ packages/ui/node_modules/
 
 # development
 .vscode/
+.idea
+hidden

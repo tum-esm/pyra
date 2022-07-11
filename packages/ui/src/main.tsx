@@ -1,98 +1,61 @@
 import { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
-import './styles/index.css';
+import { ICONS } from './assets';
+import { fetchUtils, reduxUtils } from './utils';
+import { structuralComponents } from './components';
+import Dashboard from './components/structural/dashboard';
 
-import backend from './utils/backend';
-import Button from './components/essential/button';
-import Header from './components/header';
-import LogTab from './tabs/log-tab';
-import StatusTab from './tabs/status-tab';
-import TYPES from './utils/types';
-import ConfigTab from './tabs/config-tab';
-
-const tabs = ['Status', 'Config', 'Logs', 'Enclosure Controls'];
-
-function Main() {
-    const [activeTab, setActiveTab] = useState('Status');
+export default function Main() {
     const [backendIntegrity, setBackendIntegrity] = useState<
-        undefined | 'valid' | 'cli is missing' | 'config is invalid'
+        undefined | 'valid' | 'cli is missing' | 'config is invalid' | 'pyra-core is not running'
     >(undefined);
-    const [centralConfig, setCentralConfig] = useState<TYPES.config | undefined>(
-        undefined
-    );
+
+    const dispatch = reduxUtils.useTypedDispatch();
+
+    const setPyraCorePID = (pid: number | undefined) =>
+        dispatch(reduxUtils.coreProcessActions.set({ pid }));
+
+    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
 
     useEffect(() => {
-        loadInitialState();
-    }, []);
-
-    async function loadInitialState() {
-        setBackendIntegrity(undefined);
-        setCentralConfig(undefined);
-
-        const pyraCliIsAvailable = await backend.pyraCliIsAvailable();
-        if (!pyraCliIsAvailable) {
-            setBackendIntegrity('cli is missing');
-            return;
+        if (pyraCorePID === -1 && backendIntegrity == 'valid') {
+            setBackendIntegrity('pyra-core is not running');
         }
+    }, [backendIntegrity, pyraCorePID]);
 
-        const p = await backend.getConfig();
-        if (p.stdout.startsWith('file not in a valid json format')) {
-            setBackendIntegrity('config is invalid');
-        } else {
+    async function startPyraCore() {
+        setPyraCorePID(undefined);
+        try {
+            const p = await fetchUtils.backend.startPyraCore();
+            const pid = parseInt(p.stdout.replace(/[^\d]/g, ''));
+            setPyraCorePID(pid);
             setBackendIntegrity('valid');
-            setCentralConfig(JSON.parse(p.stdout));
+        } catch {
+            // TODO: add message to queue
+            setPyraCorePID(undefined);
         }
     }
 
+    useEffect(() => {
+        fetchUtils.initialAppState(dispatch, setBackendIntegrity).catch(console.error);
+    }, []);
+
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
-            {(backendIntegrity === 'cli is missing' ||
-                backendIntegrity === 'config is invalid') && (
-                <main className="flex flex-col items-center justify-center w-full h-full bg-slate-100 gap-y-4">
-                    <p className="inline max-w-sm text-center">
-                        {backendIntegrity === 'cli is missing' && (
-                            <>
-                                <pre className="bg-slate-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
-                                    pyra-cli
-                                </pre>{' '}
-                                has not been found on your system.{' '}
-                            </>
-                        )}
-                        {backendIntegrity === 'config is invalid' && (
-                            <>
-                                The file{' '}
-                                <pre className="bg-slate-200 mr-1 px-1 py-0.5 rounded-sm text-sm inline">
-                                    config.json
-                                </pre>{' '}
-                                is not in a valid JSON format.{' '}
-                            </>
-                        )}
-                        Please following the installation instructions on{' '}
-                        <span className="font-bold text-blue-500 underline">
-                            https://github.com/tum-esm/pyra
-                        </span>
-                        .
-                    </p>
-                    <Button onClick={loadInitialState} variant="green">
-                        retry connection
-                    </Button>
+            {backendIntegrity === undefined && (
+                <main className="w-full h-full flex-row-center">
+                    <div className="w-8 h-8 text-green-600 animate-spin">{ICONS.spinner}</div>
                 </main>
             )}
-            {backendIntegrity === 'valid' && centralConfig !== undefined && (
-                <>
-                    <Header {...{ tabs, activeTab, setActiveTab }} />
-                    <main className="flex-grow w-full min-h-0 bg-slate-75">
-                        <StatusTab
-                            visible={activeTab === 'Status'}
-                            {...{ centralConfig, setCentralConfig }}
-                        />
-                        <ConfigTab visible={activeTab === 'Config'} />
-                        <LogTab visible={activeTab === 'Logs'} />
-                    </main>
-                </>
+            {backendIntegrity !== undefined && backendIntegrity !== 'valid' && (
+                <structuralComponents.DisconnectedScreen
+                    backendIntegrity={backendIntegrity}
+                    loadInitialAppState={() =>
+                        fetchUtils.initialAppState(dispatch, setBackendIntegrity)
+                    }
+                    startPyraCore={startPyraCore}
+                />
             )}
+            {backendIntegrity === 'valid' && <Dashboard />}
         </div>
     );
 }
-
-ReactDOM.render(<Main />, document.getElementById('root'));

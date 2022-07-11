@@ -1,37 +1,21 @@
-# ==============================================================================
-# author            : Patrick Aigner
-# email             : patrick.aigner@tum.de
-# date              : 20220421
-# version           : 1.0
-# notes             :
-# license           : -
-# py version        : 3.10
-# ==============================================================================
-# description       :
-# Measurement conditions checks for start and stop conditions that are set in
-# the parameters json file. It can check for environmental conditions like sun
-# status, temporal conditions like current time, or manual user input.
-# ==============================================================================
-
 import datetime
-from packages.core.utils import Astronomy, StateInterface, Logger, OSInfo
+from packages.core.utils import Astronomy, StateInterface, Logger
 
-logger = Logger(origin="pyra.core.measurement-conditions")
+logger = Logger(origin="measurement-conditions")
 
 
 def get_times_from_tuples(triggers: any):
+
     now = datetime.datetime.now()
     current_time = datetime.time(now.hour, now.minute, now.second)
-    start_time = datetime.time(*triggers["start_time"])
-    end_time = datetime.time(*triggers["stop_time"])
+    start_time = datetime.time(**triggers["start_time"])
+    end_time = datetime.time(**triggers["stop_time"])
     return current_time, start_time, end_time
 
 
 class MeasurementConditions:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
-        if self._CONFIG["general"]["test_mode"]:
-            return
 
     def run(self, new_config: dict):
         self._CONFIG = new_config
@@ -40,65 +24,68 @@ class MeasurementConditions:
             return
 
         logger.info("Running MeasurementConditions")
-
-        # check os system stability
-        ans = OSInfo.check_cpu_usage()
-        logger.debug("Current CPU usage for all cores is {}%.".format(ans))
-
-        ans = OSInfo.check_average_system_load()
-        logger.info(
-            "The average system load in the past 1/5/15 minutes was" " {}.".format(ans)
-        )
-
-        ans = OSInfo.check_memory_usage()
-        logger.debug("Current v_memory usage for the system is {}.".format(ans))
-
-        ans = OSInfo.time_since_os_boot()
-        logger.debug("The system is running since {}.".format(ans))
-
-        ans = OSInfo.check_disk_space()
-        logger.debug("The disk is currently filled with {}%.".format(ans))
-
-        # raises error if disk_space is below 10%
-        OSInfo.validate_disk_space()
-        # raises error if system battery is below 20%
-        OSInfo.validate_system_battery()
-
         decision = self._CONFIG["measurement_decision"]
-        triggers = self._CONFIG["measurement_triggers"]
+        logger.debug(f"Decision mode for measurements is: {decision['mode']}.")
 
         if decision["mode"] == "manual":
-            automation_should_be_running = decision["manual_decision_result"]
-
+            measurements_should_be_running = decision["manual_decision_result"]
         if decision["mode"] == "cli":
-            automation_should_be_running = decision["cli_decision_result"]
-
+            measurements_should_be_running = decision["cli_decision_result"]
         if decision["mode"] == "automatic":
-            automation_should_be_running = True
+            measurements_should_be_running = self._get_automatic_decision()
 
-            # consider sun elevation
-            if triggers["consider_sun_elevation"]:
-                current_sun_elevation = Astronomy.get_current_sun_elevation()
-                sun_is_too_low = current_sun_elevation < triggers["min_sun_elevation"]
-                sun_is_too_high = current_sun_elevation > triggers["max_sun_elevation"]
-                if sun_is_too_low or sun_is_too_high:
-                    automation_should_be_running &= False
-
-            # consider daytime
-            if triggers["consider_time"]:
-                current_time, start_time, end_time = get_times_from_tuples(triggers)
-                time_is_too_early = current_time < start_time
-                time_is_too_late = current_time > end_time
-                if time_is_too_early or time_is_too_late:
-                    automation_should_be_running &= False
-
-            # consider evaluation from the VBDSD
-            if triggers["consider_vbdsd"] and (self._CONFIG["vbdsd"] is not None):
-                # Don't consider VBDSD if it does not have enough
-                # images yet, which will result in a state of "None"
-                if StateInterface.read()["vbdsd_indicates_good_conditions"] == False:
-                    automation_should_be_running &= False
-
-        StateInterface.update(
-            {"automation_should_be_running": automation_should_be_running}
+        logger.info(
+            f"Measurements should be running is set to: {measurements_should_be_running}."
         )
+        StateInterface.update(
+            {"measurements_should_be_running": measurements_should_be_running}
+        )
+
+    def _get_automatic_decision(self) -> bool:
+        triggers = self._CONFIG["measurement_triggers"]
+        if self._CONFIG["vbdsd"] is None:
+            triggers["consider_vbdsd"] = False
+
+        if not any(
+            [
+                triggers["consider_sun_elevation"],
+                triggers["consider_time"],
+                triggers["consider_vbdsd"],
+            ]
+        ):
+            return False
+
+        if triggers["consider_sun_elevation"]:
+            logger.info("Sun elevation as a trigger is considered.")
+            current_sun_elevation = Astronomy.get_current_sun_elevation()
+            sun_above_threshold = (
+                current_sun_elevation > triggers["min_sun_elevation"] * Astronomy.units.deg
+            )
+            if sun_above_threshold:
+                logger.debug("Sun angle is above threshold.")
+            else:
+                logger.debug("Sun angle is below threshold.")
+                return False
+
+        if triggers["consider_time"]:
+            logger.info("Time as a trigger is considered.")
+            current_time, start_time, end_time = get_times_from_tuples(triggers)
+            time_is_valid = (current_time > start_time) and (current_time < end_time)
+            logger.debug(f"Time conditions are {'' if time_is_valid else 'not '}fulfilled.")
+            if not time_is_valid:
+                return False
+
+        if triggers["consider_vbdsd"]:
+            logger.info("VBDSD as a trigger is considered.")
+            vbdsd_result = StateInterface.read()["vbdsd_indicates_good_conditions"]
+
+            if vbdsd_result is None:
+                logger.debug(f"VBDSD does not nave enough images yet.")
+                return False
+
+            logger.debug(
+                f"VBDSD indicates {'good' if vbdsd_result else 'bad'} sun conditions."
+            )
+            return vbdsd_result
+
+        return True

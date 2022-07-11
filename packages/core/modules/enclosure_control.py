@@ -1,33 +1,14 @@
-# author            : Patrick Aigner
-# email             : patrick.aigner@tum.de
-# date              : 20220421
-# version           : 1.0
-# notes             :
-# license           : -
-# py version        : 3.10
-# ==============================================================================
-# description       :
-# ==============================================================================
-
-import snap7
 import time
-from packages.core.utils import (
-    StateInterface,
-    Logger,
-    OSInfo,
-    Astronomy,
-    STANDARD_PLC_INTERFACES,
-    PLCInterface,
-)
+from packages.core.utils import StateInterface, Logger, Astronomy, PLCError, PLCInterface
 
-logger = Logger(origin="pyra.core.enclosure-control")
+logger = Logger(origin="enclosure-control")
 
 
 class CoverError(Exception):
     pass
 
 
-class PLCError(Exception):
+class MotorFailedError(Exception):
     pass
 
 
@@ -37,231 +18,116 @@ class EnclosureControl:
     """
 
     def __init__(self, initial_config: dict):
-        self._CONFIG = initial_config
-        if self._CONFIG["general"]["test_mode"]:
+        self.config = initial_config
+        self.initialized = False
+        if self.config["general"]["test_mode"]:
             return
 
-        if self._CONFIG["tum_plc"] is None:
+        if self.config["tum_plc"] is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
-        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG][
-            "tum_plc"
-        ]["version"]
+        self._initialize()
 
-        self.plc = snap7.client.Client()
-        self.connection = self.plc_connect()
+    def _initialize(self):
+        self.plc_interface = PLCInterface(self.config)
+        self.plc_interface.set_auto_temperature(True)
+        self.plc_state = self.plc_interface.read()
         self.last_cycle_automation_status = 0
-        self.plc_write_bool(self._PLC_INTERFACE.control["auto_temp_mode"], True)
+        self.initialized = True
 
-    def run(self, new_config: dict):
-        self._CONFIG = new_config
-        if self._CONFIG["general"]["test_mode"]:
+    def run(self, new_config: dict) -> None:
+        self.config = new_config
+        if self.config["tum_plc"] is None:
+            logger.debug("Skipping EnclosureControl without a TUM PLC")
+            return
+
+        if self.config["general"]["test_mode"]:
             logger.debug("Skipping EnclosureControl in test mode")
             return
-        if self._CONFIG["tum_plc"] is None:
-            logger.debug("Skipping EnclosureControl without a TUM PLC")
-            return
-
-        self._PLC_INTERFACE: PLCInterface = STANDARD_PLC_INTERFACES[self._CONFIG][
-            "tum_plc"
-        ]["version"]
 
         logger.info("Running EnclosureControl")
 
-        # check PLC ip connection
-        plc_status = OSInfo.check_connection_status(self._CONFIG["tum_plc"]["ip"])
-        logger.debug("The PLC IP connection returned the status {}.".format(plc_status))
+        if self.initialized:
+            self.plc_state = self.plc_interface.read()
+        else:
+            self._initialize()
 
-        if plc_status == "NO_INFO":
+        self.plc_interface.update_config(self.config)
+
+        # read current state of actors and sensors in enclosure
+        logger.info("New continuous readings.")
+        StateInterface.update({"enclosure_plc_readings": self.plc_state.to_dict()})
+
+        if self.config["tum_plc"]["controlled_by_user"]:
+            logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
+            return
+
+        # possibly powerup/down spectrometer
+        self.auto_set_power_spectrometer()
+
+        if self.plc_state.state.motor_failed:
+            raise MotorFailedError("URGENT: stop all actions, check cover in person")
+
+        # check PLC ip connection
+        if self.plc_interface.is_responsive():
+            logger.debug("Successful ping to PLC.")
+        else:
             raise PLCError("Could not find an active PLC IP connection.")
 
         # check for automation state flank changes
-        automation_should_be_running = StateInterface.read()[
-            "automation_should_be_running"
+        measurements_should_be_running = StateInterface.read()[
+            "measurements_should_be_running"
         ]
-        if self.last_cycle_automation_status != automation_should_be_running:
-            if automation_should_be_running:
+        if self.last_cycle_automation_status != measurements_should_be_running:
+            if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
-                # TODO: check if that is correct reset handling
-                if self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]):
-                    self.plc_write_bool(self._PLC_INTERFACE.control["reset"], False)
+                if self.plc_state.state.reset_needed:
+                    self.plc_interface.reset()
                     time.sleep(10)
-
-                self.plc_write_bool(
-                    self._PLC_INTERFACE.control["sync_to_tracker"], True
-                )
+                if not self.plc_state.state.rain:
+                    self.plc_interface.set_sync_to_tracker(True)
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: stop macro
-                self.plc_write_bool(
-                    self._PLC_INTERFACE.control["sync_to_tracker"], False
-                )
-                self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], 0)
+                self.plc_interface.set_sync_to_tracker(False)
+                self.move_cover(0)
                 logger.info("Closing Cover.")
-                self.wait_for_cover_closing()
+                self.wait_for_cover_closing(throw_error=False)
 
         # save the automation status for the next run
-        self.last_cycle_automation_status = automation_should_be_running
+        self.last_cycle_automation_status = measurements_should_be_running
 
-        if not automation_should_be_running:
-            if not self._PLC_INTERFACE.actors["cover_closed"]:
+        if (not measurements_should_be_running) & (not self.plc_state.state.rain):
+            if not self.plc_state.state.cover_closed:
                 logger.info("Cover is still open. Trying to close again.")
-                self.plc_write_int(self._PLC_INTERFACE.actors["move_cover"], 0)
+                self.force_cover_close()
                 self.wait_for_cover_closing()
 
-        # read current state of actors and sensors in enclosure
-        current_reading = self.read_state_from_plc()
-        logger.info("New continuous readings.")
-        StateInterface.update({"enclosure_plc_readings": current_reading})
+    # PLC.ACTORS SETTERS
 
-        # possibly powerup/down spectrometer
-        self.manage_spectrometer_power()
+    def move_cover(self, value) -> None:
+        logger.debug(f"Received request to move cover to position {value} degrees.")
 
-        # TODO: check what resetbutton after rain does (and the auto reset option
-
-    def manage_spectrometer_power(self):
-        """
-        Shuts down spectrometer if the sun angle is too low. Starts up the
-        spectrometer in the morning when minimum angle is satisfied.
-        """
-
-        current_sun_elevation = Astronomy.get_current_sun_elevation()
-        min_power_elevation = self._CONFIG["tum_plc"]["min_power_elevation"]
-        spectrometer_has_power = self.plc_read_bool(
-            self._PLC_INTERFACE.power["spectrometer"]
-        )
-
-        if current_sun_elevation is not None:
-            if (current_sun_elevation > min_power_elevation) and (
-                not spectrometer_has_power
-            ):
-                self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], True)
-                logger.info("Powering up the spectrometer.")
-            elif spectrometer_has_power:
-                self.plc_write_bool(self._PLC_INTERFACE.power["spectrometer"], False)
-                logger.info("Powering down the spectrometer.")
-
-    def read_state_from_plc(self):
-        """
-        Checks the state of the enclosure by continuously reading sensor and
-        actor output.
-
-        returns
-        r: list
-        """
-        return [
-            self.plc_read_int(self._PLC_INTERFACE.actors["fan_speed"]),
-            self.plc_read_int(self._PLC_INTERFACE.actors["current_angle"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["auto_temp_mode"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["manual_control"]),
-            self.plc_read_bool(self._PLC_INTERFACE.control["manual_temp_mode"]),
-            self.plc_read_int(self._PLC_INTERFACE.sensors["humidity"]),
-            self.plc_read_int(self._PLC_INTERFACE.sensors["temperature"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["camera"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["computer"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["heater"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["motor_failed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["rain"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["reset_needed"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["router"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["spectrometer"]),
-            self.plc_read_bool(self._PLC_INTERFACE.state["ups_alert"]),
-        ]
-
-    def plc_connect(self):
-        """
-        Connects to the PLC Snap7
-
-        Returns:
-        True -> connected
-        False -> not connected
-        """
-        self.plc.connect(self._CONFIG["tum_plc"]["ip"], 0, 1)
-        return self.plc.get_connected()
-
-    def plc_disconnect(self):
-        """
-        Disconnects from the PLC Snap7
-
-        Returns:
-        True -> disconnected
-        False -> not disconnected
-        """
-        self.plc.disconnect()
-
-        if not self.plc.get_connected():
-            return True
+        # rain check before moving cover. PLC will deny cover requests during rain anyway
+        if self.plc_state.state.rain:
+            logger.debug("Denied to move cover due to rain detected.")
         else:
-            return False
+            self.plc_interface.set_manual_control(True)
+            self.plc_interface.set_cover_angle(value)
+            self.plc_interface.set_manual_control(False)
 
-    def plc_connected(self):
-        """
-        Connects to the PLC Snap7
+    def force_cover_close(self) -> None:
+        if self.plc_state.state.reset_needed:
+            self.plc_interface.reset()
 
-        Returns:
-        True -> connected
-        False -> not connected
-        """
-        return self.plc.get_connected()
+        self.plc_interface.set_sync_to_tracker(False)
+        self.plc_interface.set_manual_control(True)
+        self.plc_interface.set_cover_angle(0)
+        self.plc_interface.set_manual_control(False)
+        self.wait_for_cover_closing()
 
-    def plc_read_int(self, action):
-        """Reads an INT value in the PLC database."""
-        assert len(action) == 3
-        db_number, start, size = action
-
-        msg = self.plc.db_read(db_number, start, size)
-        value = snap7.util.get_int(msg, 0)
-
-        # wait if cpu is still busy
-        self.cpu_busy_check()
-
-        return value
-
-    def plc_write_int(self, action, value):
-        """Changes an INT value in the PLC database."""
-        assert len(action) == 3
-        db_number, start, size = action
-
-        msg = bytearray(size)
-        snap7.util.set_int(msg, 0, value)
-        self.plc.db_write(db_number, start, msg)
-
-        # wait if cpu is still busy
-        self.cpu_busy_check()
-
-    def plc_read_bool(self, action):
-        """Reads a BOOL value in the PLC database."""
-        assert len(action) == 4
-        db_number, start, size, bool_index = action
-
-        msg = self.plc.db_read(db_number, start, size)
-        value = snap7.util.get_bool(msg, 0, bool_index)
-
-        # wait if cpu is still busy
-        self.cpu_busy_check()
-
-        return value
-
-    def plc_write_bool(self, action, value):
-        """Changes a BOOL value in the PLC database."""
-        assert len(action) == 4
-        db_number, start, size, bool_index = action
-
-        msg = self.plc.db_read(db_number, start, size)
-        snap7.util.set_bool(msg, 0, bool_index, value)
-        self.plc.db_write(db_number, start, msg)
-
-        # wait if cpu is still busy
-        self.cpu_busy_check()
-
-    def cpu_busy_check(self):
-        """Sleeps if cpu is busy."""
-        if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
-            time.sleep(2)
-
-    def wait_for_cover_closing(self):
+    def wait_for_cover_closing(self, throw_error=True) -> None:
         """Waits steps of 5s for the enclosure cover to close.
 
         Raises the custom error CoverError if clover doesn't close in a given
@@ -269,14 +135,34 @@ class EnclosureControl:
         """
 
         start_time = time.time()
-        loop = True
-
-        while loop:
+        while True:
             time.sleep(5)
 
-            if self.plc_read_bool(self._PLC_INTERFACE.state["cover_closed"]):
-                loop = False
+            if self.plc_interface.cover_is_closed():
+                break
 
             elapsed_time = time.time() - start_time
             if elapsed_time > 31:
-                raise CoverError("Enclosure cover might be stuck.")
+                if throw_error:
+                    raise CoverError("Enclosure cover might be stuck.")
+                break
+
+    def auto_set_power_spectrometer(self) -> None:
+        """
+        Shuts down spectrometer if the sun angle is too low. Starts up the
+        spectrometer in the morning when minimum angle is satisfied.
+        """
+
+        current_sun_elevation = Astronomy.get_current_sun_elevation()
+        min_power_elevation = (
+            self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
+        )
+
+        if current_sun_elevation is not None:
+            sun_is_above_minimum = current_sun_elevation >= min_power_elevation
+            if sun_is_above_minimum and (not self.plc_state.power.spectrometer):
+                self.plc_interface.set_power_spectrometer(True)
+                logger.info("Powering up the spectrometer.")
+            if (not sun_is_above_minimum) and self.plc_state.power.spectrometer:
+                self.plc_interface.set_power_spectrometer(False)
+                logger.info("Powering down the spectrometer.")

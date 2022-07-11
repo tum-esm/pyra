@@ -27,11 +27,11 @@
 # ==============================================================================
 
 
-import multiprocessing
 import os
+import queue
 import shutil
+from threading import Thread
 import time
-import astropy.units as astropy_units
 import cv2 as cv
 import numpy as np
 from packages.core.utils import (
@@ -42,7 +42,7 @@ from packages.core.utils import (
     Astronomy,
 )
 
-logger = Logger(origin="pyra.core.vbdsd")
+logger = Logger(origin="vbdsd")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -61,11 +61,12 @@ class _VBDSD:
         camera, otherwise None will be returned.
         """
         camera_id = _CONFIG["vbdsd"]["camera_id"]
-        _VBDSD.cam = cv.VideoCapture(camera_id)
+
+        _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         _VBDSD.cam.release()
 
         for _ in range(retries):
-            _VBDSD.cam = cv.VideoCapture(camera_id)
+            _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             time.sleep(1)
             if _VBDSD.cam.isOpened():
                 logger.debug(f"Camera with id {camera_id} is now connected")
@@ -76,11 +77,24 @@ class _VBDSD:
                 _VBDSD.cam.set(11, 64)  # contrast
                 _VBDSD.cam.set(12, 0)  # saturation
                 _VBDSD.cam.set(14, 0)  # gain
-                _VBDSD.cam.read()
+                _VBDSD.cam.read()  # throw away first picture
                 _VBDSD.change_exposure()
                 return
 
-        logger.debug(f"Camera with id {camera_id} could not be found")
+        logger.warning(f"Camera with id {camera_id} could not be found")
+
+    @staticmethod
+    def reinit_settings():
+        if _VBDSD.cam.isOpened():
+            logger.debug(f"Reset Camera settings for next day.")
+            _VBDSD.cam.set(3, 1280)  # width
+            _VBDSD.cam.set(4, 720)  # height
+            _VBDSD.cam.set(15, -12)  # exposure
+            _VBDSD.cam.set(10, 64)  # brightness
+            _VBDSD.cam.set(11, 64)  # contrast
+            _VBDSD.cam.set(12, 0)  # saturation
+            _VBDSD.cam.set(14, 0)  # gain
+            _VBDSD.cam.read()  # throw away first picture
 
     @staticmethod
     def eval_sun_state(frame):
@@ -130,9 +144,7 @@ class _VBDSD:
             cv.circle(img_b, center, radius - 20, 0, 15)
             cv.circle(frame, center, radius, 255, 5)
 
-        contours, hierarchy = cv.findContours(
-            img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE
-        )
+        contours, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
 
         ppi_contour = None
         ppi = -1
@@ -141,9 +153,7 @@ class _VBDSD:
             for i in range(len(contours)):
                 if cv.contourArea(contours[i]) > 2000:
                     x, y, w, h = cv.boundingRect(contours[i])
-                    if float(w) == float(
-                        h
-                    ):  # Use constraints to find the projection plane
+                    if float(w) == float(h):  # Use constraints to find the projection plane
                         ppi_contour = contours[i]  # Save contour
                         ppi = i
 
@@ -213,16 +223,17 @@ class _VBDSD:
 
         current_sun_angle = Astronomy.get_current_sun_elevation()
 
-        if current_sun_angle < 4 * astropy_units.deg:
+        if current_sun_angle < 4 * Astronomy.units.deg:
             exp = -9 + diff
-        elif current_sun_angle < 6 * astropy_units.deg:
+        elif current_sun_angle < 6 * Astronomy.units.deg:
             exp = -10 + diff
-        elif current_sun_angle < 10 * astropy_units.deg:
+        elif current_sun_angle < 10 * Astronomy.units.deg:
             exp = -11 + diff
         else:
             exp = -12 + diff
 
         _VBDSD.cam.set(15, exp)
+        logger.debug("Changed camera exposure to {}".format(exp))
         _VBDSD.cam.read()
         time.sleep(0.2)
 
@@ -247,26 +258,31 @@ class _VBDSD:
 
 class VBDSD_Thread:
     def __init__(self):
-        self.__process = None
+        self.__thread = None
+        self.__shared_queue = queue.Queue()
 
     def start(self):
         """
         Start a thread using the multiprocessing library
         """
         logger.info("Starting thread")
-        self.__process = multiprocessing.Process(target=VBDSD_Thread.main)
-        self.__process.start()
+        self.__thread = Thread(target=VBDSD_Thread.main, args=(self.__shared_queue,))
+        self.__thread.start()
 
     def is_running(self):
-        return self.__process is not None
+        return self.__thread is not None
 
     def stop(self):
         """
         Stop the thread, remove all images inside the directory
         "runtime_data/vbdsd" and set the state to 'null'
         """
-        logger.info("Terminating thread")
-        self.__process.terminate()
+
+        logger.info("Sending termination signal")
+        self.__shared_queue.put("stop")
+
+        logger.info("Waiting for thread to terminate")
+        self.__thread.join()
 
         logger.debug("Removing all images")
         VBDSD_Thread.__remove_vbdsd_images()
@@ -274,7 +290,7 @@ class VBDSD_Thread:
         logger.debug('Setting state to "null"')
         StateInterface.update({"vbdsd_indicates_good_conditions": None})
 
-        self.__process = None
+        self.__thread = None
 
     @staticmethod
     def __remove_vbdsd_images():
@@ -283,9 +299,10 @@ class VBDSD_Thread:
         os.mkdir(IMG_DIR)
 
     @staticmethod
-    def main(infinite_loop=True):
+    def main(shared_queue: queue.Queue, infinite_loop=True):
         global _CONFIG
         _CONFIG = ConfigInterface.read()
+        # delete all temp pictures when vbdsd is deactivated
         if _CONFIG["vbdsd"] is None:
             VBDSD_Thread.__remove_vbdsd_images()
             return
@@ -294,14 +311,24 @@ class VBDSD_Thread:
         current_state = None
 
         while True:
+
+            # Check for termination
+            try:
+                if shared_queue.get(block=False) == "stop":
+                    break
+            except queue.Empty:
+                pass
+
             start_time = time.time()
             _CONFIG = ConfigInterface.read()
+            # delete all temp pictures when vbdsd is deactivated
             if _CONFIG["vbdsd"] is None:
                 VBDSD_Thread.__remove_vbdsd_images()
                 return
 
+            # init camera connection
             if _VBDSD.cam is None:
-                logger.info(f"(Re)connecting to camera")
+                logger.info(f"Initializing VBDSD camera")
                 _VBDSD.init_cam()
 
                 # if connecting was not successful
@@ -314,21 +341,22 @@ class VBDSD_Thread:
             new_size = _CONFIG["vbdsd"]["evaluation_size"]
             if status_history.maxsize() != new_size:
                 logger.debug(
-                    "Size of status history has changed: "
+                    "Size of VBDSD history has changed: "
                     + f"{status_history.maxsize()} -> {new_size}"
                 )
                 status_history.reinitialize(new_size)
 
             # sleep while sun angle is too low
             if Astronomy.get_current_sun_elevation().is_within_bounds(
-                None, _CONFIG["vbdsd"]["min_sun_elevation"] * astropy_units.deg
+                None, _CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
             ):
                 logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                 if current_state != None:
-                    StateInterface.update(
-                        {"vbdsd_indicates_good_conditions": current_state}
-                    )
+                    StateInterface.update({"vbdsd_indicates_good_conditions": False})
+                    VBDSD_Thread.__remove_vbdsd_images()
                     current_state = None
+                    # reinit for next day
+                    _VBDSD.reinit_settings()
                 time.sleep(300)
                 continue
 
@@ -342,16 +370,19 @@ class VBDSD_Thread:
 
             # append sun status to status history
             status_history.append(max(status, 0))
-            logger.debug(f"New status: {status}")
-            logger.debug(f"New status history: {status_history.get()}")
+            logger.debug(f"New VBDSD status: {status}")
+            logger.debug(f"New VBDSD status history: {status_history.get()}")
 
-            if frame is not None:
-                img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
-                img_path = os.path.join(IMG_DIR, img_name)
-                cv.imwrite(img_path, frame)
-                logger.debug(f"Saving image to: {img_path}")
-            else:
+            if frame is None:
                 logger.debug(f"Could not take image")
+            else:
+                if _CONFIG["vbdsd"]["save_images"]:
+                    img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
+                    img_path = os.path.join(IMG_DIR, img_name)
+                    cv.imwrite(img_path, frame)
+                    logger.debug(f"Saving image to: {img_path}")
+                else:
+                    logger.debug(f"Skipping image saving")
 
             # evaluate sun state only if list is filled
             if status_history.size() == status_history.maxsize():
@@ -372,9 +403,7 @@ class VBDSD_Thread:
             elapsed_time = time.time() - start_time
             time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
             if time_to_wait > 0:
-                logger.debug(
-                    f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)"
-                )
+                logger.debug(f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)")
                 time.sleep(time_to_wait)
 
             if not infinite_loop:

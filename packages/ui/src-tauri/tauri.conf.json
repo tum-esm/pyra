@@ -7,86 +7,51 @@
         "distDir": "../dist"
     },
     "package": {
-        "productName": "pyra-ui",
-        "version": "4.0.0-alpha.1"
+        "productName": "Pyra UI",
+        "version": "4.0.2"
     },
     "tauri": {
         "allowlist": {
             "dialog": {
                 "confirm": true,
+                "message": true,
                 "open": true
             },
             "shell": {
+                "all": true,
                 "execute": true,
                 "open": ".*",
                 "scope": [
                     {
-                        "name": "pyra-cli",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py"]
+                        "name": "system-python",
+                        "cmd": "python",
+                        "args": true
                     },
                     {
-                        "name": "pyra-cli-logs-read-info",
+                        "name": "venv-python",
                         "cmd": ".venv/bin/python",
-                        "args": [
-                            "packages/cli/main.py",
-                            "logs",
-                            "read",
-                            "--level",
-                            "INFO"
-                        ]
-                    },
-                    {
-                        "name": "pyra-cli-logs-read-debug",
-                        "cmd": ".venv/bin/python",
-                        "args": [
-                            "packages/cli/main.py",
-                            "logs",
-                            "read",
-                            "--level",
-                            "DEBUG"
-                        ]
-                    },
-                    {
-                        "name": "pyra-cli-logs-archive",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "logs", "archive"]
-                    },
-                    {
-                        "name": "pyra-cli-core-start",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "core", "start"]
-                    },
-                    {
-                        "name": "pyra-cli-core-is-running",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "core", "is-running"]
-                    },
-                    {
-                        "name": "pyra-cli-core-stop",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "core", "stop"]
-                    },
-                    {
-                        "name": "pyra-cli-config-get",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "config", "get"]
-                    },
-                    {
-                        "name": "pyra-cli-config-update",
-                        "cmd": ".venv/bin/python",
-                        "args": [
-                            "packages/cli/main.py",
-                            "config",
-                            "update",
-                            { "validator": "\\{.*\\}" }
-                        ]
-                    },
-                    {
-                        "name": "pyra-cli-state-get",
-                        "cmd": ".venv/bin/python",
-                        "args": ["packages/cli/main.py", "state", "get"]
+                        "args": true
                     }
+                ]
+            },
+            "path": {
+                "all": true
+            },
+            "fs": {
+                "readFile": true,
+                "scope": [
+                    "$DOWNLOAD/*/pyra-4/logs/debug.log",
+                    "$DOWNLOAD\\pyra-4\\logs\\debug.log",
+                    "$DOCUMENT/*/pyra-4/logs/debug.log",
+                    "$DOCUMENT\\pyra-4\\logs\\debug.log",
+                    "$DOWNLOAD/*/pyra-4/config/config.json",
+                    "$DOWNLOAD\\pyra-4\\config\\config.json",
+                    "$DOCUMENT/*/pyra-4/config/config.json",
+                    "$DOCUMENT\\pyra-4\\config\\config.json",
+                    "$DOWNLOAD/*/pyra-4/runtime-data/state.json",
+                    "$DOWNLOAD\\pyra-4\\runtime-data\\state.json",
+                    "$DOCUMENT/*/pyra-4/runtime-data/state.json",
+                    "$DOCUMENT\\pyra-4\\runtime-data\\state.json"
                 ]
             }
         },
@@ -133,11 +98,11 @@
             {
                 "fullscreen": false,
                 "resizable": true,
-                "title": "Pyra 4 UI",
-                "height": 500,
-                "minHeight": 500,
-                "width": 900,
-                "minWidth": 900,
+                "title": "Pyra UI",
+                "height": 620,
+                "minHeight": 620,
+                "width": 1000,
+                "minWidth": 1000,
                 "center": true
             }
         ]

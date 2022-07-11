@@ -1,25 +1,35 @@
 {
     "name": "pyra-ui",
     "private": true,
-    "version": "4.0.0-alpha.1",
+    "version": "4.0.2",
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "tauri": "export RUST_BACKTRACE=full && tauri"
+        "tauri": "tauri"
     },
     "dependencies": {
-        "@tauri-apps/api": "1.0.0-rc.7",
+        "@reduxjs/toolkit": "^1.8.2",
+        "@tauri-apps/api": "1.0.1",
+        "deep-diff": "^1.0.2",
         "lodash": "4.17.21",
+        "moment": "^2.29.4",
         "react": "18.1.0",
-        "react-dom": "18.1.0"
+        "react-dom": "18.1.0",
+        "react-hot-toast": "^2.2.0",
+        "react-redux": "^8.0.2",
+        "socket.io-client": "^4.5.1"
     },
     "devDependencies": {
         "@tailwindcss/forms": "0.5.2",
-        "@tauri-apps/cli": "1.0.0-rc.14",
+        "@tauri-apps/cli": "1.0.0",
+        "@types/deep-diff": "^1.0.1",
         "@types/lodash": "4.14.182",
+        "@types/moment": "^2.13.0",
+        "@types/node": "^18.0.0",
         "@types/react": "18.0.12",
         "@types/react-dom": "18.0.5",
+        "@types/socket.io-client": "^3.0.0",
         "@vitejs/plugin-react": "1.3.0",
         "autoprefixer": "10.4.7",
         "postcss": "8.4.14",
@@ -33,6 +43,6 @@
         "tabWidth": 4,
         "semi": true,
         "singleQuote": true,
-        "printWidth": 88
+        "printWidth": 100
     }
 }
