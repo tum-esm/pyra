@@ -218,10 +218,12 @@ export default function OverviewTab() {
                 className={
                     'w-full !mb-0 bg-white flex-grow text-xs ' +
                     'border border-gray-250 shadow-sm rounded-md -mt-2 ' +
-                    'font-mono overflow-hidden'
+                    'font-mono overflow-hidden '
                 }
             >
-                {currentInfoLogLines === undefined && <div className="p-2"><essentialComponents.Spinner /></div>}
+                {(currentInfoLogLines === undefined || currentInfoLogLines.length === 0) && (
+                    <div className="p-2"><essentialComponents.Spinner /></div>
+                )}
                 {currentInfoLogLines !== undefined &&
                     currentInfoLogLines.map((l, i) => (
                         <essentialComponents.LogLine key={`${i} ${l}`} text={l} />
