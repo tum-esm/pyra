@@ -65,8 +65,7 @@ export default function OverviewTab() {
     }
 
     const allInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
-    const currentInfoLogLines =
-        allInfoLogLines === undefined ? ['...'] : allInfoLogLines.slice(-10);
+    const currentInfoLogLines = allInfoLogLines?.slice(-10);
 
     function renderStateValue(
         value: null | boolean | number | string | number[],
@@ -222,9 +221,11 @@ export default function OverviewTab() {
                     'font-mono overflow-hidden'
                 }
             >
-                {currentInfoLogLines.map((l, i) => (
-                    <essentialComponents.LogLine key={`${i} ${l}`} text={l} />
-                ))}
+                {currentInfoLogLines === undefined && <essentialComponents.Spinner />}
+                {currentInfoLogLines !== undefined &&
+                    currentInfoLogLines.map((l, i) => (
+                        <essentialComponents.LogLine key={`${i} ${l}`} text={l} />
+                    ))}
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { dialog, shell } from '@tauri-apps/api';
-import { fetchUtils, reduxUtils } from '../utils';
+import { fetchUtils, functionalUtils, reduxUtils } from '../utils';
 import { essentialComponents } from '../components';
 import toast from 'react-hot-toast';
 import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
@@ -9,12 +9,28 @@ export default function LogTab() {
     const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
     const [archiving, setArchiving] = useState(false);
 
-    const debugLogLines = reduxUtils.useTypedSelector((s) => s.logs.debugLines);
-    const infoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
+    const dispatch = reduxUtils.useTypedDispatch();
+
     const fetchUpdates = reduxUtils.useTypedSelector((s) => s.logs.fetchUpdates);
     const setFetchUpdates = (f: boolean) => dispatch(reduxUtils.logsActions.setFetchUpdates(f));
 
-    const dispatch = reduxUtils.useTypedDispatch();
+    const renderedLogScope = reduxUtils.useTypedSelector((s) => s.logs.renderedLogScope);
+    const setRenderedLogScope = (f: '3 iterations' | '5 minutes') =>
+        dispatch(reduxUtils.logsActions.setRenderedLogScope(f));
+
+    const debugLogLines = reduxUtils.useTypedSelector((s) => s.logs.debugLines);
+    const infoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
+
+    const renderedLogLines: string[] | undefined = useMemo(() => {
+        if (debugLogLines === undefined || infoLogLines === undefined) {
+            return undefined;
+        }
+        let leveledLines = logLevel === 'info' ? infoLogLines : debugLogLines;
+        if (renderedLogScope === '3 iterations') {
+            leveledLines = functionalUtils.reduceLogLines(leveledLines, '3 iterations');
+        }
+        return leveledLines;
+    }, [debugLogLines, infoLogLines, logLevel, renderedLogScope]);
 
     async function openLogsFolder() {
         let baseDir = await documentDir();
@@ -51,13 +67,8 @@ export default function LogTab() {
         }
     }
 
-    const logsAreLoading = debugLogLines === undefined || infoLogLines === undefined;
-
-    // TODO: Make min-window-size larger
-    // TODO: Toggle between log times: "2 iterations" | "3 minutes" | "15 minutes" | "60 minutes"
-
     return (
-        <div className={'flex-col w-full h-full pt-4 '}>
+        <div className={'flex flex-col w-full h-[calc(100vh-3.5rem)] pt-4 overflow-hidden '}>
             <div className="px-6 mb-4 flex-row-center gap-x-2">
                 <essentialComponents.LiveSwitch isLive={fetchUpdates} toggle={setFetchUpdates} />
                 <essentialComponents.Toggle
@@ -65,7 +76,12 @@ export default function LogTab() {
                     setValue={(s: any) => setLogLevel(s)}
                     values={['info', 'debug']}
                 />
-                {logsAreLoading && <essentialComponents.Spinner />}
+                <essentialComponents.Toggle
+                    value={renderedLogScope}
+                    setValue={setRenderedLogScope}
+                    values={['3 iterations', '5 minutes']}
+                />
+                {renderedLogLines === undefined && <essentialComponents.Spinner />}
                 <div className="flex-grow" />
                 <essentialComponents.Button onClick={openLogsFolder} variant="white">
                     open logs folder
@@ -76,16 +92,16 @@ export default function LogTab() {
             </div>
             <div
                 className={
-                    'w-full !py-2 !mb-0 font-mono text-xs ' +
-                    'border-t border-gray-250 bg-white flex-grow'
+                    'w-full !py-2 !mb-0 font-mono text-xs overflow-y-scroll ' +
+                    'border-t border-gray-250 bg-whites flex-grow bg-white'
                 }
             >
-                {!logsAreLoading && (
+                {renderedLogLines !== undefined && (
                     <>
-                        {(logLevel === 'info' ? infoLogLines : debugLogLines).map((l, i) => (
+                        {renderedLogLines.map((l, i) => (
                             <essentialComponents.LogLine text={l} key={`${i} ${l}`} />
                         ))}
-                        {debugLogLines.length == 0 && <strong>logs are empty</strong>}
+                        {renderedLogLines.length == 0 && <strong>logs are empty</strong>}
                     </>
                 )}
             </div>

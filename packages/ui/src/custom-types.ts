@@ -9,6 +9,7 @@ export namespace customTypes {
         infoLines: string[] | undefined;
         debugLines: string[] | undefined;
         fetchUpdates: boolean;
+        renderedLogScope: string;
     };
     export type reduxStateCoreState = { body: coreState | undefined };
     export type reduxStateCoreProcess = {
