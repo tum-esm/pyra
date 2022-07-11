@@ -87,7 +87,7 @@ export default function OverviewTab() {
     }
 
     return (
-        <div className={'flex-col-center w-full h-full overflow-y-scroll gap-y-4 pt-4 pb-12 px-6'}>
+        <div className={'flex-col-center w-full gap-y-4 pt-4 pb-12 px-6'}>
             <div className="w-full text-sm h-7 flex-row-left">
                 <essentialComponents.Ping state={true} />
                 <span className="ml-2.5 mr-1">
@@ -112,7 +112,7 @@ export default function OverviewTab() {
             </div>
             <div className="w-full h-px bg-gray-300" />
             {coreState === undefined && (
-                <div className="w-full flex-row-left gap-x-2">
+                <div className="w-full flex-row-left gap-x-2 text-sm pl-2">
                     State is loading <essentialComponents.Spinner />
                 </div>
             )}
@@ -213,7 +213,7 @@ export default function OverviewTab() {
                 </div>
             )}
             <div className="w-full h-px bg-gray-300" />
-            <div className="w-full pl-2 -mb-1 text-sm font-medium">Last 10 log lines:</div>
+            <div className="w-full pl-2 -mb-1 text-sm">Last 10 log lines:</div>
             <div
                 className={
                     'w-full !mb-0 bg-white flex-grow text-xs ' +
@@ -221,7 +221,7 @@ export default function OverviewTab() {
                     'font-mono overflow-hidden'
                 }
             >
-                {currentInfoLogLines === undefined && <essentialComponents.Spinner />}
+                {currentInfoLogLines === undefined && <div className="p-2"><essentialComponents.Spinner /></div>}
                 {currentInfoLogLines !== undefined &&
                     currentInfoLogLines.map((l, i) => (
                         <essentialComponents.LogLine key={`${i} ${l}`} text={l} />

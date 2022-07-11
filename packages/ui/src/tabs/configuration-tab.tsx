@@ -74,7 +74,7 @@ export default function ConfigurationTab() {
             <div
                 className={
                     'bg-white border-r border-gray-300 shadow ' +
-                    'flex flex-col py-3 z-10 w-44 overflow-y-scroll'
+                    'flex flex-col py-3 z-10 w-44 h-full'
                 }
             >
                 {sections.map((section) => (
@@ -100,7 +100,7 @@ export default function ConfigurationTab() {
                     </button>
                 ))}
             </div>
-            <div className={'z-0 flex-grow h-full p-6 overflow-y-scroll relative pb-20'}>
+            <div className={'z-0 flex-grow h-full p-6 overflow-y-auto relative pb-20'}>
                 {activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
                 {activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
                 {activeKey === 'camtracker' && <configurationComponents.ConfigSectionCamtracker />}

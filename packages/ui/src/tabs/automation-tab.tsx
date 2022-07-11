@@ -9,7 +9,7 @@ export default function AutomationTab() {
     );
 
     return (
-        <div className={'flex flex-col w-full h-full overflow-y-scroll gap-y-4 py-4'}>
+        <div className={'flex flex-col w-full gap-y-4 py-4'}>
             <automationComponents.PyraCoreStatus />
             <div className="w-full h-px bg-gray-300" />
             {pyraIsInTestMode && (

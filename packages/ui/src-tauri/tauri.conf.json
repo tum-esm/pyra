@@ -99,8 +99,8 @@
                 "fullscreen": false,
                 "resizable": true,
                 "title": "Pyra UI",
-                "height": 600,
-                "minHeight": 600,
+                "height": 620,
+                "minHeight": 620,
                 "width": 1000,
                 "minWidth": 1000,
                 "center": true
