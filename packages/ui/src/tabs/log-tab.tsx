@@ -34,11 +34,11 @@ export default function LogTab() {
 
     async function openLogsFolder() {
         let baseDir = await documentDir();
-        let filePath = await join('pyra-4', 'logs', 'debug.log');
+        let filePath = await join('pyra-4', 'logs');
         switch (import.meta.env.VITE_ENVIRONMENT) {
             // on my personal machine
             case 'development-moritz':
-                filePath = await join('research', filePath);
+                filePath = await join('research', 'pyra', 'logs');
                 break;
 
             // on the R19 laptop the Documents folder is a network directory
