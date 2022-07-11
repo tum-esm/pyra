@@ -5,8 +5,8 @@ export default function Header(props: {
 }) {
     return (
         <header className="z-50 flex flex-row items-center flex-shrink-0 w-full px-2 py-0 bg-gray-900 shadow h-14">
-            <h1 className="pl-3 text-2xl font-bold text-center text-white whitespace-nowrap">
-                PyRa <span className="pl-0.5 font-normal opacity-50">{APP_VERSION}</span>
+            <h1 className="pl-3 text-2xl font-semibold text-center text-white whitespace-nowrap">
+                PYRA <span className="pl-0.5 font-normal opacity-50">{APP_VERSION}</span>
             </h1>
             <div className="flex-grow " />
             <div className="flex flex-wrap justify-center px-4 py-2 gap-x-2 gap-y-2">
