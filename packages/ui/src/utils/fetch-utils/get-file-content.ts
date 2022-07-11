@@ -7,7 +7,7 @@ async function getFileContent(filePath: string) {
     switch (import.meta.env.VITE_ENVIRONMENT) {
         // on my personal machine
         case 'development-moritz':
-            absoluteFilePath = await join('research', 'pyra', ...filePath.split('/'));
+            absoluteFilePath = await join('research', 'pyra-4', ...filePath.split('/'));
             break;
 
         // on the R19 laptop the Documents folder is a network directory

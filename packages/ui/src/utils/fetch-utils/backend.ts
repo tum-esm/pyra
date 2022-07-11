@@ -7,7 +7,7 @@ async function callCLI(args: string[]) {
     switch (import.meta.env.VITE_ENVIRONMENT) {
         // on my personal machine
         case 'development-moritz':
-            projectDirPath = await join(await documentDir(), 'research', 'pyra');
+            projectDirPath = await join(await documentDir(), 'research', 'pyra-4');
             break;
 
         // on the R19 laptop the Documents folder is a network directory
