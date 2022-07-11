@@ -5,7 +5,7 @@
 -   [x] Remove unused UIcode (sort config keys, ...)
 -   [x] In PLCInterface write updates to StateInterface
 -   [x] In cli.plc write updates to StateInterface
--   [ ] When over 70 minutes archive logs older than 60 minutes
+-   [x] Archive logs older than 60 minutes every 10 minutes
 -   [x] remove triggers.max_sun_elevation as not needed
 -   [x] Add commit sha and pyra version to emails
 -   [x] Add last 2 iterations log lines to emails
