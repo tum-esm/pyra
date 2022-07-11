@@ -40,7 +40,7 @@ def get_current_log_lines():
             included_iterations += 1
         log_lines_in_email.append(l)
         if included_iterations == 2:
-            return log_lines_in_email.reverse()
+            return log_lines_in_email[::-1]
 
 
 class ExceptionEmailClient:
