@@ -1,7 +1,13 @@
 import subprocess
+import time
 import click
 import os
 import psutil
+from packages.core.modules.enclosure_control import EnclosureControl
+from packages.core.modules.opus_measurement import OpusMeasurement
+from packages.core.modules.sun_tracking import SunTracking
+from packages.core.utils import ConfigInterface
+from packages.core.utils.interfaces.plc_interface import PLCInterface
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -63,11 +69,24 @@ def _stop_pyra_core():
         error_handler("No active process to be terminated")
     else:
         success_handler(
-            f"Terminated {len(termination_pids)} background "
+            f"Terminated pyra-core {len(termination_pids)} background "
             + f"processe(s) with PID(s) {termination_pids}"
         )
 
-        # TODO: Add teardown routine (close cover, etc.)
+        config = ConfigInterface().read()
+        enclosure = EnclosureControl(config)
+        tracking = SunTracking(config)
+        opus = OpusMeasurement(config)
+
+        enclosure.force_cover_close()
+        time.sleep(2)
+        if tracking.ct_application_running:
+            tracking.stop_sun_tracking_automation()
+            time.sleep(2)
+        if opus.opus_application_running:
+            opus.stop_macro()
+
+        success_handler("Stopped the measurement process")
 
 
 @click.command(help="Checks whether the pyra-core background process is running")

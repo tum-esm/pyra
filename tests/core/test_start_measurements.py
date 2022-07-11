@@ -6,8 +6,7 @@ from packages.core.modules.opus_measurement import OpusMeasurement
 import time
 
 
-def test_start_up():
-
+def test_start_measurements():
     _CONFIG = ConfigInterface().read()
     enclosure = EnclosureControl(_CONFIG)
     opus = OpusMeasurement(_CONFIG)

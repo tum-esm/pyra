@@ -32,6 +32,7 @@ class EnclosureControl:
     def _initialize(self):
         self.plc_interface = PLCInterface(self.config)
         self.plc_interface.set_auto_temperature(True)
+        self.plc_state = self.plc_interface.read()
         self.last_cycle_automation_status = 0
         self.initialized = True
 
@@ -47,11 +48,12 @@ class EnclosureControl:
 
         logger.info("Running EnclosureControl")
 
-        if not self.initialized:
+        if self.initialized:
+            self.plc_state = self.plc_interface.read()
+        else:
             self._initialize()
 
         self.plc_interface.update_config(self.config)
-        self.plc_state = self.plc_interface.read()
 
         # read current state of actors and sensors in enclosure
         logger.info("New continuous readings.")

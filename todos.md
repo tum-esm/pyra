@@ -9,7 +9,7 @@
 -   [x] remove triggers.max_sun_elevation as not needed
 -   [x] Add commit sha and pyra version to emails
 -   [x] Add last 2 iterations log lines to emails
--   [ ] Add teardown routine cli.core
+-   [x] Add teardown routine cli.core
 -   [ ] Add time logic
 
 -   [ ] Test stuff (incl. time-toggle performance) on enclosure
