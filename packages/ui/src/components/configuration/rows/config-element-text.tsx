@@ -28,7 +28,6 @@ export default function ConfigElementText(props: {
 
     async function triggerFileSelection() {
         const result: any = await dialog.open({ title: 'PyRa 4 UI', multiple: false });
-        console.log({ result });
         if (result !== null) {
             setValue(result);
         }

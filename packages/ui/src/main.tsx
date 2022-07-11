@@ -39,11 +39,6 @@ export default function Main() {
         fetchUtils.initialAppState(dispatch, setBackendIntegrity).catch(console.error);
     }, []);
 
-    // TODO: show "reload required" popup if "enclosureControlsIsVisible" changes to true or false
-    //const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
-    //let enclosureControlsIsVisible =
-    //    centralConfig === undefined ? undefined : centralConfig.tum_plc !== null;
-
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
             {backendIntegrity === undefined && (

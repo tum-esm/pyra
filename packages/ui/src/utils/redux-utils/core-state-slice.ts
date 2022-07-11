@@ -12,7 +12,6 @@ export const coreStateSlice = createSlice({
             state: customTypes.reduxStateCoreState,
             action: { payload: customTypes.coreState }
         ) => {
-            console.log('ELO');
             state.body = JSON.parse(JSON.stringify(action.payload));
         },
         setPartial: (
@@ -25,7 +24,7 @@ export const coreStateSlice = createSlice({
                     JSON.parse(JSON.stringify(state.body))
                 );
             } else {
-                console.warn('Cannot coreState.setPartial with a null state');
+                console.error('Cannot coreState.setPartial with a null state');
             }
         },
     },
