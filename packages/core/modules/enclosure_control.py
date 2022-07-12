@@ -125,7 +125,6 @@ class EnclosureControl:
         self.plc_interface.set_manual_control(True)
         self.plc_interface.set_cover_angle(0)
         self.plc_interface.set_manual_control(False)
-        self.wait_for_cover_closing()
 
     def wait_for_cover_closing(self, throw_error=True) -> None:
         """Waits steps of 5s for the enclosure cover to close.
