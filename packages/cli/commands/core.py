@@ -82,6 +82,7 @@ def _stop_pyra_core():
         if tracking.ct_application_running:
             tracking.stop_sun_tracking_automation()
         if opus.opus_application_running:
+            # TODO: Kill Macro does not succeed. Why?
             opus.stop_macro()
             time.sleep(2)
             opus.close_opus()
