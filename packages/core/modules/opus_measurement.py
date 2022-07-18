@@ -135,6 +135,7 @@ class OpusMeasurement:
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         full_path = self._CONFIG["opus"]["macro_path"]
+        macro_basename = os.path.basename(full_path)
 
         if not self.__test_dde_connection:
             return
@@ -144,14 +145,14 @@ class OpusMeasurement:
         StateInterface.update({"active_macro_id": active_macro_id})
 
         if "OK" in answer:
-            logger.info("Started OPUS macro: {}.".format(full_path))
+            logger.info(f"Started OPUS macro: {macro_basename} with id: {active_macro_id}.")
         else:
-            logger.info("Could not start OPUS macro as expected.")
+            logger.info(f"Could not start OPUS macro with id: {active_macro_id} as expected.")
 
     def stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._CONFIG["opus"]["macro_path"]
+        macro_basename = os.path.basename(self._CONFIG["opus"]["macro_path"])
         active_macro_id = StateInterface.read()["active_macro_id"]
 
         if not self.__test_dde_connection:
@@ -159,9 +160,9 @@ class OpusMeasurement:
         answer = self.conversation.Request("KILL_MACRO " + active_macro_id)
 
         if "OK" in answer:
-            logger.info(f"Stopped OPUS macro: {full_path}.")
+            logger.info(f"Stopped OPUS macro: {macro_basename} with id: {active_macro_id}.")
         else:
-            logger.info("Could not stop OPUS macro as expected.")
+            logger.info(f"Could not stop OPUS macro with id: {active_macro_id} as expected.")
 
 
     def close_opus(self):
