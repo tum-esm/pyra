@@ -103,6 +103,14 @@ class EnclosureControl:
                 logger.info("Cover is still open. Trying to close again.")
                 self.force_cover_close()
                 self.wait_for_cover_closing()
+        
+        # check and sync: sync_to_cover with measurement status
+        if measurements_should_be_running & (not self.plc_state.control.sync_to_tracker):
+            logger.debug("Set sync to tracker to True to macht measurement status.")
+            self.plc_interface.set_sync_to_tracker(True)
+        if (not measurements_should_be_running) & self.plc_state.control.sync_to_tracker:
+            logger.debug("Set sync to tracker to False to macht measurement status.")
+            self.plc_interface.set_sync_to_tracker(False)
 
     # PLC.ACTORS SETTERS
 
