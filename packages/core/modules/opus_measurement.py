@@ -72,9 +72,7 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -169,7 +167,6 @@ class OpusMeasurement:
             StateInterface.update({"active_macro_id": None})
         else:
             logger.info(f"Could not stop OPUS macro with id: {active_macro_id} as expected.")
-
 
     def close_opus(self):
         """Closes OPUS via DDE."""
@@ -315,4 +312,3 @@ class OpusMeasurement:
                 self.load_experiment()
                 time.sleep(5)
                 self.start_macro()
-
