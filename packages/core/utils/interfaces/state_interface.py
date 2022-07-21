@@ -20,6 +20,7 @@ VBDSD_IMG_DIR = os.path.join(RUNTIME_DATA_PATH, "vbdsd")
 
 
 # TODO: Rename as CoreStateInterface
+# TODO: Documentation
 
 
 class StateInterface:
@@ -48,6 +49,7 @@ class StateInterface:
                 "last_boot_time": None,
                 "filled_disk_space_fraction": None,
             },
+            "active_opus_macro_id": None,
         }
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
