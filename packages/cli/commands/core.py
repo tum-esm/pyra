@@ -79,12 +79,13 @@ def _stop_pyra_core():
         opus = OpusMeasurement(config)
 
         enclosure.force_cover_close()
-        time.sleep(2)
         if tracking.ct_application_running:
             tracking.stop_sun_tracking_automation()
-            time.sleep(2)
         if opus.opus_application_running:
+            # TODO: Kill Macro does not succeed. Why?
             opus.stop_macro()
+            time.sleep(2)
+            opus.close_opus()
 
         success_handler("Stopped the measurement process")
 
