@@ -370,8 +370,7 @@ class VBDSD_Thread:
 
             # append sun status to status history
             status_history.append(max(status, 0))
-            logger.debug(f"New VBDSD status: {status}")
-            logger.debug(f"New VBDSD status history: {status_history.get()}")
+            logger.debug(f"New VBDSD status: {status}. Current history: {status_history.get()}")
 
             if frame is None:
                 logger.debug(f"Could not take image")
@@ -380,9 +379,6 @@ class VBDSD_Thread:
                     img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
                     img_path = os.path.join(IMG_DIR, img_name)
                     cv.imwrite(img_path, frame)
-                    logger.debug(f"Saving image to: {img_path}")
-                else:
-                    logger.debug(f"Skipping image saving")
 
             # evaluate sun state only if list is filled
             if status_history.size() == status_history.maxsize():
@@ -403,7 +399,12 @@ class VBDSD_Thread:
             elapsed_time = time.time() - start_time
             time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
             if time_to_wait > 0:
-                logger.debug(f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)")
+                if _CONFIG["vbdsd"]["save_images"]:
+                    logger.debug(
+                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s). Saving image to: {img_path}")
+                else:
+                    logger.debug(
+                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s). Skipping image saving.")
                 time.sleep(time_to_wait)
 
             if not infinite_loop:

@@ -28,6 +28,7 @@ class OpusMeasurement:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
         self.initialized = False
+        self.current_experiment = None
         if self._CONFIG["general"]["test_mode"]:
             return
 
@@ -62,15 +63,16 @@ class OpusMeasurement:
         # start or stops opus.exe depending on sun angle
         self.automated_process_handling()
 
+        # check and reload experiment if updated in config.json
+        self.check_for_experiment_change()
+
         if self.__is_em27_responsive:
             logger.debug("Successful ping to EM27.")
         else:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -128,6 +130,7 @@ class OpusMeasurement:
 
         if "OK" in answer:
             logger.info("Loaded new OPUS experiment: {}.".format(full_path))
+            self.current_experiment = full_path
         else:
             logger.info("Could not load OPUS experiment as expected.")
 
@@ -135,29 +138,35 @@ class OpusMeasurement:
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         full_path = self._CONFIG["opus"]["macro_path"]
+        macro_basename = os.path.basename(full_path)
 
         if not self.__test_dde_connection:
             return
         answer = self.conversation.Request("RUN_MACRO " + full_path)
 
+        active_macro_id = str(answer[4:-1])
+        StateInterface.update({"active_macro_id": active_macro_id})
+
         if "OK" in answer:
-            logger.info("Started OPUS macro: {}.".format(full_path))
+            logger.info(f"Started OPUS macro: {macro_basename} with id: {active_macro_id}.")
         else:
-            logger.info("Could not start OPUS macro as expected.")
+            logger.info(f"Could not start OPUS macro with id: {active_macro_id} as expected.")
 
     def stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._CONFIG["opus"]["macro_path"]
+        macro_basename = os.path.basename(self._CONFIG["opus"]["macro_path"])
+        active_macro_id = StateInterface.read()["active_macro_id"]
 
         if not self.__test_dde_connection:
             return
-        answer = self.conversation.Request("KILL_MACRO " + full_path)
+        answer = self.conversation.Request("KILL_MACRO " + active_macro_id)
 
         if "OK" in answer:
-            logger.info("Stopped OPUS macro: {}.".format(full_path))
+            logger.info(f"Stopped OPUS macro: {macro_basename} with id: {active_macro_id}.")
+            StateInterface.update({"active_macro_id": None})
         else:
-            logger.info("Could not stop OPUS macro as expected.")
+            logger.info(f"Could not stop OPUS macro with id: {active_macro_id} as expected.")
 
     def close_opus(self):
         """Closes OPUS via DDE."""
@@ -288,3 +297,18 @@ class OpusMeasurement:
                 self.stop_macro()
                 time.sleep(5)
                 self.close_opus()
+
+    def check_for_experiment_change(self):
+        """Compares the experiment in the config with the current active experiment.
+        To reload an experiment during an active macro the macro needs to be stopped first.
+        """
+
+        if self._CONFIG["opus"]["experiment_path"] != self.current_experiment:
+            if StateInterface.read()["active_macro_id"] == None:
+                self.load_experiment()
+            else:
+                self.stop_macro()
+                time.sleep(5)
+                self.load_experiment()
+                time.sleep(5)
+                self.start_macro()
