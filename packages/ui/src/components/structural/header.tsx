@@ -17,10 +17,10 @@ export default function Header(props: {
             t !== 'PLC Controls' &&
             plcIsControlledByUser === true
         ) {
-            const switchTabsAnyways = await ask(
-                'PLC is still controlled by user. Switch tabs anyways?',
-                { title: 'PLC is controlled by user', type: 'warning' }
-            );
+            const switchTabsAnyways = await ask('Switch tabs anyways?', {
+                title: 'PLC is still controlled by user',
+                type: 'warning',
+            });
             if (switchTabsAnyways) {
                 setActiveTab(t);
             }

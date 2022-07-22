@@ -15,7 +15,7 @@ CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 
 RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
-STATE_FILE_PATH = os.path.join(RUNTIME_DATA_PATH, "runtime-data", "state.json")
+STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 VBDSD_IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", "vbdsd")
 
 PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
@@ -41,11 +41,6 @@ class StateInterface:
             "measurements_should_be_running": False,
             "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
             "os_state": {
-                "average_system_load": {
-                    "last_1_minute": None,
-                    "last_5_minutes": None,
-                    "last_15_minutes": None,
-                },
                 "cpu_usage": None,
                 "memory_usage": None,
                 "last_boot_time": None,

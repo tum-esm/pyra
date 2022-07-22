@@ -34,11 +34,6 @@ class SystemChecks:
         StateInterface.update(
             {
                 "os_state": {
-                    "average_system_load": {
-                        "last_1_minute": round(average_system_load[0] * 100),
-                        "last_5_minutes": round(average_system_load[1] * 100),
-                        "last_15_minutes": round(average_system_load[2] * 100),
-                    },
                     "cpu_usage": cpu_usage,
                     "memory_usage": memory_usage,
                     "last_boot_time": last_boot_time,

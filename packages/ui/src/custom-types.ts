@@ -220,11 +220,6 @@ export namespace customTypes {
     };
 
     export type OSState = {
-        average_system_load: {
-            last_1_minute: number | null;
-            last_5_minutes: number | null;
-            last_15_minutes: number | null;
-        };
         cpu_usage: number | null;
         memory_usage: number | null;
         last_boot_time: string | null;
