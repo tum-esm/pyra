@@ -30,7 +30,7 @@ Bilder/**/*.JPG
 runtime-data/
 pyra-core-process-state.json
 logs/persistent-state.json
-logs/measurement-activity/*.json
+logs/activity/*.json
 
 # pyra ui
 packages/electron-ui/node_modules/
