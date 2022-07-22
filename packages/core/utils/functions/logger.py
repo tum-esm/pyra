@@ -140,4 +140,4 @@ class Logger:
             current_activity.append({"time": now.strftime("%H:%M:%S"), "event": event_label})
 
             with open(filepath, "w") as f:
-                json.dump(current_activity, f)
+                json.dump(current_activity, f, indent=4)

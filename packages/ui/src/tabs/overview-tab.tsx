@@ -1,5 +1,5 @@
 import { fetchUtils, reduxUtils } from '../utils';
-import { essentialComponents } from '../components';
+import { essentialComponents, overviewComponents } from '../components';
 import ICONS from '../assets/icons';
 import { useState } from 'react';
 import { customTypes } from '../custom-types';
@@ -121,6 +121,8 @@ export default function OverviewTab() {
                     </strong>
                 )}
             </div>
+            <div className="w-full h-px bg-gray-300" />
+            <overviewComponents.ActivityPlot />
             <div className="w-full h-px bg-gray-300" />
             {coreState === undefined && (
                 <div className="w-full pl-2 text-sm flex-row-left gap-x-2">
