@@ -34,6 +34,14 @@ class MeasurementConditions:
         if decision["mode"] == "automatic":
             measurements_should_be_running = self._get_automatic_decision()
 
+        if (
+            StateInterface.read()["measurements_should_be_running"]
+            != measurements_should_be_running
+        ):
+            Logger.log_activity_event(
+                "start-measurements" if measurements_should_be_running else "stop-measurements"
+            )
+
         logger.info(
             f"Measurements should be running is set to: {measurements_should_be_running}."
         )
