@@ -1,5 +1,6 @@
 import { range } from 'lodash';
 import moment from 'moment';
+import { reduxUtils } from '../../utils';
 
 const borderClass = 'border border-gray-250 rounded-sm';
 
@@ -13,6 +14,9 @@ function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
 
 function ActivityPlot() {
     const now = moment.utc();
+
+    const a = reduxUtils.useTypedSelector((s) => s.activity.history);
+    console.log({ a });
 
     return (
         <div className="flex flex-row items-center w-full gap-x-4">

@@ -15,11 +15,15 @@ export namespace customTypes {
     export type reduxStateCoreProcess = {
         pid: number | undefined;
     };
+    export type reduxStateActivity = {
+        history: activityHistory | undefined;
+    };
     export type reduxState = {
         config: reduxStateConfig;
         logs: reduxStateLogs;
         coreState: reduxStateCoreState;
         coreProcess: reduxStateCoreProcess;
+        activity: reduxStateActivity;
     };
     export type intArray3 = [number, number, number];
     export type intArray4 = [number, number, number, number];
@@ -237,4 +241,15 @@ export namespace customTypes {
         measurements_should_be_running?: boolean;
         enclosure_plc_readings?: partialEnclosurePlcReadings;
     };
+
+    export type activityHistory = {
+        time: string;
+        event:
+            | 'start-core'
+            | 'stop-core'
+            | 'start-measurements'
+            | 'stop-measurements'
+            | 'error-occured'
+            | 'errors-resolved';
+    }[];
 }
