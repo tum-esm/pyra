@@ -1,10 +1,22 @@
 import { range } from 'lodash';
+import moment from 'moment';
 
 const borderClass = 'border border-gray-200 rounded-sm';
 
-// 0 3 6 9 12 15 18 21 24
+function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
+    let fraction = time.hour() / 24.0 + time.minute() / (24.0 * 60) + time.second() / (24.0 * 3600);
+    if (fromRight) {
+        fraction = 1 - fraction;
+    }
+    return `${(fraction * 100).toFixed(2)}%`;
+}
 
 function ActivityPlot() {
+    const now = moment.utc();
+    const then = moment.utc('09:15:00', 'hh:mm:ss');
+
+    console.log(then.hour());
+
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
             <div className="text-sm font-semibold leading-3">Today's Activity:</div>
@@ -27,7 +39,7 @@ function ActivityPlot() {
                 >
                     <div
                         className="absolute top-0 z-20 h-full bg-red-200"
-                        style={{ left: '30%', right: '60%' }}
+                        style={{ left: timeToPercentage(now), right: timeToPercentage(then, true) }}
                     />
                     <div
                         className="absolute top-0 z-10 h-full bg-green-200"
