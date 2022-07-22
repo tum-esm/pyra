@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 import os
 import traceback
 import filelock
@@ -105,3 +106,38 @@ class Logger:
                     filename = os.path.join(PROJECT_DIR, "logs", "archive", f"{date}-{t}.log")
                     with open(filename, "a") as f:
                         f.writelines(archive_log_date_groups[date][t] + [""])
+
+    @staticmethod
+    def log_activity_event(event_label: str):
+        """
+        Log things like:
+        * start-measurements
+        * stop-measurements
+        * error-occured
+        * errors-resolved
+        * start-core
+        * stop-core
+        """
+        assert event_label in [
+            "start-measurements",
+            "stop-measurements",
+            "error-occured",
+            "errors-resolved",
+            "start-core",
+            "stop-core",
+        ]
+        now = datetime.utcnow()
+        filename = now.strftime("activity-%Y-%m-%d.json")
+        filepath = os.path.join(PROJECT_DIR, "logs", "activity", filename)
+
+        with filelock.FileLock(LOG_FILES_LOCK):
+            if os.path.isfile(filepath):
+                with open(filepath, "r") as f:
+                    current_activity = json.load(f)
+            else:
+                current_activity = []
+
+            current_activity.append({"time": now.strftime("%H:%M:%S"), "event": event_label})
+
+            with open(filepath, "w") as f:
+                json.dump(current_activity, f, indent=4)

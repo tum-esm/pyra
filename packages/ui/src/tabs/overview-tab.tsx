@@ -1,9 +1,10 @@
 import { fetchUtils, reduxUtils } from '../utils';
-import { essentialComponents } from '../components';
+import { essentialComponents, overviewComponents } from '../components';
 import ICONS from '../assets/icons';
 import { useState } from 'react';
 import { customTypes } from '../custom-types';
 import toast from 'react-hot-toast';
+import { mean } from 'lodash';
 
 export default function OverviewTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
@@ -81,9 +82,19 @@ export default function OverviewTab() {
             return value;
         }
         if (typeof value === 'object') {
-            return value.map((v) => `${v}%`).join(' | ');
+            value = mean(value);
         }
-        return `${value} ${options.numberAppendix}`;
+        return (
+            <div className="flex-row-center">
+                <div className="relative w-32 h-2 overflow-hidden bg-white border rounded-full border-gray-250">
+                    <div
+                        className="h-full bg-slate-700"
+                        style={{ width: `${value.toFixed(3)}%` }}
+                    />
+                </div>
+                <div className="ml-1.5 font-mono w-[3.375rem] text-right">{value.toFixed(1)} %</div>
+            </div>
+        );
     }
 
     return (
@@ -111,8 +122,10 @@ export default function OverviewTab() {
                 )}
             </div>
             <div className="w-full h-px bg-gray-300" />
+            <overviewComponents.ActivityPlot />
+            <div className="w-full h-px bg-gray-300" />
             {coreState === undefined && (
-                <div className="w-full flex-row-left gap-x-2 text-sm pl-2">
+                <div className="w-full pl-2 text-sm flex-row-left gap-x-2">
                     State is loading <essentialComponents.Spinner />
                 </div>
             )}
@@ -222,7 +235,9 @@ export default function OverviewTab() {
                 }
             >
                 {(currentInfoLogLines === undefined || currentInfoLogLines.length === 0) && (
-                    <div className="p-2"><essentialComponents.Spinner /></div>
+                    <div className="p-2">
+                        <essentialComponents.Spinner />
+                    </div>
                 )}
                 {currentInfoLogLines !== undefined &&
                     currentInfoLogLines.map((l, i) => (

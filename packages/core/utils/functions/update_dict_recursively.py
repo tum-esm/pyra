@@ -17,3 +17,16 @@ def update_dict_recursively(old_object, new_object):
         else:
             assert type(old_object) == type(new_object)
         return new_object
+
+
+"""
+TODO: Documentation
+{
+    "a": 3,
+    "b": {
+        "d": 40
+    }
+}
+
+{"a": 20}
+"""

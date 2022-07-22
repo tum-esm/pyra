@@ -72,7 +72,9 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
+        measurements_should_be_running = StateInterface.read()[
+            "measurements_should_be_running"
+        ]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -145,7 +147,7 @@ class OpusMeasurement:
         answer = self.conversation.Request("RUN_MACRO " + full_path)
 
         active_macro_id = str(answer[4:-1])
-        StateInterface.update({"active_macro_id": active_macro_id})
+        StateInterface.update({"active_opus_macro_id": active_macro_id}, persistent=True)
 
         if "OK" in answer:
             logger.info(f"Started OPUS macro: {macro_basename} with id: {active_macro_id}.")
@@ -156,7 +158,7 @@ class OpusMeasurement:
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
         macro_basename = os.path.basename(self._CONFIG["opus"]["macro_path"])
-        active_macro_id = StateInterface.read()["active_macro_id"]
+        active_macro_id = StateInterface.read(persistent=True)["active_opus_macro_id"]
 
         if not self.__test_dde_connection:
             return
@@ -164,7 +166,7 @@ class OpusMeasurement:
 
         if "OK" in answer:
             logger.info(f"Stopped OPUS macro: {macro_basename} with id: {active_macro_id}.")
-            StateInterface.update({"active_macro_id": None})
+            StateInterface.update({"active_opus_macro_id": None}, persistent=True)
         else:
             logger.info(f"Could not stop OPUS macro with id: {active_macro_id} as expected.")
 
@@ -304,7 +306,7 @@ class OpusMeasurement:
         """
 
         if self._CONFIG["opus"]["experiment_path"] != self.current_experiment:
-            if StateInterface.read()["active_macro_id"] == None:
+            if StateInterface.read(persistent=True)["active_opus_macro_id"] == None:
                 self.load_experiment()
             else:
                 self.stop_macro()

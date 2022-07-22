@@ -6,8 +6,7 @@ import psutil
 from packages.core.modules.enclosure_control import EnclosureControl
 from packages.core.modules.opus_measurement import OpusMeasurement
 from packages.core.modules.sun_tracking import SunTracking
-from packages.core.utils import ConfigInterface
-from packages.core.utils.interfaces.plc_interface import PLCInterface
+from packages.core.utils import ConfigInterface, Logger
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -59,6 +58,7 @@ def _start_pyra_core():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        Logger.log_activity_event("start-core")
         success_handler(f"Started background process with PID {p.pid}")
 
 
@@ -72,6 +72,12 @@ def _stop_pyra_core():
             f"Terminated {len(termination_pids)} pyra-core background "
             + f"processe(s) with PID(s) {termination_pids}"
         )
+        Logger.log_activity_event("stop-core")
+
+        config = ConfigInterface.read()
+
+        if config["general"]["test_mode"] or (config["tum_plc"] is None):
+            return
 
         config = ConfigInterface().read()
         enclosure = EnclosureControl(config)
@@ -82,7 +88,6 @@ def _stop_pyra_core():
         if tracking.ct_application_running:
             tracking.stop_sun_tracking_automation()
         if opus.opus_application_running:
-            # TODO: Kill Macro does not succeed. Why?
             opus.stop_macro()
             time.sleep(2)
             opus.close_opus()
