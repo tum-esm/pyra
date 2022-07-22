@@ -1,6 +1,7 @@
-import { range } from 'lodash';
+import { range, reduce } from 'lodash';
 import moment from 'moment';
 import { reduxUtils } from '../../utils';
+import { customTypes } from '../../custom-types';
 
 const borderClass = 'border border-gray-250 rounded-sm';
 
@@ -10,6 +11,34 @@ function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
         fraction = 1 - fraction;
     }
     return `${(fraction * 100).toFixed(2)}%`;
+}
+
+type ActivitySection = { from: string; to: string };
+
+function getSections(
+    activityHistory: customTypes.activityHistory,
+    startIndicator: string,
+    stopIndicator: string
+): ActivitySection[] {
+    const sections = reduce(
+        activityHistory,
+        (prev: ActivitySection[], curr, index) => {
+            if (curr.event === startIndicator) {
+                return [...prev, { from: curr.time, to: '23:59:59' }];
+            } else if (curr.event === stopIndicator) {
+                if (prev.length == 0) {
+                    return [{ from: '00:00:00', to: curr.time }];
+                } else {
+                    const lastFrom: any = prev.at(-1)?.from;
+                    return [...prev.slice(0, -1), { from: lastFrom, to: curr.time }];
+                }
+            } else {
+                return prev;
+            }
+        },
+        []
+    );
+    return sections;
 }
 
 function ActivityPlot() {
@@ -78,7 +107,7 @@ function ActivityPlot() {
                                 'flex-shrink-0 w-2.5 h-2.5 bg-gray-300 rounded-full ' + borderClass
                             }
                         />
-                        core is not running
+                        core not running
                     </span>
                     <span className="flex-row-center gap-x-1">
                         <div
@@ -94,7 +123,7 @@ function ActivityPlot() {
                                 'flex-shrink-0 w-2.5 h-2.5 bg-green-200 rounded-full ' + borderClass
                             }
                         />
-                        measurements running
+                        measuring
                     </span>
                     <span className="flex-row-center gap-x-1">
                         <div
