@@ -15,7 +15,8 @@
             "dialog": {
                 "confirm": true,
                 "message": true,
-                "open": true
+                "open": true,
+                "ask": true
             },
             "shell": {
                 "all": true,
