@@ -15,8 +15,10 @@ CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 
 RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
-STATE_FILE_PATH = os.path.join(RUNTIME_DATA_PATH, "state.json")
-VBDSD_IMG_DIR = os.path.join(RUNTIME_DATA_PATH, "vbdsd")
+STATE_FILE_PATH = os.path.join(RUNTIME_DATA_PATH, "runtime-data", "state.json")
+VBDSD_IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", "vbdsd")
+
+PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
 
 
 # TODO: Rename as CoreStateInterface
@@ -49,23 +51,31 @@ class StateInterface:
                 "last_boot_time": None,
                 "filled_disk_space_fraction": None,
             },
-            "active_opus_macro_id": None,
         }
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
 
+        # persistent state will not be removed with a restart of pyra-core
+        if not os.path.isfile(PERSISTENT_STATE_FILE_PATH):
+            new_persistent_state = {"active_opus_macro_id": None, "current_exceptions": []}
+            with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
+                json.dump(new_persistent_state, f, indent=4)
+
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def read() -> dict:
-        with open(STATE_FILE_PATH, "r") as f:
+    def read(persistent: bool = False) -> dict:
+        file_path = PERSISTENT_STATE_FILE_PATH if persistent else STATE_FILE_PATH
+        with open(file_path, "r") as f:
             return json.load(f)
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def update(update: dict):
-        with open(STATE_FILE_PATH, "r") as f:
+    def update(update: dict, persistent: bool = False):
+        file_path = PERSISTENT_STATE_FILE_PATH if persistent else STATE_FILE_PATH
+
+        with open(file_path, "r") as f:
             current_state = json.load(f)
 
         new_state = update_dict_recursively(current_state, update)
-        with open(STATE_FILE_PATH, "w") as f:
+        with open(file_path, "w") as f:
             json.dump(new_state, f, indent=4)
