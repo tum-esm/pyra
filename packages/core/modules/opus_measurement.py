@@ -116,10 +116,7 @@ class OpusMeasurement:
             self.__connect_to_dde_opus()
 
             # retest DDE connection
-            if self.conversation.Connected() == 1:
-                return True
-            else:
-                return False
+            return self.conversation.Connected() == 1
 
     def load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
@@ -130,6 +127,7 @@ class OpusMeasurement:
             return
         answer = self.conversation.Request("LOAD_EXPERIMENT " + experiment_path)
         logger.info(f"Loaded new OPUS experiment: {experiment_path}")
+        self.current_experiment = experiment_path
 
         # TODO: why does the following logic not work anymore
         """
