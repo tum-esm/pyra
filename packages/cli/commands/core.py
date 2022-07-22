@@ -75,7 +75,6 @@ def _stop_pyra_core():
         Logger.log_activity_event("stop-core")
 
         config = ConfigInterface.read()
-
         if config["general"]["test_mode"] or (config["tum_plc"] is None):
             return
 
@@ -85,9 +84,9 @@ def _stop_pyra_core():
         opus = OpusMeasurement(config)
 
         enclosure.force_cover_close()
-        if tracking.ct_application_running:
+        if tracking.ct_application_running():
             tracking.stop_sun_tracking_automation()
-        if opus.opus_application_running:
+        if opus.opus_application_running():
             opus.stop_macro()
             time.sleep(2)
             opus.close_opus()
