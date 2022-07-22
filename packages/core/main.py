@@ -32,7 +32,7 @@ def run():
     ]
     vbdsd_thread = modules.vbdsd.VBDSD_Thread()
 
-    current_exceptions = []
+    current_exceptions = StateInterface.read(persistent=True)["current_exceptions"]
 
     while True:
         start_time = time.time()
@@ -82,6 +82,7 @@ def run():
 
             # if no errors until now
             current_exceptions = [*new_current_exceptions]
+            StateInterface.update({"current_exceptions": current_exceptions}, persistent=True)
         except Exception as e:
             logger.exception(e)
 
