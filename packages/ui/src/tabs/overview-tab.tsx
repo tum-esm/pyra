@@ -6,6 +6,16 @@ import { customTypes } from '../custom-types';
 import toast from 'react-hot-toast';
 import { mean } from 'lodash';
 
+
+function SystemRow(props: { label: string, value: React.ReactNode }) {
+    return (<div className="w-full pl-2 flex-row-left">
+        <div className="w-32">{props.label}:</div>
+        <div className="min-w-[2rem]">
+            {props.value}
+        </div>
+    </div>)
+}
+
 export default function OverviewTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
     const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
@@ -68,18 +78,11 @@ export default function OverviewTab() {
     const allInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
     const currentInfoLogLines = allInfoLogLines?.slice(-10);
 
-    function renderStateValue(
-        value: null | boolean | number | string | number[],
-        options: { trueLabel: string; falseLabel: string; numberAppendix: string }
+    function renderSystemBar(
+        value: null | number | number[]
     ) {
         if (value === null) {
             return '-';
-        }
-        if (typeof value === 'boolean') {
-            return value ? options.trueLabel : options.falseLabel;
-        }
-        if (typeof value === 'string') {
-            return value;
         }
         if (typeof value === 'object') {
             value = mean(value);
@@ -95,6 +98,27 @@ export default function OverviewTab() {
                 <div className="ml-1.5 font-mono w-[3.375rem] text-right">{value.toFixed(1)} %</div>
             </div>
         );
+    }
+
+    function renderString(
+        value: null | string | number,
+        options?: { appendix: string }
+    ) {
+        if (value === null) {
+            return '-';
+        } else {
+            return `${value}${options !== undefined ? options.appendix : ""}`;
+        }
+    }
+
+    function renderBoolean(
+        value: null | boolean
+    ) {
+        if (value === null) {
+            return '-';
+        } else {
+            return value ? "Yes" : "No";
+        }
     }
 
     return (
@@ -150,39 +174,26 @@ export default function OverviewTab() {
                             'border-r border-gray-300 min-w-[16rem]'
                         }
                     >
-                        {[
-                            {
-                                label: 'Temperature',
-                                value: coreState.enclosure_plc_readings.sensors.temperature,
-                            },
-                            {
-                                label: 'Reset needed',
-                                value: coreState.enclosure_plc_readings.state.reset_needed,
-                            },
-                            {
-                                label: 'Motor failed',
-                                value: coreState.enclosure_plc_readings.state.motor_failed,
-                            },
-                            {
-                                label: 'Cover is closed',
-                                value: coreState.enclosure_plc_readings.state.cover_closed,
-                            },
-                            {
-                                label: 'Rain Detected',
-                                value: coreState.enclosure_plc_readings.state.rain,
-                            },
-                        ].map((s) => (
-                            <div className="w-full pl-2 flex-row-left">
-                                <div className="w-32">{s.label}:</div>
-                                <div className="min-w-[2rem]">
-                                    {renderStateValue(s.value, {
-                                        trueLabel: 'Yes',
-                                        falseLabel: 'No',
-                                        numberAppendix: '°C',
-                                    })}
-                                </div>
-                            </div>
-                        ))}
+                        <SystemRow
+                            label="Temperature"
+                            value={renderString(coreState.enclosure_plc_readings.sensors.temperature, { appendix: "°C" })}
+                        />
+                        <SystemRow
+                            label="Reset needed"
+                            value={renderBoolean(coreState.enclosure_plc_readings.state.reset_needed)}
+                        />
+                        <SystemRow
+                            label="Motor failed"
+                            value={renderBoolean(coreState.enclosure_plc_readings.state.motor_failed)}
+                        />
+                        <SystemRow
+                            label="Cover is closed"
+                            value={renderBoolean(coreState.enclosure_plc_readings.state.cover_closed)}
+                        />
+                        <SystemRow
+                            label="Rain detected"
+                            value={renderBoolean(coreState.enclosure_plc_readings.state.rain)}
+                        />
                         <essentialComponents.Button
                             variant="red"
                             onClick={closeCover}
@@ -193,35 +204,22 @@ export default function OverviewTab() {
                         </essentialComponents.Button>
                     </div>
                     <div className="flex-col items-start justify-start pl-3 text-sm">
-                        {[
-                            {
-                                label: 'Last boot time',
-                                value: coreState.os_state.last_boot_time,
-                            },
-                            {
-                                label: 'Disk space usage',
-                                value: coreState.os_state.filled_disk_space_fraction,
-                            },
-                            {
-                                label: 'CPU cores usage',
-                                value: coreState.os_state.cpu_usage,
-                            },
-                            {
-                                label: 'Memory usage',
-                                value: coreState.os_state.memory_usage,
-                            },
-                        ].map((s) => (
-                            <div className="w-full flex-row-left">
-                                <div className="w-32">{s.label}:</div>
-                                <div>
-                                    {renderStateValue(s.value, {
-                                        trueLabel: 'Yes',
-                                        falseLabel: 'No',
-                                        numberAppendix: '%',
-                                    })}
-                                </div>
-                            </div>
-                        ))}
+                        <SystemRow
+                            label='Last boot time'
+                            value={renderString(coreState.os_state.last_boot_time)}
+                        />
+                        <SystemRow
+                            label="Disk space usage"
+                            value={renderSystemBar(coreState.os_state.filled_disk_space_fraction)}
+                        />
+                        <SystemRow
+                            label="CPU usage"
+                            value={renderSystemBar(coreState.os_state.cpu_usage)}
+                        />
+                        <SystemRow
+                            label="Memory usage"
+                            value={renderSystemBar(coreState.os_state.memory_usage)}
+                        />
                     </div>
                 </div>
             )}
