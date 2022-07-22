@@ -20,7 +20,7 @@ function getSections(
     startIndicator: string,
     stopIndicator: string
 ): ActivitySection[] {
-    const sections = reduce(
+    return reduce(
         activityHistory,
         (prev: ActivitySection[], curr, index) => {
             if (curr.event === startIndicator) {
@@ -38,14 +38,29 @@ function getSections(
         },
         []
     );
-    return sections;
 }
 
 function ActivityPlot() {
     const now = moment.utc();
 
-    const a = reduxUtils.useTypedSelector((s) => s.activity.history);
-    console.log({ a });
+    const rawActivityHistory = reduxUtils.useTypedSelector((s) => s.activity.history);
+
+    let activityHistory: customTypes.activityHistory = [];
+    if (rawActivityHistory !== undefined) {
+        if (rawActivityHistory.length === 0 || rawActivityHistory.at(0)?.event !== 'start-core') {
+            activityHistory = [{ event: 'start-core', time: '00:00:00' }, ...rawActivityHistory];
+        } else {
+            activityHistory = rawActivityHistory;
+        }
+    }
+
+    const sections = {
+        core: getSections(activityHistory, 'start-core', 'stop-core'),
+        measurements: getSections(activityHistory, 'start-measurements', 'stop-measurements'),
+        error: getSections(activityHistory, 'error-occured', 'errors-resolved'),
+    };
+
+    console.log({ sections });
 
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
@@ -67,15 +82,37 @@ function ActivityPlot() {
                         'relative flex-grow w-full h-4 bg-gray-300 overflow-hidden ' + borderClass
                     }
                 >
-                    <div
-                        className="absolute top-0 z-10 h-full bg-green-200"
-                        style={{ left: '12%', right: '30%' }}
-                    />
+                    {sections.core.map((s) => (
+                        <div
+                            key={`core-${s.from}-${s.to}`}
+                            className="absolute top-0 z-0 h-full bg-white"
+                            style={{
+                                left: timeToPercentage(moment.utc(s.from, 'HH:mm:ss', true)),
+                                right: timeToPercentage(moment.utc(s.to, 'HH:mm:ss', true), true),
+                            }}
+                        />
+                    ))}
+                    {sections.measurements.map((s) => (
+                        <div
+                            key={`measurements-${s.from}-${s.to}`}
+                            className="absolute top-0 z-10 h-full bg-green-200"
+                            style={{
+                                left: timeToPercentage(moment.utc(s.from, 'HH:mm:ss', true)),
+                                right: timeToPercentage(moment.utc(s.to, 'HH:mm:ss', true), true),
+                            }}
+                        />
+                    ))}
+                    {sections.error.map((s) => (
+                        <div
+                            key={`error-${s.from}-${s.to}`}
+                            className="absolute top-0 z-10 h-full bg-red-200"
+                            style={{
+                                left: timeToPercentage(moment.utc(s.from, 'HH:mm:ss', true)),
+                                right: timeToPercentage(moment.utc(s.to, 'HH:mm:ss', true), true),
+                            }}
+                        />
+                    ))}
                     {/* blue line of current time */}
-                    <div
-                        className="absolute top-0 z-0 h-full bg-white"
-                        style={{ left: '10%', right: '10%' }}
-                    />
                     {/* blue label "now" */}
                     <div
                         className="absolute z-40 w-[2px] -mx-px bg-blue-500 top-0 h-full"
