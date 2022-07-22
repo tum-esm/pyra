@@ -1,7 +1,7 @@
 import { range } from 'lodash';
 import moment from 'moment';
 
-const borderClass = 'border border-gray-200 rounded-sm';
+const borderClass = 'border border-gray-250 rounded-sm';
 
 function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
     let fraction = time.hour() / 24.0 + time.minute() / (24.0 * 60) + time.second() / (24.0 * 3600);
@@ -13,9 +13,6 @@ function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
 
 function ActivityPlot() {
     const now = moment.utc();
-    const then = moment.utc('09:15:00', 'hh:mm:ss');
-
-    console.log(then.hour());
 
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
@@ -34,27 +31,47 @@ function ActivityPlot() {
                 </div>
                 <div
                     className={
-                        'relative flex-grow w-full h-2.5 bg-gray-350 overflow-hidden ' + borderClass
+                        'relative flex-grow w-full h-4 bg-gray-300 overflow-hidden ' + borderClass
                     }
                 >
-                    <div
-                        className="absolute top-0 z-20 h-full bg-red-200"
-                        style={{ left: timeToPercentage(now), right: timeToPercentage(then, true) }}
-                    />
                     <div
                         className="absolute top-0 z-10 h-full bg-green-200"
                         style={{ left: '12%', right: '30%' }}
                     />
+                    {/* blue line of current time */}
                     <div
                         className="absolute top-0 z-0 h-full bg-white"
                         style={{ left: '10%', right: '10%' }}
+                    />
+                    {/* blue label "now" */}
+                    <div
+                        className="absolute z-40 w-[2px] -mx-px bg-blue-500 top-0 h-full"
+                        style={{ left: timeToPercentage(now) }}
+                    />
+                    <div
+                        className={
+                            'absolute top-0 z-40 h-full text-blue-500 flex-row-center ' +
+                            'px-1 text-xs font-medium'
+                        }
+                        style={
+                            now.hour() < 23
+                                ? { left: timeToPercentage(now) }
+                                : { right: timeToPercentage(now, true) }
+                        }
+                    >
+                        now
+                    </div>
+                    {/* gray block of future time */}
+                    <div
+                        className="absolute top-0 z-30 h-full bg-gray-150"
+                        style={{ left: timeToPercentage(now), right: 0 }}
                     />
                 </div>
                 <div className="w-full h-5 pt-1 text-xs font-medium text-gray-500 flex-row-center gap-x-4">
                     <span className="flex-row-center gap-x-1">
                         <div
                             className={
-                                'flex-shrink-0 w-2.5 h-2.5 bg-gray-350 rounded-full ' + borderClass
+                                'flex-shrink-0 w-2.5 h-2.5 bg-gray-300 rounded-full ' + borderClass
                             }
                         />
                         core is not running
