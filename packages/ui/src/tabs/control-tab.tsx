@@ -555,6 +555,54 @@ export default function ControlTab() {
                                 },
                             ]}
                         />
+
+                        <VariableBlock
+                            label="Connections"
+                            disabled={buttonsAreDisabled}
+                            rows={[
+                                {
+                                    variable: {
+                                        key: 'Camera',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections.camera
+                                        ),
+                                    },
+                                },
+                                {
+                                    variable: {
+                                        key: 'Computer',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections.computer
+                                        ),
+                                    },
+                                },
+                                {
+                                    variable: {
+                                        key: 'Heater',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections.heater
+                                        ),
+                                    },
+                                },
+                                {
+                                    variable: {
+                                        key: 'Router',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections.router
+                                        ),
+                                    },
+                                },
+                                {
+                                    variable: {
+                                        key: 'Spectrometer',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections
+                                                .spectrometer
+                                        ),
+                                    },
+                                },
+                            ]}
+                        />
                     </>
                 )}
             </div>
