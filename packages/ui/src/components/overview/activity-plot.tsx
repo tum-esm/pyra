@@ -41,7 +41,7 @@ function getSections(
 }
 
 function ActivityPlot() {
-    const now = moment.utc();
+    const now = moment();
 
     const rawActivityHistory = reduxUtils.useTypedSelector((s) => s.activity.history);
 
@@ -62,6 +62,8 @@ function ActivityPlot() {
 
     console.log({ sections });
 
+    const localTUCOffset = moment().utcOffset();
+
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
             <div className="flex-grow flex-col-left">
@@ -72,7 +74,11 @@ function ActivityPlot() {
                             className="absolute top-0 pl-1 border-l-[1.5px] border-gray-350"
                             style={{ left: `${h / 0.24}%` }}
                         >
-                            {h}h{h === 0 && ' UTC'}
+                            {h}h
+                            {h === 0 &&
+                                ' UTC' +
+                                    (localTUCOffset < 0 ? '-' : '+') +
+                                    (localTUCOffset / 60).toString()}
                         </div>
                     ))}
                 </div>
