@@ -64,7 +64,6 @@ function ActivityPlot() {
 
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
-            <div className="text-sm font-semibold leading-3">Today's Activity:</div>
             <div className="flex-grow flex-col-left">
                 <div className="relative grid w-full h-5 text-xs font-medium text-gray-500">
                     {range(0, 22, 3).map((h) => (
