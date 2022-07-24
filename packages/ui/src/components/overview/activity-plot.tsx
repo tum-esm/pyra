@@ -24,13 +24,13 @@ function getSections(
         activityHistory,
         (prev: ActivitySection[], curr, index) => {
             if (curr.event === startIndicator) {
-                return [...prev, { from: curr.time, to: '23:59:59' }];
+                return [...prev, { from: curr.localTime, to: '23:59:59' }];
             } else if (curr.event === stopIndicator) {
                 if (prev.length == 0) {
-                    return [{ from: '00:00:00', to: curr.time }];
+                    return [{ from: '00:00:00', to: curr.localTime }];
                 } else {
                     const lastFrom: any = prev.at(-1)?.from;
-                    return [...prev.slice(0, -1), { from: lastFrom, to: curr.time }];
+                    return [...prev.slice(0, -1), { from: lastFrom, to: curr.localTime }];
                 }
             } else {
                 return prev;
@@ -48,7 +48,10 @@ function ActivityPlot() {
     let activityHistory: customTypes.activityHistory = [];
     if (rawActivityHistory !== undefined) {
         if (rawActivityHistory.length === 0 || rawActivityHistory.at(0)?.event !== 'start-core') {
-            activityHistory = [{ event: 'start-core', time: '00:00:00' }, ...rawActivityHistory];
+            activityHistory = [
+                { event: 'start-core', localTime: '00:00:00' },
+                ...rawActivityHistory,
+            ];
         } else {
             activityHistory = rawActivityHistory;
         }

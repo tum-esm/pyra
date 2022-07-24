@@ -243,7 +243,7 @@ export namespace customTypes {
     };
 
     export type activityHistory = {
-        time: string;
+        localTime: string;
         event:
             | 'start-core'
             | 'stop-core'

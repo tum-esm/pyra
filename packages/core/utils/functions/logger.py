@@ -126,7 +126,7 @@ class Logger:
             "start-core",
             "stop-core",
         ]
-        now = datetime.utcnow()
+        now = datetime.now()
         filename = now.strftime("activity-%Y-%m-%d.json")
         filepath = os.path.join(PROJECT_DIR, "logs", "activity", filename)
 
@@ -137,7 +137,9 @@ class Logger:
             else:
                 current_activity = []
 
-            current_activity.append({"time": now.strftime("%H:%M:%S"), "event": event_label})
+            current_activity.append(
+                {"localTime": now.strftime("%H:%M:%S"), "event": event_label}
+            )
 
             with open(filepath, "w") as f:
                 json.dump(current_activity, f, indent=4)
