@@ -345,9 +345,9 @@ export default function ControlTab() {
                                 },
                                 {
                                     variable: {
-                                        key: 'Motor failed',
+                                        key: 'UPS alert',
                                         value: renderBoolValue(
-                                            coreState.enclosure_plc_readings.state.motor_failed
+                                            coreState.enclosure_plc_readings.state.ups_alert
                                         ),
                                     },
                                 },
