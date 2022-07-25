@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 import os
 import traceback
 import filelock
@@ -24,7 +25,7 @@ def log_line_has_time(log_line: str):
 
 
 class Logger:
-    last_archive_time = datetime.utcnow()
+    last_archive_time = datetime.now()
 
     def __init__(self, origin="pyra.core"):
         self.origin = origin
@@ -46,8 +47,15 @@ class Logger:
         self._write_log_line("EXCEPTION", f"{type(e).__name__} occured: {tb}")
 
     def _write_log_line(self, level: str, message: str):
-        now = datetime.utcnow()
-        log_string = f"{now} - {self.origin} - {level} - {message}\n"
+        now = datetime.now()
+        utc_offset = round((datetime.now() - datetime.utcnow()).total_seconds() / 3600, 1)
+        if round(utc_offset) == utc_offset:
+            utc_offset = round(utc_offset)
+
+        log_string = (
+            f"{now} UTC{'' if utc_offset < 0 else '+'}{utc_offset} "
+            + f"- {self.origin} - {level} - {message}\n"
+        )
         with filelock.FileLock(LOG_FILES_LOCK):
             with open(DEBUG_LOG_FILE, "a") as f1:
                 f1.write(log_string)
@@ -69,9 +77,7 @@ class Logger:
 
             lines_to_be_archived = []
             lines_to_be_kept = []
-            latest_time = str(
-                datetime.utcnow() - timedelta(hours=(1 if keep_last_hour else 0))
-            )
+            latest_time = str(datetime.now() - timedelta(hours=(1 if keep_last_hour else 0)))
             line_time = log_lines_in_file[0][:26]
             for index, line in enumerate(log_lines_in_file):
                 if log_line_has_time(line):
@@ -105,3 +111,40 @@ class Logger:
                     filename = os.path.join(PROJECT_DIR, "logs", "archive", f"{date}-{t}.log")
                     with open(filename, "a") as f:
                         f.writelines(archive_log_date_groups[date][t] + [""])
+
+    @staticmethod
+    def log_activity_event(event_label: str):
+        """
+        Log things like:
+        * start-measurements
+        * stop-measurements
+        * error-occured
+        * errors-resolved
+        * start-core
+        * stop-core
+        """
+        assert event_label in [
+            "start-measurements",
+            "stop-measurements",
+            "error-occured",
+            "errors-resolved",
+            "start-core",
+            "stop-core",
+        ]
+        now = datetime.now()
+        filename = now.strftime("activity-%Y-%m-%d.json")
+        filepath = os.path.join(PROJECT_DIR, "logs", "activity", filename)
+
+        with filelock.FileLock(LOG_FILES_LOCK):
+            if os.path.isfile(filepath):
+                with open(filepath, "r") as f:
+                    current_activity = json.load(f)
+            else:
+                current_activity = []
+
+            current_activity.append(
+                {"localTime": now.strftime("%H:%M:%S"), "event": event_label}
+            )
+
+            with open(filepath, "w") as f:
+                json.dump(current_activity, f, indent=4)

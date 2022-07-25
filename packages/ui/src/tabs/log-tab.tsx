@@ -38,7 +38,7 @@ export default function LogTab() {
         switch (import.meta.env.VITE_ENVIRONMENT) {
             // on my personal machine
             case 'development-moritz':
-                filePath = await join('research', 'pyra', 'logs');
+                filePath = await join('research', 'pyra-4', 'logs');
                 break;
 
             // on the R19 laptop the Documents folder is a network directory

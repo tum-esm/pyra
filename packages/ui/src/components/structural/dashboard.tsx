@@ -5,6 +5,7 @@ import { structuralComponents } from '../../components';
 import { customTypes } from '../../custom-types';
 import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
+import moment from 'moment';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -32,18 +33,37 @@ export default function Dashboard() {
             }
         }
 
+        async function fetchActivityFile() {
+            if (fetchLogUpdates) {
+                const filename = moment.utc().format('YYYY-MM-DD');
+                try {
+                    const fileContent = await fetchUtils.getFileContent(
+                        `logs/activity/activity-${filename}.json`
+                    );
+                    // @ts-ignore
+                    dispatch(reduxUtils.activityActions.set(JSON.parse(fileContent)));
+                } catch (e) {
+                    console.debug(`Could not load activity file: ${e}`);
+                    dispatch(reduxUtils.activityActions.set([]));
+                }
+            }
+        }
+
         if (!initialFetchTriggered) {
             fetchStateFile();
             fetchLogFile();
+            fetchActivityFile();
             setInitialFetchTriggered(true);
         }
 
         const interval1 = setInterval(fetchStateFile, 5000);
         const interval2 = setInterval(fetchLogFile, 5000);
+        const interval3 = setInterval(fetchActivityFile, 5000);
 
         return () => {
             clearInterval(interval1);
             clearInterval(interval2);
+            clearInterval(interval3);
         };
     }, [dispatch, fetchLogUpdates, initialFetchTriggered]);
 

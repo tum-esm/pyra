@@ -17,11 +17,6 @@ class OSInterface:
         return psutil.cpu_percent(interval=1, percpu=True)
 
     @staticmethod
-    def get_average_system_load() -> list:
-        """returns average system load in the last [1min,5min,15min] in %"""
-        return [x / psutil.cpu_count() * 100 for x in psutil.getloadavg()]
-
-    @staticmethod
     def get_memory_usage() -> float:
         """returns -> tuple (total, available, percent, used, free, active, inactive,
         buffers, cached, shared, slab)

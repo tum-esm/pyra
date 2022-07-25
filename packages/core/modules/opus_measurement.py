@@ -28,6 +28,7 @@ class OpusMeasurement:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
         self.initialized = False
+        self.current_experiment = None
         if self._CONFIG["general"]["test_mode"]:
             return
 
@@ -61,6 +62,9 @@ class OpusMeasurement:
 
         # start or stops opus.exe depending on sun angle
         self.automated_process_handling()
+
+        # check and reload experiment if updated in config.json
+        self.check_for_experiment_change()
 
         if self.__is_em27_responsive:
             logger.debug("Successful ping to EM27.")
@@ -112,52 +116,67 @@ class OpusMeasurement:
             self.__connect_to_dde_opus()
 
             # retest DDE connection
-            if self.conversation.Connected() == 1:
-                return True
-            else:
-                return False
+            return self.conversation.Connected() == 1
 
     def load_experiment(self):
         """Loads a new experiment in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._CONFIG["opus"]["experiment_path"]
+        experiment_path = self._CONFIG["opus"]["experiment_path"]
 
         if not self.__test_dde_connection:
             return
-        answer = self.conversation.Request("LOAD_EXPERIMENT " + full_path)
+        answer = self.conversation.Request("LOAD_EXPERIMENT " + experiment_path)
+        logger.info(f"Loaded new OPUS experiment: {experiment_path}")
+        self.current_experiment = experiment_path
 
+        # TODO: why does the following logic not work anymore
+        """
         if "OK" in answer:
             logger.info("Loaded new OPUS experiment: {}.".format(full_path))
+            self.current_experiment = full_path
         else:
             logger.info("Could not load OPUS experiment as expected.")
+        """
 
     def start_macro(self):
         """Starts a new macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._CONFIG["opus"]["macro_path"]
-
         if not self.__test_dde_connection:
             return
-        answer = self.conversation.Request("RUN_MACRO " + full_path)
+
+        macro_path = self._CONFIG["opus"]["macro_path"]
+        answer = self.conversation.Request(f"RUN_MACRO {macro_path}")
+        logger.info(f"Started OPUS macro: {macro_path}")
+
+        # TODO: why does the following logic not work anymore
+        """
+        active_macro_id = str(answer[4:-1])
+        StateInterface.update({"active_opus_macro_id": active_macro_id}, persistent=True)
 
         if "OK" in answer:
-            logger.info("Started OPUS macro: {}.".format(full_path))
+            logger.info(f"Started OPUS macro: {macro_basename} with id: {active_macro_id}.")
         else:
-            logger.info("Could not start OPUS macro as expected.")
+            logger.info(f"Could not start OPUS macro with id: {active_macro_id} as expected.")
+        """
 
     def stop_macro(self):
         """Stops the currently running macro in OPUS over DDE connection."""
         self.__connect_to_dde_opus()
-        full_path = self._CONFIG["opus"]["macro_path"]
+        macro_path = os.path.basename(self._CONFIG["opus"]["macro_path"])
 
         if not self.__test_dde_connection:
             return
-        answer = self.conversation.Request("KILL_MACRO " + full_path)
+        answer = self.conversation.Request("KILL_MACRO " + macro_path)
+        logger.info(f"Stopped OPUS macro: {macro_path}")
 
+        # TODO: why does the following logic not work anymore
+        """
         if "OK" in answer:
-            logger.info("Stopped OPUS macro: {}.".format(full_path))
+            logger.info(f"Stopped OPUS macro: {macro_basename} with id: {active_macro_id}.")
+            StateInterface.update({"active_opus_macro_id": None}, persistent=True)
         else:
-            logger.info("Could not stop OPUS macro as expected.")
+            logger.info(f"Could not stop OPUS macro with id: {active_macro_id} as expected.")
+        """
 
     def close_opus(self):
         """Closes OPUS via DDE."""
@@ -166,11 +185,15 @@ class OpusMeasurement:
         if not self.__test_dde_connection:
             return
         answer = self.conversation.Request("CLOSE_OPUS")
+        logger.info("Stopped OPUS.exe")
 
+        # TODO: why does the following logic not work anymore
+        """
         if "OK" in answer:
             logger.info("Stopped OPUS.exe")
         else:
             logger.info("No response for OPUS.exe close request.")
+        """
 
     def __shutdown_dde_server(self):
         """Note the underlying DDE object (ie, Server, Topics and Items) are
@@ -188,11 +211,7 @@ class OpusMeasurement:
         True -> Connected
         False -> Not Connected"""
         response = os.system("ping -n 1 " + self._CONFIG["em27"]["ip"])
-
-        if response == 0:
-            return True
-        else:
-            return False
+        return response == 0
 
     def start_opus(self):
         """Uses os.startfile() to start up OPUS
@@ -288,3 +307,18 @@ class OpusMeasurement:
                 self.stop_macro()
                 time.sleep(5)
                 self.close_opus()
+
+    def check_for_experiment_change(self):
+        """Compares the experiment in the config with the current active experiment.
+        To reload an experiment during an active macro the macro needs to be stopped first.
+        """
+
+        if self._CONFIG["opus"]["experiment_path"] != self.current_experiment:
+            if StateInterface.read(persistent=True)["active_opus_macro_id"] == None:
+                self.load_experiment()
+            else:
+                self.stop_macro()
+                time.sleep(5)
+                self.load_experiment()
+                time.sleep(5)
+                self.start_macro()

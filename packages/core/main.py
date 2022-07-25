@@ -32,7 +32,7 @@ def run():
     ]
     vbdsd_thread = modules.vbdsd.VBDSD_Thread()
 
-    current_exceptions = []
+    current_exceptions = StateInterface.read(persistent=True)["current_exceptions"]
 
     while True:
         start_time = time.time()
@@ -74,14 +74,18 @@ def run():
                 if type(new_exception).__name__ not in current_exceptions:
                     new_current_exceptions.append(type(new_exception).__name__)
                     ExceptionEmailClient.handle_occured_exception(_CONFIG, new_exception)
+                    if len(current_exceptions) == 0:
+                        Logger.log_activity_event("error-occured")
             else:
                 if len(current_exceptions) > 0:
                     new_current_exceptions = []
                     ExceptionEmailClient.handle_resolved_exception(_CONFIG)
                     logger.info(f"All exceptions have been resolved.")
+                    Logger.log_activity_event("errors-resolved")
 
             # if no errors until now
             current_exceptions = [*new_current_exceptions]
+            StateInterface.update({"current_exceptions": current_exceptions}, persistent=True)
         except Exception as e:
             logger.exception(e)
 

@@ -15,11 +15,15 @@ export namespace customTypes {
     export type reduxStateCoreProcess = {
         pid: number | undefined;
     };
+    export type reduxStateActivity = {
+        history: activityHistory | undefined;
+    };
     export type reduxState = {
         config: reduxStateConfig;
         logs: reduxStateLogs;
         coreState: reduxStateCoreState;
         coreProcess: reduxStateCoreProcess;
+        activity: reduxStateActivity;
     };
     export type intArray3 = [number, number, number];
     export type intArray4 = [number, number, number, number];
@@ -220,11 +224,6 @@ export namespace customTypes {
     };
 
     export type OSState = {
-        average_system_load: {
-            last_1_minute: number | null;
-            last_5_minutes: number | null;
-            last_15_minutes: number | null;
-        };
         cpu_usage: number | null;
         memory_usage: number | null;
         last_boot_time: string | null;
@@ -242,4 +241,15 @@ export namespace customTypes {
         measurements_should_be_running?: boolean;
         enclosure_plc_readings?: partialEnclosurePlcReadings;
     };
+
+    export type activityHistory = {
+        localTime: string;
+        event:
+            | 'start-core'
+            | 'stop-core'
+            | 'start-measurements'
+            | 'stop-measurements'
+            | 'error-occured'
+            | 'errors-resolved';
+    }[];
 }

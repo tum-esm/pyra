@@ -17,8 +17,8 @@ def test_stop_measurements():
     enclosure.wait_for_cover_closing()
 
     time.sleep(2)
-    if tracking.ct_application_running:
+    if tracking.ct_application_running():
         tracking.stop_sun_tracking_automation()
         time.sleep(2)
-    if opus.opus_application_running:
+    if opus.opus_application_running():
         opus.stop_macro()

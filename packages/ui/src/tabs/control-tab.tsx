@@ -345,9 +345,9 @@ export default function ControlTab() {
                                 },
                                 {
                                     variable: {
-                                        key: 'Motor failed',
+                                        key: 'UPS alert',
                                         value: renderBoolValue(
-                                            coreState.enclosure_plc_readings.state.motor_failed
+                                            coreState.enclosure_plc_readings.state.ups_alert
                                         ),
                                     },
                                 },
@@ -551,6 +551,54 @@ export default function ControlTab() {
                                             : 'enable',
                                         callback: togglePowerHeater,
                                         spinner: isLoadingPowerHeater,
+                                    },
+                                },
+                            ]}
+                        />
+
+                        <VariableBlock
+                            label="Connections"
+                            disabled={buttonsAreDisabled}
+                            rows={[
+                                {
+                                    variable: {
+                                        key: 'Camera',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections.camera
+                                        ),
+                                    },
+                                },
+                                {
+                                    variable: {
+                                        key: 'Computer',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections.computer
+                                        ),
+                                    },
+                                },
+                                {
+                                    variable: {
+                                        key: 'Heater',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections.heater
+                                        ),
+                                    },
+                                },
+                                {
+                                    variable: {
+                                        key: 'Router',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections.router
+                                        ),
+                                    },
+                                },
+                                {
+                                    variable: {
+                                        key: 'Spectrometer',
+                                        value: renderBoolValue(
+                                            coreState.enclosure_plc_readings.connections
+                                                .spectrometer
+                                        ),
                                     },
                                 },
                             ]}

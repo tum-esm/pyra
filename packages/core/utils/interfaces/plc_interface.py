@@ -224,9 +224,9 @@ class PLCInterface:
         )
 
     def _sleep_while_cpu_is_busy(self) -> None:
-        time.sleep(0.2)
+        time.sleep(0.5)
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
-            time.sleep(1.5)
+            time.sleep(2)
 
     def _read_int(self, action: list[int]) -> int:
         """Reads an INT value in the PLC database."""
