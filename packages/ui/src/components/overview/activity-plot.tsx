@@ -63,8 +63,6 @@ function ActivityPlot() {
         error: getSections(activityHistory, 'error-occured', 'errors-resolved'),
     };
 
-    console.log({ sections });
-
     const localTUCOffset = moment().utcOffset();
 
     return (
