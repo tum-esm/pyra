@@ -53,7 +53,7 @@ class Logger:
             utc_offset = round(utc_offset)
 
         log_string = (
-            f"{now} UTC{'-' if utc_offset < 0 else '+'}{utc_offset} "
+            f"{now} UTC{'' if utc_offset < 0 else '+'}{utc_offset} "
             + f"- {self.origin} - {level} - {message}\n"
         )
         with filelock.FileLock(LOG_FILES_LOCK):

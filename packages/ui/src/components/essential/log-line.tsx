@@ -1,7 +1,11 @@
 export default function LogLine(props: { text: string }) {
     let { text } = props;
 
-    if (!text.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC\+\d(\.\d)? - .* - .* - .*$/)) {
+    if (
+        !text.match(
+            /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC(\+|-)\d(\.\d)? - .* - .* - .*$/
+        )
+    ) {
         const textStyle =
             text === 'More log lines inside logs folder ...'
                 ? 'text-gray-400'

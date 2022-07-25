@@ -80,7 +80,7 @@ function ActivityPlot() {
                             {h}h
                             {h === 0 &&
                                 ' UTC' +
-                                    (localTUCOffset < 0 ? '-' : '+') +
+                                    (localTUCOffset < 0 ? '' : '+') +
                                     (localTUCOffset / 60).toString()}
                         </div>
                     ))}
