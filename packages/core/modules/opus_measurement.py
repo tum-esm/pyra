@@ -28,7 +28,7 @@ class OpusMeasurement:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
         self.initialized = False
-        self.current_experiment = None
+        self.current_experiment = self._CONFIG["opus"]["experiment_path"]
         if self._CONFIG["general"]["test_mode"]:
             return
 
@@ -72,9 +72,7 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
