@@ -28,7 +28,7 @@ class OpusMeasurement:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
         self.initialized = False
-        self.current_experiment = None
+        self.current_experiment = self._CONFIG["opus"]["experiment_path"]
         if self._CONFIG["general"]["test_mode"]:
             return
 

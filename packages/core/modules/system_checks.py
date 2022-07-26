@@ -29,7 +29,7 @@ class SystemChecks:
         OSInterface.validate_disk_space()
 
         # raises error if system battery is below 20%
-        OSInterface.validate_system_battery()
+        #OSInterface.validate_system_battery()
 
         StateInterface.update(
             {
