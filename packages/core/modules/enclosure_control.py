@@ -73,12 +73,10 @@ class EnclosureControl:
         if self.plc_interface.is_responsive():
             logger.debug("Successful ping to PLC.")
         else:
-            raise PLCError("Could not find an active PLC IP connection.")
+            logger.warning("Could not ping PLC.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -103,7 +101,7 @@ class EnclosureControl:
                 logger.info("Cover is still open. Trying to close again.")
                 self.force_cover_close()
                 self.wait_for_cover_closing()
-        
+
         # check and sync: sync_to_cover with measurement status
         if measurements_should_be_running & (not self.plc_state.control.sync_to_tracker):
             logger.debug("Set sync to tracker to True to macht measurement status.")
@@ -161,9 +159,7 @@ class EnclosureControl:
         """
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
-        min_power_elevation = (
-            self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
-        )
+        min_power_elevation = self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
 
         if current_sun_elevation is not None:
             sun_is_above_minimum = current_sun_elevation >= min_power_elevation
