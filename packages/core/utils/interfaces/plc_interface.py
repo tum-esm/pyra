@@ -131,7 +131,7 @@ class PLCInterface:
         """
         Connects to the PLC Snap7
         """
-        if not self.plc.get_connected() and self.is_responsive():
+        if not self.plc.get_connected():
 
             start_time = time.time()
             while True:
