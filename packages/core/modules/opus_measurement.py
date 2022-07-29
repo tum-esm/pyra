@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from tracemalloc import start
 from packages.core.utils import Logger, StateInterface, Astronomy
 
 
@@ -72,9 +73,7 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -293,7 +292,7 @@ class OpusMeasurement:
             if not self.opus_application_running():
                 logger.info("Start OPUS.")
                 self.start_opus()
-                time.sleep(10)
+                self.wait_for_opus_startup()
                 logger.info("Loading OPUS Experiment.")
                 self.load_experiment()
                 # returns to give OPUS time to start until next call of run()
@@ -307,6 +306,17 @@ class OpusMeasurement:
                 self.stop_macro()
                 time.sleep(5)
                 self.close_opus()
+
+    def wait_for_opus_startup(self):
+        """Checks for OPUS to be running. Breaks out of the loop after a defined time."""
+        start_time = time.time()
+        while True:
+            if self.opus_application_running():
+                break
+            time.sleep(0.5)
+
+            if time.time() - start_time > 60:
+                break
 
     def check_for_experiment_change(self):
         """Compares the experiment in the config with the current active experiment.
