@@ -69,10 +69,11 @@ class OSInterface:
     @staticmethod
     def validate_system_battery():
         """Raises LowEnergyError if system battery runs lower than 20%."""
-        if OSInterface.get_system_battery() < 20.0:
-            raise LowEnergyError(
-                "The battery of the system is below 20%. Please check the power supply."
-            )
+        if psutil.sensor_battery():
+            if psutil.sensors_battery().percent < 20.0:
+                raise LowEnergyError(
+                    "The battery of the system is below 20%. Please check the power supply."
+                )
 
     @staticmethod
     def get_last_boot_time():
