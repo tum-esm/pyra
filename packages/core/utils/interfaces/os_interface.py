@@ -60,14 +60,16 @@ class OSInterface:
 
     @staticmethod
     def get_system_battery() -> float:
-        """Returns system battery in percent as a float"""
-        return psutil.sensors_battery().percent
+        """Returns system battery in percent as a float.
+        Returns 100.0 if no battery is in the device."""
+        if psutil.sensor_battery():
+            return psutil.sensors_battery().percent
+        return 100.0
 
     @staticmethod
     def validate_system_battery():
         """Raises LowEnergyError if system battery runs lower than 20%."""
-        battery_status = OSInterface.get_system_battery()
-        if (battery_status < 20.0) and (battery_status != None):
+        if OSInterface.get_system_battery() < 20.0:
             raise LowEnergyError(
                 "The battery of the system is below 20%. Please check the power supply."
             )
