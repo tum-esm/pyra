@@ -9,6 +9,7 @@ config/config.json
 config/config.original.json
 config/*.lock
 .env
+packages/cli/alias/pyra-cli.bat
 
 # logs
 *.log
@@ -25,12 +26,12 @@ pids
 *.pid.lock
 .DS_Store
 *.dat
-Bilder/**/*.JPG
 *.txt
 runtime-data/
 pyra-core-process-state.json
 logs/persistent-state.json
 logs/activity/*.json
+logs/vbdsd/*.jpg
 
 # pyra ui
 packages/electron-ui/node_modules/
