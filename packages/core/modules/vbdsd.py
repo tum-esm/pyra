@@ -27,6 +27,7 @@
 # ==============================================================================
 
 
+from datetime import datetime
 import os
 import queue
 import shutil
@@ -253,15 +254,15 @@ class _VBDSD:
             if ret:
                 status, processed_frame = _VBDSD.eval_sun_state(raw_frame)
                 if save_images:
-                    image_timestamp = time.strftime("YYYYMMDD-%H:%M:%S")
-                    cv.imwrite(
-                        os.path.join(IMG_DIR, f"{image_timestamp}-{status}-raw.jpg"),
-                        raw_frame,
+                    image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+                    raw_image_path = os.path.join(
+                        IMG_DIR, f"{image_timestamp}-{status}-raw.jpg"
                     )
-                    cv.imwrite(
-                        os.path.join(IMG_DIR, f"{image_timestamp}-{status}-processed.jpg"),
-                        processed_frame,
+                    processed_image_path = os.path.join(
+                        IMG_DIR, f"{image_timestamp}-{status}-processed.jpg"
                     )
+                    cv.imwrite(raw_image_path, raw_frame)
+                    cv.imwrite(processed_image_path, processed_frame)
                 return status, processed_frame
         return 0, original_frame
 
