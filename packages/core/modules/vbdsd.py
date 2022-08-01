@@ -238,7 +238,7 @@ class _VBDSD:
         time.sleep(0.2)
 
     @staticmethod
-    def run(retries: int = 5):
+    def run(save_images: bool, retries: int = 5):
         """
         Calls take_vbdsd_image and processes the image if successful.
 
@@ -247,13 +247,23 @@ class _VBDSD:
         frame: Source image
         """
 
-        frame = None
+        original_frame = None
         for _ in range(retries + 1):
-            ret, frame = _VBDSD.cam.read()
+            ret, raw_frame = _VBDSD.cam.read()
             if ret:
-                return _VBDSD.eval_sun_state(frame)
-
-        return 0, frame
+                status, processed_frame = _VBDSD.eval_sun_state(raw_frame)
+                if save_images:
+                    image_timestamp = time.strftime("YYYYMMDD-%H:%M:%S")
+                    cv.imwrite(
+                        os.path.join(IMG_DIR, f"{image_timestamp}-{status}-raw.jpg"),
+                        raw_frame,
+                    )
+                    cv.imwrite(
+                        os.path.join(IMG_DIR, f"{image_timestamp}-{status}-processed.jpg"),
+                        processed_frame,
+                    )
+                return status, processed_frame
+        return 0, original_frame
 
 
 class VBDSD_Thread:
@@ -274,8 +284,7 @@ class VBDSD_Thread:
 
     def stop(self):
         """
-        Stop the thread, remove all images inside the directory
-        "runtime_data/vbdsd" and set the state to 'null'
+        Stop the thread and set the state to 'null'
         """
 
         logger.info("Sending termination signal")
@@ -284,28 +293,15 @@ class VBDSD_Thread:
         logger.info("Waiting for thread to terminate")
         self.__thread.join()
 
-        logger.debug("Removing all images")
-        VBDSD_Thread.__remove_vbdsd_images()
-
         logger.debug('Setting state to "null"')
         StateInterface.update({"vbdsd_indicates_good_conditions": None})
 
         self.__thread = None
 
     @staticmethod
-    def __remove_vbdsd_images():
-        if os.path.exists(IMG_DIR):
-            shutil.rmtree(IMG_DIR)
-        os.mkdir(IMG_DIR)
-
-    @staticmethod
     def main(shared_queue: queue.Queue, infinite_loop=True):
         global _CONFIG
         _CONFIG = ConfigInterface.read()
-        # delete all temp pictures when vbdsd is deactivated
-        if _CONFIG["vbdsd"] is None:
-            VBDSD_Thread.__remove_vbdsd_images()
-            return
 
         status_history = RingList(_CONFIG["vbdsd"]["evaluation_size"])
         current_state = None
@@ -321,10 +317,6 @@ class VBDSD_Thread:
 
             start_time = time.time()
             _CONFIG = ConfigInterface.read()
-            # delete all temp pictures when vbdsd is deactivated
-            if _CONFIG["vbdsd"] is None:
-                VBDSD_Thread.__remove_vbdsd_images()
-                return
 
             # init camera connection
             if _VBDSD.cam is None:
@@ -353,7 +345,6 @@ class VBDSD_Thread:
                 logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                 if current_state != None:
                     StateInterface.update({"vbdsd_indicates_good_conditions": False})
-                    VBDSD_Thread.__remove_vbdsd_images()
                     current_state = None
                     # reinit for next day
                     _VBDSD.reinit_settings()
@@ -361,12 +352,12 @@ class VBDSD_Thread:
                 continue
 
             # take a picture and process it
-            status, frame = _VBDSD.run()
+            status, frame = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
 
             # retry with change_exposure(1) if status fail
             if status == -1:
                 _VBDSD.change_exposure(1)
-                status, frame = _VBDSD.run()
+                status, frame = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
 
             # append sun status to status history
             status_history.append(max(status, 0))
@@ -376,11 +367,6 @@ class VBDSD_Thread:
 
             if frame is None:
                 logger.debug(f"Could not take image")
-            else:
-                if _CONFIG["vbdsd"]["save_images"]:
-                    img_name = time.strftime("%H_%M_%S_") + str(status) + ".jpg"
-                    img_path = os.path.join(IMG_DIR, img_name)
-                    cv.imwrite(img_path, frame)
 
             # evaluate sun state only if list is filled
             if status_history.size() == status_history.maxsize():
@@ -391,8 +377,7 @@ class VBDSD_Thread:
 
             if current_state != new_state:
                 logger.info(
-                    f"State change: {'GOOD' if current_state else 'BAD'}"
-                    + f" -> {'GOOD' if new_state else 'BAD'}"
+                    f"State change: {'GOOD -> BAD' if current_state else 'BAD -> GOOD'}"
                 )
                 StateInterface.update({"vbdsd_indicates_good_conditions": new_state})
                 current_state = new_state
@@ -401,14 +386,9 @@ class VBDSD_Thread:
             elapsed_time = time.time() - start_time
             time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
             if time_to_wait > 0:
-                if _CONFIG["vbdsd"]["save_images"]:
-                    logger.debug(
-                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s). Saving image to: {img_path}"
-                    )
-                else:
-                    logger.debug(
-                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s). Skipping image saving."
-                    )
+                logger.debug(
+                    f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)."
+                )
                 time.sleep(time_to_wait)
 
             if not infinite_loop:
