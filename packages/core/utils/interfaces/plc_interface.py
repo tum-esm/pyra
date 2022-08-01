@@ -38,7 +38,7 @@ class PLCSensorsState:
 @dataclasses.dataclass
 class PLCStateState:
     cover_closed: bool = None
-    motor_failed: bool = None
+    motor_failed: bool | None = None
     rain: bool = None
     reset_needed: bool = None
     ups_alert: bool = None
@@ -55,11 +55,11 @@ class PLCPowerState:
 
 @dataclasses.dataclass
 class PLCConnectionsState:
-    camera: bool = None
+    camera: bool | None = None
     computer: bool = None
     heater: bool = None
     router: bool = None
-    spectrometer: bool = None
+    spectrometer: bool | None = None
 
 
 @dataclasses.dataclass
@@ -172,17 +172,23 @@ class PLCInterface:
         """
 
         plc_db_content = {}
-        plc_db_content[8] = self.plc.db_read(8, 0, 25)
-        self._sleep_while_cpu_is_busy()
-        plc_db_content[25] = self.plc.db_read(25, 0, 9)
-        self._sleep_while_cpu_is_busy()
-        plc_db_content[3] = self.plc.db_read(3, 0, 5)
-        self._sleep_while_cpu_is_busy()
+        if self.config["tum_plc"]["version"] == 1:
+            plc_db_size = { 3: 6, 8: 26, 25: 10}
+        else:
+            plc_db_size = { 3: 5, 6: 17, 8: 25 }
+        
+        for db_index, db_size in plc_db_size.items():
+            plc_db_content[db_index] = self.plc.db_read(db_index, 0, db_size)
+            self._sleep_while_cpu_is_busy()
+        
+        logger.debug(f"new plc bulk read: {plc_db_content}")
 
         def _get_int(spec: list[int]) -> int:
             return snap7.util.get_int(plc_db_content[spec[0]], spec[1])
 
-        def _get_bool(spec: list[int]) -> bool:
+        def _get_bool(spec: list[int] | None) -> bool:
+            if spec is None:
+                return None
             return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])
 
         return PLCState(
@@ -341,7 +347,7 @@ class PLCInterface:
         )
 
     def reset(self) -> None:
-        self._write_bool(self.specification.control.reset, False)
+        self._write_bool(self.specification.control.reset, True)
 
     # PLC.ACTORS SETTERS
     def set_cover_angle(self, value: int) -> None:
