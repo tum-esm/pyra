@@ -46,7 +46,7 @@ logger = Logger(origin="vbdsd")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", "vbdsd")
+IMG_DIR = os.path.join(PROJECT_DIR, "logs", "vbdsd")
 _CONFIG = None
 
 
@@ -370,7 +370,9 @@ class VBDSD_Thread:
 
             # append sun status to status history
             status_history.append(max(status, 0))
-            logger.debug(f"New VBDSD status: {status}. Current history: {status_history.get()}")
+            logger.debug(
+                f"New VBDSD status: {status}. Current history: {status_history.get()}"
+            )
 
             if frame is None:
                 logger.debug(f"Could not take image")
@@ -401,10 +403,12 @@ class VBDSD_Thread:
             if time_to_wait > 0:
                 if _CONFIG["vbdsd"]["save_images"]:
                     logger.debug(
-                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s). Saving image to: {img_path}")
+                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s). Saving image to: {img_path}"
+                    )
                 else:
                     logger.debug(
-                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s). Skipping image saving.")
+                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s). Skipping image saving."
+                    )
                 time.sleep(time_to_wait)
 
             if not infinite_loop:
