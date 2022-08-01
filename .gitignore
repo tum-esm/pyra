@@ -9,6 +9,7 @@ config/config.json
 config/config.original.json
 config/*.lock
 .env
+packages/cli/alias/pyra-cli.bat
 
 # logs
 *.log
