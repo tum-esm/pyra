@@ -20,6 +20,7 @@ def run():
             _CONFIG = ConfigInterface.read()
             break
         except AssertionError as e:
+            logger.error(f"{e}")
             logger.error(f"Invalid config, waiting 10 seconds")
             time.sleep(10)
 
