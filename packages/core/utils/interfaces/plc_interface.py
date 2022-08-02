@@ -158,11 +158,11 @@ class PLCInterface:
         """
         try:
             self.plc.disconnect()
+            self.plc.destroy()
             logger.debug("Gracefully disconnected from PLC.")
         except Snap7Exception:
+            self.plc.destroy()
             logger.debug("Disconnected ungracefully from PLC.")
-
-        self.plc.destroy()
 
     def _is_connected(self) -> bool:
         """
