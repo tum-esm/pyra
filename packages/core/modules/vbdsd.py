@@ -248,7 +248,7 @@ class _VBDSD:
         frame: Source image
         """
 
-        original_frame = None
+        raw_frame = None
         for _ in range(retries + 1):
             ret, raw_frame = _VBDSD.cam.read()
             if ret:
@@ -264,7 +264,7 @@ class _VBDSD:
                     cv.imwrite(raw_image_path, raw_frame)
                     cv.imwrite(processed_image_path, processed_frame)
                 return status, processed_frame
-        return 0, original_frame
+        return 0, raw_frame
 
 
 class VBDSD_Thread:
