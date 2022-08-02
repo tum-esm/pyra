@@ -31,13 +31,16 @@ class EnclosureControl:
 
     def _initialize(self):
         self.plc_interface = PLCInterface(self.config)
+        self.plc_interface.conect()
         self.plc_interface.set_auto_temperature(True)
+        self.plc_interface.disconnect()
         self.plc_state = self.plc_interface.read()
         self.last_cycle_automation_status = 0
         self.initialized = True
 
     def run(self, new_config: dict) -> None:
         self.config = new_config
+        self.plc_interface.connect()
 
         if self.config["tum_plc"] is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
@@ -91,6 +94,9 @@ class EnclosureControl:
 
         # verify that sync_to_cover status is still synced with measurement status
         self.verify_cover_sync()
+
+        # disconnect from PLC
+        self.plc_interface.disconnect()
 
     # PLC.ACTORS SETTERS
 

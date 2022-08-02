@@ -113,53 +113,51 @@ class PLCInterface:
         self.config = config
         self.specification = PLC_SPECIFICATION_VERSIONS[config["tum_plc"]["version"]]
 
-        self.plc = snap7.client.Client()
-        self._connect()
-
     # CONNECTION
 
     def update_config(self, new_config: dict):
         if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
             logger.debug("PLC ip has changed, reconnecting now")
-            self._disconnect()
+            self.disconnect()
 
         self.config = new_config
         if not self._is_connected():
-            self._connect()
+            self.connect()
 
-    def _connect(self) -> None:
+    def connect(self) -> None:
         """
         Connects to the PLC Snap7
         """
-        if not self.plc.get_connected():
+        self.plc = snap7.client.Client()
+        start_time = time.time()
 
-            start_time = time.time()
-            while True:
-                try:
-                    self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
-                    time.sleep(0.2)
+        while True:
+            try:
+                self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
+                time.sleep(0.2)
 
-                    if time.time() - start_time > 30:
-                        logger.debug("Connect to PLC timed out.")
-                        return
+                if time.time() - start_time > 30:
+                    logger.debug("Connect to PLC timed out.")
+                    return
 
-                    if self.plc.get_connected():
-                        logger.debug("Connected to PLC.")
-                        return
+                if self.plc.get_connected():
+                    logger.debug("Connected to PLC.")
+                    return
 
-                    self.plc.destroy()
-                    self.plc = snap7.client.Client()
+                self.plc.destroy()
+                self.plc = snap7.client.Client()
 
-                except Snap7Exception:
-                    self.plc.destroy()
-                    self.plc = snap7.client.Client()
-                    continue
+            except Snap7Exception:
+                self.plc.destroy()
+                self.plc = snap7.client.Client()
+                continue
 
-    def _disconnect(self) -> None:
+    def disconnect(self) -> None:
         """
         Disconnects from the PLC Snap7
         """
         self.plc.disconnect()
+        self.plc.destroy()
 
     def _is_connected(self) -> bool:
         """
