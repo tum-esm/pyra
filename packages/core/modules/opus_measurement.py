@@ -240,7 +240,7 @@ class OpusMeasurement:
         try:
             if win32ui.FindWindow(
                 None,
-                "OPUS - Operator: Default  (Administrator) - [Display - default.ows]",
+                "OPUS - Operator: Admin  (Administrator) - [Display - default.ows]",
             ):
                 return True
         except win32ui.error:

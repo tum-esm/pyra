@@ -175,7 +175,7 @@ def _set_spectrometer_power(state):
 @click.command(help="Run plc function 'set_power_computer()'")
 @click.argument("state")
 def _set_computer_power(state):
-    set_boolean_plc_state(state, lambda p: plc_command_group.set_power_computer)
+    set_boolean_plc_state(state, lambda p: p.set_power_computer)
 
 
 @click.group()
