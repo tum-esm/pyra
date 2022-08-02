@@ -73,7 +73,9 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
+        measurements_should_be_running = StateInterface.read()[
+            "measurements_should_be_running"
+        ]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -237,10 +239,19 @@ class OpusMeasurement:
         # FindWindow(className, windowName)
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
+        # TODO: resolve this dynamic instead of static
+        if self._CONFIG["tum_plc"]["version"] == 1:
+            opus_windows_name = (
+                "OPUS - Operator: Default  (Administrator) - [Display - default.ows]"
+            )
+        else:
+            opus_windows_name = (
+                "OPUS - Operator: Admin  (Administrator) - [Display - default.ows]"
+            )
         try:
             if win32ui.FindWindow(
                 None,
-                "OPUS - Operator: Admin  (Administrator) - [Display - default.ows]",
+                opus_windows_name,
             ):
                 return True
         except win32ui.error:
