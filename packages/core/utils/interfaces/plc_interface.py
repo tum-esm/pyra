@@ -118,11 +118,7 @@ class PLCInterface:
     def update_config(self, new_config: dict):
         if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
             logger.debug("PLC ip has changed, reconnecting now")
-            self.disconnect()
-
         self.config = new_config
-        if not self._is_connected():
-            self.connect()
 
     def connect(self) -> None:
         """

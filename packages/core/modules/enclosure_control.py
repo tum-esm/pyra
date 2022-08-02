@@ -34,13 +34,11 @@ class EnclosureControl:
         self.plc_interface.set_auto_temperature(True)
         self.plc_state = self.plc_interface.read()
         logger.debug("Finished initial PLC setup.")
-        self.plc_interface.disconnect()
         self.last_cycle_automation_status = 0
         self.initialized = True
 
     def run(self, new_config: dict) -> None:
         self.config = new_config
-        self.plc_interface.connect()
 
         if self.config["tum_plc"] is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
@@ -51,17 +49,20 @@ class EnclosureControl:
             return
 
         logger.info("Running EnclosureControl")
+        
+        if not self.initialized:
+            self._initialize()
+        else:
+            self.plc_interface.update_config(self.config)
+            self.plc_interface.connect()
+            
+        # TODO: possibly end function if plc is not connected
 
         # get the latest PLC interface state and update with current config
-        if self.initialized:
-            try:
-                self.plc_state = self.plc_interface.read()
-            except Snap7Exception:
-                logger.warning("Could not read PLC state in this loop.")
-        else:
-            self._initialize()
-
-        self.plc_interface.update_config(self.config)
+        try:
+            self.plc_state = self.plc_interface.read()
+        except Snap7Exception:
+            logger.warning("Could not read PLC state in this loop.")
 
         # read current state of actors and sensors in enclosure
         logger.info("New continuous readings.")
