@@ -1,4 +1,5 @@
 import time
+from snap7.exceptions import Snap7Exception
 from packages.core.utils import StateInterface, Logger, Astronomy, PLCError, PLCInterface
 
 logger = Logger(origin="enclosure-control")
@@ -55,7 +56,10 @@ class EnclosureControl:
 
         # get the latest PLC interface state and update with current config
         if self.initialized:
-            self.plc_state = self.plc_interface.read()
+            try:
+                self.plc_state = self.plc_interface.read()
+            except Snap7Exception:
+                logger.warning("Could not read PLC state in this loop.")
         else:
             self._initialize()
 
