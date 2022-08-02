@@ -34,6 +34,7 @@ class EnclosureControl:
         self.plc_interface.connect()
         self.plc_interface.set_auto_temperature(True)
         self.plc_state = self.plc_interface.read()
+        logger.debug("Initial PLC setup finished.")
         self.plc_interface.disconnect()
         self.last_cycle_automation_status = 0
         self.initialized = True
