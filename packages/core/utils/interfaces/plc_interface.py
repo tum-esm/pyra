@@ -193,14 +193,14 @@ class PLCInterface:
 
         plc_db_content = {}
         if self.config["tum_plc"]["version"] == 1:
-            plc_db_size = { 3: 6, 8: 26, 25: 10}
+            plc_db_size = {3: 6, 8: 26, 25: 10}
         else:
-            plc_db_size = { 3: 5, 6: 17, 8: 25 }
-        
+            plc_db_size = {3: 5, 6: 17, 8: 25}
+
         for db_index, db_size in plc_db_size.items():
             plc_db_content[db_index] = self.plc.db_read(db_index, 0, db_size)
             self._sleep_while_cpu_is_busy()
-        
+
         logger.debug(f"new plc bulk read: {plc_db_content}")
 
         def _get_int(spec: list[int]) -> int:
@@ -359,7 +359,10 @@ class PLCInterface:
         update_state_file({"enclosure_plc_readings": {"control": {"manual_temp_mode": new_state}}})
 
     def reset(self) -> None:
-        self._write_bool(self.specification.control.reset, True)
+        if self.config["tum_plc"]["version"] == 1:
+            self._write_bool(self.specification.control.reset, False)
+        else:
+            self._write_bool(self.specification.control.reset, True)
 
     # PLC.ACTORS SETTERS
     def set_cover_angle(self, value: int) -> None:
