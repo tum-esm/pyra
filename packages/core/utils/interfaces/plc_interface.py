@@ -158,6 +158,7 @@ class PLCInterface:
         """
         self.plc.disconnect()
         self.plc.destroy()
+        logger.debug("Disconnected from PLC.")
 
     def _is_connected(self) -> bool:
         """

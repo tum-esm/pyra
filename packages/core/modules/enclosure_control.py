@@ -31,10 +31,10 @@ class EnclosureControl:
 
     def _initialize(self):
         self.plc_interface = PLCInterface(self.config)
-        self.plc_interface.conect()
+        self.plc_interface.connect()
         self.plc_interface.set_auto_temperature(True)
-        self.plc_interface.disconnect()
         self.plc_state = self.plc_interface.read()
+        self.plc_interface.disconnect()
         self.last_cycle_automation_status = 0
         self.initialized = True
 
