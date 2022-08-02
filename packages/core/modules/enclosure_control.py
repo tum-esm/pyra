@@ -140,7 +140,7 @@ class EnclosureControl:
                 break
 
             elapsed_time = time.time() - start_time
-            if elapsed_time > 31:
+            if elapsed_time > 60:
                 if throw_error:
                     raise CoverError("Enclosure cover might be stuck.")
                 break
