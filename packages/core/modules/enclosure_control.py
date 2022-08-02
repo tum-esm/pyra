@@ -1,4 +1,5 @@
 import time
+from snap7.exceptions import Snap7Exception
 from packages.core.utils import StateInterface, Logger, Astronomy, PLCError, PLCInterface
 
 logger = Logger(origin="enclosure-control")
@@ -29,13 +30,18 @@ class EnclosureControl:
 
     def _initialize(self):
         self.plc_interface = PLCInterface(self.config)
+        self.plc_interface.connect()
         self.plc_interface.set_auto_temperature(True)
         self.plc_state = self.plc_interface.read()
+        logger.debug("Finished initial PLC setup.")
+        self.plc_interface.disconnect()
         self.last_cycle_automation_status = 0
         self.initialized = True
 
     def run(self, new_config: dict) -> None:
         self.config = new_config
+        self.plc_interface.connect()
+
         if self.config["tum_plc"] is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
@@ -46,8 +52,12 @@ class EnclosureControl:
 
         logger.info("Running EnclosureControl")
 
+        # get the latest PLC interface state and update with current config
         if self.initialized:
-            self.plc_state = self.plc_interface.read()
+            try:
+                self.plc_state = self.plc_interface.read()
+            except Snap7Exception:
+                logger.warning("Could not read PLC state in this loop.")
         else:
             self._initialize()
 
@@ -61,54 +71,35 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
             return
 
-        # possibly powerup/down spectrometer
+        # dawn/dusk detection: powerup/down spectrometer
         self.auto_set_power_spectrometer()
 
         if self.plc_state.state.motor_failed:
             raise MotorFailedError("URGENT: stop all actions, check cover in person")
 
-        # check PLC ip connection
+        # check PLC ip connection (single ping)
         if self.plc_interface.is_responsive():
             logger.debug("Successful ping to PLC.")
         else:
-            raise PLCError("Could not find an active PLC IP connection.")
+            logger.warning("Could not ping PLC.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()[
+        self.measurements_should_be_running = StateInterface.read()[
             "measurements_should_be_running"
         ]
-        if self.last_cycle_automation_status != measurements_should_be_running:
-            if measurements_should_be_running:
-                # flank change 0 -> 1: load experiment, start macro
-                if self.plc_state.state.reset_needed:
-                    self.plc_interface.reset()
-                    time.sleep(10)
-                if not self.plc_state.state.rain:
-                    self.plc_interface.set_sync_to_tracker(True)
-                logger.info("Syncing Cover to Tracker.")
-            else:
-                # flank change 1 -> 0: stop macro
-                self.plc_interface.set_sync_to_tracker(False)
-                self.move_cover(0)
-                logger.info("Closing Cover.")
-                self.wait_for_cover_closing(throw_error=False)
+        self.sync_cover_to_measurement_status()
 
         # save the automation status for the next run
-        self.last_cycle_automation_status = measurements_should_be_running
+        self.last_cycle_automation_status = self.measurements_should_be_running
 
-        if (not measurements_should_be_running) & (not self.plc_state.state.rain):
-            if not self.plc_state.state.cover_closed:
-                logger.info("Cover is still open. Trying to close again.")
-                self.force_cover_close()
-                self.wait_for_cover_closing()
-        
-        # check and sync: sync_to_cover with measurement status
-        if measurements_should_be_running & (not self.plc_state.control.sync_to_tracker):
-            logger.debug("Set sync to tracker to True to macht measurement status.")
-            self.plc_interface.set_sync_to_tracker(True)
-        if (not measurements_should_be_running) & self.plc_state.control.sync_to_tracker:
-            logger.debug("Set sync to tracker to False to macht measurement status.")
-            self.plc_interface.set_sync_to_tracker(False)
+        # verify cover position for every loop. Close cover if supposed to be closed.
+        self.verify_cover_position()
+
+        # verify that sync_to_cover status is still synced with measurement status
+        self.verify_cover_sync()
+
+        # disconnect from PLC
+        self.plc_interface.disconnect()
 
     # PLC.ACTORS SETTERS
 
@@ -147,7 +138,7 @@ class EnclosureControl:
                 break
 
             elapsed_time = time.time() - start_time
-            if elapsed_time > 31:
+            if elapsed_time > 60:
                 if throw_error:
                     raise CoverError("Enclosure cover might be stuck.")
                 break
@@ -159,9 +150,7 @@ class EnclosureControl:
         """
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
-        min_power_elevation = (
-            self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
-        )
+        min_power_elevation = self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
 
         if current_sun_elevation is not None:
             sun_is_above_minimum = current_sun_elevation >= min_power_elevation
@@ -171,3 +160,35 @@ class EnclosureControl:
             if (not sun_is_above_minimum) and self.plc_state.power.spectrometer:
                 self.plc_interface.set_power_spectrometer(False)
                 logger.info("Powering down the spectrometer.")
+
+    def sync_cover_to_measurement_status(self) -> None:
+        if self.last_cycle_automation_status != self.measurements_should_be_running:
+            if self.measurements_should_be_running:
+                # flank change 0 -> 1: set cover mode: sync to tracker
+                if self.plc_state.state.reset_needed:
+                    self.plc_interface.reset()
+                    time.sleep(10)
+                if not self.plc_state.state.rain:
+                    self.plc_interface.set_sync_to_tracker(True)
+                logger.info("Syncing Cover to Tracker.")
+            else:
+                # flank change 1 -> 0: remove cover mode: sync to tracker, close cover
+                self.plc_interface.set_sync_to_tracker(False)
+                self.move_cover(0)
+                logger.info("Closing Cover.")
+                self.wait_for_cover_closing(throw_error=False)
+
+    def verify_cover_position(self) -> None:
+        if (not self.measurements_should_be_running) & (not self.plc_state.state.rain):
+            if not self.plc_state.state.cover_closed:
+                logger.info("Cover is still open. Trying to close again.")
+                self.force_cover_close()
+                self.wait_for_cover_closing()
+
+    def verify_cover_sync(self) -> None:
+        if self.measurements_should_be_running & (not self.plc_state.control.sync_to_tracker):
+            logger.debug("Set sync to tracker to True to match measurement status.")
+            self.plc_interface.set_sync_to_tracker(True)
+        if (not self.measurements_should_be_running) & self.plc_state.control.sync_to_tracker:
+            logger.debug("Set sync to tracker to False to match measurement status.")
+            self.plc_interface.set_sync_to_tracker(False)

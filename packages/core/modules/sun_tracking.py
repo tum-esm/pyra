@@ -33,9 +33,7 @@ class SunTracking:
 
         logger.info("Running SunTracking")
 
-        measurements_should_be_running = StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
 
         # main logic for active automation
         if measurements_should_be_running and not self.ct_application_running():
@@ -213,7 +211,7 @@ class SunTracking:
         az_offeset = float(tracker_status[4])
         threshold = float(self._CONFIG["camtracker"]["motor_offset_threshold"])
 
-        if (elev_offset > threshold) or (az_offeset > threshold):
+        if (abs(elev_offset) > threshold) or (abs(az_offeset) > threshold):
             return False
 
         return True

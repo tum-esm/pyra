@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import snap7
+from snap7.exceptions import Snap7Exception
 import time
 import os
 from packages.core.utils import Logger, with_filelock, update_dict_recursively
@@ -112,37 +113,56 @@ class PLCInterface:
         self.config = config
         self.specification = PLC_SPECIFICATION_VERSIONS[config["tum_plc"]["version"]]
 
-        self.plc = snap7.client.Client()
-        self._connect()
-
     # CONNECTION
 
     def update_config(self, new_config: dict):
         if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
             logger.debug("PLC ip has changed, reconnecting now")
-            self._disconnect()
+            self.disconnect()
 
         self.config = new_config
         if not self._is_connected():
-            self._connect()
+            self.connect()
 
-    def _connect(self) -> None:
+    def connect(self) -> None:
         """
         Connects to the PLC Snap7
         """
-        self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
+        self.plc = snap7.client.Client()
+        start_time = time.time()
 
-        if not self._is_connected():
-            raise PLCError("Could not connect to PLC")
+        while True:
+            try:
+                self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
+                time.sleep(0.2)
 
-    def _disconnect(self) -> None:
+                if time.time() - start_time > 30:
+                    logger.debug("Connect to PLC timed out.")
+                    return
+
+                if self.plc.get_connected():
+                    logger.debug("Connected to PLC.")
+                    return
+
+                self.plc.destroy()
+                self.plc = snap7.client.Client()
+
+            except Snap7Exception:
+                self.plc.destroy()
+                self.plc = snap7.client.Client()
+                continue
+
+    def disconnect(self) -> None:
         """
         Disconnects from the PLC Snap7
         """
-        self.plc.disconnect()
-
-        if self._is_connected():
-            raise PLCError("Could not disconnect from PLC")
+        try:
+            self.plc.disconnect()
+            self.plc.destroy()
+            logger.debug("Gracefully disconnected from PLC.")
+        except Snap7Exception:
+            self.plc.destroy()
+            logger.debug("Disconnected ungracefully from PLC.")
 
     def _is_connected(self) -> bool:
         """
@@ -318,33 +338,25 @@ class PLCInterface:
         self._write_bool(self.specification.control.sync_to_tracker, new_state)
         if self._read_bool(self.specification.control.sync_to_tracker) != new_state:
             raise PLCError("PLC state did not change")
-        update_state_file(
-            {"enclosure_plc_readings": {"control": {"sync_to_tracker": new_state}}}
-        )
+        update_state_file({"enclosure_plc_readings": {"control": {"sync_to_tracker": new_state}}})
 
     def set_manual_control(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_control, new_state)
         if self._read_bool(self.specification.control.manual_control) != new_state:
             raise PLCError("PLC state did not change")
-        update_state_file(
-            {"enclosure_plc_readings": {"control": {"manual_control": new_state}}}
-        )
+        update_state_file({"enclosure_plc_readings": {"control": {"manual_control": new_state}}})
 
     def set_auto_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.auto_temp_mode, new_state)
         if self._read_bool(self.specification.control.auto_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
-        update_state_file(
-            {"enclosure_plc_readings": {"control": {"auto_temp_mode": new_state}}}
-        )
+        update_state_file({"enclosure_plc_readings": {"control": {"auto_temp_mode": new_state}}})
 
     def set_manual_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_temp_mode, new_state)
         if self._read_bool(self.specification.control.manual_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
-        update_state_file(
-            {"enclosure_plc_readings": {"control": {"manual_temp_mode": new_state}}}
-        )
+        update_state_file({"enclosure_plc_readings": {"control": {"manual_temp_mode": new_state}}})
 
     def reset(self) -> None:
         self._write_bool(self.specification.control.reset, True)
