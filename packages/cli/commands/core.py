@@ -79,19 +79,33 @@ def _stop_pyra_core():
             return
 
         config = ConfigInterface().read()
-        enclosure = EnclosureControl(config)
-        tracking = SunTracking(config)
-        opus = OpusMeasurement(config)
 
-        enclosure.force_cover_close()
-        if tracking.ct_application_running():
-            tracking.stop_sun_tracking_automation()
-        if opus.opus_application_running():
-            opus.stop_macro()
-            time.sleep(2)
-            opus.close_opus()
+        try:
+            enclosure = EnclosureControl(config)
+            enclosure.plc_interface.connect()
+            enclosure.force_cover_close()
+            enclosure.plc_interface.disconnect()
+            success_handler("Successfully closed cover")
+        except:
+            error_handler("Failed to close cover")
 
-        success_handler("Stopped the measurement process")
+        try:
+            tracking = SunTracking(config)
+            if tracking.ct_application_running():
+                tracking.stop_sun_tracking_automation()
+            success_handler("Successfully closed CamTracker")
+        except:
+            error_handler("Failed to close CamTracker")
+
+        try:
+            opus = OpusMeasurement(config)
+            if opus.opus_application_running():
+                opus.stop_macro()
+                time.sleep(2)
+                opus.close_opus()
+            success_handler("Successfully closed OPUS")
+        except:
+            error_handler("Failed to close OPUS")
 
 
 @click.command(help="Checks whether the pyra-core background process is running")
