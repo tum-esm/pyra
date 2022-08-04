@@ -25,6 +25,7 @@ def get_plc_interface():
         assert config["tum_plc"] is not None, "PLC not configured"
         assert config["tum_plc"]["controlled_by_user"], "PLC is controlled by automation"
         plc_interface = PLCInterface(config)
+        plc_interface.connect()
     except (PLCError, AssertionError) as e:
         error_handler(f"{e}")
 
@@ -38,6 +39,7 @@ def _read(no_indent):
     if plc_interface is not None:
         plc_readings = plc_interface.read()
         success_handler(json.dumps(plc_readings.to_dict(), indent=(None if no_indent else 2)))
+        plc_interface.disconnect()
 
 
 @click.command(help="Run plc function 'reset()'")
@@ -58,6 +60,7 @@ def _reset():
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
         success_handler("Ok")
+        plc_interface.disconnect()
 
 
 def wait_until_cover_is_at_angle(plc_interface: PLCInterface, new_cover_angle, timeout=15):
@@ -100,6 +103,7 @@ def _set_cover_angle(angle):
         wait_until_cover_is_at_angle(plc_interface, new_cover_angle)
 
         success_handler("Ok")
+        plc_interface.disconnect()
 
 
 @with_filelock(CONFIG_LOCK_PATH)
@@ -124,6 +128,7 @@ def _close_cover():
         wait_until_cover_is_at_angle(plc_interface, 0)
 
         success_handler("Ok")
+        plc_interface.disconnect()
 
 
 def set_boolean_plc_state(
@@ -134,6 +139,7 @@ def set_boolean_plc_state(
         assert state in ["true", "false"], 'state has to be either "true" or "false"'
         get_setter_function(plc_interface)(state == "true")
         success_handler("Ok")
+        plc_interface.disconnect()
 
 
 @click.command(help="Run plc function 'set_sync_to_tracker()'")
