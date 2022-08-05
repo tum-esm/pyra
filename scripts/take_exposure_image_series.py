@@ -21,13 +21,12 @@ class VBDSD:
             VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             time.sleep(1)
             if VBDSD.cam.isOpened():
-                VBDSD.cam.set(3, 1280)  # width
-                VBDSD.cam.set(4, 720)  # height
+                VBDSD.cam.set(cv.CAP_PROP_FRAME_WIDTH, 1280)  # width
+                VBDSD.cam.set(cv.CAP_PROP_FRAME_HEIGHT, 720)  # height
                 VBDSD.update_camera_settings(
                     exposure=-12, brightness=64, contrast=64, saturation=0, gain=0
                 )
                 VBDSD.cam.read()  # throw away first picture
-                VBDSD.change_exposure()
 
     @staticmethod
     def update_camera_settings(
@@ -38,15 +37,15 @@ class VBDSD:
         gain: int = None,
     ):
         if exposure is not None:
-            VBDSD.cam.set(15, exposure)
+            VBDSD.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
         if brightness is not None:
-            VBDSD.cam.set(10, brightness)
+            VBDSD.cam.set(cv.CAP_PROP_BRIGHTNESS, brightness)
         if contrast is not None:
-            VBDSD.cam.set(11, contrast)
+            VBDSD.cam.set(cv.CAP_PROP_CONTRAST, contrast)
         if saturation is not None:
-            VBDSD.cam.set(12, saturation)
+            VBDSD.cam.set(cv.CAP_PROP_SATURATION, saturation)
         if gain is not None:
-            VBDSD.cam.set(14, gain)
+            VBDSD.cam.set(cv.CAP_PROP_GAIN, gain)
 
     @staticmethod
     def take_image(exposure: int, retries: int = 5):
@@ -73,9 +72,12 @@ def main():
 
     print(f"successfully initialized camera")
 
-    # retry with change_exposure(1) if status fail
-    for exposure in range(-20, 1):
+    exposure = -13
+    while True:
         was_successful = VBDSD.take_image(exposure)
         assert was_successful, f"could not take image for exposure {exposure}"
+        exposure += 0.5
+        if exposure > -1:
+            break
 
     print(f"all done!")
