@@ -58,6 +58,7 @@ class _VBDSD:
     @staticmethod
     def deinit():
         _VBDSD.cam.release()
+        _VBDSD.cam = None
 
     @staticmethod
     def update_camera_settings(
