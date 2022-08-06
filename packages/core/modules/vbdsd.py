@@ -1,36 +1,6 @@
-# filename          : vbdsd.py
-# description  : Vision-Based Direct Sunlight Detector
-# ==============================================================================
-# author            : Benno Voggenreiter
-# email             : -
-# date              : 20190719
-# version           : 1.0
-# notes             : Created by Benno Voggenreiter (Master's Thesis)
-# license           : -
-# py version        : 2.7
-# ==============================================================================
-# author            : Benno Voggenreiter
-# email             : -
-# date              : 20210226
-# version           : 2.0
-# notes             : Improved by Nikolas Hars (Bachelor's Thesis)
-# license           : -
-# py version        : 2.7
-# ==============================================================================
-# author            : Patrick Aigner
-# email             : patrick.aigner@tum.de
-# date              : 20220328
-# version           : 3.0
-# notes             : Upgrade to Python 3.10 and refactoring for Pyra 4.
-# license           : -
-# py version        : 3.10
-# ==============================================================================
-
-
 from datetime import datetime
 import os
 import queue
-import shutil
 from threading import Thread
 import time
 import cv2 as cv
@@ -56,215 +26,71 @@ class _VBDSD:
 
     @staticmethod
     def init_cam(retries: int = 5):
-        """
-        init_cam(int id): Connects to the camera with id and sets its parameters.
-        If successfully connected, the function returns an instance object of the
-        camera, otherwise None will be returned.
-        """
-        camera_id = _CONFIG["vbdsd"]["camera_id"]
+        camera_id = 0
 
         _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         _VBDSD.cam.release()
 
         for _ in range(retries):
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
-            time.sleep(1)
             if _VBDSD.cam.isOpened():
-                logger.debug(f"Camera with id {camera_id} is now connected")
-                _VBDSD.cam.set(3, 1280)  # width
-                _VBDSD.cam.set(4, 720)  # height
-                _VBDSD.cam.set(15, -12)  # exposure
-                _VBDSD.cam.set(10, 64)  # brightness
-                _VBDSD.cam.set(11, 64)  # contrast
-                _VBDSD.cam.set(12, 0)  # saturation
-                _VBDSD.cam.set(14, 0)  # gain
-                _VBDSD.cam.read()  # throw away first picture
-                _VBDSD.change_exposure()
+                _VBDSD.cam.set(cv.CAP_PROP_FRAME_WIDTH, 1280)  # width
+                _VBDSD.cam.set(cv.CAP_PROP_FRAME_HEIGHT, 720)  # height
+                _VBDSD.update_camera_settings(
+                    exposure=-12, brightness=64, contrast=64, saturation=0, gain=0
+                )
+                print(f"using backend {_VBDSD.cam.getBackendName()}")
                 return
+            else:
+                time.sleep(2)
 
-        logger.warning(f"Camera with id {camera_id} could not be found")
-
-    @staticmethod
-    def reinit_settings():
-        if _VBDSD.cam.isOpened():
-            logger.debug(f"Reset Camera settings for next day.")
-            _VBDSD.cam.set(3, 1280)  # width
-            _VBDSD.cam.set(4, 720)  # height
-            _VBDSD.cam.set(15, -12)  # exposure
-            _VBDSD.cam.set(10, 64)  # brightness
-            _VBDSD.cam.set(11, 64)  # contrast
-            _VBDSD.cam.set(12, 0)  # saturation
-            _VBDSD.cam.set(14, 0)  # gain
-            _VBDSD.cam.read()  # throw away first picture
+        raise Exception("could not initialize camera")
 
     @staticmethod
-    def eval_sun_state(frame):
-        """
-        This function will extract the current sun state from an input image (frame)
-        Is uses cv2 package for image detection / computer vision tasks.
+    def update_camera_settings(
+        exposure: int = None,
+        brightness: int = None,
+        contrast: int = None,
+        saturation: int = None,
+        gain: int = None,
+    ):
+        if exposure is not None:
+            _VBDSD.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
+            assert (
+                _VBDSD.cam.get(cv.CAP_PROP_EXPOSURE) == exposure
+            ), f"could not set exposure to {exposure}"
+        if brightness is not None:
+            _VBDSD.cam.set(cv.CAP_PROP_BRIGHTNESS, brightness)
+            assert (
+                _VBDSD.cam.get(cv.CAP_PROP_BRIGHTNESS) == brightness
+            ), f"could not set brightness to {brightness}"
+        if contrast is not None:
+            _VBDSD.cam.set(cv.CAP_PROP_CONTRAST, contrast)
+            assert (
+                _VBDSD.cam.get(cv.CAP_PROP_CONTRAST) == contrast
+            ), f"could not set contrast to {contrast}"
+        if saturation is not None:
+            _VBDSD.cam.set(cv.CAP_PROP_SATURATION, saturation)
+            assert (
+                _VBDSD.cam.get(cv.CAP_PROP_SATURATION) == saturation
+            ), f"could not set saturation to {saturation}"
+        if gain is not None:
+            _VBDSD.cam.set(cv.CAP_PROP_GAIN, gain)
+            assert _VBDSD.cam.get(cv.CAP_PROP_GAIN) == gain, f"could not set gain to {gain}"
 
-        returns:
-        1, frame -> sun status is good, picture used for evaluation
-        0, frame -> sun status is bad, picture used for evaluation
-        """
-        blur = cv.medianBlur(frame, 15)
-        frame_gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
-
-        if frame_gray.shape[1] == 1280:  # Crop on sides
-            frame_gray = frame_gray[:, 170:1100]
-            frame = frame[:, 170:1100]
-
-        img_b = cv.adaptiveThreshold(
-            frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 23, 2
-        )
-        img_b = cv.medianBlur(img_b, 9)
-        img_b, frame = _VBDSD.extend_border(img_b, frame)
-
-        circles = cv.HoughCircles(
-            img_b,
-            cv.HOUGH_GRADIENT,
-            1,
-            900,
-            param1=200,
-            param2=1,
-            minRadius=345,
-            maxRadius=355,
-        )
-        # (min + max) radius have to be quite exact.
-        # 900 = Distance to next circle to prevent wrong circles
-
-        if circles is None:
-            return -1, frame
-
-        circles = np.uint16(np.around(circles))
-
-        for i in circles[0, :]:
-            center = (i[0], i[1])
-            radius = i[2]
-            cv.circle(img_b, center, radius - 10, 255, 30)
-            cv.circle(img_b, center, radius - 20, 0, 15)
-            cv.circle(frame, center, radius, 255, 5)
-
-        contours, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-
-        ppi_contour = None
-        ppi = -1
-        areas = [0]
-        if len(contours) > 0:
-            for i in range(len(contours)):
-                if cv.contourArea(contours[i]) > 2000:
-                    x, y, w, h = cv.boundingRect(contours[i])
-                    if float(w) == float(h):  # Use constraints to find the projection plane
-                        ppi_contour = contours[i]  # Save contour
-                        ppi = i
-
-            if ppi_contour is None:
-                return -1, frame
-
-            if ppi >= 0:
-                c_areas = []
-                for contour in contours:
-                    temp_area = cv.contourArea(contour)
-                    c_areas.append(temp_area)
-                indices = np.argsort(c_areas)
-
-            font = cv.FONT_HERSHEY_SIMPLEX
-            color = (0, 0, 255)  # red
-
-            # x_length = frame.shape[1]
-            y_length = frame.shape[0]
-
-            # Check the size and parents and level of contour
-            for i in indices:
-                if hierarchy[0][i][3] == ppi:  # Contour is on pp
-                    x, y, w, h = cv.boundingRect(contours[i])
-                    pos = (x, y)
-                    cv.drawContours(frame, contours[i], -1, color, 4)
-                    cv.putText(frame, ("%s" % (i)), pos, font, 1, color, 2, 10)
-                    areas.append(c_areas[i])
-
-        cv.putText(
-            frame,
-            "%05d" % (np.sum(areas)),
-            (10, y_length - 20),
-            font,
-            1,
-            (255, 255, 255),
-            2,
-            10,
-        )
-
-        if np.sum(areas) >= 8000:
-            return 1, frame
-        else:
-            return 0, frame
+        # throw away some images after changing settings
+        for _ in range(2):
+            _VBDSD.cam.read()
 
     @staticmethod
-    def extend_border(img, frame):
-        """This function allows to use different models of the vbdsd hardware setup
-        by cutting the field of view to the same base.
-        """
-        bordersize = 50
-        make_border = lambda f: cv.copyMakeBorder(
-            f,
-            top=bordersize,
-            bottom=bordersize,
-            left=0,
-            right=0,
-            borderType=cv.BORDER_CONSTANT,
-            value=[0, 0, 0],
-        )
-        return make_border(img), make_border(frame)
-
-    @staticmethod
-    def change_exposure(diff=0):
-        """Changes the camera exposure settings according to the current sun angle
-        with a known setting. Allows to add an INT on top for further adjustment.
-        """
-
-        current_sun_angle = Astronomy.get_current_sun_elevation()
-
-        if current_sun_angle < 4 * Astronomy.units.deg:
-            exp = -9 + diff
-        elif current_sun_angle < 6 * Astronomy.units.deg:
-            exp = -10 + diff
-        elif current_sun_angle < 10 * Astronomy.units.deg:
-            exp = -11 + diff
-        else:
-            exp = -12 + diff
-
-        _VBDSD.cam.set(15, exp)
-        logger.debug("Changed camera exposure to {}".format(exp))
-        _VBDSD.cam.read()
-        time.sleep(0.2)
-
-    @staticmethod
-    def run(save_images: bool, retries: int = 5):
-        """
-        Calls take_vbdsd_image and processes the image if successful.
-
-        Returns
-        status: 1 or 0
-        frame: Source image
-        """
-
-        raw_frame = None
+    def take_image(retries: int = 5):
+        assert _VBDSD.cam is not None, "camera is not initialized yet"
+        assert _VBDSD.cam.isOpened(), "camera is not open"
         for _ in range(retries + 1):
-            ret, raw_frame = _VBDSD.cam.read()
+            ret, frame = _VBDSD.cam.read()
             if ret:
-                status, processed_frame = _VBDSD.eval_sun_state(raw_frame)
-                if save_images:
-                    image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-                    raw_image_path = os.path.join(
-                        IMG_DIR, f"{image_timestamp}-{status}-raw.jpg"
-                    )
-                    processed_image_path = os.path.join(
-                        IMG_DIR, f"{image_timestamp}-{status}-processed.jpg"
-                    )
-                    cv.imwrite(raw_image_path, raw_frame)
-                    cv.imwrite(processed_image_path, processed_frame)
-                return status, processed_frame
-        return 0, raw_frame
+                return frame
+        raise Exception("could not take image")
 
 
 class VBDSD_Thread:
