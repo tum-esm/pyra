@@ -225,7 +225,11 @@ class VBDSD_Thread:
         self.__thread = None
 
     @staticmethod
-    def main(shared_queue: queue.Queue, infinite_loop=True):
+    def main(shared_queue: queue.Queue, infinite_loop: bool = True, headless: bool = False):
+        # headless mode = don't use logger, just print messages to console
+        if headless:
+            logger = Logger(origin="vbdsd", just_print=True)
+
         global _CONFIG
         _CONFIG = ConfigInterface.read()
 
