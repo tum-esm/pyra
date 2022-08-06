@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 import queue
-from threading import Thread
+import threading
 import time
 import cv2 as cv
 import numpy as np
@@ -21,6 +21,10 @@ IMG_DIR = os.path.join(PROJECT_DIR, "logs", "vbdsd")
 _CONFIG = None
 
 
+class CameraError(Exception):
+    pass
+
+
 class _VBDSD:
     cam = None
 
@@ -34,10 +38,14 @@ class _VBDSD:
         for _ in range(retries):
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             if _VBDSD.cam.isOpened():
-                _VBDSD.cam.set(cv.CAP_PROP_FRAME_WIDTH, 1280)  # width
-                _VBDSD.cam.set(cv.CAP_PROP_FRAME_HEIGHT, 720)  # height
                 _VBDSD.update_camera_settings(
-                    exposure=-12, brightness=64, contrast=64, saturation=0, gain=0
+                    width=1280,
+                    height=720,
+                    exposure=-12,
+                    brightness=64,
+                    contrast=64,
+                    saturation=0,
+                    gain=0,
                 )
                 print(f"using backend {_VBDSD.cam.getBackendName()}")
                 return
@@ -53,44 +61,43 @@ class _VBDSD:
         contrast: int = None,
         saturation: int = None,
         gain: int = None,
+        width: int = None,
+        height: int = None,
     ):
-        if exposure is not None:
-            _VBDSD.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
-            assert (
-                _VBDSD.cam.get(cv.CAP_PROP_EXPOSURE) == exposure
-            ), f"could not set exposure to {exposure}"
-        if brightness is not None:
-            _VBDSD.cam.set(cv.CAP_PROP_BRIGHTNESS, brightness)
-            assert (
-                _VBDSD.cam.get(cv.CAP_PROP_BRIGHTNESS) == brightness
-            ), f"could not set brightness to {brightness}"
-        if contrast is not None:
-            _VBDSD.cam.set(cv.CAP_PROP_CONTRAST, contrast)
-            assert (
-                _VBDSD.cam.get(cv.CAP_PROP_CONTRAST) == contrast
-            ), f"could not set contrast to {contrast}"
-        if saturation is not None:
-            _VBDSD.cam.set(cv.CAP_PROP_SATURATION, saturation)
-            assert (
-                _VBDSD.cam.get(cv.CAP_PROP_SATURATION) == saturation
-            ), f"could not set saturation to {saturation}"
-        if gain is not None:
-            _VBDSD.cam.set(cv.CAP_PROP_GAIN, gain)
-            assert _VBDSD.cam.get(cv.CAP_PROP_GAIN) == gain, f"could not set gain to {gain}"
+        # which settings are available depends on the camera model.
+        # however, this function will throw an AssertionError, when
+        # the value could not be changed
+        properties = {
+            "width": (cv.CAP_PROP_FRAME_WIDTH, width),
+            "height": (cv.CAP_PROP_FRAME_HEIGHT, height),
+            "exposure": (cv.CAP_PROP_EXPOSURE, exposure),
+            "brightness": (cv.CAP_PROP_EXPOSURE, brightness),
+            "contrast": (cv.CAP_PROP_EXPOSURE, contrast),
+            "saturation": (cv.CAP_PROP_EXPOSURE, saturation),
+            "gain": (cv.CAP_PROP_EXPOSURE, gain),
+        }
+        for property_name in properties:
+            key, value = properties[property_name]
+            if value is not None:
+                _VBDSD.cam.set(key, value)
+                new_value = _VBDSD.cam.get(key)
+                assert new_value == value, f"could not set {property_name} to {value}"
 
-        # throw away some images after changing settings
+        # throw away some images after changing settings. I don't know
+        # why this is necessary, but it resolved a lot of issues
         for _ in range(2):
             _VBDSD.cam.read()
 
     @staticmethod
-    def take_image(retries: int = 5):
+    def take_image(retries: int = 5) -> cv.Mat:
         assert _VBDSD.cam is not None, "camera is not initialized yet"
-        assert _VBDSD.cam.isOpened(), "camera is not open"
+        if not _VBDSD.cam.isOpened():
+            raise CameraError("camera is not open")
         for _ in range(retries + 1):
             ret, frame = _VBDSD.cam.read()
             if ret:
                 return frame
-        raise Exception("could not take image")
+        raise CameraError("could not take image")
 
     @staticmethod
     def get_best_exposure() -> int:
@@ -106,6 +113,71 @@ class _VBDSD:
         print(exposure_results)
         return min(exposure_results, key=lambda r: abs(r["mean"] - 100))["exposure"]
 
+    @staticmethod
+    def determine_frame_status(frame: cv.Mat, save_image: bool) -> int:
+        # transform image from 1280x720 to 640x360
+        downscaled_image = cv.resize(frame, (640, 360))
+
+        # for each rgb pixel [234,234,234] only consider the gray value (234)
+        single_valued_pixels = downscaled_image.mean(axis=2, dtype=np.float32)
+
+        # apply kmeans (bin colors to the 3 most dominant ones)
+        _, raw_labels, raw_centers = cv.kmeans(
+            data=single_valued_pixels.flatten(),
+            K=3,
+            bestLabels=None,
+            criteria=(cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
+            attempts=5,
+            flags=cv.KMEANS_RANDOM_CENTERS,
+        )
+
+        # determine the three color values
+        centers: list[int] = list(raw_centers.flatten())
+        _, middle_color, bright_color = list(sorted(centers))
+
+        # count the occurances of each color
+        h = np.histogram(raw_labels, bins=[0, 1, 2, 3])[0]
+        hs: dict[int, int] = {centers[i]: h[i] for i in range(3)}
+        bright_color_count = hs[bright_color]
+        middle_color_count = hs[middle_color]
+
+        # TODO: the values below should be adjusted by looking at the ifgs directly
+        status = 1
+
+        # the shadows have to make up 7.5% - 40% of the circle
+        shadow_fraction = middle_color_count / (middle_color_count + bright_color_count)
+        if shadow_fraction < 0.075 or shadow_fraction > 0.40:
+            status = 0
+
+        # the shadow color should be at least 40 (of 255) points darker
+        shadow_offset = bright_color - middle_color
+        if shadow_offset < 30:
+            status = 0
+
+        if save_image:
+            image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            raw_image_path = os.path.join(IMG_DIR, f"{image_timestamp}-{status}-raw.jpg")
+            cv.imwrite(raw_image_path, frame)
+
+            processed_image_path = os.path.join(
+                IMG_DIR, f"{image_timestamp}-{status}-processed.jpg"
+            )
+            color_centers = [[np.mean(c)] * 3 for c in list(raw_centers)]
+            flat_processed_frame = np.uint8(color_centers)[raw_labels.flatten()]
+            processed_frame = flat_processed_frame.reshape((downscaled_image.shape))
+            cv.imwrite(processed_image_path, processed_frame)
+
+        return status
+
+    @staticmethod
+    def run(save_image: bool) -> int:
+        # TODO: run autoexposure function periodically
+        try:
+            frame = _VBDSD.take_image()
+            return _VBDSD.determine_frame_status(frame, save_image)
+        except CameraError:
+            return -1
+
 
 class VBDSD_Thread:
     def __init__(self):
@@ -117,7 +189,7 @@ class VBDSD_Thread:
         Start a thread using the multiprocessing library
         """
         logger.info("Starting thread")
-        self.__thread = Thread(target=VBDSD_Thread.main, args=(self.__shared_queue,))
+        self.__thread = threading.Thread(target=VBDSD_Thread.main, args=(self.__shared_queue,))
         self.__thread.start()
 
     def is_running(self):
@@ -192,22 +264,16 @@ class VBDSD_Thread:
                 time.sleep(300)
                 continue
 
-            # take a picture and process it
-            status, frame = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
-
-            # retry with change_exposure(1) if status fail
+            # take a picture and process it: status is in [-1,0,1]
+            status = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
             if status == -1:
-                _VBDSD.change_exposure(1)
-                status, frame = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
+                logger.debug(f"Could not take image")
 
             # append sun status to status history
-            status_history.append(max(status, 0))
+            status_history.append(0 if (status == -1) else status)
             logger.debug(
                 f"New VBDSD status: {status}. Current history: {status_history.get()}"
             )
-
-            if frame is None:
-                logger.debug(f"Could not take image")
 
             # evaluate sun state only if list is filled
             if status_history.size() == status_history.maxsize():
@@ -218,7 +284,7 @@ class VBDSD_Thread:
 
             if current_state != new_state:
                 logger.info(
-                    f"State change: {'GOOD -> BAD' if current_state else 'BAD -> GOOD'}"
+                    f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
                 )
                 StateInterface.update({"vbdsd_indicates_good_conditions": new_state})
                 current_state = new_state
