@@ -112,7 +112,7 @@ def enable_user_control_in_config():
         config: dict = json.load(f)
     config["tum_plc"]["controlled_by_user"] = True
     with open(CONFIG_FILE_PATH, "w") as f:
-        json.dump(config, f)
+        json.dump(config, f, indent=4)
 
 
 @click.command(help="Run plc function 'force_cover_close()'")
