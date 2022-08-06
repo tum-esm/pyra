@@ -60,7 +60,7 @@ class VBDSD:
         if gain is not None:
             VBDSD.cam.set(cv.CAP_PROP_GAIN, gain)
             assert VBDSD.cam.get(cv.CAP_PROP_GAIN) == gain, f"could not set gain to {gain}"
-        
+
         # throw away some images after changing settings
         for i in range(2):
             VBDSD.cam.read()
