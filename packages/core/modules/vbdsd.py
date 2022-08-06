@@ -92,6 +92,20 @@ class _VBDSD:
                 return frame
         raise Exception("could not take image")
 
+    @staticmethod
+    def get_best_exposure() -> int:
+        """
+        determine the exposure, where the overall
+        mean pixel value color is closest to 100
+        """
+        exposure_results = []
+        for e in range(-12, 0):
+            _VBDSD.update_camera_settings(exposure=e)
+            image = _VBDSD.take_image()
+            exposure_results.append({"exposure": e, "mean": np.mean(image)})
+        print(exposure_results)
+        return min(exposure_results, key=lambda r: abs(r["mean"] - 100))["exposure"]
+
 
 class VBDSD_Thread:
     def __init__(self):
