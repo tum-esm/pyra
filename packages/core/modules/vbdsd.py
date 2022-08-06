@@ -126,6 +126,7 @@ class _VBDSD:
         if new_exposure != _VBDSD.current_exposure:
             _VBDSD.update_camera_settings(exposure=new_exposure)
             logger.info(f"changing exposure: {_VBDSD.current_exposure} -> {new_exposure}")
+            _VBDSD.current_exposure = new_exposure
 
     @staticmethod
     def determine_frame_status(frame: cv.Mat, save_image: bool) -> int:
@@ -168,7 +169,9 @@ class _VBDSD:
         if shadow_offset < 50:
             status = 0
 
-        logger.debug(f"shadow_fraction = {shadow_fraction}, shadow_offset = {shadow_offset}")
+        logger.debug(
+            f"exposure = {_VBDSD.current_exposure}, shadow_fraction = {shadow_fraction}, shadow_offset = {shadow_offset}"
+        )
 
         if save_image:
             image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
