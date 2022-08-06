@@ -34,8 +34,8 @@ class _VBDSD:
     def init(camera_id: int, retries: int = 5):
 
         # TODO: Why is this necessary?
-        # _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
-        # _VBDSD.cam.release()
+        _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+        _VBDSD.cam.release()
 
         for _ in range(retries):
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
@@ -57,8 +57,9 @@ class _VBDSD:
 
     @staticmethod
     def deinit():
-        _VBDSD.cam.release()
-        _VBDSD.cam = None
+        if _VBDSD.cam is not None:
+            _VBDSD.cam.release()
+            _VBDSD.cam = None
 
     @staticmethod
     def update_camera_settings(
@@ -77,17 +78,20 @@ class _VBDSD:
             "width": (cv.CAP_PROP_FRAME_WIDTH, width),
             "height": (cv.CAP_PROP_FRAME_HEIGHT, height),
             "exposure": (cv.CAP_PROP_EXPOSURE, exposure),
-            "brightness": (cv.CAP_PROP_EXPOSURE, brightness),
-            "contrast": (cv.CAP_PROP_EXPOSURE, contrast),
-            "saturation": (cv.CAP_PROP_EXPOSURE, saturation),
-            "gain": (cv.CAP_PROP_EXPOSURE, gain),
+            "brightness": (cv.CAP_PROP_BRIGHTNESS, brightness),
+            "contrast": (cv.CAP_PROP_CONTRAST, contrast),
+            "saturation": (cv.CAP_PROP_SATURATION, saturation),
+            "gain": (cv.CAP_PROP_GAIN, gain),
         }
         for property_name in properties:
             key, value = properties[property_name]
             if value is not None:
                 _VBDSD.cam.set(key, value)
-                new_value = _VBDSD.cam.get(key)
-                assert new_value == value, f"could not set {property_name} to {value}"
+                if property_name not in ["width", "height"]:
+                    new_value = _VBDSD.cam.get(key)
+                    assert (
+                        new_value == value
+                    ), f"could not set {property_name} to {value}, value is still at {new_value}"
 
         # throw away some images after changing settings. I don't know
         # why this is necessary, but it resolved a lot of issues
@@ -226,7 +230,7 @@ class VBDSD_Thread:
 
     @staticmethod
     def main(shared_queue: queue.Queue, infinite_loop: bool = True, headless: bool = False):
-        # headless mode = don't use logger, just print messages to console
+        # headless mode = don't use logger, just print messages to console, always save images
         if headless:
             logger = Logger(origin="vbdsd", just_print=True)
 
@@ -252,7 +256,7 @@ class VBDSD_Thread:
                 # init camera connection
                 if _VBDSD.cam is None:
                     logger.info(f"Initializing VBDSD camera")
-                    _VBDSD.init_cam(_CONFIG["vbdsd"]["camera_id"])
+                    _VBDSD.init(_CONFIG["vbdsd"]["camera_id"])
 
                 # reinit if parameter changes
                 new_size = _CONFIG["vbdsd"]["evaluation_size"]
@@ -277,7 +281,7 @@ class VBDSD_Thread:
                     continue
 
                 # take a picture and process it: status is in [-1,0,1]
-                status = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
+                status = _VBDSD.run(headless or _CONFIG["vbdsd"]["save_images"])
                 if status == -1:
                     logger.debug(f"Could not take image")
 
@@ -315,8 +319,8 @@ class VBDSD_Thread:
             except Exception as e:
                 status_history.empty()
                 _VBDSD.deinit()
-
-                logger.error("Error within VBDSD thread: trying again in 60 seconds")
                 logger.exception(e)
 
-                time.sleep(60)
+                sleep_time = 8 if headless else 60
+                logger.error(f"Error in VBDSD thread: sleeping {sleep_time} seconds")
+                time.sleep(sleep_time)

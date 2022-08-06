@@ -58,7 +58,7 @@ class Logger:
             + f"- {self.origin} - {level} - {message}\n"
         )
         if self.just_print:
-            print(log_string)
+            print(log_string, end="")
         else:
             with filelock.FileLock(LOG_FILES_LOCK):
                 with open(DEBUG_LOG_FILE, "a") as f1:
