@@ -160,13 +160,15 @@ class _VBDSD:
 
         # the shadows have to make up 7.5% - 40% of the circle
         shadow_fraction = middle_color_count / (middle_color_count + bright_color_count)
-        if shadow_fraction < 0.075 or shadow_fraction > 0.40:
+        if shadow_fraction < 0.1 or shadow_fraction > 0.4:
             status = 0
 
         # the shadow color should be at least 40 (of 255) points darker
         shadow_offset = bright_color - middle_color
-        if shadow_offset < 30:
+        if shadow_offset < 50:
             status = 0
+
+        logger.debug(f"shadow_fraction = {shadow_fraction}, shadow_offset = {shadow_offset}")
 
         if save_image:
             image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -186,8 +188,10 @@ class _VBDSD:
     @staticmethod
     def run(save_image: bool) -> int:
         # run autoexposure function every 3 minutes
-        if (time.time() - _VBDSD.last_autoexposure_time) > 180:
+        now = time.time()
+        if (now - _VBDSD.last_autoexposure_time) > 180:
             _VBDSD.adjust_exposure()
+            _VBDSD.last_autoexposure_time = now
 
         try:
             frame = _VBDSD.take_image()
@@ -230,11 +234,12 @@ class VBDSD_Thread:
 
     @staticmethod
     def main(shared_queue: queue.Queue, infinite_loop: bool = True, headless: bool = False):
+        global logger
+        global _CONFIG
+
         # headless mode = don't use logger, just print messages to console, always save images
         if headless:
             logger = Logger(origin="vbdsd", just_print=True)
-
-        global _CONFIG
         _CONFIG = ConfigInterface.read()
 
         status_history = RingList(_CONFIG["vbdsd"]["evaluation_size"])
