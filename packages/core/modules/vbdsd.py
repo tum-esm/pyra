@@ -27,9 +27,11 @@ class CameraError(Exception):
 
 class _VBDSD:
     cam = None
+    current_exposure = -12
+    last_autoexposure_time = 0
 
     @staticmethod
-    def init_cam(retries: int = 5):
+    def init(retries: int = 5):
         camera_id = 0
 
         _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
@@ -53,6 +55,10 @@ class _VBDSD:
                 time.sleep(2)
 
         raise Exception("could not initialize camera")
+
+    @staticmethod
+    def deinit():
+        _VBDSD.cam.release()
 
     @staticmethod
     def update_camera_settings(
@@ -100,9 +106,9 @@ class _VBDSD:
         raise CameraError("could not take image")
 
     @staticmethod
-    def get_best_exposure() -> int:
+    def adjust_exposure():
         """
-        determine the exposure, where the overall
+        set exposure to the value where the overall
         mean pixel value color is closest to 100
         """
         exposure_results = []
@@ -110,8 +116,12 @@ class _VBDSD:
             _VBDSD.update_camera_settings(exposure=e)
             image = _VBDSD.take_image()
             exposure_results.append({"exposure": e, "mean": np.mean(image)})
-        print(exposure_results)
-        return min(exposure_results, key=lambda r: abs(r["mean"] - 100))["exposure"]
+        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 100))["exposure"]
+        logger.debug(f"exposure results: {exposure_results}")
+
+        if new_exposure != _VBDSD.current_exposure:
+            _VBDSD.update_camera_settings(exposure=new_exposure)
+            logger.info(f"changing exposure: {_VBDSD.current_exposure} -> {new_exposure}")
 
     @staticmethod
     def determine_frame_status(frame: cv.Mat, save_image: bool) -> int:
@@ -171,7 +181,10 @@ class _VBDSD:
 
     @staticmethod
     def run(save_image: bool) -> int:
-        # TODO: run autoexposure function periodically
+        # run autoexposure function every 3 minutes
+        if (time.time() - _VBDSD.last_autoexposure_time) > 180:
+            _VBDSD.adjust_exposure()
+
         try:
             frame = _VBDSD.take_image()
             return _VBDSD.determine_frame_status(frame, save_image)
@@ -220,7 +233,6 @@ class VBDSD_Thread:
         current_state = None
 
         while True:
-
             # Check for termination
             try:
                 if shared_queue.get(block=False) == "stop":
@@ -235,12 +247,6 @@ class VBDSD_Thread:
             if _VBDSD.cam is None:
                 logger.info(f"Initializing VBDSD camera")
                 _VBDSD.init_cam()
-
-                # if connecting was not successful
-                if _VBDSD.cam is None:
-                    status_history.empty()
-                    time.sleep(60)
-                    continue
 
             # reinit if parameter changes
             new_size = _CONFIG["vbdsd"]["evaluation_size"]
