@@ -236,73 +236,84 @@ class VBDSD_Thread:
             # Check for termination
             try:
                 if shared_queue.get(block=False) == "stop":
+                    _VBDSD.deinit()
                     break
             except queue.Empty:
                 pass
 
-            start_time = time.time()
-            _CONFIG = ConfigInterface.read()
+            try:
+                start_time = time.time()
+                _CONFIG = ConfigInterface.read()
 
-            # init camera connection
-            if _VBDSD.cam is None:
-                logger.info(f"Initializing VBDSD camera")
-                _VBDSD.init_cam()
+                # init camera connection
+                if _VBDSD.cam is None:
+                    logger.info(f"Initializing VBDSD camera")
+                    _VBDSD.init_cam()
 
-            # reinit if parameter changes
-            new_size = _CONFIG["vbdsd"]["evaluation_size"]
-            if status_history.maxsize() != new_size:
+                # reinit if parameter changes
+                new_size = _CONFIG["vbdsd"]["evaluation_size"]
+                if status_history.maxsize() != new_size:
+                    logger.debug(
+                        "Size of VBDSD history has changed: "
+                        + f"{status_history.maxsize()} -> {new_size}"
+                    )
+                    status_history.reinitialize(new_size)
+
+                # sleep while sun angle is too low
+                if Astronomy.get_current_sun_elevation().is_within_bounds(
+                    None, _CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
+                ):
+                    logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
+                    if current_state != None:
+                        StateInterface.update({"vbdsd_indicates_good_conditions": False})
+                        current_state = None
+                        # reinit for next day
+                        _VBDSD.reinit_settings()
+                    time.sleep(300)
+                    continue
+
+                # take a picture and process it: status is in [-1,0,1]
+                status = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
+                if status == -1:
+                    logger.debug(f"Could not take image")
+
+                # append sun status to status history
+                status_history.append(0 if (status == -1) else status)
                 logger.debug(
-                    "Size of VBDSD history has changed: "
-                    + f"{status_history.maxsize()} -> {new_size}"
+                    f"New VBDSD status: {status}. Current history: {status_history.get()}"
                 )
-                status_history.reinitialize(new_size)
 
-            # sleep while sun angle is too low
-            if Astronomy.get_current_sun_elevation().is_within_bounds(
-                None, _CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
-            ):
-                logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
-                if current_state != None:
-                    StateInterface.update({"vbdsd_indicates_good_conditions": False})
-                    current_state = None
-                    # reinit for next day
-                    _VBDSD.reinit_settings()
-                time.sleep(300)
-                continue
+                # evaluate sun state only if list is filled
+                if status_history.size() == status_history.maxsize():
+                    score = status_history.sum() / status_history.size()
+                    new_state = score > _CONFIG["vbdsd"]["measurement_threshold"]
+                else:
+                    new_state = None
 
-            # take a picture and process it: status is in [-1,0,1]
-            status = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
-            if status == -1:
-                logger.debug(f"Could not take image")
+                if current_state != new_state:
+                    logger.info(
+                        f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
+                    )
+                    StateInterface.update({"vbdsd_indicates_good_conditions": new_state})
+                    current_state = new_state
 
-            # append sun status to status history
-            status_history.append(0 if (status == -1) else status)
-            logger.debug(
-                f"New VBDSD status: {status}. Current history: {status_history.get()}"
-            )
+                # wait rest of loop time
+                elapsed_time = time.time() - start_time
+                time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
+                if time_to_wait > 0:
+                    logger.debug(
+                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)."
+                    )
+                    time.sleep(time_to_wait)
 
-            # evaluate sun state only if list is filled
-            if status_history.size() == status_history.maxsize():
-                score = status_history.sum() / status_history.size()
-                new_state = score > _CONFIG["vbdsd"]["measurement_threshold"]
-            else:
-                new_state = None
+                if not infinite_loop:
+                    return status_history
 
-            if current_state != new_state:
-                logger.info(
-                    f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
-                )
-                StateInterface.update({"vbdsd_indicates_good_conditions": new_state})
-                current_state = new_state
+            except Exception as e:
+                status_history.empty()
+                _VBDSD.deinit()
 
-            # wait rest of loop time
-            elapsed_time = time.time() - start_time
-            time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
-            if time_to_wait > 0:
-                logger.debug(
-                    f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)."
-                )
-                time.sleep(time_to_wait)
+                logger.error("Error within VBDSD thread: trying again in 60 seconds")
+                logger.exception(e)
 
-            if not infinite_loop:
-                return status_history
+                time.sleep(60)
