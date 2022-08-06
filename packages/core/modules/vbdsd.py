@@ -31,11 +31,11 @@ class _VBDSD:
     last_autoexposure_time = 0
 
     @staticmethod
-    def init(retries: int = 5):
-        camera_id = 0
+    def init(camera_id: int, retries: int = 5):
 
-        _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
-        _VBDSD.cam.release()
+        # TODO: Why is this necessary?
+        # _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+        # _VBDSD.cam.release()
 
         for _ in range(retries):
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
@@ -49,7 +49,6 @@ class _VBDSD:
                     saturation=0,
                     gain=0,
                 )
-                print(f"using backend {_VBDSD.cam.getBackendName()}")
                 return
             else:
                 time.sleep(2)
@@ -248,7 +247,7 @@ class VBDSD_Thread:
                 # init camera connection
                 if _VBDSD.cam is None:
                     logger.info(f"Initializing VBDSD camera")
-                    _VBDSD.init_cam()
+                    _VBDSD.init_cam(_CONFIG["vbdsd"]["camera_id"])
 
                 # reinit if parameter changes
                 new_size = _CONFIG["vbdsd"]["evaluation_size"]
@@ -284,11 +283,10 @@ class VBDSD_Thread:
                 )
 
                 # evaluate sun state only if list is filled
+                new_state = None
                 if status_history.size() == status_history.maxsize():
                     score = status_history.sum() / status_history.size()
                     new_state = score > _CONFIG["vbdsd"]["measurement_threshold"]
-                else:
-                    new_state = None
 
                 if current_state != new_state:
                     logger.info(
