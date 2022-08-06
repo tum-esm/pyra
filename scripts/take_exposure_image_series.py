@@ -22,8 +22,6 @@ class VBDSD:
                 VBDSD.update_camera_settings(
                     exposure=-12, brightness=64, contrast=64, saturation=0, gain=0
                 )
-                VBDSD.cam.set(cv.CAP_PROP_AUTO_EXPOSURE, 0)
-                VBDSD.cam.read()  # throw away first picture
                 print(f"using backend {VBDSD.cam.getBackendName()}")
                 return
             else:
@@ -63,9 +61,14 @@ class VBDSD:
             VBDSD.cam.set(cv.CAP_PROP_GAIN, gain)
             assert VBDSD.cam.get(cv.CAP_PROP_GAIN) == gain, f"could not set gain to {gain}"
 
+        # throw away some images after changing settings
+        for _ in range(2):
+            VBDSD.cam.read()
+
     @staticmethod
     def take_image(retries: int = 5):
         assert VBDSD.cam is not None, "camera is not initialized yet"
+        assert VBDSD.cam.isOpened(), "camera is not open"
         for _ in range(retries + 1):
             ret, frame = VBDSD.cam.read()
             if ret:
@@ -79,10 +82,11 @@ class VBDSD:
         mean pixel value color is closest to 100
         """
         exposure_results = []
-        for e in range(-13, 0):
+        for e in range(-12, 0):
             VBDSD.update_camera_settings(exposure=e)
             image = VBDSD.take_image()
             exposure_results.append({"exposure": e, "mean": np.mean(image)})
+        print(exposure_results)
         return min(exposure_results, key=lambda r: abs(r["mean"] - 100))["exposure"]
 
 
@@ -94,7 +98,12 @@ if __name__ == "__main__":
 
     best_exposure = VBDSD.get_best_exposure()
     print(f"best_exposure = {best_exposure}")
+
     VBDSD.update_camera_settings(exposure=best_exposure)
 
     sample_image = VBDSD.take_image()
-    cv.imwrite(f"sample-image-exposure-{abs(best_exposure)}.jpg")
+    print(np.mean(sample_image))
+    cv.imwrite(f"sample-image-exposure-{best_exposure}.jpg", sample_image)
+
+    VBDSD.cam.release()
+    cv.destroyAllWindows()
