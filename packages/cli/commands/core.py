@@ -97,12 +97,9 @@ def _stop_pyra_core():
             error_handler(f"Failed to close CamTracker: {e}")
 
         try:
-            # TODO: kill macro forcefully
-            opus = OpusMeasurement(config)
-            if opus.opus_application_running():
-                opus.stop_macro()
-                time.sleep(2)
-                opus.close_opus()
+            executable_name = config["opus"]["executable_path"].split("\\")[-1]
+            exit_code = os.system(f"taskkill /f /im {executable_name}")
+            assert exit_code == 0, f"taskkill ended with an exit_code of {exit_code}"
             success_handler("Successfully closed OPUS")
         except Exception as e:
             error_handler(f"Failed to close OPUS: {e}")
