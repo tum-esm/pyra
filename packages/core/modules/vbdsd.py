@@ -29,6 +29,7 @@ class _VBDSD:
     cam = None
     current_exposure = -12
     last_autoexposure_time = 0
+    available_exposures = [-12]
 
     @staticmethod
     def init(camera_id: int, retries: int = 5):
@@ -40,6 +41,7 @@ class _VBDSD:
         for _ in range(retries):
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             if _VBDSD.cam.isOpened():
+                _VBDSD.available_exposures = _VBDSD.get_available_exposures()
                 _VBDSD.update_camera_settings(
                     width=1280,
                     height=720,
@@ -60,6 +62,16 @@ class _VBDSD:
         if _VBDSD.cam is not None:
             _VBDSD.cam.release()
             _VBDSD.cam = None
+
+    @staticmethod
+    def get_available_exposures() -> list[int]:
+        possible_values = []
+        for exposure in range(-20, 20):
+            _VBDSD.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
+            if _VBDSD.cam.get(cv.CAP_PROP_EXPOSURE) == exposure:
+                possible_values.append(exposure)
+
+        return possible_values
 
     @staticmethod
     def update_camera_settings(
@@ -116,7 +128,7 @@ class _VBDSD:
         mean pixel value color is closest to 100
         """
         exposure_results = []
-        for e in range(-12, 0):
+        for e in _VBDSD.available_settings["exposure"]:
             _VBDSD.update_camera_settings(exposure=e)
             image = _VBDSD.take_image()
             exposure_results.append({"exposure": e, "mean": np.mean(image)})
