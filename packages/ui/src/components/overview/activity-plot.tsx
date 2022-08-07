@@ -26,11 +26,13 @@ function getSections(
             if (curr.event === startIndicator) {
                 return [...prev, { from: curr.localTime, to: '23:59:59' }];
             } else if (stopIndicators.includes(curr.event)) {
-                if (prev.length == 0) {
+                if (startIndicator !== 'start-measurements' && prev.length == 0) {
                     return [{ from: '00:00:00', to: curr.localTime }];
-                } else {
+                } else if (prev.length != 0) {
                     const lastFrom: any = prev.at(-1)?.from;
                     return [...prev.slice(0, -1), { from: lastFrom, to: curr.localTime }];
+                } else {
+                    return prev;
                 }
             } else {
                 return prev;
