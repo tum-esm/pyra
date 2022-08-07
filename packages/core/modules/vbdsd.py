@@ -166,7 +166,7 @@ class _VBDSD:
         circle_cx, circle_cy, circle_r = ImageProcessing.get_circle_location(binary_mask)
 
         # only consider edges and make them bold
-        edges_only = np.array(cv.Canny(single_valued_pixels, 60, 60), dtype=np.float32)
+        edges_only = np.array(cv.Canny(single_valued_pixels, 50, 50), dtype=np.float32)
         edges_only_dilated = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
         )
@@ -180,7 +180,7 @@ class _VBDSD:
         edge_fraction = round((np.sum(edges_only_dilated) / 255) / np.sum(binary_mask), 6)
 
         # TODO: the values below should be adjusted by looking at the ifgs directly
-        status = 1 if (edge_fraction > 0.03) else 0
+        status = 1 if (edge_fraction > 0.02) else 0
 
         logger.debug(f"exposure = {_VBDSD.current_exposure}, edge_fraction = {edge_fraction}")
 
