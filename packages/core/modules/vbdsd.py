@@ -28,13 +28,12 @@ class CameraError(Exception):
 
 class _VBDSD:
     cam = None
-    current_exposure = -12
-    last_autoexposure_time = 0
-    available_exposures = [-12]
+    current_exposure = None
+    last_autoexposure_time = None
+    available_exposures = None
 
     @staticmethod
     def init(camera_id: int, retries: int = 5):
-
         # TODO: Why is this necessary?
         _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         _VBDSD.cam.release()
@@ -43,6 +42,8 @@ class _VBDSD:
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             if _VBDSD.cam.isOpened():
                 _VBDSD.available_exposures = _VBDSD.get_available_exposures()
+                _VBDSD.current_exposure = -12
+                _VBDSD.last_autoexposure_time = 0
                 _VBDSD.update_camera_settings(
                     width=1280,
                     height=720,
@@ -56,7 +57,7 @@ class _VBDSD:
             else:
                 time.sleep(2)
 
-        raise Exception("could not initialize camera")
+        raise CameraError("could not initialize camera")
 
     @staticmethod
     def deinit():
@@ -192,11 +193,10 @@ class _VBDSD:
             _VBDSD.adjust_exposure()
             _VBDSD.last_autoexposure_time = now
 
-        try:
-            frame = _VBDSD.take_image()
-            return _VBDSD.determine_frame_status(frame, save_image)
-        except CameraError:
-            return -1
+        frame = _VBDSD.take_image()
+        if np.mean(frame) > 240:
+            raise CameraError("frame returned from camera is white (most likely invalid)")
+        return _VBDSD.determine_frame_status(frame, save_image)
 
 
 class VBDSD_Thread:
@@ -325,6 +325,6 @@ class VBDSD_Thread:
                 _VBDSD.deinit()
                 logger.exception(e)
 
-                sleep_time = 8 if headless else 60
-                logger.error(f"Error in VBDSD thread: sleeping {sleep_time} seconds")
-                time.sleep(sleep_time)
+                logger.error(f"error in VBDSD thread: {repr(e)}")
+                logger.info(f"reinitializing VBDSD class. sleeping 8 seconds")
+                time.sleep(8)
