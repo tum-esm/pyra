@@ -18,14 +18,14 @@ type ActivitySection = { from: string; to: string };
 function getSections(
     activityHistory: customTypes.activityHistory,
     startIndicator: string,
-    stopIndicator: string
+    stopIndicators: string[]
 ): ActivitySection[] {
     return reduce(
         activityHistory,
         (prev: ActivitySection[], curr, index) => {
             if (curr.event === startIndicator) {
                 return [...prev, { from: curr.localTime, to: '23:59:59' }];
-            } else if (curr.event === stopIndicator) {
+            } else if (stopIndicators.includes(curr.event)) {
                 if (prev.length == 0) {
                     return [{ from: '00:00:00', to: curr.localTime }];
                 } else {
@@ -58,9 +58,12 @@ function ActivityPlot() {
     }
 
     const sections = {
-        core: getSections(activityHistory, 'start-core', 'stop-core'),
-        measurements: getSections(activityHistory, 'start-measurements', 'stop-measurements'),
-        error: getSections(activityHistory, 'error-occured', 'errors-resolved'),
+        core: getSections(activityHistory, 'start-core', ['stop-core']),
+        measurements: getSections(activityHistory, 'start-measurements', [
+            'stop-core',
+            'stop-measurements',
+        ]),
+        error: getSections(activityHistory, 'error-occured', ['errors-resolved']),
     };
 
     const localUTCOffset = moment().utcOffset();
