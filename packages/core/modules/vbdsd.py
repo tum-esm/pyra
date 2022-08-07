@@ -272,7 +272,7 @@ class VBDSD_Thread:
                     status_history.reinitialize(new_size)
 
                 # sleep while sun angle is too low
-                if Astronomy.get_current_sun_elevation().is_within_bounds(
+                if (not headless) and Astronomy.get_current_sun_elevation().is_within_bounds(
                     None, _CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
                 ):
                     logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
