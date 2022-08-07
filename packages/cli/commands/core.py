@@ -97,9 +97,13 @@ def _stop_pyra_core():
             error_handler(f"Failed to close CamTracker: {e}")
 
         try:
-            executable_name = config["opus"]["executable_path"].split("\\")[-1]
-            exit_code = os.system(f"taskkill /f /im {executable_name}")
-            assert exit_code == 0, f"taskkill ended with an exit_code of {exit_code}"
+            processes = [p.name() for p in psutil.process_iter()]
+            for e in ["opus.exe", "OpusCore.exe"]:
+                if e in processes:
+                    exit_code = os.system(f"taskkill /f /im {e}")
+                    assert (
+                        exit_code == 0
+                    ), f'taskkill  of "{e}" ended with an exit_code of {exit_code}'
             success_handler("Successfully closed OPUS")
         except Exception as e:
             error_handler(f"Failed to close OPUS: {e}")
