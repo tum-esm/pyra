@@ -129,7 +129,7 @@ class _VBDSD:
         mean pixel value color is closest to 100
         """
         exposure_results = []
-        for e in _VBDSD.available_settings["exposure"]:
+        for e in _VBDSD.available_exposures:
             _VBDSD.update_camera_settings(exposure=e)
             image = _VBDSD.take_image()
             exposure_results.append({"exposure": e, "mean": np.mean(image)})
