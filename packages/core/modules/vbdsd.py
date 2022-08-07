@@ -177,7 +177,7 @@ class _VBDSD:
         )
 
         # determine how many pixels inside the circle are made up of "edge pixels"
-        edge_fraction = (np.sum(edges_only_dilated) / 255) / np.sum(binary_mask)
+        edge_fraction = round((np.sum(edges_only_dilated) / 255) / np.sum(binary_mask), 6)
 
         # TODO: the values below should be adjusted by looking at the ifgs directly
         status = 1 if (edge_fraction > 0.03) else 0
@@ -332,8 +332,7 @@ class VBDSD_Thread:
             except Exception as e:
                 status_history.empty()
                 _VBDSD.deinit()
-                logger.exception(e)
 
                 logger.error(f"error in VBDSD thread: {repr(e)}")
-                logger.info(f"reinitializing VBDSD class. sleeping 8 seconds")
-                time.sleep(8)
+                logger.info(f"reinitializing VBDSD class. sleeping 10 seconds")
+                time.sleep(10)
