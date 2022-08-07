@@ -55,9 +55,10 @@ CONFIG_FILE_SCHEMA = {
         {
             "em27_ip": _Schemas.ip,
             "executable_path": _Schemas.file,
-            "executable_parameter": _Schemas.string,
             "experiment_path": _Schemas.file,
             "macro_path": _Schemas.file,
+            "username": {"type": "string"},
+            "password": {"type": "string"},
         }
     ),
     "camtracker": DICT_SCHEMA(

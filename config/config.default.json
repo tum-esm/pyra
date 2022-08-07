@@ -8,9 +8,10 @@
     "opus": {
         "em27_ip": "10.10.0.1",
         "executable_path": "C:\\Program Files (x86)\\Bruker\\OPUS_7.8.44\\opus.exe",
-        "executable_parameter": "/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD=Default@OPUS",
         "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
-        "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx"
+        "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx",
+        "username": "Default",
+        "password": "..."
     },
     "camtracker": {
         "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt",

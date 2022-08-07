@@ -46,9 +46,10 @@ export namespace customTypes {
         opus: {
             em27_ip: string;
             executable_path: string;
-            executable_parameter: string;
             experiment_path: string;
             macro_path: string;
+            username: string;
+            password: string;
         };
         camtracker: {
             config_path: string;
@@ -101,9 +102,10 @@ export namespace customTypes {
         opus?: {
             em27_ip?: string;
             executable_path?: string;
-            executable_parameter?: string;
             experiment_path?: string;
             macro_path?: string;
+            username?: string;
+            password?: string;
         };
         camtracker?: {
             config_path?: string;
