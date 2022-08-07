@@ -308,8 +308,10 @@ class VBDSD_Thread:
                         raise e
                     else:
                         logger.debug(
-                            f"camera occured ({repeated_camera_error_count} time(s) in a row). sleeping 20 seconds"
+                            f"camera occured ({repeated_camera_error_count} time(s) in a row). "
+                            + "sleeping 15 seconds, reconnecting camera"
                         )
+                        _VBDSD.deinit()
                         time.sleep(15)
                         continue
 
@@ -349,5 +351,5 @@ class VBDSD_Thread:
                 _VBDSD.deinit()
 
                 logger.error(f"error in VBDSD thread: {repr(e)}")
-                logger.info(f"reinitializing VBDSD class. sleeping 30 seconds")
+                logger.info(f"sleeping 30 seconds, reinitializing VBDSD thread")
                 time.sleep(30)
