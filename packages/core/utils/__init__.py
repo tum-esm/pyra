@@ -4,6 +4,7 @@ from .functions import Astronomy
 from .functions import ExceptionEmailClient
 from .functions import ExceptionEmailClient
 from .functions import update_dict_recursively
+from .functions import ImageProcessing
 
 from .decorators import with_filelock
 

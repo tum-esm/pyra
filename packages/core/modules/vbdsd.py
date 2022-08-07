@@ -11,6 +11,7 @@ from packages.core.utils import (
     Logger,
     RingList,
     Astronomy,
+    ImageProcessing,
 )
 
 logger = Logger(origin="vbdsd")
@@ -29,6 +30,7 @@ class _VBDSD:
     cam = None
     current_exposure = -12
     last_autoexposure_time = 0
+    available_exposures = [-12]
 
     @staticmethod
     def init(camera_id: int, retries: int = 5):
@@ -40,6 +42,7 @@ class _VBDSD:
         for _ in range(retries):
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             if _VBDSD.cam.isOpened():
+                _VBDSD.available_exposures = _VBDSD.get_available_exposures()
                 _VBDSD.update_camera_settings(
                     width=1280,
                     height=720,
@@ -60,6 +63,16 @@ class _VBDSD:
         if _VBDSD.cam is not None:
             _VBDSD.cam.release()
             _VBDSD.cam = None
+
+    @staticmethod
+    def get_available_exposures() -> list[int]:
+        possible_values = []
+        for exposure in range(-20, 20):
+            _VBDSD.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
+            if _VBDSD.cam.get(cv.CAP_PROP_EXPOSURE) == exposure:
+                possible_values.append(exposure)
+
+        return possible_values
 
     @staticmethod
     def update_camera_settings(
@@ -116,7 +129,7 @@ class _VBDSD:
         mean pixel value color is closest to 100
         """
         exposure_results = []
-        for e in range(-12, 0):
+        for e in _VBDSD.available_settings["exposure"]:
             _VBDSD.update_camera_settings(exposure=e)
             image = _VBDSD.take_image()
             exposure_results.append({"exposure": e, "mean": np.mean(image)})
@@ -131,60 +144,43 @@ class _VBDSD:
     @staticmethod
     def determine_frame_status(frame: cv.Mat, save_image: bool) -> int:
         # transform image from 1280x720 to 640x360
-        downscaled_image = cv.resize(frame, (640, 360))
+        downscaled_image = cv.resize(frame, None, fx=0.5, fy=0.5)
 
         # for each rgb pixel [234,234,234] only consider the gray value (234)
-        single_valued_pixels = downscaled_image.mean(axis=2, dtype=np.float32)
+        single_valued_pixels = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)
 
-        # apply kmeans (bin colors to the 3 most dominant ones)
-        _, raw_labels, raw_centers = cv.kmeans(
-            data=single_valued_pixels.flatten(),
-            K=3,
-            bestLabels=None,
-            criteria=(cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
-            attempts=5,
-            flags=cv.KMEANS_RANDOM_CENTERS,
+        # determine lense position and size from binary mask
+        binary_mask = ImageProcessing.get_binary_mask(single_valued_pixels)
+        circle_cx, circle_cy, circle_r = ImageProcessing.get_circle_location(binary_mask)
+
+        # only consider edges and make them bold
+        edges_only = np.array(cv.Canny(single_valued_pixels, 60, 60), dtype=np.float32)
+        edges_only_dilated = cv.dilate(
+            edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
         )
 
-        # determine the three color values
-        centers: list[int] = list(raw_centers.flatten())
-        _, middle_color, bright_color = list(sorted(centers))
+        # blacken the outer 10% of the circle radius
+        edges_only_dilated *= ImageProcessing.get_circle_mask(
+            edges_only_dilated.shape, circle_r * 0.9, circle_cx, circle_cy
+        )
 
-        # count the occurances of each color
-        h = np.histogram(raw_labels, bins=[0, 1, 2, 3])[0]
-        hs: dict[int, int] = {centers[i]: h[i] for i in range(3)}
-        bright_color_count = hs[bright_color]
-        middle_color_count = hs[middle_color]
+        # determine how many pixels inside the circle are made up of "edge pixels"
+        edge_fraction = (np.sum(edges_only_dilated) / 255) / np.sum(binary_mask)
 
         # TODO: the values below should be adjusted by looking at the ifgs directly
-        status = 1
+        status = 1 if (edge_fraction > 0.03) else 0
 
-        # the shadows have to make up 7.5% - 40% of the circle
-        shadow_fraction = middle_color_count / (middle_color_count + bright_color_count)
-        if shadow_fraction < 0.1 or shadow_fraction > 0.4:
-            status = 0
-
-        # the shadow color should be at least 40 (of 255) points darker
-        shadow_offset = bright_color - middle_color
-        if shadow_offset < 50:
-            status = 0
-
-        logger.debug(
-            f"exposure = {_VBDSD.current_exposure}, shadow_fraction = {shadow_fraction}, shadow_offset = {shadow_offset}"
-        )
+        logger.debug(f"exposure = {_VBDSD.current_exposure}, edge_fraction = {edge_fraction}")
 
         if save_image:
             image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            raw_image_path = os.path.join(IMG_DIR, f"{image_timestamp}-{status}-raw.jpg")
-            cv.imwrite(raw_image_path, frame)
-
-            processed_image_path = os.path.join(
-                IMG_DIR, f"{image_timestamp}-{status}-processed.jpg"
+            raw_image_name = f"{image_timestamp}-{status}-raw.jpg"
+            processed_image_name = f"{image_timestamp}-{status}-processed.jpg"
+            processed_frame = ImageProcessing.add_markings_to_image(
+                edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
             )
-            color_centers = [[np.mean(c)] * 3 for c in list(raw_centers)]
-            flat_processed_frame = np.uint8(color_centers)[raw_labels.flatten()]
-            processed_frame = flat_processed_frame.reshape((downscaled_image.shape))
-            cv.imwrite(processed_image_path, processed_frame)
+            cv.imwrite(os.path.join(IMG_DIR, raw_image_name), frame)
+            cv.imwrite(os.path.join(IMG_DIR, processed_image_name), processed_frame)
 
         return status
 
