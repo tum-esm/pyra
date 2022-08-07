@@ -20,6 +20,7 @@ export default function ConfigSectionGeneral() {
                 value={localSectionConfig.seconds_per_core_interval}
                 setValue={(v: number) => update({ general: { seconds_per_core_interval: v } })}
                 oldValue={centralSectionConfig.seconds_per_core_interval}
+                postfix="second(s)"
             />
             <configurationComponents.ConfigElementToggle
                 title="Test Mode"

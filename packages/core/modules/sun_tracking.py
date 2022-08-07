@@ -10,11 +10,6 @@ import datetime
 from packages.core.utils import StateInterface, Logger, OSInterface
 
 
-# these imports are provided by pywin32
-if sys.platform == "win32":
-    import win32ui  # type: ignore
-
-
 logger = Logger(origin="sun-tracking")
 
 
@@ -33,7 +28,9 @@ class SunTracking:
 
         logger.info("Running SunTracking")
 
-        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
+        measurements_should_be_running = StateInterface.read()[
+            "measurements_should_be_running"
+        ]
 
         # main logic for active automation
         if measurements_should_be_running and not self.ct_application_running():

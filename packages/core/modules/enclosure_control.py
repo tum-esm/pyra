@@ -1,6 +1,6 @@
 import time
 from snap7.exceptions import Snap7Exception
-from packages.core.utils import StateInterface, Logger, Astronomy, PLCError, PLCInterface
+from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface
 
 logger = Logger(origin="enclosure-control")
 
@@ -49,13 +49,13 @@ class EnclosureControl:
             return
 
         logger.info("Running EnclosureControl")
-        
+
         if not self.initialized:
             self._initialize()
         else:
             self.plc_interface.update_config(self.config)
             self.plc_interface.connect()
-            
+
         # TODO: possibly end function if plc is not connected
 
         # get the latest PLC interface state and update with current config
@@ -116,6 +116,9 @@ class EnclosureControl:
             self.plc_interface.set_manual_control(False)
 
     def force_cover_close(self) -> None:
+        if not self.initialized:
+            self._initialize()
+
         if self.plc_state.state.reset_needed:
             self.plc_interface.reset()
 
@@ -151,7 +154,9 @@ class EnclosureControl:
         """
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
-        min_power_elevation = self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
+        min_power_elevation = (
+            self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
+        )
 
         if current_sun_elevation is not None:
             sun_is_above_minimum = current_sun_elevation >= min_power_elevation

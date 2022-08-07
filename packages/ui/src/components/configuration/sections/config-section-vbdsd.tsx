@@ -79,6 +79,7 @@ export default function ConfigSectionVbdsd() {
                     centralSectionConfig !== null ? centralSectionConfig.min_sun_elevation : 'null'
                 }
                 numeric
+                postfix="degree(s)"
             />
             <configurationComponents.ConfigElementText
                 title="Seconds Per Interval"
@@ -90,6 +91,7 @@ export default function ConfigSectionVbdsd() {
                         : 'null'
                 }
                 numeric
+                postfix="second(s)"
             />
             <configurationComponents.ConfigElementText
                 title="Evaluation Size"
@@ -99,6 +101,7 @@ export default function ConfigSectionVbdsd() {
                     centralSectionConfig !== null ? centralSectionConfig.evaluation_size : 'null'
                 }
                 numeric
+                postfix="image(s)"
             />
             <configurationComponents.ConfigElementText
                 title="Measurement Threshold"

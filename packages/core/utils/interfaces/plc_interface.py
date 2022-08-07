@@ -7,7 +7,7 @@ import os
 from packages.core.utils import Logger, with_filelock, update_dict_recursively
 from .plc_specification import PLC_SPECIFICATION_VERSIONS
 
-logger = Logger(origin="pyra.core.enclosure-control")
+logger = Logger(origin="plc-interface")
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 
@@ -334,25 +334,33 @@ class PLCInterface:
         self._write_bool(self.specification.control.sync_to_tracker, new_state)
         if self._read_bool(self.specification.control.sync_to_tracker) != new_state:
             raise PLCError("PLC state did not change")
-        update_state_file({"enclosure_plc_readings": {"control": {"sync_to_tracker": new_state}}})
+        update_state_file(
+            {"enclosure_plc_readings": {"control": {"sync_to_tracker": new_state}}}
+        )
 
     def set_manual_control(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_control, new_state)
         if self._read_bool(self.specification.control.manual_control) != new_state:
             raise PLCError("PLC state did not change")
-        update_state_file({"enclosure_plc_readings": {"control": {"manual_control": new_state}}})
+        update_state_file(
+            {"enclosure_plc_readings": {"control": {"manual_control": new_state}}}
+        )
 
     def set_auto_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.auto_temp_mode, new_state)
         if self._read_bool(self.specification.control.auto_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
-        update_state_file({"enclosure_plc_readings": {"control": {"auto_temp_mode": new_state}}})
+        update_state_file(
+            {"enclosure_plc_readings": {"control": {"auto_temp_mode": new_state}}}
+        )
 
     def set_manual_temperature(self, new_state: bool) -> None:
         self._write_bool(self.specification.control.manual_temp_mode, new_state)
         if self._read_bool(self.specification.control.manual_temp_mode) != new_state:
             raise PLCError("PLC state did not change")
-        update_state_file({"enclosure_plc_readings": {"control": {"manual_temp_mode": new_state}}})
+        update_state_file(
+            {"enclosure_plc_readings": {"control": {"manual_temp_mode": new_state}}}
+        )
 
     def reset(self) -> None:
         if self.config["tum_plc"]["version"] == 1:

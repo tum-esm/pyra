@@ -1,37 +1,7 @@
-# filename          : vbdsd.py
-# description  : Vision-Based Direct Sunlight Detector
-# ==============================================================================
-# author            : Benno Voggenreiter
-# email             : -
-# date              : 20190719
-# version           : 1.0
-# notes             : Created by Benno Voggenreiter (Master's Thesis)
-# license           : -
-# py version        : 2.7
-# ==============================================================================
-# author            : Benno Voggenreiter
-# email             : -
-# date              : 20210226
-# version           : 2.0
-# notes             : Improved by Nikolas Hars (Bachelor's Thesis)
-# license           : -
-# py version        : 2.7
-# ==============================================================================
-# author            : Patrick Aigner
-# email             : patrick.aigner@tum.de
-# date              : 20220328
-# version           : 3.0
-# notes             : Upgrade to Python 3.10 and refactoring for Pyra 4.
-# license           : -
-# py version        : 3.10
-# ==============================================================================
-
-
 from datetime import datetime
 import os
 import queue
-import shutil
-from threading import Thread
+import threading
 import time
 import cv2 as cv
 import numpy as np
@@ -41,6 +11,7 @@ from packages.core.utils import (
     Logger,
     RingList,
     Astronomy,
+    ImageProcessing,
 )
 
 logger = Logger(origin="vbdsd")
@@ -51,220 +22,190 @@ IMG_DIR = os.path.join(PROJECT_DIR, "logs", "vbdsd")
 _CONFIG = None
 
 
+class CameraError(Exception):
+    pass
+
+
 class _VBDSD:
     cam = None
+    current_exposure = None
+    last_autoexposure_time = 0
+    available_exposures = None
 
     @staticmethod
-    def init_cam(retries: int = 5):
-        """
-        init_cam(int id): Connects to the camera with id and sets its parameters.
-        If successfully connected, the function returns an instance object of the
-        camera, otherwise None will be returned.
-        """
-        camera_id = _CONFIG["vbdsd"]["camera_id"]
-
+    def init(camera_id: int, retries: int = 5):
+        # TODO: Why is this necessary?
         _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         _VBDSD.cam.release()
 
         for _ in range(retries):
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
-            time.sleep(1)
             if _VBDSD.cam.isOpened():
-                logger.debug(f"Camera with id {camera_id} is now connected")
-                _VBDSD.cam.set(3, 1280)  # width
-                _VBDSD.cam.set(4, 720)  # height
-                _VBDSD.cam.set(15, -12)  # exposure
-                _VBDSD.cam.set(10, 64)  # brightness
-                _VBDSD.cam.set(11, 64)  # contrast
-                _VBDSD.cam.set(12, 0)  # saturation
-                _VBDSD.cam.set(14, 0)  # gain
-                _VBDSD.cam.read()  # throw away first picture
-                _VBDSD.change_exposure()
+
+                if _VBDSD.available_exposures is None:
+                    _VBDSD.available_exposures = _VBDSD.get_available_exposures()
+                    logger.debug(
+                        f"determined available exposures: {_VBDSD.available_exposures}"
+                    )
+                    assert (
+                        len(_VBDSD.available_exposures) > 0
+                    ), "did not find any available exposures"
+
+                _VBDSD.current_exposure = min(_VBDSD.available_exposures)
+                _VBDSD.update_camera_settings(
+                    width=1280,
+                    height=720,
+                    exposure=min(_VBDSD.available_exposures),
+                    brightness=64,
+                    contrast=64,
+                    saturation=0,
+                    gain=0,
+                )
                 return
+            else:
+                time.sleep(2)
 
-        logger.warning(f"Camera with id {camera_id} could not be found")
-
-    @staticmethod
-    def reinit_settings():
-        if _VBDSD.cam.isOpened():
-            logger.debug(f"Reset Camera settings for next day.")
-            _VBDSD.cam.set(3, 1280)  # width
-            _VBDSD.cam.set(4, 720)  # height
-            _VBDSD.cam.set(15, -12)  # exposure
-            _VBDSD.cam.set(10, 64)  # brightness
-            _VBDSD.cam.set(11, 64)  # contrast
-            _VBDSD.cam.set(12, 0)  # saturation
-            _VBDSD.cam.set(14, 0)  # gain
-            _VBDSD.cam.read()  # throw away first picture
+        raise CameraError("could not initialize camera")
 
     @staticmethod
-    def eval_sun_state(frame):
-        """
-        This function will extract the current sun state from an input image (frame)
-        Is uses cv2 package for image detection / computer vision tasks.
-
-        returns:
-        1, frame -> sun status is good, picture used for evaluation
-        0, frame -> sun status is bad, picture used for evaluation
-        """
-        blur = cv.medianBlur(frame, 15)
-        frame_gray = cv.cvtColor(blur, cv.COLOR_BGR2GRAY)
-
-        if frame_gray.shape[1] == 1280:  # Crop on sides
-            frame_gray = frame_gray[:, 170:1100]
-            frame = frame[:, 170:1100]
-
-        img_b = cv.adaptiveThreshold(
-            frame_gray, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 23, 2
-        )
-        img_b = cv.medianBlur(img_b, 9)
-        img_b, frame = _VBDSD.extend_border(img_b, frame)
-
-        circles = cv.HoughCircles(
-            img_b,
-            cv.HOUGH_GRADIENT,
-            1,
-            900,
-            param1=200,
-            param2=1,
-            minRadius=345,
-            maxRadius=355,
-        )
-        # (min + max) radius have to be quite exact.
-        # 900 = Distance to next circle to prevent wrong circles
-
-        if circles is None:
-            return -1, frame
-
-        circles = np.uint16(np.around(circles))
-
-        for i in circles[0, :]:
-            center = (i[0], i[1])
-            radius = i[2]
-            cv.circle(img_b, center, radius - 10, 255, 30)
-            cv.circle(img_b, center, radius - 20, 0, 15)
-            cv.circle(frame, center, radius, 255, 5)
-
-        contours, hierarchy = cv.findContours(img_b.copy(), cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
-
-        ppi_contour = None
-        ppi = -1
-        areas = [0]
-        if len(contours) > 0:
-            for i in range(len(contours)):
-                if cv.contourArea(contours[i]) > 2000:
-                    x, y, w, h = cv.boundingRect(contours[i])
-                    if float(w) == float(h):  # Use constraints to find the projection plane
-                        ppi_contour = contours[i]  # Save contour
-                        ppi = i
-
-            if ppi_contour is None:
-                return -1, frame
-
-            if ppi >= 0:
-                c_areas = []
-                for contour in contours:
-                    temp_area = cv.contourArea(contour)
-                    c_areas.append(temp_area)
-                indices = np.argsort(c_areas)
-
-            font = cv.FONT_HERSHEY_SIMPLEX
-            color = (0, 0, 255)  # red
-
-            # x_length = frame.shape[1]
-            y_length = frame.shape[0]
-
-            # Check the size and parents and level of contour
-            for i in indices:
-                if hierarchy[0][i][3] == ppi:  # Contour is on pp
-                    x, y, w, h = cv.boundingRect(contours[i])
-                    pos = (x, y)
-                    cv.drawContours(frame, contours[i], -1, color, 4)
-                    cv.putText(frame, ("%s" % (i)), pos, font, 1, color, 2, 10)
-                    areas.append(c_areas[i])
-
-        cv.putText(
-            frame,
-            "%05d" % (np.sum(areas)),
-            (10, y_length - 20),
-            font,
-            1,
-            (255, 255, 255),
-            2,
-            10,
-        )
-
-        if np.sum(areas) >= 8000:
-            return 1, frame
-        else:
-            return 0, frame
+    def deinit():
+        if _VBDSD.cam is not None:
+            _VBDSD.cam.release()
+            _VBDSD.cam = None
 
     @staticmethod
-    def extend_border(img, frame):
-        """This function allows to use different models of the vbdsd hardware setup
-        by cutting the field of view to the same base.
-        """
-        bordersize = 50
-        make_border = lambda f: cv.copyMakeBorder(
-            f,
-            top=bordersize,
-            bottom=bordersize,
-            left=0,
-            right=0,
-            borderType=cv.BORDER_CONSTANT,
-            value=[0, 0, 0],
-        )
-        return make_border(img), make_border(frame)
+    def get_available_exposures() -> list[int]:
+        possible_values = []
+        for exposure in range(-20, 20):
+            _VBDSD.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
+            if _VBDSD.cam.get(cv.CAP_PROP_EXPOSURE) == exposure:
+                possible_values.append(exposure)
+
+        return possible_values
 
     @staticmethod
-    def change_exposure(diff=0):
-        """Changes the camera exposure settings according to the current sun angle
-        with a known setting. Allows to add an INT on top for further adjustment.
-        """
+    def update_camera_settings(
+        exposure: int = None,
+        brightness: int = None,
+        contrast: int = None,
+        saturation: int = None,
+        gain: int = None,
+        width: int = None,
+        height: int = None,
+    ):
+        # which settings are available depends on the camera model.
+        # however, this function will throw an AssertionError, when
+        # the value could not be changed
+        properties = {
+            "width": (cv.CAP_PROP_FRAME_WIDTH, width),
+            "height": (cv.CAP_PROP_FRAME_HEIGHT, height),
+            "exposure": (cv.CAP_PROP_EXPOSURE, exposure),
+            "brightness": (cv.CAP_PROP_BRIGHTNESS, brightness),
+            "contrast": (cv.CAP_PROP_CONTRAST, contrast),
+            "saturation": (cv.CAP_PROP_SATURATION, saturation),
+            "gain": (cv.CAP_PROP_GAIN, gain),
+        }
+        for property_name in properties:
+            key, value = properties[property_name]
+            if value is not None:
+                _VBDSD.cam.set(key, value)
+                if property_name not in ["width", "height"]:
+                    new_value = _VBDSD.cam.get(key)
+                    assert (
+                        new_value == value
+                    ), f"could not set {property_name} to {value}, value is still at {new_value}"
 
-        current_sun_angle = Astronomy.get_current_sun_elevation()
-
-        if current_sun_angle < 4 * Astronomy.units.deg:
-            exp = -9 + diff
-        elif current_sun_angle < 6 * Astronomy.units.deg:
-            exp = -10 + diff
-        elif current_sun_angle < 10 * Astronomy.units.deg:
-            exp = -11 + diff
-        else:
-            exp = -12 + diff
-
-        _VBDSD.cam.set(15, exp)
-        logger.debug("Changed camera exposure to {}".format(exp))
-        _VBDSD.cam.read()
-        time.sleep(0.2)
+        # throw away some images after changing settings. I don't know
+        # why this is necessary, but it resolved a lot of issues
+        for _ in range(2):
+            _VBDSD.cam.read()
 
     @staticmethod
-    def run(save_images: bool, retries: int = 5):
-        """
-        Calls take_vbdsd_image and processes the image if successful.
-
-        Returns
-        status: 1 or 0
-        frame: Source image
-        """
-
-        raw_frame = None
+    def take_image(retries: int = 10, trow_away_white_images: bool = True) -> cv.Mat:
+        assert _VBDSD.cam is not None, "camera is not initialized yet"
+        if not _VBDSD.cam.isOpened():
+            raise CameraError("camera is not open")
         for _ in range(retries + 1):
-            ret, raw_frame = _VBDSD.cam.read()
+            ret, frame = _VBDSD.cam.read()
             if ret:
-                status, processed_frame = _VBDSD.eval_sun_state(raw_frame)
-                if save_images:
-                    image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-                    raw_image_path = os.path.join(
-                        IMG_DIR, f"{image_timestamp}-{status}-raw.jpg"
-                    )
-                    processed_image_path = os.path.join(
-                        IMG_DIR, f"{image_timestamp}-{status}-processed.jpg"
-                    )
-                    cv.imwrite(raw_image_path, raw_frame)
-                    cv.imwrite(processed_image_path, processed_frame)
-                return status, processed_frame
-        return 0, raw_frame
+                if trow_away_white_images and np.mean(frame) > 240:
+                    # image is mostly white
+                    continue
+                return frame
+        raise CameraError("could not take image")
+
+    @staticmethod
+    def adjust_exposure():
+        """
+        set exposure to the value where the overall
+        mean pixel value color is closest to 100
+        """
+        exposure_results = []
+        for e in _VBDSD.available_exposures:
+            _VBDSD.update_camera_settings(exposure=e)
+            image = _VBDSD.take_image(trow_away_white_images=False)
+            exposure_results.append({"exposure": e, "mean": np.mean(image)})
+        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 100))["exposure"]
+        logger.debug(f"exposure results: {exposure_results}")
+
+        if new_exposure != _VBDSD.current_exposure:
+            _VBDSD.update_camera_settings(exposure=new_exposure)
+            logger.info(f"changing exposure: {_VBDSD.current_exposure} -> {new_exposure}")
+            _VBDSD.current_exposure = new_exposure
+
+    @staticmethod
+    def determine_frame_status(frame: cv.Mat, save_image: bool) -> int:
+        # transform image from 1280x720 to 640x360
+        downscaled_image = cv.resize(frame, None, fx=0.5, fy=0.5)
+
+        # for each rgb pixel [234,234,234] only consider the gray value (234)
+        single_valued_pixels = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)
+
+        # determine lense position and size from binary mask
+        binary_mask = ImageProcessing.get_binary_mask(single_valued_pixels)
+        circle_cx, circle_cy, circle_r = ImageProcessing.get_circle_location(binary_mask)
+
+        # only consider edges and make them bold
+        edges_only = np.array(cv.Canny(single_valued_pixels, 60, 60), dtype=np.float32)
+        edges_only_dilated = cv.dilate(
+            edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
+        )
+
+        # blacken the outer 10% of the circle radius
+        edges_only_dilated *= ImageProcessing.get_circle_mask(
+            edges_only_dilated.shape, circle_r * 0.9, circle_cx, circle_cy
+        )
+
+        # determine how many pixels inside the circle are made up of "edge pixels"
+        edge_fraction = round((np.sum(edges_only_dilated) / 255) / np.sum(binary_mask), 6)
+
+        # TODO: the values below should be adjusted by looking at the ifgs directly
+        status = 1 if (edge_fraction > 0.03) else 0
+
+        logger.debug(f"exposure = {_VBDSD.current_exposure}, edge_fraction = {edge_fraction}")
+
+        if save_image:
+            image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            raw_image_name = f"{image_timestamp}-{status}-raw.jpg"
+            processed_image_name = f"{image_timestamp}-{status}-processed.jpg"
+            processed_frame = ImageProcessing.add_markings_to_image(
+                edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
+            )
+            cv.imwrite(os.path.join(IMG_DIR, raw_image_name), frame)
+            cv.imwrite(os.path.join(IMG_DIR, processed_image_name), processed_frame)
+
+        return status
+
+    @staticmethod
+    def run(save_image: bool) -> int:
+        # run autoexposure function every 3 minutes
+        now = time.time()
+        if (now - _VBDSD.last_autoexposure_time) > 180:
+            _VBDSD.adjust_exposure()
+            _VBDSD.last_autoexposure_time = now
+
+        frame = _VBDSD.take_image()
+        return _VBDSD.determine_frame_status(frame, save_image)
 
 
 class VBDSD_Thread:
@@ -277,7 +218,7 @@ class VBDSD_Thread:
         Start a thread using the multiprocessing library
         """
         logger.info("Starting thread")
-        self.__thread = Thread(target=VBDSD_Thread.main, args=(self.__shared_queue,))
+        self.__thread = threading.Thread(target=VBDSD_Thread.main, args=(self.__shared_queue,))
         self.__thread.start()
 
     def is_running(self):
@@ -300,97 +241,115 @@ class VBDSD_Thread:
         self.__thread = None
 
     @staticmethod
-    def main(shared_queue: queue.Queue, infinite_loop=True):
+    def main(shared_queue: queue.Queue, infinite_loop: bool = True, headless: bool = False):
+        global logger
         global _CONFIG
+
+        # headless mode = don't use logger, just print messages to console, always save images
+        if headless:
+            logger = Logger(origin="vbdsd", just_print=True)
         _CONFIG = ConfigInterface.read()
 
         status_history = RingList(_CONFIG["vbdsd"]["evaluation_size"])
         current_state = None
 
-        while True:
+        repeated_camera_error_count = 0
 
+        while True:
             # Check for termination
             try:
                 if shared_queue.get(block=False) == "stop":
+                    _VBDSD.deinit()
                     break
             except queue.Empty:
                 pass
 
-            start_time = time.time()
-            _CONFIG = ConfigInterface.read()
+            try:
+                start_time = time.time()
+                _CONFIG = ConfigInterface.read()
 
-            # init camera connection
-            if _VBDSD.cam is None:
-                logger.info(f"Initializing VBDSD camera")
-                _VBDSD.init_cam()
-
-                # if connecting was not successful
+                # init camera connection
                 if _VBDSD.cam is None:
-                    status_history.empty()
-                    time.sleep(60)
+                    logger.info(f"Initializing VBDSD camera")
+                    _VBDSD.init(_CONFIG["vbdsd"]["camera_id"])
+
+                # reinit if parameter changes
+                new_size = _CONFIG["vbdsd"]["evaluation_size"]
+                if status_history.maxsize() != new_size:
+                    logger.debug(
+                        "Size of VBDSD history has changed: "
+                        + f"{status_history.maxsize()} -> {new_size}"
+                    )
+                    status_history.reinitialize(new_size)
+
+                # sleep while sun angle is too low
+                if (not headless) and Astronomy.get_current_sun_elevation().is_within_bounds(
+                    None, _CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
+                ):
+                    logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
+                    if current_state != None:
+                        StateInterface.update({"vbdsd_indicates_good_conditions": False})
+                        current_state = None
+                        # reinit for next day
+                        _VBDSD.reinit_settings()
+                    time.sleep(300)
                     continue
 
-            # reinit if parameter changes
-            new_size = _CONFIG["vbdsd"]["evaluation_size"]
-            if status_history.maxsize() != new_size:
+                # take a picture and process it: status is in [0, 1]
+                # a CameraError is allowed to happen 3 times in a row
+                # at the 4th time the camera is not able to take an image
+                # an Exception will be raised (and VBDSD will be restarted)
+                try:
+                    status = _VBDSD.run(headless or _CONFIG["vbdsd"]["save_images"])
+                    repeated_camera_error_count = 0
+                except CameraError as e:
+                    repeated_camera_error_count += 1
+                    if repeated_camera_error_count > 3:
+                        raise e
+                    else:
+                        logger.debug(
+                            f"camera occured ({repeated_camera_error_count} time(s) in a row). "
+                            + "sleeping 15 seconds, reconnecting camera"
+                        )
+                        _VBDSD.deinit()
+                        time.sleep(15)
+                        continue
+
+                # append sun status to status history
+                status_history.append(0 if (status == -1) else status)
                 logger.debug(
-                    "Size of VBDSD history has changed: "
-                    + f"{status_history.maxsize()} -> {new_size}"
+                    f"New VBDSD status: {status}. Current history: {status_history.get()}"
                 )
-                status_history.reinitialize(new_size)
 
-            # sleep while sun angle is too low
-            if Astronomy.get_current_sun_elevation().is_within_bounds(
-                None, _CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
-            ):
-                logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
-                if current_state != None:
-                    StateInterface.update({"vbdsd_indicates_good_conditions": False})
-                    current_state = None
-                    # reinit for next day
-                    _VBDSD.reinit_settings()
-                time.sleep(300)
-                continue
-
-            # take a picture and process it
-            status, frame = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
-
-            # retry with change_exposure(1) if status fail
-            if status == -1:
-                _VBDSD.change_exposure(1)
-                status, frame = _VBDSD.run(_CONFIG["vbdsd"]["save_images"])
-
-            # append sun status to status history
-            status_history.append(max(status, 0))
-            logger.debug(
-                f"New VBDSD status: {status}. Current history: {status_history.get()}"
-            )
-
-            if frame is None:
-                logger.debug(f"Could not take image")
-
-            # evaluate sun state only if list is filled
-            if status_history.size() == status_history.maxsize():
-                score = status_history.sum() / status_history.size()
-                new_state = score > _CONFIG["vbdsd"]["measurement_threshold"]
-            else:
+                # evaluate sun state only if list is filled
                 new_state = None
+                if status_history.size() == status_history.maxsize():
+                    score = status_history.sum() / status_history.size()
+                    new_state = score > _CONFIG["vbdsd"]["measurement_threshold"]
 
-            if current_state != new_state:
-                logger.info(
-                    f"State change: {'GOOD -> BAD' if current_state else 'BAD -> GOOD'}"
-                )
-                StateInterface.update({"vbdsd_indicates_good_conditions": new_state})
-                current_state = new_state
+                if current_state != new_state:
+                    logger.info(
+                        f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
+                    )
+                    StateInterface.update({"vbdsd_indicates_good_conditions": new_state})
+                    current_state = new_state
 
-            # wait rest of loop time
-            elapsed_time = time.time() - start_time
-            time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
-            if time_to_wait > 0:
-                logger.debug(
-                    f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)."
-                )
-                time.sleep(time_to_wait)
+                # wait rest of loop time
+                elapsed_time = time.time() - start_time
+                time_to_wait = _CONFIG["vbdsd"]["seconds_per_interval"] - elapsed_time
+                if time_to_wait > 0:
+                    logger.debug(
+                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)."
+                    )
+                    time.sleep(time_to_wait)
 
-            if not infinite_loop:
-                return status_history
+                if not infinite_loop:
+                    return status_history
+
+            except Exception as e:
+                status_history.empty()
+                _VBDSD.deinit()
+
+                logger.error(f"error in VBDSD thread: {repr(e)}")
+                logger.info(f"sleeping 30 seconds, reinitializing VBDSD thread")
+                time.sleep(30)

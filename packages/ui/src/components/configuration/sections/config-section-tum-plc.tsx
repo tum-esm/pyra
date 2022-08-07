@@ -71,6 +71,7 @@ export default function ConfigSectionTumPlc() {
                         ? centralSectionConfig.min_power_elevation
                         : 'null'
                 }
+                postfix="degree(s)"
             />
             <configurationComponents.ConfigElementText
                 title="IP"
