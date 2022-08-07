@@ -29,7 +29,7 @@ class CameraError(Exception):
 class _VBDSD:
     cam = None
     current_exposure = None
-    last_autoexposure_time = None
+    last_autoexposure_time = 0
     available_exposures = None
 
     @staticmethod
@@ -41,13 +41,21 @@ class _VBDSD:
         for _ in range(retries):
             _VBDSD.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             if _VBDSD.cam.isOpened():
-                _VBDSD.available_exposures = _VBDSD.get_available_exposures()
-                _VBDSD.current_exposure = -12
-                _VBDSD.last_autoexposure_time = 0
+
+                if _VBDSD.available_exposures is None:
+                    _VBDSD.available_exposures = _VBDSD.get_available_exposures()
+                    logger.debug(
+                        f"determined available exposures: {_VBDSD.available_exposures}"
+                    )
+                    assert (
+                        len(_VBDSD.available_exposures) > 0
+                    ), "did not find any available exposures"
+
+                _VBDSD.current_exposure = min(_VBDSD.available_exposures)
                 _VBDSD.update_camera_settings(
                     width=1280,
                     height=720,
-                    exposure=-12,
+                    exposure=min(_VBDSD.available_exposures),
                     brightness=64,
                     contrast=64,
                     saturation=0,
@@ -113,13 +121,16 @@ class _VBDSD:
             _VBDSD.cam.read()
 
     @staticmethod
-    def take_image(retries: int = 5) -> cv.Mat:
+    def take_image(retries: int = 10, trow_away_white_images: bool = True) -> cv.Mat:
         assert _VBDSD.cam is not None, "camera is not initialized yet"
         if not _VBDSD.cam.isOpened():
             raise CameraError("camera is not open")
         for _ in range(retries + 1):
             ret, frame = _VBDSD.cam.read()
             if ret:
+                if trow_away_white_images and np.mean(frame) > 240:
+                    # image is mostly white
+                    continue
                 return frame
         raise CameraError("could not take image")
 
@@ -132,7 +143,7 @@ class _VBDSD:
         exposure_results = []
         for e in _VBDSD.available_exposures:
             _VBDSD.update_camera_settings(exposure=e)
-            image = _VBDSD.take_image()
+            image = _VBDSD.take_image(trow_away_white_images=False)
             exposure_results.append({"exposure": e, "mean": np.mean(image)})
         new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 100))["exposure"]
         logger.debug(f"exposure results: {exposure_results}")
@@ -194,8 +205,6 @@ class _VBDSD:
             _VBDSD.last_autoexposure_time = now
 
         frame = _VBDSD.take_image()
-        if np.mean(frame) > 240:
-            raise CameraError("frame returned from camera is white (most likely invalid)")
         return _VBDSD.determine_frame_status(frame, save_image)
 
 
