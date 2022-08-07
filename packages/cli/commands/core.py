@@ -82,7 +82,6 @@ def _stop_pyra_core():
 
         try:
             enclosure = EnclosureControl(config)
-            enclosure.plc_interface.connect()
             enclosure.force_cover_close()
             enclosure.plc_interface.disconnect()
             success_handler("Successfully closed cover")
