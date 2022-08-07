@@ -2,20 +2,6 @@ import { dialog } from '@tauri-apps/api';
 import { functionalUtils } from '../../../utils';
 import { configurationComponents, essentialComponents } from '../..';
 
-function getPostfix(key: string) {
-    key = key.toLowerCase();
-    if (key.includes('angle') || key.includes('threshold') || key.includes('elevation')) {
-        return 'degrees';
-    }
-    if (key.includes('seconds')) {
-        return 'seconds';
-    }
-    if (key.includes('evaluation size')) {
-        return 'images';
-    }
-    return undefined;
-}
-
 export default function ConfigElementText(props: {
     title: string;
     value: string | number;
@@ -23,8 +9,9 @@ export default function ConfigElementText(props: {
     setValue(v: string | number): void;
     disabled?: boolean;
     numeric?: boolean;
+    postfix?: string;
 }) {
-    const { title, value, oldValue, setValue, disabled, numeric } = props;
+    const { title, value, oldValue, setValue, disabled, numeric, postfix } = props;
 
     async function triggerFileSelection() {
         const result: any = await dialog.open({ title: 'PyRa 4 UI', multiple: false });
@@ -46,7 +33,7 @@ export default function ConfigElementText(props: {
                 <essentialComponents.TextInput
                     value={value.toString()}
                     setValue={(v) => (numeric ? setValue(parseNumericValue(v)) : setValue(v))}
-                    postfix={getPostfix(title)}
+                    postfix={postfix}
                 />
                 {showfileSelector && !disabled && (
                     <essentialComponents.Button variant="white" onClick={triggerFileSelection}>

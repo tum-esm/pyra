@@ -44,6 +44,7 @@ export default function ConfigSectionCamtracker() {
                 value={localSectionConfig.motor_offset_threshold}
                 setValue={(v: number) => update({ camtracker: { motor_offset_threshold: v } })}
                 oldValue={centralSectionConfig.motor_offset_threshold}
+                postfix="degree(s)"
             />
         </>
     );

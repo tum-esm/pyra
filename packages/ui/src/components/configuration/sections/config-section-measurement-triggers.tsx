@@ -62,6 +62,7 @@ export default function ConfigSectionMeasurementTriggers() {
                 value={localSectionConfig.min_sun_elevation}
                 setValue={(v: number) => update({ measurement_triggers: { min_sun_elevation: v } })}
                 oldValue={centralSectionConfig.min_sun_elevation}
+                postfix="degree(s)"
             />
         </>
     );
