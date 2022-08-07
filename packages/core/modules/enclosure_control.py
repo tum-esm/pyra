@@ -155,8 +155,8 @@ class EnclosureControl:
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
         min_power_elevation = (
-            self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
-        )
+            self.config["general"]["min_sun_elevation"] - 1
+        ) * Astronomy.units.deg
 
         if current_sun_elevation is not None:
             sun_is_above_minimum = current_sun_elevation >= min_power_elevation

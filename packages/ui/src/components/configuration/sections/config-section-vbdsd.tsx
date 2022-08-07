@@ -17,7 +17,6 @@ export default function ConfigSectionVbdsd() {
                 evaluation_size: 15,
                 seconds_per_interval: 6,
                 measurement_threshold: 0.6,
-                min_sun_elevation: 11.0,
                 save_images: false,
             },
         });
@@ -70,16 +69,6 @@ export default function ConfigSectionVbdsd() {
                 setValue={(v: number) => update({ vbdsd: { camera_id: v } })}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.camera_id : 'null'}
                 numeric
-            />
-            <configurationComponents.ConfigElementText
-                title="Min. Sun Elevation"
-                value={localSectionConfig.min_sun_elevation}
-                setValue={(v: number) => update({ vbdsd: { min_sun_elevation: v } })}
-                oldValue={
-                    centralSectionConfig !== null ? centralSectionConfig.min_sun_elevation : 'null'
-                }
-                numeric
-                postfix="degree(s)"
             />
             <configurationComponents.ConfigElementText
                 title="Seconds Per Interval"

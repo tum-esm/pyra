@@ -2,7 +2,8 @@
     "general": {
         "seconds_per_core_interval": 30,
         "test_mode": false,
-        "station_id": "..."
+        "station_id": "...",
+        "min_sun_elevation": 11
     },
     "opus": {
         "em27_ip": "10.10.0.1",
@@ -43,7 +44,7 @@
             "minute": 0,
             "second": 0
         },
-        "min_sun_elevation": 0.0
+        "min_sun_elevation": 0
     },
     "tum_plc": null,
     "vbdsd": null
