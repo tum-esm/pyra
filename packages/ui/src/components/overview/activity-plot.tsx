@@ -63,7 +63,7 @@ function ActivityPlot() {
         error: getSections(activityHistory, 'error-occured', 'errors-resolved'),
     };
 
-    const localTUCOffset = moment().utcOffset();
+    const localUTCOffset = moment().utcOffset();
 
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
@@ -78,8 +78,8 @@ function ActivityPlot() {
                             {h}h
                             {h === 0 &&
                                 ' UTC' +
-                                    (localTUCOffset < 0 ? '' : '+') +
-                                    (localTUCOffset / 60).toString()}
+                                    (localUTCOffset < 0 ? '' : '+') +
+                                    (localUTCOffset / 60).toString()}
                         </div>
                     ))}
                 </div>

@@ -23,7 +23,7 @@ export default function reduceLogLines(logLines: string[], mode: '3 iterations' 
             }
         }
     } else {
-        let oldestTime = moment.utc().subtract({ minutes: 5 });
+        let oldestTime = moment().subtract({ minutes: 5 });
         let oldestTimestamp = oldestTime.format('YYYY-MM-DD HH:mm:ss');
         reducedLogLines = takeWhile(
             logLines.reverse(),

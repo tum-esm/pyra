@@ -35,7 +35,7 @@ export default function Dashboard() {
 
         async function fetchActivityFile() {
             if (fetchLogUpdates) {
-                const filename = moment.utc().format('YYYY-MM-DD');
+                const filename = moment().format('YYYY-MM-DD');
                 try {
                     const fileContent = await fetchUtils.getFileContent(
                         `logs/activity/activity-${filename}.json`
