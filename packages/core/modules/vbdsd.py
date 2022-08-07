@@ -253,6 +253,8 @@ class VBDSD_Thread:
         status_history = RingList(_CONFIG["vbdsd"]["evaluation_size"])
         current_state = None
 
+        repeated_camera_error_count = 0
+
         while True:
             # Check for termination
             try:
@@ -293,10 +295,23 @@ class VBDSD_Thread:
                     time.sleep(300)
                     continue
 
-                # take a picture and process it: status is in [-1,0,1]
-                status = _VBDSD.run(headless or _CONFIG["vbdsd"]["save_images"])
-                if status == -1:
-                    logger.debug(f"Could not take image")
+                # take a picture and process it: status is in [0, 1]
+                # a CameraError is allowed to happen 3 times in a row
+                # at the 4th time the camera is not able to take an image
+                # an Exception will be raised (and VBDSD will be restarted)
+                try:
+                    status = _VBDSD.run(headless or _CONFIG["vbdsd"]["save_images"])
+                    repeated_camera_error_count = 0
+                except CameraError as e:
+                    repeated_camera_error_count += 1
+                    if repeated_camera_error_count > 3:
+                        raise e
+                    else:
+                        logger.debug(
+                            f"camera occured ({repeated_camera_error_count} time(s) in a row). sleeping 20 seconds"
+                        )
+                        time.sleep(15)
+                        continue
 
                 # append sun status to status history
                 status_history.append(0 if (status == -1) else status)
@@ -334,5 +349,5 @@ class VBDSD_Thread:
                 _VBDSD.deinit()
 
                 logger.error(f"error in VBDSD thread: {repr(e)}")
-                logger.info(f"reinitializing VBDSD class. sleeping 10 seconds")
-                time.sleep(10)
+                logger.info(f"reinitializing VBDSD class. sleeping 30 seconds")
+                time.sleep(30)
