@@ -106,8 +106,8 @@ CONFIG_FILE_STRUCTURE_SCHEMA = {
         {
             "camera_id": {"type": "integer"},
             "evaluation_size": {"type": "integer"},
-            "seconds_per_interval": {"type": "integer"},
-            "measurement_threshold": {"type": "integer"},
+            "seconds_per_interval": {"type": "number"},
+            "measurement_threshold": {"type": "number"},
             "save_images": {"type": "boolean"},
         }
     ),
