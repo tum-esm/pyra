@@ -7,8 +7,6 @@ image_names = list(sorted([f for f in os.listdir(IMG_PATH) if f.endswith(".jpg")
 kept_times = {}
 
 for n in image_names:
-    if int(n[11:13]) % 2 == 1:
-        continue
     if n[:13] in kept_times:
         continue
     kept_times[n[:13]] = n.replace("-raw.jpg", "").replace("-processed.jpg", "")
