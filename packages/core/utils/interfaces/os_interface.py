@@ -35,9 +35,7 @@ class OSInterface:
     def validate_disk_space():
         """Raises an error if the diskspace is less than 10%"""
         if OSInterface.get_disk_space() > 90:
-            raise StorageError(
-                "Disk space is less than 10%. This is bad for the OS stability."
-            )
+            raise StorageError("Disk space is less than 10%. This is bad for the OS stability.")
 
     @staticmethod
     def get_connection_status(ip: str) -> str:
@@ -62,23 +60,25 @@ class OSInterface:
 
     @staticmethod
     def get_system_battery() -> float:
-        """Returns system battery in percent as a float"""
-        return psutil.sensors_battery().percent
+        """Returns system battery in percent as a float.
+        Returns 100.0 if no battery is in the device."""
+        if psutil.sensors_battery():
+            return psutil.sensors_battery().percent
+        return 100.0
 
     @staticmethod
     def validate_system_battery():
         """Raises LowEnergyError if system battery runs lower than 20%."""
-        if OSInterface.get_system_battery() < 20.0:
-            raise LowEnergyError(
-                "The battery of the system is below 20%. Please check the power supply."
-            )
+        if psutil.sensors_battery():
+            if psutil.sensors_battery().percent < 20.0:
+                raise LowEnergyError(
+                    "The battery of the system is below 20%. Please check the power supply."
+                )
 
     @staticmethod
     def get_last_boot_time():
         """Returns last OS boot time."""
-        return datetime.datetime.fromtimestamp(psutil.boot_time()).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
+        return datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
 
     @staticmethod
     def get_process_status(process_name: str) -> str:

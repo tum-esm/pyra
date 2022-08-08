@@ -1,11 +1,7 @@
 import json
 import os
-import shutil
-
-from packages.core.utils import update_dict_recursively
-
+from packages.core.utils import with_filelock, update_dict_recursively
 from .plc_interface import EMPTY_PLC_STATE
-from packages.core.utils import with_filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
@@ -16,7 +12,6 @@ STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 
 RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
 STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
-VBDSD_IMG_DIR = os.path.join(PROJECT_DIR, "runtime-data", "vbdsd")
 
 PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
 
@@ -29,11 +24,9 @@ class StateInterface:
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
     def initialize() -> None:
-        # clear runtime_data directory
-        if os.path.exists(RUNTIME_DATA_PATH):
-            shutil.rmtree(RUNTIME_DATA_PATH)
-        os.mkdir(RUNTIME_DATA_PATH)
-        os.mkdir(VBDSD_IMG_DIR)
+        # possibly create runtime_data directory
+        if not os.path.exists(RUNTIME_DATA_PATH):
+            os.mkdir(RUNTIME_DATA_PATH)
 
         # write initial state.json file
         new_state = {
@@ -50,7 +43,7 @@ class StateInterface:
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
 
-        # persistent state will not be removed with a restart of pyra-core
+        # persistent state will not be overwritten with a restart of pyra-core
         if not os.path.isfile(PERSISTENT_STATE_FILE_PATH):
             new_persistent_state = {"active_opus_macro_id": None, "current_exceptions": []}
             with open(PERSISTENT_STATE_FILE_PATH, "w") as f:

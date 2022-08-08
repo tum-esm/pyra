@@ -27,8 +27,9 @@ def log_line_has_time(log_line: str):
 class Logger:
     last_archive_time = datetime.now()
 
-    def __init__(self, origin="pyra.core"):
+    def __init__(self, origin="pyra.core", just_print: bool = False):
         self.origin = origin
+        self.just_print = just_print
 
     def debug(self, message: str):
         self._write_log_line("DEBUG", message)
@@ -56,12 +57,15 @@ class Logger:
             f"{now} UTC{'' if utc_offset < 0 else '+'}{utc_offset} "
             + f"- {self.origin} - {level} - {message}\n"
         )
-        with filelock.FileLock(LOG_FILES_LOCK):
-            with open(DEBUG_LOG_FILE, "a") as f1:
-                f1.write(log_string)
-            if level != "DEBUG":
-                with open(INFO_LOG_FILE, "a") as f2:
-                    f2.write(log_string)
+        if self.just_print:
+            print(log_string, end="")
+        else:
+            with filelock.FileLock(LOG_FILES_LOCK):
+                with open(DEBUG_LOG_FILE, "a") as f1:
+                    f1.write(log_string)
+                if level != "DEBUG":
+                    with open(INFO_LOG_FILE, "a") as f2:
+                        f2.write(log_string)
 
         # Archive lines older than 60 minutes, every 10 minutes
         if (now - Logger.last_archive_time).total_seconds() > 600:

@@ -30,6 +30,8 @@ def _get_config():
             content = json.load(f)
         except:
             raise AssertionError("file not in a valid json format")
+
+    ConfigValidation.check_structure(content)
     click.echo(json.dumps(content))
 
 
@@ -50,7 +52,7 @@ def _update_config(content: str):
 
     merged_json = update_dict_recursively(current_json, new_partial_json)
     with open(CONFIG_FILE_PATH, "w") as f:
-        json.dump(merged_json, f)
+        json.dump(merged_json, f, indent=4)
 
     success_handler("Updated config file")
 

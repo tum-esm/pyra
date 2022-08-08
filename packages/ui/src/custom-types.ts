@@ -41,13 +41,15 @@ export namespace customTypes {
             seconds_per_core_interval: number;
             test_mode: boolean;
             station_id: string;
+            min_sun_elevation: number;
         };
         opus: {
             em27_ip: string;
             executable_path: string;
-            executable_parameter: string;
             experiment_path: string;
             macro_path: string;
+            username: string;
+            password: string;
         };
         camtracker: {
             config_path: string;
@@ -76,7 +78,6 @@ export namespace customTypes {
             min_sun_elevation: number;
         };
         tum_plc: null | {
-            min_power_elevation: number;
             ip: string;
             version: number;
             controlled_by_user: boolean;
@@ -86,7 +87,6 @@ export namespace customTypes {
             evaluation_size: number;
             seconds_per_interval: number;
             measurement_threshold: number;
-            min_sun_elevation: number;
             save_images: boolean;
         };
     };
@@ -97,13 +97,15 @@ export namespace customTypes {
             seconds_per_core_interval?: number;
             test_mode?: boolean;
             station_id?: string;
+            min_sun_elevation?: number;
         };
         opus?: {
             em27_ip?: string;
             executable_path?: string;
-            executable_parameter?: string;
             experiment_path?: string;
             macro_path?: string;
+            username?: string;
+            password?: string;
         };
         camtracker?: {
             config_path?: string;
@@ -132,7 +134,6 @@ export namespace customTypes {
             min_sun_elevation?: number;
         };
         tum_plc?: null | {
-            min_power_elevation?: number;
             ip?: string;
             version?: number;
             controlled_by_user?: boolean;
@@ -142,7 +143,6 @@ export namespace customTypes {
             evaluation_size?: number;
             seconds_per_interval?: number;
             measurement_threshold?: number;
-            min_sun_elevation?: number;
             save_images?: boolean;
         };
     };

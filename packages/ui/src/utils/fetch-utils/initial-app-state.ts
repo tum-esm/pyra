@@ -22,20 +22,26 @@ async function initialAppState(
     setBackendIntegrity(undefined);
     console.debug('loading initial state ...');
 
-    const result1 = await backend.pyraCliIsAvailable();
-    if (result1.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...')) {
-        console.debug('found pyra-cli');
-    } else {
+    let result1 = undefined;
+    try {
+        result1 = await backend.pyraCliIsAvailable();
+        if (!result1.stdout.includes('Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...')) {
+            throw '';
+        }
+    } catch {
         console.error(`Could not reach pyra-cli. processResult = ${JSON.stringify(result1)}`);
         setBackendIntegrity('cli is missing');
         return;
     }
 
-    const result2 = await backend.getConfig();
+    console.debug('found pyra-cli');
+
+    let result2 = undefined;
     try {
+        result2 = await backend.getConfig();
         const newConfig = JSON.parse(result2.stdout);
         dispatch(reduxUtils.configActions.setConfigs(newConfig));
-    } catch (e) {
+    } catch {
         console.error(
             `Could not fetch config file. configProcessResult = ${JSON.stringify(result2)}`
         );
