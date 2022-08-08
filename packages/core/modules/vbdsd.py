@@ -155,8 +155,9 @@ class _VBDSD:
         logger.debug(f"exposure results: {exposure_results}")
         new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"]
 
+        _VBDSD.update_camera_settings(exposure=new_exposure)
+
         if new_exposure != _VBDSD.current_exposure:
-            _VBDSD.update_camera_settings(exposure=new_exposure)
             logger.info(f"changing exposure: {_VBDSD.current_exposure} -> {new_exposure}")
             _VBDSD.current_exposure = new_exposure
 
