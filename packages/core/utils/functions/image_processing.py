@@ -101,14 +101,14 @@ class ImageProcessing:
         return img
 
     @staticmethod
-    def add_text_to_image(img, text):
+    def add_text_to_image(img, text, color=(200, 0, 0)):
         cv.putText(
             img,
             text=text,
             org=(10, img.shape[0] - 15),
             fontFace=None,
             fontScale=0.8,
-            color=(200, 0, 0),
+            color=color,
             thickness=2,
         )
         return img

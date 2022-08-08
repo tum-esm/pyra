@@ -141,22 +141,19 @@ class _VBDSD:
         set exposure to the value where the overall
         mean pixel value color is closest to 100
         """
-        exposure_results = [{"exposure": e, "values": []} for e in _VBDSD.available_exposures]
-        for i in range(3):
-            for j, e in enumerate(_VBDSD.available_exposures):
-                _VBDSD.update_camera_settings(exposure=e)
-                img = _VBDSD.take_image(trow_away_white_images=False)
-                mean_color = np.mean(img)
-                exposure_results[j]["values"].append(mean_color)
-                img = ImageProcessing.add_text_to_image(img, f"mean={round(mean_color, 3)}")
-                cv.imwrite(
-                    os.path.join(AUTOEXPOSURE_IMG_DIR, f"exposure-{e}-take-{j}.jpg"), img
-                )
+        exposure_results = []
+        for e in _VBDSD.available_exposures:
+            _VBDSD.update_camera_settings(exposure=e)
+            img = _VBDSD.take_image(trow_away_white_images=False)
+            mean_color = round(np.mean(img), 3)
+            exposure_results.append({"exposure": e, "mean": mean_color})
+            img = ImageProcessing.add_text_to_image(
+                img, f"mean={mean_color}", color=(0, 0, 255)
+            )
+            cv.imwrite(os.path.join(AUTOEXPOSURE_IMG_DIR, f"exposure-{e}.jpg"), img)
 
         logger.debug(f"exposure results: {exposure_results}")
-        new_exposure = min(exposure_results, key=lambda r: abs(np.mean(r["values"]) - 50))[
-            "exposure"
-        ]
+        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"]
 
         if new_exposure != _VBDSD.current_exposure:
             _VBDSD.update_camera_settings(exposure=new_exposure)
