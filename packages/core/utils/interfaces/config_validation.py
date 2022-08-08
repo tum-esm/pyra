@@ -42,6 +42,77 @@ class _Schemas:
     file = {"type": "string", "check_with": _file_path_exists}
 
 
+CONFIG_FILE_STRUCTURE_SCHEMA = {
+    "general": DICT_SCHEMA(
+        {
+            "seconds_per_core_interval": {"type": "number"},
+            "test_mode": {"type": "boolean"},
+            "station_id": {"type": "string"},
+            "min_sun_elevation": {"type": "number"},
+        }
+    ),
+    "opus": DICT_SCHEMA(
+        {
+            "em27_ip": {"type": "string"},
+            "executable_path": {"type": "string"},
+            "experiment_path": {"type": "string"},
+            "macro_path": {"type": "string"},
+            "username": {"type": "string"},
+            "password": {"type": "string"},
+        }
+    ),
+    "camtracker": DICT_SCHEMA(
+        {
+            "config_path": {"type": "string"},
+            "executable_path": {"type": "string"},
+            "learn_az_elev_path": {"type": "string"},
+            "sun_intensity_path": {"type": "string"},
+            "motor_offset_threshold": {"type": "number"},
+        }
+    ),
+    "error_email": DICT_SCHEMA(
+        {
+            "sender_address": {"type": "string"},
+            "sender_password": {"type": "string"},
+            "notify_recipients": {"type": "boolean"},
+            "recipients": {"type": "string"},
+        }
+    ),
+    "measurement_decision": DICT_SCHEMA(
+        {
+            "mode": {"type": "string"},
+            "manual_decision_result": {"type": "boolean"},
+            "cli_decision_result": {"type": "boolean"},
+        }
+    ),
+    "measurement_triggers": DICT_SCHEMA(
+        {
+            "consider_time": {"type": "boolean"},
+            "consider_sun_elevation": {"type": "boolean"},
+            "consider_vbdsd": {"type": "boolean"},
+            "start_time": _Schemas.time_dict,
+            "stop_time": _Schemas.time_dict,
+            "min_sun_elevation": {"type": "number"},
+        }
+    ),
+    "tum_plc": NULLABLE_DICT_SCHEMA(
+        {
+            "ip": {"type": "string"},
+            "version": {"type": "integer"},
+            "controlled_by_user": {"type": "boolean"},
+        }
+    ),
+    "vbdsd": NULLABLE_DICT_SCHEMA(
+        {
+            "camera_id": {"type": "integer"},
+            "evaluation_size": {"type": "integer"},
+            "seconds_per_interval": {"type": "integer"},
+            "measurement_threshold": {"type": "integer"},
+            "save_images": {"type": "boolean"},
+        }
+    ),
+}
+
 CONFIG_FILE_SCHEMA = {
     "general": DICT_SCHEMA(
         {
@@ -134,6 +205,16 @@ class ConfigValidation:
         )
         assert validator.validate(content_object), validator.errors
         # Add assertions that cannot be done with cerberus here
+
+    @staticmethod
+    def check_structure(content_object: dict):
+        """
+        Only validates whether the object has all required
+        keys and the correct value-datatypes. Not validations
+        like "file exists", etc.
+        """
+        validator = cerberus.Validator(CONFIG_FILE_STRUCTURE_SCHEMA, require_all=True)
+        assert validator.validate(content_object), validator.errors
 
     @staticmethod
     def check_current_config_file() -> Tuple[bool, str]:

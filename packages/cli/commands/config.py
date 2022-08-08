@@ -30,6 +30,8 @@ def _get_config():
             content = json.load(f)
         except:
             raise AssertionError("file not in a valid json format")
+
+    ConfigValidation.check_structure(content)
     click.echo(json.dumps(content))
 
 
