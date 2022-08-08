@@ -32,6 +32,7 @@ pyra-core-process-state.json
 logs/persistent-state.json
 logs/activity/*.json
 logs/vbdsd/*.jpg
+logs/vbdsd-autoexposure/*.jpg
 
 # pyra ui
 packages/electron-ui/node_modules/
