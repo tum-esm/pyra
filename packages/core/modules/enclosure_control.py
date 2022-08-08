@@ -1,6 +1,6 @@
 import time
 from snap7.exceptions import Snap7Exception
-from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface
+from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface, PLCError
 
 logger = Logger(origin="enclosure-control")
 
@@ -21,6 +21,7 @@ class EnclosureControl:
     def __init__(self, initial_config: dict):
         self.config = initial_config
         self.initialized = False
+        self.last_plc_connection_time = time.time()
         if self.config["general"]["test_mode"]:
             return
 
@@ -50,57 +51,73 @@ class EnclosureControl:
 
         logger.info("Running EnclosureControl")
 
-        if not self.initialized:
-            self._initialize()
-        else:
-            self.plc_interface.update_config(self.config)
-            self.plc_interface.connect()
-
-        # TODO: possibly end function if plc is not connected
-
-        # get the latest PLC interface state and update with current config
         try:
-            self.plc_state = self.plc_interface.read()
-        except Snap7Exception:
-            logger.warning("Could not read PLC state in this loop.")
+            if not self.initialized:
+                self._initialize()
+            else:
+                self.plc_interface.update_config(self.config)
+                self.plc_interface.connect()
 
-        # read current state of actors and sensors in enclosure
-        logger.info("New continuous readings.")
-        StateInterface.update({"enclosure_plc_readings": self.plc_state.to_dict()})
+            # TODO: possibly end function if plc is not connected
 
-        if self.config["tum_plc"]["controlled_by_user"]:
-            logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
-            return
+            # get the latest PLC interface state and update with current config
+            try:
+                self.plc_state = self.plc_interface.read()
+            except Snap7Exception:
+                logger.warning("Could not read PLC state in this loop.")
 
-        # dawn/dusk detection: powerup/down spectrometer
-        self.auto_set_power_spectrometer()
+            # read current state of actors and sensors in enclosure
+            logger.info("New continuous readings.")
+            StateInterface.update({"enclosure_plc_readings": self.plc_state.to_dict()})
 
-        if self.plc_state.state.motor_failed:
-            raise MotorFailedError("URGENT: stop all actions, check cover in person")
+            if self.config["tum_plc"]["controlled_by_user"]:
+                logger.debug(
+                    "Skipping EnclosureControl because enclosure is controlled by user"
+                )
+                return
 
-        # check PLC ip connection (single ping)
-        if self.plc_interface.is_responsive():
-            logger.debug("Successful ping to PLC.")
-        else:
-            logger.warning("Could not ping PLC.")
+            # dawn/dusk detection: powerup/down spectrometer
+            self.auto_set_power_spectrometer()
 
-        # check for automation state flank changes
-        self.measurements_should_be_running = StateInterface.read()[
-            "measurements_should_be_running"
-        ]
-        self.sync_cover_to_measurement_status()
+            if self.plc_state.state.motor_failed:
+                raise MotorFailedError("URGENT: stop all actions, check cover in person")
 
-        # save the automation status for the next run
-        self.last_cycle_automation_status = self.measurements_should_be_running
+            # check PLC ip connection (single ping)
+            if self.plc_interface.is_responsive():
+                logger.debug("Successful ping to PLC.")
+            else:
+                logger.warning("Could not ping PLC.")
 
-        # verify cover position for every loop. Close cover if supposed to be closed.
-        self.verify_cover_position()
+            # check for automation state flank changes
+            self.measurements_should_be_running = StateInterface.read()[
+                "measurements_should_be_running"
+            ]
+            self.sync_cover_to_measurement_status()
 
-        # verify that sync_to_cover status is still synced with measurement status
-        self.verify_cover_sync()
+            # save the automation status for the next run
+            self.last_cycle_automation_status = self.measurements_should_be_running
 
-        # disconnect from PLC
-        self.plc_interface.disconnect()
+            # verify cover position for every loop. Close cover if supposed to be closed.
+            self.verify_cover_position()
+
+            # verify that sync_to_cover status is still synced with measurement status
+            self.verify_cover_sync()
+
+            # disconnect from PLC
+            self.plc_interface.disconnect()
+            self.last_plc_connection_time = time.time()
+
+        except Snap7Exception as e:
+            logger.exception(e)
+            now = time.time()
+            seconds_since_error_occured = now - self.last_plc_connection_time
+            if seconds_since_error_occured > 600:
+                raise PLCError("Snap7Exception persisting for 10+ minutes")
+            else:
+                logger.info(
+                    f"Snap7Exception persisting for {round(seconds_since_error_occured/60, 2)}"
+                    + " minutes. Sending email at 10 minutes."
+                )
 
     # PLC.ACTORS SETTERS
 
@@ -155,8 +172,8 @@ class EnclosureControl:
 
         current_sun_elevation = Astronomy.get_current_sun_elevation()
         min_power_elevation = (
-            self.config["tum_plc"]["min_power_elevation"] * Astronomy.units.deg
-        )
+            self.config["general"]["min_sun_elevation"] - 1
+        ) * Astronomy.units.deg
 
         if current_sun_elevation is not None:
             sun_is_above_minimum = current_sun_elevation >= min_power_elevation

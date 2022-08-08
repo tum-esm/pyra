@@ -217,13 +217,15 @@ class OpusMeasurement:
         """
 
         opus_path = self._CONFIG["opus"]["executable_path"]
+        opus_username = self._CONFIG["opus"]["username"]
+        opus_password = self._CONFIG["opus"]["password"]
 
         # works only > python3.10
         # without cwd CT will have trouble loading its internal database)
         os.startfile(
             os.path.basename(opus_path),
             cwd=os.path.dirname(opus_path),
-            arguments=self._CONFIG["opus"]["executable_parameter"],
+            arguments=f"/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD={opus_username}@{opus_password}",
             show_cmd=2,
         )
 
@@ -236,15 +238,10 @@ class OpusMeasurement:
         # FindWindow(className, windowName)
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
-        # TODO: resolve this dynamic instead of static
-        if self._CONFIG["tum_plc"]["version"] == 1:
-            opus_windows_name = (
-                "OPUS - Operator: Default  (Administrator) - [Display - default.ows]"
-            )
-        else:
-            opus_windows_name = (
-                "OPUS - Operator: Admin  (Administrator) - [Display - default.ows]"
-            )
+        opus_username = self._CONFIG["opus"]["username"]
+        opus_windows_name = (
+            f"OPUS - Operator: {opus_username}  (Administrator) - [Display - default.ows]"
+        )
         try:
             if win32ui.FindWindow(
                 None,
@@ -284,7 +281,7 @@ class OpusMeasurement:
 
         # sleep while sun angle is too low
         if Astronomy.get_current_sun_elevation().is_within_bounds(
-            None, self._CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
+            None, self._CONFIG["general"]["min_sun_elevation"] * Astronomy.units.deg
         ):
             return True
         else:

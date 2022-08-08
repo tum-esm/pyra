@@ -1,6 +1,7 @@
 import { customTypes } from '../../../custom-types';
 import { configurationComponents } from '../..';
 import { reduxUtils } from '../../../utils';
+import { ICONS } from '../../../assets';
 
 export default function ConfigSectionMeasurementTriggers() {
     const centralSectionConfig = reduxUtils.useTypedSelector(
@@ -64,6 +65,10 @@ export default function ConfigSectionMeasurementTriggers() {
                 oldValue={centralSectionConfig.min_sun_elevation}
                 postfix="degree(s)"
             />
+            <div className="w-full -mt-[1.125rem] pl-[12.5rem] text-xs text-blue-600 flex-row-left gap-x-1">
+                <div className="w-4 h-4 text-blue-400">{ICONS.info}</div>This angle will only have
+                an effect if it is higher than "general.min_sun_elevation".
+            </div>
         </>
     );
 }

@@ -48,15 +48,17 @@ CONFIG_FILE_SCHEMA = {
             "seconds_per_core_interval": {"type": "number", "min": 5, "max": 600},
             "test_mode": _Schemas.boolean,
             "station_id": {"type": "string"},
+            "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
         }
     ),
     "opus": DICT_SCHEMA(
         {
             "em27_ip": _Schemas.ip,
             "executable_path": _Schemas.file,
-            "executable_parameter": _Schemas.string,
             "experiment_path": _Schemas.file,
             "macro_path": _Schemas.file,
+            "username": {"type": "string"},
+            "password": {"type": "string"},
         }
     ),
     "camtracker": DICT_SCHEMA(
@@ -95,7 +97,6 @@ CONFIG_FILE_SCHEMA = {
     ),
     "tum_plc": NULLABLE_DICT_SCHEMA(
         {
-            "min_power_elevation": {"type": "number", "min": 0, "max": 90},
             "ip": _Schemas.ip,
             "version": {"type": "integer", "allowed": [1, 2]},
             "controlled_by_user": {"type": "boolean"},
@@ -107,7 +108,6 @@ CONFIG_FILE_SCHEMA = {
             "evaluation_size": {"type": "integer", "min": 1, "max": 100},
             "seconds_per_interval": {"type": "number", "min": 5, "max": 600},
             "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
-            "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
             "save_images": _Schemas.boolean,
         }
     ),

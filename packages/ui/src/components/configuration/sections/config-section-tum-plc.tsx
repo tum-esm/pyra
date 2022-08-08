@@ -13,7 +13,6 @@ export default function ConfigSectionTumPlc() {
     function addDefault() {
         update({
             tum_plc: {
-                min_power_elevation: 10.0,
                 ip: '10.0.0.4',
                 version: 1,
                 controlled_by_user: false,
@@ -62,17 +61,6 @@ export default function ConfigSectionTumPlc() {
                 remove configuration
             </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-gray-300" />
-            <configurationComponents.ConfigElementText
-                title="Min. Power Elevation"
-                value={localSectionConfig.min_power_elevation}
-                setValue={(v: number) => update({ tum_plc: { min_power_elevation: v } })}
-                oldValue={
-                    centralSectionConfig !== null
-                        ? centralSectionConfig.min_power_elevation
-                        : 'null'
-                }
-                postfix="degree(s)"
-            />
             <configurationComponents.ConfigElementText
                 title="IP"
                 value={localSectionConfig.ip}
