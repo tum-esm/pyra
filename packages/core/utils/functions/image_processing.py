@@ -97,14 +97,18 @@ class ImageProcessing:
     ):
         img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
         img = cv.circle(img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2)
+        img = ImageProcessing.add_text_to_image(img, f"{round(edge_fraction * 100, 2)}%")
+        return img
+
+    @staticmethod
+    def add_text_to_image(img, text):
         cv.putText(
             img,
-            text=f"{round(edge_fraction * 100, 2)}%",
+            text=text,
             org=(10, img.shape[0] - 15),
             fontFace=None,
             fontScale=0.8,
             color=(200, 0, 0),
             thickness=2,
         )
-
         return img
