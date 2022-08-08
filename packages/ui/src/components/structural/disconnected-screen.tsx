@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react';
 import { essentialComponents } from '..';
-import { reduxUtils } from '../../utils';
+import { reduxUtils, fetchUtils } from '../../utils';
 
-const linkToInstallationInstructions = (
+const LinkToInstallationInstructions = (props: { projectDirPath: string }) => (
     <>
-        Please following the installation instructions on{' '}
+        Please follow the installation instructions on{' '}
         <span className="font-bold text-blue-500 underline">https://github.com/tum-esm/pyra</span>.
+        PYRA 4 should be located at "{props.projectDirPath}"
     </>
 );
 
@@ -19,25 +21,34 @@ export default function DisconnectedScreen(props: {
 }) {
     const { backendIntegrity } = props;
     const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
+    const [projectDirPath, setProjectDirPath] = useState('');
+
+    useEffect(() => {
+        async function init() {
+            setProjectDirPath(await fetchUtils.getProjectDirPath());
+        }
+
+        init();
+    }, []);
 
     return (
         <main className="flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4">
-            <div className="inline max-w-sm text-center">
+            <div className="inline max-w-lg text-center">
                 {backendIntegrity === 'cli is missing' && (
                     <>
-                        <strong>pyra-cli</strong> has not been found on your system.{' '}
-                        {linkToInstallationInstructions}
+                        PYRA has not been found on your system.{' '}
+                        <LinkToInstallationInstructions projectDirPath={projectDirPath} />
                     </>
                 )}
                 {backendIntegrity === 'config is invalid' && (
                     <>
                         The file <strong>config.json</strong> is not in a valid JSON format.{' '}
-                        {linkToInstallationInstructions}
+                        <LinkToInstallationInstructions projectDirPath={projectDirPath} />
                     </>
                 )}
                 {backendIntegrity === 'pyra-core is not running' && (
                     <>
-                        <strong>pyra-core</strong> is not running.
+                        <strong>PYRA Core</strong> is not running.
                     </>
                 )}
             </div>
@@ -53,7 +64,7 @@ export default function DisconnectedScreen(props: {
                 }
             >
                 {backendIntegrity === 'pyra-core is not running'
-                    ? 'start pyra-core'
+                    ? 'start core'
                     : 'retry connection'}
             </essentialComponents.Button>
         </main>
