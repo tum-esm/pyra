@@ -129,12 +129,11 @@ class PLCInterface:
 
         while True:
             try:
+                if (time.time() - start_time) > 30:
+                    raise Snap7Exception("Connect to PLC timed out.")
+
                 self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
                 time.sleep(0.2)
-
-                if time.time() - start_time > 30:
-                    logger.debug("Connect to PLC timed out.")
-                    return
 
                 if self.plc.get_connected():
                     logger.debug("Connected to PLC.")
@@ -146,7 +145,6 @@ class PLCInterface:
             except Snap7Exception:
                 self.plc.destroy()
                 self.plc = snap7.client.Client()
-                continue
 
     def disconnect(self) -> None:
         """
