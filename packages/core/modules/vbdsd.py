@@ -140,13 +140,17 @@ class _VBDSD:
         set exposure to the value where the overall
         mean pixel value color is closest to 100
         """
-        exposure_results = []
-        for e in _VBDSD.available_exposures:
-            _VBDSD.update_camera_settings(exposure=e)
-            image = _VBDSD.take_image(trow_away_white_images=False)
-            exposure_results.append({"exposure": e, "mean": np.mean(image)})
-        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 100))["exposure"]
+        exposure_results = [{"exposure": e, "values": []} for e in _VBDSD.available_exposures]
+        for _ in range(3):
+            for i, e in enumerate(_VBDSD.available_exposures):
+                _VBDSD.update_camera_settings(exposure=e)
+                image = _VBDSD.take_image(trow_away_white_images=False)
+                exposure_results[i]["values"].append(np.mean(image))
+
         logger.debug(f"exposure results: {exposure_results}")
+        new_exposure = min(exposure_results, key=lambda r: abs(np.mean(r["values"]) - 75))[
+            "exposure"
+        ]
 
         if new_exposure != _VBDSD.current_exposure:
             _VBDSD.update_camera_settings(exposure=new_exposure)
