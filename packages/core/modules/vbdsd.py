@@ -174,7 +174,7 @@ class _VBDSD:
         circle_cx, circle_cy, circle_r = ImageProcessing.get_circle_location(binary_mask)
 
         # only consider edges and make them bold
-        edges_only = np.array(cv.Canny(single_valued_pixels, 50, 50), dtype=np.float32)
+        edges_only = np.array(cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32)
         edges_only_dilated = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
         )
