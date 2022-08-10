@@ -6,8 +6,6 @@ from packages.core.utils import Logger, StateInterface, Astronomy
 
 # these imports are provided by pywin32
 if sys.platform == "win32":
-    import win32con  # type: ignore
-    import win32process  # type: ignore
     import win32ui  # type: ignore
     import dde  # type: ignore
 
@@ -28,7 +26,7 @@ class OpusMeasurement:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
         self.initialized = False
-        self.current_experiment = None
+        self.current_experiment = self._CONFIG["opus"]["experiment_path"]
         if self._CONFIG["general"]["test_mode"]:
             return
 
@@ -72,9 +70,7 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        measurements_should_be_running = StateInterface.read()["measurements_should_be_running"]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: load experiment, start macro
@@ -219,13 +215,15 @@ class OpusMeasurement:
         """
 
         opus_path = self._CONFIG["opus"]["executable_path"]
+        opus_username = self._CONFIG["opus"]["username"]
+        opus_password = self._CONFIG["opus"]["password"]
 
         # works only > python3.10
         # without cwd CT will have trouble loading its internal database)
         os.startfile(
             os.path.basename(opus_path),
             cwd=os.path.dirname(opus_path),
-            arguments=self._CONFIG["opus"]["executable_parameter"],
+            arguments=f"/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD={opus_username}@{opus_password}",
             show_cmd=2,
         )
 
@@ -238,10 +236,14 @@ class OpusMeasurement:
         # FindWindow(className, windowName)
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
+        opus_username = self._CONFIG["opus"]["username"]
+        opus_windows_name = (
+            f"OPUS - Operator: {opus_username}  (Administrator) - [Display - default.ows]"
+        )
         try:
             if win32ui.FindWindow(
                 None,
-                "OPUS - Operator: Default  (Administrator) - [Display - default.ows]",
+                opus_windows_name,
             ):
                 return True
         except win32ui.error:
@@ -277,7 +279,7 @@ class OpusMeasurement:
 
         # sleep while sun angle is too low
         if Astronomy.get_current_sun_elevation().is_within_bounds(
-            None, self._CONFIG["vbdsd"]["min_sun_elevation"] * Astronomy.units.deg
+            None, self._CONFIG["general"]["min_sun_elevation"] * Astronomy.units.deg
         ):
             return True
         else:
@@ -293,7 +295,7 @@ class OpusMeasurement:
             if not self.opus_application_running():
                 logger.info("Start OPUS.")
                 self.start_opus()
-                time.sleep(10)
+                self.wait_for_opus_startup()
                 logger.info("Loading OPUS Experiment.")
                 self.load_experiment()
                 # returns to give OPUS time to start until next call of run()
@@ -307,6 +309,17 @@ class OpusMeasurement:
                 self.stop_macro()
                 time.sleep(5)
                 self.close_opus()
+
+    def wait_for_opus_startup(self):
+        """Checks for OPUS to be running. Breaks out of the loop after a defined time."""
+        start_time = time.time()
+        while True:
+            if self.opus_application_running():
+                break
+            time.sleep(0.5)
+
+            if time.time() - start_time > 60:
+                break
 
     def check_for_experiment_change(self):
         """Compares the experiment in the config with the current active experiment.

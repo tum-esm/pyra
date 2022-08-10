@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyra"
-version = "4.0.3"
+version = "4.0.4"
 description = ""
 authors = ["Patrick Aigner <patrick.aigner@tum.de>", "Moritz Makowski <moritz.makowski@tum.de>"]
 

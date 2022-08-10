@@ -28,12 +28,6 @@ export default function ConfigSectionOpus() {
                 oldValue={centralSectionConfig.executable_path}
             />
             <configurationComponents.ConfigElementText
-                title="Executable Parameter"
-                value={localSectionConfig.executable_parameter}
-                setValue={(v: string) => update({ opus: { executable_parameter: v } })}
-                oldValue={centralSectionConfig.executable_parameter}
-            />
-            <configurationComponents.ConfigElementText
                 title="Experiment Path"
                 value={localSectionConfig.experiment_path}
                 setValue={(v: string) => update({ opus: { experiment_path: v } })}
@@ -44,6 +38,18 @@ export default function ConfigSectionOpus() {
                 value={localSectionConfig.macro_path}
                 setValue={(v: string) => update({ opus: { macro_path: v } })}
                 oldValue={centralSectionConfig.macro_path}
+            />
+            <configurationComponents.ConfigElementText
+                title="Username"
+                value={localSectionConfig.username}
+                setValue={(v: string) => update({ opus: { username: v } })}
+                oldValue={centralSectionConfig.username}
+            />
+            <configurationComponents.ConfigElementText
+                title="Password"
+                value={localSectionConfig.password}
+                setValue={(v: string) => update({ opus: { password: v } })}
+                oldValue={centralSectionConfig.password}
             />
         </>
     );

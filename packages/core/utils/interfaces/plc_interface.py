@@ -1,12 +1,13 @@
 import dataclasses
 import json
 import snap7
+from snap7.exceptions import Snap7Exception
 import time
 import os
 from packages.core.utils import Logger, with_filelock, update_dict_recursively
 from .plc_specification import PLC_SPECIFICATION_VERSIONS
 
-logger = Logger(origin="pyra.core.enclosure-control")
+logger = Logger(origin="plc-interface")
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 
@@ -38,7 +39,7 @@ class PLCSensorsState:
 @dataclasses.dataclass
 class PLCStateState:
     cover_closed: bool = None
-    motor_failed: bool = None
+    motor_failed: bool | None = None
     rain: bool = None
     reset_needed: bool = None
     ups_alert: bool = None
@@ -55,11 +56,11 @@ class PLCPowerState:
 
 @dataclasses.dataclass
 class PLCConnectionsState:
-    camera: bool = None
+    camera: bool | None = None
     computer: bool = None
     heater: bool = None
     router: bool = None
-    spectrometer: bool = None
+    spectrometer: bool | None = None
 
 
 @dataclasses.dataclass
@@ -112,37 +113,50 @@ class PLCInterface:
         self.config = config
         self.specification = PLC_SPECIFICATION_VERSIONS[config["tum_plc"]["version"]]
 
-        self.plc = snap7.client.Client()
-        self._connect()
-
     # CONNECTION
 
     def update_config(self, new_config: dict):
         if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
             logger.debug("PLC ip has changed, reconnecting now")
-            self._disconnect()
-
         self.config = new_config
-        if not self._is_connected():
-            self._connect()
 
-    def _connect(self) -> None:
+    def connect(self) -> None:
         """
         Connects to the PLC Snap7
         """
-        self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
+        self.plc = snap7.client.Client()
+        start_time = time.time()
 
-        if not self._is_connected():
-            raise PLCError("Could not connect to PLC")
+        while True:
+            try:
+                if (time.time() - start_time) > 30:
+                    raise Snap7Exception("Connect to PLC timed out.")
 
-    def _disconnect(self) -> None:
+                self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
+                time.sleep(0.2)
+
+                if self.plc.get_connected():
+                    logger.debug("Connected to PLC.")
+                    return
+
+                self.plc.destroy()
+                self.plc = snap7.client.Client()
+
+            except Snap7Exception:
+                self.plc.destroy()
+                self.plc = snap7.client.Client()
+
+    def disconnect(self) -> None:
         """
         Disconnects from the PLC Snap7
         """
-        self.plc.disconnect()
-
-        if self._is_connected():
-            raise PLCError("Could not disconnect from PLC")
+        try:
+            self.plc.disconnect()
+            self.plc.destroy()
+            logger.debug("Gracefully disconnected from PLC.")
+        except Snap7Exception:
+            self.plc.destroy()
+            logger.debug("Disconnected ungracefully from PLC.")
 
     def _is_connected(self) -> bool:
         """
@@ -172,17 +186,23 @@ class PLCInterface:
         """
 
         plc_db_content = {}
-        plc_db_content[8] = self.plc.db_read(8, 0, 25)
-        self._sleep_while_cpu_is_busy()
-        plc_db_content[25] = self.plc.db_read(25, 0, 9)
-        self._sleep_while_cpu_is_busy()
-        plc_db_content[3] = self.plc.db_read(3, 0, 5)
-        self._sleep_while_cpu_is_busy()
+        if self.config["tum_plc"]["version"] == 1:
+            plc_db_size = {3: 6, 8: 26, 25: 10}
+        else:
+            plc_db_size = {3: 5, 6: 17, 8: 25}
+
+        for db_index, db_size in plc_db_size.items():
+            plc_db_content[db_index] = self.plc.db_read(db_index, 0, db_size)
+            self._sleep_while_cpu_is_busy()
+
+        logger.debug(f"new plc bulk read: {plc_db_content}")
 
         def _get_int(spec: list[int]) -> int:
             return snap7.util.get_int(plc_db_content[spec[0]], spec[1])
 
-        def _get_bool(spec: list[int]) -> bool:
+        def _get_bool(spec: list[int] | None) -> bool:
+            if spec is None:
+                return None
             return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])
 
         return PLCState(
@@ -341,7 +361,10 @@ class PLCInterface:
         )
 
     def reset(self) -> None:
-        self._write_bool(self.specification.control.reset, False)
+        if self.config["tum_plc"]["version"] == 1:
+            self._write_bool(self.specification.control.reset, False)
+        else:
+            self._write_bool(self.specification.control.reset, True)
 
     # PLC.ACTORS SETTERS
     def set_cover_angle(self, value: int) -> None:

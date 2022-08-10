@@ -10,11 +10,6 @@ import datetime
 from packages.core.utils import StateInterface, Logger, OSInterface
 
 
-# these imports are provided by pywin32
-if sys.platform == "win32":
-    import win32ui  # type: ignore
-
-
 logger = Logger(origin="sun-tracking")
 
 
@@ -213,7 +208,7 @@ class SunTracking:
         az_offeset = float(tracker_status[4])
         threshold = float(self._CONFIG["camtracker"]["motor_offset_threshold"])
 
-        if (elev_offset > threshold) or (az_offeset > threshold):
+        if (abs(elev_offset) > threshold) or (abs(az_offeset) > threshold):
             return False
 
         return True

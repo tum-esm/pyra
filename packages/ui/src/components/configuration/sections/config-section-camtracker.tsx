@@ -28,10 +28,10 @@ export default function ConfigSectionCamtracker() {
                 oldValue={centralSectionConfig.executable_path}
             />
             <configurationComponents.ConfigElementText
-                title="Executable Path"
-                value={localSectionConfig.executable_path}
-                setValue={(v: string) => update({ camtracker: { executable_path: v } })}
-                oldValue={centralSectionConfig.executable_path}
+                title="Sun Intensity Path"
+                value={localSectionConfig.sun_intensity_path}
+                setValue={(v: string) => update({ camtracker: { sun_intensity_path: v } })}
+                oldValue={centralSectionConfig.sun_intensity_path}
             />
             <configurationComponents.ConfigElementText
                 title='"learn_az_elev" Path'
@@ -44,6 +44,7 @@ export default function ConfigSectionCamtracker() {
                 value={localSectionConfig.motor_offset_threshold}
                 setValue={(v: number) => update({ camtracker: { motor_offset_threshold: v } })}
                 oldValue={centralSectionConfig.motor_offset_threshold}
+                postfix="degree(s)"
             />
         </>
     );

@@ -1,7 +1,6 @@
 import json
 import os
 from packages.core.utils import Astronomy, with_filelock
-
 from .config_validation import ConfigValidation
 
 dir = os.path.dirname

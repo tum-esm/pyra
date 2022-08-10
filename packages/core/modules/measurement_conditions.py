@@ -66,8 +66,11 @@ class MeasurementConditions:
         if triggers["consider_sun_elevation"]:
             logger.info("Sun elevation as a trigger is considered.")
             current_sun_elevation = Astronomy.get_current_sun_elevation()
-            sun_above_threshold = (
-                current_sun_elevation > triggers["min_sun_elevation"] * Astronomy.units.deg
+            min_sun_elevation = max(
+                self._CONFIG["general"]["min_sun_elevation"], triggers["min_sun_elevation"]
+            )
+            sun_above_threshold = current_sun_elevation > (
+                min_sun_elevation * Astronomy.units.deg
             )
             if sun_above_threshold:
                 logger.debug("Sun angle is above threshold.")

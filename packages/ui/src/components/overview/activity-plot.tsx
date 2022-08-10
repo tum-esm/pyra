@@ -18,19 +18,21 @@ type ActivitySection = { from: string; to: string };
 function getSections(
     activityHistory: customTypes.activityHistory,
     startIndicator: string,
-    stopIndicator: string
+    stopIndicators: string[]
 ): ActivitySection[] {
     return reduce(
         activityHistory,
         (prev: ActivitySection[], curr, index) => {
             if (curr.event === startIndicator) {
                 return [...prev, { from: curr.localTime, to: '23:59:59' }];
-            } else if (curr.event === stopIndicator) {
-                if (prev.length == 0) {
+            } else if (stopIndicators.includes(curr.event)) {
+                if (startIndicator !== 'start-measurements' && prev.length == 0) {
                     return [{ from: '00:00:00', to: curr.localTime }];
-                } else {
+                } else if (prev.length != 0) {
                     const lastFrom: any = prev.at(-1)?.from;
                     return [...prev.slice(0, -1), { from: lastFrom, to: curr.localTime }];
+                } else {
+                    return prev;
                 }
             } else {
                 return prev;
@@ -58,12 +60,15 @@ function ActivityPlot() {
     }
 
     const sections = {
-        core: getSections(activityHistory, 'start-core', 'stop-core'),
-        measurements: getSections(activityHistory, 'start-measurements', 'stop-measurements'),
-        error: getSections(activityHistory, 'error-occured', 'errors-resolved'),
+        core: getSections(activityHistory, 'start-core', ['stop-core']),
+        measurements: getSections(activityHistory, 'start-measurements', [
+            'stop-core',
+            'stop-measurements',
+        ]),
+        error: getSections(activityHistory, 'error-occured', ['errors-resolved']),
     };
 
-    const localTUCOffset = moment().utcOffset();
+    const localUTCOffset = moment().utcOffset();
 
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
@@ -78,8 +83,8 @@ function ActivityPlot() {
                             {h}h
                             {h === 0 &&
                                 ' UTC' +
-                                    (localTUCOffset < 0 ? '' : '+') +
-                                    (localTUCOffset / 60).toString()}
+                                    (localUTCOffset < 0 ? '' : '+') +
+                                    (localUTCOffset / 60).toString()}
                         </div>
                     ))}
                 </div>
