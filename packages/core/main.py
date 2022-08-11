@@ -31,7 +31,7 @@ def run():
         modules.opus_measurement.OpusMeasurement(_CONFIG),
         modules.system_checks.SystemChecks(_CONFIG),
     ]
-    vbdsd_thread = modules.vbdsd.VBDSD_Thread()
+    helios_thread_instance = modules.helios_thread.HeliosThread()
 
     current_exceptions = StateInterface.read(persistent=True)["current_exceptions"]
 
@@ -47,18 +47,18 @@ def run():
             continue
 
         if not _CONFIG["general"]["test_mode"]:
-            # Start or stop VBDSD in a thread
-            vbdsd_should_be_running = (
-                _CONFIG["vbdsd"] is not None
-                and _CONFIG["measurement_triggers"]["consider_vbdsd"]
+            # Start or stop Helios in a thread
+            helios_should_be_running = (
+                _CONFIG["helios"] is not None
+                and _CONFIG["measurement_triggers"]["consider_helios"]
             )
-            if vbdsd_should_be_running and not vbdsd_thread.is_running():
-                vbdsd_thread.start()
-            if not vbdsd_should_be_running and vbdsd_thread.is_running():
-                vbdsd_thread.stop()
+            if helios_should_be_running and not helios_thread_instance.is_running():
+                helios_thread_instance.start()
+            if not helios_should_be_running and helios_thread_instance.is_running():
+                helios_thread_instance.stop()
         else:
             logger.info("pyra-core in test mode")
-            logger.debug("Skipping VBDSD_Thread in test mode")
+            logger.debug("Skipping HeliosThread in test mode")
 
         new_exception = None
         try:

@@ -35,7 +35,7 @@ export namespace customTypes {
         | 'error_email'
         | 'measurement_triggers'
         | 'tum_plc'
-        | 'vbdsd';
+        | 'helios';
     export type config = {
         general: {
             seconds_per_core_interval: number;
@@ -72,7 +72,7 @@ export namespace customTypes {
         measurement_triggers: {
             consider_time: boolean;
             consider_sun_elevation: boolean;
-            consider_vbdsd: boolean;
+            consider_helios: boolean;
             start_time: { hour: number; minute: number; second: number };
             stop_time: { hour: number; minute: number; second: number };
             min_sun_elevation: number;
@@ -82,7 +82,7 @@ export namespace customTypes {
             version: number;
             controlled_by_user: boolean;
         };
-        vbdsd: null | {
+        helios: null | {
             camera_id: number;
             evaluation_size: number;
             seconds_per_interval: number;
@@ -128,7 +128,7 @@ export namespace customTypes {
         measurement_triggers?: {
             consider_time?: boolean;
             consider_sun_elevation?: boolean;
-            consider_vbdsd?: boolean;
+            consider_helios?: boolean;
             start_time?: { hour?: number; minute?: number; second?: number };
             stop_time?: { hour?: number; minute?: number; second?: number };
             min_sun_elevation?: number;
@@ -138,7 +138,7 @@ export namespace customTypes {
             version?: number;
             controlled_by_user?: boolean;
         };
-        vbdsd?: null | {
+        helios?: null | {
             camera_id?: number;
             evaluation_size?: number;
             seconds_per_interval?: number;
@@ -231,7 +231,7 @@ export namespace customTypes {
     };
 
     export type coreState = {
-        vbdsd_indicates_good_conditions: boolean | null;
+        helios_indicates_good_conditions: boolean | null;
         measurements_should_be_running: boolean;
         enclosure_plc_readings: enclosurePlcReadings;
         os_state: OSState;

@@ -30,7 +30,7 @@ class StateInterface:
 
         # write initial state.json file
         new_state = {
-            "vbdsd_indicates_good_conditions": None,
+            "helios_indicates_good_conditions": None,
             "measurements_should_be_running": False,
             "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
             "os_state": {

@@ -41,15 +41,17 @@ export default function parseNumberTypes(newConfig: customTypes.config): customT
                       ...newConfig.tum_plc,
                       version: parseFloat(`${newConfig.tum_plc.version}`),
                   },
-        vbdsd:
-            newConfig.vbdsd === null
+        helios:
+            newConfig.helios === null
                 ? null
                 : {
-                      camera_id: parseFloat(`${newConfig.vbdsd.camera_id}`),
-                      evaluation_size: parseFloat(`${newConfig.vbdsd.evaluation_size}`),
-                      seconds_per_interval: parseFloat(`${newConfig.vbdsd.seconds_per_interval}`),
-                      measurement_threshold: parseFloat(`${newConfig.vbdsd.measurement_threshold}`),
-                      save_images: newConfig.vbdsd.save_images,
+                      camera_id: parseFloat(`${newConfig.helios.camera_id}`),
+                      evaluation_size: parseFloat(`${newConfig.helios.evaluation_size}`),
+                      seconds_per_interval: parseFloat(`${newConfig.helios.seconds_per_interval}`),
+                      measurement_threshold: parseFloat(
+                          `${newConfig.helios.measurement_threshold}`
+                      ),
+                      save_images: newConfig.helios.save_images,
                   },
     };
 }

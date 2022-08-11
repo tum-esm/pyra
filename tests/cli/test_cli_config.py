@@ -102,7 +102,7 @@ def test_update_config(original_config):
 
 def test_add_default_config(original_config):
 
-    cases = {"vbdsd": None, "tum_plc": None}
+    cases = {"helios": None, "tum_plc": None}
 
     for c in cases:
         with open(os.path.join(PROJECT_DIR, "config", f"{c}.config.default.json"), "r") as f:

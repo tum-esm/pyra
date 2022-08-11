@@ -2,9 +2,9 @@ import { customTypes } from '../../../custom-types';
 import { configurationComponents, essentialComponents } from '../..';
 import { reduxUtils } from '../../../utils';
 
-export default function ConfigSectionVbdsd() {
-    const centralSectionConfig = reduxUtils.useTypedSelector((s) => s.config.central?.vbdsd);
-    const localSectionConfig = reduxUtils.useTypedSelector((s) => s.config.local?.vbdsd);
+export default function ConfigSectionHelios() {
+    const centralSectionConfig = reduxUtils.useTypedSelector((s) => s.config.central?.helios);
+    const localSectionConfig = reduxUtils.useTypedSelector((s) => s.config.local?.helios);
     const dispatch = reduxUtils.useTypedDispatch();
 
     const update = (c: customTypes.partialConfig) =>
@@ -12,7 +12,7 @@ export default function ConfigSectionVbdsd() {
 
     function addDefault() {
         update({
-            vbdsd: {
+            helios: {
                 camera_id: 0,
                 evaluation_size: 15,
                 seconds_per_interval: 6,
@@ -24,7 +24,7 @@ export default function ConfigSectionVbdsd() {
 
     function setNull() {
         update({
-            vbdsd: null,
+            helios: null,
         });
     }
 
@@ -66,14 +66,14 @@ export default function ConfigSectionVbdsd() {
             <configurationComponents.ConfigElementText
                 title="Camera ID"
                 value={localSectionConfig.camera_id}
-                setValue={(v: number) => update({ vbdsd: { camera_id: v } })}
+                setValue={(v: number) => update({ helios: { camera_id: v } })}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.camera_id : 'null'}
                 numeric
             />
             <configurationComponents.ConfigElementText
                 title="Seconds Per Interval"
                 value={localSectionConfig.seconds_per_interval}
-                setValue={(v: any) => update({ vbdsd: { seconds_per_interval: v } })}
+                setValue={(v: any) => update({ helios: { seconds_per_interval: v } })}
                 oldValue={
                     centralSectionConfig !== null
                         ? centralSectionConfig.seconds_per_interval
@@ -85,7 +85,7 @@ export default function ConfigSectionVbdsd() {
             <configurationComponents.ConfigElementText
                 title="Evaluation Size"
                 value={localSectionConfig.evaluation_size}
-                setValue={(v: any) => update({ vbdsd: { evaluation_size: v } })}
+                setValue={(v: any) => update({ helios: { evaluation_size: v } })}
                 oldValue={
                     centralSectionConfig !== null ? centralSectionConfig.evaluation_size : 'null'
                 }
@@ -95,7 +95,7 @@ export default function ConfigSectionVbdsd() {
             <configurationComponents.ConfigElementText
                 title="Measurement Threshold"
                 value={localSectionConfig.measurement_threshold}
-                setValue={(v: any) => update({ vbdsd: { measurement_threshold: v } })}
+                setValue={(v: any) => update({ helios: { measurement_threshold: v } })}
                 oldValue={
                     centralSectionConfig !== null
                         ? centralSectionConfig.measurement_threshold
@@ -106,7 +106,7 @@ export default function ConfigSectionVbdsd() {
             <configurationComponents.ConfigElementToggle
                 title="Save Images"
                 value={localSectionConfig.save_images}
-                setValue={(v: boolean) => update({ vbdsd: { save_images: v } })}
+                setValue={(v: boolean) => update({ helios: { save_images: v } })}
                 oldValue={centralSectionConfig?.save_images === true}
             />
         </>

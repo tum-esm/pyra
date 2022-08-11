@@ -9,7 +9,7 @@ DEFAULT_CONFIG_PATH = os.path.join(PROJECT_DIR, "config", "config.default.json")
 DEFAULT_CONFIG_PATH_TUM_PLC = os.path.join(
     PROJECT_DIR, "config", "tum_plc.config.default.json"
 )
-DEFAULT_CONFIG_PATH_VBDSD = os.path.join(PROJECT_DIR, "config", "vbdsd.config.default.json")
+DEFAULT_CONFIG_PATH_HELIOS = os.path.join(PROJECT_DIR, "config", "helios.config.default.json")
 
 
 def test_default_config():
@@ -19,8 +19,8 @@ def test_default_config():
     with open(DEFAULT_CONFIG_PATH_TUM_PLC, "r") as f:
         DEFAULT_CONFIG_TUM_PLC: dict = json.load(f)
 
-    with open(DEFAULT_CONFIG_PATH_VBDSD, "r") as f:
-        DEFAULT_CONFIG_VBDSD: dict = json.load(f)
+    with open(DEFAULT_CONFIG_PATH_HELIOS, "r") as f:
+        DEFAULT_CONFIG_HELIOS: dict = json.load(f)
 
     for k1 in DEFAULT_CONFIG.keys():
         if DEFAULT_CONFIG[k1] is not None:
@@ -33,5 +33,5 @@ def test_default_config():
     DEFAULT_CONFIG["tum_plc"] = DEFAULT_CONFIG_TUM_PLC
     Validation.check(DEFAULT_CONFIG)
 
-    DEFAULT_CONFIG["vbdsd"] = DEFAULT_CONFIG_VBDSD
+    DEFAULT_CONFIG["helios"] = DEFAULT_CONFIG_HELIOS
     Validation.check(DEFAULT_CONFIG)

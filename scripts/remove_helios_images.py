@@ -1,7 +1,7 @@
 import os
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IMG_PATH = os.path.join(PROJECT_DIR, "logs", "vbdsd")
+IMG_PATH = os.path.join(PROJECT_DIR, "logs", "helios")
 
 image_names = list(sorted([f for f in os.listdir(IMG_PATH) if f.endswith(".jpg")]))
 

@@ -1,25 +1,17 @@
 import cv2 as cv
-import os
 import time
 import datetime
 import astropy.units as astropy_units
 from packages.core.utils import (
     ConfigInterface,
-    StateInterface,
-    Logger,
-    RingList,
     Astronomy,
 )
 
-from packages.core.utils.astronomy import Astronomy
-
-
-from packages.core.utils import ConfigInterface
 
 def test_picture():
     _CONFIG = ConfigInterface().read()
 
-    cam = cv.VideoCapture(_CONFIG["vbdsd"]["camera_id"]) #
+    cam = cv.VideoCapture(_CONFIG["helios"]["camera_id"])  #
 
     cam.set(3, 1280)  # width
     cam.set(4, 720)  # height
@@ -28,7 +20,6 @@ def test_picture():
     cam.set(11, 64)  # contrast
     cam.set(12, 0)  # saturation
     cam.set(14, 0)  # gain
-
 
     current_sun_angle = Astronomy.get_current_sun_elevation()
     diff = 0
@@ -40,18 +31,17 @@ def test_picture():
         exp = -11 + diff
     else:
         exp = -12 + diff
-    
-    cam.set(15,exp)
+
+    cam.set(15, exp)
 
     for i in range(5):
         ret, frame = cam.read()
-        
 
-        path = "C:\\pyra-4\\runtime-data\\vbdsd\\test_{}.jpg".format(str(datetime.datetime.now().strftime("%H-%M-%S")))
-        
+        path = "C:\\pyra-4\\runtime-data\\helios\\test_{}.jpg".format(
+            str(datetime.datetime.now().strftime("%H-%M-%S"))
+        )
 
         cv.imwrite(path, frame)
         time.sleep(5)
 
     cam.release()
-    

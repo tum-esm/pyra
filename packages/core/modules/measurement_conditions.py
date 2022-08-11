@@ -51,14 +51,14 @@ class MeasurementConditions:
 
     def _get_automatic_decision(self) -> bool:
         triggers = self._CONFIG["measurement_triggers"]
-        if self._CONFIG["vbdsd"] is None:
-            triggers["consider_vbdsd"] = False
+        if self._CONFIG["helios"] is None:
+            triggers["consider_helios"] = False
 
         if not any(
             [
                 triggers["consider_sun_elevation"],
                 triggers["consider_time"],
-                triggers["consider_vbdsd"],
+                triggers["consider_helios"],
             ]
         ):
             return False
@@ -86,17 +86,17 @@ class MeasurementConditions:
             if not time_is_valid:
                 return False
 
-        if triggers["consider_vbdsd"]:
-            logger.info("VBDSD as a trigger is considered.")
-            vbdsd_result = StateInterface.read()["vbdsd_indicates_good_conditions"]
+        if triggers["consider_helios"]:
+            logger.info("Helios as a trigger is considered.")
+            helios_result = StateInterface.read()["helios_indicates_good_conditions"]
 
-            if vbdsd_result is None:
-                logger.debug(f"VBDSD does not nave enough images yet.")
+            if helios_result is None:
+                logger.debug(f"Helios does not nave enough images yet.")
                 return False
 
             logger.debug(
-                f"VBDSD indicates {'good' if vbdsd_result else 'bad'} sun conditions."
+                f"Helios indicates {'good' if helios_result else 'bad'} sun conditions."
             )
-            return vbdsd_result
+            return helios_result
 
         return True

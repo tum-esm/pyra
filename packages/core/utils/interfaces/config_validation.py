@@ -89,7 +89,7 @@ CONFIG_FILE_STRUCTURE_SCHEMA = {
         {
             "consider_time": {"type": "boolean"},
             "consider_sun_elevation": {"type": "boolean"},
-            "consider_vbdsd": {"type": "boolean"},
+            "consider_helios": {"type": "boolean"},
             "start_time": _Schemas.time_dict,
             "stop_time": _Schemas.time_dict,
             "min_sun_elevation": {"type": "number"},
@@ -102,7 +102,7 @@ CONFIG_FILE_STRUCTURE_SCHEMA = {
             "controlled_by_user": {"type": "boolean"},
         }
     ),
-    "vbdsd": NULLABLE_DICT_SCHEMA(
+    "helios": NULLABLE_DICT_SCHEMA(
         {
             "camera_id": {"type": "integer"},
             "evaluation_size": {"type": "integer"},
@@ -160,7 +160,7 @@ CONFIG_FILE_SCHEMA = {
         {
             "consider_time": _Schemas.boolean,
             "consider_sun_elevation": _Schemas.boolean,
-            "consider_vbdsd": _Schemas.boolean,
+            "consider_helios": _Schemas.boolean,
             "start_time": _Schemas.time_dict,
             "stop_time": _Schemas.time_dict,
             "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
@@ -173,7 +173,7 @@ CONFIG_FILE_SCHEMA = {
             "controlled_by_user": {"type": "boolean"},
         }
     ),
-    "vbdsd": NULLABLE_DICT_SCHEMA(
+    "helios": NULLABLE_DICT_SCHEMA(
         {
             "camera_id": {"type": "integer", "min": 0, "max": 999999},
             "evaluation_size": {"type": "integer", "min": 1, "max": 100},
