@@ -40,13 +40,14 @@ def get_directories_to_be_uploaded(ifg_src_path) -> list[str]:
 class UploadThread:
     def __init__(self):
         self.__thread = None
-        self.__shared_queue = queue.Queue()
+        self.__shared_queue = None
 
     def start(self):
         """
         Start the thread using the threading library
         """
         logger.info("Starting thread")
+        self.__shared_queue = queue.Queue()
         self.__thread = threading.Thread(target=UploadThread.main, args=(self.__shared_queue,))
         self.__thread.start()
 
@@ -58,31 +59,39 @@ class UploadThread:
         Send a stop-signal to the thread and wait for its termination
         """
 
+        assert self.__shared_queue is not None
+
         logger.info("Sending termination signal")
         self.__shared_queue.put("stop")
 
         logger.info("Waiting for thread to terminate")
         self.__thread.join()
         self.__thread = None
+        self.__shared_queue = None
 
         logger.info("Stopped the thread")
 
     @staticmethod
     def main(shared_queue: queue.Queue):
         while True:
+            config = ConfigInterface.read()
+
             # Check for termination
             try:
-                if shared_queue.get(block=False) == "stop":
+                if (
+                    (config["upload"] is None)
+                    or (not config["upload"]["is_active"])
+                    or (shared_queue.get(block=False) == "stop")
+                ):
                     break
             except queue.Empty:
                 pass
 
             start_time = time.time()
 
-            for d in get_directories_to_be_uploaded("fghj"):
+            for d in get_directories_to_be_uploaded(config["upload"]["src_directory"]):
                 pass
 
-            # TODO: 3. load config in every loop
             # TODO: 4. loop over each directory and use the DirectoryUploadClient
             # TODO: 5. Figure out where ifgs lie on system
             # TODO: 6. Implement datalogger upload
