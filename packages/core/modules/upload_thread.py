@@ -1,8 +1,10 @@
 from datetime import datetime
+import hashlib
 import json
 import os
 import queue
 import shutil
+import invoke
 import paramiko
 import threading
 import time
@@ -58,6 +60,40 @@ class DirectoryUploadClient:
                 indent=4,
             )
         self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
+
+    def get_remote_directory_checksum(self):
+        local_script_path = os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
+        remote_script_path = (
+            self.config["upload"]["src_directory"] + "/get_upload_dir_checksum.py"
+        )
+        self.transfer_process.put(local_script_path, remote_script_path)
+
+        try:
+            self.connection.run("python3.10 --version", hide=True)
+        except invoke.exceptions.UnexpectedExit:
+            raise InvalidUploadState("python3.10 is not installed on the server")
+
+        try:
+            remote_command = f"python3.10 {remote_script_path} {self.src_dir_path}"
+            a: invoke.runners.Result = self.connection.run(remote_command, hide=True)
+            assert a.exited == 0
+            return a.stdout.strip()
+        except (invoke.exceptions.UnexpectedExit, AssertionError) as e:
+            raise InvalidUploadState(
+                f"could not execute remote command on server ({remote_command}): {e}"
+            )
+
+    def get_local_directory_checksum(self):
+        # calculate checksum over all files (sorted)
+        hasher = hashlib.md5()
+        for filename in sorted(self.meta_content["fileList"]):
+            filepath = os.path.join(self.src_dir_path, filename)
+            with open(filepath, "rb") as f:
+                hasher.update(f.read())
+
+        # output hashsum - with a status code of 0 the programs
+        # stdout is a checksum, otherwise it is a traceback
+        return hasher.hexdigest()
 
     def fetch_meta(self):
         if os.path.isfile(self.src_meta_path):
@@ -137,11 +173,9 @@ class DirectoryUploadClient:
         )
 
         if self.remove_src_after_upload:
-            # TODO: make sure all copying was successful - calculate
-            #       a checksum over all files in the fileList
-            local_checksum = "..."
-            remote_checksum = "......"
-            if local_checksum == remote_checksum:
+            remote_checksum = self.get_remote_directory_checksum()
+            local_checksum = self.get_local_directory_checksum()
+            if remote_checksum == local_checksum:
                 self.update_meta({"complete": True})
                 shutil.rmtree(self.src_dir_path)
                 logger.debug("successfully removed source")

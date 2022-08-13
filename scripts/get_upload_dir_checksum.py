@@ -26,5 +26,5 @@ for filename in sorted(file_list):
         hasher.update(f.read())
 
 # output hashsum - with a status code of 0 the programs
-# stdout is a checksome, otherwise it is a traceback
+# stdout is a checksum, otherwise it is a traceback
 print(hasher.hexdigest())
