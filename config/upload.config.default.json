@@ -1,0 +1,8 @@
+{
+    "is_active": false,
+    "host": "1.2.3.4",
+    "user": "...",
+    "password": "...",
+    "src_directory": "...",
+    "dst_directory": "..."
+}

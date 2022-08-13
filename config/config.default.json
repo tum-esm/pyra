@@ -48,5 +48,6 @@
         "min_sun_elevation": 0
     },
     "tum_plc": null,
-    "helios": null
+    "helios": null,
+    "upload": null
 }

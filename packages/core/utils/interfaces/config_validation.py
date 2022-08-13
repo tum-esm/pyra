@@ -1,12 +1,18 @@
 import json
 import os
 from typing import Tuple
+from xmlrpc.client import boolean
 import cerberus
 from packages.core.utils import Logger
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
+
+
+def _directory_path_exists(field, value, error):
+    if not os.path.isfile(value):
+        error(field, "Path has to be an existing file")
 
 
 def _file_path_exists(field, value, error):
@@ -27,162 +33,103 @@ DICT_SCHEMA = lambda s: {"type": "dict", "schema": s}
 NULLABLE_DICT_SCHEMA = lambda s: {"type": "dict", "schema": s, "nullable": True}
 
 
-class _Schemas:
-    time_dict = {
-        "type": "dict",
-        "schema": {
-            "hour": {"type": "integer", "min": 0, "max": 23},
-            "minute": {"type": "integer", "min": 0, "max": 59},
-            "second": {"type": "integer", "min": 0, "max": 59},
+def get_config_file_schema(strict: boolean):
+    filtered_spec = lambda spec: {k: v for k, v in spec.items() if (k == "type" or strict)}
+    specs = {
+        "ip": filtered_spec({"type": "string", "check_with": _is_valid_ip_adress}),
+        "file": filtered_spec({"type": "string", "check_with": _file_path_exists}),
+        "directory": filtered_spec({"type": "string", "check_with": _directory_path_exists}),
+        "time": {
+            "type": "dict",
+            "schema": {
+                "hour": filtered_spec({"type": "integer", "min": 0, "max": 23}),
+                "minute": filtered_spec({"type": "integer", "min": 0, "max": 59}),
+                "second": filtered_spec({"type": "integer", "min": 0, "max": 59}),
+            },
         },
     }
-    string = {"type": "string"}
-    boolean = {"type": "boolean"}
-    ip = {"type": "string", "check_with": _is_valid_ip_adress}
-    file = {"type": "string", "check_with": _file_path_exists}
-
-
-CONFIG_FILE_STRUCTURE_SCHEMA = {
-    "general": DICT_SCHEMA(
-        {
-            "seconds_per_core_interval": {"type": "number"},
-            "test_mode": {"type": "boolean"},
-            "station_id": {"type": "string"},
-            "min_sun_elevation": {"type": "number"},
-        }
-    ),
-    "opus": DICT_SCHEMA(
-        {
-            "em27_ip": {"type": "string"},
-            "executable_path": {"type": "string"},
-            "experiment_path": {"type": "string"},
-            "macro_path": {"type": "string"},
-            "username": {"type": "string"},
-            "password": {"type": "string"},
-        }
-    ),
-    "camtracker": DICT_SCHEMA(
-        {
-            "config_path": {"type": "string"},
-            "executable_path": {"type": "string"},
-            "learn_az_elev_path": {"type": "string"},
-            "sun_intensity_path": {"type": "string"},
-            "motor_offset_threshold": {"type": "number"},
-        }
-    ),
-    "error_email": DICT_SCHEMA(
-        {
-            "sender_address": {"type": "string"},
-            "sender_password": {"type": "string"},
-            "notify_recipients": {"type": "boolean"},
-            "recipients": {"type": "string"},
-        }
-    ),
-    "measurement_decision": DICT_SCHEMA(
-        {
-            "mode": {"type": "string"},
-            "manual_decision_result": {"type": "boolean"},
-            "cli_decision_result": {"type": "boolean"},
-        }
-    ),
-    "measurement_triggers": DICT_SCHEMA(
-        {
-            "consider_time": {"type": "boolean"},
-            "consider_sun_elevation": {"type": "boolean"},
-            "consider_helios": {"type": "boolean"},
-            "start_time": _Schemas.time_dict,
-            "stop_time": _Schemas.time_dict,
-            "min_sun_elevation": {"type": "number"},
-        }
-    ),
-    "tum_plc": NULLABLE_DICT_SCHEMA(
-        {
-            "ip": {"type": "string"},
-            "version": {"type": "integer"},
-            "controlled_by_user": {"type": "boolean"},
-        }
-    ),
-    "helios": NULLABLE_DICT_SCHEMA(
-        {
-            "camera_id": {"type": "integer"},
-            "evaluation_size": {"type": "integer"},
-            "seconds_per_interval": {"type": "number"},
-            "measurement_threshold": {"type": "number"},
-            "save_images": {"type": "boolean"},
-        }
-    ),
-}
-
-CONFIG_FILE_SCHEMA = {
-    "general": DICT_SCHEMA(
-        {
-            "seconds_per_core_interval": {"type": "number", "min": 5, "max": 600},
-            "test_mode": _Schemas.boolean,
-            "station_id": {"type": "string"},
-            "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
-        }
-    ),
-    "opus": DICT_SCHEMA(
-        {
-            "em27_ip": _Schemas.ip,
-            "executable_path": _Schemas.file,
-            "experiment_path": _Schemas.file,
-            "macro_path": _Schemas.file,
-            "username": {"type": "string"},
-            "password": {"type": "string"},
-        }
-    ),
-    "camtracker": DICT_SCHEMA(
-        {
-            "config_path": _Schemas.file,
-            "executable_path": _Schemas.file,
-            "learn_az_elev_path": _Schemas.file,
-            "sun_intensity_path": _Schemas.file,
-            "motor_offset_threshold": {"type": "number", "min": -360, "max": 360},
-        }
-    ),
-    "error_email": DICT_SCHEMA(
-        {
-            "sender_address": _Schemas.string,
-            "sender_password": _Schemas.string,
-            "notify_recipients": _Schemas.boolean,
-            "recipients": _Schemas.string,
-        }
-    ),
-    "measurement_decision": DICT_SCHEMA(
-        {
-            "mode": {"type": "string", "allowed": ["automatic", "manual", "cli"]},
-            "manual_decision_result": _Schemas.boolean,
-            "cli_decision_result": _Schemas.boolean,
-        }
-    ),
-    "measurement_triggers": DICT_SCHEMA(
-        {
-            "consider_time": _Schemas.boolean,
-            "consider_sun_elevation": _Schemas.boolean,
-            "consider_helios": _Schemas.boolean,
-            "start_time": _Schemas.time_dict,
-            "stop_time": _Schemas.time_dict,
-            "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
-        }
-    ),
-    "tum_plc": NULLABLE_DICT_SCHEMA(
-        {
-            "ip": _Schemas.ip,
-            "version": {"type": "integer", "allowed": [1, 2]},
-            "controlled_by_user": {"type": "boolean"},
-        }
-    ),
-    "helios": NULLABLE_DICT_SCHEMA(
-        {
-            "camera_id": {"type": "integer", "min": 0, "max": 999999},
-            "evaluation_size": {"type": "integer", "min": 1, "max": 100},
-            "seconds_per_interval": {"type": "number", "min": 5, "max": 600},
-            "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
-            "save_images": _Schemas.boolean,
-        }
-    ),
-}
+    return {
+        "general": DICT_SCHEMA(
+            {
+                "seconds_per_core_interval": filtered_spec(
+                    {"type": "number", "min": 5, "max": 600}
+                ),
+                "test_mode": {"type": "boolean"},
+                "station_id": {"type": "string"},
+                "min_sun_elevation": filtered_spec({"type": "number", "min": 0, "max": 90}),
+            }
+        ),
+        "opus": DICT_SCHEMA(
+            {
+                "em27_ip": specs["ip"],
+                "executable_path": specs["file"],
+                "experiment_path": specs["file"],
+                "macro_path": specs["file"],
+                "username": {"type": "string"},
+                "password": {"type": "string"},
+            }
+        ),
+        "camtracker": DICT_SCHEMA(
+            {
+                "config_path": specs["file"],
+                "executable_path": specs["file"],
+                "learn_az_elev_path": specs["file"],
+                "sun_intensity_path": specs["file"],
+                "motor_offset_threshold": {"type": "number", "min": -360, "max": 360},
+            }
+        ),
+        "error_email": DICT_SCHEMA(
+            {
+                "sender_address": {"type": "string"},
+                "sender_password": {"type": "string"},
+                "notify_recipients": {"type": "boolean"},
+                "recipients": {"type": "string"},
+            }
+        ),
+        "measurement_decision": DICT_SCHEMA(
+            {
+                "mode": {"type": "string", "allowed": ["automatic", "manual", "cli"]},
+                "manual_decision_result": {"type": "boolean"},
+                "cli_decision_result": {"type": "boolean"},
+            }
+        ),
+        "measurement_triggers": DICT_SCHEMA(
+            {
+                "consider_time": {"type": "boolean"},
+                "consider_sun_elevation": {"type": "boolean"},
+                "consider_helios": {"type": "boolean"},
+                "start_time": specs["time"],
+                "stop_time": specs["time"],
+                "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
+            }
+        ),
+        "tum_plc": NULLABLE_DICT_SCHEMA(
+            {
+                "ip": specs["ip"],
+                "version": {"type": "integer", "allowed": [1, 2]},
+                "controlled_by_user": {"type": "boolean"},
+            }
+        ),
+        "helios": NULLABLE_DICT_SCHEMA(
+            {
+                "camera_id": {"type": "integer", "min": 0, "max": 999999},
+                "evaluation_size": {"type": "integer", "min": 1, "max": 100},
+                "seconds_per_interval": {"type": "number", "min": 5, "max": 600},
+                "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
+                "save_images": {"type": "boolean"},
+            }
+        ),
+        "upload": NULLABLE_DICT_SCHEMA(
+            {
+                "is_active": {"type": "boolean"},
+                "host": specs["ip"],
+                "user": {"type": "string"},
+                "password": {"type": "string"},
+                "src_directory": specs["file"],
+                "dst_directory": {"type": "string"},
+            }
+        ),
+    }
 
 
 class CerberusException(Exception):
