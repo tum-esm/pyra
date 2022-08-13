@@ -35,7 +35,8 @@ export namespace customTypes {
         | 'error_email'
         | 'measurement_triggers'
         | 'tum_plc'
-        | 'helios';
+        | 'helios'
+        | 'upload';
     export type config = {
         general: {
             seconds_per_core_interval: number;
@@ -96,6 +97,7 @@ export namespace customTypes {
             password: string;
             src_directory: string;
             dst_directory: string;
+            remove_src_after_upload: boolean;
         };
     };
 
@@ -160,6 +162,7 @@ export namespace customTypes {
             password?: string;
             src_directory?: string;
             dst_directory?: string;
+            remove_src_after_upload?: boolean;
         };
     };
 

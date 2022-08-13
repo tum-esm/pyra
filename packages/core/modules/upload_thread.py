@@ -42,6 +42,7 @@ class DirectoryUploadClient:
         ), f"remote {config['upload']['dst_directory']} is not a directory"
 
         self.meta_content: dict | None = None
+        self.remove_src_after_upload: bool = config["upload"]["remove_src_after_upload"]
 
     def create_remote_dir(self):
         self.connection.run(f"mkdir {self.dst_dir_path}")
@@ -70,9 +71,10 @@ class DirectoryUploadClient:
             # TODO: log/report this exception and continue with other directories
             raise InvalidUploadState(str(e))
 
-    def update_meta(self, new_meta_content: dict):
+    def update_meta(self, new_meta_content_partial: dict):
         new_meta_content = {
-            **new_meta_content,
+            **self.meta_content,
+            **new_meta_content_partial,
             "lastModifiedTime": round(time.time(), 3),
         }
         with open(self.src_meta_path, "w") as f:
@@ -121,7 +123,6 @@ class DirectoryUploadClient:
             if upload_count % 25 == 0:
                 self.update_meta(
                     {
-                        **self.meta_content,
                         "fileList": [*(self.meta_content["fileList"]), *uploaded_files],
                     }
                 )
@@ -131,18 +132,29 @@ class DirectoryUploadClient:
         # "complete" to True. This indicates that
         self.update_meta(
             {
-                **self.meta_content,
-                "complete": True,
                 "fileList": [*(self.meta_content["fileList"]), *uploaded_files],
             }
         )
 
-        # TODO: make sure all copying was successful - maybe
-        #       use a checksum over a temporary tarball
-        # TODO: make the deletion of src optional (boolean in config)
-        # shutil.rmtree(self.src_dir_path)
+        if self.remove_src_after_upload:
+            # TODO: make sure all copying was successful - calculate
+            #       a checksum over all files in the fileList
+            local_checksum = "..."
+            remote_checksum = "......"
+            if local_checksum == remote_checksum:
+                self.update_meta({"complete": True})
+                shutil.rmtree(self.src_dir_path)
+                logger.debug("successfully removed source")
+            else:
+                raise InvalidUploadState(
+                    f"checksums do not match, local={local_checksum} "
+                    + f"remote={remote_checksum}"
+                )
+        else:
+            logger.debug("skipping removal of source")
 
-        # close ssh and scp connection
+    def teardown(self):
+        """close ssh and scp connection"""
         self.connection.close()
 
 
@@ -224,7 +236,7 @@ class UploadThread:
                 config["upload"]["src_directory"]
             ):
                 try:
-                    DirectoryUploadClient(src_date_string).run()
+                    client = DirectoryUploadClient(src_date_string).run()
                     logger.info(f"successfully uploaded data from {src_date_string}")
                 except TimeoutError as e:
                     logger.error(f"could not reach host (uploading {src_date_string}): {e}")
@@ -232,9 +244,7 @@ class UploadThread:
                     logger.error(f"failed to authenticate (uploading {src_date_string}): {e}")
                 except InvalidUploadState as e:
                     logger.error(f"stuck in invalid state (uploading {src_date_string}): {e}")
-
-            # TODO: 6. Figure out where ifgs lie on systems
-            # TODO: 7. Implement datalogger upload
+                client.teardown()
 
             elapsed_time = time.time() - start_time
             time_to_wait = 5 - elapsed_time

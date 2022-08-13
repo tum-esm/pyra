@@ -19,6 +19,7 @@ export default function ConfigSectionUpload() {
                 password: '...',
                 src_directory: '...',
                 dst_directory: '...',
+                remove_src_after_upload: false,
             },
         });
     }
@@ -103,6 +104,12 @@ export default function ConfigSectionUpload() {
                 oldValue={
                     centralSectionConfig !== null ? centralSectionConfig.dst_directory : 'null'
                 }
+            />
+            <configurationComponents.ConfigElementToggle
+                title="Remove Source After Upload"
+                value={localSectionConfig.remove_src_after_upload}
+                setValue={(v: boolean) => update({ upload: { remove_src_after_upload: v } })}
+                oldValue={centralSectionConfig?.remove_src_after_upload === true}
             />
         </>
     );

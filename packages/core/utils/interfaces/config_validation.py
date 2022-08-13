@@ -136,6 +136,7 @@ def get_config_file_schema(strict: boolean):
                 "password": {"type": "string"},
                 "src_directory": specs["file"],
                 "dst_directory": {"type": "string"},
+                "remove_src_after_upload": {"type": "boolean"},
             }
         ),
     }
