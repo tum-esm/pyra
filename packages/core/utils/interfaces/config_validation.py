@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Tuple
+from typing import Any, Tuple
 from xmlrpc.client import boolean
 import cerberus
 from packages.core.utils import Logger
@@ -34,29 +34,38 @@ NULLABLE_DICT_SCHEMA = lambda s: {"type": "dict", "schema": s, "nullable": True}
 
 
 def get_config_file_schema(strict: boolean):
-    filtered_spec = lambda spec: {k: v for k, v in spec.items() if (k == "type" or strict)}
+    """
+    Returns a cerberus schema for the config. With strict=false,
+    the checks whether file paths or directories exist will be
+    skipped. Strict-mode is used by the core, Loose-mode is used
+    by the CLI (which has to work even with invalid paths).
+    """
+
     specs = {
-        "ip": filtered_spec({"type": "string", "check_with": _is_valid_ip_adress}),
-        "file": filtered_spec({"type": "string", "check_with": _file_path_exists}),
-        "directory": filtered_spec({"type": "string", "check_with": _directory_path_exists}),
+        "ip": {"type": "string", "check_with": _is_valid_ip_adress},
+        "file": {"type": "string"},
+        "directory": {"type": "string"},
         "time": {
             "type": "dict",
             "schema": {
-                "hour": filtered_spec({"type": "integer", "min": 0, "max": 23}),
-                "minute": filtered_spec({"type": "integer", "min": 0, "max": 59}),
-                "second": filtered_spec({"type": "integer", "min": 0, "max": 59}),
+                "hour": {"type": "integer", "min": 0, "max": 23},
+                "minute": {"type": "integer", "min": 0, "max": 59},
+                "second": {"type": "integer", "min": 0, "max": 59},
             },
         },
     }
+
+    if strict:
+        specs["file"]["check_with"] = _file_path_exists
+        specs["directory"]["check_with"] = _directory_path_exists
+
     return {
         "general": DICT_SCHEMA(
             {
-                "seconds_per_core_interval": filtered_spec(
-                    {"type": "number", "min": 5, "max": 600}
-                ),
+                "seconds_per_core_interval": {"type": "number", "min": 5, "max": 600},
                 "test_mode": {"type": "boolean"},
                 "station_id": {"type": "string"},
-                "min_sun_elevation": filtered_spec({"type": "number", "min": 0, "max": 90}),
+                "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
             }
         ),
         "opus": DICT_SCHEMA(
@@ -148,7 +157,7 @@ class ConfigValidation:
         partial_validation: bool = False,
     ):
         validator = cerberus.Validator(
-            CONFIG_FILE_SCHEMA, require_all=(not partial_validation)
+            get_config_file_schema(strict=True), require_all=(not partial_validation)
         )
         assert validator.validate(content_object), validator.errors
         # Add assertions that cannot be done with cerberus here
@@ -160,7 +169,7 @@ class ConfigValidation:
         keys and the correct value-datatypes. Not validations
         like "file exists", etc.
         """
-        validator = cerberus.Validator(CONFIG_FILE_STRUCTURE_SCHEMA, require_all=True)
+        validator = cerberus.Validator(get_config_file_schema(strict=False), require_all=True)
         assert validator.validate(content_object), validator.errors
 
     @staticmethod
