@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import queue
 import threading
@@ -14,8 +15,26 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
 
-def get_directories_to_be_uploaded(ifg_src_dir):
-    pass
+def is_valid_date(date_string: str):
+    try:
+        day_ending = datetime.strptime(f"{date_string} 23:59:59", "%Y%m%d %H:%M:%S")
+        seconds_since_day_ending = (datetime.now() - day_ending).total_seconds()
+        assert seconds_since_day_ending >= 3600
+        return True
+    except (ValueError, AssertionError):
+        return False
+
+
+def get_directories_to_be_uploaded(ifg_src_path) -> list[str]:
+    if not os.path.isdir(ifg_src_path):
+        return []
+
+    return list(
+        filter(
+            lambda f: os.path.isdir(os.path.join(ifg_src_path, f)) and is_valid_date(f),
+            os.listdir(ifg_src_path),
+        )
+    )
 
 
 class UploadThread:
@@ -60,10 +79,11 @@ class UploadThread:
 
             start_time = time.time()
 
-            # TODO: 1. add upload stuff to config
-            # TODO: 2. determine directories to be uploaded
-            # TODO: 3. loop over each directory and use the DirectoryUploadClient
-            # TODO: 4. make the client use threads -> still process one directory at a time but upload individual files in parallel
+            for d in get_directories_to_be_uploaded("fghj"):
+                pass
+
+            # TODO: 3. load config in every loop
+            # TODO: 4. loop over each directory and use the DirectoryUploadClient
             # TODO: 5. Figure out where ifgs lie on system
             # TODO: 6. Implement datalogger upload
 
