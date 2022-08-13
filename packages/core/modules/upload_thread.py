@@ -9,6 +9,7 @@ import paramiko
 import threading
 import time
 import fabric
+import re
 from packages.core.utils import (
     ConfigInterface,
     Logger,
@@ -25,7 +26,7 @@ class InvalidUploadState(Exception):
 
 
 class DirectoryUploadClient:
-    def __init__(self, dirname: str, config: dict):
+    def __init__(self, date_string: str, config: dict):
         self.connection = fabric.connection.Connection(
             f"{config['upload']['user']}@{config['upload']['host']}",
             connect_kwargs={"password": config["upload"]["password"]},
@@ -33,11 +34,12 @@ class DirectoryUploadClient:
         )
         self.transfer_process = fabric.transfer.Transfer(self.connection)
 
-        self.src_dir_path = os.path.join(config["upload"]["src_directory"], dirname)
+        self.date_string
+        self.src_dir_path = os.path.join(config["upload"]["src_directory"], date_string)
         self.src_meta_path = os.path.join(self.src_dir_path, "upload-meta.json")
         assert os.path.isdir(self.src_dir_path), f"{self.src_dir_path} is not a directory"
 
-        self.dst_dir_path = f"{config['upload']['dst_directory']}/{dirname}"
+        self.dst_dir_path = f"{config['upload']['dst_directory']}/{date_string}"
         self.dst_meta_path = f"{self.dst_dir_path}/upload-meta.json"
         assert self.transfer_process.is_remote_dir(
             config["upload"]["dst_directory"]
@@ -125,11 +127,20 @@ class DirectoryUploadClient:
         self.fetch_meta()
         assert self.meta_content is not None
 
-        # determine files missing in dst
-        src_file_set = set(os.listdir(self.src_dir_path))
-        src_file_set.remove("upload-meta.json")
+        # determine files present in src and dst directory
+        ifg_file_patter = re.compile("^.*" + self.date_string + ".*\.\d{4}$")
+        src_file_set = set(
+            [f for f in os.listdir(self.src_dir_path) if ifg_file_patter.match(f)]
+        )
         dst_file_set = set(self.meta_content["fileList"])
+
+        # determine file differences between src and dst
         files_missing_in_dst = src_file_set.difference(dst_file_set)
+        files_missing_in_src = dst_file_set.difference(src_file_set)
+        if len(files_missing_in_src) > 0:
+            raise InvalidUploadState(
+                f"files present in dst are missing in src: {files_missing_in_src}"
+            )
 
         # if there are files that have not been uploaded,
         # assert that the remote meta also indicates an
