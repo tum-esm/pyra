@@ -242,11 +242,9 @@ class HeliosThread:
 
         logger.info("Waiting for thread to terminate")
         self.__thread.join()
-
-        logger.debug('Setting state to "null"')
         StateInterface.update({"helios_indicates_good_conditions": None})
-
         self.__thread = None
+        logger.info("Stopped the thread")
 
     @staticmethod
     def main(shared_queue: queue.Queue, infinite_loop: bool = True, headless: bool = False):

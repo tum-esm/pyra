@@ -11,6 +11,43 @@ from packages.core.utils import (
 logger = Logger(origin="main")
 
 
+def toggle_thread_states(
+    config: dict,
+    helios_thread_instance: modules.helios_thread.HeliosThread,
+    upload_thread_instance: modules.upload_thread.UploadThread,
+):
+    helios_should_be_running = all(
+        [
+            not config["general"]["test_mode"],
+            config["helios"] is not None,
+            config["measurement_triggers"]["consider_helios"],
+        ]
+    )
+    upload_should_be_running = all(
+        [
+            not config["general"]["test_mode"],
+            config["upload"] is not None,
+            config["upload"]["is_active"],
+        ]
+    )
+
+    if config["general"]["test_mode"]:
+        logger.info("pyra-core in test mode")
+        logger.debug("Skipping HeliosThread and UploadThread in test mode")
+
+    # Start/stop HeliosThread
+    if helios_should_be_running and not helios_thread_instance.is_running():
+        helios_thread_instance.start()
+    if not helios_should_be_running and helios_thread_instance.is_running():
+        helios_thread_instance.stop()
+
+    # Start/stop UploadThread
+    if upload_should_be_running and not upload_thread_instance.is_running():
+        upload_thread_instance.start()
+    if not upload_should_be_running and upload_thread_instance.is_running():
+        upload_thread_instance.stop()
+
+
 def run():
     StateInterface.initialize()
     logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
@@ -32,6 +69,7 @@ def run():
         modules.system_checks.SystemChecks(_CONFIG),
     ]
     helios_thread_instance = modules.helios_thread.HeliosThread()
+    upload_thread_instance = modules.upload_thread.UploadThread()
 
     current_exceptions = StateInterface.read(persistent=True)["current_exceptions"]
 
@@ -46,19 +84,11 @@ def run():
             time.sleep(10)
             continue
 
-        if not _CONFIG["general"]["test_mode"]:
-            # Start or stop Helios in a thread
-            helios_should_be_running = (
-                _CONFIG["helios"] is not None
-                and _CONFIG["measurement_triggers"]["consider_helios"]
-            )
-            if helios_should_be_running and not helios_thread_instance.is_running():
-                helios_thread_instance.start()
-            if not helios_should_be_running and helios_thread_instance.is_running():
-                helios_thread_instance.stop()
-        else:
+        toggle_thread_states(_CONFIG, helios_thread_instance, upload_thread_instance)
+
+        if _CONFIG["general"]["test_mode"]:
             logger.info("pyra-core in test mode")
-            logger.debug("Skipping HeliosThread in test mode")
+            logger.debug("Skipping HeliosThread and UploadThread in test mode")
 
         new_exception = None
         try:
