@@ -8,8 +8,9 @@ import ConfigSectionErrorEmail from './sections/config-section-error-email';
 import ConfigSectionCamtracker from './sections/config-section-camtracker';
 import ConfigSectionMeasurementTriggers from './sections/config-section-measurement-triggers';
 import ConfigSectionOpus from './sections/config-section-opus';
-import ConfigSectionHelios from './sections/config-section-helios';
 import ConfigSectionTumPlc from './sections/config-section-tum-plc';
+import ConfigSectionHelios from './sections/config-section-helios';
+import ConfigSectionUpload from './sections/config-section-upload';
 
 export default {
     LabeledRow,
@@ -24,4 +25,5 @@ export default {
     ConfigSectionOpus,
     ConfigSectionTumPlc,
     ConfigSectionHelios,
+    ConfigSectionUpload,
 };

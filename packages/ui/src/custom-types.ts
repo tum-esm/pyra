@@ -89,6 +89,14 @@ export namespace customTypes {
             measurement_threshold: number;
             save_images: boolean;
         };
+        upload: null | {
+            is_active: boolean;
+            host: string;
+            user: string;
+            password: string;
+            src_directory: string;
+            dst_directory: string;
+        };
     };
 
     // I have not found a more elegant way yet to generate a partialConfig type
@@ -144,6 +152,14 @@ export namespace customTypes {
             seconds_per_interval?: number;
             measurement_threshold?: number;
             save_images?: boolean;
+        };
+        upload?: null | {
+            is_active?: boolean;
+            host?: string;
+            user?: string;
+            password?: string;
+            src_directory?: string;
+            dst_directory?: string;
         };
     };
 

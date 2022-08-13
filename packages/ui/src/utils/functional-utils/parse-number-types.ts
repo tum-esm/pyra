@@ -53,5 +53,6 @@ export default function parseNumberTypes(newConfig: customTypes.config): customT
                       ),
                       save_images: newConfig.helios.save_images,
                   },
+        upload: newConfig.upload,
     };
 }
