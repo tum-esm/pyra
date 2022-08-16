@@ -1,4 +1,4 @@
-from packages.core.modules.helios_thread import HeliosThread
+from packages.core.threads.helios_thread import HeliosThread
 import time
 
 

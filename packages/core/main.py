@@ -1,6 +1,6 @@
 import os
 import time
-from packages.core import modules
+from packages.core import modules, threads
 from packages.core.utils import (
     ConfigInterface,
     StateInterface,
@@ -12,7 +12,7 @@ logger = Logger(origin="main")
 
 # TODO: document
 def toggle_thread_states(
-    config: dict, helios_thread_instance: modules.helios_thread.HeliosThread
+    config: dict, helios_thread_instance: threads.helios_thread.HeliosThread
 ):
     helios_should_be_running = all(
         [
@@ -82,8 +82,8 @@ def run():
         modules.opus_measurement.OpusMeasurement(_CONFIG),
         modules.system_checks.SystemChecks(_CONFIG),
     ]
-    helios_thread_instance = modules.helios_thread.HeliosThread()
-    upload_thread_instance = modules.upload_thread.UploadThread()
+    helios_thread_instance = threads.helios_thread.HeliosThread()
+    upload_thread_instance = threads.upload_thread.UploadThread()
 
     current_exceptions = StateInterface.read(persistent=True)["current_exceptions"]
 
