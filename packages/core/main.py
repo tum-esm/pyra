@@ -10,33 +10,46 @@ from packages.core.utils import (
 
 logger = Logger(origin="main")
 
-# TODO: document
+
 def update_exception_state(
     config: dict, current_exceptions: list[str], new_exception: Exception
 ):
-    try:
-        new_current_exceptions = [*current_exceptions]
+    """
+    Take a list of current_exceptions (all exceptions that are
+    present from the last mainloop iteration, possibly empty) and
+    a new_exception (the one that happened in this loop, possibly
+    None).
 
+    If the new_exception is None, all exceptions have been resolved
+    resolved: send a "resolved" email in case the current_exceptions
+    was not empty yet.
+
+    If the new_exception is not None, if it is not already in the
+    list of current_exceptions: append it to that list and send a
+    "new error occured" email.
+    """
+    try:
+        updated_current_exceptions = [*current_exceptions]
         if new_exception is not None:
             if type(new_exception).__name__ not in current_exceptions:
-                new_current_exceptions.append(type(new_exception).__name__)
+                updated_current_exceptions.append(type(new_exception).__name__)
                 ExceptionEmailClient.handle_occured_exception(config, new_exception)
                 if len(current_exceptions) == 0:
                     Logger.log_activity_event("error-occured")
         else:
             if len(current_exceptions) > 0:
-                new_current_exceptions = []
+                updated_current_exceptions = []
                 ExceptionEmailClient.handle_resolved_exception(config)
                 logger.info(f"All exceptions have been resolved.")
                 Logger.log_activity_event("errors-resolved")
 
         # if no errors until now
-        current_exceptions = [*new_current_exceptions]
         StateInterface.update({"current_exceptions": current_exceptions}, persistent=True)
+        return updated_current_exceptions
+
     except Exception as e:
         logger.exception(e)
-
-    return current_exceptions
+        return current_exceptions
 
 
 def run():
