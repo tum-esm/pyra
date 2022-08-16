@@ -48,6 +48,34 @@ def toggle_thread_states(
         upload_thread_instance.stop()
 
 
+def update_exception_state(
+    config: dict, current_exceptions: list[str], new_exception: Exception
+):
+    try:
+        new_current_exceptions = [*current_exceptions]
+
+        if new_exception is not None:
+            if type(new_exception).__name__ not in current_exceptions:
+                new_current_exceptions.append(type(new_exception).__name__)
+                ExceptionEmailClient.handle_occured_exception(config, new_exception)
+                if len(current_exceptions) == 0:
+                    Logger.log_activity_event("error-occured")
+        else:
+            if len(current_exceptions) > 0:
+                new_current_exceptions = []
+                ExceptionEmailClient.handle_resolved_exception(config)
+                logger.info(f"All exceptions have been resolved.")
+                Logger.log_activity_event("errors-resolved")
+
+        # if no errors until now
+        current_exceptions = [*new_current_exceptions]
+        StateInterface.update({"current_exceptions": current_exceptions}, persistent=True)
+    except Exception as e:
+        logger.exception(e)
+
+    return current_exceptions
+
+
 def run():
     StateInterface.initialize()
     logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
@@ -98,31 +126,13 @@ def run():
             new_exception = e
             logger.exception(new_exception)
 
-        try:
-            new_current_exceptions = [*current_exceptions]
-
-            if new_exception is not None:
-                if type(new_exception).__name__ not in current_exceptions:
-                    new_current_exceptions.append(type(new_exception).__name__)
-                    ExceptionEmailClient.handle_occured_exception(_CONFIG, new_exception)
-                    if len(current_exceptions) == 0:
-                        Logger.log_activity_event("error-occured")
-            else:
-                if len(current_exceptions) > 0:
-                    new_current_exceptions = []
-                    ExceptionEmailClient.handle_resolved_exception(_CONFIG)
-                    logger.info(f"All exceptions have been resolved.")
-                    Logger.log_activity_event("errors-resolved")
-
-            # if no errors until now
-            current_exceptions = [*new_current_exceptions]
-            StateInterface.update({"current_exceptions": current_exceptions}, persistent=True)
-        except Exception as e:
-            logger.exception(e)
-
-        logger.info("Ending iteration")
+        # update the list of currently present exceptions
+        # send error emails on new exceptions, send resolved
+        # emails when no errors are present anymore
+        current_exceptions = update_exception_state(_CONFIG, current_exceptions, new_exception)
 
         # wait rest of loop time
+        logger.info("Ending iteration")
         elapsed_time = time.time() - start_time
         time_to_wait = _CONFIG["general"]["seconds_per_core_interval"] - elapsed_time
         if time_to_wait > 0:
