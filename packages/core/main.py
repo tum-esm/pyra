@@ -10,7 +10,7 @@ from packages.core.utils import (
 
 logger = Logger(origin="main")
 
-# TODO: document
+# TODO: remove
 def toggle_thread_states(
     config: dict, helios_thread_instance: threads.helios_thread.HeliosThread
 ):
@@ -99,9 +99,8 @@ def run():
             continue
 
         # TODO: add comment
+        helios_thread_instance.update_thread_state()
         upload_thread_instance.update_thread_state()
-
-        toggle_thread_states(_CONFIG, helios_thread_instance)
 
         if _CONFIG["general"]["test_mode"]:
             logger.info("pyra-core in test mode")

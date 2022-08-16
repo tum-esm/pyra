@@ -13,6 +13,7 @@ from packages.core.utils import (
     Astronomy,
     ImageProcessing,
 )
+from packages.core.threads.abstract_thread_base import AbstractThreadBase
 
 logger = Logger(origin="helios")
 
@@ -216,38 +217,22 @@ class _Helios:
         return _Helios.determine_frame_status(frame, save_image)
 
 
-class HeliosThread:
+class HeliosThread(AbstractThreadBase):
     def __init__(self):
-        self.__thread = None
-        self.__shared_queue = queue.Queue()
+        super().__init__(logger)
 
-    def start(self):
-        """
-        Start a thread using the multiprocessing library
-        """
-        logger.info("Starting thread")
-        self.__thread = threading.Thread(target=HeliosThread.main, args=(self.__shared_queue,))
-        self.__thread.start()
+    # FIXME: update this logic (the code has just been copied from upload)
+    def should_be_running(self, config: dict) -> bool:
+        """Should the thread be running? (based on config.upload)"""
+        return (
+            (not config["general"]["test_mode"])
+            and ("upload" in config.keys())
+            and (config["upload"]["is_active"])
+        )
 
-    def is_running(self):
-        return self.__thread is not None
-
-    def stop(self):
-        """
-        Stop the thread and set the state to 'null'
-        """
-
-        logger.info("Sending termination signal")
-        self.__shared_queue.put("stop")
-
-        logger.info("Waiting for thread to terminate")
-        self.__thread.join()
-        StateInterface.update({"helios_indicates_good_conditions": None})
-        self.__thread = None
-        logger.info("Stopped the thread")
-
-    @staticmethod
-    def main(shared_queue: queue.Queue, infinite_loop: bool = True, headless: bool = False):
+    # TODO: Update tests/headless mode to comply with new class structure
+    def main(self, infinite_loop: bool = True, headless: bool = False):
+        """Main entrypoint of the thread"""
         global logger
         global _CONFIG
 
@@ -263,12 +248,8 @@ class HeliosThread:
 
         while True:
             # Check for termination
-            try:
-                if shared_queue.get(block=False) == "stop":
-                    _Helios.deinit()
-                    break
-            except queue.Empty:
-                pass
+            if not self.should_be_running(_CONFIG):
+                return
 
             try:
                 start_time = time.time()
