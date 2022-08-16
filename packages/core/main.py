@@ -10,7 +10,7 @@ from packages.core.utils import (
 
 logger = Logger(origin="main")
 
-
+# TODO: document
 def toggle_thread_states(
     config: dict,
     helios_thread_instance: modules.helios_thread.HeliosThread,
@@ -48,6 +48,7 @@ def toggle_thread_states(
         upload_thread_instance.stop()
 
 
+# TODO: document
 def update_exception_state(
     config: dict, current_exceptions: list[str], new_exception: Exception
 ):
@@ -112,6 +113,7 @@ def run():
             time.sleep(10)
             continue
 
+        # TODO: add comment
         toggle_thread_states(_CONFIG, helios_thread_instance, upload_thread_instance)
 
         if _CONFIG["general"]["test_mode"]:

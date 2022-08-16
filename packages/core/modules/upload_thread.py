@@ -34,7 +34,7 @@ class DirectoryUploadClient:
         )
         self.transfer_process = fabric.transfer.Transfer(self.connection)
 
-        self.date_string
+        self.date_string = date_string
         self.src_dir_path = os.path.join(config["upload"]["src_directory"], date_string)
         self.src_meta_path = os.path.join(self.src_dir_path, "upload-meta.json")
         assert os.path.isdir(self.src_dir_path), f"{self.src_dir_path} is not a directory"
@@ -225,6 +225,10 @@ def get_directories_to_be_uploaded(ifg_src_path) -> list[str]:
     )
 
 
+# TODO: draw architecture of the upload
+# TODO: simplify the whole file!
+
+
 class UploadThread:
     def __init__(self):
         self.__thread = None
@@ -265,6 +269,8 @@ class UploadThread:
             config = ConfigInterface.read()
 
             # Check for termination
+            # FIXME: right now, this checks seems to be in multiple places
+            # TODO: extract this into a function
             try:
                 if (
                     (config["upload"] is None)
@@ -277,6 +283,7 @@ class UploadThread:
 
             start_time = time.time()
 
+            # TODO: check for termination between loop iterations
             for src_date_string in get_directories_to_be_uploaded(
                 config["upload"]["src_directory"]
             ):
