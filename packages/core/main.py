@@ -40,25 +40,39 @@ def update_exception_state(
 
 
 def run():
+    """
+    The mainloop of PYRA Core. This function will loop infinitely.
+    It loads the config file, validates it runs every module one by
+    one, and possibly restarts the upload- and helios-thread.
+    """
     StateInterface.initialize()
     logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
 
+    # Loop until a valid config has been found. Without
+    # an invalid config, the mainloop cannot initialize
     while True:
         try:
-            _CONFIG = ConfigInterface.read()
+            config = ConfigInterface.read()
             break
         except AssertionError as e:
             logger.error(f"{e}")
             logger.error(f"Invalid config, waiting 10 seconds")
             time.sleep(10)
 
-    _modules = [
-        modules.measurement_conditions.MeasurementConditions(_CONFIG),
-        modules.enclosure_control.EnclosureControl(_CONFIG),
-        modules.sun_tracking.SunTracking(_CONFIG),
-        modules.opus_measurement.OpusMeasurement(_CONFIG),
-        modules.system_checks.SystemChecks(_CONFIG),
+    # these modules will be executed one by one in each
+    # mainloop iteration
+    mainloop_modules = [
+        modules.measurement_conditions.MeasurementConditions(config),
+        modules.enclosure_control.EnclosureControl(config),
+        modules.sun_tracking.SunTracking(config),
+        modules.opus_measurement.OpusMeasurement(config),
+        modules.system_checks.SystemChecks(config),
     ]
+
+    # these thread classes always exist and start their
+    # dedicated mainloop in a parallel thread if the
+    # respective service is configured. The threads itself
+    # load the config periodically and stop themselves
     helios_thread_instance = threads.helios_thread.HeliosThread()
     upload_thread_instance = threads.upload_thread.UploadThread()
 
@@ -68,8 +82,9 @@ def run():
         start_time = time.time()
         logger.info("Starting iteration")
 
+        # load config at the beginning of each mainloop iteration
         try:
-            _CONFIG = ConfigInterface.read()
+            config = ConfigInterface.read()
         except AssertionError as e:
             logger.error(f"Invalid config, waiting 10 seconds")
             time.sleep(10)
@@ -80,14 +95,17 @@ def run():
         helios_thread_instance.update_thread_state()
         upload_thread_instance.update_thread_state()
 
-        if _CONFIG["general"]["test_mode"]:
+        if config["general"]["test_mode"]:
             logger.info("pyra-core in test mode")
             logger.debug("Skipping HeliosThread and UploadThread in test mode")
 
+        # loop over every module, when one of the modules
+        # encounters an exception, this inner loop stops
+        # and the exception will be processed (logs, emails)
         new_exception = None
         try:
-            for module in _modules:
-                module.run(_CONFIG)
+            for m in mainloop_modules:
+                m.run(config)
         except Exception as e:
             new_exception = e
             logger.exception(new_exception)
@@ -95,12 +113,12 @@ def run():
         # update the list of currently present exceptions
         # send error emails on new exceptions, send resolved
         # emails when no errors are present anymore
-        current_exceptions = update_exception_state(_CONFIG, current_exceptions, new_exception)
+        current_exceptions = update_exception_state(config, current_exceptions, new_exception)
 
         # wait rest of loop time
         logger.info("Ending iteration")
         elapsed_time = time.time() - start_time
-        time_to_wait = _CONFIG["general"]["seconds_per_core_interval"] - elapsed_time
+        time_to_wait = config["general"]["seconds_per_core_interval"] - elapsed_time
         if time_to_wait > 0:
             logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
             time.sleep(time_to_wait)
