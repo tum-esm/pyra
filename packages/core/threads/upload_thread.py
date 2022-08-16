@@ -5,7 +5,6 @@ import os
 import shutil
 import invoke
 import paramiko
-import threading
 import time
 import fabric
 import re
@@ -13,6 +12,7 @@ from packages.core.utils import (
     ConfigInterface,
     Logger,
 )
+from packages.core.threads.abstract_thread_base import AbstractThreadBase
 
 logger = Logger(origin="upload")
 
@@ -228,29 +228,11 @@ def get_directories_to_be_uploaded(ifg_src_path) -> list[str]:
 # TODO: simplify the whole file!
 
 
-class UploadThread:
+class UploadThread(AbstractThreadBase):
     def __init__(self):
-        self.__thread = None
+        super().__init__(logger)
 
-    def update_thread_state(self, config: dict):
-        """
-        Make sure that the upload loop is (not) running, based on config.upload
-        """
-        is_running = self.__thread.is_alive()
-        should_be_running = UploadThread.should_be_running(config)
-
-        if should_be_running and (not is_running):
-            logger.info("Starting the thread")
-            self.__thread = threading.Thread(target=UploadThread.main)
-            self.__thread.start()
-
-        if (self.__thread is not None) and (not is_running):
-            logger.info("Thread has stopped")
-            self.__thread.join()
-            self.__thread = None
-
-    @staticmethod
-    def should_be_running(config: dict) -> bool:
+    def should_be_running(self, config: dict) -> bool:
         """Should the thread be running? (based on config.upload)"""
         return (
             (not config["general"]["test_mode"])
@@ -258,16 +240,13 @@ class UploadThread:
             and (config["upload"]["is_active"])
         )
 
-    @staticmethod
-    def main():
-        """
-        Main entry point for the upload process
-        """
+    def main(self):
+        """Main entrypoint of the thread"""
         while True:
             config = ConfigInterface.read()
 
             # Check for termination
-            if not UploadThread.should_be_running(config):
+            if not self.should_be_running(config):
                 return
 
             # TODO: check for termination between loop iterations
