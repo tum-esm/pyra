@@ -232,56 +232,44 @@ def get_directories_to_be_uploaded(ifg_src_path) -> list[str]:
 class UploadThread:
     def __init__(self):
         self.__thread = None
-        self.__shared_queue = None
 
-    def start(self):
+    def update_thread_state(self, config: dict):
         """
-        Start the thread using the threading library
+        Make sure that the upload loop is (not) running, based on config.upload
         """
-        logger.info("Starting thread")
-        self.__shared_queue = queue.Queue()
-        self.__thread = threading.Thread(target=UploadThread.main, args=(self.__shared_queue,))
-        self.__thread.start()
+        is_running = self.__thread.is_alive()
+        should_be_running = UploadThread.should_be_running(config)
 
-    def is_running(self):
-        return self.__thread is not None
+        if should_be_running and (not is_running):
+            logger.info("Starting the thread")
+            self.__thread = threading.Thread(target=UploadThread.main)
+            self.__thread.start()
 
-    def stop(self):
-        """
-        Send a stop-signal to the thread and wait for its termination
-        """
-
-        assert self.__shared_queue is not None
-
-        logger.info("Sending termination signal")
-        self.__shared_queue.put("stop")
-
-        logger.info("Waiting for thread to terminate")
-        self.__thread.join()
-        self.__thread = None
-        self.__shared_queue = None
-
-        logger.info("Stopped the thread")
+        if (self.__thread is not None) and (not is_running):
+            logger.info("Thread has stopped")
+            self.__thread.join()
+            self.__thread = None
 
     @staticmethod
-    def main(shared_queue: queue.Queue):
+    def should_be_running(config: dict) -> bool:
+        """Should the thread be running? (based on config.upload)"""
+        return (
+            (not config["general"]["test_mode"])
+            and ("upload" in config.keys())
+            and (config["upload"]["is_active"])
+        )
+
+    @staticmethod
+    def main():
+        """
+        Main entry point for the upload process
+        """
         while True:
             config = ConfigInterface.read()
 
             # Check for termination
-            # FIXME: right now, this checks seems to be in multiple places
-            # TODO: extract this into a function
-            try:
-                if (
-                    (config["upload"] is None)
-                    or (not config["upload"]["is_active"])
-                    or (shared_queue.get(block=False) == "stop")
-                ):
-                    break
-            except queue.Empty:
-                pass
-
-            start_time = time.time()
+            if not UploadThread.should_be_running(config):
+                return
 
             # TODO: check for termination between loop iterations
             for src_date_string in get_directories_to_be_uploaded(
@@ -298,7 +286,4 @@ class UploadThread:
                     logger.error(f"stuck in invalid state (uploading {src_date_string}): {e}")
                 client.teardown()
 
-            elapsed_time = time.time() - start_time
-            time_to_wait = 5 - elapsed_time
-            if time_to_wait > 0:
-                time.sleep(time_to_wait)
+            time.sleep(60)

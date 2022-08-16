@@ -12,22 +12,13 @@ logger = Logger(origin="main")
 
 # TODO: document
 def toggle_thread_states(
-    config: dict,
-    helios_thread_instance: modules.helios_thread.HeliosThread,
-    upload_thread_instance: modules.upload_thread.UploadThread,
+    config: dict, helios_thread_instance: modules.helios_thread.HeliosThread
 ):
     helios_should_be_running = all(
         [
             not config["general"]["test_mode"],
             config["helios"] is not None,
             config["measurement_triggers"]["consider_helios"],
-        ]
-    )
-    upload_should_be_running = all(
-        [
-            not config["general"]["test_mode"],
-            config["upload"] is not None,
-            config["upload"]["is_active"],
         ]
     )
 
@@ -40,12 +31,6 @@ def toggle_thread_states(
         helios_thread_instance.start()
     if not helios_should_be_running and helios_thread_instance.is_running():
         helios_thread_instance.stop()
-
-    # Start/stop UploadThread
-    if upload_should_be_running and not upload_thread_instance.is_running():
-        upload_thread_instance.start()
-    if not upload_should_be_running and upload_thread_instance.is_running():
-        upload_thread_instance.stop()
 
 
 # TODO: document
@@ -114,7 +99,9 @@ def run():
             continue
 
         # TODO: add comment
-        toggle_thread_states(_CONFIG, helios_thread_instance, upload_thread_instance)
+        upload_thread_instance.update_thread_state()
+
+        toggle_thread_states(_CONFIG, helios_thread_instance)
 
         if _CONFIG["general"]["test_mode"]:
             logger.info("pyra-core in test mode")
