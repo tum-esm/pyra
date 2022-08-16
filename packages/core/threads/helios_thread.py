@@ -221,13 +221,12 @@ class HeliosThread(AbstractThreadBase):
     def __init__(self):
         super().__init__(logger)
 
-    # FIXME: update this logic (the code has just been copied from upload)
     def should_be_running(self, config: dict) -> bool:
         """Should the thread be running? (based on config.upload)"""
         return (
             (not config["general"]["test_mode"])
-            and ("upload" in config.keys())
-            and (config["upload"]["is_active"])
+            and (config["helios"] is not None)
+            and (config["measurement_triggers"]["consider_helios"])
         )
 
     # TODO: Update tests/headless mode to comply with new class structure

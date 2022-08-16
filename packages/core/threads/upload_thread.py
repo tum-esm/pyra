@@ -236,7 +236,7 @@ class UploadThread(AbstractThreadBase):
         """Should the thread be running? (based on config.upload)"""
         return (
             (not config["general"]["test_mode"])
-            and ("upload" in config.keys())
+            and (config["upload"] is not None)
             and (config["upload"]["is_active"])
         )
 

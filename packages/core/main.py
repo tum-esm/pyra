@@ -10,29 +10,6 @@ from packages.core.utils import (
 
 logger = Logger(origin="main")
 
-# TODO: remove
-def toggle_thread_states(
-    config: dict, helios_thread_instance: threads.helios_thread.HeliosThread
-):
-    helios_should_be_running = all(
-        [
-            not config["general"]["test_mode"],
-            config["helios"] is not None,
-            config["measurement_triggers"]["consider_helios"],
-        ]
-    )
-
-    if config["general"]["test_mode"]:
-        logger.info("pyra-core in test mode")
-        logger.debug("Skipping HeliosThread and UploadThread in test mode")
-
-    # Start/stop HeliosThread
-    if helios_should_be_running and not helios_thread_instance.is_running():
-        helios_thread_instance.start()
-    if not helios_should_be_running and helios_thread_instance.is_running():
-        helios_thread_instance.stop()
-
-
 # TODO: document
 def update_exception_state(
     config: dict, current_exceptions: list[str], new_exception: Exception
@@ -98,7 +75,8 @@ def run():
             time.sleep(10)
             continue
 
-        # TODO: add comment
+        # check whether the two threads are (not) running
+        # possibly (re)start each thread
         helios_thread_instance.update_thread_state()
         upload_thread_instance.update_thread_state()
 
