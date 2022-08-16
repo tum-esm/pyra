@@ -269,7 +269,7 @@ class DirectoryUploadClient:
 
 class UploadThread(AbstractThreadBase):
     """
-    Thread for uloading all interferograms from a specific
+    Thread for uploading all interferograms from a specific
     directory to a server via SSH. The local files will only
     be removed (optional) if the files on the server generate
     the same MD5 checksum as the local files.

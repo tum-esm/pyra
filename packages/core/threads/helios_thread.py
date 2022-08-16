@@ -1,7 +1,5 @@
 from datetime import datetime
 import os
-import queue
-import threading
 import time
 import cv2 as cv
 import numpy as np
@@ -71,12 +69,20 @@ class _Helios:
 
     @staticmethod
     def deinit():
+        """
+        Possibly release the camera (linked over cv2.VideoCapture)
+        """
         if _Helios.cam is not None:
             _Helios.cam.release()
             _Helios.cam = None
 
     @staticmethod
     def get_available_exposures() -> list[int]:
+        """
+        Loop over every integer in [-20, ..., +20] and try to set
+        the camera exposure to each value. Return a list of integers
+        that the camera accepted as an exposure setting.
+        """
         possible_values = []
         for exposure in range(-20, 20):
             _Helios.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
@@ -95,9 +101,11 @@ class _Helios:
         width: int = None,
         height: int = None,
     ):
-        # which settings are available depends on the camera model.
-        # however, this function will throw an AssertionError, when
-        # the value could not be changed
+        """
+        Update the settings of the connected camera. Which settings are
+        available depends on the camera model. However, this function will
+        throw an AssertionError, when the value could not be changed.
+        """
         properties = {
             "width": (cv.CAP_PROP_FRAME_WIDTH, width),
             "height": (cv.CAP_PROP_FRAME_HEIGHT, height),
@@ -118,12 +126,20 @@ class _Helios:
                     ), f"could not set {property_name} to {value}, value is still at {new_value}"
 
         # throw away some images after changing settings. I don't know
-        # why this is necessary, but it resolved a lot of issues
+        # why this is necessary, but it resolves a lot of issues
         for _ in range(2):
             _Helios.cam.read()
 
     @staticmethod
     def take_image(retries: int = 10, trow_away_white_images: bool = True) -> cv.Mat:
+        """
+        Take an image using the initialized camera. Raises an
+        AssertionError if camera has not been set up.
+
+        Retries up to n times (camera can say "not possible")
+        and throws away all mostly white images (overexposed)
+        except when specified not to (used in autoexposure).
+        """
         assert _Helios.cam is not None, "camera is not initialized yet"
         if not _Helios.cam.isOpened():
             raise CameraError("camera is not open")
@@ -139,8 +155,10 @@ class _Helios:
     @staticmethod
     def adjust_exposure():
         """
-        set exposure to the value where the overall
-        mean pixel value color is closest to 100
+        This function will loop over all available exposures and
+        take one image for each exposure. Then it sets exposure
+        to the value where the overall mean pixel value color is
+        closest to 50.
         """
         exposure_results = []
         for e in _Helios.available_exposures:
@@ -164,6 +182,19 @@ class _Helios:
 
     @staticmethod
     def determine_frame_status(frame: cv.Mat, save_image: bool) -> int:
+        """
+        For a given frame, determine whether the conditions are
+        good (direct sunlight, returns 1) or bad (diffuse light
+        or darkness, returns 0).
+
+        1. Downscale image (faster processing)
+        2. Convert to grayscale image
+        3. Determine position and size of circular opening
+        4. Determine edges in image (canny edge filter)
+        5. Only consider edges inside 0.9 * circleradius
+        6. If number of edge-pixels is > x: return 1; else: return 0;
+        """
+
         # transform image from 1280x720 to 640x360
         downscaled_image = cv.resize(frame, None, fx=0.5, fy=0.5)
 
@@ -207,7 +238,11 @@ class _Helios:
 
     @staticmethod
     def run(save_image: bool) -> int:
-        # run autoexposure function every 3 minutes
+        """
+        Take an image and evaluate the sun conditions.
+
+        Run autoexposure function every 3 minutes.
+        """
         now = time.time()
         if (now - _Helios.last_autoexposure_time) > 180:
             _Helios.adjust_exposure()
@@ -218,6 +253,26 @@ class _Helios:
 
 
 class HeliosThread(AbstractThreadBase):
+    """
+    Thread for determining the current sun conditions in a
+    parallel mainloop.
+
+    "Good" sun conditions with respect to EM27 measurements
+    means direct sunlight, i.e. no clouds in front of the
+    sun. Interferograms recored in diffuse light conditions
+    result in a concentration timeseries (after retrieval)
+    with a very large standard deviation.
+
+    Direct sunlight can be determined by "hard" shadows, i.e.
+    quick transitions between light and dark surfaces. This
+    thread periodically takes images in a special camera setup
+    and uses edge detected to determine how many hard shadows
+    it can find in the image.
+
+    The result of this constant sunlight evaluation is written
+    to the StateInterface.
+    """
+
     def __init__(self):
         super().__init__(logger)
 
