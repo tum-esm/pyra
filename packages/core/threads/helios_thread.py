@@ -184,7 +184,9 @@ class _Helios:
 
         logger.debug(f"exposure results: {exposure_results}")
 
-        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"]
+        new_exposure: Any = min(exposure_results, key=lambda r: abs(r["mean"] - 50))[
+            "exposure"
+        ]
         _Helios.update_camera_settings(exposure=new_exposure)
 
         if new_exposure != _Helios.current_exposure:
@@ -220,13 +222,13 @@ class _Helios:
         edges_only: np.ndarray = np.array(
             cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32
         )
-        edges_only_dilated = cv.dilate(
+        edges_only_dilated: cv.Mat = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
         )
 
         # blacken the outer 10% of the circle radius
         edges_only_dilated *= ImageProcessing.get_circle_mask(
-            edges_only_dilated.shape, circle_r * 0.9, circle_cx, circle_cy
+            edges_only_dilated.shape, round(circle_r * 0.9), circle_cx, circle_cy
         )
 
         # determine how many pixels inside the circle are made up of "edge pixels"

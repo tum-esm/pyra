@@ -1,8 +1,7 @@
 import json
 import os
 import shutil
-from packages.core.utils import with_filelock, update_dict_recursively
-from packages.core.utils.types import upload_meta
+from packages.core.utils import with_filelock, update_dict_recursively, PersistentStateTypes
 from .plc_interface import EMPTY_PLC_STATE
 
 dir = os.path.dirname
@@ -18,7 +17,7 @@ STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
 
 
-EMPTY_STATE_OBJECT: dict = {
+EMPTY_STATE_OBJECT: PersistentStateTypes.Dict = {
     "helios_indicates_good_conditions": None,
     "measurements_should_be_running": False,
     "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
@@ -30,7 +29,7 @@ EMPTY_STATE_OBJECT: dict = {
     },
 }
 
-EMPTY_PERSISTENT_STATE_OBJECT: upload_meta.PersistentStateDict = {
+EMPTY_PERSISTENT_STATE_OBJECT: PersistentStateTypes.PartialDict = {
     "active_opus_macro_id": None,
     "current_exceptions": [],
 }
@@ -82,14 +81,18 @@ class StateInterface:
     def read() -> dict:
         """Read the state file and return its content"""
         with open(STATE_FILE_PATH, "r") as f:
-            return json.load(f)
+            new_object = json.load(f)
+            # TODO: PersistentStateTypes.validate_object(new_object)
+            return new_object
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def read_persistent() -> upload_meta.PersistentStateDict:
+    def read_persistent() -> PersistentStateTypes.Dict:
         """Read the persistent state file and return its content"""
         with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
-            return json.load(f)
+            new_object = json.load(f)
+            PersistentStateTypes.validate_object(new_object)
+            return new_object
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
@@ -109,7 +112,7 @@ class StateInterface:
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def update_persistent(update: upload_meta.PartialPersistentStateDict) -> None:
+    def update_persistent(update: PersistentStateTypes.PartialDict) -> None:
         """
         Update the (persistent) state file and return its content.
         The update object should only include the properties to be
@@ -118,6 +121,7 @@ class StateInterface:
 
         with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
             current_state = json.load(f)
+            PersistentStateTypes.validate_object(current_state)
 
         new_state = update_dict_recursively(current_state, update)
         with open(PERSISTENT_STATE_FILE_PATH, "w") as f:

@@ -152,7 +152,7 @@ class SunTracking:
 
         try:
             assert len(str_values) == 6
-            float_values: Any = tuple([float(v) for v in str_values])
+            float_values = tuple([float(v) for v in str_values])
         except (AssertionError, ValueError):
             raise AssertionError(f'invalid last logfile line "{last_line}"')
 
@@ -167,7 +167,7 @@ class SunTracking:
             now.day,
         ), f'date in file is too old: "{last_line}"'
 
-        return float_values
+        return float_values  # type: ignore
 
     def validate_tracker_position(self) -> bool:
         """Reads motor offsets and compares it with defined threshold.

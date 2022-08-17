@@ -20,7 +20,7 @@ def _file_path_exists(field, value, error):  # type: ignore
         error(field, "Path has to be an existing file")
 
 
-def _is_valid_ip_adress(field, value, error):
+def _is_valid_ip_adress(field, value, error):  # type: ignore
     try:
         assert len(value.split(".")) == 4
         assert all([n.isnumeric() for n in value.split(".")])

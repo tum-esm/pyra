@@ -6,7 +6,9 @@ class ImageProcessing:
 
     # circle code adapted from https://stackoverflow.com/a/39074620/8255842
     @staticmethod
-    def get_circle_mask(img_shape: tuple[int, int], radius: int, center_x: int, center_y: int):
+    def get_circle_mask(
+        img_shape: tuple[int, int], radius: int, center_x: int, center_y: int
+    ) -> cv.Mat:
         """
         input: image width/height, circle radius/center_x/center_y
 
@@ -26,13 +28,13 @@ class ImageProcessing:
         return (np.abs(np.hypot(center_x - x, center_y - y)) < radius).astype(np.uint8)
 
     @staticmethod
-    def moving_average(xs, n=3):
+    def moving_average(xs: list[float], n: int = 3) -> float:
         ret = np.cumsum(xs)
         ret[n:] = ret[n:] - ret[:-n]
         return ret[n - 1 :] / n
 
     @staticmethod
-    def get_binary_mask(frame):
+    def get_binary_mask(frame: cv.Mat) -> cv.Mat:
         """
         input: gray image matrix (2D matrix) with integer values for each pixel
         output: binary mask (same shape) that has 0s for dark pixels and 1s for bright pixels
@@ -60,7 +62,7 @@ class ImageProcessing:
         return binary_mask
 
     @staticmethod
-    def get_circle_location(binary_mask):
+    def get_circle_location(binary_mask: cv.Mat) -> tuple[int, int, int]:
         """
         input: binary mask (2D array) like
         [[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
@@ -93,15 +95,17 @@ class ImageProcessing:
 
     @staticmethod
     def add_markings_to_image(
-        img, edge_fraction: int, circle_cx: int, circle_cy: int, circle_r
-    ):
+        img: cv.Mat, edge_fraction: int, circle_cx: int, circle_cy: int, circle_r: int
+    ) -> cv.Mat:
         img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
         img = cv.circle(img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2)
         img = ImageProcessing.add_text_to_image(img, f"{round(edge_fraction * 100, 2)}%")
         return img
 
     @staticmethod
-    def add_text_to_image(img, text, color=(200, 0, 0)):
+    def add_text_to_image(
+        img: cv.Mat, text: str, color: tuple[int, int, int] = (200, 0, 0)
+    ) -> cv.Mat:
         cv.putText(
             img,
             text=text,

@@ -1,4 +1,7 @@
-def update_dict_recursively(old_object, new_object):
+from typing import Any
+
+
+def update_dict_recursively(old_object: Any, new_object: Any) -> Any:
     if old_object is None or new_object is None:
         return new_object
 
