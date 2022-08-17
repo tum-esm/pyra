@@ -29,11 +29,11 @@ def _is_valid_ip_adress(field, value, error):
         error(field, "String has to be a valid IPv4 address")
 
 
-def get_dict_schema(s: dict) -> dict:
+def get_dict_schema(s: dict) -> dict:  # type: ignore
     return {"type": "dict", "schema": s}
 
 
-def get_nullable_dict_schema(s: dict) -> dict:
+def get_nullable_dict_schema(s: dict) -> dict:  # type: ignore
     return {"type": "dict", "schema": s, "nullable": True}
 
 

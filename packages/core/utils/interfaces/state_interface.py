@@ -40,7 +40,7 @@ EMPTY_PERSISTENT_STATE_OBJECT: dict = {
 class StateInterface:
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def initialize():
+    def initialize() -> None:
         """
         This will create two files:
 
@@ -85,7 +85,7 @@ class StateInterface:
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def update(update: dict, persistent: bool = False):
+    def update(update: dict, persistent: bool = False) -> None:
         """
         Update the (persistent) state file and return its content.
         The update object should only include the properties to be

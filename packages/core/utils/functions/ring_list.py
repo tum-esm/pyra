@@ -1,3 +1,6 @@
+# TODO add static types
+
+
 class RingList:
     """
     Base code created by Flavio Catalani on Tue, 5 Jul 2005 (PSF).
@@ -27,7 +30,7 @@ class RingList:
     def get(self):
         return self.__data__
 
-    def remove(self):
+    def remove(self) -> None:
         if self.__cur__ > 0:
             del self.__data__[self.__cur__ - 1]
             self.__cur__ -= 1

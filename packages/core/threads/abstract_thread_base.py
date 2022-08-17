@@ -40,6 +40,6 @@ class AbstractThreadBase(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def main(self):
+    def main(self) -> None:
         """Main entrypoint of the thread"""
         pass

@@ -1,5 +1,4 @@
 import datetime
-from typing import Literal
 from packages.core.utils import Astronomy, StateInterface, Logger
 
 logger = Logger(origin="measurement-conditions")

@@ -1,1 +1,1 @@
-python -m mypy run-pyra-core.py
+python -m mypy run-pyra-core.py --strict

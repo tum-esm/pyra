@@ -211,9 +211,13 @@ class EnclosureControl:
                 self.wait_for_cover_closing()
 
     def verify_cover_sync(self) -> None:
-        if self.measurements_should_be_running & (not self.plc_state.control.sync_to_tracker):
+        if self.measurements_should_be_running and (
+            not self.plc_state.control.sync_to_tracker
+        ):
             logger.debug("Set sync to tracker to True to match measurement status.")
             self.plc_interface.set_sync_to_tracker(True)
-        if (not self.measurements_should_be_running) & self.plc_state.control.sync_to_tracker:
+        if (
+            not self.measurements_should_be_running
+        ) and self.plc_state.control.sync_to_tracker:
             logger.debug("Set sync to tracker to False to match measurement status.")
             self.plc_interface.set_sync_to_tracker(False)

@@ -34,7 +34,7 @@ class OSInterface:
         return disk.percent
 
     @staticmethod
-    def validate_disk_space():
+    def validate_disk_space() -> None:
         """Raises an error if the diskspace is less than 10%"""
         if OSInterface.get_disk_space() > 90:
             raise OSInterface.StorageError(
@@ -75,10 +75,11 @@ class OSInterface:
         return 100
 
     @staticmethod
-    def validate_system_battery():
+    def validate_system_battery() -> None:
         """Raises LowEnergyError if system battery runs lower than 20%."""
-        if psutil.sensors_battery():
-            if psutil.sensors_battery().percent < 20.0:
+        battery_state = psutil.sensors_battery()
+        if battery_state is not None:
+            if battery_state.percent < 20:
                 raise OSInterface.LowEnergyError(
                     "The battery of the system is below 20%. Please check the power supply."
                 )

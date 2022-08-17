@@ -3,7 +3,6 @@ import hashlib
 import json
 import os
 import shutil
-from typing import Optional
 import invoke
 import paramiko
 import time
@@ -37,7 +36,9 @@ class DirectoryUploadClient:
         )
         self.transfer_process = fabric.transfer.Transfer(self.connection)
 
+        self.config = config
         self.date_string = date_string
+
         self.src_dir_path = os.path.join(config["upload"]["src_directory"], date_string)
         self.src_meta_path = os.path.join(self.src_dir_path, "upload-meta.json")
         assert os.path.isdir(self.src_dir_path), f"{self.src_dir_path} is not a directory"

@@ -168,6 +168,9 @@ class _Helios:
         to the value where the overall mean pixel value color is
         closest to 50.
         """
+        assert _Helios.available_exposures is not None
+        assert len(_Helios.available_exposures) > 0
+
         exposure_results = []
         for e in _Helios.available_exposures:
             _Helios.update_camera_settings(exposure=e)
@@ -180,8 +183,8 @@ class _Helios:
             cv.imwrite(os.path.join(AUTOEXPOSURE_IMG_DIR, f"exposure-{e}.jpg"), img)
 
         logger.debug(f"exposure results: {exposure_results}")
-        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"]
 
+        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"]
         _Helios.update_camera_settings(exposure=new_exposure)
 
         if new_exposure != _Helios.current_exposure:
@@ -214,7 +217,9 @@ class _Helios:
         circle_cx, circle_cy, circle_r = ImageProcessing.get_circle_location(binary_mask)
 
         # only consider edges and make them bold
-        edges_only = np.array(cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32)
+        edges_only: np.ndarray = np.array(
+            cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32
+        )
         edges_only_dilated = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
         )
@@ -395,7 +400,8 @@ class HeliosThread(AbstractThreadBase):
                     time.sleep(time_to_wait)
 
                 if not infinite_loop:
-                    return status_history
+                    break
+                    # return status_history
 
             except Exception as e:
                 status_history.empty()

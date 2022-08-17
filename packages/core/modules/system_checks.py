@@ -7,7 +7,7 @@ class SystemChecks:
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
 
-    def run(self, new_config: dict):
+    def run(self, new_config: dict) -> None:
         self._CONFIG = new_config
         logger.info("Running SystemChecks")
 
