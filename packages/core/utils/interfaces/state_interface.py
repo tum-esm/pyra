@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from packages.core.utils import with_filelock, update_dict_recursively
+from packages.core.utils import types, with_filelock, update_dict_recursively
 from .plc_interface import EMPTY_PLC_STATE
 
 dir = os.path.dirname
@@ -29,12 +29,13 @@ EMPTY_STATE_OBJECT: dict = {
     },
 }
 
-EMPTY_PERSISTENT_STATE_OBJECT: dict = {
+EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
     "active_opus_macro_id": None,
     "current_exceptions": [],
 }
 
 # TODO: Validate structure with cerberus (assertion)
+#       we could possibly use pydantic for that
 
 
 class StateInterface:
@@ -77,25 +78,46 @@ class StateInterface:
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def read(persistent: bool = False) -> dict:
-        """Read the (persistent) state file and return its content"""
-        file_path = PERSISTENT_STATE_FILE_PATH if persistent else STATE_FILE_PATH
-        with open(file_path, "r") as f:
+    def read() -> dict:
+        """Read the state file and return its content"""
+        with open(STATE_FILE_PATH, "r") as f:
             return json.load(f)
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def update(update: dict, persistent: bool = False) -> None:
+    def read_persistent() -> types.PersistentStateDict:
+        """Read the persistent state file and return its content"""
+        with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
+            return json.load(f)
+
+    @staticmethod
+    @with_filelock(STATE_LOCK_PATH)
+    def update(update: dict) -> None:
         """
         Update the (persistent) state file and return its content.
         The update object should only include the properties to be
         changed in contrast to containing the whole file.
         """
-        file_path = PERSISTENT_STATE_FILE_PATH if persistent else STATE_FILE_PATH
 
-        with open(file_path, "r") as f:
+        with open(STATE_FILE_PATH, "r") as f:
             current_state = json.load(f)
 
         new_state = update_dict_recursively(current_state, update)
-        with open(file_path, "w") as f:
+        with open(STATE_FILE_PATH, "w") as f:
+            json.dump(new_state, f, indent=4)
+
+    @staticmethod
+    @with_filelock(STATE_LOCK_PATH)
+    def update_persistent(update: types.PartialPersistentStateDict) -> None:
+        """
+        Update the (persistent) state file and return its content.
+        The update object should only include the properties to be
+        changed in contrast to containing the whole file.
+        """
+
+        with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
+            current_state = json.load(f)
+
+        new_state = update_dict_recursively(current_state, update)
+        with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)

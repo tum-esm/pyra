@@ -45,7 +45,7 @@ def update_exception_state(
                 Logger.log_activity_event("errors-resolved")
 
         # if no errors until now
-        StateInterface.update({"current_exceptions": current_exceptions}, persistent=True)
+        StateInterface.update_persistent({"current_exceptions": current_exceptions})
         return updated_current_exceptions
 
     except Exception as e:
@@ -90,7 +90,7 @@ def run() -> None:
     helios_thread_instance = threads.helios_thread.HeliosThread(config)
     upload_thread_instance = threads.upload_thread.UploadThread(config)
 
-    current_exceptions = StateInterface.read(persistent=True)["current_exceptions"]
+    current_exceptions = StateInterface.read_persistent()["current_exceptions"]
 
     while True:
         start_time = time.time()
