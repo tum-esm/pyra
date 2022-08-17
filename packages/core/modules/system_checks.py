@@ -5,6 +5,11 @@ logger = Logger(origin="system-checks")
 
 
 class SystemChecks:
+    """SystemChecks interacts with the present Operating System through OSInterface. It checks and
+    logs important parameters (CPU, memory, disk space) to give insight into the overall system
+    stability. It raises custom errors when the disk runs out of storage or the energy supply is
+    not ensured. SystemChecks writes the latest readout into StateInterface."""
+
     def __init__(self, initial_config: dict):
         self._CONFIG = initial_config
 
