@@ -29,7 +29,7 @@ class EnclosureControl:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
-    def _initialize(self):
+    def __initialize(self) -> None:
         self.plc_interface = PLCInterface(self.config)
         self.plc_interface.connect()
         self.plc_interface.set_auto_temperature(True)
@@ -53,7 +53,7 @@ class EnclosureControl:
 
         try:
             if not self.initialized:
-                self._initialize()
+                self.__initialize()
             else:
                 self.plc_interface.update_config(self.config)
                 self.plc_interface.connect()
@@ -136,7 +136,7 @@ class EnclosureControl:
 
     def force_cover_close(self) -> None:
         if not self.initialized:
-            self._initialize()
+            self.__initialize()
 
         if self.plc_state.state.reset_needed:
             self.plc_interface.reset()

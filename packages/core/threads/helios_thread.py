@@ -34,7 +34,7 @@ class _Helios:
     available_exposures = None
 
     @staticmethod
-    def init(camera_id: int, retries: int = 5):
+    def init(camera_id: int, retries: int = 5) -> None:
         # TODO: Why is this necessary?
         _Helios.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         assert _Helios.cam is not None
@@ -71,7 +71,7 @@ class _Helios:
         raise CameraError("could not initialize camera")
 
     @staticmethod
-    def deinit():
+    def deinit() -> None:
         """
         Possibly release the camera (linked over cv2.VideoCapture)
         """
@@ -98,14 +98,14 @@ class _Helios:
 
     @staticmethod
     def update_camera_settings(
-        exposure: int = None,
-        brightness: int = None,
-        contrast: int = None,
-        saturation: int = None,
-        gain: int = None,
-        width: int = None,
-        height: int = None,
-    ):
+        exposure: Optional[int] = None,
+        brightness: Optional[int] = None,
+        contrast: Optional[int] = None,
+        saturation: Optional[int] = None,
+        gain: Optional[int] = None,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+    ) -> None:
         """
         Update the settings of the connected camera. Which settings are
         available depends on the camera model. However, this function will
@@ -161,7 +161,7 @@ class _Helios:
         raise CameraError("could not take image")
 
     @staticmethod
-    def adjust_exposure():
+    def adjust_exposure() -> None:
         """
         This function will loop over all available exposures and
         take one image for each exposure. Then it sets exposure
@@ -189,7 +189,7 @@ class _Helios:
             _Helios.current_exposure = new_exposure
 
     @staticmethod
-    def determine_frame_status(frame: cv.Mat, save_image: bool) -> Literal[1, 0]:
+    def determine_frame_status(frame: cv.Mat, save_image: bool) -> Literal[0, 1]:
         """
         For a given frame, determine whether the conditions are
         good (direct sunlight, returns 1) or bad (diffuse light
@@ -246,7 +246,7 @@ class _Helios:
         return status
 
     @staticmethod
-    def run(save_image: bool) -> int:
+    def run(save_image: bool) -> Literal[0, 1]:
         """
         Take an image and evaluate the sun conditions.
 
@@ -282,8 +282,8 @@ class HeliosThread(AbstractThreadBase):
     to the StateInterface.
     """
 
-    def __init__(self):
-        super().__init__(logger)
+    def __init__(self, config: dict):
+        super().__init__(config, "helios")
 
     def should_be_running(self) -> bool:
         """Should the thread be running? (based on config.upload)"""
@@ -294,7 +294,7 @@ class HeliosThread(AbstractThreadBase):
         )
 
     # TODO: Update tests/headless mode to comply with new class structure
-    def main(self, infinite_loop: bool = True, headless: bool = False):
+    def main(self, infinite_loop: bool = True, headless: bool = False) -> None:
         """Main entrypoint of the thread"""
         global logger
         global _CONFIG
@@ -367,7 +367,7 @@ class HeliosThread(AbstractThreadBase):
                         continue
 
                 # append sun status to status history
-                status_history.append(0 if (status == -1) else status)
+                status_history.append(status)
                 logger.debug(
                     f"New Helios status: {status}. Current history: {status_history.get()}"
                 )

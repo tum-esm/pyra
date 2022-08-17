@@ -3,15 +3,13 @@ import hashlib
 import json
 import os
 import shutil
+from typing import Optional
 import invoke
 import paramiko
 import time
 import fabric  # type: ignore
 import re
-from packages.core.utils import (
-    ConfigInterface,
-    Logger,
-)
+from packages.core.utils import ConfigInterface, Logger, types
 from .abstract_thread_base import AbstractThreadBase
 
 logger = Logger(origin="upload")
@@ -50,36 +48,27 @@ class DirectoryUploadClient:
             config["upload"]["dst_directory"]
         ), f"remote {config['upload']['dst_directory']} is not a directory"
 
-        self.meta_content: dict | None = None
+        self.meta_content: types.UploadMetaDict = {
+            "complete": False,
+            "fileList": [],
+            "createdTime": round(time.time(), 3),
+            "lastModifiedTime": round(time.time(), 3),
+        }
         self.remove_src_after_upload: bool = config["upload"]["remove_src_after_upload"]
 
-    def __initialize_remote_dir(self):
+    def __initialize_remote_dir(self) -> None:
         """
         If the respective dst directory does not exist,
         create the directory and add a fresh upload-meta.json
-        file to it looking like this: {
-            "complete": false,
-            "fileList": [],
-            "createdTime": <unix-timestamp>,
-            "lastModifiedTime": <unix-timestamp>
-        }
+        file to it.
         """
         if not self.transfer_process.is_remote_dir(self.dst_dir_path):
             self.connection.run(f"mkdir {self.dst_dir_path}")
             with open(self.src_meta_path, "w") as f:
-                json.dump(
-                    {
-                        "complete": False,
-                        "fileList": [],
-                        "createdTime": round(time.time(), 3),
-                        "lastModifiedTime": round(time.time(), 3),
-                    },
-                    f,
-                    indent=4,
-                )
+                json.dump(self.meta_content, f, indent=4)
             self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
 
-    def __get_remote_directory_checksum(self):
+    def __get_remote_directory_checksum(self) -> str:
         """
         Calculate checksum over all files listed in the
         upload-meta.json file. The same logic will run
@@ -111,7 +100,7 @@ class DirectoryUploadClient:
                 f"could not execute remote command on server ({remote_command}): {e}"
             )
 
-    def __get_local_directory_checksum(self):
+    def __get_local_directory_checksum(self) -> str:
         """
         Calculate checksum over all files listed in the
         upload-meta.json file. The same logic will run
@@ -128,7 +117,7 @@ class DirectoryUploadClient:
         # stdout is a checksum, otherwise it is a traceback
         return hasher.hexdigest()
 
-    def __fetch_meta(self):
+    def __fetch_meta(self) -> None:
         """
         Download the remote meta file to the local src directory
         """
@@ -138,26 +127,25 @@ class DirectoryUploadClient:
         try:
             assert os.path.isfile(self.src_meta_path)
             with open(self.src_meta_path, "r") as f:
+                # TODO: validate this with cerberus
                 self.meta_content = json.load(f)
         except (AssertionError, json.JSONDecodeError) as e:
             raise InvalidUploadState(str(e))
 
-    def __update_meta(self, new_meta_content_partial: dict):
+    def __update_meta(self, new_meta_content_partial: types.PartialUploadMetaDict) -> None:
         """
         Update the local upload-meta.json file and overwrite
         the meta file on the server
         """
-        new_meta_content = {
-            **self.meta_content,
-            **new_meta_content_partial,
-            "lastModifiedTime": round(time.time(), 3),
-        }
-        with open(self.src_meta_path, "w") as f:
-            json.dump(new_meta_content, f, indent=4)
-        self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
-        self.meta_content = new_meta_content
+        assert self.meta_content is not None
+        self.meta_content.update(new_meta_content_partial)
+        self.meta_content.update({"lastModifiedTime": round(time.time(), 3)})
 
-    def run(self):
+        with open(self.src_meta_path, "w") as f:
+            json.dump(self.meta_content, f, indent=4)
+        self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
+
+    def run(self) -> None:
         """
         Perform the whole upload process for a given directory.
 
@@ -216,7 +204,7 @@ class DirectoryUploadClient:
             except KeyError:
                 upload_is_finished = True
 
-            if (self.meta_content["fileList"] % 25 == 0) or upload_is_finished:
+            if (len(self.meta_content["fileList"]) % 25 == 0) or upload_is_finished:
                 self.__update_meta({"fileList": self.meta_content["fileList"]})
 
         # raise an exception if the checksums do not match
@@ -239,12 +227,12 @@ class DirectoryUploadClient:
         else:
             logger.debug("skipping removal of source")
 
-    def teardown(self):
+    def teardown(self) -> None:
         """close ssh and scp connection"""
         self.connection.close()
 
     @staticmethod
-    def __is_valid_date(date_string: str):
+    def __is_valid_date(date_string: str) -> bool:
         try:
             day_ending = datetime.strptime(f"{date_string} 23:59:59", "%Y%m%d %H:%M:%S")
             seconds_since_day_ending = (datetime.now() - day_ending).total_seconds()
@@ -289,8 +277,8 @@ class UploadThread(AbstractThreadBase):
         📁 ...
     """
 
-    def __init__(self):
-        super().__init__(logger)
+    def __init__(self, config: dict):
+        super().__init__(config, "upload")
 
     def should_be_running(self) -> bool:
         """Should the thread be running? (based on config.upload)"""
@@ -300,10 +288,11 @@ class UploadThread(AbstractThreadBase):
             and (self.config["upload"]["is_active"])
         )
 
-    def main(self):
+    def main(self) -> None:
         """Main entrypoint of the thread"""
         while True:
             config = ConfigInterface.read()
+            self.config = config
 
             src_dates_strings = DirectoryUploadClient.get_directories_to_be_uploaded(
                 config["upload"]["src_directory"]
@@ -311,11 +300,11 @@ class UploadThread(AbstractThreadBase):
             for src_date_string in src_dates_strings:
 
                 # check for termination before processing each directory
-                if not self.should_be_running(config):
+                if not self.should_be_running():
                     return
 
                 try:
-                    client = DirectoryUploadClient(src_date_string)
+                    client = DirectoryUploadClient(src_date_string, config)
                     client.run()
                 except TimeoutError as e:
                     logger.error(f"could not reach host (uploading {src_date_string}): {e}")

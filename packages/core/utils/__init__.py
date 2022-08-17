@@ -12,3 +12,5 @@ from .interfaces import ConfigInterface
 from .interfaces import StateInterface
 from .interfaces import PLCInterface
 from .interfaces import OSInterface
+
+from . import types

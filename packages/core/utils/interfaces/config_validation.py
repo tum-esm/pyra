@@ -10,12 +10,12 @@ PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 
 
-def _directory_path_exists(field, value, error):
+def _directory_path_exists(field, value, error):  # type: ignore
     if not os.path.isfile(value):
         error(field, "Path has to be an existing file")
 
 
-def _file_path_exists(field, value, error):
+def _file_path_exists(field, value, error):  # type: ignore
     if not os.path.isfile(value):
         error(field, "Path has to be an existing file")
 
@@ -29,8 +29,12 @@ def _is_valid_ip_adress(field, value, error):
         error(field, "String has to be a valid IPv4 address")
 
 
-DICT_SCHEMA = lambda s: {"type": "dict", "schema": s}
-NULLABLE_DICT_SCHEMA = lambda s: {"type": "dict", "schema": s, "nullable": True}
+def get_dict_schema(s: dict) -> dict:
+    return {"type": "dict", "schema": s}
+
+
+def get_nullable_dict_schema(s: dict) -> dict:
+    return {"type": "dict", "schema": s, "nullable": True}
 
 
 def get_config_file_schema(strict: boolean):
@@ -60,7 +64,7 @@ def get_config_file_schema(strict: boolean):
         specs["directory"]["check_with"] = _directory_path_exists
 
     return {
-        "general": DICT_SCHEMA(
+        "general": get_dict_schema(
             {
                 "seconds_per_core_interval": {
                     "type": "number",
@@ -72,7 +76,7 @@ def get_config_file_schema(strict: boolean):
                 "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
             }
         ),
-        "opus": DICT_SCHEMA(
+        "opus": get_dict_schema(
             {
                 "em27_ip": specs["ip"],
                 "executable_path": specs["file"],
@@ -82,7 +86,7 @@ def get_config_file_schema(strict: boolean):
                 "password": {"type": "string"},
             }
         ),
-        "camtracker": DICT_SCHEMA(
+        "camtracker": get_dict_schema(
             {
                 "config_path": specs["file"],
                 "executable_path": specs["file"],
@@ -95,7 +99,7 @@ def get_config_file_schema(strict: boolean):
                 },
             }
         ),
-        "error_email": DICT_SCHEMA(
+        "error_email": get_dict_schema(
             {
                 "sender_address": {"type": "string"},
                 "sender_password": {"type": "string"},
@@ -103,7 +107,7 @@ def get_config_file_schema(strict: boolean):
                 "recipients": {"type": "string"},
             }
         ),
-        "measurement_decision": DICT_SCHEMA(
+        "measurement_decision": get_dict_schema(
             {
                 "mode": {
                     "type": "string",
@@ -113,7 +117,7 @@ def get_config_file_schema(strict: boolean):
                 "cli_decision_result": {"type": "boolean"},
             }
         ),
-        "measurement_triggers": DICT_SCHEMA(
+        "measurement_triggers": get_dict_schema(
             {
                 "consider_time": {"type": "boolean"},
                 "consider_sun_elevation": {"type": "boolean"},
@@ -123,14 +127,14 @@ def get_config_file_schema(strict: boolean):
                 "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
             }
         ),
-        "tum_plc": NULLABLE_DICT_SCHEMA(
+        "tum_plc": get_nullable_dict_schema(
             {
                 "ip": specs["ip"],
                 "version": {"type": "integer", "allowed": [1, 2]},
                 "controlled_by_user": {"type": "boolean"},
             }
         ),
-        "helios": NULLABLE_DICT_SCHEMA(
+        "helios": get_nullable_dict_schema(
             {
                 "camera_id": {"type": "integer", "min": 0, "max": 999999},
                 "evaluation_size": {"type": "integer", "min": 1, "max": 100},
@@ -147,7 +151,7 @@ def get_config_file_schema(strict: boolean):
                 "save_images": {"type": "boolean"},
             }
         ),
-        "upload": NULLABLE_DICT_SCHEMA(
+        "upload": get_nullable_dict_schema(
             {
                 "is_active": {"type": "boolean"},
                 "host": specs["ip"],
