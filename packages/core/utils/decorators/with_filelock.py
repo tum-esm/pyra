@@ -25,12 +25,12 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 class with_filelock:
     def __init__(self, file_lock_path: str, timeout: float = -1) -> None:
-        self.file_lock_path = file_lock_path
-        self.timeout = timeout
+        self.file_lock_path: str = file_lock_path
+        self.timeout: float = timeout
 
     def __call__(self, f: F) -> F:
         @wraps(f)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: tuple[Any], **kwargs: dict[str, Any]) -> Any:
             with filelock.FileLock(self.file_lock_path, timeout=self.timeout):
                 return function(*args, **kwargs)
 

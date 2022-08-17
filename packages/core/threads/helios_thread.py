@@ -184,9 +184,7 @@ class _Helios:
 
         logger.debug(f"exposure results: {exposure_results}")
 
-        new_exposure: Any = min(exposure_results, key=lambda r: abs(r["mean"] - 50))[
-            "exposure"
-        ]
+        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"]  # type: ignore
         _Helios.update_camera_settings(exposure=new_exposure)
 
         if new_exposure != _Helios.current_exposure:
@@ -219,9 +217,7 @@ class _Helios:
         circle_cx, circle_cy, circle_r = ImageProcessing.get_circle_location(binary_mask)
 
         # only consider edges and make them bold
-        edges_only: np.ndarray = np.array(
-            cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32
-        )
+        edges_only: cv.Mat = np.array(cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32)
         edges_only_dilated: cv.Mat = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
         )
@@ -289,7 +285,7 @@ class HeliosThread(AbstractThreadBase):
     to the StateInterface.
     """
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict) -> None:
         super().__init__(config, "helios")
 
     def should_be_running(self) -> bool:

@@ -1,4 +1,4 @@
-from typing import Optional, TypedDict
+from typing import Any, Optional, TypedDict
 
 import pydantic
 
@@ -19,7 +19,7 @@ class UploadMetaTypes:
         lastModifiedTime: float
 
     @staticmethod
-    def validate_object(o: dict, partial: bool = False) -> None:
+    def validate_object(o: Any, partial: bool = False) -> None:
         """
         Check, whether a given object is a correct UploadMetaDict
         Raises a pydantic.ValidationError if the object is invalid.

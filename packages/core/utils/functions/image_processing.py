@@ -28,7 +28,7 @@ class ImageProcessing:
         return (np.abs(np.hypot(center_x - x, center_y - y)) < radius).astype(np.uint8)
 
     @staticmethod
-    def moving_average(xs: list[float], n: int = 3) -> float:
+    def moving_average(xs: list[float], n: int = 3) -> np.ndarray:
         ret = np.cumsum(xs)
         ret[n:] = ret[n:] - ret[:-n]
         return ret[n - 1 :] / n

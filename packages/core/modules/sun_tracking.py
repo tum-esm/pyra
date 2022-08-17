@@ -182,7 +182,7 @@ class SunTracking:
 
         elev_offset = tracker_status[3]
         az_offeset = tracker_status[4]
-        threshold = self._CONFIG["camtracker"]["motor_offset_threshold"]
+        threshold: float = self._CONFIG["camtracker"]["motor_offset_threshold"]
 
         return (abs(elev_offset) <= threshold) and (abs(az_offeset) <= threshold)
 

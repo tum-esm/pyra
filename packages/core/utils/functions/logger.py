@@ -15,7 +15,7 @@ LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")
 # manually. Doesn't really make a performance difference
 
 
-def log_line_has_time(log_line: str):
+def log_line_has_time(log_line: str) -> bool:
     try:
         assert len(log_line) >= 10
         datetime.strptime(log_line[:10], "%Y-%m-%d")
@@ -27,7 +27,7 @@ def log_line_has_time(log_line: str):
 class Logger:
     last_archive_time = datetime.now()
 
-    def __init__(self, origin="pyra.core", just_print: bool = False):
+    def __init__(self, origin="pyra.core", just_print: bool = False) -> None:
         self.origin = origin
         self.just_print = just_print
 
@@ -100,7 +100,7 @@ class Logger:
             if len(lines_to_be_archived) == 0:
                 return
 
-            archive_log_date_groups = {}
+            archive_log_date_groups: dict[str, dict[str, list[str]]] = {}
             line_date = lines_to_be_archived[0][:10].replace("-", "")
             for line in lines_to_be_archived:
                 if log_line_has_time(line):

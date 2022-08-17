@@ -17,7 +17,7 @@ STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
 
 
-EMPTY_STATE_OBJECT: PersistentStateTypes.Dict = {
+EMPTY_STATE_OBJECT: dict = {
     "helios_indicates_good_conditions": None,
     "measurements_should_be_running": False,
     "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
@@ -90,7 +90,7 @@ class StateInterface:
     def read_persistent() -> PersistentStateTypes.Dict:
         """Read the persistent state file and return its content"""
         with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
-            new_object = json.load(f)
+            new_object: PersistentStateTypes.Dict = json.load(f)
             PersistentStateTypes.validate_object(new_object)
             return new_object
 

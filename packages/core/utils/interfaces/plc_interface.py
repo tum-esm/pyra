@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Optional
+from typing import Any, Optional
 import snap7  # type: ignore
 import time
 import os
@@ -71,7 +71,7 @@ class PLCState:
     power: PLCPowerState
     connections: PLCConnectionsState
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         out = {}
         for field in dataclasses.fields(self):
             field_value = getattr(self, field.name)
@@ -198,7 +198,7 @@ class PLCInterface:
 
         # TODO: self.plc.read_multi_vars()
 
-        plc_db_content = {}
+        plc_db_content: dict[int, int] = {}
         if self.config["tum_plc"]["version"] == 1:
             plc_db_size = {3: 6, 8: 26, 25: 10}
         else:
@@ -213,12 +213,12 @@ class PLCInterface:
         def _get_int(spec: Optional[list[int]]) -> Optional[int]:
             if spec is None:
                 return None
-            return snap7.util.get_int(plc_db_content[spec[0]], spec[1])
+            return snap7.util.get_int(plc_db_content[spec[0]], spec[1])  # type: ignore
 
         def _get_bool(spec: Optional[list[int]]) -> Optional[bool]:
             if spec is None:
                 return None
-            return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])
+            return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])  # type: ignore
 
         s = self.specification
 
@@ -273,12 +273,15 @@ class PLCInterface:
             time.sleep(2)
 
     def __read_int(self, action: list[int]) -> int:
-        """Reads an INT value in the PLC database."""
-        assert len(action) == 3
-        db_number, start, size = action
+        """
+        Reads an INT value in the PLC database.
 
-        msg = self.plc.db_read(db_number, start, size)
-        value = snap7.util.get_int(msg, 0)
+        action is tuple: db_number, start, size
+        """
+        assert len(action) == 3
+
+        msg: bytearray = self.plc.db_read(*action)
+        value: int = snap7.util.get_int(msg, 0)
 
         self.__sleep_while_cpu_is_busy()
 
@@ -300,8 +303,8 @@ class PLCInterface:
         assert len(action) == 4
         db_number, start, size, bool_index = action
 
-        msg = self.plc.db_read(db_number, start, size)
-        value = snap7.util.get_bool(msg, 0, bool_index)
+        msg: bytearray = self.plc.db_read(db_number, start, size)
+        value: bool = snap7.util.get_bool(msg, 0, bool_index)
 
         self.__sleep_while_cpu_is_busy()
 

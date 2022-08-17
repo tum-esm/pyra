@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 import astropy.coordinates as astropy_coordinates  # type: ignore
 import astropy.time as astropy_time  # type: ignore
 import astropy.units as astropy_units  # type: ignore
@@ -6,13 +6,15 @@ import astropy.units as astropy_units  # type: ignore
 # TODO: pass config via functions instea of indirectly
 #       more code  but way simpler
 
+# TODO: add static typic (simplify code while doing that (less astropy stuff))
+
 
 class Astronomy:
     CONFIG: Optional[dict] = None
     units = astropy_units
 
     @staticmethod
-    def get_current_sun_elevation():
+    def get_current_sun_elevation() -> Any:
         """calc_sun_angle_deg(location loc): Computes and returns the current sun
         angle in degree, based on the location loc, computed by get_tracker_position(),
         and current time. Therefore, the pack- ages time and astrophy are required.
@@ -54,7 +56,7 @@ class Astronomy:
             return (lat, lon, alt)
 
     @staticmethod
-    def __get_astropy_location():
+    def __get_astropy_location() -> Any:
         """
         get_tracker_position(): Reads out the height, the longitude and the
         latitude of the system from CamTrackerConfig.txt, and computes the location

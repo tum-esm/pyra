@@ -9,12 +9,12 @@ class AbstractThreadBase(abc.ABC):
     An abstract base class for thread classes used in PYRA
     """
 
-    def __init__(self, config: dict, logger_origin: str):
+    def __init__(self, config: dict, logger_origin: str) -> None:
         self.__thread: Optional[threading.Thread] = None
         self.__logger: Logger = Logger(origin=logger_origin)
         self.config: dict = config
 
-    def update_thread_state(self, new_config: dict):
+    def update_thread_state(self, new_config: dict) -> None:
         """
         Make sure that the thread loop is (not) running,
         based on config.upload

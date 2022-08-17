@@ -37,7 +37,7 @@ def get_nullable_dict_schema(s: dict) -> dict:  # type: ignore
     return {"type": "dict", "schema": s, "nullable": True}
 
 
-def get_config_file_schema(strict: boolean):
+def get_config_file_schema(strict: bool) -> dict:
     """
     Returns a cerberus schema for the config. With strict=false,
     the checks whether file paths or directories exist will be

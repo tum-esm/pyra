@@ -10,14 +10,14 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 
 
-def get_pyra_version():
+def get_pyra_version() -> str:
     with open(os.path.join(PROJECT_DIR, "packages", "ui", "package.json")) as f:
         pyra_version: str = json.load(f)["version"]
     assert pyra_version.startswith("4.")
     return pyra_version
 
 
-def get_commit_sha():
+def get_commit_sha() -> str:
     commit_sha_process = subprocess.run(
         ["git", "rev-parse", "--verify", "HEAD", "--short"],
         stdout=subprocess.PIPE,
@@ -29,7 +29,7 @@ def get_commit_sha():
     return commit_sha
 
 
-def get_current_log_lines():
+def get_current_log_lines() -> list[str]:
     with open(f"{PROJECT_DIR}/logs/info.log") as f:
         latest_log_lines = f.readlines()
 
@@ -40,12 +40,13 @@ def get_current_log_lines():
             included_iterations += 1
         log_lines_in_email.append(l)
         if included_iterations == 2:
-            return log_lines_in_email[::-1]
+            break
+    return log_lines_in_email[::-1]
 
 
 class ExceptionEmailClient:
     @staticmethod
-    def _send_email(config: dict, text: str, html: str, subject: str):
+    def _send_email(config: dict, text: str, html: str, subject: str) -> None:
         sender_email = config["error_email"]["sender_address"]
         sender_password = config["error_email"]["sender_password"]
         recipients = config["error_email"]["recipients"].replace(" ", "").split(",")
@@ -68,7 +69,7 @@ class ExceptionEmailClient:
             )
 
     @staticmethod
-    def handle_resolved_exception(config: dict):
+    def handle_resolved_exception(config: dict) -> None:
         if not config["error_email"]["notify_recipients"]:
             return
 
@@ -103,7 +104,7 @@ class ExceptionEmailClient:
         ExceptionEmailClient._send_email(config, text, html, subject)
 
     @staticmethod
-    def handle_occured_exception(config: dict, exception: Exception):
+    def handle_occured_exception(config: dict, exception: Exception) -> None:
         if not config["error_email"]["notify_recipients"]:
             return
 
