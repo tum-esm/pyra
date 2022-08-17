@@ -6,7 +6,7 @@ import shutil
 import invoke
 import paramiko
 import time
-import fabric
+import fabric  # type: ignore
 import re
 from packages.core.utils import (
     ConfigInterface,

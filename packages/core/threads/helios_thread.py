@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 import time
-import cv2 as cv
+import cv2 as cv  # type: ignore
 import numpy as np
 from packages.core.utils import (
     ConfigInterface,

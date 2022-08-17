@@ -1,8 +1,8 @@
 import json
 import os
-from typing import Any, Tuple
+from typing import Tuple
 from xmlrpc.client import boolean
-import cerberus
+import cerberus  # type: ignore
 from packages.core.utils import Logger
 
 dir = os.path.dirname

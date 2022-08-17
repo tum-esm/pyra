@@ -5,7 +5,7 @@
 import os
 import sys
 import time
-import jdcal
+import jdcal  # type: ignore
 import datetime
 from packages.core.utils import StateInterface, Logger, OSInterface
 

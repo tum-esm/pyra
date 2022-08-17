@@ -1,8 +1,9 @@
 import dataclasses
-import snap7
+from typing import Optional
+import snap7  # type: ignore
 import time
 import os
-from snap7.exceptions import Snap7Exception
+from snap7.exceptions import Snap7Exception  # type: ignore
 from packages.core.utils import Logger, StateInterface
 from .plc_specification import PLC_SPECIFICATION_VERSIONS
 
@@ -16,16 +17,16 @@ PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 
 @dataclasses.dataclass
 class PLCActorsState:
-    current_angle: int = None
-    fan_speed: int = None
+    current_angle: Optional[int] = None
+    fan_speed: Optional[int] = None
 
 
 @dataclasses.dataclass
 class PLCControlState:
-    auto_temp_mode: bool = None
-    manual_control: bool = None
-    manual_temp_mode: bool = None
-    sync_to_tracker: bool = None
+    auto_temp_mode: Optional[bool] = None
+    manual_control: Optional[bool] = None
+    manual_temp_mode: Optional[bool] = None
+    sync_to_tracker: Optional[bool] = None
 
 
 @dataclasses.dataclass
@@ -36,29 +37,29 @@ class PLCSensorsState:
 
 @dataclasses.dataclass
 class PLCStateState:
-    cover_closed: bool = None
-    motor_failed: bool | None = None
-    rain: bool = None
-    reset_needed: bool = None
-    ups_alert: bool = None
+    cover_closed: Optional[bool] = None
+    motor_failed: Optional[bool] = None
+    rain: Optional[bool] = None
+    reset_needed: Optional[bool] = None
+    ups_alert: Optional[bool] = None
 
 
 @dataclasses.dataclass
 class PLCPowerState:
-    camera: bool = None
-    computer: bool = None
-    heater: bool = None
-    router: bool = None
-    spectrometer: bool = None
+    camera: Optional[bool] = None
+    computer: Optional[bool] = None
+    heater: Optional[bool] = None
+    router: Optional[bool] = None
+    spectrometer: Optional[bool] = None
 
 
 @dataclasses.dataclass
 class PLCConnectionsState:
-    camera: bool | None = None
-    computer: bool = None
-    heater: bool = None
-    router: bool = None
-    spectrometer: bool | None = None
+    camera: Optional[bool] = None
+    computer: Optional[bool] = None
+    heater: Optional[bool] = None
+    router: Optional[bool] = None
+    spectrometer: Optional[bool] = None
 
 
 @dataclasses.dataclass

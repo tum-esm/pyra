@@ -1,5 +1,5 @@
 import time
-from snap7.exceptions import Snap7Exception
+from snap7.exceptions import Snap7Exception  # type: ignore
 from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface
 
 logger = Logger(origin="enclosure-control")

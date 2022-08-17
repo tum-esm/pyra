@@ -1,6 +1,6 @@
-import astropy.coordinates as astropy_coordinates
-import astropy.time as astropy_time
-import astropy.units as astropy_units
+import astropy.coordinates as astropy_coordinates  # type: ignore
+import astropy.time as astropy_time  # type: ignore
+import astropy.units as astropy_units  # type: ignore
 
 
 class Astronomy:
