@@ -105,8 +105,8 @@ def run():
 
         # check whether the two threads are (not) running
         # possibly (re)start each thread
-        helios_thread_instance.update_thread_state()
-        upload_thread_instance.update_thread_state()
+        helios_thread_instance.update_thread_state(config)
+        upload_thread_instance.update_thread_state(config)
 
         if config["general"]["test_mode"]:
             logger.info("pyra-core in test mode")

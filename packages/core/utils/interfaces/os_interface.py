@@ -3,15 +3,15 @@ import psutil
 import datetime
 
 
-class LowEnergyError(Exception):
-    pass
-
-
-class StorageError(Exception):
-    pass
-
-
 class OSInterface:
+    @staticmethod
+    class StorageError(Exception):
+        """Raised when storage is more than 90% full"""
+
+    @staticmethod
+    class LowEnergyError(Exception):
+        """Raised when battery is less than 20% full"""
+
     @staticmethod
     def get_cpu_usage() -> list[float]:
         """returns cpu_percent for all cores -> list [cpu1%, cpu2%,...]"""
@@ -36,7 +36,7 @@ class OSInterface:
     def validate_disk_space():
         """Raises an error if the diskspace is less than 10%"""
         if OSInterface.get_disk_space() > 90:
-            raise StorageError(
+            raise OSInterface.StorageError(
                 "Disk space is less than 10%. This is bad for the OS stability."
             )
 
@@ -77,7 +77,7 @@ class OSInterface:
         """Raises LowEnergyError if system battery runs lower than 20%."""
         if psutil.sensors_battery():
             if psutil.sensors_battery().percent < 20.0:
-                raise LowEnergyError(
+                raise OSInterface.LowEnergyError(
                     "The battery of the system is below 20%. Please check the power supply."
                 )
 
@@ -110,3 +110,6 @@ class OSInterface:
                 return p.status()
 
         return "not_found"
+
+
+OSInterface.StorageError

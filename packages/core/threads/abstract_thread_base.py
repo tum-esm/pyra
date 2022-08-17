@@ -1,6 +1,5 @@
 import abc
 import threading
-from typing import Callable
 from packages.core.utils.functions.logger import Logger
 
 
@@ -21,7 +20,7 @@ class AbstractThreadBase(abc.ABC):
         self.config = config
 
         is_running = (self.__thread is not None) and self.__thread.is_alive()
-        should_be_running = self.should_be_running()
+        should_be_running = self.should_be_running(config)
 
         if should_be_running and (not is_running):
             self.__logger.info("Starting the thread")

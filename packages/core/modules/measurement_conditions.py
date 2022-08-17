@@ -1,11 +1,12 @@
 import datetime
+from typing import Literal
 from packages.core.utils import Astronomy, StateInterface, Logger
 
 logger = Logger(origin="measurement-conditions")
 
 
-def get_times_from_tuples(triggers: any):
-
+# TODO: add type annotation
+def get_times_from_tuples(triggers) -> tuple[datetime.time, datetime.time, datetime.time]:
     now = datetime.datetime.now()
     current_time = datetime.time(now.hour, now.minute, now.second)
     start_time = datetime.time(**triggers["start_time"])

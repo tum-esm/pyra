@@ -1,22 +1,22 @@
 import time
 from snap7.exceptions import Snap7Exception
-from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface, PLCError
+from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface
 
 logger = Logger(origin="enclosure-control")
-
-
-class CoverError(Exception):
-    pass
-
-
-class MotorFailedError(Exception):
-    pass
 
 
 class EnclosureControl:
     """
     https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
     """
+
+    @staticmethod
+    class CoverError(Exception):
+        pass
+
+    @staticmethod
+    class MotorFailedError(Exception):
+        pass
 
     def __init__(self, initial_config: dict):
         self.config = initial_config
@@ -80,7 +80,9 @@ class EnclosureControl:
             self.auto_set_power_spectrometer()
 
             if self.plc_state.state.motor_failed:
-                raise MotorFailedError("URGENT: stop all actions, check cover in person")
+                raise EnclosureControl.MotorFailedError(
+                    "URGENT: stop all actions, check cover in person"
+                )
 
             # check PLC ip connection (single ping)
             if self.plc_interface.is_responsive():
@@ -112,7 +114,7 @@ class EnclosureControl:
             now = time.time()
             seconds_since_error_occured = now - self.last_plc_connection_time
             if seconds_since_error_occured > 600:
-                raise PLCError("Snap7Exception persisting for 10+ minutes")
+                raise PLCInterface.PLCError("Snap7Exception persisting for 10+ minutes")
             else:
                 logger.info(
                     f"Snap7Exception persisting for {round(seconds_since_error_occured/60, 2)}"
@@ -161,7 +163,7 @@ class EnclosureControl:
             elapsed_time = time.time() - start_time
             if elapsed_time > 60:
                 if throw_error:
-                    raise CoverError("Enclosure cover might be stuck.")
+                    raise EnclosureControl.CoverError("Enclosure cover might be stuck.")
                 break
 
     def auto_set_power_spectrometer(self) -> None:
