@@ -1,1 +1,1 @@
-python -m mypy run-pyra-core.py --strict
+python -m mypy run-pyra-core.py --strict --implicit-reexport --no-warn-unused-ignores

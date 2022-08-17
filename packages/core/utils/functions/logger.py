@@ -31,23 +31,23 @@ class Logger:
         self.origin = origin
         self.just_print = just_print
 
-    def debug(self, message: str):
+    def debug(self, message: str) -> None:
         self._write_log_line("DEBUG", message)
 
-    def info(self, message: str):
+    def info(self, message: str) -> None:
         self._write_log_line("INFO", message)
 
-    def warning(self, message: str):
+    def warning(self, message: str) -> None:
         self._write_log_line("WARNING", message)
 
-    def error(self, message: str):
+    def error(self, message: str) -> None:
         self._write_log_line("ERROR", message)
 
-    def exception(self, e: Exception):
+    def exception(self, e: Exception) -> None:
         tb = "\n".join(traceback.format_exception(e))
         self._write_log_line("EXCEPTION", f"{type(e).__name__} occured: {tb}")
 
-    def _write_log_line(self, level: str, message: str):
+    def _write_log_line(self, level: str, message: str) -> None:
         now = datetime.now()
         utc_offset = round((datetime.now() - datetime.utcnow()).total_seconds() / 3600, 1)
         if round(utc_offset) == utc_offset:
@@ -73,7 +73,7 @@ class Logger:
             Logger.last_archive_time = now
 
     @staticmethod
-    def archive(keep_last_hour=False):
+    def archive(keep_last_hour: bool = False) -> None:
         with filelock.FileLock(LOG_FILES_LOCK):
             with open(DEBUG_LOG_FILE, "r") as f:
                 log_lines_in_file = f.readlines()
@@ -118,7 +118,7 @@ class Logger:
                         f.writelines(archive_log_date_groups[date][t] + [""])
 
     @staticmethod
-    def log_activity_event(event_label: str):
+    def log_activity_event(event_label: str) -> None:
         """
         Log things like:
         * start-measurements

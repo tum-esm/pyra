@@ -13,4 +13,5 @@ from .interfaces import StateInterface
 from .interfaces import PLCInterface
 from .interfaces import OSInterface
 
-from . import types
+from .types import UploadMetaTypes
+from .types import PersistentStateTypes

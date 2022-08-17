@@ -1,7 +1,8 @@
 import json
 import os
 import shutil
-from packages.core.utils import types, with_filelock, update_dict_recursively
+from packages.core.utils import with_filelock, update_dict_recursively
+from packages.core.utils.types import upload_meta
 from .plc_interface import EMPTY_PLC_STATE
 
 dir = os.path.dirname
@@ -29,7 +30,7 @@ EMPTY_STATE_OBJECT: dict = {
     },
 }
 
-EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
+EMPTY_PERSISTENT_STATE_OBJECT: upload_meta.PersistentStateDict = {
     "active_opus_macro_id": None,
     "current_exceptions": [],
 }
@@ -85,7 +86,7 @@ class StateInterface:
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def read_persistent() -> types.PersistentStateDict:
+    def read_persistent() -> upload_meta.PersistentStateDict:
         """Read the persistent state file and return its content"""
         with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
             return json.load(f)
@@ -108,7 +109,7 @@ class StateInterface:
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def update_persistent(update: types.PartialPersistentStateDict) -> None:
+    def update_persistent(update: upload_meta.PartialPersistentStateDict) -> None:
         """
         Update the (persistent) state file and return its content.
         The update object should only include the properties to be

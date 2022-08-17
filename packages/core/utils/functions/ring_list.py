@@ -7,16 +7,18 @@ class RingList:
     Added sum() and reinitialize() functions.
     """
 
-    def __init__(self, length):
-        self.__max__ = length
-        self.empty()
+    def __init__(self, length: int):
+        self.__max__: int = length
+        self.__data__: list[int] = []
+        self.__full__: int = 0
+        self.__cur__: int = 0
 
-    def empty(self):
+    def empty(self) -> None:
         self.__data__ = []
         self.__full__ = 0
         self.__cur__ = 0
 
-    def append(self, x):
+    def append(self, x: int) -> None:
         if self.__full__ == 1:
             for i in range(0, self.__cur__ - 1):
                 self.__data__[i] = self.__data__[i + 1]
@@ -27,7 +29,7 @@ class RingList:
             if self.__cur__ == self.__max__:
                 self.__full__ = 1
 
-    def get(self):
+    def get(self) -> list[int]:
         return self.__data__
 
     def remove(self) -> None:
@@ -35,16 +37,16 @@ class RingList:
             del self.__data__[self.__cur__ - 1]
             self.__cur__ -= 1
 
-    def size(self):
+    def size(self) -> int:
         return self.__cur__
 
-    def maxsize(self):
+    def maxsize(self) -> int:
         return self.__max__
 
-    def sum(self):
-        return float(sum(self.get()))
+    def sum(self) -> int:
+        return sum(self.get())
 
-    def reinitialize(self, length):
+    def reinitialize(self, length: int) -> None:
         self.__max__ = length
         self.__full__ = 0
         self.__cur__ = 0
@@ -54,5 +56,5 @@ class RingList:
         for item in handover_list:
             self.append(item)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.__data__)

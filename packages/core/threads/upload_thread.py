@@ -8,7 +8,9 @@ import paramiko
 import time
 import fabric  # type: ignore
 import re
-from packages.core.utils import ConfigInterface, Logger, types
+import pydantic
+from packages.core.utils import ConfigInterface, Logger
+from packages.core.utils.types import UploadMetaTypes
 from .abstract_thread_base import AbstractThreadBase
 
 logger = Logger(origin="upload")
@@ -49,7 +51,7 @@ class DirectoryUploadClient:
             config["upload"]["dst_directory"]
         ), f"remote {config['upload']['dst_directory']} is not a directory"
 
-        self.meta_content: types.UploadMetaDict = {
+        self.meta_content: UploadMetaTypes.Dict = {
             "complete": False,
             "fileList": [],
             "createdTime": round(time.time(), 3),
@@ -128,12 +130,13 @@ class DirectoryUploadClient:
         try:
             assert os.path.isfile(self.src_meta_path)
             with open(self.src_meta_path, "r") as f:
-                # TODO: validate this with cerberus
-                self.meta_content = json.load(f)
-        except (AssertionError, json.JSONDecodeError) as e:
+                new_meta_content = json.load(f)
+                UploadMetaTypes.validate_object(new_meta_content)
+                self.meta_content = new_meta_content
+        except (AssertionError, json.JSONDecodeError, pydantic.ValidationError) as e:
             raise InvalidUploadState(str(e))
 
-    def __update_meta(self, new_meta_content_partial: types.PartialUploadMetaDict) -> None:
+    def __update_meta(self, new_meta_content_partial: UploadMetaTypes.PartialDict) -> None:
         """
         Update the local upload-meta.json file and overwrite
         the meta file on the server
@@ -243,7 +246,7 @@ class DirectoryUploadClient:
             return False
 
     @staticmethod
-    def get_directories_to_be_uploaded(ifg_src_path) -> list[str]:
+    def get_directories_to_be_uploaded(ifg_src_path: str) -> list[str]:
         if not os.path.isdir(ifg_src_path):
             return []
 
