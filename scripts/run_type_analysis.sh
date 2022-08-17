@@ -1,0 +1,1 @@
+python -m mypy run-pyra-core.py

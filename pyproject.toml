@@ -22,6 +22,10 @@ fabric = "^2.7.1"
 pytest = "7.1.2"
 black = "22.3.0"
 deepdiff = "^5.8.1"
+mypy = "^0.971"
+types-paramiko = "^2.11.3"
+types-invoke = "^1.7.3"
+types-psutil = "^5.9.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
