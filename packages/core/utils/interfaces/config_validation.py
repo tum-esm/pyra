@@ -62,7 +62,11 @@ def get_config_file_schema(strict: boolean):
     return {
         "general": DICT_SCHEMA(
             {
-                "seconds_per_core_interval": {"type": "number", "min": 5, "max": 600},
+                "seconds_per_core_interval": {
+                    "type": "number",
+                    "min": 5,
+                    "max": 600,
+                },
                 "test_mode": {"type": "boolean"},
                 "station_id": {"type": "string"},
                 "min_sun_elevation": {"type": "number", "min": 0, "max": 90},
@@ -84,7 +88,11 @@ def get_config_file_schema(strict: boolean):
                 "executable_path": specs["file"],
                 "learn_az_elev_path": specs["file"],
                 "sun_intensity_path": specs["file"],
-                "motor_offset_threshold": {"type": "number", "min": -360, "max": 360},
+                "motor_offset_threshold": {
+                    "type": "number",
+                    "min": -360,
+                    "max": 360,
+                },
             }
         ),
         "error_email": DICT_SCHEMA(
@@ -97,7 +105,10 @@ def get_config_file_schema(strict: boolean):
         ),
         "measurement_decision": DICT_SCHEMA(
             {
-                "mode": {"type": "string", "allowed": ["automatic", "manual", "cli"]},
+                "mode": {
+                    "type": "string",
+                    "allowed": ["automatic", "manual", "cli"],
+                },
                 "manual_decision_result": {"type": "boolean"},
                 "cli_decision_result": {"type": "boolean"},
             }
@@ -123,8 +134,16 @@ def get_config_file_schema(strict: boolean):
             {
                 "camera_id": {"type": "integer", "min": 0, "max": 999999},
                 "evaluation_size": {"type": "integer", "min": 1, "max": 100},
-                "seconds_per_interval": {"type": "number", "min": 5, "max": 600},
-                "measurement_threshold": {"type": "number", "min": 0.1, "max": 1},
+                "seconds_per_interval": {
+                    "type": "number",
+                    "min": 5,
+                    "max": 600,
+                },
+                "measurement_threshold": {
+                    "type": "number",
+                    "min": 0.1,
+                    "max": 1,
+                },
                 "save_images": {"type": "boolean"},
             }
         ),
@@ -150,31 +169,48 @@ logger = Logger(origin="config-validation")
 
 
 class ConfigValidation:
+    """
+    Functions used to validate config objects/files.
+
+    All functions in here do not used filelocks because
+    higher level functions should do that.
+    """
+
     logging_handler = logger.error
 
     @staticmethod
-    def check(
-        content_object: dict,
-        partial_validation: bool = False,
-    ):
+    def check_dict(
+        content_object: dict, partial_validation: bool = False, validate_paths: bool = True
+    ) -> None:
+        """
+        For a given config object, check its integrity.
+
+        "partial_validation" means that keys can be missing.
+        This is used when updating the config via CLI, since
+        the errors given when updating should only concern
+        the passed properties).
+
+        "validate_paths" means that paths (files and directories)
+        contained in the config object should be checked too -
+        whether they exist. This path-validation is skipped when
+        reading the config via CLI because the UI can and should
+        deal with invalid paths but not with an invalid structure.
+
+        Does not return anything, only raises AssertionErrors.
+        """
         validator = cerberus.Validator(
-            get_config_file_schema(strict=True), require_all=(not partial_validation)
+            get_config_file_schema(strict=validate_paths),
+            require_all=(not partial_validation),
         )
         assert validator.validate(content_object), validator.errors
         # Add assertions that cannot be done with cerberus here
 
     @staticmethod
-    def check_structure(content_object: dict):
-        """
-        Only validates whether the object has all required
-        keys and the correct value-datatypes. Not validations
-        like "file exists", etc.
-        """
-        validator = cerberus.Validator(get_config_file_schema(strict=False), require_all=True)
-        assert validator.validate(content_object), validator.errors
-
-    @staticmethod
     def check_current_config_file() -> Tuple[bool, str]:
+        """
+        Load the contents of the current config file and
+        validate its full integrity (with filepaths).
+        """
         try:
             assert os.path.isfile(CONFIG_FILE_PATH), "file does not exist"
             with open(CONFIG_FILE_PATH, "r") as f:
@@ -183,21 +219,25 @@ class ConfigValidation:
                 except:
                     raise AssertionError("file not in a valid json format")
 
-            ConfigValidation.check(content_object, partial_validation=False)
+            ConfigValidation.check_dict(content_object, partial_validation=False)
             return True, ""
         except Exception as e:
             ConfigValidation.logging_handler(f"Error in current config file: {e}")
             return False, e
 
     @staticmethod
-    def check_partial_config_string(content: str):
+    def check_partial_config_string(content: str) -> bool:
+        """
+        For a given string, check whether its is a valid
+        partial config object. Used in CLI.
+        """
         try:
             try:
-                content_object = json.loads(content)
+                content_dict = json.loads(content)
             except:
                 raise AssertionError("content not in a valid json format")
 
-            ConfigValidation.check(content_object, partial_validation=True)
+            ConfigValidation.check_dict(content_dict, partial_validation=True)
             return True
         except Exception as e:
             ConfigValidation.logging_handler(f"Error in new config string: {e}")

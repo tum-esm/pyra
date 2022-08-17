@@ -82,6 +82,7 @@ class PLCState:
         return out
 
 
+# used when initializing the state.json file
 EMPTY_PLC_STATE = PLCState(
     actors=PLCActorsState(),
     control=PLCControlState(),
@@ -116,13 +117,21 @@ class PLCInterface:
     # CONNECTION
 
     def update_config(self, new_config: dict):
+        """
+        Update the internally used config (executed at the)
+        beginning of enclosure-control's run-function.
+
+        Reconnecting to PLC, when IP has changed.
+        """
         if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
             logger.debug("PLC ip has changed, reconnecting now")
+            self.disconnect()
+            self.connect()
         self.config = new_config
 
     def connect(self) -> None:
         """
-        Connects to the PLC Snap7
+        Connects to the PLC Snap7. Times out after 30 seconds.
         """
         self.plc = snap7.client.Client()
         start_time = time.time()
@@ -158,7 +167,7 @@ class PLCInterface:
             self.plc.destroy()
             logger.debug("Disconnected ungracefully from PLC.")
 
-    def _is_connected(self) -> bool:
+    def __is_connected(self) -> bool:
         """
         Checks whether PLC is connected
         """
@@ -172,12 +181,21 @@ class PLCInterface:
     #    return self._read_bool(self.specification.state.rain)
 
     def cover_is_closed(self) -> bool:
+        """
+        Reads the single value "state.cover_closed"
+        """
         return self._read_bool(self.specification.state.cover_closed)
 
     def reset_is_needed(self) -> bool:
+        """
+        Reads the single value "state.reset_needed"
+        """
         return self._read_bool(self.specification.state.reset_needed)
 
     def get_cover_angle(self) -> int:
+        """
+        Reads the single value "actors.current_angle"
+        """
         return self._read_int(self.specification.actors.current_angle)
 
     def read(self) -> PLCState:

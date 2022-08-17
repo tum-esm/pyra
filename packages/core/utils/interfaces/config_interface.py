@@ -10,13 +10,15 @@ CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 
 
-# TODO: Make config interface statically typed
-
-
 class ConfigInterface:
     @staticmethod
     @with_filelock(CONFIG_LOCK_PATH)
     def read() -> dict:
+        """
+        Read the contents of the current config.json file.
+        The function will validate its integrity and raises
+        an AssertionError if the file is not valid.
+        """
         file_is_valid, validation_exception = ConfigValidation.check_current_config_file()
         assert file_is_valid, str(validation_exception)
         with open(CONFIG_FILE_PATH, "r") as f:

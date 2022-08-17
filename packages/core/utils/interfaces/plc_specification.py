@@ -61,9 +61,7 @@ class PLCSpecification:
     connections: PLCConnectionsSpecification
 
 
-# TODO: Add correct variables for PLC
-# TODO: Think of a better naming for this class/file
-
+# these are the pins used on the TUM-PLC for all functionality
 PLC_SPECIFICATION_VERSIONS: dict[int, PLCSpecification] = {
     1: PLCSpecification(
         actors=PLCActorsSpecification(
@@ -116,23 +114,20 @@ PLC_SPECIFICATION_VERSIONS: dict[int, PLCSpecification] = {
             reset=[3, 4, 1, 5],
             sync_to_tracker=[8, 8, 1, 1],
         ),
-        sensors=PLCSensorsSpecification(
-            humidity=[8, 22, 2],
-            temperature=[8, 16, 2]
-        ),
+        sensors=PLCSensorsSpecification(humidity=[8, 22, 2], temperature=[8, 16, 2]),
         state=PLCStateSpecification(
             cover_closed=[6, 16, 1, 1],
-            motor_failed= None,
+            motor_failed=None,
             rain=[3, 0, 1, 0],
             reset_needed=[3, 2, 1, 2],
             ups_alert=[8, 13, 1, 6],
         ),
         power=PLCPowerSpecification(
-            camera=[8, 8, 1, 4], #K5 Relay
-            computer= None,
-            heater=[8, 12, 1, 7], #K3 Relay
-            router= None, #not allowed
-            spectrometer=[8, 8, 1, 2], #K4 Relay
+            camera=[8, 8, 1, 4],  # K5 Relay
+            computer=None,
+            heater=[8, 12, 1, 7],  # K3 Relay
+            router=None,  # not allowed
+            spectrometer=[8, 8, 1, 2],  # K4 Relay
         ),
         connections=PLCConnectionsSpecification(
             camera=None,

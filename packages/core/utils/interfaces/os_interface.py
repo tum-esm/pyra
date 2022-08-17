@@ -1,3 +1,4 @@
+from typing import Literal
 import psutil
 import datetime
 
@@ -12,7 +13,7 @@ class StorageError(Exception):
 
 class OSInterface:
     @staticmethod
-    def get_cpu_usage() -> list:
+    def get_cpu_usage() -> list[float]:
         """returns cpu_percent for all cores -> list [cpu1%, cpu2%,...]"""
         return psutil.cpu_percent(interval=1, percpu=True)
 
@@ -35,16 +36,19 @@ class OSInterface:
     def validate_disk_space():
         """Raises an error if the diskspace is less than 10%"""
         if OSInterface.get_disk_space() > 90:
-            raise StorageError("Disk space is less than 10%. This is bad for the OS stability.")
+            raise StorageError(
+                "Disk space is less than 10%. This is bad for the OS stability."
+            )
 
+    # TODO: function is not working as expected. Needs revision.
     @staticmethod
-    def get_connection_status(ip: str) -> str:
-        """Checks the ip connection.
-        Takes IP as input as str: i.e. 10.10.0.4
-        and returns status i.e. ESTABLISHED, CLOSED, SYN_SENT
-        returns NO_INFO if IP is not found.
+    def get_connection_status(
+        ip: str,
+    ) -> Literal["ESTABLISHED", "CLOSED", "SYN_SENT", "NO_INFO"]:
         """
-        # TODO: function is not working as expected. Needs revision.
+        Takes ip address as input str: i.e. 10.10.0.4
+        Checks the ip connection for that address.
+        """
 
         connections = psutil.net_connections(kind="inet4")
 
@@ -59,12 +63,14 @@ class OSInterface:
         return "NO_INFO"
 
     @staticmethod
-    def get_system_battery() -> float:
-        """Returns system battery in percent as a float.
-        Returns 100.0 if no battery is in the device."""
-        if psutil.sensors_battery():
+    def get_system_battery() -> int:
+        """
+        Returns system battery in percent as an integer (1-100).
+        Returns 100 if device has no battery.
+        """
+        if psutil.sensors_battery() is not None:
             return psutil.sensors_battery().percent
-        return 100.0
+        return 100
 
     @staticmethod
     def validate_system_battery():
@@ -76,16 +82,28 @@ class OSInterface:
                 )
 
     @staticmethod
-    def get_last_boot_time():
+    def get_last_boot_time() -> str:
         """Returns last OS boot time."""
-        return datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
+        return datetime.datetime.fromtimestamp(psutil.boot_time()).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
     @staticmethod
-    def get_process_status(process_name: str) -> str:
-        """Takes a process name "*.exe" and returns its OS process status:
-        “running”, “paused”, “start_pending”, “pause_pending”, “continue_pending”,
-         “stop_pending” or “stopped”.
-        returns "not_found" if process is not found.
+    def get_process_status(
+        process_name: str,
+    ) -> Literal[
+        "running",
+        "paused",
+        "start_pending",
+        "pause_pending",
+        "continue_pending",
+        "stop_pending",
+        "stopped",
+        "not_found",
+    ]:
+        """
+        Takes a process name "*.exe" and returns its OS process
+        status (see return types).
         """
         for p in psutil.process_iter():
             if p.name() == process_name:

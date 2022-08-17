@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from packages.core.utils import with_filelock, update_dict_recursively
 from .plc_interface import EMPTY_PLC_STATE
 
@@ -16,42 +17,68 @@ STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
 
 
-# TODO: Rename as CoreStateInterface
-# TODO: Documentation
+EMPTY_STATE_OBJECT = {
+    "helios_indicates_good_conditions": None,
+    "measurements_should_be_running": False,
+    "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
+    "os_state": {
+        "cpu_usage": None,
+        "memory_usage": None,
+        "last_boot_time": None,
+        "filled_disk_space_fraction": None,
+    },
+}
+
+EMPTY_PERSISTENT_STATE_OBJECT = {
+    "active_opus_macro_id": None,
+    "current_exceptions": [],
+}
+
+# TODO: Validate structure with cerberus (assertion)
 
 
 class StateInterface:
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def initialize() -> None:
-        # possibly create runtime_data directory
-        if not os.path.exists(RUNTIME_DATA_PATH):
-            os.mkdir(RUNTIME_DATA_PATH)
+    def initialize():
+        """
+        This will create two files:
 
-        # write initial state.json file
-        new_state = {
-            "helios_indicates_good_conditions": None,
-            "measurements_should_be_running": False,
-            "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
-            "os_state": {
-                "cpu_usage": None,
-                "memory_usage": None,
-                "last_boot_time": None,
-                "filled_disk_space_fraction": None,
-            },
+        1. runtime-data/state.json: {
+            "helios_indicates_good_conditions": ...,
+            "measurements_should_be_running": ...,
+            "enclosure_plc_readings": {...},
+            "os_state": {...}
         }
-        with open(STATE_FILE_PATH, "w") as f:
-            json.dump(new_state, f, indent=4)
 
-        # persistent state will not be overwritten with a restart of pyra-core
+        2. logs/persistent-state.json: {
+            "active_opus_macro_id": ...,
+            "current_exceptions": []
+        }
+
+        The state.json file will be cleared with every restart
+        of PYRA Core. The persistent-state.json will only be
+        created, when it does not exist yet.
+        """
+
+        # clear runtime-data directory
+        if os.path.exists(RUNTIME_DATA_PATH):
+            shutil.rmtree(RUNTIME_DATA_PATH)
+        os.mkdir(RUNTIME_DATA_PATH)
+
+        # create the state file
+        with open(STATE_FILE_PATH, "w") as f:
+            json.dump(EMPTY_STATE_OBJECT, f, indent=4)
+
+        # possibly create the persistent state file
         if not os.path.isfile(PERSISTENT_STATE_FILE_PATH):
-            new_persistent_state = {"active_opus_macro_id": None, "current_exceptions": []}
             with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
-                json.dump(new_persistent_state, f, indent=4)
+                json.dump(EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
     def read(persistent: bool = False) -> dict:
+        """Read the (persistent) state file and return its content"""
         file_path = PERSISTENT_STATE_FILE_PATH if persistent else STATE_FILE_PATH
         with open(file_path, "r") as f:
             return json.load(f)
@@ -59,6 +86,11 @@ class StateInterface:
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
     def update(update: dict, persistent: bool = False):
+        """
+        Update the (persistent) state file and return its content.
+        The update object should only include the properties to be
+        changed in contrast to containing the whole file.
+        """
         file_path = PERSISTENT_STATE_FILE_PATH if persistent else STATE_FILE_PATH
 
         with open(file_path, "r") as f:

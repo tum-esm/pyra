@@ -1,5 +1,4 @@
-from packages.core.utils import Logger, OSInterface
-from packages.core.utils.interfaces.state_interface import StateInterface
+from packages.core.utils import Logger, OSInterface, StateInterface
 
 logger = Logger(origin="system-checks")
 

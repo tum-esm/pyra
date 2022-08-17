@@ -11,7 +11,7 @@ from packages.core.utils import (
     Astronomy,
     ImageProcessing,
 )
-from packages.core.threads.abstract_thread_base import AbstractThreadBase
+from .abstract_thread_base import AbstractThreadBase
 
 logger = Logger(origin="helios")
 
