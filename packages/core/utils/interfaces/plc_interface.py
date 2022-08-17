@@ -105,13 +105,13 @@ class PLCInterface:
         * set_auto_temperature/_manual_temperature
         """
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict) -> None:
         self.config = config
         self.specification = PLC_SPECIFICATION_VERSIONS[config["tum_plc"]["version"]]
 
     # CONNECTION/CLASS MANAGEMENT
 
-    def update_config(self, new_config: dict):
+    def update_config(self, new_config: dict) -> None:
         """
         Update the internally used config (executed at the)
         beginning of enclosure-control's run-function.

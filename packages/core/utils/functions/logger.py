@@ -27,9 +27,9 @@ def log_line_has_time(log_line: str) -> bool:
 class Logger:
     last_archive_time = datetime.now()
 
-    def __init__(self, origin="pyra.core", just_print: bool = False) -> None:
-        self.origin = origin
-        self.just_print = just_print
+    def __init__(self, origin: str = "pyra.core", just_print: bool = False) -> None:
+        self.origin: str = origin
+        self.just_print: bool = just_print
 
     def debug(self, message: str) -> None:
         self._write_log_line("DEBUG", message)

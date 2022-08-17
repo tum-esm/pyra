@@ -1,10 +1,13 @@
 import os
 import sys
 import time
+from typing import Any
 from packages.core.utils import Logger, StateInterface, Astronomy
 
 
 # these imports are provided by pywin32
+win32ui: Any = None
+dde: Any = None
 if sys.platform == "win32":
     import win32ui  # type: ignore
     import dde  # type: ignore

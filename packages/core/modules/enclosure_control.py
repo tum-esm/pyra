@@ -123,7 +123,7 @@ class EnclosureControl:
 
     # PLC.ACTORS SETTERS
 
-    def move_cover(self, value) -> None:
+    def move_cover(self, value: int) -> None:
         logger.debug(f"Received request to move cover to position {value} degrees.")
 
         # rain check before moving cover. PLC will deny cover requests during rain anyway
@@ -146,7 +146,7 @@ class EnclosureControl:
         self.plc_interface.set_cover_angle(0)
         self.plc_interface.set_manual_control(False)
 
-    def wait_for_cover_closing(self, throw_error=True) -> None:
+    def wait_for_cover_closing(self, throw_error: bool = True) -> None:
         """Waits steps of 5s for the enclosure cover to close.
 
         Raises the custom error CoverError if clover doesn't close in a given
