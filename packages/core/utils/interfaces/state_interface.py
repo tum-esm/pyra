@@ -17,7 +17,7 @@ STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
 
 
-EMPTY_STATE_OBJECT = {
+EMPTY_STATE_OBJECT: dict = {
     "helios_indicates_good_conditions": None,
     "measurements_should_be_running": False,
     "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
@@ -29,7 +29,7 @@ EMPTY_STATE_OBJECT = {
     },
 }
 
-EMPTY_PERSISTENT_STATE_OBJECT = {
+EMPTY_PERSISTENT_STATE_OBJECT: dict = {
     "active_opus_macro_id": None,
     "current_exceptions": [],
 }

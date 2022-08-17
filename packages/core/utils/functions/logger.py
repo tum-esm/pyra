@@ -72,6 +72,7 @@ class Logger:
             Logger.archive(keep_last_hour=True)
             Logger.last_archive_time = now
 
+    @staticmethod
     def archive(keep_last_hour=False):
         with filelock.FileLock(LOG_FILES_LOCK):
             with open(DEBUG_LOG_FILE, "r") as f:

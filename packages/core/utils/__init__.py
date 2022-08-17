@@ -8,7 +8,7 @@ from .functions import ImageProcessing
 
 from .decorators import with_filelock
 
-from .interfaces import ConfigInterface, ConfigValidation
+from .interfaces import ConfigInterface
 from .interfaces import StateInterface
-from .interfaces import PLCInterface, PLCError
-from .interfaces import OSInterface, LowEnergyError, StorageError
+from .interfaces import PLCInterface
+from .interfaces import OSInterface

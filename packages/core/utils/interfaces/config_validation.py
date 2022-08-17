@@ -206,7 +206,7 @@ class ConfigValidation:
         # Add assertions that cannot be done with cerberus here
 
     @staticmethod
-    def check_current_config_file() -> Tuple[bool, str]:
+    def check_current_config_file() -> Tuple[bool, Exception]:
         """
         Load the contents of the current config file and
         validate its full integrity (with filepaths).
@@ -220,7 +220,7 @@ class ConfigValidation:
                     raise AssertionError("file not in a valid json format")
 
             ConfigValidation.check_dict(content_object, partial_validation=False)
-            return True, ""
+            return True, Exception("")
         except Exception as e:
             ConfigValidation.logging_handler(f"Error in current config file: {e}")
             return False, e

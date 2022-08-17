@@ -1,3 +1,4 @@
+from ctypes import Union
 from typing import Literal
 import psutil
 import datetime
@@ -15,7 +16,7 @@ class OSInterface:
     @staticmethod
     def get_cpu_usage() -> list[float]:
         """returns cpu_percent for all cores -> list [cpu1%, cpu2%,...]"""
-        return psutil.cpu_percent(interval=1, percpu=True)
+        return psutil.cpu_percent(interval=1, percpu=True)  # type: ignore
 
     @staticmethod
     def get_memory_usage() -> float:
@@ -44,7 +45,7 @@ class OSInterface:
     @staticmethod
     def get_connection_status(
         ip: str,
-    ) -> Literal["ESTABLISHED", "CLOSED", "SYN_SENT", "NO_INFO"]:
+    ) -> str:
         """
         Takes ip address as input str: i.e. 10.10.0.4
         Checks the ip connection for that address.
@@ -68,8 +69,9 @@ class OSInterface:
         Returns system battery in percent as an integer (1-100).
         Returns 100 if device has no battery.
         """
-        if psutil.sensors_battery() is not None:
-            return psutil.sensors_battery().percent
+        battery_state = psutil.sensors_battery()
+        if battery_state is not None:
+            return battery_state.percent
         return 100
 
     @staticmethod
@@ -93,13 +95,20 @@ class OSInterface:
         process_name: str,
     ) -> Literal[
         "running",
-        "paused",
-        "start_pending",
-        "pause_pending",
-        "continue_pending",
-        "stop_pending",
+        "sleeping",
+        "disk-sleep",
         "stopped",
-        "not_found",
+        "tracing-stop",
+        "zombie",
+        "dead",
+        "wake-kill",
+        "waking",
+        "idle",
+        "locked",
+        "waiting",
+        "suspended",
+        "parked",
+        "not-found",
     ]:
         """
         Takes a process name "*.exe" and returns its OS process
@@ -109,7 +118,7 @@ class OSInterface:
             if p.name() == process_name:
                 return p.status()
 
-        return "not_found"
+        return "not-found"
 
 
 OSInterface.StorageError

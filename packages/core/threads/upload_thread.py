@@ -292,12 +292,12 @@ class UploadThread(AbstractThreadBase):
     def __init__(self):
         super().__init__(logger)
 
-    def should_be_running(self, config: dict) -> bool:
+    def should_be_running(self) -> bool:
         """Should the thread be running? (based on config.upload)"""
         return (
-            (not config["general"]["test_mode"])
-            and (config["upload"] is not None)
-            and (config["upload"]["is_active"])
+            (not self.config["general"]["test_mode"])
+            and (self.config["upload"] is not None)
+            and (self.config["upload"]["is_active"])
         )
 
     def main(self):

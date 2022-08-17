@@ -1,4 +1,9 @@
 from dataclasses import dataclass
+from typing import Optional
+
+
+# TODO: use typeddict
+# TODO: use tuples (3 ints vs 4 ints)
 
 
 @dataclass
@@ -27,7 +32,7 @@ class PLCSensorsSpecification:
 @dataclass
 class PLCStateSpecification:
     cover_closed: list[int]
-    motor_failed: list[int] | None
+    motor_failed: Optional[list[int]]
     rain: list[int]
     reset_needed: list[int]
     ups_alert: list[int]
@@ -36,19 +41,19 @@ class PLCStateSpecification:
 @dataclass
 class PLCPowerSpecification:
     camera: list[int]
-    computer: list[int]
+    computer: Optional[list[int]]
     heater: list[int]
-    router: list[int]
+    router: Optional[list[int]]
     spectrometer: list[int]
 
 
 @dataclass
 class PLCConnectionsSpecification:
-    camera: list[int] | None
+    camera: Optional[list[int]]
     computer: list[int]
     heater: list[int]
     router: list[int]
-    spectrometer: list[int] | None
+    spectrometer: Optional[list[int]]
 
 
 @dataclass

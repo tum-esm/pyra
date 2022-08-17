@@ -31,8 +31,8 @@ class PLCControlState:
 
 @dataclasses.dataclass
 class PLCSensorsState:
-    humidity: int = None
-    temperature: int = None
+    humidity: Optional[int] = None
+    temperature: Optional[int] = None
 
 
 @dataclasses.dataclass
@@ -169,19 +169,19 @@ class PLCInterface:
     # DIRECT READ FUNCTIONS
 
     def rain_is_detected(self) -> bool:
-        return self._read_bool(self.specification.state.rain)
+        return self.__read_bool(self.specification.state.rain)
 
     def cover_is_closed(self) -> bool:
         """
         Reads the single value "state.cover_closed"
         """
-        return self._read_bool(self.specification.state.cover_closed)
+        return self.__read_bool(self.specification.state.cover_closed)
 
     def reset_is_needed(self) -> bool:
         """
         Reads the single value "state.reset_needed"
         """
-        return self._read_bool(self.specification.state.reset_needed)
+        return self.__read_bool(self.specification.state.reset_needed)
 
     def get_cover_angle(self) -> int:
         """
@@ -210,10 +210,12 @@ class PLCInterface:
 
         logger.debug(f"new plc bulk read: {plc_db_content}")
 
-        def _get_int(spec: list[int]) -> int:
+        def _get_int(spec: Optional[list[int]]) -> Optional[int]:
+            if spec is None:
+                return None
             return snap7.util.get_int(plc_db_content[spec[0]], spec[1])
 
-        def _get_bool(spec: list[int] | None) -> bool:
+        def _get_bool(spec: Optional[list[int]]) -> Optional[bool]:
             if spec is None:
                 return None
             return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])
@@ -342,6 +344,7 @@ class PLCInterface:
 
     def set_power_computer(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        assert self.specification.power.computer is not None
         self.__update_bool(
             new_state,
             self.specification.power.computer,
@@ -356,8 +359,9 @@ class PLCInterface:
             {"power": {"heater": new_state}},
         )
 
-    def set__power_router(self, new_state: bool) -> None:
+    def set_power_router(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        assert self.specification.power.router is not None
         self.__update_bool(
             new_state,
             self.specification.power.router,

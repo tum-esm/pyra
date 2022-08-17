@@ -1,10 +1,14 @@
+from typing import Optional
 import astropy.coordinates as astropy_coordinates  # type: ignore
 import astropy.time as astropy_time  # type: ignore
 import astropy.units as astropy_units  # type: ignore
 
+# TODO: pass config via functions instea of indirectly
+#       more code  but way simpler
+
 
 class Astronomy:
-    CONFIG: dict = None
+    CONFIG: Optional[dict] = None
     units = astropy_units
 
     @staticmethod
@@ -22,13 +26,15 @@ class Astronomy:
         return sun_angle_deg
 
     @staticmethod
-    def __get_location_from_camtracker_config() -> tuple[float]:
+    def __get_location_from_camtracker_config() -> tuple[float, float, float]:
         """Reads the config.txt file of the CamTracker application to receive the
         latest tracker position.
 
         Returns
         tracker_position as a python list
         """
+
+        assert Astronomy.CONFIG is not None, "astronomy has no config yet"
 
         with open(Astronomy.CONFIG["camtracker"]["config_path"], "r") as f:
             _lines = f.readlines()
@@ -42,9 +48,10 @@ class Astronomy:
             assert _marker_line_index is not None, "Camtracker config file is not valid"
 
             # (latitude, longitude, altitude)
-            return tuple(
-                [float(_lines[_marker_line_index + n].replace("\n", "")) for n in [1, 2, 3]]
-            )
+            lat = float(_lines[_marker_line_index + 1].strip())
+            lon = float(_lines[_marker_line_index + 2].strip())
+            alt = float(_lines[_marker_line_index + 3].strip())
+            return (lat, lon, alt)
 
     @staticmethod
     def __get_astropy_location():

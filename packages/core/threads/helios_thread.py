@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import time
+from typing import Any, Literal, Optional
 import cv2 as cv  # type: ignore
 import numpy as np
 from packages.core.utils import (
@@ -27,21 +28,23 @@ class CameraError(Exception):
 
 
 class _Helios:
-    cam = None
+    cam: Optional[Any] = None
     current_exposure = None
-    last_autoexposure_time = 0
+    last_autoexposure_time = 0.0
     available_exposures = None
 
     @staticmethod
     def init(camera_id: int, retries: int = 5):
         # TODO: Why is this necessary?
         _Helios.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+        assert _Helios.cam is not None
         _Helios.cam.release()
 
         for _ in range(retries):
             _Helios.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
-            if _Helios.cam.isOpened():
+            assert _Helios.cam is not None
 
+            if _Helios.cam.isOpened():
                 if _Helios.available_exposures is None:
                     _Helios.available_exposures = _Helios.get_available_exposures()
                     logger.debug(
@@ -83,6 +86,8 @@ class _Helios:
         the camera exposure to each value. Return a list of integers
         that the camera accepted as an exposure setting.
         """
+        assert _Helios.cam is not None, "camera is not initialized yet"
+
         possible_values = []
         for exposure in range(-20, 20):
             _Helios.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
@@ -106,6 +111,8 @@ class _Helios:
         available depends on the camera model. However, this function will
         throw an AssertionError, when the value could not be changed.
         """
+        assert _Helios.cam is not None, "camera is not initialized yet"
+
         properties = {
             "width": (cv.CAP_PROP_FRAME_WIDTH, width),
             "height": (cv.CAP_PROP_FRAME_HEIGHT, height),
@@ -141,6 +148,7 @@ class _Helios:
         except when specified not to (used in autoexposure).
         """
         assert _Helios.cam is not None, "camera is not initialized yet"
+
         if not _Helios.cam.isOpened():
             raise CameraError("camera is not open")
         for _ in range(retries + 1):
@@ -181,7 +189,7 @@ class _Helios:
             _Helios.current_exposure = new_exposure
 
     @staticmethod
-    def determine_frame_status(frame: cv.Mat, save_image: bool) -> int:
+    def determine_frame_status(frame: cv.Mat, save_image: bool) -> Literal[1, 0]:
         """
         For a given frame, determine whether the conditions are
         good (direct sunlight, returns 1) or bad (diffuse light
@@ -217,10 +225,11 @@ class _Helios:
         )
 
         # determine how many pixels inside the circle are made up of "edge pixels"
-        edge_fraction = round((np.sum(edges_only_dilated) / 255) / np.sum(binary_mask), 6)
-
-        # TODO: the values below should be adjusted by looking at the ifgs directly
-        status = 1 if (edge_fraction > 0.02) else 0
+        pixels_inside_circle: int = np.sum(binary_mask)
+        status: Literal[1, 0] = 0
+        if pixels_inside_circle != 0:
+            edge_fraction = round((np.sum(edges_only_dilated) / 255) / pixels_inside_circle, 6)
+            status = 1 if (edge_fraction > 0.02) else 0
 
         logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
 
@@ -276,12 +285,12 @@ class HeliosThread(AbstractThreadBase):
     def __init__(self):
         super().__init__(logger)
 
-    def should_be_running(self, config: dict) -> bool:
+    def should_be_running(self) -> bool:
         """Should the thread be running? (based on config.upload)"""
         return (
-            (not config["general"]["test_mode"])
-            and (config["helios"] is not None)
-            and (config["measurement_triggers"]["consider_helios"])
+            (not self.config["general"]["test_mode"])
+            and (self.config["helios"] is not None)
+            and (self.config["measurement_triggers"]["consider_helios"])
         )
 
     # TODO: Update tests/headless mode to comply with new class structure
@@ -294,6 +303,7 @@ class HeliosThread(AbstractThreadBase):
         if headless:
             logger = Logger(origin="helios", just_print=True)
         _CONFIG = ConfigInterface.read()
+        self.config = _CONFIG
 
         status_history = RingList(_CONFIG["helios"]["evaluation_size"])
         current_state = None
@@ -302,7 +312,7 @@ class HeliosThread(AbstractThreadBase):
 
         while True:
             # Check for termination
-            if not self.should_be_running(_CONFIG):
+            if not self.should_be_running():
                 return
 
             try:
@@ -332,7 +342,7 @@ class HeliosThread(AbstractThreadBase):
                         StateInterface.update({"helios_indicates_good_conditions": False})
                         current_state = None
                         # reinit for next day
-                        _Helios.reinit_settings()
+                        _Helios.deinit()
                     time.sleep(300)
                     continue
 
