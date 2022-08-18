@@ -10,16 +10,16 @@ class _OSStateDict(TypedDict):
 
 
 class StateDict(TypedDict):
-    helios_indicates_good_conditions: Optional[int]
+    helios_indicates_good_conditions: Optional[bool]
     measurements_should_be_running: bool
-    enclosure_plc_readings: Any
+    enclosure_plc_readings: dict
     os_state: _OSStateDict
 
 
 class StateDictPartial(TypedDict, total=False):
     helios_indicates_good_conditions: Optional[int]
     measurements_should_be_running: bool
-    enclosure_plc_readings: Any
+    enclosure_plc_readings: dict
     os_state: _OSStateDict
 
 

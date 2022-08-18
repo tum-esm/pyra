@@ -5,7 +5,9 @@ logger = Logger(origin="measurement-conditions")
 
 
 # TODO: add type annotation
-def get_times_from_tuples(triggers) -> tuple[datetime.time, datetime.time, datetime.time]:
+def get_times_from_tuples(
+    triggers: dict,
+) -> tuple[datetime.time, datetime.time, datetime.time]:
     now = datetime.datetime.now()
     current_time = datetime.time(now.hour, now.minute, now.second)
     start_time = datetime.time(**triggers["start_time"])
@@ -14,7 +16,7 @@ def get_times_from_tuples(triggers) -> tuple[datetime.time, datetime.time, datet
 
 
 class MeasurementConditions:
-    def __init__(self, initial_config: dict):
+    def __init__(self, initial_config: dict) -> None:
         self._CONFIG = initial_config
 
     def run(self, new_config: dict) -> None:
