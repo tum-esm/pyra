@@ -20,7 +20,7 @@ PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state
 EMPTY_STATE_OBJECT: types.StateDict = {
     "helios_indicates_good_conditions": None,
     "measurements_should_be_running": False,
-    "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
+    "enclosure_plc_readings": EMPTY_PLC_STATE,
     "os_state": {
         "cpu_usage": None,
         "memory_usage": None,

@@ -1,5 +1,7 @@
-from typing import Any, Optional, TypedDict
+from typing import Any, Union, Optional, TypedDict
 import pydantic
+
+from . import PlcStateDict, PlcStateDictPartial
 
 
 class _OSStateDict(TypedDict):
@@ -12,14 +14,14 @@ class _OSStateDict(TypedDict):
 class StateDict(TypedDict):
     helios_indicates_good_conditions: Optional[bool]
     measurements_should_be_running: bool
-    enclosure_plc_readings: dict
+    enclosure_plc_readings: PlcStateDict
     os_state: _OSStateDict
 
 
 class StateDictPartial(TypedDict, total=False):
     helios_indicates_good_conditions: Optional[int]
     measurements_should_be_running: bool
-    enclosure_plc_readings: dict
+    enclosure_plc_readings: Union[PlcStateDict, PlcStateDictPartial]
     os_state: _OSStateDict
 
 

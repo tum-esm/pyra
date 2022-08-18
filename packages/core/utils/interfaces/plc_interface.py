@@ -11,85 +11,44 @@ logger = Logger(origin="plc-interface")
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
 
-
-# TODO: possibly rewrite this using typeddict
-
-
-@dataclasses.dataclass
-class PLCActorsState:
-    current_angle: Optional[int] = None
-    fan_speed: Optional[int] = None
-
-
-@dataclasses.dataclass
-class PLCControlState:
-    auto_temp_mode: Optional[bool] = None
-    manual_control: Optional[bool] = None
-    manual_temp_mode: Optional[bool] = None
-    sync_to_tracker: Optional[bool] = None
-
-
-@dataclasses.dataclass
-class PLCSensorsState:
-    humidity: Optional[int] = None
-    temperature: Optional[int] = None
-
-
-@dataclasses.dataclass
-class PLCStateState:
-    cover_closed: Optional[bool] = None
-    motor_failed: Optional[bool] = None
-    rain: Optional[bool] = None
-    reset_needed: Optional[bool] = None
-    ups_alert: Optional[bool] = None
-
-
-@dataclasses.dataclass
-class PLCPowerState:
-    camera: Optional[bool] = None
-    computer: Optional[bool] = None
-    heater: Optional[bool] = None
-    router: Optional[bool] = None
-    spectrometer: Optional[bool] = None
-
-
-@dataclasses.dataclass
-class PLCConnectionsState:
-    camera: Optional[bool] = None
-    computer: Optional[bool] = None
-    heater: Optional[bool] = None
-    router: Optional[bool] = None
-    spectrometer: Optional[bool] = None
-
-
-@dataclasses.dataclass
-class PLCState:
-    actors: PLCActorsState
-    control: PLCControlState
-    sensors: PLCSensorsState
-    state: PLCStateState
-    power: PLCPowerState
-    connections: PLCConnectionsState
-
-    def to_dict(self) -> dict[str, Any]:
-        out = {}
-        for field in dataclasses.fields(self):
-            field_value = getattr(self, field.name)
-            if field_value is not None:
-                field_value = getattr(self, field.name).__dict__
-            out[field.name] = field_value
-        return out
-
-
 # used when initializing the state.json file
-EMPTY_PLC_STATE = PLCState(
-    actors=PLCActorsState(),
-    control=PLCControlState(),
-    sensors=PLCSensorsState(),
-    state=PLCStateState(),
-    power=PLCPowerState(),
-    connections=PLCConnectionsState(),
-)
+EMPTY_PLC_STATE: types.PlcStateDict = {
+    "actors": {
+        "fan_speed": None,
+        "current_angle": None,
+    },
+    "control": {
+        "auto_temp_mode": None,
+        "manual_control": None,
+        "manual_temp_mode": None,
+        "sync_to_tracker": None,
+    },
+    "sensors": {
+        "humidity": None,
+        "temperature": None,
+    },
+    "state": {
+        "cover_closed": None,
+        "motor_failed": None,
+        "rain": None,
+        "reset_needed": None,
+        "ups_alert": None,
+    },
+    "power": {
+        "camera": None,
+        "computer": None,
+        "heater": None,
+        "router": None,
+        "spectrometer": None,
+    },
+    "connections": {
+        "camera": None,
+        "computer": None,
+        "heater": None,
+        "router": None,
+        "spectrometer": None,
+    },
+}
 
 
 class PLCInterface:
@@ -193,7 +152,7 @@ class PLCInterface:
 
     # BULK READ
 
-    def read(self) -> PLCState:
+    def read(self) -> types.PlcStateDict:
         """
         Read the whole state of the PLC
         """
@@ -221,43 +180,43 @@ class PLCInterface:
 
         s = self.specification
 
-        return PLCState(
-            actors=PLCActorsState(
-                fan_speed=_get_int(s.actors.fan_speed),
-                current_angle=_get_int(s.actors.current_angle),
-            ),
-            control=PLCControlState(
-                auto_temp_mode=_get_bool(s.control.auto_temp_mode),
-                manual_control=_get_bool(s.control.manual_control),
-                manual_temp_mode=_get_bool(s.control.manual_temp_mode),
-                sync_to_tracker=_get_bool(s.control.sync_to_tracker),
-            ),
-            sensors=PLCSensorsState(
-                humidity=_get_int(s.sensors.humidity),
-                temperature=_get_int(s.sensors.temperature),
-            ),
-            state=PLCStateState(
-                cover_closed=_get_bool(s.state.cover_closed),
-                motor_failed=_get_bool(s.state.motor_failed),
-                rain=_get_bool(s.state.rain),
-                reset_needed=_get_bool(s.state.reset_needed),
-                ups_alert=_get_bool(s.state.ups_alert),
-            ),
-            power=PLCPowerState(
-                camera=_get_bool(s.power.camera),
-                computer=_get_bool(s.power.computer),
-                heater=_get_bool(s.power.heater),
-                router=_get_bool(s.power.router),
-                spectrometer=_get_bool(s.power.spectrometer),
-            ),
-            connections=PLCConnectionsState(
-                camera=_get_bool(s.connections.camera),
-                computer=_get_bool(s.connections.computer),
-                heater=_get_bool(s.connections.heater),
-                router=_get_bool(s.connections.router),
-                spectrometer=_get_bool(s.connections.spectrometer),
-            ),
-        )
+        return {
+            "actors": {
+                "fan_speed": _get_int(s.actors.fan_speed),
+                "current_angle": _get_int(s.actors.current_angle),
+            },
+            "control": {
+                "auto_temp_mode": _get_bool(s.control.auto_temp_mode),
+                "manual_control": _get_bool(s.control.manual_control),
+                "manual_temp_mode": _get_bool(s.control.manual_temp_mode),
+                "sync_to_tracker": _get_bool(s.control.sync_to_tracker),
+            },
+            "sensors": {
+                "humidity": _get_int(s.sensors.humidity),
+                "temperature": _get_int(s.sensors.temperature),
+            },
+            "state": {
+                "cover_closed": _get_bool(s.state.cover_closed),
+                "motor_failed": _get_bool(s.state.motor_failed),
+                "rain": _get_bool(s.state.rain),
+                "reset_needed": _get_bool(s.state.reset_needed),
+                "ups_alert": _get_bool(s.state.ups_alert),
+            },
+            "power": {
+                "camera": _get_bool(s.power.camera),
+                "computer": _get_bool(s.power.computer),
+                "heater": _get_bool(s.power.heater),
+                "router": _get_bool(s.power.router),
+                "spectrometer": _get_bool(s.power.spectrometer),
+            },
+            "connections": {
+                "camera": _get_bool(s.connections.camera),
+                "computer": _get_bool(s.connections.computer),
+                "heater": _get_bool(s.connections.heater),
+                "router": _get_bool(s.connections.router),
+                "spectrometer": _get_bool(s.connections.spectrometer),
+            },
+        }
 
     # LOW LEVEL READ FUNCTIONS
 
@@ -322,7 +281,9 @@ class PLCInterface:
 
     # PLC.POWER SETTERS
 
-    def __update_bool(self, new_state: bool, spec: list[int], partial_plc_state: dict) -> None:
+    def __update_bool(
+        self, new_state: bool, spec: list[int], partial_plc_state: types.PlcStateDictPartial
+    ) -> None:
         """
         1. low-level direct-write new_state to PLC according to spec
         2. low-level direct-read of plc's value according to spec

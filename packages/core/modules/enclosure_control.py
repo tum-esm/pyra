@@ -74,7 +74,7 @@ class EnclosureControl:
 
             # read current state of actors and sensors in enclosure
             logger.info("New continuous readings.")
-            StateInterface.update({"enclosure_plc_readings": self.plc_state.to_dict()})
+            StateInterface.update({"enclosure_plc_readings": self.plc_state})
 
             if self.config["tum_plc"]["controlled_by_user"]:
                 logger.debug(
@@ -85,7 +85,7 @@ class EnclosureControl:
             # dawn/dusk detection: powerup/down spectrometer
             self.auto_set_power_spectrometer()
 
-            if self.plc_state.state.motor_failed:
+            if self.plc_state["state"]["motor_failed"]:
                 raise EnclosureControl.MotorFailedError(
                     "URGENT: stop all actions, check cover in person"
                 )
@@ -133,7 +133,7 @@ class EnclosureControl:
         logger.debug(f"Received request to move cover to position {value} degrees.")
 
         # rain check before moving cover. PLC will deny cover requests during rain anyway
-        if self.plc_state.state.rain:
+        if self.plc_state["state"]["rain"]:
             logger.debug("Denied to move cover due to rain detected.")
         else:
             self.plc_interface.set_manual_control(True)
@@ -144,7 +144,7 @@ class EnclosureControl:
         if not self.initialized:
             self.__initialize()
 
-        if self.plc_state.state.reset_needed:
+        if self.plc_state["state"]["reset_needed"]:
             self.plc_interface.reset()
 
         self.plc_interface.set_sync_to_tracker(False)
@@ -185,10 +185,10 @@ class EnclosureControl:
 
         if current_sun_elevation is not None:
             sun_is_above_minimum = current_sun_elevation >= min_power_elevation
-            if sun_is_above_minimum and (not self.plc_state.power.spectrometer):
+            if sun_is_above_minimum and (not self.plc_state["power"]["spectrometer"]):
                 self.plc_interface.set_power_spectrometer(True)
                 logger.info("Powering up the spectrometer.")
-            if (not sun_is_above_minimum) and self.plc_state.power.spectrometer:
+            if (not sun_is_above_minimum) and self.plc_state["power"]["spectrometer"]:
                 self.plc_interface.set_power_spectrometer(False)
                 logger.info("Powering down the spectrometer.")
 
@@ -196,10 +196,10 @@ class EnclosureControl:
         if self.last_cycle_automation_status != self.measurements_should_be_running:
             if self.measurements_should_be_running:
                 # flank change 0 -> 1: set cover mode: sync to tracker
-                if self.plc_state.state.reset_needed:
+                if self.plc_state["state"]["reset_needed"]:
                     self.plc_interface.reset()
                     time.sleep(10)
-                if not self.plc_state.state.rain:
+                if not self.plc_state["state"]["rain"]:
                     self.plc_interface.set_sync_to_tracker(True)
                 logger.info("Syncing Cover to Tracker.")
             else:
@@ -210,20 +210,20 @@ class EnclosureControl:
                 self.wait_for_cover_closing(throw_error=False)
 
     def verify_cover_position(self) -> None:
-        if (not self.measurements_should_be_running) & (not self.plc_state.state.rain):
-            if not self.plc_state.state.cover_closed:
+        if (not self.measurements_should_be_running) & (not self.plc_state["state"]["rain"]):
+            if not self.plc_state["state"]["cover_closed"]:
                 logger.info("Cover is still open. Trying to close again.")
                 self.force_cover_close()
                 self.wait_for_cover_closing()
 
     def verify_cover_sync(self) -> None:
         if self.measurements_should_be_running and (
-            not self.plc_state.control.sync_to_tracker
+            not self.plc_state["control"]["sync_to_tracker"]
         ):
             logger.debug("Set sync to tracker to True to match measurement status.")
             self.plc_interface.set_sync_to_tracker(True)
-        if (
-            not self.measurements_should_be_running
-        ) and self.plc_state.control.sync_to_tracker:
+        if (not self.measurements_should_be_running) and self.plc_state["control"][
+            "sync_to_tracker"
+        ]:
             logger.debug("Set sync to tracker to False to match measurement status.")
             self.plc_interface.set_sync_to_tracker(False)
