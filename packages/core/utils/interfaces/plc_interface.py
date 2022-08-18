@@ -4,7 +4,7 @@ import snap7  # type: ignore
 import time
 import os
 from snap7.exceptions import Snap7Exception  # type: ignore
-from packages.core.utils import Logger, StateInterface
+from packages.core.utils import Logger, StateInterface, types
 from .plc_specification import PLC_SPECIFICATION_VERSIONS
 
 logger = Logger(origin="plc-interface")
