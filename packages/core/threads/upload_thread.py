@@ -9,8 +9,7 @@ import time
 import fabric  # type: ignore
 import re
 import pydantic
-from packages.core.utils import ConfigInterface, Logger
-from packages.core.utils.types import UploadMetaTypes
+from packages.core.utils import ConfigInterface, Logger, types
 from .abstract_thread_base import AbstractThreadBase
 
 logger = Logger(origin="upload")
@@ -51,7 +50,7 @@ class DirectoryUploadClient:
             config["upload"]["dst_directory"]
         ), f"remote {config['upload']['dst_directory']} is not a directory"
 
-        self.meta_content: UploadMetaTypes.Dict = {
+        self.meta_content: types.UploadMetaDict = {
             "complete": False,
             "fileList": [],
             "createdTime": round(time.time(), 3),
@@ -131,12 +130,12 @@ class DirectoryUploadClient:
             assert os.path.isfile(self.src_meta_path)
             with open(self.src_meta_path, "r") as f:
                 new_meta_content = json.load(f)
-                UploadMetaTypes.validate_object(new_meta_content)
+                types.validate_upload_meta_dict(new_meta_content)
                 self.meta_content = new_meta_content
         except (AssertionError, json.JSONDecodeError, pydantic.ValidationError) as e:
             raise InvalidUploadState(str(e))
 
-    def __update_meta(self, new_meta_content_partial: UploadMetaTypes.PartialDict) -> None:
+    def __update_meta(self, new_meta_content_partial: types.UploadMetaDictPartial) -> None:
         """
         Update the local upload-meta.json file and overwrite
         the meta file on the server

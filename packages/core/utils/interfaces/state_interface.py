@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from packages.core.utils import with_filelock, update_dict_recursively, PersistentStateTypes
+from packages.core.utils import with_filelock, update_dict_recursively, types
 from .plc_interface import EMPTY_PLC_STATE
 
 dir = os.path.dirname
@@ -17,7 +17,7 @@ STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
 
 
-EMPTY_STATE_OBJECT: dict = {
+EMPTY_STATE_OBJECT: types.StateDict = {
     "helios_indicates_good_conditions": None,
     "measurements_should_be_running": False,
     "enclosure_plc_readings": EMPTY_PLC_STATE.to_dict(),
@@ -29,7 +29,7 @@ EMPTY_STATE_OBJECT: dict = {
     },
 }
 
-EMPTY_PERSISTENT_STATE_OBJECT: PersistentStateTypes.PartialDict = {
+EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
     "active_opus_macro_id": None,
     "current_exceptions": [],
 }
@@ -78,25 +78,25 @@ class StateInterface:
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def read() -> dict:
+    def read() -> types.StateDict:
         """Read the state file and return its content"""
         with open(STATE_FILE_PATH, "r") as f:
-            new_object = json.load(f)
-            # TODO: PersistentStateTypes.validate_object(new_object)
+            new_object: types.StateDict = json.load(f)
+            types.validate_state_dict(new_object)
             return new_object
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def read_persistent() -> PersistentStateTypes.Dict:
+    def read_persistent() -> types.PersistentStateDict:
         """Read the persistent state file and return its content"""
         with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
-            new_object: PersistentStateTypes.Dict = json.load(f)
-            PersistentStateTypes.validate_object(new_object)
+            new_object: types.PersistentStateDict = json.load(f)
+            types.validate_persistent_state_dict(new_object)
             return new_object
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def update(update: dict) -> None:
+    def update(update: types.StateDictPartial) -> None:
         """
         Update the (persistent) state file and return its content.
         The update object should only include the properties to be
@@ -112,7 +112,7 @@ class StateInterface:
 
     @staticmethod
     @with_filelock(STATE_LOCK_PATH)
-    def update_persistent(update: PersistentStateTypes.PartialDict) -> None:
+    def update_persistent(update: types.PersistentStateDictPartial) -> None:
         """
         Update the (persistent) state file and return its content.
         The update object should only include the properties to be
@@ -121,7 +121,7 @@ class StateInterface:
 
         with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
             current_state = json.load(f)
-            PersistentStateTypes.validate_object(current_state)
+            types.validate_persistent_state_dict(current_state)
 
         new_state = update_dict_recursively(current_state, update)
         with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
