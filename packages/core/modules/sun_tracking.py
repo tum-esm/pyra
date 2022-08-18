@@ -8,20 +8,20 @@ import time
 from typing import Any
 import jdcal  # type: ignore
 import datetime
-from packages.core.utils import StateInterface, Logger, OSInterface
+from packages.core.utils import StateInterface, Logger, OSInterface, types
 
 
 logger = Logger(origin="sun-tracking")
 
 
 class SunTracking:
-    def __init__(self, initial_config: dict):
+    def __init__(self, initial_config: types.ConfigDict):
         self._CONFIG = initial_config
         self.last_start_time = time.time()
         if self._CONFIG["general"]["test_mode"]:
             return
 
-    def run(self, new_config: dict) -> None:
+    def run(self, new_config: types.ConfigDict) -> None:
         self._CONFIG = new_config
         if self._CONFIG["general"]["test_mode"]:
             logger.debug("Skipping SunTracking in test mode")

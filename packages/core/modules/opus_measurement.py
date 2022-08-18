@@ -2,7 +2,7 @@ import os
 import sys
 import time
 from typing import Any
-from packages.core.utils import Logger, StateInterface, Astronomy
+from packages.core.utils import Logger, StateInterface, Astronomy, types
 
 
 # these imports are provided by pywin32
@@ -22,7 +22,7 @@ class OpusMeasurement:
     established DDE connection.
     """
 
-    def __init__(self, initial_config: dict):
+    def __init__(self, initial_config: types.ConfigDict):
         self._CONFIG = initial_config
         self.initialized = False
         self.current_experiment = self._CONFIG["opus"]["experiment_path"]
@@ -41,7 +41,7 @@ class OpusMeasurement:
         self.last_cycle_automation_status = 0
         self.initialized = True
 
-    def run(self, new_config: dict) -> None:
+    def run(self, new_config: types.ConfigDict) -> None:
         self._CONFIG = new_config
         if self._CONFIG["general"]["test_mode"] or (sys.platform != "win32"):
             logger.debug("Skipping OpusMeasurement in test mode and on non-windows systems")

@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import subprocess
 import traceback
+from .. import types
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
@@ -46,7 +47,7 @@ def get_current_log_lines() -> list[str]:
 
 class ExceptionEmailClient:
     @staticmethod
-    def _send_email(config: dict, text: str, html: str, subject: str) -> None:
+    def _send_email(config: types.ConfigDict, text: str, html: str, subject: str) -> None:
         sender_email = config["error_email"]["sender_address"]
         sender_password = config["error_email"]["sender_password"]
         recipients = config["error_email"]["recipients"].replace(" ", "").split(",")
@@ -69,7 +70,7 @@ class ExceptionEmailClient:
             )
 
     @staticmethod
-    def handle_resolved_exception(config: dict) -> None:
+    def handle_resolved_exception(config: types.ConfigDict) -> None:
         if not config["error_email"]["notify_recipients"]:
             return
 
@@ -104,7 +105,7 @@ class ExceptionEmailClient:
         ExceptionEmailClient._send_email(config, text, html, subject)
 
     @staticmethod
-    def handle_occured_exception(config: dict, exception: Exception) -> None:
+    def handle_occured_exception(config: types.ConfigDict, exception: Exception) -> None:
         if not config["error_email"]["notify_recipients"]:
             return
 

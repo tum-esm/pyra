@@ -1,13 +1,13 @@
-from packages.core.utils import Logger, OSInterface, StateInterface
+from packages.core.utils import Logger, OSInterface, StateInterface, types
 
 logger = Logger(origin="system-checks")
 
 
 class SystemChecks:
-    def __init__(self, initial_config: dict):
+    def __init__(self, initial_config: types.ConfigDict):
         self._CONFIG = initial_config
 
-    def run(self, new_config: dict) -> None:
+    def run(self, new_config: types.ConfigDict) -> None:
         self._CONFIG = new_config
         logger.info("Running SystemChecks")
 

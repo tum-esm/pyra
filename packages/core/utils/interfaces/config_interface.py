@@ -1,6 +1,6 @@
 import json
 import os
-from packages.core.utils import Astronomy, with_filelock
+from packages.core.utils import Astronomy, with_filelock, types
 from .config_validation import ConfigValidation
 
 dir = os.path.dirname
@@ -13,7 +13,7 @@ CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 class ConfigInterface:
     @staticmethod
     @with_filelock(CONFIG_LOCK_PATH)
-    def read() -> dict:
+    def read() -> types.ConfigDict:
         """
         Read the contents of the current config.json file.
         The function will validate its integrity and raises

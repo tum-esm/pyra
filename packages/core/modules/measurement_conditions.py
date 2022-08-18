@@ -1,25 +1,25 @@
 import datetime
-from packages.core.utils import Astronomy, StateInterface, Logger
+from packages.core.utils import Astronomy, StateInterface, Logger, types
 
 logger = Logger(origin="measurement-conditions")
 
 
 # TODO: add type annotation
-def get_times_from_tuples(
-    triggers: dict,
-) -> tuple[datetime.time, datetime.time, datetime.time]:
+def is_time_trigger_active(
+    config: types.ConfigDict,
+) -> bool:
     now = datetime.datetime.now()
     current_time = datetime.time(now.hour, now.minute, now.second)
-    start_time = datetime.time(**triggers["start_time"])
-    end_time = datetime.time(**triggers["stop_time"])
-    return current_time, start_time, end_time
+    start_time = datetime.time(**config["measurement_triggers"]["start_time"])
+    end_time = datetime.time(**config["measurement_triggers"]["stop_time"])
+    return (current_time > start_time) and (current_time < end_time)
 
 
 class MeasurementConditions:
-    def __init__(self, initial_config: dict) -> None:
+    def __init__(self, initial_config: types.ConfigDict) -> None:
         self._CONFIG = initial_config
 
-    def run(self, new_config: dict) -> None:
+    def run(self, new_config: types.ConfigDict) -> None:
         self._CONFIG = new_config
         if self._CONFIG["general"]["test_mode"]:
             logger.debug("Skipping MeasurementConditions in test mode")
@@ -82,8 +82,7 @@ class MeasurementConditions:
 
         if triggers["consider_time"]:
             logger.info("Time as a trigger is considered.")
-            current_time, start_time, end_time = get_times_from_tuples(triggers)
-            time_is_valid = (current_time > start_time) and (current_time < end_time)
+            time_is_valid = is_time_trigger_active(self._CONFIG)
             logger.debug(f"Time conditions are {'' if time_is_valid else 'not '}fulfilled.")
             if not time_is_valid:
                 return False

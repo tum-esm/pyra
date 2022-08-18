@@ -11,6 +11,7 @@ from packages.core.utils import (
     RingList,
     Astronomy,
     ImageProcessing,
+    types,
 )
 from .abstract_thread_base import AbstractThreadBase
 
@@ -285,7 +286,7 @@ class HeliosThread(AbstractThreadBase):
     to the StateInterface.
     """
 
-    def __init__(self, config: dict) -> None:
+    def __init__(self, config: types.ConfigDict) -> None:
         super().__init__(config, "helios")
 
     def should_be_running(self) -> bool:

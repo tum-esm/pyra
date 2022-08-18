@@ -29,7 +29,7 @@ class DirectoryUploadClient:
     the actual upload process.
     """
 
-    def __init__(self, date_string: str, config: dict) -> None:
+    def __init__(self, date_string: str, config: types.ConfigDict) -> None:
         self.connection = fabric.connection.Connection(
             f"{config['upload']['user']}@{config['upload']['host']}",
             connect_kwargs={"password": config["upload"]["password"]},
@@ -280,7 +280,7 @@ class UploadThread(AbstractThreadBase):
         📁 ...
     """
 
-    def __init__(self, config: dict) -> None:
+    def __init__(self, config: types.ConfigDict) -> None:
         super().__init__(config, "upload")
 
     def should_be_running(self) -> bool:

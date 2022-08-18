@@ -1,6 +1,6 @@
 import time
 from snap7.exceptions import Snap7Exception  # type: ignore
-from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface
+from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface, types
 
 logger = Logger(origin="enclosure-control")
 
@@ -18,7 +18,7 @@ class EnclosureControl:
     class MotorFailedError(Exception):
         pass
 
-    def __init__(self, initial_config: dict):
+    def __init__(self, initial_config: types.ConfigDict):
         self.config = initial_config
         self.initialized = False
         self.last_plc_connection_time = time.time()
@@ -38,7 +38,7 @@ class EnclosureControl:
         self.last_cycle_automation_status = 0
         self.initialized = True
 
-    def run(self, new_config: dict) -> None:
+    def run(self, new_config: types.ConfigDict) -> None:
         self.config = new_config
 
         if self.config["tum_plc"] is None:

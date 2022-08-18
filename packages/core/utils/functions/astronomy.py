@@ -2,6 +2,7 @@ from typing import Any, Optional
 import astropy.coordinates as astropy_coordinates  # type: ignore
 import astropy.time as astropy_time  # type: ignore
 import astropy.units as astropy_units  # type: ignore
+from .. import types
 
 # TODO: pass config via functions instea of indirectly
 #       more code  but way simpler
@@ -10,7 +11,7 @@ import astropy.units as astropy_units  # type: ignore
 
 
 class Astronomy:
-    CONFIG: Optional[dict] = None
+    CONFIG: Optional[types.ConfigDict] = None
     units = astropy_units
 
     @staticmethod

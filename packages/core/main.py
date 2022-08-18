@@ -7,13 +7,14 @@ from packages.core.utils import (
     StateInterface,
     Logger,
     ExceptionEmailClient,
+    types,
 )
 
 logger = Logger(origin="main")
 
 
 def update_exception_state(
-    config: dict, current_exceptions: list[str], new_exception: Optional[Exception]
+    config: types.ConfigDict, current_exceptions: list[str], new_exception: Optional[Exception]
 ) -> list[str]:
     """
     Take a list of current_exceptions (all exceptions that are
