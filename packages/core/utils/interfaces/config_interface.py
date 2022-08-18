@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Any
 from packages.core.utils import Astronomy, with_filelock, types
 from .config_validation import ConfigValidation
 
@@ -22,7 +23,9 @@ class ConfigInterface:
         file_is_valid, validation_exception = ConfigValidation.check_current_config_file()
         assert file_is_valid, str(validation_exception)
         with open(CONFIG_FILE_PATH, "r") as f:
-            _CONFIG = json.load(f)
+            new_object: Any = json.load(f)
+            types.validate_config_dict(new_object)
+            config: types.ConfigDict = new_object
 
-        Astronomy.CONFIG = _CONFIG
-        return _CONFIG
+        Astronomy.CONFIG = config
+        return config

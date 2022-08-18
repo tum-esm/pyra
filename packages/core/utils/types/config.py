@@ -2,9 +2,9 @@ from typing import Any, Literal, Optional, TypedDict
 import pydantic
 
 
-_TimeDict = TypedDict("start_time", {"hour": int, "minute": int, "second": int})
-_TimeDictPartial = TypedDict(
-    "start_time", {"hour": int, "minute": int, "second": int}, total=False
+TimeDict = TypedDict("TimeDict", {"hour": int, "minute": int, "second": int})
+TimeDictPartial = TypedDict(
+    "TimeDictPartial", {"hour": int, "minute": int, "second": int}, total=False
 )
 
 
@@ -47,7 +47,7 @@ class _ConfigSubDicts:
         executable_path: str
         learn_az_elev_path: str
         sun_intensity_path: str
-        motor_offset_threshold: str
+        motor_offset_threshold: float
 
     @staticmethod
     class CamtrackerPartial(TypedDict, total=False):
@@ -55,7 +55,7 @@ class _ConfigSubDicts:
         executable_path: str
         learn_az_elev_path: str
         sun_intensity_path: str
-        motor_offset_threshold: str
+        motor_offset_threshold: float
 
     @staticmethod
     class ErrorEmail(TypedDict):
@@ -88,8 +88,8 @@ class _ConfigSubDicts:
         consider_time: bool
         consider_sun_elevation: bool
         consider_helios: bool
-        start_time: _TimeDict
-        stop_time: _TimeDict
+        start_time: TimeDict
+        stop_time: TimeDict
         min_sun_elevation: float
 
     @staticmethod
@@ -97,20 +97,20 @@ class _ConfigSubDicts:
         consider_time: bool
         consider_sun_elevation: bool
         consider_helios: bool
-        start_time: _TimeDict
-        stop_time: _TimeDict
+        start_time: TimeDictPartial
+        stop_time: TimeDictPartial
         min_sun_elevation: float
 
     @staticmethod
     class TumPlc(TypedDict):
         ip: str
-        version: Literal[0, 1]
+        version: Literal[1, 2]
         controlled_by_user: bool
 
     @staticmethod
     class TumPlcPartial(TypedDict, total=False):
         ip: str
-        version: Literal[0, 1]
+        version: Literal[1, 2]
         controlled_by_user: bool
 
     @staticmethod

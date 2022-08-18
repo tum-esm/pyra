@@ -180,8 +180,8 @@ class SunTracking:
         # fails if file integrity is broken
         tracker_status = self.read_ct_log_learn_az_elev()
 
-        elev_offset = tracker_status[3]
-        az_offeset = tracker_status[4]
+        elev_offset: float = tracker_status[3]
+        az_offeset: float = tracker_status[4]
         threshold: float = self._CONFIG["camtracker"]["motor_offset_threshold"]
 
         return (abs(elev_offset) <= threshold) and (abs(az_offeset) <= threshold)

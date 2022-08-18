@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Literal, Optional
 
 
 # TODO: use typeddict
@@ -67,7 +67,7 @@ class PLCSpecification:
 
 
 # these are the pins used on the TUM-PLC for all functionality
-PLC_SPECIFICATION_VERSIONS: dict[int, PLCSpecification] = {
+PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], PLCSpecification] = {
     1: PLCSpecification(
         actors=PLCActorsSpecification(
             current_angle=[25, 6, 2],

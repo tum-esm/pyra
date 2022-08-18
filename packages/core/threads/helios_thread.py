@@ -309,19 +309,24 @@ class HeliosThread(AbstractThreadBase):
         _CONFIG = ConfigInterface.read()
         self.config = _CONFIG
 
+        # Check for termination
+        if (_CONFIG["helios"] is None) or (not self.should_be_running()):
+            return
+
         status_history = RingList(_CONFIG["helios"]["evaluation_size"])
         current_state = None
 
         repeated_camera_error_count = 0
 
         while True:
+            start_time = time.time()
+            _CONFIG = ConfigInterface.read()
+
             # Check for termination
-            if not self.should_be_running():
+            if (_CONFIG["helios"] is None) or (not self.should_be_running()):
                 return
 
             try:
-                start_time = time.time()
-                _CONFIG = ConfigInterface.read()
 
                 # init camera connection
                 if _Helios.cam is None:

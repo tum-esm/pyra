@@ -223,7 +223,7 @@ class OpusMeasurement:
         False -> Not Connected"""
         assert sys.platform == "win32"
 
-        response = os.system("ping -n 1 " + self._CONFIG["em27"]["ip"])
+        response = os.system("ping -n 1 " + self._CONFIG["opus"]["em27_ip"])
         return response == 0
 
     def start_opus(self) -> None:

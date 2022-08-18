@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 import snap7  # type: ignore
 import time
 import os
@@ -105,24 +105,26 @@ class PLCInterface:
         * set_auto_temperature/_manual_temperature
         """
 
-    def __init__(self, config: types.ConfigDict) -> None:
-        self.config = config
-        self.specification = PLC_SPECIFICATION_VERSIONS[config["tum_plc"]["version"]]
+    def __init__(self, plc_version: Literal[1, 2], plc_ip: str) -> None:
+        self.plc_version = plc_version
+        self.plc_ip = plc_ip
+        self.specification = PLC_SPECIFICATION_VERSIONS[plc_version]
 
     # CONNECTION/CLASS MANAGEMENT
 
-    def update_config(self, new_config: types.ConfigDict) -> None:
+    def update_config(self, new_plc_version: Literal[1, 2], new_plc_ip: str) -> None:
         """
         Update the internally used config (executed at the)
         beginning of enclosure-control's run-function.
 
         Reconnecting to PLC, when IP has changed.
         """
-        if self.config["tum_plc"]["ip"] != new_config["tum_plc"]["ip"]:
+        if (self.plc_version != new_plc_version) or (self.plc_ip != new_plc_ip):
             logger.debug("PLC ip has changed, reconnecting now")
             self.disconnect()
+            self.plc_version = new_plc_version
+            self.plc_ip = new_plc_ip
             self.connect()
-        self.config = new_config
 
     def connect(self) -> None:
         """
@@ -136,7 +138,7 @@ class PLCInterface:
                 if (time.time() - start_time) > 30:
                     raise Snap7Exception("Connect to PLC timed out.")
 
-                self.plc.connect(self.config["tum_plc"]["ip"], 0, 1)
+                self.plc.connect(self.plc_ip, 0, 1)
                 time.sleep(0.2)
 
                 if self.plc.get_connected():
@@ -164,7 +166,7 @@ class PLCInterface:
 
     def is_responsive(self) -> bool:
         """Pings the PLC"""
-        return os.system("ping -n 1 " + self.config["tum_plc"]["ip"]) == 0
+        return os.system("ping -n 1 " + self.plc_ip) == 0
 
     # DIRECT READ FUNCTIONS
 
@@ -199,10 +201,7 @@ class PLCInterface:
         # TODO: self.plc.read_multi_vars()
 
         plc_db_content: dict[int, int] = {}
-        if self.config["tum_plc"]["version"] == 1:
-            plc_db_size = {3: 6, 8: 26, 25: 10}
-        else:
-            plc_db_size = {3: 5, 6: 17, 8: 25}
+        plc_db_size = {1: {3: 6, 8: 26, 25: 10}, 2: {3: 5, 6: 17, 8: 25}}[self.plc_version]
 
         for db_index, db_size in plc_db_size.items():
             plc_db_content[db_index] = self.plc.db_read(db_index, 0, db_size)
@@ -415,7 +414,7 @@ class PLCInterface:
 
     def reset(self) -> None:
         """Does not check, whether the value has been changed"""
-        if self.config["tum_plc"]["version"] == 1:
+        if self.plc_version == 1:
             self.__write_bool(self.specification.control.reset, False)
         else:
             self.__write_bool(self.specification.control.reset, True)

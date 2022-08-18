@@ -30,6 +30,8 @@ class DirectoryUploadClient:
     """
 
     def __init__(self, date_string: str, config: types.ConfigDict) -> None:
+        assert config["upload"] is not None
+
         self.connection = fabric.connection.Connection(
             f"{config['upload']['user']}@{config['upload']['host']}",
             connect_kwargs={"password": config["upload"]["password"]},
@@ -37,7 +39,7 @@ class DirectoryUploadClient:
         )
         self.transfer_process = fabric.transfer.Transfer(self.connection)
 
-        self.config = config
+        self.upload_config = config["upload"]
         self.date_string = date_string
 
         self.src_dir_path = os.path.join(config["upload"]["src_directory"], date_string)
@@ -83,7 +85,7 @@ class DirectoryUploadClient:
         """
         local_script_path = os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
         remote_script_path = (
-            self.config["upload"]["src_directory"] + "/get_upload_dir_checksum.py"
+            self.upload_config["src_directory"] + "/get_upload_dir_checksum.py"
         )
         self.transfer_process.put(local_script_path, remote_script_path)
 
@@ -294,11 +296,13 @@ class UploadThread(AbstractThreadBase):
     def main(self) -> None:
         """Main entrypoint of the thread"""
         while True:
-            config = ConfigInterface.read()
-            self.config = config
+            self.config = ConfigInterface.read()
+
+            if self.config["upload"] is None:
+                return
 
             src_dates_strings = DirectoryUploadClient.get_directories_to_be_uploaded(
-                config["upload"]["src_directory"]
+                self.config["upload"]["src_directory"]
             )
             for src_date_string in src_dates_strings:
 
@@ -307,7 +311,7 @@ class UploadThread(AbstractThreadBase):
                     return
 
                 try:
-                    client = DirectoryUploadClient(src_date_string, config)
+                    client = DirectoryUploadClient(src_date_string, self.config)
                     client.run()
                 except TimeoutError as e:
                     logger.error(f"could not reach host (uploading {src_date_string}): {e}")

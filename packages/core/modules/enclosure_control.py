@@ -30,7 +30,11 @@ class EnclosureControl:
             return
 
     def __initialize(self) -> None:
-        self.plc_interface = PLCInterface(self.config)
+        assert self.config["tum_plc"] is not None
+
+        self.plc_interface = PLCInterface(
+            self.config["tum_plc"]["version"], self.config["tum_plc"]["ip"]
+        )
         self.plc_interface.connect()
         self.plc_interface.set_auto_temperature(True)
         self.plc_state = self.plc_interface.read()
@@ -55,7 +59,9 @@ class EnclosureControl:
             if not self.initialized:
                 self.__initialize()
             else:
-                self.plc_interface.update_config(self.config)
+                self.plc_interface.update_config(
+                    self.config["tum_plc"]["version"], self.config["tum_plc"]["ip"]
+                )
                 self.plc_interface.connect()
 
             # TODO: possibly end function if plc is not connected

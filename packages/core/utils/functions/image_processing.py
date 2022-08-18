@@ -1,3 +1,4 @@
+from typing import Iterable
 import cv2 as cv  # type: ignore
 import numpy as np
 
@@ -28,10 +29,10 @@ class ImageProcessing:
         return (np.abs(np.hypot(center_x - x, center_y - y)) < radius).astype(np.uint8)
 
     @staticmethod
-    def moving_average(xs: list[float], n: int = 3) -> np.ndarray:
+    def moving_average(xs: list[float], n: int = 3) -> list[float]:
         ret = np.cumsum(xs)
         ret[n:] = ret[n:] - ret[:-n]
-        return ret[n - 1 :] / n
+        return list(ret[n - 1 :] / n)
 
     @staticmethod
     def get_binary_mask(frame: cv.Mat) -> cv.Mat:
