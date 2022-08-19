@@ -16,6 +16,10 @@ LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")
 
 
 def log_line_has_time(log_line: str) -> bool:
+    """Returns true when a give log line (string) starts
+    with a valid date. This is not true for exception
+    tracebacks. This log line time is used to determine
+    which file to archive logs lines into."""
     try:
         assert len(log_line) >= 10
         datetime.strptime(log_line[:10], "%Y-%m-%d")
@@ -32,22 +36,29 @@ class Logger:
         self.just_print: bool = just_print
 
     def debug(self, message: str) -> None:
+        """Write a debug log (to debug only). Used for verbose output"""
         self._write_log_line("DEBUG", message)
 
     def info(self, message: str) -> None:
+        """Write an info log (to debug and info)"""
         self._write_log_line("INFO", message)
 
     def warning(self, message: str) -> None:
+        """Write a warning log (to debug and info)"""
         self._write_log_line("WARNING", message)
 
     def error(self, message: str) -> None:
+        """Write an error log (to debug and info)"""
         self._write_log_line("ERROR", message)
 
     def exception(self, e: Exception) -> None:
+        """Log the traceback of an exception"""
         tb = "\n".join(traceback.format_exception(e))
         self._write_log_line("EXCEPTION", f"{type(e).__name__} occured: {tb}")
 
     def _write_log_line(self, level: str, message: str) -> None:
+        """Format the log line string and write it to "logs/debug.log"
+        and possibly "logs/info.log"""
         now = datetime.now()
         utc_offset = round((datetime.now() - datetime.utcnow()).total_seconds() / 3600, 1)
         if round(utc_offset) == utc_offset:
@@ -74,6 +85,13 @@ class Logger:
 
     @staticmethod
     def archive(keep_last_hour: bool = False) -> None:
+        """
+        Move all log lines in "logs/info.log" and "logs/debug.log" into
+        an archive file ("logs/archive/YYYYMMDD-debug.log", "...info.log").
+
+        With keep_last_hour = True, log lines less than an hour old will
+        remain.
+        """
         with filelock.FileLock(LOG_FILES_LOCK):
             with open(DEBUG_LOG_FILE, "r") as f:
                 log_lines_in_file = f.readlines()

@@ -114,8 +114,10 @@ class EnclosureControl:
             # Check for critial error: Motor Failed Flag in PLC
             # In case of present motor failed flag the cover might not be closed in bad weather conditions.
             # Potentially putting the measurement instrument at risk.
-            if self.plc_state.state.motor_failed:
-                raise MotorFailedError("URGENT: stop all actions, check cover in person")
+            if self.plc_state["state"]["motor_failed"]:
+                raise EnclosureControl.MotorFailedError(
+                    "URGENT: stop all actions, check cover in person"
+                )
 
             # Check PLC ip connection (single ping).
             if self.plc_interface.is_responsive():
@@ -247,7 +249,7 @@ class EnclosureControl:
                 logger.info("Syncing Cover to Tracker.")
             else:
                 # flank change 1 -> 0: remove cover mode: sync to tracker, close cover
-                if self.plc_state.state.reset_needed:
+                if self.plc_state["state"]["reset_needed"]:
                     self.plc_interface.reset()
                     time.sleep(10)
                 self.plc_interface.set_sync_to_tracker(False)

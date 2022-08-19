@@ -1,6 +1,3 @@
-# TODO add static types
-
-
 class RingList:
     """
     Base code created by Flavio Catalani on Tue, 5 Jul 2005 (PSF).

@@ -98,6 +98,7 @@ class ImageProcessing:
     def add_markings_to_image(
         img: cv.Mat, edge_fraction: int, circle_cx: int, circle_cy: int, circle_r: int
     ) -> cv.Mat:
+        """Put text for edge fraction and mark circles in image"""
         img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
         img = cv.circle(img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2)
         img = ImageProcessing.add_text_to_image(img, f"{round(edge_fraction * 100, 2)}%")
@@ -107,6 +108,7 @@ class ImageProcessing:
     def add_text_to_image(
         img: cv.Mat, text: str, color: tuple[int, int, int] = (200, 0, 0)
     ) -> cv.Mat:
+        """Put some text on the bottom left of an image"""
         cv.putText(
             img,
             text=text,
