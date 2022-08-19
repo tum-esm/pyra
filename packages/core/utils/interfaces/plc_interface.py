@@ -51,6 +51,8 @@ EMPTY_PLC_STATE: types.PlcStateDict = {
 
 
 class PLCInterface:
+    """https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf"""
+
     @staticmethod
     class PLCError(Exception):
         """
