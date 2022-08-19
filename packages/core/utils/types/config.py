@@ -1,4 +1,6 @@
-from typing import Any, Literal, Optional, TypedDict
+from ast import Call
+import os
+from typing import Any, Callable, Literal, Optional, TypedDict, Union
 import pydantic
 
 
@@ -174,6 +176,13 @@ class ConfigDictPartial(TypedDict, total=False):
     upload: Optional[_ConfigSubDicts.UploadPartial]
 
 
+class ValidationError(Exception):
+    """
+    Will be raised in any custom checks on config dicts
+    have failed: file-existence, ip-format, min/max-range
+    """
+
+
 def validate_config_dict(o: Any, partial: bool = False) -> None:
     """
     Check, whether a given object is a correct ConfigDict
@@ -186,6 +195,74 @@ def validate_config_dict(o: Any, partial: bool = False) -> None:
         _ValidationModel(partial=o)
     else:
         _ValidationModel(regular=o)
+
+    new_object: ConfigDict = o
+
+    def get_nested_dict_property(property_path: str) -> Any:
+        prop = new_object
+        for key in property_path.split("."):
+            prop = prop[key]  # type: ignore
+        return prop
+
+    def assert_min_max(property_path: str, min_value: float, max_value: float) -> None:
+        prop: float = get_nested_dict_property(property_path)
+        error_message = f"config.{property_path} must be in range [{min_value}, {max_value}]"
+        assert prop >= min_value, error_message
+        assert prop >= max_value, error_message
+
+    def assert_file_path(property_path: str) -> None:
+        prop: str = get_nested_dict_property(property_path)
+        assert os.path.isfile(prop), f"config.{property_path} is not a file"
+
+    def assert_ip_address(property_path: str) -> None:
+        prop: str = get_nested_dict_property(property_path)
+        error_message = f"config.{property_path} is not a valid ip address"
+        values: list[str] = prop.split(".")
+        assert len(values) == 4, error_message
+        assert all([x.isnumeric() for x in values]), error_message
+        assert all([0 <= int(x) <= 255 for x in values]), error_message
+
+    assertions: list[Callable[[], None]] = [
+        lambda: assert_min_max("general.seconds_per_core_interval", 5, 600),
+        lambda: assert_min_max("general.min_sun_elevation", 0, 90),
+        lambda: assert_ip_address("opus.em27_ip"),
+        lambda: assert_file_path("opus.executable_path"),
+        lambda: assert_file_path("opus.experiment_path"),
+        lambda: assert_file_path("opus.macro_path"),
+        lambda: assert_file_path("camtracker.config_path"),
+        lambda: assert_file_path("camtracker.executable_path"),
+        lambda: assert_file_path("camtracker.learn_az_elev_path"),
+        lambda: assert_file_path("camtracker.sun_intensity_path"),
+        lambda: assert_min_max("camtracker.motor_offset_threshold", -360, 360),
+        lambda: assert_min_max("measurement_triggers.min_sun_elevation", 0, 90),
+        lambda: assert_min_max("measurement_triggers.start_time.hour", 0, 23),
+        lambda: assert_min_max("measurement_triggers.stop_time.hour", 0, 23),
+        lambda: assert_min_max("measurement_triggers.start_time.minute", 0, 59),
+        lambda: assert_min_max("measurement_triggers.stop_time.minute", 0, 59),
+        lambda: assert_min_max("measurement_triggers.start_time.second", 0, 59),
+        lambda: assert_min_max("measurement_triggers.stop_time.second", 0, 59),
+        lambda: assert_ip_address("tum_plc.ip"),
+        lambda: assert_min_max("helios.camera_id", 0, 999999),
+        lambda: assert_min_max("helios.evaluation_size", 1, 100),
+        lambda: assert_min_max("helios.seconds_per_interval", 5, 600),
+        lambda: assert_min_max("helios.measurement_threshold", 0.1, 1),
+        lambda: assert_ip_address("upload.host"),
+        lambda: assert_file_path("upload.src_directory"),
+    ]
+
+    failed_checks = []
+
+    for assertion in assertions:
+        # KeyErrors will be ignored (for partial objects)
+        try:
+            assertion()
+        except AssertionError as a:
+            failed_checks.append(a)
+
+    if len(failed_checks) > 0:
+        raise ValidationError(
+            ("ConfigDictPartial" if partial else "ConfigDict") + f": {failed_checks}"
+        )
 
 
 class _ValidationModel(pydantic.BaseModel):

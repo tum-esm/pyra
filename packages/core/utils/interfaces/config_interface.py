@@ -2,7 +2,6 @@ import json
 import os
 from typing import Any
 from packages.core.utils import Astronomy, with_filelock, types
-from .config_validation import ConfigValidation
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
@@ -18,10 +17,8 @@ class ConfigInterface:
         """
         Read the contents of the current config.json file.
         The function will validate its integrity and raises
-        an AssertionError if the file is not valid.
+        an Exception if the file is not valid.
         """
-        file_is_valid, validation_exception = ConfigValidation.check_current_config_file()
-        assert file_is_valid, str(validation_exception)
         with open(CONFIG_FILE_PATH, "r") as f:
             new_object: Any = json.load(f)
             types.validate_config_dict(new_object)

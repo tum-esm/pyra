@@ -120,6 +120,3 @@ class OSInterface:
                 return p.status()
 
         return "not-found"
-
-
-OSInterface.StorageError
