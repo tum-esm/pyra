@@ -1,5 +1,4 @@
-import dataclasses
-from typing import Any, Literal, Optional
+from typing import Literal, Optional
 import snap7  # type: ignore
 import time
 import os
@@ -83,6 +82,7 @@ class PLCInterface:
             self.disconnect()
             self.plc_version = new_plc_version
             self.plc_ip = new_plc_ip
+            self.specification = PLC_SPECIFICATION_VERSIONS[self.plc_version]
             self.connect()
 
     def connect(self) -> None:
@@ -130,25 +130,25 @@ class PLCInterface:
     # DIRECT READ FUNCTIONS
 
     def rain_is_detected(self) -> bool:
-        return self.__read_bool(self.specification.state.rain)
+        return self.__read_bool(self.specification["state"]["rain"])
 
     def cover_is_closed(self) -> bool:
         """
         Reads the single value "state.cover_closed"
         """
-        return self.__read_bool(self.specification.state.cover_closed)
+        return self.__read_bool(self.specification["state"]["cover_closed"])
 
     def reset_is_needed(self) -> bool:
         """
         Reads the single value "state.reset_needed"
         """
-        return self.__read_bool(self.specification.state.reset_needed)
+        return self.__read_bool(self.specification["state"]["reset_needed"])
 
     def get_cover_angle(self) -> int:
         """
         Reads the single value "actors.current_angle"
         """
-        return self.__read_int(self.specification.actors.current_angle)
+        return self.__read_int(self.specification["actors"]["current_angle"])
 
     # BULK READ
 
@@ -182,39 +182,39 @@ class PLCInterface:
 
         return {
             "actors": {
-                "fan_speed": _get_int(s.actors.fan_speed),
-                "current_angle": _get_int(s.actors.current_angle),
+                "fan_speed": _get_int(s["actors"]["fan_speed"]),
+                "current_angle": _get_int(s["actors"]["current_angle"]),
             },
             "control": {
-                "auto_temp_mode": _get_bool(s.control.auto_temp_mode),
-                "manual_control": _get_bool(s.control.manual_control),
-                "manual_temp_mode": _get_bool(s.control.manual_temp_mode),
-                "sync_to_tracker": _get_bool(s.control.sync_to_tracker),
+                "auto_temp_mode": _get_bool(s["control"]["auto_temp_mode"]),
+                "manual_control": _get_bool(s["control"]["manual_control"]),
+                "manual_temp_mode": _get_bool(s["control"]["manual_temp_mode"]),
+                "sync_to_tracker": _get_bool(s["control"]["sync_to_tracker"]),
             },
             "sensors": {
-                "humidity": _get_int(s.sensors.humidity),
-                "temperature": _get_int(s.sensors.temperature),
+                "humidity": _get_int(s["sensors"]["humidity"]),
+                "temperature": _get_int(s["sensors"]["temperature"]),
             },
             "state": {
-                "cover_closed": _get_bool(s.state.cover_closed),
-                "motor_failed": _get_bool(s.state.motor_failed),
-                "rain": _get_bool(s.state.rain),
-                "reset_needed": _get_bool(s.state.reset_needed),
-                "ups_alert": _get_bool(s.state.ups_alert),
+                "cover_closed": _get_bool(s["state"]["cover_closed"]),
+                "motor_failed": _get_bool(s["state"]["motor_failed"]),
+                "rain": _get_bool(s["state"]["rain"]),
+                "reset_needed": _get_bool(s["state"]["reset_needed"]),
+                "ups_alert": _get_bool(s["state"]["ups_alert"]),
             },
             "power": {
-                "camera": _get_bool(s.power.camera),
-                "computer": _get_bool(s.power.computer),
-                "heater": _get_bool(s.power.heater),
-                "router": _get_bool(s.power.router),
-                "spectrometer": _get_bool(s.power.spectrometer),
+                "camera": _get_bool(s["power"]["camera"]),
+                "computer": _get_bool(s["power"]["computer"]),
+                "heater": _get_bool(s["power"]["heater"]),
+                "router": _get_bool(s["power"]["router"]),
+                "spectrometer": _get_bool(s["power"]["spectrometer"]),
             },
             "connections": {
-                "camera": _get_bool(s.connections.camera),
-                "computer": _get_bool(s.connections.computer),
-                "heater": _get_bool(s.connections.heater),
-                "router": _get_bool(s.connections.router),
-                "spectrometer": _get_bool(s.connections.spectrometer),
+                "camera": _get_bool(s["connections"]["camera"]),
+                "computer": _get_bool(s["connections"]["computer"]),
+                "heater": _get_bool(s["connections"]["heater"]),
+                "router": _get_bool(s["connections"]["router"]),
+                "spectrometer": _get_bool(s["connections"]["spectrometer"]),
             },
         }
 
@@ -301,16 +301,16 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(
             new_state,
-            self.specification.power.camera,
+            self.specification["power"]["camera"],
             {"power": {"camera": new_state}},
         )
 
     def set_power_computer(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
-        assert self.specification.power.computer is not None
+        assert self.specification["power"]["computer"] is not None
         self.__update_bool(
             new_state,
-            self.specification.power.computer,
+            self.specification["power"]["computer"],
             {"power": {"computer": new_state}},
         )
 
@@ -318,16 +318,16 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(
             new_state,
-            self.specification.power.heater,
+            self.specification["power"]["heater"],
             {"power": {"heater": new_state}},
         )
 
     def set_power_router(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
-        assert self.specification.power.router is not None
+        assert self.specification["power"]["router"] is not None
         self.__update_bool(
             new_state,
-            self.specification.power.router,
+            self.specification["power"]["router"],
             {"power": {"router": new_state}},
         )
 
@@ -335,7 +335,7 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(
             new_state,
-            self.specification.power.spectrometer,
+            self.specification["power"]["spectrometer"],
             {"power": {"spectrometer": new_state}},
         )
 
@@ -345,7 +345,7 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(
             new_state,
-            self.specification.control.sync_to_tracker,
+            self.specification["control"]["sync_to_tracker"],
             {"control": {"sync_to_tracker": new_state}},
         )
 
@@ -353,7 +353,7 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(
             new_state,
-            self.specification.control.manual_control,
+            self.specification["control"]["manual_control"],
             {"control": {"manual_control": new_state}},
         )
 
@@ -361,7 +361,7 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(
             new_state,
-            self.specification.control.auto_temp_mode,
+            self.specification["control"]["auto_temp_mode"],
             {"control": {"auto_temp_mode": new_state}},
         )
 
@@ -369,19 +369,19 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(
             new_state,
-            self.specification.control.manual_temp_mode,
+            self.specification["control"]["manual_temp_mode"],
             {"control": {"manual_temp_mode": new_state}},
         )
 
     def reset(self) -> None:
         """Does not check, whether the value has been changed"""
         if self.plc_version == 1:
-            self.__write_bool(self.specification.control.reset, False)
+            self.__write_bool(self.specification["control"]["reset"], False)
         else:
-            self.__write_bool(self.specification.control.reset, True)
+            self.__write_bool(self.specification["control"]["reset"], True)
 
     # PLC.ACTORS SETTERS
 
     def set_cover_angle(self, value: int) -> None:
         """Does not check, whether the value has been changed"""
-        self.__write_int(self.specification.actors.move_cover, value)
+        self.__write_int(self.specification["actors"]["move_cover"], value)
