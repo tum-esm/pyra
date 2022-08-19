@@ -183,7 +183,7 @@ class ValidationError(Exception):
     """
 
 
-def validate_config_dict(o: Any, partial: bool = False) -> None:
+def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = False) -> None:
     """
     Check, whether a given object is a correct ConfigDict
     Raises a pydantic.ValidationError if the object is invalid.
@@ -212,7 +212,8 @@ def validate_config_dict(o: Any, partial: bool = False) -> None:
 
     def assert_file_path(property_path: str) -> None:
         prop: str = get_nested_dict_property(property_path)
-        assert os.path.isfile(prop), f"config.{property_path} is not a file"
+        if not skip_filepaths:
+            assert os.path.isfile(prop), f"config.{property_path} is not a file"
 
     def assert_ip_address(property_path: str) -> None:
         prop: str = get_nested_dict_property(property_path)

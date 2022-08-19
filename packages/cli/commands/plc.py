@@ -1,10 +1,10 @@
 import json
 import time
-from typing import Callable
+from typing import Callable, Optional
 import click
 import os
-from packages.core.modules.enclosure_control import CoverError
-from packages.core.utils import StateInterface, ConfigInterface, PLCInterface, PLCError
+from packages.core.modules.enclosure_control import EnclosureControl
+from packages.core.utils import StateInterface, ConfigInterface, PLCInterface, types
 from packages.core.utils import with_filelock
 
 dir = os.path.dirname
@@ -13,37 +13,42 @@ STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 
-error_handler = lambda text: click.echo(click.style(text, fg="red"))
-success_handler = lambda text: click.echo(click.style(text, fg="green"))
+
+def print_green(text: str) -> None:
+    click.echo(click.style(text, fg="green"))
 
 
-def get_plc_interface():
+def print_red(text: str) -> None:
+    click.echo(click.style(text, fg="red"))
+
+
+def get_plc_interface() -> Optional[PLCInterface]:
     config = ConfigInterface.read()
     plc_interface = None
 
     try:
         assert config["tum_plc"] is not None, "PLC not configured"
         assert config["tum_plc"]["controlled_by_user"], "PLC is controlled by automation"
-        plc_interface = PLCInterface(config)
+        plc_interface = PLCInterface(config["tum_plc"]["version"], config["tum_plc"]["ip"])
         plc_interface.connect()
-    except (PLCError, AssertionError) as e:
-        error_handler(f"{e}")
+    except Exception as e:
+        print_red(f"{e}")
 
     return plc_interface
 
 
 @click.command(help="Read current state from plc.")
 @click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
-def _read(no_indent):
+def _read(no_indent: bool) -> None:
     plc_interface = get_plc_interface()
     if plc_interface is not None:
         plc_readings = plc_interface.read()
-        success_handler(json.dumps(plc_readings.to_dict(), indent=(None if no_indent else 2)))
+        print_green(json.dumps(plc_readings, indent=(None if no_indent else 2)))
         plc_interface.disconnect()
 
 
 @click.command(help="Run plc function 'reset()'")
-def _reset():
+def _reset() -> None:
     plc_interface = get_plc_interface()
     if plc_interface is not None:
         plc_interface.reset()
@@ -59,11 +64,13 @@ def _reset():
                 )
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
-        success_handler("Ok")
+        print_green("Ok")
         plc_interface.disconnect()
 
 
-def wait_until_cover_is_at_angle(plc_interface: PLCInterface, new_cover_angle, timeout=15):
+def wait_until_cover_is_at_angle(
+    plc_interface: PLCInterface, new_cover_angle: int, timeout: float = 15
+) -> None:
     # waiting until cover is at this angle
     running_time = 0
     while True:
@@ -82,14 +89,14 @@ def wait_until_cover_is_at_angle(plc_interface: PLCInterface, new_cover_angle, t
             break
 
         if running_time > timeout:
-            raise CoverError(
+            raise EnclosureControl.CoverError(
                 f"Cover took too long to move, latest cover angle: {current_cover_angle}"
             )
 
 
 @click.command(help="Run plc function 'move_cover()'")
 @click.argument("angle")
-def _set_cover_angle(angle):
+def _set_cover_angle(angle: str) -> None:
     plc_interface = get_plc_interface()
     if plc_interface is not None:
         new_cover_angle = int("".join([c for c in str(angle) if c.isnumeric() or c == "."]))
@@ -102,21 +109,25 @@ def _set_cover_angle(angle):
         plc_interface.set_manual_control(False)
         wait_until_cover_is_at_angle(plc_interface, new_cover_angle)
 
-        success_handler("Ok")
+        print_green("Ok")
         plc_interface.disconnect()
 
 
 @with_filelock(CONFIG_LOCK_PATH)
-def enable_user_control_in_config():
+def enable_user_control_in_config() -> None:
     with open(CONFIG_FILE_PATH, "r") as f:
-        config: dict = json.load(f)
-    config["tum_plc"]["controlled_by_user"] = True
-    with open(CONFIG_FILE_PATH, "w") as f:
-        json.dump(config, f, indent=4)
+        config = json.load(f)
+    types.validate_config_dict(config)
+
+    verified_config: types.ConfigDict = config
+    if verified_config["tum_plc"] is not None:
+        verified_config["tum_plc"]["controlled_by_user"] = True
+        with open(CONFIG_FILE_PATH, "w") as f:
+            json.dump(verified_config, f, indent=4)
 
 
 @click.command(help="Run plc function 'force_cover_close()'")
-def _close_cover():
+def _close_cover() -> None:
     enable_user_control_in_config()
 
     plc_interface = get_plc_interface()
@@ -127,65 +138,65 @@ def _close_cover():
         plc_interface.set_manual_control(False)
         wait_until_cover_is_at_angle(plc_interface, 0)
 
-        success_handler("Ok")
+        print_green("Ok")
         plc_interface.disconnect()
 
 
 def set_boolean_plc_state(
-    state, get_setter_function: Callable[[PLCInterface], Callable[[bool], None]]
-):
+    state: str, get_setter_function: Callable[[PLCInterface], Callable[[bool], None]]
+) -> None:
     plc_interface = get_plc_interface()
     if plc_interface is not None:
         assert state in ["true", "false"], 'state has to be either "true" or "false"'
         get_setter_function(plc_interface)(state == "true")
-        success_handler("Ok")
+        print_green("Ok")
         plc_interface.disconnect()
 
 
 @click.command(help="Run plc function 'set_sync_to_tracker()'")
 @click.argument("state")
-def _set_sync_to_tracker(state):
+def _set_sync_to_tracker(state: str) -> None:
     set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
 
 
 @click.command(help="Run plc function 'set_auto_temperature()'")
 @click.argument("state")
-def _set_auto_temperature(state):
+def _set_auto_temperature(state: str) -> None:
     set_boolean_plc_state(state, lambda p: p.set_auto_temperature)
 
 
 @click.command(help="Run plc function 'set_power_heater()'")
 @click.argument("state")
-def _set_heater_power(state):
+def _set_heater_power(state: str) -> None:
     set_boolean_plc_state(state, lambda p: p.set_power_heater)
 
 
 @click.command(help="Run plc function 'set_power_heater()'")
 @click.argument("state")
-def _set_camera_power(state):
+def _set_camera_power(state: str) -> None:
     set_boolean_plc_state(state, lambda p: p.set_power_camera)
 
 
 @click.command(help="Run plc function 'set_power_router()'")
 @click.argument("state")
-def _set_router_power(state):
+def _set_router_power(state: str) -> None:
     set_boolean_plc_state(state, lambda p: p.set_power_router)
 
 
 @click.command(help="Run plc function 'set_power_spectrometer()'")
 @click.argument("state")
-def _set_spectrometer_power(state):
+def _set_spectrometer_power(state: str) -> None:
     set_boolean_plc_state(state, lambda p: p.set_power_spectrometer)
 
 
 @click.command(help="Run plc function 'set_power_computer()'")
 @click.argument("state")
-def _set_computer_power(state):
+def _set_computer_power(state: str) -> None:
     set_boolean_plc_state(state, lambda p: p.set_power_computer)
 
 
 @click.group()
-def plc_command_group():
+def plc_command_group() -> None:
     pass
 
 

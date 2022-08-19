@@ -69,7 +69,7 @@ def run() -> None:
         try:
             config = ConfigInterface.read()
             break
-        except AssertionError as e:
+        except Exception as e:
             logger.error(f"{e}")
             logger.error(f"Invalid config, waiting 10 seconds")
             time.sleep(10)
@@ -100,7 +100,7 @@ def run() -> None:
         # load config at the beginning of each mainloop iteration
         try:
             config = ConfigInterface.read()
-        except AssertionError as e:
+        except Exception as e:
             logger.error(f"Invalid config, waiting 10 seconds")
             time.sleep(10)
             continue

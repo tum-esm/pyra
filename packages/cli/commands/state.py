@@ -8,14 +8,11 @@ PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
 STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 
-error_handler = lambda text: click.echo(click.style(text, fg="red"))
-success_handler = lambda text: click.echo(click.style(text, fg="green"))
-
 
 @click.command(help="Read the current state.json file.")
 @click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
 @with_filelock(STATE_LOCK_PATH)
-def _get_state(no_indent):
+def _get_state(no_indent: bool) -> None:
     if not os.path.isfile(STATE_FILE_PATH):
         StateInterface.initialize()
 
@@ -33,7 +30,7 @@ def _get_state(no_indent):
 
 
 @click.group()
-def state_command_group():
+def state_command_group() -> None:
     pass
 
 
