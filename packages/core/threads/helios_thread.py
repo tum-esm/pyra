@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 import time
-import cv2 as cv  # type: ignore
+import cv2 as cv
 import numpy as np
 from typing import Any, Literal, Optional
 from packages.core import types, utils, interfaces

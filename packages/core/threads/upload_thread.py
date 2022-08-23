@@ -6,7 +6,7 @@ import shutil
 import invoke
 import paramiko
 import time
-import fabric  # type: ignore
+import fabric
 import re
 import pydantic
 from packages.core import types, utils, interfaces

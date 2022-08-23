@@ -1,7 +1,7 @@
 from typing import Any, Optional
-import astropy.coordinates as astropy_coordinates  # type: ignore
-import astropy.time as astropy_time  # type: ignore
-import astropy.units as astropy_units  # type: ignore
+import astropy.coordinates as astropy_coordinates
+import astropy.time as astropy_time
+import astropy.units as astropy_units
 from packages.core import types
 
 # TODO: pass config via functions instea of indirectly more code  but way simpler

@@ -1,5 +1,5 @@
 import time
-from snap7.exceptions import Snap7Exception  # type: ignore
+from snap7.exceptions import Snap7Exception
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="enclosure-control")

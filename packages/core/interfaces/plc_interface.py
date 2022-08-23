@@ -1,8 +1,8 @@
 from typing import Literal, Optional
-import snap7  # type: ignore
+import snap7
 import time
 import os
-from snap7.exceptions import Snap7Exception  # type: ignore
+from snap7.exceptions import Snap7Exception
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="plc-interface")

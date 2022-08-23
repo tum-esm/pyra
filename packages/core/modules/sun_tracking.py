@@ -4,7 +4,7 @@
 
 import os
 import time
-import jdcal  # type: ignore
+import jdcal
 import datetime
 from packages.core import types, utils, interfaces
 
