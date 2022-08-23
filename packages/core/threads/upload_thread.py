@@ -9,10 +9,10 @@ import time
 import fabric  # type: ignore
 import re
 import pydantic
-from packages.core.utils import ConfigInterface, Logger, types
+from packages.core import types, utils, interfaces
 from .abstract_thread_base import AbstractThreadBase
 
-logger = Logger(origin="upload")
+logger = utils.Logger(origin="upload")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -296,7 +296,7 @@ class UploadThread(AbstractThreadBase):
     def main(self) -> None:
         """Main entrypoint of the thread"""
         while True:
-            self.config = ConfigInterface.read()
+            self.config = interfaces.ConfigInterface.read()
 
             if self.config["upload"] is None:
                 return

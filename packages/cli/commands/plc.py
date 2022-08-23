@@ -3,9 +3,9 @@ import time
 from typing import Callable, Optional
 import click
 import os
+from packages.core import types
 from packages.core.modules.enclosure_control import EnclosureControl
-from packages.core.utils import StateInterface, ConfigInterface, PLCInterface, types
-from packages.core.utils import with_filelock
+from packages.core.utils import StateInterface, ConfigInterface, PLCInterface, with_filelock
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))

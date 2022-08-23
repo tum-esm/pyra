@@ -1,4 +1,3 @@
-from typing import Iterable
 import cv2 as cv  # type: ignore
 import numpy as np
 

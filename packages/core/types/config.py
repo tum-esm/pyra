@@ -1,7 +1,6 @@
-from ast import Call
 import os
-from typing import Any, Callable, Literal, Optional, TypedDict, Union
 import pydantic
+from typing import Any, Callable, Literal, Optional, TypedDict
 
 
 TimeDict = TypedDict("TimeDict", {"hour": int, "minute": int, "second": int})
@@ -214,7 +213,7 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
         prop: float = get_nested_dict_property(property_path)
         error_message = f"config.{property_path} must be in range [{min_value}, {max_value}]"
         assert prop >= min_value, error_message
-        assert prop >= max_value, error_message
+        assert prop <= max_value, error_message
 
     def assert_file_path(property_path: str) -> None:
         prop: str = get_nested_dict_property(property_path)
@@ -260,11 +259,14 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
     failed_checks = []
 
     for assertion in assertions:
-        # KeyErrors will be ignored (for partial objects)
         try:
             assertion()
         except AssertionError as a:
             failed_checks.append(a)
+        except (TypeError, KeyError):
+            # Will be ignored because the structure is already
+            # validated. Occurs when property is missing
+            pass
 
     if len(failed_checks) > 0:
         raise ValidationError(

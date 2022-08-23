@@ -1,7 +1,9 @@
 class RingList:
     """
     Base code created by Flavio Catalani on Tue, 5 Jul 2005 (PSF).
-    Added sum() and reinitialize() functions.
+    Added empty(), sum(), and reinitialize() functions.
+
+    https://code.activestate.com/recipes/435902-ring-list-a-fixed-size-circular-list/
     """
 
     def __init__(self, length: int):

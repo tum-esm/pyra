@@ -4,7 +4,6 @@ import click
 import os
 import psutil
 from packages.core.modules.enclosure_control import EnclosureControl
-from packages.core.modules.opus_measurement import OpusMeasurement
 from packages.core.modules.sun_tracking import SunTracking
 from packages.core.utils import ConfigInterface, Logger
 

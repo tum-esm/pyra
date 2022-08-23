@@ -1,5 +1,5 @@
-from typing import Any, Optional, TypedDict
 import pydantic
+from typing import Any, Optional, TypedDict
 
 
 class PersistentStateDict(TypedDict):

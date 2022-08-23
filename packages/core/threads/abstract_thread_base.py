@@ -1,7 +1,7 @@
 import abc
 import threading
 from typing import Optional
-from packages.core.utils import Logger, types
+from packages.core import types, utils
 
 
 class AbstractThreadBase(abc.ABC):
@@ -11,7 +11,7 @@ class AbstractThreadBase(abc.ABC):
 
     def __init__(self, config: types.ConfigDict, logger_origin: str) -> None:
         self.__thread: Optional[threading.Thread] = None
-        self.__logger: Logger = Logger(origin=logger_origin)
+        self.__logger: utils.Logger = utils.Logger(origin=logger_origin)
         self.config: types.ConfigDict = config
 
     def update_thread_state(self, new_config: types.ConfigDict) -> None:

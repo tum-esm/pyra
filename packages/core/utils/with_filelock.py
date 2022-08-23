@@ -26,6 +26,6 @@ class with_filelock:
         @wraps(f)
         def wrapper(*args: tuple[Any], **kwargs: dict[str, Any]) -> Any:
             with filelock.FileLock(self.file_lock_path, timeout=self.timeout):
-                return function(*args, **kwargs)
+                return f(*args, **kwargs)
 
         return cast(F, wrapper)

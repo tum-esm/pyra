@@ -3,15 +3,13 @@
 # interface to be implemented for any software like "Camtracker"
 
 import os
-import sys
 import time
-from typing import Any
 import jdcal  # type: ignore
 import datetime
-from packages.core.utils import StateInterface, Logger, OSInterface, types
+from packages.core import types, utils, interfaces
 
 
-logger = Logger(origin="sun-tracking")
+logger = utils.Logger(origin="sun-tracking")
 
 
 class SunTracking:
@@ -29,7 +27,7 @@ class SunTracking:
 
         logger.info("Running SunTracking")
 
-        measurements_should_be_running = StateInterface.read()[
+        measurements_should_be_running = interfaces.StateInterface.read()[
             "measurements_should_be_running"
         ]
 
@@ -66,7 +64,7 @@ class SunTracking:
         ct_path = self._CONFIG["camtracker"]["executable_path"]
         process_name = os.path.basename(ct_path)
 
-        return OSInterface.get_process_status(process_name) in [
+        return interfaces.OSInterface.get_process_status(process_name) in [
             "running",
             "start_pending",
             "continue_pending",

@@ -1,10 +1,10 @@
 import json
 import os
 from typing import Any
-from packages.core.utils import Astronomy, with_filelock, types
+from packages.core import types, utils
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
@@ -12,7 +12,7 @@ CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
 
 class ConfigInterface:
     @staticmethod
-    @with_filelock(CONFIG_LOCK_PATH)
+    @utils.with_filelock(CONFIG_LOCK_PATH)
     def read() -> types.ConfigDict:
         """
         Read the contents of the current config.json file.
@@ -24,5 +24,5 @@ class ConfigInterface:
             types.validate_config_dict(new_object)
             config: types.ConfigDict = new_object
 
-        Astronomy.CONFIG = config
+        utils.Astronomy.CONFIG = config
         return config

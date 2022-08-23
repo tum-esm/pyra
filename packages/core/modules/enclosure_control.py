@@ -1,8 +1,8 @@
 import time
 from snap7.exceptions import Snap7Exception  # type: ignore
-from packages.core.utils import StateInterface, Logger, Astronomy, PLCInterface, types
+from packages.core import types, utils, interfaces
 
-logger = Logger(origin="enclosure-control")
+logger = utils.Logger(origin="enclosure-control")
 
 
 class EnclosureControl:
@@ -44,7 +44,7 @@ class EnclosureControl:
         """Initializes the default PLC settings at startup or activation in config."""
         assert self.config["tum_plc"] is not None
 
-        self.plc_interface = PLCInterface(
+        self.plc_interface = interfaces.PLCInterface(
             self.config["tum_plc"]["version"], self.config["tum_plc"]["ip"]
         )
         self.plc_interface.connect()
@@ -73,7 +73,7 @@ class EnclosureControl:
         logger.info("Running EnclosureControl")
 
         # Check for current measurement status
-        self.measurements_should_be_running = StateInterface.read()[
+        self.measurements_should_be_running = interfaces.StateInterface.read()[
             "measurements_should_be_running"
         ]
 
@@ -99,7 +99,7 @@ class EnclosureControl:
 
             # Push the latest readout of the PLC state to the StateInterface
             logger.info("New continuous readings.")
-            StateInterface.update({"enclosure_plc_readings": self.plc_state})
+            interfaces.StateInterface.update({"enclosure_plc_readings": self.plc_state})
 
             # Skip writing to the PLC as the user took over control from the automation
             if self.config["tum_plc"]["controlled_by_user"]:
@@ -149,7 +149,9 @@ class EnclosureControl:
             now = time.time()
             seconds_since_error_occured = now - self.last_plc_connection_time
             if seconds_since_error_occured > 600:
-                raise PLCInterface.PLCError("Snap7Exception persisting for 10+ minutes")
+                raise interfaces.PLCInterface.PLCError(
+                    "Snap7Exception persisting for 10+ minutes"
+                )
             else:
                 logger.info(
                     f"Snap7Exception persisting for {round(seconds_since_error_occured/60, 2)}"
@@ -219,10 +221,10 @@ class EnclosureControl:
         spectrometer in the morning when minimum angle is satisfied.
         """
 
-        current_sun_elevation = Astronomy.get_current_sun_elevation()
+        current_sun_elevation = utils.Astronomy.get_current_sun_elevation()
         min_power_elevation = (
             self.config["general"]["min_sun_elevation"] - 1
-        ) * Astronomy.units.deg
+        ) * utils.Astronomy.units.deg
 
         if current_sun_elevation is not None:
             sun_is_above_minimum = current_sun_elevation >= min_power_elevation

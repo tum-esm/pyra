@@ -1,11 +1,10 @@
 import json
 import os
 import shutil
-from packages.core.utils import with_filelock, update_dict_recursively, types
-from .plc_interface import EMPTY_PLC_STATE
+from packages.core import types, utils
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
@@ -20,7 +19,43 @@ PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state
 EMPTY_STATE_OBJECT: types.StateDict = {
     "helios_indicates_good_conditions": None,
     "measurements_should_be_running": False,
-    "enclosure_plc_readings": EMPTY_PLC_STATE,
+    "enclosure_plc_readings": {
+        "actors": {
+            "fan_speed": None,
+            "current_angle": None,
+        },
+        "control": {
+            "auto_temp_mode": None,
+            "manual_control": None,
+            "manual_temp_mode": None,
+            "sync_to_tracker": None,
+        },
+        "sensors": {
+            "humidity": None,
+            "temperature": None,
+        },
+        "state": {
+            "cover_closed": None,
+            "motor_failed": None,
+            "rain": None,
+            "reset_needed": None,
+            "ups_alert": None,
+        },
+        "power": {
+            "camera": None,
+            "computer": None,
+            "heater": None,
+            "router": None,
+            "spectrometer": None,
+        },
+        "connections": {
+            "camera": None,
+            "computer": None,
+            "heater": None,
+            "router": None,
+            "spectrometer": None,
+        },
+    },
     "os_state": {
         "cpu_usage": None,
         "memory_usage": None,
@@ -34,13 +69,10 @@ EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
     "current_exceptions": [],
 }
 
-# TODO: Validate structure with cerberus (assertion)
-#       we could possibly use pydantic for that
-
 
 class StateInterface:
     @staticmethod
-    @with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH)
     def initialize() -> None:
         """
         This will create two files:
@@ -77,7 +109,7 @@ class StateInterface:
                 json.dump(EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
 
     @staticmethod
-    @with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH)
     def read() -> types.StateDict:
         """Read the state file and return its content"""
         with open(STATE_FILE_PATH, "r") as f:
@@ -86,7 +118,7 @@ class StateInterface:
             return new_object
 
     @staticmethod
-    @with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH)
     def read_persistent() -> types.PersistentStateDict:
         """Read the persistent state file and return its content"""
         with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
@@ -95,7 +127,7 @@ class StateInterface:
             return new_object
 
     @staticmethod
-    @with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH)
     def update(update: types.StateDictPartial) -> None:
         """
         Update the (persistent) state file and return its content.
@@ -106,12 +138,12 @@ class StateInterface:
         with open(STATE_FILE_PATH, "r") as f:
             current_state = json.load(f)
 
-        new_state = update_dict_recursively(current_state, update)
+        new_state = utils.update_dict_recursively(current_state, update)
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
 
     @staticmethod
-    @with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH)
     def update_persistent(update: types.PersistentStateDictPartial) -> None:
         """
         Update the (persistent) state file and return its content.
@@ -123,6 +155,6 @@ class StateInterface:
             current_state = json.load(f)
             types.validate_persistent_state_dict(current_state)
 
-        new_state = update_dict_recursively(current_state, update)
+        new_state = utils.update_dict_recursively(current_state, update)
         with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)

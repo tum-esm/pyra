@@ -3,7 +3,8 @@ import shutil
 import click
 import os
 import sys
-from packages.core.utils import types, with_filelock, update_dict_recursively
+from packages.core import types
+from packages.core.utils import with_filelock, update_dict_recursively
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))

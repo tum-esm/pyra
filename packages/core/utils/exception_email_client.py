@@ -6,10 +6,10 @@ from email.mime.multipart import MIMEMultipart
 import subprocess
 import traceback
 from typing import Optional
-from .. import types
+from packages.core import types
 
 dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(dir(os.path.abspath(__file__))))))
+PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
 
 def get_pyra_version() -> str:

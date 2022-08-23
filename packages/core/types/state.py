@@ -1,7 +1,6 @@
-from typing import Any, Union, Optional, TypedDict
 import pydantic
-
-from . import PlcStateDict, PlcStateDictPartial
+from typing import Any, Union, Optional, TypedDict
+from .plc_state import PlcStateDict, PlcStateDictPartial
 
 
 class _OSStateDict(TypedDict):

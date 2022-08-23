@@ -1,7 +1,7 @@
 import datetime
-from packages.core.utils import Astronomy, StateInterface, Logger, types
+from packages.core import types, utils, interfaces
 
-logger = Logger(origin="measurement-conditions")
+logger = utils.Logger(origin="measurement-conditions")
 
 
 def is_time_trigger_active(
@@ -61,10 +61,10 @@ class MeasurementConditions:
             measurements_should_be_running = self._get_automatic_decision()
 
         if (
-            StateInterface.read()["measurements_should_be_running"]
+            interfaces.StateInterface.read()["measurements_should_be_running"]
             != measurements_should_be_running
         ):
-            Logger.log_activity_event(
+            utils.Logger.log_activity_event(
                 "start-measurements" if measurements_should_be_running else "stop-measurements"
             )
 
@@ -72,7 +72,7 @@ class MeasurementConditions:
             f"Measurements should be running is set to: {measurements_should_be_running}."
         )
         # Update of the StateInterface with the latest measurement decision
-        StateInterface.update(
+        interfaces.StateInterface.update(
             {"measurements_should_be_running": measurements_should_be_running}
         )
 
@@ -98,12 +98,12 @@ class MeasurementConditions:
         # Evaluate sun elevation if trigger is active
         if triggers["consider_sun_elevation"]:
             logger.info("Sun elevation as a trigger is considered.")
-            current_sun_elevation = Astronomy.get_current_sun_elevation()
+            current_sun_elevation = utils.Astronomy.get_current_sun_elevation()
             min_sun_elevation = max(
                 self._CONFIG["general"]["min_sun_elevation"], triggers["min_sun_elevation"]
             )
             sun_above_threshold = current_sun_elevation > (
-                min_sun_elevation * Astronomy.units.deg
+                min_sun_elevation * utils.Astronomy.units.deg
             )
             if sun_above_threshold:
                 logger.debug("Sun angle is above threshold.")
@@ -123,7 +123,9 @@ class MeasurementConditions:
         # Helios runs in a thread and evaluates the sun conditions consistanly during day.
         if triggers["consider_helios"]:
             logger.info("Helios as a trigger is considered.")
-            helios_result = StateInterface.read()["helios_indicates_good_conditions"]
+            helios_result = interfaces.StateInterface.read()[
+                "helios_indicates_good_conditions"
+            ]
 
             if helios_result is None:
                 logger.debug(f"Helios does not nave enough images yet.")

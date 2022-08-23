@@ -2,7 +2,7 @@ import os
 import sys
 import time
 from typing import Any
-from packages.core.utils import Logger, StateInterface, Astronomy, types
+from packages.core import types, utils, interfaces
 
 
 # these imports are provided by pywin32
@@ -13,7 +13,7 @@ if sys.platform == "win32":
     import dde  # type: ignore
 
 
-logger = Logger(origin="opus-measurement")
+logger = utils.Logger(origin="opus-measurement")
 
 
 class OpusMeasurement:
@@ -71,7 +71,7 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = StateInterface.read()[
+        measurements_should_be_running = interfaces.StateInterface.read()[
             "measurements_should_be_running"
         ]
         if self.last_cycle_automation_status != measurements_should_be_running:
@@ -301,8 +301,8 @@ class OpusMeasurement:
         """OPUS closes at the end of the day to start up fresh the next day."""
         assert sys.platform == "win32"
 
-        sun_angle_is_low: bool = Astronomy.get_current_sun_elevation().is_within_bounds(
-            None, self._CONFIG["general"]["min_sun_elevation"] * Astronomy.units.deg
+        sun_angle_is_low: bool = utils.Astronomy.get_current_sun_elevation().is_within_bounds(
+            None, self._CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg
         )
         return sun_angle_is_low
 
@@ -352,7 +352,7 @@ class OpusMeasurement:
         assert sys.platform == "win32"
 
         if self._CONFIG["opus"]["experiment_path"] != self.current_experiment:
-            if StateInterface.read_persistent()["active_opus_macro_id"] == None:
+            if interfaces.StateInterface.read_persistent()["active_opus_macro_id"] == None:
                 self.load_experiment()
             else:
                 self.stop_macro()

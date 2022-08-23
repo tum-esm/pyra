@@ -1,16 +1,11 @@
 import os
 import time
 from typing import Any, Optional
-from packages.core import modules, threads
-from packages.core.utils import (
-    ConfigInterface,
-    StateInterface,
-    Logger,
-    ExceptionEmailClient,
-    types,
-)
+from packages.core import types, utils, interfaces, modules, threads
 
-logger = Logger(origin="main")
+logger = utils.Logger(origin="main")
+
+# TODO: Move library ignores to pyproject.toml
 
 
 def update_exception_state(
@@ -35,18 +30,18 @@ def update_exception_state(
         if new_exception is not None:
             if type(new_exception).__name__ not in current_exceptions:
                 updated_current_exceptions.append(type(new_exception).__name__)
-                ExceptionEmailClient.handle_occured_exception(config, new_exception)
+                utils.ExceptionEmailClient.handle_occured_exception(config, new_exception)
                 if len(current_exceptions) == 0:
-                    Logger.log_activity_event("error-occured")
+                    utils.Logger.log_activity_event("error-occured")
         else:
             if len(current_exceptions) > 0:
                 updated_current_exceptions = []
-                ExceptionEmailClient.handle_resolved_exception(config)
+                utils.ExceptionEmailClient.handle_resolved_exception(config)
                 logger.info(f"All exceptions have been resolved.")
-                Logger.log_activity_event("errors-resolved")
+                utils.Logger.log_activity_event("errors-resolved")
 
         # if no errors until now
-        StateInterface.update_persistent({"current_exceptions": current_exceptions})
+        interfaces.StateInterface.update_persistent({"current_exceptions": current_exceptions})
         return updated_current_exceptions
 
     except Exception as e:
@@ -60,18 +55,18 @@ def run() -> None:
     It loads the config file, validates it runs every module one by
     one, and possibly restarts the upload- and helios-thread.
     """
-    StateInterface.initialize()
+    interfaces.StateInterface.initialize()
     logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
 
     # Loop until a valid config has been found. Without
     # an invalid config, the mainloop cannot initialize
     while True:
         try:
-            config = ConfigInterface.read()
+            config = interfaces.ConfigInterface.read()
             break
         except Exception as e:
-            logger.error(f"{e}")
-            logger.error(f"Invalid config, waiting 10 seconds")
+            logger.exception(e)
+            logger.error(f"Could not read config, waiting 10 seconds")
             time.sleep(10)
 
     # these modules will be executed one by one in each
@@ -91,7 +86,7 @@ def run() -> None:
     helios_thread_instance = threads.helios_thread.HeliosThread(config)
     upload_thread_instance = threads.upload_thread.UploadThread(config)
 
-    current_exceptions = StateInterface.read_persistent()["current_exceptions"]
+    current_exceptions = interfaces.StateInterface.read_persistent()["current_exceptions"]
 
     while True:
         start_time = time.time()
@@ -99,7 +94,7 @@ def run() -> None:
 
         # load config at the beginning of each mainloop iteration
         try:
-            config = ConfigInterface.read()
+            config = interfaces.ConfigInterface.read()
         except Exception as e:
             logger.error(f"Invalid config, waiting 10 seconds")
             time.sleep(10)

@@ -1,21 +1,13 @@
 from datetime import datetime
 import os
 import time
-from typing import Any, Literal, Optional
 import cv2 as cv  # type: ignore
 import numpy as np
-from packages.core.utils import (
-    ConfigInterface,
-    StateInterface,
-    Logger,
-    RingList,
-    Astronomy,
-    ImageProcessing,
-    types,
-)
+from typing import Any, Literal, Optional
+from packages.core import types, utils, interfaces
 from .abstract_thread_base import AbstractThreadBase
 
-logger = Logger(origin="helios")
+logger = utils.Logger(origin="helios")
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -178,7 +170,7 @@ class _Helios:
             img = _Helios.take_image(trow_away_white_images=False)
             mean_color = round(np.mean(img), 3)
             exposure_results.append({"exposure": e, "mean": mean_color})
-            img = ImageProcessing.add_text_to_image(
+            img = utils.ImageProcessing.add_text_to_image(
                 img, f"mean={mean_color}", color=(0, 0, 255)
             )
             cv.imwrite(os.path.join(AUTOEXPOSURE_IMG_DIR, f"exposure-{e}.jpg"), img)
@@ -214,8 +206,8 @@ class _Helios:
         single_valued_pixels = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)
 
         # determine lense position and size from binary mask
-        binary_mask = ImageProcessing.get_binary_mask(single_valued_pixels)
-        circle_cx, circle_cy, circle_r = ImageProcessing.get_circle_location(binary_mask)
+        binary_mask = utils.ImageProcessing.get_binary_mask(single_valued_pixels)
+        circle_cx, circle_cy, circle_r = utils.ImageProcessing.get_circle_location(binary_mask)
 
         # only consider edges and make them bold
         edges_only: cv.Mat = np.array(cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32)
@@ -224,7 +216,7 @@ class _Helios:
         )
 
         # blacken the outer 10% of the circle radius
-        edges_only_dilated *= ImageProcessing.get_circle_mask(
+        edges_only_dilated *= utils.ImageProcessing.get_circle_mask(
             edges_only_dilated.shape, round(circle_r * 0.9), circle_cx, circle_cy
         )
 
@@ -241,7 +233,7 @@ class _Helios:
             image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
             raw_image_name = f"{image_timestamp}-{status}-raw.jpg"
             processed_image_name = f"{image_timestamp}-{status}-processed.jpg"
-            processed_frame = ImageProcessing.add_markings_to_image(
+            processed_frame = utils.ImageProcessing.add_markings_to_image(
                 edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
             )
             cv.imwrite(os.path.join(IMG_DIR, raw_image_name), frame)
@@ -305,22 +297,22 @@ class HeliosThread(AbstractThreadBase):
 
         # headless mode = don't use logger, just print messages to console, always save images
         if headless:
-            logger = Logger(origin="helios", just_print=True)
-        _CONFIG = ConfigInterface.read()
+            logger = utils.Logger(origin="helios", just_print=True)
+        _CONFIG = interfaces.ConfigInterface.read()
         self.config = _CONFIG
 
         # Check for termination
         if (_CONFIG["helios"] is None) or (not self.should_be_running()):
             return
 
-        status_history = RingList(_CONFIG["helios"]["evaluation_size"])
+        status_history = utils.RingList(_CONFIG["helios"]["evaluation_size"])
         current_state = None
 
         repeated_camera_error_count = 0
 
         while True:
             start_time = time.time()
-            _CONFIG = ConfigInterface.read()
+            _CONFIG = interfaces.ConfigInterface.read()
 
             # Check for termination
             if (_CONFIG["helios"] is None) or (not self.should_be_running()):
@@ -343,12 +335,16 @@ class HeliosThread(AbstractThreadBase):
                     status_history.reinitialize(new_size)
 
                 # sleep while sun angle is too low
-                if (not headless) and Astronomy.get_current_sun_elevation().is_within_bounds(
-                    None, _CONFIG["general"]["min_sun_elevation"] * Astronomy.units.deg
+                if (
+                    not headless
+                ) and utils.Astronomy.get_current_sun_elevation().is_within_bounds(
+                    None, _CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg
                 ):
                     logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                     if current_state != None:
-                        StateInterface.update({"helios_indicates_good_conditions": False})
+                        interfaces.StateInterface.update(
+                            {"helios_indicates_good_conditions": False}
+                        )
                         current_state = None
                         # reinit for next day
                         _Helios.deinit()
@@ -391,7 +387,9 @@ class HeliosThread(AbstractThreadBase):
                     logger.info(
                         f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
                     )
-                    StateInterface.update({"helios_indicates_good_conditions": new_state})
+                    interfaces.StateInterface.update(
+                        {"helios_indicates_good_conditions": new_state}
+                    )
                     current_state = new_state
 
                 # wait rest of loop time

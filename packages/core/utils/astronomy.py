@@ -2,10 +2,9 @@ from typing import Any, Optional
 import astropy.coordinates as astropy_coordinates  # type: ignore
 import astropy.time as astropy_time  # type: ignore
 import astropy.units as astropy_units  # type: ignore
-from .. import types
+from packages.core import types
 
-# TODO: pass config via functions instea of indirectly
-#       more code  but way simpler
+# TODO: pass config via functions instea of indirectly more code  but way simpler
 
 # TODO: add static typic (simplify code while doing that (less astropy stuff))
 
