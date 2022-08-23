@@ -42,15 +42,15 @@ class DirectoryUploadClient:
         self.upload_config = config["upload"]
         self.date_string = date_string
 
-        self.src_dir_path = os.path.join(config["upload"]["src_directory"], date_string)
+        self.src_dir_path = os.path.join(config["upload"]["src_directory_ifgs"], date_string)
         self.src_meta_path = os.path.join(self.src_dir_path, "upload-meta.json")
         assert os.path.isdir(self.src_dir_path), f"{self.src_dir_path} is not a directory"
 
-        self.dst_dir_path = f"{config['upload']['dst_directory']}/{date_string}"
+        self.dst_dir_path = f"{config['upload']['dst_directory_ifgs']}/{date_string}"
         self.dst_meta_path = f"{self.dst_dir_path}/upload-meta.json"
         assert self.transfer_process.is_remote_dir(
-            config["upload"]["dst_directory"]
-        ), f"remote {config['upload']['dst_directory']} is not a directory"
+            config["upload"]["dst_directory_ifgs"]
+        ), f"remote {config['upload']['dst_directory_ifgs']} is not a directory"
 
         self.meta_content: types.UploadMetaDict = {
             "complete": False,
@@ -58,7 +58,7 @@ class DirectoryUploadClient:
             "createdTime": round(time.time(), 3),
             "lastModifiedTime": round(time.time(), 3),
         }
-        self.remove_src_after_upload: bool = config["upload"]["remove_src_after_upload"]
+        self.remove_src_after_upload: bool = config["upload"]["remove_src_ifgs_after_upload"]
 
     def __initialize_remote_dir(self) -> None:
         """
@@ -85,7 +85,7 @@ class DirectoryUploadClient:
         """
         local_script_path = os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
         remote_script_path = (
-            self.upload_config["src_directory"] + "/get_upload_dir_checksum.py"
+            self.upload_config["src_directory_ifgs"] + "/get_upload_dir_checksum.py"
         )
         self.transfer_process.put(local_script_path, remote_script_path)
 
@@ -290,7 +290,7 @@ class UploadThread(AbstractThreadBase):
         return (
             (not self.config["general"]["test_mode"])
             and (self.config["upload"] is not None)
-            and (self.config["upload"]["is_active"])
+            and (self.config["upload"]["upload_ifgs"])
         )
 
     def main(self) -> None:
@@ -302,7 +302,7 @@ class UploadThread(AbstractThreadBase):
                 return
 
             src_dates_strings = DirectoryUploadClient.get_directories_to_be_uploaded(
-                self.config["upload"]["src_directory"]
+                self.config["upload"]["src_directory_ifgs"]
             )
             for src_date_string in src_dates_strings:
 

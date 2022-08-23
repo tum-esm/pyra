@@ -133,23 +133,29 @@ class _ConfigSubDicts:
 
     @staticmethod
     class Upload(TypedDict):
-        is_active: bool
         host: str
         user: str
         password: str
-        src_directory: str
-        dst_directory: str
-        remove_src_after_upload: bool
+        upload_ifgs: bool
+        src_directory_ifgs: str
+        dst_directory_ifgs: str
+        remove_src_ifgs_after_upload: bool
+        upload_helios: bool
+        dst_directory_helios: str
+        remove_src_helios_after_upload: bool
 
     @staticmethod
     class UploadPartial(TypedDict, total=False):
-        is_active: bool
         host: str
         user: str
         password: str
-        src_directory: str
-        dst_directory: str
-        remove_src_after_upload: bool
+        upload_ifgs: bool
+        src_directory_ifgs: str
+        dst_directory_ifgs: str
+        remove_src_ifgs_after_upload: bool
+        upload_helios: bool
+        dst_directory_helios: str
+        remove_src_helios_after_upload: bool
 
 
 class ConfigDict(TypedDict):
