@@ -4,10 +4,11 @@
 .pytest_cache
 __pycache__
 .coverage
+test-tmp/
 
 # config
 config/config.json
-config/config.original.json
+config/config.tmp.json
 config/*.lock
 .env
 packages/cli/alias/pyra-cli.bat
