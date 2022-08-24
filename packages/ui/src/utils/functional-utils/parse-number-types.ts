@@ -51,6 +51,9 @@ export default function parseNumberTypes(newConfig: customTypes.config): customT
                       measurement_threshold: parseFloat(
                           `${newConfig.helios.measurement_threshold}`
                       ),
+                      edge_detection_threshold: parseFloat(
+                          `${newConfig.helios.edge_detection_threshold}`
+                      ),
                       save_images: newConfig.helios.save_images,
                   },
         upload: newConfig.upload,

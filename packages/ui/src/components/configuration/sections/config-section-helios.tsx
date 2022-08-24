@@ -17,6 +17,7 @@ export default function ConfigSectionHelios() {
                 evaluation_size: 15,
                 seconds_per_interval: 6,
                 measurement_threshold: 0.6,
+                edge_detection_threshold: 0.02,
                 save_images: false,
             },
         });
@@ -99,6 +100,17 @@ export default function ConfigSectionHelios() {
                 oldValue={
                     centralSectionConfig !== null
                         ? centralSectionConfig.measurement_threshold
+                        : 'null'
+                }
+                numeric
+            />
+            <configurationComponents.ConfigElementText
+                title="Edge Detection Threshold"
+                value={localSectionConfig.edge_detection_threshold}
+                setValue={(v: any) => update({ helios: { edge_detection_threshold: v } })}
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.edge_detection_threshold
                         : 'null'
                 }
                 numeric

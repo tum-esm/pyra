@@ -88,6 +88,7 @@ export namespace customTypes {
             evaluation_size: number;
             seconds_per_interval: number;
             measurement_threshold: number;
+            edge_detection_threshold: number;
             save_images: boolean;
         };
         upload: null | {
@@ -156,6 +157,7 @@ export namespace customTypes {
             evaluation_size?: number;
             seconds_per_interval?: number;
             measurement_threshold?: number;
+            edge_detection_threshold?: number;
             save_images?: boolean;
         };
         upload?: null | {
