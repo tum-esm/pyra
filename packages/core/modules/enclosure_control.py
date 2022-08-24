@@ -33,6 +33,7 @@ class EnclosureControl:
         self.config = initial_config
         self.initialized = False
         self.last_plc_connection_time = time.time()
+        self.motor_reset_needed_in_last_iteration = False
         if self.config["general"]["test_mode"]:
             return
 
@@ -101,6 +102,28 @@ class EnclosureControl:
             logger.info("New continuous readings.")
             interfaces.StateInterface.update({"enclosure_plc_readings": self.plc_state})
 
+            # Check for critial error: Motor Failed Flag in PLC. In case of present
+            # motor failed flag the cover might not be closed in bad weather
+            # conditions. Potentially putting the measurement instrument at risk.
+            if self.plc_state["state"]["motor_failed"]:
+                if self.plc_state["state"]["reset_needed"] and (
+                    not self.motor_reset_needed_in_last_iteration
+                ):
+                    # when both motor and reset flag are set, then a reset is probably
+                    # needed - skipping this module until the next iteration
+                    self.motor_reset_needed_in_last_iteration = True
+                    self.plc_interface.reset()
+                    return
+                else:
+                    # if the motor failed but no reset needed or if the reset has
+                    # already been done in the last iteration, then this error will
+                    # be raised (and an email sent out)
+                    raise EnclosureControl.MotorFailedError(
+                        "URGENT: stop all actions, check cover in person"
+                    )
+            else:
+                self.motor_reset_needed_in_last_iteration = False
+
             # Skip writing to the PLC as the user took over control from the automation
             if self.config["tum_plc"]["controlled_by_user"]:
                 logger.debug(
@@ -110,14 +133,6 @@ class EnclosureControl:
 
             # Dawn/dusk detection: powerup/down spectrometer at a defined sun angle
             self.auto_set_power_spectrometer()
-
-            # Check for critial error: Motor Failed Flag in PLC
-            # In case of present motor failed flag the cover might not be closed in bad weather conditions.
-            # Potentially putting the measurement instrument at risk.
-            if self.plc_state["state"]["motor_failed"]:
-                raise EnclosureControl.MotorFailedError(
-                    "URGENT: stop all actions, check cover in person"
-                )
 
             # Check PLC ip connection (single ping).
             if self.plc_interface.is_responsive():
