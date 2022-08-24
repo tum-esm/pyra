@@ -120,6 +120,7 @@ class ConfigSubDicts:
         evaluation_size: int
         seconds_per_interval: float
         measurement_threshold: float
+        edge_detection_threshold: float
         save_images: bool
 
     @staticmethod
@@ -128,6 +129,7 @@ class ConfigSubDicts:
         evaluation_size: int
         seconds_per_interval: float
         measurement_threshold: float
+        edge_detection_threshold: float
         save_images: bool
 
     @staticmethod

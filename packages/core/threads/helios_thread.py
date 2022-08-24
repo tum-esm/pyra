@@ -13,7 +13,7 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 IMG_DIR = os.path.join(PROJECT_DIR, "logs", "helios")
 AUTOEXPOSURE_IMG_DIR = os.path.join(PROJECT_DIR, "logs", "helios-autoexposure")
-_CONFIG = None
+_CONFIG: Optional[types.ConfigDict] = None
 
 
 class CameraError(Exception):
@@ -199,6 +199,9 @@ class _Helios:
         6. If number of edge-pixels is > x: return 1; else: return 0;
         """
 
+        assert _CONFIG is not None
+        assert _CONFIG["helios"] is not None
+
         # transform image from 1280x720 to 640x360
         downscaled_image = cv.resize(frame, None, fx=0.5, fy=0.5)
 
@@ -225,7 +228,10 @@ class _Helios:
         status: Literal[1, 0] = 0
         if pixels_inside_circle != 0:
             edge_fraction = round((np.sum(edges_only_dilated) / 255) / pixels_inside_circle, 6)
-            status = 1 if (edge_fraction > 0.02) else 0
+            sufficient_edge_fraction = (
+                edge_fraction >= _CONFIG["helios"]["edge_detection_threshold"]
+            )
+            status = 1 if sufficient_edge_fraction else 0
 
         logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
 
