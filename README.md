@@ -22,6 +22,12 @@
 
 ### FileLocks
 
-Since we have parallel processes interacting with state, config and logs, we need to control the access to these resources in order to avoid race conditons. We use the python module [filelock](https://pypi.org/project/filelock/) for this. Before working with one of these resources, a process has to aquire a filelock for the respective `.state.lock`/`.config.lock`/`.logs.lock` file. When it cannot aquire a lock for 10 seconds, it throws a `TimeoutError`.
+Since we have parallel processes interacting with state, config, and logs, we need to control the access to these resources to avoid race conditions. We use the python module [filelock](https://pypi.org/project/filelock/) for this. Before working with one of these resources, a process has to acquire a file lock for the respective `.state.lock`/`.config.lock`/`.logs.lock` file. When it cannot acquire a lock for 10 seconds, it throws a `TimeoutError`.
 
-When running into a deadlock, with timeout errors (never happened to us yet), there is a cli command `pyra-cli remove-filelocks` to remove all existing lock files.
+When running into a deadlock, with timeout errors (never happened to us yet), the CLI command `pyra-cli remove-filelocks` removes all present lock files.
+
+### Version numbers
+
+Versions up to `4.0.4` are alpha and beta versions that should not be used regularly. PYRA can be generally used starting from version `4.0.5`.
+
+Inside the codebase, the version number is included 3 times: `pyproject.toml`, `packages/ui/package.json`, `packages/ui/src-tauri/tauri.conf.json`. The script `scripts/sync_version_numbers.py` takes the version number from the `.toml` file and pastes it into the other locations. This script can be run in a [git-hook](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
