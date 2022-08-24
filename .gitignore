@@ -3,6 +3,7 @@
 *.pyc
 .pytest_cache
 __pycache__
+.coverage
 
 # config
 config/config.json
