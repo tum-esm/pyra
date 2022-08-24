@@ -1,5 +1,6 @@
 import subprocess
 import json
+import invoke
 import paramiko
 import os
 import time
@@ -22,20 +23,32 @@ PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 def get_local_checksum(dir_path: str, dates: list[str]) -> str:
     checksums = []
     for date in sorted(dates):
-        date_path = os.path.join(dir_path, date)
-        assert os.path.isdir(date_path), f"{date_path} does not exist"
-
         p = subprocess.run(
             [
                 "python",
                 os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py"),
-                date_path,
+                os.path.join(dir_path, date),
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        date_checksum = p.stdout.decode().strip()
-        checksums.append(date + ":" + date_checksum)
+        assert p.returncode == 0
+        checksums.append(date + ":" + p.stdout.decode().strip())
+
+    return ",".join(checksums)
+
+
+def get_remote_checksum(
+    dir_path: str, dates: list[str], connection: fabric.connection.Connection
+) -> str:
+    checksums = []
+
+    for date in sorted(dates):
+        p: invoke.runners.Result = connection.run(
+            f"python3.10 {dir_path}/get_upload_dir_checksum.py {dir_path}/{date}", hide=True
+        )
+        assert p.exited == 0
+        checksums.append(date + ":" + p.stdout.strip())
 
     return ",".join(checksums)
 
