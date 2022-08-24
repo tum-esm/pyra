@@ -286,8 +286,8 @@ export default function ControlTab() {
     }
 
     return (
-        <div className={'w-full relative px-6 py-6 flex-col-left gap-y-4'}>
-            <div className="flex-row-left gap-x-2">
+        <div className={'w-full relative py-4 flex-col-left gap-y-4'}>
+            <div className="px-6 flex-row-left gap-x-2">
                 <div>PLC is controlled by:</div>
                 <essentialComponents.Toggle
                     value={plcIsControlledByUser ? 'user' : 'automation'}
@@ -304,7 +304,7 @@ export default function ControlTab() {
                 )}
             </div>
             <div className="w-full h-px my-0 bg-gray-300" />
-            <div className="flex flex-col w-full text-sm gap-y-2">
+            <div className="flex flex-col w-full px-6 text-sm gap-y-2">
                 {pyraIsInTestMode && (
                     <div className="flex-row-center">
                         No PLC connection when pyra is in test mode

@@ -95,7 +95,7 @@ export default function ConfigSectionUpload() {
                 oldValue={centralSectionConfig?.upload_ifgs === true}
             />
             <configurationComponents.ConfigElementText
-                title="IFG Source Directory Path"
+                title="IFG Source Directory"
                 value={localSectionConfig.src_directory_ifgs}
                 setValue={(v: any) => update({ upload: { src_directory_ifgs: v } })}
                 oldValue={
@@ -103,7 +103,7 @@ export default function ConfigSectionUpload() {
                 }
             />
             <configurationComponents.ConfigElementText
-                title="IFG Destination Directory Path (Server Side)"
+                title="IFG Destination Directory (Server Side)"
                 value={localSectionConfig.dst_directory_ifgs}
                 setValue={(v: any) => update({ upload: { dst_directory_ifgs: v } })}
                 oldValue={
@@ -134,7 +134,7 @@ export default function ConfigSectionUpload() {
                 }
             />
             <configurationComponents.ConfigElementToggle
-                title="Remove Source Helios Images After Upload"
+                title="Remove Helios Images After Upload"
                 value={localSectionConfig.remove_src_helios_after_upload}
                 setValue={(v: boolean) => update({ upload: { remove_src_helios_after_upload: v } })}
                 oldValue={centralSectionConfig?.remove_src_helios_after_upload === true}
