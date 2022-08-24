@@ -293,13 +293,15 @@ class HeliosThread(AbstractThreadBase):
             and (self.config["measurement_triggers"]["consider_helios"])
         )
 
-    # TODO: Update tests/headless mode to comply with new class structure
-    def main(self, infinite_loop: bool = True, headless: bool = False) -> None:
-        """Main entrypoint of the thread"""
+    def main(self, headless: bool = False) -> None:
+        """
+        Main entrypoint of the thread.
+
+        headless mode = don't write to log files, print to console, save all images
+        """
         global logger
         global _CONFIG
 
-        # headless mode = don't use logger, just print messages to console, always save images
         if headless:
             logger = utils.Logger(origin="helios", just_print=True)
         _CONFIG = interfaces.ConfigInterface.read()
@@ -404,10 +406,6 @@ class HeliosThread(AbstractThreadBase):
                         f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)."
                     )
                     time.sleep(time_to_wait)
-
-                if not infinite_loop:
-                    break
-                    # return status_history
 
             except Exception as e:
                 status_history.empty()

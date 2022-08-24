@@ -5,8 +5,6 @@ from packages.core import types, utils, interfaces, modules, threads
 
 logger = utils.Logger(origin="main")
 
-# TODO: Move library ignores to pyproject.toml
-
 
 def update_exception_state(
     config: types.ConfigDict, current_exceptions: list[str], new_exception: Optional[Exception]
@@ -83,8 +81,8 @@ def run() -> None:
     # dedicated mainloop in a parallel thread if the
     # respective service is configured. The threads itself
     # load the config periodically and stop themselves
-    helios_thread_instance = threads.helios_thread.HeliosThread(config)
-    upload_thread_instance = threads.upload_thread.UploadThread(config)
+    helios_thread_instance = threads.HeliosThread(config)
+    upload_thread_instance = threads.UploadThread(config)
 
     current_exceptions = interfaces.StateInterface.read_persistent()["current_exceptions"]
 

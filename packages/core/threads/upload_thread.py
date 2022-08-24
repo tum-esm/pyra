@@ -310,8 +310,16 @@ class UploadThread(AbstractThreadBase):
             self.config["upload"] is not None
         )
 
-    def main(self) -> None:
-        """Main entrypoint of the thread"""
+    def main(self, headless: bool = False) -> None:
+        """
+        Main entrypoint of the thread
+
+        headless mode = don't write to log files, print to console
+        """
+
+        if headless:
+            logger = utils.Logger(origin="upload", just_print=True)
+
         while True:
             self.config = interfaces.ConfigInterface.read()
             upload_config = self.config["upload"]
