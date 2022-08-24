@@ -276,6 +276,9 @@ class OpusMeasurement:
     def test_setup(self) -> None:
         assert sys.platform == "win32"
 
+        if not self.initialized:
+            self.__initialize()
+
         opus_is_running = self.opus_application_running()
         if not opus_is_running:
             self.start_opus()
