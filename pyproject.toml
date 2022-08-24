@@ -50,3 +50,8 @@ module = [
     "snap7.*",
 ]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    'ignore:the imp module is deprecated in favour of importlib:DeprecationWarning',
+]
