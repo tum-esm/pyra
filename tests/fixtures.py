@@ -160,11 +160,12 @@ def populated_upload_test_directories():
     os.mkdir(test_ifg_dir)
 
     # add a bunch of random sample files to these directories
-    popuplate_upload_test_directory(original_helios_dir)
-    popuplate_upload_test_directory(test_ifg_dir)
+
+    ifg_dates = popuplate_upload_test_directory(test_ifg_dir)
+    helios_dates = popuplate_upload_test_directory(original_helios_dir)
 
     # run the respective test
-    yield
+    yield {"ifg_dates": ifg_dates, "helios_dates": helios_dates}
 
     # fill helios dir with original content again
     shutil.rmtree(original_helios_dir)
@@ -177,18 +178,19 @@ def random_string() -> str:
     return "".join([random.choice(letters) for i in range(5)])
 
 
-def popuplate_upload_test_directory(dir_path: str):
+def popuplate_upload_test_directory(dir_path: str) -> list[str]:
     """
     Generates 5 directories with random dates (YYYYMMDD)
     each containing 10 files with random names
     """
     try:
+        date_strings = []
         for _ in range(5):
             year = random.randint(2000, 2022)
             month = random.randint(1, 12)
             day = random.randint(1, 28)
             date_string = f"{year}{str(month).zfill(2)}{str(day).zfill(2)}"
-
+            date_strings.append(date_string)
             os.mkdir(os.path.join(dir_path, date_string))
             filenames = []
             for _ in range(10):
@@ -207,9 +209,11 @@ def popuplate_upload_test_directory(dir_path: str):
                     f,
                 )
 
+        return date_strings
+
     except FileExistsError:
         # this happens when the random functions produce
         # the same date or string twice
         shutil.rmtree(dir_path)
         os.mkdir(dir_path)
-        popuplate_upload_test_directory(dir_path)
+        return popuplate_upload_test_directory(dir_path)

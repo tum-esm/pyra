@@ -19,9 +19,33 @@ PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 #    original dir using the "diff" command
 
 
+def get_local_checksum(dir_path: str, dates: list[str]) -> str:
+    checksums = []
+    for date in sorted(dates):
+        date_path = os.path.join(dir_path, date)
+        assert os.path.isdir(date_path), f"{date_path} does not exist"
+
+        p = subprocess.run(
+            [
+                "python",
+                os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py"),
+                date_path,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        date_checksum = p.stdout.decode().strip()
+        checksums.append(date + ":" + date_checksum)
+
+    return ",".join(checksums)
+
+
 def test_upload(original_config, populated_upload_test_directories) -> None:
     upload_config = original_config["upload"]
     assert upload_config is not None, "config.upload is null"
+
+    ifg_dates = populated_upload_test_directories["ifg_dates"]
+    helios_dates = populated_upload_test_directories["helios_dates"]
 
     try:
         connection = fabric.connection.Connection(
@@ -37,10 +61,6 @@ def test_upload(original_config, populated_upload_test_directories) -> None:
 
     src_dir_ifgs = os.path.join(PROJECT_DIR, "test-tmp")
     src_dir_helios = os.path.join(PROJECT_DIR, "logs", "helios")
-
-    get_local_checksum = lambda path: subprocess.check_output(
-        ["python", os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py"), path]
-    ).strip()
 
     # set up test directories
     dst_test_dir = f"/tmp/pyra-upload-test-{int(time.time())}"
@@ -69,8 +89,8 @@ def test_upload(original_config, populated_upload_test_directories) -> None:
 
     checksums = {
         "initial": {
-            "ifgs": get_local_checksum(src_dir_ifgs),
-            "helios": get_local_checksum(src_dir_helios),
+            "ifgs": get_local_checksum(src_dir_ifgs, ifg_dates),
+            "helios": get_local_checksum(src_dir_helios, helios_dates),
         }
     }
     print(checksums)
