@@ -1,7 +1,3 @@
-# This is an Implementation this for the "Camtracker" software
-# Later, we will make an abstract base class that enforces a standard
-# interface to be implemented for any software like "Camtracker"
-
 import os
 import time
 import jdcal
@@ -13,6 +9,21 @@ logger = utils.Logger(origin="sun-tracking")
 
 
 class SunTracking:
+    """SunTracking manages the software CamTracker. CamTracker controls moveable mirrors attached
+    to the FTIR spectrometer EM27. These mirrors are sync with the current sun position to ensure
+    direct sun light to be directed into the instrument. SunTracking will initialize CamTracker
+    according to the current value of StateInterface: measurements_should_be_running.
+
+    These mirrors are initialized at startup of CamTracker if it is called with the additional
+    parameter "-autostart". CamTracker can be gracefully shut down with creating a stop.txt file
+    in its directory. CamTracker creates multiple logfiles at run time that give information on
+    its current status of tracking the sun. Most importantly motor offsets tells the difference
+    between current sun angle and calculated sun positions. It happens from time to time that
+    SunTracker fails to track the sun and is unable to reinitialize the tracking. If a certain
+    motor offset threshold is reached the only way to fix the offset is to restart CamTracker.
+
+    """
+
     def __init__(self, initial_config: types.ConfigDict):
         self._CONFIG = initial_config
         self.last_start_time = time.time()
@@ -20,24 +31,34 @@ class SunTracking:
             return
 
     def run(self, new_config: types.ConfigDict) -> None:
+        """Called in every cycle of the main loop.
+        Redas StateInterface: measurements_should_be_running and starts and stops CamTracker
+        tracking."""
+
+        # update to latest config
         self._CONFIG = new_config
+
+        # Skip rest of the function if test mode is active
         if self._CONFIG["general"]["test_mode"]:
             logger.debug("Skipping SunTracking in test mode")
             return
 
         logger.info("Running SunTracking")
 
+        # check for automation state flank changes
         measurements_should_be_running = interfaces.StateInterface.read()[
             "measurements_should_be_running"
         ]
 
         # main logic for active automation
+        # start sun tracking if supposed to be running and not active
         if measurements_should_be_running and not self.ct_application_running():
             logger.info("Start CamTracker")
             self.start_sun_tracking_automation()
             self.last_start_time = time.time()
             return
 
+        # stops sun tracking if supposed to be not running and active
         if not measurements_should_be_running and self.ct_application_running():
             logger.info("Stop CamTracker")
             self.stop_sun_tracking_automation()
@@ -45,6 +66,7 @@ class SunTracking:
 
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
+        # is only considered if tracking is already up for at least 5 minutes.
         if (
             self.ct_application_running()
             and (time.time() - self.last_start_time) > 300
@@ -55,7 +77,7 @@ class SunTracking:
             self.stop_sun_tracking_automation()
 
     def ct_application_running(self) -> bool:
-        """Checks if CamTracker is already running by identifying the window.
+        """Checks if CamTracker is already running by identifying the active window.
 
         False if Application is currently not running on OS
         True if Application is currently running on OS
@@ -73,10 +95,12 @@ class SunTracking:
         ]
 
     def start_sun_tracking_automation(self) -> None:
-        """Uses os.startfile() to start up the CamTracker
-        executable with additional parameter -automation.
-        The paramter - automation will instruct CamTracker to automatically
-        move the mirrors to the expected sun position during startup.
+        """Uses os.startfile() to start up the CamTracker executable with additional parameter
+        "-automation". The paramter - automation will instruct CamTracker to automatically move the
+        mirrors to the expected sun position during startup.
+
+        Removes stop.txt file in CamTracker directory if present. This file is the current way of
+        gracefully shutting down CamTracker and move the mirrors back to parking position.
         """
 
         # delete stop.txt file in camtracker folder if present
@@ -100,8 +124,8 @@ class SunTracking:
         """Tells the CamTracker application to end program and move mirrors
         to parking position.
 
-        CamTracker has an internal check for a stop.txt file in its directory
-        and will do a clean shutdown.
+        CamTracker has an internal check for a stop.txt file in its directory.
+        After detection it will move it's mirrors to parking position and end itself.
         """
 
         # create stop.txt file in camtracker folder
@@ -111,9 +135,7 @@ class SunTracking:
         f.close()
 
     def clean_stop_file(self) -> None:
-        """CamTracker needs a stop.txt file to safely shutdown.
-        This file needs to be removed after CamTracker shutdown.
-        """
+        """This function removes the stop.txt file to allow CamTracker to restart."""
 
         camtracker_directory = os.path.dirname(self._CONFIG["camtracker"]["executable_path"])
         stop_file_path = os.path.join(camtracker_directory, "stop.txt")
@@ -122,8 +144,7 @@ class SunTracking:
             os.remove(stop_file_path)
 
     def read_ct_log_learn_az_elev(self) -> tuple[float, float, float, float, float, float]:
-        """
-        Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
+        """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
 
         Returns a list of string parameter: [
             Julian Date,
@@ -134,7 +155,7 @@ class SunTracking:
             Ellipse distance/px
         ]
 
-        Raises AssertionError if log file is invalid
+        Raises AssertionError if log file is invalid.
         """
 
         # read azimuth and elevation motor offsets from camtracker logfiles
@@ -169,6 +190,8 @@ class SunTracking:
 
     def validate_tracker_position(self) -> bool:
         """Reads motor offsets and compares it with defined threshold.
+        The motor offset defines the difference between the current active and calculated sun
+        angle.
 
         Returns
         True -> Offsets are within threshold
@@ -186,7 +209,8 @@ class SunTracking:
 
     def test_setup(self) -> None:
         """
-        Test whether starting and stopping of CamTracker works
+        Function to test the functonality of this module. Starts up CamTracker to initialize the
+        tracking mirrors. Then moves mirrors back to parking position and shuts dosn CamTracker.
         """
         if not self.ct_application_running():
             self.start_sun_tracking_automation()
