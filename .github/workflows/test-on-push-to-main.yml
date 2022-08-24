@@ -72,5 +72,5 @@ jobs:
             - name: Run pytest tests
               run: |
                   source .venv/bin/activate
-                  pytest --cov=packages tests
+                  pytest -m "ci" --cov=packages tests
                   coverage report

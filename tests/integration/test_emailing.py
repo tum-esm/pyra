@@ -1,6 +1,8 @@
+import pytest
 from packages.core import utils, interfaces
 
 
+@pytest.mark.integration
 def test_emailing() -> None:
     _CONFIG = interfaces.ConfigInterface().read()
 

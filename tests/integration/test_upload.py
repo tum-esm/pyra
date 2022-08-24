@@ -5,6 +5,7 @@ import invoke
 import paramiko
 import os
 import time
+import pytest
 import fabric.connection, fabric.transfer
 from ..fixtures import original_config, populated_upload_test_directories, fabric_connection
 
@@ -70,6 +71,7 @@ def assert_remote_meta_completeness(
         assert '"complete": true' in p.stdout.strip()
 
 
+@pytest.mark.integration
 def test_upload(original_config, populated_upload_test_directories, fabric_connection) -> None:
     upload_config = original_config["upload"]
     assert upload_config is not None, "config.upload is null"

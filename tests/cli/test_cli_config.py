@@ -1,5 +1,6 @@
 import json
 import subprocess
+import pytest
 import os
 from deepdiff import DeepDiff
 from ..fixtures import sample_config
@@ -36,6 +37,7 @@ def run_cli_command(command: list[str]) -> str:
     return stdout
 
 
+@pytest.mark.ci
 def test_get_config(sample_config) -> None:
     # get config from cli
     stdout = run_cli_command(["config", "get"])
@@ -45,11 +47,13 @@ def test_get_config(sample_config) -> None:
     assert_config_file_content(config_object_1, "output from cli does not match file content")
 
 
+@pytest.mark.ci
 def test_validate_current_config(sample_config) -> None:
     stdout = run_cli_command(["config", "validate"])
     assert stdout.startswith("Current config file is valid")
 
 
+@pytest.mark.ci
 def test_update_config(sample_config) -> None:
 
     updates = [
@@ -67,7 +71,7 @@ def test_update_config(sample_config) -> None:
         stdout = run_cli_command(["config", "update", json.dumps(update)])
         assert "config is invalid" in stdout
 
-    assert_config_file_content(original_config, "config.json should not have changed")
+    assert_config_file_content(sample_config, "config.json should not have changed")
 
     updates = [
         {"general": {"seconds_per_core_interval": 400}},
@@ -95,11 +99,12 @@ def test_update_config(sample_config) -> None:
     for index, update in enumerate(updates):
         stdout = run_cli_command(["config", "update", json.dumps(update)])
         assert "Updated config file" in stdout
-        original_config = transform(original_config, index)
+        sample_config = transform(sample_config, index)
 
-        assert_config_file_content(original_config, "config.json did not update as expected")
+        assert_config_file_content(sample_config, "config.json did not update as expected")
 
 
+@pytest.mark.ci
 def test_add_default_config(sample_config) -> None:
 
     cases = {"helios": None, "tum_plc": None}

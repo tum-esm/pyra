@@ -56,3 +56,7 @@ ignore_missing_imports = true
 filterwarnings = [
     'ignore:the imp module is deprecated in favour of importlib:DeprecationWarning',
 ]
+markers = [
+    "ci: can be run in a CI environment",
+    "integration: can only be run on a configured system",
+]
