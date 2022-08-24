@@ -40,14 +40,14 @@ class DirectoryUploadClient:
     ) -> None:
         self.date_string = date_string
         self.src_path = src_path
-        self.dst_path = dst_path
+        self.dst_path = dst_path[:-1] if dst_path.endswith("/") else dst_path
         self.remove_files_after_upload = remove_files_after_upload
         self.connection = connection
         self.transfer_process = transfer_process
 
         self.src_meta_path = os.path.join(self.src_path, self.date_string, "upload-meta.json")
         self.dst_meta_path = os.path.join(
-            f"{self.src_path}/{self.date_string}/upload-meta.json"
+            f"{self.dst_path}/{self.date_string}/upload-meta.json"
         )
 
         assert self.transfer_process.is_remote_dir(
@@ -95,7 +95,9 @@ class DirectoryUploadClient:
             raise InvalidUploadState("python3.10 is not installed on the server")
 
         try:
-            remote_command = f"python3.10 {remote_script_path} {self.src_dir_path}"
+            remote_command = (
+                f"python3.10 {remote_script_path} {self.src_path}/{self.date_string}"
+            )
             a: invoke.runners.Result = self.connection.run(remote_command, hide=True)
             assert a.exited == 0
             return a.stdout.strip()
@@ -231,7 +233,7 @@ class DirectoryUploadClient:
 
         # only set meta.complete to True, when the checksums match
         self.__update_meta(update={"complete": True})
-        logger.debug(f"successfully uploaded {self.directory_name}")
+        logger.debug(f"successfully uploaded {self.date_string}")
 
         # only remove src if configured and checksums match
         if self.remove_files_after_upload:
@@ -312,9 +314,9 @@ class UploadThread(AbstractThreadBase):
         """Main entrypoint of the thread"""
         while True:
             self.config = interfaces.ConfigInterface.read()
-            if not self.should_be_running():
+            upload_config = self.config["upload"]
+            if not self.should_be_running() or upload_config is None:
                 break
-            upload_config: types.ConfigSubDicts.Upload = self.config["upload"]
 
             try:
                 connection = fabric.connection.Connection(
@@ -324,17 +326,11 @@ class UploadThread(AbstractThreadBase):
                 )
                 transfer_process = fabric.transfer.Transfer(connection)
             except TimeoutError as e:
-                logger.error(
-                    f"could not reach host (uploading {date_string}),"
-                    + f" waiting 5 minutes: {e}"
-                )
+                logger.error(f"could not reach host, waiting 5 minutes: {e}")
                 time.sleep(300)
                 continue
             except paramiko.ssh_exception.AuthenticationException as e:
-                logger.error(
-                    f"failed to authenticate (uploading {date_string}),"
-                    + f" waiting 2 minutes: {e}"
-                )
+                logger.error(f"failed to authenticate, waiting 2 minutes: {e}")
                 time.sleep(120)
                 continue
 
