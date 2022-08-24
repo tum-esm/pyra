@@ -45,7 +45,7 @@ no_warn_unused_ignores = true
 module = [
     "astropy.*",
     "cv2",
-    "fabric",
+    "fabric.*",
     "jdcal",
     "snap7",
     "snap7.*",

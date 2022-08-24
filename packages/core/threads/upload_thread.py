@@ -7,7 +7,7 @@ from typing import Optional
 import invoke
 import paramiko
 import time
-import fabric
+import fabric.connection, fabric.transfer
 import re
 import pydantic
 from packages.core import types, utils, interfaces
