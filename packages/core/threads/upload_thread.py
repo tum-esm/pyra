@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import shutil
+from typing import Optional
 import invoke
 import paramiko
 import time
@@ -24,33 +25,34 @@ class InvalidUploadState(Exception):
 
 class DirectoryUploadClient:
     """
-    This is the client that is concerned with uploading one
-    specific directory (YYYYMMDD). "self.run()" will perform
-    the actual upload process.
+    This is the client that is concerned with uploading one specific
+    directory. run() will perform the actual upload process.
     """
 
-    def __init__(self, date_string: str, config: types.ConfigDict) -> None:
-        assert config["upload"] is not None
-
-        self.connection = fabric.connection.Connection(
-            f"{config['upload']['user']}@{config['upload']['host']}",
-            connect_kwargs={"password": config["upload"]["password"]},
-            connect_timeout=5,
-        )
-        self.transfer_process = fabric.transfer.Transfer(self.connection)
-
-        self.upload_config = config["upload"]
+    def __init__(
+        self,
+        date_string: str,
+        src_path: str,
+        dst_path: str,
+        remove_files_after_upload: bool,
+        connection: fabric.connection.Connection,
+        transfer_process: fabric.transfer.Transfer,
+    ) -> None:
         self.date_string = date_string
+        self.src_path = src_path
+        self.dst_path = dst_path
+        self.remove_files_after_upload = remove_files_after_upload
+        self.connection = connection
+        self.transfer_process = transfer_process
 
-        self.src_dir_path = os.path.join(config["upload"]["src_directory_ifgs"], date_string)
-        self.src_meta_path = os.path.join(self.src_dir_path, "upload-meta.json")
-        assert os.path.isdir(self.src_dir_path), f"{self.src_dir_path} is not a directory"
+        self.src_meta_path = os.path.join(self.src_path, self.date_string, "upload-meta.json")
+        self.dst_meta_path = os.path.join(
+            f"{self.src_path}/{self.date_string}/upload-meta.json"
+        )
 
-        self.dst_dir_path = f"{config['upload']['dst_directory_ifgs']}/{date_string}"
-        self.dst_meta_path = f"{self.dst_dir_path}/upload-meta.json"
         assert self.transfer_process.is_remote_dir(
-            config["upload"]["dst_directory_ifgs"]
-        ), f"remote {config['upload']['dst_directory_ifgs']} is not a directory"
+            self.dst_path
+        ), f"remote {self.dst_path} is not a directory"
 
         self.meta_content: types.UploadMetaDict = {
             "complete": False,
@@ -58,7 +60,6 @@ class DirectoryUploadClient:
             "createdTime": round(time.time(), 3),
             "lastModifiedTime": round(time.time(), 3),
         }
-        self.remove_src_after_upload: bool = config["upload"]["remove_src_ifgs_after_upload"]
 
     def __initialize_remote_dir(self) -> None:
         """
@@ -66,8 +67,9 @@ class DirectoryUploadClient:
         create the directory and add a fresh upload-meta.json
         file to it.
         """
-        if not self.transfer_process.is_remote_dir(self.dst_dir_path):
-            self.connection.run(f"mkdir {self.dst_dir_path}")
+        dst_dir_path = f"{self.dst_path}/{self.date_string}"
+        if not self.transfer_process.is_remote_dir(dst_dir_path):
+            self.connection.run(f"mkdir {dst_dir_path}")
             with open(self.src_meta_path, "w") as f:
                 json.dump(self.meta_content, f, indent=4)
             self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
@@ -84,9 +86,7 @@ class DirectoryUploadClient:
         not present.
         """
         local_script_path = os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
-        remote_script_path = (
-            self.upload_config["src_directory_ifgs"] + "/get_upload_dir_checksum.py"
-        )
+        remote_script_path = f"{self.dst_path}/{self.date_string}/get_upload_dir_checksum.py"
         self.transfer_process.put(local_script_path, remote_script_path)
 
         try:
@@ -113,7 +113,7 @@ class DirectoryUploadClient:
         """
         hasher = hashlib.md5()
         for filename in sorted(self.meta_content["fileList"]):
-            filepath = os.path.join(self.src_dir_path, filename)
+            filepath = os.path.join(self.src_path, self.date_string, filename)
             with open(filepath, "rb") as f:
                 hasher.update(f.read())
 
@@ -137,18 +137,23 @@ class DirectoryUploadClient:
         except (AssertionError, json.JSONDecodeError, pydantic.ValidationError) as e:
             raise InvalidUploadState(str(e))
 
-    def __update_meta(self, new_meta_content_partial: types.UploadMetaDictPartial) -> None:
+    def __update_meta(
+        self,
+        update: Optional[types.UploadMetaDictPartial] = None,
+        sync_remote_meta: bool = True,
+    ) -> None:
         """
         Update the local upload-meta.json file and overwrite
-        the meta file on the server
+        the meta file on the server when sync==True
         """
-        assert self.meta_content is not None
-        self.meta_content.update(new_meta_content_partial)
-        self.meta_content.update({"lastModifiedTime": round(time.time(), 3)})
+        if update is not None:
+            self.meta_content.update(update)
+            self.meta_content.update({"lastModifiedTime": round(time.time(), 3)})
+            with open(self.src_meta_path, "w") as f:
+                json.dump(self.meta_content, f, indent=4)
 
-        with open(self.src_meta_path, "w") as f:
-            json.dump(self.meta_content, f, indent=4)
-        self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
+        if sync_remote_meta:
+            self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
 
     def run(self) -> None:
         """
@@ -168,20 +173,19 @@ class DirectoryUploadClient:
 
         self.__initialize_remote_dir()
         self.__fetch_meta()
-        assert self.meta_content is not None
 
         # determine files present in src and dst directory
-        # ifg files should be named like "<anything>YYYYMMDD<anything>.<digits>"
-        ifg_file_pattern = re.compile("^.*" + self.date_string + ".*\.\d{2,6}$")
-        src_file_set = set(
-            [f for f in os.listdir(self.src_dir_path) if ifg_file_pattern.match(f)]
-        )
+        # files should be named like "<anything>YYYYMMDD<anything>"
+        ifg_file_pattern = re.compile("^.*" + self.date_string + ".*$")
+        raw_src_files = os.listdir(os.path.join(self.src_path, self.date_string))
+        src_file_set = set([f for f in raw_src_files if ifg_file_pattern.match(f)])
         dst_file_set = set(self.meta_content["fileList"])
 
         # determine file differences between src and dst
         files_missing_in_dst = src_file_set.difference(dst_file_set)
         files_missing_in_src = dst_file_set.difference(src_file_set)
         if len(files_missing_in_src) > 0:
+            # this happens, when the process fails during the src removal
             raise InvalidUploadState(
                 f"files present in dst are missing in src: {files_missing_in_src}"
             )
@@ -195,22 +199,26 @@ class DirectoryUploadClient:
             )
 
         # upload every file that is missing in the remote
-        # meta but present in the local directory. Every 25
-        # files, upload the remote meta file on which files
-        # have been uploaded
-        upload_is_finished = False
-        while not upload_is_finished:
+        # meta but present in the local directory
+        while True:
             try:
-                f = files_missing_in_dst.pop()
+                f = files_missing_in_dst.pop()  # raises a KeyError when empty
                 self.transfer_process.put(
-                    os.path.join(self.src_dir_path, f), f"{self.dst_dir_path}/{f}"
+                    os.path.join(self.src_path, self.date_string, f),
+                    f"{self.dst_path}/{self.date_string}/{f}",
                 )
-                self.meta_content["fileList"].append(f)
+                # update the local meta in every loop, but only
+                # sync the remote meta every 25 iterations
+                new_file_list = [*self.meta_content["fileList"], f]
+                self.__update_meta(
+                    update={"fileList": new_file_list},
+                    sync_remote_meta=(len(new_file_list) % 25 == 0),
+                )
             except KeyError:
-                upload_is_finished = True
+                break
 
-            if (len(self.meta_content["fileList"]) % 25 == 0) or upload_is_finished:
-                self.__update_meta({"fileList": self.meta_content["fileList"]})
+        # make sure that the remote meta is synced
+        self.__update_meta()
 
         # raise an exception if the checksums do not match
         remote_checksum = self.__get_remote_directory_checksum()
@@ -221,20 +229,16 @@ class DirectoryUploadClient:
                 + f"remote={remote_checksum}"
             )
 
-        # only set meta.complet to True, when the checksums match
-        self.__update_meta({"complete": True})
-        logger.debug(f"successfully uploaded {self.date_string}")
+        # only set meta.complete to True, when the checksums match
+        self.__update_meta(update={"complete": True})
+        logger.debug(f"successfully uploaded {self.directory_name}")
 
         # only remove src if configured and checksums match
-        if self.remove_src_after_upload:
-            shutil.rmtree(self.src_dir_path)
+        if self.remove_files_after_upload:
+            shutil.rmtree(os.path.join(self.src_path, self.date_string))
             logger.debug("successfully removed source")
         else:
             logger.debug("skipping removal of source")
-
-    def teardown(self) -> None:
-        """close ssh and scp connection"""
-        self.connection.close()
 
     @staticmethod
     def __is_valid_date(date_string: str) -> bool:
@@ -247,15 +251,15 @@ class DirectoryUploadClient:
             return False
 
     @staticmethod
-    def get_directories_to_be_uploaded(ifg_src_path: str) -> list[str]:
-        if not os.path.isdir(ifg_src_path):
+    def get_directories_to_be_uploaded(data_path: str) -> list[str]:
+        if not os.path.isdir(data_path):
             return []
 
         return list(
             filter(
-                lambda f: os.path.isdir(os.path.join(ifg_src_path, f))
+                lambda f: os.path.isdir(os.path.join(data_path, f))
                 and DirectoryUploadClient.__is_valid_date(f),
-                os.listdir(ifg_src_path),
+                os.listdir(data_path),
             )
         )
 
@@ -267,19 +271,32 @@ class UploadThread(AbstractThreadBase):
     be removed (optional) if the files on the server generate
     the same MD5 checksum as the local files.
 
-    The source directory (where OPUS puts the interferograms)
-    can be configured with config.upload.src_directory. OPUS's
-    dst directory should be configured inside the macro file.
+    The source directory where OPUS puts the interferograms
+    can be configured with config.upload.src_directory_ifgs.
+    OPUS's output directory should be configured inside the
+    macro file.
 
     The expected file structure looks like this:
-    📁 <config.upload.src_directory>
+    📁 <src-dir> and <dst-dir>
         📁 <YYYYMMDD>
-            📄 <interferogram 1>
-            📄 <interferogram 2>
+            📄 <file 1>
+            📄 <file 2>
         📁 <YYYYMMDD>
-            📄 <interferogram 1>
-            📄 <interferogram 2>
+            📄 <file 1>
+            📄 <file 2>
         📁 ...
+
+    Each YYYYMMDD folder will be uploaded independently. During
+    its upload the process will store its progress inside a file
+    "YYYYMMDD/upload-meta.json" (locally and remotely).
+
+    The upload-meta.json file looks like this:
+    {
+        "complete": bool,
+        "fileList": [<file 1>, <file 2>, ...],
+        "createdTime": float,
+        "lastModifiedTime": float
+    }
     """
 
     def __init__(self, config: types.ConfigDict) -> None:
@@ -287,40 +304,86 @@ class UploadThread(AbstractThreadBase):
 
     def should_be_running(self) -> bool:
         """Should the thread be running? (based on config.upload)"""
-        return (
-            (not self.config["general"]["test_mode"])
-            and (self.config["upload"] is not None)
-            and (self.config["upload"]["upload_ifgs"])
+        return (not self.config["general"]["test_mode"]) and (
+            self.config["upload"] is not None
         )
 
     def main(self) -> None:
         """Main entrypoint of the thread"""
         while True:
             self.config = interfaces.ConfigInterface.read()
+            if not self.should_be_running():
+                break
+            upload_config: types.ConfigSubDicts.Upload = self.config["upload"]
 
-            if self.config["upload"] is None:
-                return
+            try:
+                connection = fabric.connection.Connection(
+                    f"{upload_config['user']}@{upload_config['host']}",
+                    connect_kwargs={"password": upload_config["password"]},
+                    connect_timeout=5,
+                )
+                transfer_process = fabric.transfer.Transfer(connection)
+            except TimeoutError as e:
+                logger.error(
+                    f"could not reach host (uploading {date_string}),"
+                    + f" waiting 5 minutes: {e}"
+                )
+                time.sleep(300)
+                continue
+            except paramiko.ssh_exception.AuthenticationException as e:
+                logger.error(
+                    f"failed to authenticate (uploading {date_string}),"
+                    + f" waiting 2 minutes: {e}"
+                )
+                time.sleep(120)
+                continue
 
-            src_dates_strings = DirectoryUploadClient.get_directories_to_be_uploaded(
-                self.config["upload"]["src_directory_ifgs"]
-            )
-            for src_date_string in src_dates_strings:
+            for category in ["helios", "ifgs"]:
+                if category == "helios":
+                    if upload_config["upload_helios"]:
+                        src_path = os.path.join(PROJECT_DIR, "logs", "helios")
+                        dst_path = upload_config["dst_directory_helios"]
+                        remove_files_after_upload = upload_config[
+                            "remove_src_helios_after_upload"
+                        ]
+                    else:
+                        continue
+                else:
+                    if upload_config["upload_ifgs"]:
+                        src_path = upload_config["src_directory_ifgs"]
+                        dst_path = upload_config["dst_directory_ifgs"]
+                        remove_files_after_upload = upload_config[
+                            "remove_src_ifgs_after_upload"
+                        ]
+                        if not os.path.isdir(src_path):
+                            logger.error(
+                                f'config.upload.src_directory_ifgs ("{src_path}") is not a directory'
+                            )
+                            continue
+                    else:
+                        continue
 
-                # check for termination before processing each directory
-                if not self.should_be_running():
-                    return
+                src_date_strings = DirectoryUploadClient.get_directories_to_be_uploaded(
+                    src_path
+                )
+                for date_string in src_date_strings:
+                    # check for termination before processing each directory
+                    if not self.should_be_running():
+                        break
 
-                try:
-                    client = DirectoryUploadClient(src_date_string, self.config)
-                    client.run()
-                except TimeoutError as e:
-                    logger.error(f"could not reach host (uploading {src_date_string}): {e}")
-                except paramiko.ssh_exception.AuthenticationException as e:
-                    logger.error(f"failed to authenticate (uploading {src_date_string}): {e}")
-                except InvalidUploadState as e:
-                    logger.error(f"stuck in invalid state (uploading {src_date_string}): {e}")
+                    try:
+                        DirectoryUploadClient(
+                            date_string,
+                            src_path,
+                            dst_path,
+                            remove_files_after_upload,
+                            connection,
+                            transfer_process,
+                        ).run()
+                    except InvalidUploadState as e:
+                        logger.error(f"uploading {date_string} is stuck in invalid state: {e}")
 
-                client.teardown()
-
-            # Wait 10 minutes until checking all directories again
+            # Close SSH connections and wait 10 minutes
+            # before checking all directories again
+            connection.close()
             time.sleep(600)
