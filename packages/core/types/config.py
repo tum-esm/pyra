@@ -206,7 +206,7 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
     except pydantic.ValidationError as e:
         pretty_error_messages = []
         for error in e.errors():
-            fields = [f for f in error["loc"][1:] if f not in ["__root__"]]
+            fields = [str(f) for f in error["loc"][1:] if f not in ["__root__"]]
             pretty_error_messages.append(f"{'.'.join(fields)} -> {error['msg']}")
         raise ValidationError(f"config is invalid: {', '.join(pretty_error_messages)}")
 
