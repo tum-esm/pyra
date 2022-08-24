@@ -209,11 +209,11 @@ function ActivityPlot() {
                         </div>
                     ))}
                 </div>
-                <div className={'relative flex-grow w-full h-5'}>
+                <div className={'relative flex-grow w-full h-6'}>
                     {sections.core.map((s) => (
                         <div
                             key={`core-${s.from}-${s.to}`}
-                            className="absolute top-0 z-0 h-1 bg-blue-400 rounded-full"
+                            className="absolute z-10 h-1 bg-blue-400 rounded-full top-1"
                             style={{
                                 left: timeToPercentage(moment(s.from, 'HH:mm:ss', true)),
                                 right: timeToPercentage(moment(s.to, 'HH:mm:ss', true), true),
@@ -224,7 +224,7 @@ function ActivityPlot() {
                     {sections.measurements.map((s) => (
                         <div
                             key={`measurements-${s.from}-${s.to}`}
-                            className="absolute z-10 h-1 bg-green-400 rounded-full top-1.5"
+                            className="absolute z-10 h-1 bg-green-400 rounded-full top-2.5"
                             style={{
                                 left: timeToPercentage(moment(s.from, 'HH:mm:ss', true)),
                                 right: timeToPercentage(moment(s.to, 'HH:mm:ss', true), true),
@@ -235,7 +235,7 @@ function ActivityPlot() {
                     {sections.error.map((s) => (
                         <div
                             key={`error-${s.from}-${s.to}`}
-                            className="absolute z-10 h-1 bg-red-400 rounded-full top-3"
+                            className="absolute z-10 h-1 bg-red-400 rounded-full top-4"
                             style={{
                                 left: timeToPercentage(moment(s.from, 'HH:mm:ss', true)),
                                 right: timeToPercentage(moment(s.to, 'HH:mm:ss', true), true),
@@ -245,13 +245,14 @@ function ActivityPlot() {
                     ))}
                     {/* blue line of current time */}
                     {/* blue label "now" */}
+
                     <div
-                        className="absolute z-40 w-[2.5px] -mx-px bg-blue-800 -top-0.5 h-6 rounded-full"
+                        className="absolute z-30 w-[2.5px] -mx-px bg-gray-900 -top-0.5 h-7 rounded-full"
                         style={{ left: timeToPercentage(now) }}
                     />
                     <div
                         className={
-                            'absolute -top-0.5 z-40 h-6 text-blue-800 flex-row-center ' +
+                            'absolute -top-0.5 z-30 h-7 text-gray-900 flex-row-center ' +
                             'px-1 text-xs font-medium'
                         }
                         style={
@@ -264,7 +265,11 @@ function ActivityPlot() {
                     </div>
                     {/* gray block of future time */}
                     <div
-                        className="absolute top-0 z-30 h-full bg-gray-200 rounded-r-sm"
+                        className="absolute top-0 z-0 h-full bg-gray-700 rounded-l"
+                        style={{ left: 0, right: timeToPercentage(now, true) }}
+                    />
+                    <div
+                        className="absolute top-0 z-20 h-full bg-gray-300 rounded-r"
                         style={{ left: timeToPercentage(now), right: 0 }}
                     />
                 </div>
