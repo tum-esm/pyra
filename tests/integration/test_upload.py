@@ -1,5 +1,6 @@
 import subprocess
 import json
+import sys
 import invoke
 import paramiko
 import os
@@ -9,6 +10,9 @@ from ..fixtures import original_config, populated_upload_test_directories
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
+sys.path.append(PROJECT_DIR)
+
+from packages.core import threads
 
 # TODO: in headless-upload mode, do not loop infinitely
 # TODO: test without removal (+ rerunning)
@@ -76,46 +80,61 @@ def test_upload(original_config, populated_upload_test_directories) -> None:
     src_dir_helios = os.path.join(PROJECT_DIR, "logs", "helios")
 
     # set up test directories
-    dst_test_dir = f"/tmp/pyra-upload-test-{int(time.time())}"
-    dst_test_dir_ifgs = f"{dst_test_dir}/ifgs"
-    dst_test_dir_helios = f"{dst_test_dir}/helios"
+    dst_dir = f"/tmp/pyra-upload-test-{int(time.time())}"
+    dst_dir_ifgs = f"{dst_dir}/ifgs"
+    dst_dir_helios = f"{dst_dir}/helios"
     assert transfer_process.is_remote_dir("/tmp")
-    assert not transfer_process.is_remote_dir(dst_test_dir)
-    connection.run(f"mkdir {dst_test_dir}")
-    connection.run(f"mkdir {dst_test_dir_ifgs}")
-    connection.run(f"mkdir {dst_test_dir_helios}")
-    assert transfer_process.is_remote_dir(dst_test_dir_ifgs)
-    assert transfer_process.is_remote_dir(dst_test_dir_helios)
+    assert not transfer_process.is_remote_dir(dst_dir)
+    connection.run(f"mkdir {dst_dir}")
+    connection.run(f"mkdir {dst_dir_ifgs}")
+    connection.run(f"mkdir {dst_dir_helios}")
+    assert transfer_process.is_remote_dir(dst_dir_ifgs)
+    assert transfer_process.is_remote_dir(dst_dir_helios)
 
     upload_config = {
         **upload_config,
         "upload_ifgs": True,
         "src_directory_ifgs": src_dir_ifgs,
-        "dst_directory_ifgs": dst_test_dir_ifgs,
+        "dst_directory_ifgs": dst_dir_ifgs,
         "remove_src_ifgs_after_upload": False,
         "upload_helios": True,
-        "dst_directory_helios": dst_test_dir_helios,
+        "dst_directory_helios": dst_dir_helios,
         "remove_src_helios_after_upload": False,
     }
+    config = {
+        **original_config,
+        "upload": upload_config,
+        "general": {**original_config["general"], "test_mode": False},
+    }
     with open(os.path.join(PROJECT_DIR, "config", "config.json"), "w") as f:
-        json.dump({**original_config, "upload": upload_config}, f)
+        json.dump(config, f)
 
     checksums = {
-        "initial": {
+        "local-initial": {
             "ifgs": get_local_checksum(src_dir_ifgs, ifg_dates),
             "helios": get_local_checksum(src_dir_helios, helios_dates),
         }
     }
+    threads.UploadThread(config).main(headless=True)
+
+    checksums["remote-end"] = {
+        "ifgs": get_remote_checksum(dst_dir_ifgs, ifg_dates, connection),
+        "helios": get_remote_checksum(dst_dir_helios, helios_dates, connection),
+    }
+    checksums["local-end"] = {
+        "ifgs": get_local_checksum(src_dir_ifgs, ifg_dates),
+        "helios": get_local_checksum(src_dir_helios, helios_dates),
+    }
+
     print(checksums)
-    assert False
 
-    # TODO: trigger headless upload process
+    assert checksums["local-initial"]["ifgs"] == checksums["remote-end"]["ifgs"]
+    assert checksums["local-initial"]["ifgs"] == checksums["local-end"]["ifgs"]
 
-    # TODO: Assert existence of checksum script on remote
-    # TODO: calculate checksum on remote
-    # TODO: calculate checksum locally (a second time)
+    assert checksums["local-initial"]["helios"] == checksums["remote-end"]["helios"]
+    assert checksums["local-initial"]["helios"] == checksums["local-end"]["helios"]
 
-    # TODO: Assert equality of all three checksums
+    # TODO: Assert that all remote metas contain complete=true
 
     # TODO: Upload again, now with "remove" flag set
     # TODO: Assert that local directories are empty
