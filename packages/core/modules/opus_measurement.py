@@ -17,9 +17,18 @@ logger = utils.Logger(origin="opus-measurement")
 
 
 class OpusMeasurement:
-    """Creates a working DDE connection to the OPUS DDE Server.
-    Allows to remotely control experiments and macros in OPUS over the
-    established DDE connection.
+    """OPUS Measurements manages the FTIR spectrometer measurement software OPUS. It allows to
+    remotely communicate with OPUS via a DDE connection and trigger different commands.
+
+    OPUS needs an experiment file and can perform continious measurements with parameters passed
+    by a macro file. These files can be loaded via commands over the active DDE connection.
+
+    During the day it makes sure that OPUS up and running and reloads the latest experiment if it
+    was changed by the operator. During night OPUS is shut down to reset after a full day of
+    measurements. Day and night is defined by the set sun angle in the config.
+
+    OPUSMeasurement will start and stop Macros according to the current value of StateInterface:
+    measurements_should_be_running.
     """
 
     def __init__(self, initial_config: types.ConfigDict):
@@ -32,6 +41,7 @@ class OpusMeasurement:
         self.__initialize()
 
     def __initialize(self) -> None:
+        """Initialize the DDE connection and sets up the conversaton."""
         assert sys.platform == "win32"
 
         # note: dde servers talk to dde servers
@@ -42,6 +52,11 @@ class OpusMeasurement:
         self.initialized = True
 
     def run(self, new_config: types.ConfigDict) -> None:
+        """Called in every cycle of the main loop.
+        Starts and stops OPUS.exe based on the present sun angle. Reads StateInterface:
+        measurements_should_be_running and starts and stops the OPUS macro."""
+
+        # loads latest config
         self._CONFIG = new_config
         if self._CONFIG["general"]["test_mode"] or (sys.platform != "win32"):
             logger.debug("Skipping OpusMeasurement in test mode and on non-windows systems")
@@ -65,6 +80,7 @@ class OpusMeasurement:
         # check and reload experiment if updated in config.json
         self.check_for_experiment_change()
 
+        # checks IP connection to FTIR spectrometer
         if self.__is_em27_responsive:
             logger.debug("Successful ping to EM27.")
         else:
@@ -76,7 +92,7 @@ class OpusMeasurement:
         ]
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
-                # flank change 0 -> 1: load experiment, start macro
+                # flank change 0 -> 1: start macro
                 logger.info("Starting OPUS Macro.")
                 self.start_macro()
             else:
@@ -88,6 +104,7 @@ class OpusMeasurement:
         self.last_cycle_automation_status = measurements_should_be_running
 
     def __connect_to_dde_opus(self) -> None:
+        """Connects to the OPUS server over DDE."""
         assert sys.platform == "win32"
         try:
             self.conversation.ConnectTo("OPUS", "OPUS/System")
@@ -144,10 +161,12 @@ class OpusMeasurement:
         """Starts a new macro in OPUS over DDE connection."""
         assert sys.platform == "win32"
 
+        # perform connect
         self.__connect_to_dde_opus()
         if not self.__test_dde_connection():
             return
 
+        # load macro
         macro_path = self._CONFIG["opus"]["macro_path"]
         answer = self.conversation.Request(f"RUN_MACRO {macro_path}")
         logger.info(f"Started OPUS macro: {macro_path}")
@@ -167,11 +186,13 @@ class OpusMeasurement:
         """Stops the currently running macro in OPUS over DDE connection."""
         assert sys.platform == "win32"
 
+        # perform connect
         self.__connect_to_dde_opus()
-        macro_path = os.path.basename(self._CONFIG["opus"]["macro_path"])
-
         if not self.__test_dde_connection():
             return
+
+        # stop macro
+        macro_path = os.path.basename(self._CONFIG["opus"]["macro_path"])
         answer = self.conversation.Request("KILL_MACRO " + macro_path)
         logger.info(f"Stopped OPUS macro: {macro_path}")
 
@@ -185,7 +206,7 @@ class OpusMeasurement:
         """
 
     def close_opus(self) -> None:
-        """Closes OPUS via DDE."""
+        """Closes OPUS via DDE call."""
         assert sys.platform == "win32"
 
         self.__connect_to_dde_opus()
@@ -227,9 +248,7 @@ class OpusMeasurement:
         return response == 0
 
     def start_opus(self) -> None:
-        """Uses os.startfile() to start up OPUS
-        This simulates a user click on the opus.exe.
-        """
+        """Starts the OPUS.exe with os.startfile(). This simulates a user click on the executable."""
         assert sys.platform == "win32"
 
         opus_path = self._CONFIG["opus"]["executable_path"]
@@ -251,6 +270,7 @@ class OpusMeasurement:
     def opus_application_running(self) -> bool:
         """Checks if OPUS is already running by identifying the window.
 
+        Returns:
         False if Application is currently not running on OS
         True if Application is currently running on OS
         """
@@ -273,35 +293,10 @@ class OpusMeasurement:
         except win32ui.error:
             return False
 
-    def test_setup(self) -> None:
-        assert sys.platform == "win32"
-
-        if not self.initialized:
-            self.__initialize()
-
-        opus_is_running = self.opus_application_running()
-        if not opus_is_running:
-            self.start_opus()
-            try_count = 0
-            while try_count < 10:
-                if self.opus_application_running():
-                    break
-                try_count += 1
-                time.sleep(6)
-
-        assert self.opus_application_running()
-        assert self.__test_dde_connection()
-
-        self.load_experiment()
-        time.sleep(2)
-
-        self.start_macro()
-        time.sleep(10)
-
-        self.stop_macro()
-
     def low_sun_angle_present(self) -> bool:
-        """OPUS closes at the end of the day to start up fresh the next day."""
+        """Checks defined sun angle in config. Closes OPUS at the end of the day to start up fresh
+        the next day."""
+
         assert sys.platform == "win32"
 
         sun_angle_is_low: bool = utils.Astronomy.get_current_sun_elevation().is_within_bounds(
@@ -341,10 +336,12 @@ class OpusMeasurement:
 
         start_time = time.time()
         while True:
+            # brakes when OPUS is up and running
             if self.opus_application_running():
                 break
             time.sleep(0.5)
 
+            # breaks after 60s of waiting
             if time.time() - start_time > 60:
                 break
 
@@ -363,3 +360,29 @@ class OpusMeasurement:
                 self.load_experiment()
                 time.sleep(5)
                 self.start_macro()
+
+    def test_setup(self) -> None:
+        """Function to test the functonality of this module. Starts up OPUS, loads an experiment,
+        starts a macro and stops it after 10s."""
+        assert sys.platform == "win32"
+
+        opus_is_running = self.opus_application_running()
+        if not opus_is_running:
+            self.start_opus()
+            try_count = 0
+            while try_count < 10:
+                if self.opus_application_running():
+                    break
+                try_count += 1
+                time.sleep(6)
+
+        assert self.opus_application_running()
+        assert self.__test_dde_connection()
+
+        self.load_experiment()
+        time.sleep(2)
+
+        self.start_macro()
+        time.sleep(10)
+
+        self.stop_macro()
