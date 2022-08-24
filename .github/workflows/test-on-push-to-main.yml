@@ -2,7 +2,7 @@ name: 'test-on-push-to-main'
 on:
     push:
         branches:
-            - development-moritz
+            - main
 
 jobs:
     test-typescript-codebase:
@@ -11,15 +11,17 @@ jobs:
             # check-out repo and set-up python
             - name: Check out repository
               uses: actions/checkout@v3
-            - name: Install yarn dependencies
+            - name: Set up NodeJS with Yarn
               uses: actions/setup-node@v3
               with:
                   node-version: '14'
                   cache: 'yarn'
                   cache-dependency-path: packages/ui/yarn.lock
-            - run: yarn install
+            - name: Install dependencies
+              run: yarn install
               working-directory: packages/ui
-            - run: yarn build
+            - name: Build frontend
+              run: yarn build
               working-directory: packages/ui
 
     test-python-codebase:
