@@ -112,46 +112,65 @@ def test_upload(original_config, populated_upload_test_directories, fabric_conne
         "dst_directory_helios": dst_dir_helios,
         "remove_src_helios_after_upload": False,
     }
-    config = {
-        **original_config,
-        "upload": upload_config,
-        "general": {**original_config["general"], "test_mode": False},
-    }
+    config = json.loads(json.dumps(original_config))
+    config["general"]["test_mode"] = False
+    config["upload"] = upload_config
     with open(os.path.join(PROJECT_DIR, "config", "config.json"), "w") as f:
         json.dump(config, f)
 
     checksums = {
-        "local-initial": {
+        "local-1": {
             "ifgs": get_local_checksum(src_dir_ifgs, ifg_dates),
             "helios": get_local_checksum(src_dir_helios, helios_dates),
         }
     }
     threads.UploadThread(config).main(headless=True)
 
-    checksums["remote-end"] = {
+    checksums["remote-1"] = {
         "ifgs": get_remote_checksum(dst_dir_ifgs, ifg_dates, connection),
         "helios": get_remote_checksum(dst_dir_helios, helios_dates, connection),
     }
-    checksums["local-end"] = {
+    checksums["local-2"] = {
         "ifgs": get_local_checksum(src_dir_ifgs, ifg_dates),
         "helios": get_local_checksum(src_dir_helios, helios_dates),
     }
-
-    print(checksums)
+    print(json.dumps(checksums, indent=4))
 
     # check whether the dst is equal to the initial source
-    assert checksums["local-initial"]["ifgs"] == checksums["remote-end"]["ifgs"]
-    assert checksums["local-initial"]["helios"] == checksums["remote-end"]["helios"]
+    assert checksums["local-1"]["ifgs"] == checksums["remote-1"]["ifgs"]
+    assert checksums["local-1"]["helios"] == checksums["remote-1"]["helios"]
 
     # check whether the src has not been changed
-    assert checksums["local-initial"]["ifgs"] == checksums["local-end"]["ifgs"]
-    assert checksums["local-initial"]["helios"] == checksums["local-end"]["helios"]
+    assert checksums["local-1"]["ifgs"] == checksums["local-2"]["ifgs"]
+    assert checksums["local-1"]["helios"] == checksums["local-2"]["helios"]
 
     # check if every remote meta contains "complete=true"
     assert_remote_meta_completeness(dst_dir_ifgs, ifg_dates, connection)
     assert_remote_meta_completeness(dst_dir_helios, helios_dates, connection)
 
-    # TODO: Upload again, now with "remove" flag set
-    # TODO: Assert that local directories are empty
-    # TODO: Calculate remote checksum
-    # TODO: Assert equality to first three checksums
+    # upload again, now with "remove" flag set
+    config["upload"]["remove_src_ifgs_after_upload"] = True
+    config["upload"]["remove_src_helios_after_upload"] = True
+    with open(os.path.join(PROJECT_DIR, "config", "config.json"), "w") as f:
+        json.dump(config, f)
+
+    threads.UploadThread(config).main(headless=True)
+
+    # check whether the local directories are empty
+    for date in ifg_dates:
+        assert not os.path.isdir(os.path.join(src_dir_ifgs, date))
+    for date in helios_dates:
+        assert not os.path.isdir(os.path.join(src_dir_helios, date))
+
+    # check whether the dst has not been changed
+    checksums["remote-2"] = {
+        "ifgs": get_remote_checksum(dst_dir_ifgs, ifg_dates, connection),
+        "helios": get_remote_checksum(dst_dir_helios, helios_dates, connection),
+    }
+    print(json.dumps(checksums, indent=4))
+    assert checksums["local-1"]["ifgs"] == checksums["remote-2"]["ifgs"]
+    assert checksums["local-1"]["helios"] == checksums["remote-2"]["helios"]
+
+    # check if every remote meta contains "complete=true"
+    assert_remote_meta_completeness(dst_dir_ifgs, ifg_dates, connection)
+    assert_remote_meta_completeness(dst_dir_helios, helios_dates, connection)
