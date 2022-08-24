@@ -91,13 +91,16 @@ export namespace customTypes {
             save_images: boolean;
         };
         upload: null | {
-            is_active: boolean;
             host: string;
             user: string;
             password: string;
-            src_directory: string;
-            dst_directory: string;
-            remove_src_after_upload: boolean;
+            upload_ifgs: boolean;
+            src_directory_ifgs: string;
+            dst_directory_ifgs: string;
+            remove_src_ifgs_after_upload: boolean;
+            upload_helios: boolean;
+            dst_directory_helios: string;
+            remove_src_helios_after_upload: boolean;
         };
     };
 
@@ -156,13 +159,16 @@ export namespace customTypes {
             save_images?: boolean;
         };
         upload?: null | {
-            is_active?: boolean;
             host?: string;
             user?: string;
             password?: string;
-            src_directory?: string;
-            dst_directory?: string;
-            remove_src_after_upload?: boolean;
+            upload_ifgs?: boolean;
+            src_directory_ifgs?: string;
+            dst_directory_ifgs?: string;
+            remove_src_ifgs_after_upload?: boolean;
+            upload_helios?: boolean;
+            dst_directory_helios?: string;
+            remove_src_helios_after_upload?: boolean;
         };
     };
 

@@ -1,6 +1,7 @@
 import { customTypes } from '../../../custom-types';
 import { configurationComponents, essentialComponents } from '../..';
 import { reduxUtils } from '../../../utils';
+import { ICONS } from '../../../assets';
 
 export default function ConfigSectionUpload() {
     const centralSectionConfig = reduxUtils.useTypedSelector((s) => s.config.central?.upload);
@@ -13,13 +14,16 @@ export default function ConfigSectionUpload() {
     function addDefault() {
         update({
             upload: {
-                is_active: false,
                 host: '1.2.3.4',
                 user: '...',
                 password: '...',
-                src_directory: '...',
-                dst_directory: '...',
-                remove_src_after_upload: false,
+                upload_ifgs: false,
+                src_directory_ifgs: '...',
+                dst_directory_ifgs: '...',
+                remove_src_ifgs_after_upload: false,
+                upload_helios: false,
+                dst_directory_helios: '...',
+                remove_src_helios_after_upload: true,
             },
         });
     }
@@ -65,12 +69,6 @@ export default function ConfigSectionUpload() {
                 remove configuration
             </essentialComponents.Button>
             <div className="w-full h-px my-6 bg-gray-300" />
-            <configurationComponents.ConfigElementToggle
-                title="Is Active"
-                value={localSectionConfig.is_active}
-                setValue={(v: boolean) => update({ upload: { is_active: v } })}
-                oldValue={centralSectionConfig?.is_active === true}
-            />
             <configurationComponents.ConfigElementText
                 title="Host"
                 value={localSectionConfig.host}
@@ -89,27 +87,57 @@ export default function ConfigSectionUpload() {
                 setValue={(v: any) => update({ upload: { password: v } })}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.password : 'null'}
             />
+            <div className="w-full h-px my-6 bg-gray-300" />
+            <configurationComponents.ConfigElementToggle
+                title="Upload IFGs"
+                value={localSectionConfig.upload_ifgs}
+                setValue={(v: boolean) => update({ upload: { upload_ifgs: v } })}
+                oldValue={centralSectionConfig?.upload_ifgs === true}
+            />
             <configurationComponents.ConfigElementText
-                title="Source Directory Path"
-                value={localSectionConfig.src_directory}
-                setValue={(v: any) => update({ upload: { src_directory: v } })}
+                title="IFG Source Directory Path"
+                value={localSectionConfig.src_directory_ifgs}
+                setValue={(v: any) => update({ upload: { src_directory_ifgs: v } })}
                 oldValue={
-                    centralSectionConfig !== null ? centralSectionConfig.src_directory : 'null'
+                    centralSectionConfig !== null ? centralSectionConfig.src_directory_ifgs : 'null'
                 }
             />
             <configurationComponents.ConfigElementText
-                title="Destination Directory Path (Server Side)"
-                value={localSectionConfig.dst_directory}
-                setValue={(v: any) => update({ upload: { dst_directory: v } })}
+                title="IFG Destination Directory Path (Server Side)"
+                value={localSectionConfig.dst_directory_ifgs}
+                setValue={(v: any) => update({ upload: { dst_directory_ifgs: v } })}
                 oldValue={
-                    centralSectionConfig !== null ? centralSectionConfig.dst_directory : 'null'
+                    centralSectionConfig !== null ? centralSectionConfig.dst_directory_ifgs : 'null'
                 }
             />
             <configurationComponents.ConfigElementToggle
-                title="Remove Source After Upload"
-                value={localSectionConfig.remove_src_after_upload}
-                setValue={(v: boolean) => update({ upload: { remove_src_after_upload: v } })}
-                oldValue={centralSectionConfig?.remove_src_after_upload === true}
+                title="Remove Source IFGs After Upload"
+                value={localSectionConfig.remove_src_ifgs_after_upload}
+                setValue={(v: boolean) => update({ upload: { remove_src_ifgs_after_upload: v } })}
+                oldValue={centralSectionConfig?.remove_src_ifgs_after_upload === true}
+            />
+            <div className="w-full h-px my-6 bg-gray-300" />
+            <configurationComponents.ConfigElementToggle
+                title="Upload Helios Images"
+                value={localSectionConfig.upload_helios}
+                setValue={(v: boolean) => update({ upload: { upload_helios: v } })}
+                oldValue={centralSectionConfig?.upload_helios === true}
+            />
+            <configurationComponents.ConfigElementText
+                title="Helios Destination Directory Path (Server Side)"
+                value={localSectionConfig.dst_directory_helios}
+                setValue={(v: any) => update({ upload: { dst_directory_helios: v } })}
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.dst_directory_helios
+                        : 'null'
+                }
+            />
+            <configurationComponents.ConfigElementToggle
+                title="Remove Source Helios Images After Upload"
+                value={localSectionConfig.remove_src_helios_after_upload}
+                setValue={(v: boolean) => update({ upload: { remove_src_helios_after_upload: v } })}
+                oldValue={centralSectionConfig?.remove_src_helios_after_upload === true}
             />
         </>
     );
