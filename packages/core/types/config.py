@@ -198,10 +198,17 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
     This should always be used when loading the object from a
     JSON file!
     """
-    if partial:
-        _ValidationModel(partial=o)
-    else:
-        _ValidationModel(regular=o)
+    try:
+        if partial:
+            _ValidationModel(partial=o)
+        else:
+            _ValidationModel(regular=o)
+    except pydantic.ValidationError as e:
+        pretty_error_messages = []
+        for error in e.errors():
+            fields = [f for f in error["loc"][1:] if f not in ["__root__"]]
+            pretty_error_messages.append(f"{'.'.join(fields)} -> {error['msg']}")
+        raise ValidationError(f"config is invalid: {', '.join(pretty_error_messages)}")
 
     new_object: ConfigDict = o
 
@@ -260,24 +267,25 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
     # this does not check for a valid upload.src_directory_ifgs path
     # since the thread itself will check for this
 
-    failed_checks = []
+    pretty_error_messages = []
 
     for assertion in assertions:
         try:
             assertion()
         except AssertionError as a:
-            failed_checks.append(a)
+            pretty_error_messages.append(a.args[0])
         except (TypeError, KeyError):
             # Will be ignored because the structure is already
             # validated. Occurs when property is missing
             pass
 
-    if len(failed_checks) > 0:
-        raise ValidationError(
-            ("ConfigDictPartial" if partial else "ConfigDict") + f": {failed_checks}"
-        )
+    if len(pretty_error_messages) > 0:
+        raise ValidationError(f"config is invalid: {', '.join(pretty_error_messages)}")
 
 
 class _ValidationModel(pydantic.BaseModel):
     regular: Optional[ConfigDict]
     partial: Optional[ConfigDictPartial]
+
+    class Config:
+        extra = "forbid"

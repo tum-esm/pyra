@@ -58,24 +58,28 @@ def test_start_stop_procedure(original_config, original_logs):
 
     print("first three log lines:\n" + "".join(info_log_lines[:3]) + "\n")
     expected_lines = [
-        f"main - INFO - started mainloop inside process with PID {pid}",
-        "main - INFO - Starting Iteration",
+        f"main - INFO - Starting mainloop inside process with PID {pid}",
+        "main - INFO - Starting iteration",
         "main - INFO - pyra-core in test mode",
     ]
     now = datetime.utcnow()
     for expected_line, actual_line in zip(expected_lines, info_log_lines[:3]):
         line_time = datetime.strptime(actual_line[:19], "%Y-%m-%d %H:%M:%S")
 
-        print(f"expected log line: {'.'*29}{expected_line}")
+        print(
+            f"expected log line: {'.'*(len(actual_line.strip()) - len(expected_line) - 1)} {expected_line}"
+        )
         print(f"actual log line:   {actual_line}\n")
         assert (now - line_time).total_seconds() < 3
-        assert actual_line.endswith(expected_line + "\n")
+        assert actual_line.strip().endswith(expected_line)
 
     stdout_5 = run_cli_command(["core", "is-running"])
     assert stdout_5.startswith(f"pyra-core is running with PID {pid}")
 
     stdout_6 = run_cli_command(["core", "stop"])
-    assert stdout_6.startswith(f"Terminated 1 background processe(s) with PID(s) [{pid}]")
+    assert stdout_6.startswith(
+        f"Terminated 1 pyra-core background processe(s) with PID(s) [{pid}]"
+    )
 
     stdout_7 = run_cli_command(["core", "is-running"])
     assert stdout_7.startswith("pyra-core is not running")

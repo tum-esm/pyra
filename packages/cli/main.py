@@ -6,7 +6,7 @@ dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
 sys.path.append(PROJECT_DIR)
 
-from .commands import (
+from commands import (
     config_command_group,
     core_command_group,
     logs_command_group,

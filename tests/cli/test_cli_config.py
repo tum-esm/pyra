@@ -65,7 +65,7 @@ def test_update_config(original_config):
     # run "pyra-cli config update" for some invalid variables
     for update in updates:
         stdout = run_cli_command(["config", "update", json.dumps(update)])
-        assert "Error in new config string" in stdout
+        assert "config is invalid" in stdout
 
     assert_config_file_content(original_config, "config.json should not have changed")
 
