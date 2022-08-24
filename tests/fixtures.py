@@ -3,6 +3,7 @@ import os
 import random
 import shutil
 import pytest
+import fabric.connection
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXISTING_TEST_FILE_PATH = os.path.join(PROJECT_DIR, "pyproject.toml")
@@ -217,3 +218,23 @@ def popuplate_upload_test_directory(dir_path: str) -> list[str]:
         shutil.rmtree(dir_path)
         os.mkdir(dir_path)
         return popuplate_upload_test_directory(dir_path)
+
+
+@pytest.fixture
+def fabric_connection():
+    """
+    Supply a fabric SSH connection
+    """
+    with open(os.path.join(PROJECT_DIR, "config", "config.json")) as f:
+        config = json.load(f)
+
+    connection = fabric.connection.Connection(
+        f"{config['upload']['user']}@{config['upload']['host']}",
+        connect_kwargs={"password": config["upload"]["password"]},
+        connect_timeout=5,
+    )
+
+    # run the respective test
+    yield connection
+
+    connection.close()

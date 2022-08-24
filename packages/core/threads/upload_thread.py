@@ -69,7 +69,7 @@ class DirectoryUploadClient:
         """
         dst_dir_path = f"{self.dst_path}/{self.date_string}"
         if not self.transfer_process.is_remote_dir(dst_dir_path):
-            self.connection.run(f"mkdir {dst_dir_path}")
+            self.connection.run(f"mkdir {dst_dir_path}", hide=True, in_stream=False)
             with open(self.src_meta_path, "w") as f:
                 json.dump(self.meta_content, f, indent=4)
             self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
@@ -90,7 +90,7 @@ class DirectoryUploadClient:
         self.transfer_process.put(local_script_path, remote_script_path)
 
         try:
-            self.connection.run("python3.10 --version", hide=True)
+            self.connection.run("python3.10 --version", hide=True, in_stream=False)
         except invoke.exceptions.UnexpectedExit:
             raise InvalidUploadState("python3.10 is not installed on the server")
 
@@ -98,7 +98,9 @@ class DirectoryUploadClient:
             remote_command = (
                 f"python3.10 {remote_script_path} {self.dst_path}/{self.date_string}"
             )
-            a: invoke.runners.Result = self.connection.run(remote_command, hide=True)
+            a: invoke.runners.Result = self.connection.run(
+                remote_command, hide=True, in_stream=False
+            )
             assert a.exited == 0
             return a.stdout.strip()
         except (invoke.exceptions.UnexpectedExit, AssertionError) as e:

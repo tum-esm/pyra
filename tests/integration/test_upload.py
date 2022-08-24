@@ -6,7 +6,7 @@ import paramiko
 import os
 import time
 import fabric.connection, fabric.transfer
-from ..fixtures import original_config, populated_upload_test_directories
+from ..fixtures import original_config, populated_upload_test_directories, fabric_connection
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
@@ -70,7 +70,7 @@ def assert_remote_meta_completeness(
         assert '"complete": true' in p.stdout.strip()
 
 
-def test_upload(original_config, populated_upload_test_directories) -> None:
+def test_upload(original_config, populated_upload_test_directories, fabric_connection) -> None:
     upload_config = original_config["upload"]
     assert upload_config is not None, "config.upload is null"
 
@@ -78,17 +78,13 @@ def test_upload(original_config, populated_upload_test_directories) -> None:
     helios_dates = populated_upload_test_directories["helios_dates"]
 
     try:
-        connection = fabric.connection.Connection(
-            f"{upload_config['user']}@{upload_config['host']}",
-            connect_kwargs={"password": upload_config["password"]},
-            connect_timeout=5,
-        )
+        connection: fabric.connection.Connection = fabric_connection
         transfer_process = fabric.transfer.Transfer(connection)
         connection.open()
         assert connection.is_connected
-    except TimeoutError as e:
+    except TimeoutError:
         raise Exception("could not reach host")
-    except paramiko.ssh_exception.AuthenticationException as e:
+    except paramiko.ssh_exception.AuthenticationException:
         raise Exception("failed to authenticate")
 
     src_dir_ifgs = os.path.join(PROJECT_DIR, "test-tmp")
