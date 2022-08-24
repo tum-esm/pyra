@@ -16,7 +16,7 @@ export default function generateActivityHistories(activityHistory: customTypes.a
     const now = moment();
 
     const measurementsAreRunning = false; // TODO: read from logs
-    const errorIsPresent = false; // TODO: read from logs
+    const errorIsPresent = true; // TODO: read from logs
 
     let coreEndTime: moment.Moment | undefined = now;
     let measurementsEndTime: moment.Moment | undefined = measurementsAreRunning ? now : undefined;
@@ -31,17 +31,14 @@ export default function generateActivityHistories(activityHistory: customTypes.a
     ).reverse();
 
     reversedActivityHistory.forEach((a) => {
-        // when a 'start-core' is encountered, and I know that the
-        // core is running at the current state of the parsing
         if (a.event === 'start-core' && coreEndTime !== undefined) {
             coreHistory.push({ from: a.localTime, to: coreEndTime.format('HH:mm:ss') });
             coreEndTime = undefined;
             measurementsEndTime = undefined;
         }
 
-        // when a 'start-measurements' is encountered, and I know that
-        // measurments are running at the current state of the parsing
         if (a.event === 'start-measurements') {
+            // if I have already seen an unpaired "stop-measurements"
             if (measurementsEndTime !== undefined) {
                 measurementsHistory.push({
                     from: a.localTime,
@@ -56,12 +53,19 @@ export default function generateActivityHistories(activityHistory: customTypes.a
             measurementsEndTime = undefined;
         }
 
+        if (a.event === 'error-occured' && errorEndTime !== undefined) {
+            errorHistory.push({ from: a.localTime, to: errorEndTime.format('HH:mm:ss') });
+            errorEndTime = undefined;
+        }
+
         if (a.event === 'stop-core') {
             coreEndTime = moment(a.localTime, 'HH:mm:ss');
         }
-
         if (a.event === 'stop-measurements') {
             measurementsEndTime = moment(a.localTime, 'HH:mm:ss');
+        }
+        if (a.event === 'errors-resolved') {
+            errorEndTime = moment(a.localTime, 'HH:mm:ss');
         }
     });
 
