@@ -3,9 +3,7 @@ import time
 from typing import Callable, Optional
 import click
 import os
-from packages.core import types
-from packages.core.modules.enclosure_control import EnclosureControl
-from packages.core.utils import StateInterface, ConfigInterface, PLCInterface, with_filelock
+from packages.core import types, utils, interfaces, modules
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -22,14 +20,16 @@ def print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
-def get_plc_interface() -> Optional[PLCInterface]:
-    config = ConfigInterface.read()
+def get_plc_interface() -> Optional[interfaces.PLCInterface]:
+    config = interfaces.ConfigInterface.read()
     plc_interface = None
 
     try:
         assert config["tum_plc"] is not None, "PLC not configured"
         assert config["tum_plc"]["controlled_by_user"], "PLC is controlled by automation"
-        plc_interface = PLCInterface(config["tum_plc"]["version"], config["tum_plc"]["ip"])
+        plc_interface = interfaces.PLCInterface(
+            config["tum_plc"]["version"], config["tum_plc"]["ip"]
+        )
         plc_interface.connect()
     except Exception as e:
         print_red(f"{e}")
@@ -59,7 +59,7 @@ def _reset() -> None:
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
-                StateInterface.update(
+                interfaces.StateInterface.update(
                     {"enclosure_plc_readings": {"state": {"reset_needed": False}}}
                 )
                 break
@@ -69,7 +69,7 @@ def _reset() -> None:
 
 
 def wait_until_cover_is_at_angle(
-    plc_interface: PLCInterface, new_cover_angle: int, timeout: float = 15
+    plc_interface: interfaces.PLCInterface, new_cover_angle: int, timeout: float = 15
 ) -> None:
     # waiting until cover is at this angle
     running_time = 0
@@ -78,7 +78,7 @@ def wait_until_cover_is_at_angle(
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
-            StateInterface.update(
+            interfaces.StateInterface.update(
                 {
                     "enclosure_plc_readings": {
                         "actors": {"current_angle": new_cover_angle},
@@ -89,7 +89,7 @@ def wait_until_cover_is_at_angle(
             break
 
         if running_time > timeout:
-            raise EnclosureControl.CoverError(
+            raise modules.enclosure_control.EnclosureControl.CoverError(
                 f"Cover took too long to move, latest cover angle: {current_cover_angle}"
             )
 
@@ -113,7 +113,7 @@ def _set_cover_angle(angle: str) -> None:
         plc_interface.disconnect()
 
 
-@with_filelock(CONFIG_LOCK_PATH)
+@utils.with_filelock(CONFIG_LOCK_PATH)
 def enable_user_control_in_config() -> None:
     with open(CONFIG_FILE_PATH, "r") as f:
         config = json.load(f)
@@ -143,7 +143,8 @@ def _close_cover() -> None:
 
 
 def set_boolean_plc_state(
-    state: str, get_setter_function: Callable[[PLCInterface], Callable[[bool], None]]
+    state: str,
+    get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool], None]],
 ) -> None:
     plc_interface = get_plc_interface()
     if plc_interface is not None:

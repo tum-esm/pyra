@@ -3,9 +3,7 @@ from typing import Optional
 import click
 import os
 import psutil
-from packages.core.modules.enclosure_control import EnclosureControl
-from packages.core.modules.sun_tracking import SunTracking
-from packages.core.utils import ConfigInterface, Logger
+from packages.core import utils, interfaces, modules
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -62,7 +60,7 @@ def _start_pyra_core() -> None:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        Logger.log_activity_event("start-core")
+        utils.Logger.log_activity_event("start-core")
         print_green(f"Started background process with PID {p.pid}")
 
 
@@ -76,16 +74,16 @@ def _stop_pyra_core() -> None:
             f"Terminated {len(termination_pids)} pyra-core background "
             + f"processe(s) with PID(s) {termination_pids}"
         )
-        Logger.log_activity_event("stop-core")
+        utils.Logger.log_activity_event("stop-core")
 
-        config = ConfigInterface.read()
+        config = interfaces.ConfigInterface.read()
         if config["general"]["test_mode"] or (config["tum_plc"] is None):
             return
 
-        config = ConfigInterface().read()
+        config = interfaces.ConfigInterface().read()
 
         try:
-            enclosure = EnclosureControl(config)
+            enclosure = modules.enclosure_control.EnclosureControl(config)
             enclosure.force_cover_close()
             enclosure.plc_interface.disconnect()
             print_green("Successfully closed cover")
@@ -93,7 +91,7 @@ def _stop_pyra_core() -> None:
             print_red(f"Failed to close cover: {e}")
 
         try:
-            tracking = SunTracking(config)
+            tracking = modules.sun_tracking.SunTracking(config)
             if tracking.ct_application_running():
                 tracking.stop_sun_tracking_automation()
             print_green("Successfully closed CamTracker")

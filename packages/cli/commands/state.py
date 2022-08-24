@@ -1,7 +1,7 @@
 import json
 import click
 import os
-from packages.core.utils import StateInterface, with_filelock
+from packages.core import utils, interfaces
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -11,10 +11,10 @@ STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 
 @click.command(help="Read the current state.json file.")
 @click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
-@with_filelock(STATE_LOCK_PATH)
+@utils.with_filelock(STATE_LOCK_PATH)
 def _get_state(no_indent: bool) -> None:
     if not os.path.isfile(STATE_FILE_PATH):
-        StateInterface.initialize()
+        interfaces.StateInterface.initialize()
 
     with open(STATE_FILE_PATH, "r") as f:
         try:
