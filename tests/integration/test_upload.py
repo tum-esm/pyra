@@ -49,12 +49,25 @@ def get_remote_checksum(
 
     for date in sorted(dates):
         p: invoke.runners.Result = connection.run(
-            f"python3.10 {dir_path}/get_upload_dir_checksum.py {dir_path}/{date}", hide=True
+            f"python3.10 {dir_path}/get_upload_dir_checksum.py {dir_path}/{date}",
+            hide=True,
+            in_stream=False,
         )
         assert p.exited == 0
         checksums.append(date + ":" + p.stdout.strip())
 
     return ",".join(checksums)
+
+
+def assert_remote_meta_completeness(
+    dir_path: str, dates: list[str], connection: fabric.connection.Connection
+) -> str:
+    for date in sorted(dates):
+        p: invoke.runners.Result = connection.run(
+            f"cat {dir_path}/{date}/upload-meta.json", hide=True, in_stream=False
+        )
+        assert p.exited == 0
+        assert '"complete": true' in p.stdout.strip()
 
 
 def test_upload(original_config, populated_upload_test_directories) -> None:
@@ -71,6 +84,8 @@ def test_upload(original_config, populated_upload_test_directories) -> None:
             connect_timeout=5,
         )
         transfer_process = fabric.transfer.Transfer(connection)
+        connection.open()
+        assert connection.is_connected
     except TimeoutError as e:
         raise Exception("could not reach host")
     except paramiko.ssh_exception.AuthenticationException as e:
@@ -85,9 +100,9 @@ def test_upload(original_config, populated_upload_test_directories) -> None:
     dst_dir_helios = f"{dst_dir}/helios"
     assert transfer_process.is_remote_dir("/tmp")
     assert not transfer_process.is_remote_dir(dst_dir)
-    connection.run(f"mkdir {dst_dir}")
-    connection.run(f"mkdir {dst_dir_ifgs}")
-    connection.run(f"mkdir {dst_dir_helios}")
+    connection.run(f"mkdir {dst_dir}", hide=True, in_stream=False)
+    connection.run(f"mkdir {dst_dir_ifgs}", hide=True, in_stream=False)
+    connection.run(f"mkdir {dst_dir_helios}", hide=True, in_stream=False)
     assert transfer_process.is_remote_dir(dst_dir_ifgs)
     assert transfer_process.is_remote_dir(dst_dir_helios)
 
@@ -128,13 +143,17 @@ def test_upload(original_config, populated_upload_test_directories) -> None:
 
     print(checksums)
 
+    # check whether the dst is equal to the initial source
     assert checksums["local-initial"]["ifgs"] == checksums["remote-end"]["ifgs"]
-    assert checksums["local-initial"]["ifgs"] == checksums["local-end"]["ifgs"]
-
     assert checksums["local-initial"]["helios"] == checksums["remote-end"]["helios"]
+
+    # check whether the src has not been changed
+    assert checksums["local-initial"]["ifgs"] == checksums["local-end"]["ifgs"]
     assert checksums["local-initial"]["helios"] == checksums["local-end"]["helios"]
 
-    # TODO: Assert that all remote metas contain complete=true
+    # check if every remote meta contains "complete=true"
+    assert_remote_meta_completeness(dst_dir_ifgs, ifg_dates, connection)
+    assert_remote_meta_completeness(dst_dir_helios, helios_dates, connection)
 
     # TODO: Upload again, now with "remove" flag set
     # TODO: Assert that local directories are empty
