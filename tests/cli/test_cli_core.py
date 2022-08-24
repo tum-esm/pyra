@@ -2,7 +2,7 @@ from datetime import datetime
 import subprocess
 import os
 import time
-from ..fixtures import original_config, original_logs
+from ..fixtures import sample_config, empty_logs
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
@@ -11,7 +11,7 @@ PYRA_CLI_PATH = os.path.join(PROJECT_DIR, "packages", "cli", "main.py")
 INFO_LOG_PATH = os.path.join(PROJECT_DIR, "logs", "info.log")
 
 
-def run_cli_command(command: list[str]):
+def run_cli_command(command: list[str]) -> str:
     process = subprocess.run(
         [INTERPRETER_PATH, PYRA_CLI_PATH, *command],
         stderr=subprocess.PIPE,
@@ -25,7 +25,7 @@ def run_cli_command(command: list[str]):
     return stdout
 
 
-def test_start_stop_procedure(original_config, original_logs):
+def test_start_stop_procedure(sample_config, empty_logs) -> None:
     # terminate all pyra-core processes
     run_cli_command(["core", "stop"])
 

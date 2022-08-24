@@ -7,7 +7,7 @@ import pytest
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXISTING_TEST_FILE_PATH = os.path.join(PROJECT_DIR, "pyproject.toml")
 
-TEST_CONFIG = {
+SAMPLE_CONFIG = {
     "general": {
         "seconds_per_core_interval": 30,
         "test_mode": True,
@@ -75,28 +75,55 @@ def restore_file(original_path: str, temporary_path: str):
 
 
 @pytest.fixture()
-def original_config():
+def sample_config():
     """
     Store the original config.json file under a different name.
     Restore it after the tests are done.
+
+    Yields a sample config.
     """
 
     original_config_path = os.path.join(PROJECT_DIR, "config", "config.json")
     temporary_config_path = os.path.join(PROJECT_DIR, "config", "config.tmp.json")
-    test_content = json.dumps(TEST_CONFIG, indent=4)
-    save_file(original_config_path, temporary_config_path, test_content)
+    config_string = json.dumps(SAMPLE_CONFIG, indent=4)
+    save_file(original_config_path, temporary_config_path, config_string)
 
     # run the respective test
-    yield TEST_CONFIG
+    yield SAMPLE_CONFIG
 
     restore_file(original_config_path, temporary_config_path)
 
 
 @pytest.fixture()
-def original_logs():
+def original_config():
+    """
+    Store the original config.json file under a different name.
+    Restore it after the tests are done.
+
+    Yields the original config (from config.json).
+    """
+
+    original_config_path = os.path.join(PROJECT_DIR, "config", "config.json")
+    temporary_config_path = os.path.join(PROJECT_DIR, "config", "config.tmp.json")
+
+    assert os.path.isfile(original_config_path)
+    with open(original_config_path) as f:
+        config_string = f.read()
+    save_file(original_config_path, temporary_config_path, config_string)
+
+    # run the respective test
+    yield json.loads(config_string)
+
+    restore_file(original_config_path, temporary_config_path)
+
+
+@pytest.fixture()
+def empty_logs():
     """
     Store the original info.log and debug.log file under a
     different name. Restore them after the tests are done.
+
+    Yields nothing, but the log files are emtpy.
     """
     original_info_logs_path = os.path.join(PROJECT_DIR, "logs", "info.log")
     temporary_info_logs_path = os.path.join(PROJECT_DIR, "logs", "info.tmp.log")
@@ -126,8 +153,6 @@ def populated_upload_test_directories():
     # replace original helios dir with empty test dir
     os.rename(original_helios_dir, temporary_helios_dir)
     os.mkdir(original_helios_dir)
-    with open(os.path.join(original_helios_dir, ".gitkeep"), "w") as f:
-        f.write("")
 
     # add a second test dir (ifg upload)
     test_ifg_dir = os.path.join(PROJECT_DIR, "test-tmp")
@@ -139,7 +164,7 @@ def populated_upload_test_directories():
     popuplate_upload_test_directory(test_ifg_dir)
 
     # run the respective test
-    yield test_ifg_dir
+    yield
 
     # fill helios dir with original content again
     shutil.rmtree(original_helios_dir)
@@ -157,13 +182,34 @@ def popuplate_upload_test_directory(dir_path: str):
     Generates 5 directories with random dates (YYYYMMDD)
     each containing 10 files with random names
     """
-    for _ in range(5):
-        year = random.randint(2000, 2022)
-        month = random.randint(1, 12)
-        day = random.randint(1, 28)
-        date_string = f"{year}{str(month).zfill(2)}{str(day).zfill(2)}"
-        os.mkdir(os.path.join(dir_path, date_string))
-        for _ in range(10):
-            filename = f"{random_string()}{date_string}{random_string()}"
-            with open(os.path.join(dir_path, date_string, filename), "w") as f:
-                f.write(random_string())
+    try:
+        for _ in range(5):
+            year = random.randint(2000, 2022)
+            month = random.randint(1, 12)
+            day = random.randint(1, 28)
+            date_string = f"{year}{str(month).zfill(2)}{str(day).zfill(2)}"
+
+            os.mkdir(os.path.join(dir_path, date_string))
+            filenames = []
+            for _ in range(10):
+                filename = f"{random_string()}{date_string}{random_string()}"
+                filenames.append(filename)
+                with open(os.path.join(dir_path, date_string, filename), "w") as f:
+                    f.write(random_string())
+            with open(os.path.join(dir_path, date_string, "upload-meta.json"), "w") as f:
+                json.dump(
+                    {
+                        "complete": False,
+                        "fileList": filenames,
+                        "createdTime": 0,
+                        "lastModifiedTime": 0,
+                    },
+                    f,
+                )
+
+    except FileExistsError:
+        # this happens when the random functions produce
+        # the same date or string twice
+        shutil.rmtree(dir_path)
+        os.mkdir(dir_path)
+        popuplate_upload_test_directory(dir_path)
