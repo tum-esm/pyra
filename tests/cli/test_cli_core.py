@@ -50,7 +50,7 @@ def test_start_stop_procedure(original_config, original_logs):
     assert pid_string.isnumeric()
     pid = int(pid_string)
 
-    time.sleep(1)
+    time.sleep(8)
 
     with open(INFO_LOG_PATH, "r") as f:
         info_log_lines = f.readlines()
@@ -70,7 +70,7 @@ def test_start_stop_procedure(original_config, original_logs):
             f"expected log line: {'.'*(len(actual_line.strip()) - len(expected_line) - 1)} {expected_line}"
         )
         print(f"actual log line:   {actual_line}\n")
-        assert (now - line_time).total_seconds() < 3
+        assert (now - line_time).total_seconds() < 10
         assert actual_line.strip().endswith(expected_line)
 
     stdout_5 = run_cli_command(["core", "is-running"])
