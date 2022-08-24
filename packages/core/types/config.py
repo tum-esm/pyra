@@ -9,7 +9,7 @@ TimeDictPartial = TypedDict(
 )
 
 
-class _ConfigSubDicts:
+class ConfigSubDicts:
     @staticmethod
     class General(TypedDict):
         seconds_per_core_interval: float
@@ -158,27 +158,27 @@ class _ConfigSubDicts:
 
 
 class ConfigDict(TypedDict):
-    general: _ConfigSubDicts.General
-    opus: _ConfigSubDicts.Opus
-    camtracker: _ConfigSubDicts.Camtracker
-    error_email: _ConfigSubDicts.ErrorEmail
-    measurement_decision: _ConfigSubDicts.MeasurementDecision
-    measurement_triggers: _ConfigSubDicts.MeasurementTriggers
-    tum_plc: Optional[_ConfigSubDicts.TumPlc]
-    helios: Optional[_ConfigSubDicts.Helios]
-    upload: Optional[_ConfigSubDicts.Upload]
+    general: ConfigSubDicts.General
+    opus: ConfigSubDicts.Opus
+    camtracker: ConfigSubDicts.Camtracker
+    error_email: ConfigSubDicts.ErrorEmail
+    measurement_decision: ConfigSubDicts.MeasurementDecision
+    measurement_triggers: ConfigSubDicts.MeasurementTriggers
+    tum_plc: Optional[ConfigSubDicts.TumPlc]
+    helios: Optional[ConfigSubDicts.Helios]
+    upload: Optional[ConfigSubDicts.Upload]
 
 
 class ConfigDictPartial(TypedDict, total=False):
-    general: _ConfigSubDicts.GeneralPartial
-    opus: _ConfigSubDicts.OpusPartial
-    camtracker: _ConfigSubDicts.CamtrackerPartial
-    error_email: _ConfigSubDicts.ErrorEmailPartial
-    measurement_decision: _ConfigSubDicts.MeasurementDecisionPartial
-    measurement_triggers: _ConfigSubDicts.MeasurementTriggersPartial
-    tum_plc: Optional[_ConfigSubDicts.TumPlcPartial]
-    helios: Optional[_ConfigSubDicts.HeliosPartial]
-    upload: Optional[_ConfigSubDicts.UploadPartial]
+    general: ConfigSubDicts.GeneralPartial
+    opus: ConfigSubDicts.OpusPartial
+    camtracker: ConfigSubDicts.CamtrackerPartial
+    error_email: ConfigSubDicts.ErrorEmailPartial
+    measurement_decision: ConfigSubDicts.MeasurementDecisionPartial
+    measurement_triggers: ConfigSubDicts.MeasurementTriggersPartial
+    tum_plc: Optional[ConfigSubDicts.TumPlcPartial]
+    helios: Optional[ConfigSubDicts.HeliosPartial]
+    upload: Optional[ConfigSubDicts.UploadPartial]
 
 
 class ValidationError(Exception):
@@ -253,8 +253,10 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
         lambda: assert_min_max("helios.seconds_per_interval", 5, 600),
         lambda: assert_min_max("helios.measurement_threshold", 0.1, 1),
         lambda: assert_ip_address("upload.host"),
-        lambda: assert_file_path("upload.src_directory"),
     ]
+
+    # this does not check for a valid upload.src_directory_ifgs path
+    # since the thread itself will check for this
 
     failed_checks = []
 

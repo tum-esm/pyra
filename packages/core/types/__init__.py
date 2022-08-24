@@ -1,4 +1,4 @@
-from .config import ConfigDict, ConfigDictPartial
+from .config import ConfigDict, ConfigDictPartial, ConfigSubDicts
 from .config import validate_config_dict
 
 from .persistent_state import PersistentStateDict, PersistentStateDictPartial
