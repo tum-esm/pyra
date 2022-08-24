@@ -64,7 +64,7 @@ def run() -> None:
             break
         except Exception as e:
             logger.exception(e)
-            logger.error(f"Could not read config, waiting 10 seconds")
+            logger.error("Invalid config, waiting 10 seconds")
             time.sleep(10)
 
     # these modules will be executed one by one in each
@@ -94,7 +94,7 @@ def run() -> None:
         try:
             config = interfaces.ConfigInterface.read()
         except Exception as e:
-            logger.error(f"Invalid config, waiting 10 seconds")
+            logger.error("Invalid config, waiting 10 seconds")
             time.sleep(10)
             continue
 

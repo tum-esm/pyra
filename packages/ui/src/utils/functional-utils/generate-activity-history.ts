@@ -3,7 +3,11 @@ import { customTypes } from '../../custom-types';
 
 type ActivitySection = { from: string; to: string };
 
-export default function generateActivityHistories(activityHistory: customTypes.activityHistory): {
+export default function generateActivityHistories(
+    activityHistory: customTypes.activityHistory,
+    measurementsAreRunning: boolean,
+    errorIsPresent: boolean
+): {
     core: ActivitySection[];
     measurements: ActivitySection[];
     error: ActivitySection[];
@@ -12,11 +16,11 @@ export default function generateActivityHistories(activityHistory: customTypes.a
     This function parses the activity logs in reverse. The current state
     can be read from the current log lines (whether measurements should be
     running and/or an error is present).
+
+    measurementsAreRunning and errorIsPresent is determined from the current
+    log lines.
     */
     const now = moment();
-
-    const measurementsAreRunning = false; // TODO: read from logs
-    const errorIsPresent = true; // TODO: read from logs
 
     let coreEndTime: moment.Moment | undefined = now;
     let measurementsEndTime: moment.Moment | undefined = measurementsAreRunning ? now : undefined;

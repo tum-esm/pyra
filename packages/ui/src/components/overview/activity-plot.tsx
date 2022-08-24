@@ -3,8 +3,6 @@ import moment from 'moment';
 import { functionalUtils, reduxUtils } from '../../utils';
 import { customTypes } from '../../custom-types';
 
-const borderClass = 'border border-gray-250 rounded-sm';
-
 function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
     let fraction = time.hour() / 24.0 + time.minute() / (24.0 * 60) + time.second() / (24.0 * 3600);
     if (fromRight) {
@@ -13,164 +11,28 @@ function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
     return `${(fraction * 100).toFixed(2)}%`;
 }
 
-/*
-type ActivitySection = { from: string; to: string };
-
-function getActivitySectionsCore(activityHistory: customTypes.activityHistory): ActivitySection[] {
-    if (activityHistory.length == 0) {
-        return [{ from: '00:00:00', to: '23:59:59' }];
-    } else {
-        const firstEvent = activityHistory.at(0);
-        let sectionList: ActivitySection[] = [];
-        let currentElement: ActivitySection | undefined = {
-            from: firstEvent?.event === 'start-core' ? firstEvent.localTime : '00:00:00',
-            to: '23:59:59',
-        };
-
-        activityHistory.slice(1, undefined).forEach((a) => {
-            if (a.event === 'start-core') {
-                if (currentElement === undefined) {
-                    currentElement = { from: a.localTime, to: '23:59:59' };
-                }
-            }
-            if (a.event === 'stop-core') {
-                if (currentElement !== undefined) {
-                    sectionList.push({ ...currentElement, to: a.localTime });
-                    currentElement = undefined;
-                }
-            }
-        });
-
-        if (currentElement !== undefined) {
-            sectionList.push(currentElement);
-        }
-
-        return sectionList;
-    }
-}
-
-function getActivitySectionsError(activityHistory: customTypes.activityHistory): ActivitySection[] {
-    if (activityHistory.length == 0) {
-        return [];
-    } else {
-        let sectionList: ActivitySection[] = [];
-        let currentElement: ActivitySection | undefined = undefined;
-
-        activityHistory.forEach((a) => {
-            if (a.event === 'error-occured') {
-                if (currentElement === undefined) {
-                    currentElement = { from: a.localTime, to: '23:59:59' };
-                }
-            }
-            if (a.event === 'errors-resolved') {
-                if (currentElement === undefined) {
-                    sectionList.push({ from: '00:00:00', to: a.localTime });
-                } else {
-                    sectionList.push({ from: currentElement.from, to: a.localTime });
-                    currentElement = undefined;
-                }
-            }
-        });
-
-        if (currentElement !== undefined) {
-            sectionList.push(currentElement);
-        }
-
-        return sectionList;
-    }
-}
-
-function getActivitySectionsMeasurements(
-    activityHistory: customTypes.activityHistory
-): ActivitySection[] {
-    if (activityHistory.length == 0) {
-        return [];
-    } else {
-        let sectionList: ActivitySection[] = [];
-        let currentElement: ActivitySection | undefined = undefined;
-
-        activityHistory.forEach((a) => {
-            if (a.event === 'start-measurements') {
-                if (currentElement === undefined) {
-                    currentElement = { from: a.localTime, to: '23:59:59' };
-                }
-            }
-            if (a.event === 'stop-measurements') {
-                if (currentElement === undefined) {
-                    sectionList.push({ from: '00:00:00', to: a.localTime });
-                } else {
-                    sectionList.push({ from: currentElement.from, to: a.localTime });
-                }
-            }
-            if (a.event === 'stop-core') {
-                if (currentElement !== undefined) {
-                    sectionList.push({ from: currentElement.from, to: a.localTime });
-                }
-            }
-        });
-
-        if (currentElement !== undefined) {
-            sectionList.push(currentElement);
-        }
-
-        return sectionList;
-    }
-}
-
-
-    return reduce(
-        activityHistory,
-        (prev: ActivitySection[], curr, index) => {
-            if (curr.event === startIndicator) {
-                return [...prev, { from: curr.localTime, to: '23:59:59' }];
-            } else if (stopIndicators.includes(curr.event)) {
-                if (startIndicator !== 'start-measurements' && prev.length == 0) {
-                    return [{ from: '00:00:00', to: curr.localTime }];
-                } else if (prev.length != 0) {
-                    const lastFrom: any = prev.at(-1)?.from;
-                    return [...prev.slice(0, -1), { from: lastFrom, to: curr.localTime }];
-                } else {
-                    return prev;
-                }
-            } else {
-                return prev;
-            }
-        },
-        []
-    );
-}
-
-function getSections(
-    activityHistory: customTypes.activityHistory,
-    startIndicator: string,
-    stopIndicators: string[]
-): ActivitySection[] {
-    return reduce(
-        activityHistory,
-        (prev: ActivitySection[], curr, index) => {
-            if (curr.event === startIndicator) {
-                return [...prev, { from: curr.localTime, to: '23:59:59' }];
-            } else if (stopIndicators.includes(curr.event)) {
-                if (startIndicator !== 'start-measurements' && prev.length == 0) {
-                    return [{ from: '00:00:00', to: curr.localTime }];
-                } else if (prev.length != 0) {
-                    const lastFrom: any = prev.at(-1)?.from;
-                    return [...prev.slice(0, -1), { from: lastFrom, to: curr.localTime }];
-                } else {
-                    return prev;
-                }
-            } else {
-                return prev;
-            }
-        },
-        []
-    );
-}*/
-
 function ActivityPlot() {
     const now = moment();
 
+    // " - INFO - Measurements should be running is set to: true"
+    // " - EXCEPTION - "
+
     const rawActivityHistory = reduxUtils.useTypedSelector((s) => s.activity.history);
+    const currentInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
+
+    let measurementsAreRunning = false;
+    let errorIsPresent = false;
+    if (currentInfoLogLines !== undefined) {
+        const joined_logs = functionalUtils
+            .reduceLogLines(currentInfoLogLines, '3 iterations')
+            .join('\n');
+        measurementsAreRunning =
+            joined_logs.includes(' - INFO - Measurements should be running is set to: true') &&
+            !joined_logs.includes(' - INFO - Measurements should be running is set to: false');
+        errorIsPresent =
+            joined_logs.includes(' - EXCEPTION - ') &&
+            !joined_logs.includes(' - ERROR - Invalid config, waiting 10 seconds');
+    }
 
     let activityHistory: customTypes.activityHistory = [];
     if (rawActivityHistory !== undefined) {
@@ -184,7 +46,11 @@ function ActivityPlot() {
         }
     }
 
-    const sections = functionalUtils.generateActivityHistories(activityHistory);
+    const sections = functionalUtils.generateActivityHistories(
+        activityHistory,
+        measurementsAreRunning,
+        errorIsPresent
+    );
     console.log(sections);
 
     const localUTCOffset = moment().utcOffset();
