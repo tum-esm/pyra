@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal, Optional
 import snap7
 import time
@@ -221,6 +222,7 @@ class PLCInterface:
         s = self.specification
 
         return {
+            "last_read_time": datetime.now().strftime("%Y:%m:%d"),
             "actors": {
                 "fan_speed": _get_int(s["actors"]["fan_speed"]),
                 "current_angle": _get_int(s["actors"]["current_angle"]),

@@ -175,6 +175,7 @@ export namespace customTypes {
     };
 
     export type enclosurePlcReadings = {
+        last_read_time: string | null;
         actors: {
             fan_speed: number | null;
             current_angle: number | null;
@@ -213,6 +214,7 @@ export namespace customTypes {
     };
 
     export type partialEnclosurePlcReadings = {
+        last_read_time?: string;
         actors?: {
             fan_speed?: number;
             current_angle?: number;

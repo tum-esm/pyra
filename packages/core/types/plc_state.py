@@ -88,6 +88,7 @@ class _PlcStateDictConnectionsPartial(TypedDict, total=False):
 
 
 class PlcStateDict(TypedDict):
+    last_read_time: Optional[str]
     actors: _PlcStateDictActors
     control: _PlcStateDictControl
     sensors: _PlcStateDictSensors
@@ -97,6 +98,7 @@ class PlcStateDict(TypedDict):
 
 
 class PlcStateDictPartial(TypedDict, total=False):
+    last_read_time: Optional[str]
     actors: _PlcStateDictActorsPartial
     control: _PlcStateDictControlPartial
     sensors: _PlcStateDictSensorsPartial

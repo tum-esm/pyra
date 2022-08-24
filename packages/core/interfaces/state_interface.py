@@ -20,6 +20,7 @@ EMPTY_STATE_OBJECT: types.StateDict = {
     "helios_indicates_good_conditions": None,
     "measurements_should_be_running": False,
     "enclosure_plc_readings": {
+        "last_read_time": None,
         "actors": {
             "fan_speed": None,
             "current_angle": None,
