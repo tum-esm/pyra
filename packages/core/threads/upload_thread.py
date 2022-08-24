@@ -86,7 +86,7 @@ class DirectoryUploadClient:
         not present.
         """
         local_script_path = os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
-        remote_script_path = f"{self.dst_path}/{self.date_string}/get_upload_dir_checksum.py"
+        remote_script_path = f"{self.dst_path}/get_upload_dir_checksum.py"
         self.transfer_process.put(local_script_path, remote_script_path)
 
         try:
@@ -96,7 +96,7 @@ class DirectoryUploadClient:
 
         try:
             remote_command = (
-                f"python3.10 {remote_script_path} {self.src_path}/{self.date_string}"
+                f"python3.10 {remote_script_path} {self.dst_path}/{self.date_string}"
             )
             a: invoke.runners.Result = self.connection.run(remote_command, hide=True)
             assert a.exited == 0
@@ -299,6 +299,8 @@ class UploadThread(AbstractThreadBase):
         "createdTime": float,
         "lastModifiedTime": float
     }
+
+    This function only does one loop in headless mode.
     """
 
     def __init__(self, config: types.ConfigDict) -> None:
@@ -335,10 +337,14 @@ class UploadThread(AbstractThreadBase):
                 transfer_process = fabric.transfer.Transfer(connection)
             except TimeoutError as e:
                 logger.error(f"could not reach host, waiting 5 minutes: {e}")
+                if headless:
+                    break
                 time.sleep(300)
                 continue
             except paramiko.ssh_exception.AuthenticationException as e:
                 logger.error(f"failed to authenticate, waiting 2 minutes: {e}")
+                if headless:
+                    break
                 time.sleep(120)
                 continue
 
@@ -386,6 +392,9 @@ class UploadThread(AbstractThreadBase):
                         ).run()
                     except InvalidUploadState as e:
                         logger.error(f"uploading {date_string} is stuck in invalid state: {e}")
+
+            if headless:
+                break
 
             # Close SSH connections and wait 10 minutes
             # before checking all directories again

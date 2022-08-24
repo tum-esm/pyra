@@ -1,4 +1,5 @@
-from packages.core.threads import HeliosThread
+from packages.core import interfaces, threads
 
 if __name__ == "__main__":
-    HeliosThread.main(headless=True)
+    config = interfaces.ConfigInterface.read()
+    threads.HeliosThread(config).main(headless=True)
