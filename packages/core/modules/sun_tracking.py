@@ -21,7 +21,6 @@ class SunTracking:
     between current sun angle and calculated sun positions. It happens from time to time that
     SunTracker fails to track the sun and is unable to reinitialize the tracking. If a certain
     motor offset threshold is reached the only way to fix the offset is to restart CamTracker.
-
     """
 
     def __init__(self, initial_config: types.ConfigDict):
