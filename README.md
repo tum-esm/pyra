@@ -15,3 +15,13 @@
 **Testing (not in an active CI):** We could add automated tests to the main- and integration branches. However, most things we could test make use of OPUS, Camtracker, Helios, or the enclosure, hence we can only do a subset of our tests in an isolated CI environment without the system present.
 
 **Issues:** Things we work on are managed via issues - which are bundled into milestones (each milestone represents a release). The issues should be closed once they are on the `main` branch via commit messages ("closes #87", "fixes #70", etc. see [this list of keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)). Issues that have been finished but are not on the `main` branch yet, can be labeled using the white label "implemented". This way, we can oversee incompleted issues, but don't forget to merge them.
+
+<br/>
+
+## Elements
+
+### FileLocks
+
+Since we have parallel processes interacting with state, config and logs, we need to control the access to these resources in order to avoid race conditons. We use the python module [filelock](https://pypi.org/project/filelock/) for this. Before working with one of these resources, a process has to aquire a filelock for the respective `.state.lock`/`.config.lock`/`.logs.lock` file. When it cannot aquire a lock for 10 seconds, it throws a `TimeoutError`.
+
+When running into a deadlock, with timeout errors (never happened to us yet), there is a cli command `pyra-cli remove-filelocks` to remove all existing lock files.

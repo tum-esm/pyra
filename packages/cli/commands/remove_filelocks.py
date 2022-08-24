@@ -20,14 +20,11 @@ def print_red(text: str) -> None:
 def remove_filelocks() -> None:
     lock_files = [
         os.path.join(PROJECT_DIR, "config", ".config.lock"),
+        os.path.join(PROJECT_DIR, "config", ".state.lock"),
         os.path.join(PROJECT_DIR, "logs", ".logs.lock"),
-        os.path.join(PROJECT_DIR, "state", ".state.lock"),
     ]
-    if input("Are you sure? (y) ").startswith("y"):
-        for f in lock_files:
-            if os.path.isfile(f):
-                os.remove(f)
-                print_green(f"Removing {f}")
-        print_green("Done!")
-    else:
-        print_red("Aborting")
+    for f in lock_files:
+        if os.path.isfile(f):
+            os.remove(f)
+            print_green(f"Removing {f}")
+    print_green("Done!")

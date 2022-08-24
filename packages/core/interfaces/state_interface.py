@@ -72,7 +72,7 @@ EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
 
 class StateInterface:
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def initialize() -> None:
         """
         This will create two files:
@@ -109,7 +109,7 @@ class StateInterface:
                 json.dump(EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
 
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def read() -> types.StateDict:
         """Read the state file and return its content"""
         with open(STATE_FILE_PATH, "r") as f:
@@ -118,7 +118,7 @@ class StateInterface:
             return new_object
 
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def read_persistent() -> types.PersistentStateDict:
         """Read the persistent state file and return its content"""
         with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
@@ -127,7 +127,7 @@ class StateInterface:
             return new_object
 
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def update(update: types.StateDictPartial) -> None:
         """
         Update the (persistent) state file and return its content.
@@ -143,7 +143,7 @@ class StateInterface:
             json.dump(new_state, f, indent=4)
 
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH)
+    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def update_persistent(update: types.PersistentStateDictPartial) -> None:
         """
         Update the (persistent) state file and return its content.

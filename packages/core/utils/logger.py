@@ -71,7 +71,7 @@ class Logger:
         if self.just_print:
             print(log_string, end="")
         else:
-            with filelock.FileLock(LOG_FILES_LOCK):
+            with filelock.FileLock(LOG_FILES_LOCK, timeout=10):
                 with open(DEBUG_LOG_FILE, "a") as f1:
                     f1.write(log_string)
                 if level != "DEBUG":
@@ -92,7 +92,7 @@ class Logger:
         With keep_last_hour = True, log lines less than an hour old will
         remain.
         """
-        with filelock.FileLock(LOG_FILES_LOCK):
+        with filelock.FileLock(LOG_FILES_LOCK, timeout=10):
             with open(DEBUG_LOG_FILE, "r") as f:
                 log_lines_in_file = f.readlines()
             if len(log_lines_in_file) == 0:
@@ -158,7 +158,7 @@ class Logger:
         filename = now.strftime("activity-%Y-%m-%d.json")
         filepath = os.path.join(PROJECT_DIR, "logs", "activity", filename)
 
-        with filelock.FileLock(LOG_FILES_LOCK):
+        with filelock.FileLock(LOG_FILES_LOCK, timeout=10):
             if os.path.isfile(filepath):
                 with open(filepath, "r") as f:
                     current_activity = json.load(f)
