@@ -230,14 +230,18 @@ class _Helios:
         logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
 
         if save_image:
-            image_timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-            raw_image_name = f"{image_timestamp}-{status}-raw.jpg"
-            processed_image_name = f"{image_timestamp}-{status}-processed.jpg"
+            now = datetime.now()
+            img_timestamp = now.strftime("%Y%m%d-%H%M%S")
+            raw_img_name = f"{img_timestamp}-{status}-raw.jpg"
+            processed_img_name = f"{img_timestamp}-{status}-processed.jpg"
             processed_frame = utils.ImageProcessing.add_markings_to_image(
                 edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
             )
-            cv.imwrite(os.path.join(IMG_DIR, raw_image_name), frame)
-            cv.imwrite(os.path.join(IMG_DIR, processed_image_name), processed_frame)
+            img_directory_path = os.path.join(IMG_DIR, now.strftime("%Y%m%d"))
+            if not os.path.exists(img_directory_path):
+                os.mkdir(img_directory_path)
+            cv.imwrite(os.path.join(img_directory_path, raw_img_name), frame)
+            cv.imwrite(os.path.join(img_directory_path, processed_img_name), processed_frame)
 
         return status
 
