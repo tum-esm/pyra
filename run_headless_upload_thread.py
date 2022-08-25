@@ -1,5 +1,4 @@
-from packages.core import interfaces, threads
+from packages.core import threads
 
 if __name__ == "__main__":
-    config = interfaces.ConfigInterface.read()
-    threads.UploadThread(config).main(headless=True)
+    threads.UploadThread.main(headless=True)

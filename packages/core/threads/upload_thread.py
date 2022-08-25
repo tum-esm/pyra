@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import shutil
+import threading
 from typing import Optional
 import invoke
 import paramiko
@@ -11,7 +12,6 @@ import fabric.connection, fabric.transfer
 import re
 import pydantic
 from packages.core import types, utils, interfaces
-from .abstract_thread_base import AbstractThreadBase
 
 logger = utils.Logger(origin="upload")
 
@@ -268,7 +268,7 @@ class DirectoryUploadClient:
         )
 
 
-class UploadThread(AbstractThreadBase):
+class UploadThread:
     """
     Thread for uploading all interferograms from a specific
     directory to a server via SSH. The local files will only
@@ -305,16 +305,39 @@ class UploadThread(AbstractThreadBase):
     This function only does one loop in headless mode.
     """
 
-    def __init__(self, config: types.ConfigDict) -> None:
-        super().__init__(config, "upload")
+    def __init__(self, config: types.ConfigDict, logger_origin: str) -> None:
+        self.__thread: Optional[threading.Thread] = None
+        self.__logger: utils.Logger = utils.Logger(origin=logger_origin)
+        self.config: types.ConfigDict = config
 
-    def should_be_running(self) -> bool:
+    def update_thread_state(self, new_config: types.ConfigDict) -> None:
+        """
+        Make sure that the thread loop is (not) running,
+        based on config.upload
+        """
+        self.config = new_config
+        should_be_running = UploadThread.should_be_running(self.config)
+        is_running = self.__thread.is_alive()
+        is_teared_down = self.__thread is not None
+
+        if should_be_running:
+            if not is_running:
+                self.__logger.info("Starting the thread")
+                self.__thread = threading.Thread(target=UploadThread.main)
+                self.__thread.start()
+        else:
+            if (not is_running) and (not is_teared_down):
+                self.__logger.info("Thread has stopped")
+                self.__thread.join()
+                self.__thread = None
+
+    @staticmethod
+    def should_be_running(config: types.ConfigDict) -> bool:
         """Should the thread be running? (based on config.upload)"""
-        return (not self.config["general"]["test_mode"]) and (
-            self.config["upload"] is not None
-        )
+        return (not config["general"]["test_mode"]) and (config["upload"] is not None)
 
-    def main(self, headless: bool = False) -> None:
+    @staticmethod
+    def main(headless: bool = False) -> None:
         """
         Main entrypoint of the thread
 
@@ -325,9 +348,9 @@ class UploadThread(AbstractThreadBase):
             logger = utils.Logger(origin="upload", just_print=True)
 
         while True:
-            self.config = interfaces.ConfigInterface.read()
-            upload_config = self.config["upload"]
-            if not self.should_be_running() or upload_config is None:
+            config = interfaces.ConfigInterface.read()
+            upload_config = config["upload"]
+            if not UploadThread.should_be_running() or upload_config is None:
                 break
 
             try:
@@ -380,7 +403,7 @@ class UploadThread(AbstractThreadBase):
                 )
                 for date_string in src_date_strings:
                     # check for termination before processing each directory
-                    if not self.should_be_running():
+                    if not UploadThread.should_be_running(config):
                         break
 
                     try:
