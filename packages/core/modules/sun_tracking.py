@@ -175,7 +175,7 @@ class SunTracking:
             raise AssertionError(f'invalid last logfile line "{last_line}"')
 
         # convert julian day to greg calendar as tuple (Year, Month, Day)
-        jddate = jdcal.jd2gcal(float(last_line[0]), 0)[:3]
+        jddate = jdcal.jd2gcal(float_values[0], 0)[:3]
 
         # assert that the log file is up-to-date
         now = datetime.datetime.now()
