@@ -18,6 +18,7 @@ jdcal = "1.4.1"
 psutil = "5.9.1"
 fabric = "^2.7.1"
 pydantic = "^1.9.2"
+tqdm = "^4.64.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "7.1.2"
