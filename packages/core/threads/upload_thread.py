@@ -318,22 +318,17 @@ class UploadThread:
         """
         self.config = new_config
         should_be_running = UploadThread.should_be_running(self.config)
-        thread_is_running = self.__thread.is_alive()
 
-        if should_be_running and (not thread_is_running):
+        if should_be_running and (not self.__thread.is_alive()):
             self.__logger.info("Starting the thread")
             self.__thread.start()
 
         # set up a new thread instance for the next time the thread should start
-        if (
-            (not should_be_running)
-            and (not thread_is_running)
-            and (not self.has_been_teared_down)
-        ):
-            self.__logger.info("Thread has stopped")
+        if (not self.__thread.is_alive()) and (not self.has_been_teared_down):
             self.__thread.join()
             self.has_been_teared_down = True
             self.__thread = threading.Thread(target=UploadThread.main)
+            self.__logger.info("Thread has stopped")
 
     @staticmethod
     def should_be_running(config: types.ConfigDict) -> bool:
