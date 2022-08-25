@@ -204,22 +204,17 @@ class DirectoryUploadClient:
 
         # upload every file that is missing in the remote
         # meta but present in the local directory
-        while True:
-            try:
-                f = files_missing_in_dst.pop()  # raises a KeyError when empty
-                self.transfer_process.put(
-                    os.path.join(self.src_path, self.date_string, f),
-                    f"{self.dst_path}/{self.date_string}/{f}",
-                )
-                # update the local meta in every loop, but only
-                # sync the remote meta every 25 iterations
-                new_file_list = [*self.meta_content["fileList"], f]
-                self.__update_meta(
-                    update={"fileList": new_file_list},
-                    sync_remote_meta=(len(new_file_list) % 25 == 0),
-                )
-            except KeyError:
-                break
+        for i, f in enumerate(sorted(files_missing_in_dst)):
+            self.transfer_process.put(
+                os.path.join(self.src_path, self.date_string, f),
+                f"{self.dst_path}/{self.date_string}/{f}",
+            )
+            # update the local meta in every loop, but only
+            # sync the remote meta every 25 iterations
+            self.__update_meta(
+                update={"fileList": [*self.meta_content["fileList"], f]},
+                sync_remote_meta=(i % 25 == 0),
+            )
 
         # make sure that the remote meta is synced
         self.__update_meta()
