@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-img_pattern = re.compile("^\d{8}\-\d{6}\.jpg$")
+img_pattern = re.compile("^\d{8}\-\d{6}\-(0|1|\-1)\-(raw|processed)\.jpg$")
 for img_name in tqdm(os.listdir(os.path.join(PROJECT_DIR, "logs", "vbdsd"))):
     if not img_pattern.match(img_name):
         continue
