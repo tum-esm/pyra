@@ -118,7 +118,7 @@ def test_upload(original_config, populated_upload_test_directories, fabric_conne
     config["general"]["test_mode"] = False
     config["upload"] = upload_config
     with open(os.path.join(PROJECT_DIR, "config", "config.json"), "w") as f:
-        json.dump(config, f)
+        json.dump(config, f, indent=4)
 
     checksums = {
         "local-1": {
@@ -154,7 +154,7 @@ def test_upload(original_config, populated_upload_test_directories, fabric_conne
     config["upload"]["remove_src_ifgs_after_upload"] = True
     config["upload"]["remove_src_helios_after_upload"] = True
     with open(os.path.join(PROJECT_DIR, "config", "config.json"), "w") as f:
-        json.dump(config, f)
+        json.dump(config, f, indent=4)
 
     threads.UploadThread(config).main(headless=True)
 

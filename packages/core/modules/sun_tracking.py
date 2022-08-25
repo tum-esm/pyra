@@ -67,7 +67,7 @@ class SunTracking:
         # shutdown CamTracker. Will be restarted in next run() cycle.
         # is only considered if tracking is already up for at least 5 minutes.
         if not self.ct_application_running():
-            logger.debug("CamTracker is no running")
+            logger.debug("CamTracker is not running")
             return
 
         if (time.time() - self.last_start_time) < 300:
@@ -81,7 +81,7 @@ class SunTracking:
             logger.debug("CamTracker motor position is valid.")
         else:
             logger.info("CamTracker motor position is over threshold.")
-            logger.info("Stop CamTracker. Preparing for reinitialization.")
+            logger.info("Stopping CamTracker. Preparing for reinitialization.")
             self.stop_sun_tracking_automation()
 
     def ct_application_running(self) -> bool:

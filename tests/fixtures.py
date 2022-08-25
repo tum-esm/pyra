@@ -187,7 +187,7 @@ def popuplate_upload_test_directory(dir_path: str) -> list[str]:
     try:
         date_strings = []
         for _ in range(5):
-            year = random.randint(2000, 2022)
+            year = random.randint(2000, 2021)
             month = random.randint(1, 12)
             day = random.randint(1, 28)
             date_string = f"{year}{str(month).zfill(2)}{str(day).zfill(2)}"

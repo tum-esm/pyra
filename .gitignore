@@ -33,8 +33,9 @@ runtime-data/
 pyra-core-process-state.json
 logs/persistent-state.json
 logs/activity/*.json
-logs/vbdsd/*.jpg
-logs/vbdsd-autoexposure/*.jpg
+logs/**/*.jpg
+!logs/helios/.gitkeep
+logs/helios/*
 
 # pyra ui
 packages/electron-ui/node_modules/
