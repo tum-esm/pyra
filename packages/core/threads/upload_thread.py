@@ -305,10 +305,11 @@ class UploadThread:
     This function only does one loop in headless mode.
     """
 
-    def __init__(self, config: types.ConfigDict, logger_origin: str) -> None:
-        self.__thread: Optional[threading.Thread] = None
-        self.__logger: utils.Logger = utils.Logger(origin=logger_origin)
+    def __init__(self, config: types.ConfigDict) -> None:
+        self.__thread = threading.Thread(target=UploadThread.main)
+        self.__logger: utils.Logger = utils.Logger(origin="upload")
         self.config: types.ConfigDict = config
+        self.has_been_teared_down = True
 
     def update_thread_state(self, new_config: types.ConfigDict) -> None:
         """
@@ -317,19 +318,22 @@ class UploadThread:
         """
         self.config = new_config
         should_be_running = UploadThread.should_be_running(self.config)
-        is_running = self.__thread.is_alive()
-        is_teared_down = self.__thread is not None
+        thread_is_running = self.__thread.is_alive()
 
-        if should_be_running:
-            if not is_running:
-                self.__logger.info("Starting the thread")
-                self.__thread = threading.Thread(target=UploadThread.main)
-                self.__thread.start()
-        else:
-            if (not is_running) and (not is_teared_down):
-                self.__logger.info("Thread has stopped")
-                self.__thread.join()
-                self.__thread = None
+        if should_be_running and (not thread_is_running):
+            self.__logger.info("Starting the thread")
+            self.__thread.start()
+
+        # set up a new thread instance for the next time the thread should start
+        if (
+            (not should_be_running)
+            and (not thread_is_running)
+            and (not self.has_been_teared_down)
+        ):
+            self.__logger.info("Thread has stopped")
+            self.__thread.join()
+            self.has_been_teared_down = True
+            self.__thread = threading.Thread(target=UploadThread.main)
 
     @staticmethod
     def should_be_running(config: types.ConfigDict) -> bool:
@@ -350,7 +354,7 @@ class UploadThread:
         while True:
             config = interfaces.ConfigInterface.read()
             upload_config = config["upload"]
-            if not UploadThread.should_be_running() or upload_config is None:
+            if not UploadThread.should_be_running(config) or upload_config is None:
                 break
 
             try:
