@@ -15,10 +15,6 @@ sys.path.append(PROJECT_DIR)
 
 from packages.core import threads
 
-# TODO: in headless-upload mode, do not loop infinitely
-# TODO: test without removal (+ rerunning)
-# TODO: test with removal
-
 # 1. Before upload, create a dst dir that does not
 #    exist on the remote dir
 # 2. After upload, download dst dir and compare to

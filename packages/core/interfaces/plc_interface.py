@@ -134,10 +134,10 @@ class PLCInterface:
         start_time = time.time()
 
         while True:
-            try:
-                if (time.time() - start_time) > 30:
-                    raise Snap7Exception("Connect to PLC timed out.")
+            if (time.time() - start_time) > 30:
+                raise Snap7Exception("Connect to PLC timed out.")
 
+            try:
                 self.plc.connect(self.plc_ip, 0, 1)
                 time.sleep(0.2)
 
