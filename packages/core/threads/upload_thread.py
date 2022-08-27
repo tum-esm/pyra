@@ -444,11 +444,13 @@ class UploadThread:
                 if headless:
                     break
 
-                # Close SSH connections and wait 10 minutes
-                # before checking all directories again
-                logger.debug("Finished iteration, sleeping 10 minutes")
+                # Close SSH and SCP connections
                 connection.close()
-                time.sleep(600)
+
+                if not restart_mainloop:
+                    # Wait 10 minutes before checking all directories again
+                    logger.debug("Finished iteration, sleeping 10 minutes")
+                    time.sleep(600)
             except Exception as e:
                 logger.error("Error inside upload thread")
                 logger.exception(e)
