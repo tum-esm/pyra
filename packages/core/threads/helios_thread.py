@@ -292,8 +292,7 @@ class HeliosThread:
         self.__thread = threading.Thread(target=HeliosThread.main)
         self.__logger: utils.Logger = utils.Logger(origin="helios")
         self.config: types.ConfigDict = config
-        self.has_been_started = False
-        self.has_been_teared_down = True
+        self.is_initialized = False
 
     def update_thread_state(self, new_config: types.ConfigDict) -> None:
         """
@@ -303,19 +302,20 @@ class HeliosThread:
         self.config = new_config
         should_be_running = HeliosThread.should_be_running(self.config)
 
-        if should_be_running and (not self.__thread.is_alive()):
+        if should_be_running and (not self.is_initialized):
             self.__logger.info("Starting the thread")
-            self.has_been_teared_down = False
-            self.has_been_started = True
+            self.is_initialized = True
             self.__thread.start()
 
         # set up a new thread instance for the next time the thread should start
-        if (not self.__thread.is_alive()) and (not self.has_been_teared_down):
-            self.__thread.join()
-            self.has_been_teared_down = True
-            self.has_been_started = False
-            self.__thread = threading.Thread(target=HeliosThread.main)
-            self.__logger.info("Thread has stopped")
+        if self.is_initialized:
+            if self.__thread.is_alive():
+                self.__logger.debug("Thread is alive")
+            else:
+                self.__logger.debug("Thread is not alive, running teardown")
+                self.__thread.join()
+                self.__thread = threading.Thread(target=HeliosThread.main)
+                self.is_initialized = False
 
     @staticmethod
     def should_be_running(config: types.ConfigDict) -> bool:

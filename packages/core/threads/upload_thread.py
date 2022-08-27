@@ -304,8 +304,7 @@ class UploadThread:
         self.__thread = threading.Thread(target=UploadThread.main)
         self.__logger: utils.Logger = utils.Logger(origin="upload")
         self.config: types.ConfigDict = config
-        self.has_been_started = False
-        self.has_been_teared_down = True
+        self.is_initialized = False
 
     def update_thread_state(self, new_config: types.ConfigDict) -> None:
         """
@@ -317,19 +316,20 @@ class UploadThread:
             not new_config["general"]["test_mode"]
         )
 
-        if should_be_running and (not self.__thread.is_alive()):
+        if should_be_running and (not self.is_initialized):
             self.__logger.info("Starting the thread")
-            self.has_been_teared_down = False
-            self.has_been_started = True
+            self.is_initialized = True
             self.__thread.start()
 
         # set up a new thread instance for the next time the thread should start
-        if (not self.__thread.is_alive()) and (not self.has_been_teared_down):
-            self.__thread.join()
-            self.has_been_teared_down = True
-            self.has_been_started = False
-            self.__thread = threading.Thread(target=UploadThread.main)
-            self.__logger.info("Thread has stopped")
+        if self.is_initialized:
+            if self.__thread.is_alive():
+                self.__logger.debug("Thread is alive")
+            else:
+                self.__logger.debug("Thread is not alive, running teardown")
+                self.__thread.join()
+                self.__thread = threading.Thread(target=UploadThread.main)
+                self.is_initialized = False
 
     @staticmethod
     def main(headless: bool = False) -> None:
@@ -338,6 +338,7 @@ class UploadThread:
 
         headless mode = don't write to log files, print to console
         """
+        global logger
 
         if headless:
             logger = utils.Logger(origin="upload", just_print=True)
@@ -405,6 +406,7 @@ class UploadThread:
                         src_path
                     )
                     for date_string in src_date_strings:
+                        logger.debug("loading config")
                         new_config = interfaces.ConfigInterface.read()
                         new_upload_config = new_config["upload"]
 
@@ -444,6 +446,7 @@ class UploadThread:
 
                 # Close SSH connections and wait 10 minutes
                 # before checking all directories again
+                logger.debug("Finished iteration, sleeping 10 minutes")
                 connection.close()
                 time.sleep(600)
             except Exception as e:
