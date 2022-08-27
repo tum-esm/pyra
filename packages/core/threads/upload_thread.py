@@ -230,14 +230,14 @@ class DirectoryUploadClient:
 
         # only set meta.complete to True, when the checksums match
         self.__update_meta(update={"complete": True})
-        logger.debug(f"successfully uploaded {self.date_string}")
+        logger.info(f"Successfully uploaded {self.date_string}")
 
         # only remove src if configured and checksums match
         if self.remove_files_after_upload:
             shutil.rmtree(os.path.join(self.src_path, self.date_string))
-            logger.debug("successfully removed source")
+            logger.debug("Successfully removed source")
         else:
-            logger.debug("skipping removal of source")
+            logger.debug("Skipping removal of source")
 
     @staticmethod
     def __is_valid_date(date_string: str) -> bool:
@@ -406,7 +406,6 @@ class UploadThread:
                         src_path
                     )
                     for date_string in src_date_strings:
-                        logger.debug("loading config")
                         new_config = interfaces.ConfigInterface.read()
                         new_upload_config = new_config["upload"]
 
@@ -421,13 +420,12 @@ class UploadThread:
                                 for key in upload_config.keys()
                             ]
                         ):
-                            logger.info("a change in the upload config has been detected")
-                            restart_mainloop = (
-                                True  # this stops the out loop (over [ifg, helios])
-                            )
-                            break  # this stops the inner loop (over dates)
+                            logger.info("Change in config.upload has been detected")
+                            restart_mainloop = True  # stops outer loop (ifg, helios)
+                            break  # stops inner loop (ifg-/helios-dates)
 
                         try:
+                            logger.info(f"Starting to process {date_string}")
                             DirectoryUploadClient(
                                 date_string,
                                 src_path,
