@@ -344,8 +344,11 @@ class UploadThread:
         while True:
             config = interfaces.ConfigInterface.read()
             upload_config = config["upload"]
-            if not UploadThread.should_be_running(config) or upload_config is None:
-                break
+            logger.info("Starting iteration, loading new config")
+
+            if (upload_config is None) or config["general"]["test_mode"]:
+                logger.info("Ending mainloop")
+                return
 
             try:
                 connection = fabric.connection.Connection(
@@ -367,7 +370,11 @@ class UploadThread:
                 time.sleep(120)
                 continue
 
+            restart_mainloop = False
             for category in ["helios", "ifgs"]:
+                if restart_mainloop:
+                    break
+
                 if category == "helios":
                     if upload_config["upload_helios"]:
                         src_path = os.path.join(PROJECT_DIR, "logs", "helios")
@@ -396,9 +403,23 @@ class UploadThread:
                     src_path
                 )
                 for date_string in src_date_strings:
+                    new_config = interfaces.ConfigInterface.read()
+                    new_upload_config = new_config["upload"]
+
                     # check for termination before processing each directory
-                    if not UploadThread.should_be_running(config):
-                        break
+                    if (new_upload_config is None) or new_config["general"]["test_mode"]:
+                        return
+
+                    # if the config changes, the mainloop should start over
+                    if any(
+                        [
+                            upload_config[key] != new_upload_config[key]  # type: ignore
+                            for key in upload_config.keys()
+                        ]
+                    ):
+                        logger.info("a change in the upload config has been detected")
+                        restart_mainloop = True  # this stops the out loop (over [ifg, helios])
+                        break  # this stops the inner loop (over dates)
 
                     try:
                         DirectoryUploadClient(
