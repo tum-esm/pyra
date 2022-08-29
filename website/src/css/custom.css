@@ -6,19 +6,15 @@
 
 /* You can override the default Infima variables here. */
 :root {
-    --ifm-color-primary-lightest: #99f6e4; /* teal-200 */
-    --ifm-color-primary-lighter: #5eead4; /* teal-300 */
-    --ifm-color-primary-light: #2dd4bf; /* teal-400 */
-    --ifm-color-primary: #14b8a6; /* teal-500 */
-    --ifm-color-primary-dark: #0d9488; /* teal-600 */
-    --ifm-color-primary-darker: #0f766e; /* teal-700 */
-    --ifm-color-primary-darkest: #115e59; /* teal-800 */
+    --ifm-color-primary-lightest: #fcd34d; /* amber-300 */
+    --ifm-color-primary-lighter: #fbbf24; /* amber-400 */
+    --ifm-color-primary-light: #f59e0b; /* amber-500 */
+    --ifm-color-primary: #d97706; /* amber-600 */
+    --ifm-color-primary-dark: #b45309; /* amber-700 */
+    --ifm-color-primary-darker: #92400e; /* amber-800 */
+    --ifm-color-primary-darkest: #78350f; /* amber-900 */
 
-    --ifm-footer-background-color: #0f172a;
-    --ifm-footer-color: white;
-    --ifm-footer-padding-vertical: 1.5rem;
-
-    --ifm-link-color: #0d9488; /* teal-600 */
+    --ifm-link-color: #b45309; /* amber-700 */
     --ifm-font-size-base: 1.25rem;
     --ifm-line-height-base: 1.4rem;
 }

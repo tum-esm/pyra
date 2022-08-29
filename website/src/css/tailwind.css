@@ -1,2 +1,29 @@
 @tailwind components;
 @tailwind utilities;
+
+h1 {
+    @apply tw-text-4xl !tw-mt-0 !tw-mb-4;
+}
+
+h2 {
+    @apply tw-text-3xl !tw-mt-0 !tw-mb-3;
+}
+
+h3 {
+    @apply tw-text-2xl !tw-mt-0 !tw-mb-2;
+}
+
+h1,
+h2,
+h3,
+p {
+    @apply tw-text-gray-800;
+}
+
+.footer--dark {
+    --ifm-footer-background-color: #0b111f; /* slate-950 */
+    --ifm-footer-color: white;
+    --ifm-footer-padding-vertical: 1rem;
+
+    @apply tw-text-sm tw-font-normal;
+}
