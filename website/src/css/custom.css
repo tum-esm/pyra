@@ -96,3 +96,7 @@ article .col:nth-child(odd) {
 article .col:nth-child(even) {
     @apply !tw-pl-2;
 }
+
+article .row article {
+    @apply !tw-mb-4 !tw-py-0;
+}
