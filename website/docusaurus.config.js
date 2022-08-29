@@ -60,8 +60,9 @@ const config = {
                 items: [
                     {
                         href: 'https://github.com/tum-esm/pyra',
-                        label: 'GitHub',
                         position: 'right',
+                        className: 'header-github-link',
+                        ariaLabel: 'GitHub repository',
                     },
                 ],
             },
