@@ -55,7 +55,7 @@ const config = {
                 respectPrefersColorScheme: false,
             },
             navbar: {
-                title: 'PYRA 4 Documentation',
+                title: 'PYRA 4',
                 logo: {
                     alt: 'PYRA 4 Logo',
                     src: 'img/logo.svg',

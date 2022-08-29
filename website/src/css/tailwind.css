@@ -9,8 +9,12 @@ h2 {
     @apply tw-text-3xl !tw-mt-0 !tw-mb-3;
 }
 
+h2:not(:first-of-type) {
+    @apply !tw-mt-10;
+}
+
 h3 {
-    @apply tw-text-2xl !tw-mt-0 !tw-mb-2;
+    @apply tw-text-2xl !tw-mt-6 !tw-mb-2;
 }
 
 h1,
