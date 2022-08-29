@@ -8,6 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
     title: 'PYRA 4',
     tagline: 'operate an EM27 station autonomously',
+    staticDirectories: ['static'],
     url: 'https://your-docusaurus-test-site.com',
     baseUrl: '/',
     onBrokenLinks: 'throw',
