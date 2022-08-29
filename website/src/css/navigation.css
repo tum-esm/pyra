@@ -1,28 +1,3 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
-
-/* You can override the default Infima variables here. */
-:root {
-    --ifm-color-primary-lightest: #84c5f4; /* blue-200 */
-    --ifm-color-primary-lighter: #62b0e8; /* blue-300 */
-    --ifm-color-primary-light: #4098d7; /* blue-400 */
-    --ifm-color-primary: #2680c2; /* blue-500 */
-    --ifm-color-primary-dark: #186faf; /* blue-600 */
-    --ifm-color-primary-darker: #0f609b; /* blue-700 */
-    --ifm-color-primary-darkest: #0a558c; /* blue-800 */
-
-    --ifm-link-color: #186faf; /* blue-600 */
-    --ifm-font-size-base: 1.2rem;
-    --ifm-line-height-base: 1.5rem;
-
-    --ifm-transition-fast: 100ms;
-
-    --ifm-spacing-horizontal: 1rem;
-}
-
 .header-github-link:hover {
     opacity: 0.6;
 }
@@ -99,4 +74,20 @@ article .col:nth-child(even) {
 
 article .row article {
     @apply !tw-mb-4 !tw-py-0;
+}
+
+.footer--dark {
+    --ifm-footer-background-color: #0b111f; /* slate-950 */
+    --ifm-footer-color: white;
+    --ifm-footer-padding-vertical: 1rem;
+
+    @apply tw-text-sm tw-font-normal;
+}
+
+.theme-doc-footer-edit-meta-row {
+    @apply tw-text-xs tw-font-medium tw-underline;
+}
+
+.theme-doc-footer-edit-meta-row svg {
+    @apply tw-hidden;
 }

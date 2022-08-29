@@ -1,0 +1,44 @@
+.theme-admonition {
+    @apply tw-rounded tw-shadow-none tw-border-0;
+}
+
+.theme-admonition-note,
+.theme-admonition-note p {
+    @apply tw-bg-gray-150 tw-text-gray-800;
+}
+
+.theme-admonition-note svg {
+    @apply !tw-fill-gray-500;
+}
+
+.theme-admonition-tip,
+.theme-admonition-tip p {
+    @apply tw-bg-green-200 tw-text-green-900;
+}
+.theme-admonition-tip svg {
+    @apply !tw-fill-green-500;
+}
+
+.theme-admonition-info,
+.theme-admonition-info p {
+    @apply tw-bg-blue-150 tw-text-blue-900;
+}
+.theme-admonition-info svg {
+    @apply !tw-fill-blue-500;
+}
+
+.theme-admonition-caution,
+.theme-admonition-caution p {
+    @apply tw-bg-amber-200 tw-text-amber-900;
+}
+.theme-admonition-caution svg {
+    @apply !tw-fill-amber-500;
+}
+
+.theme-admonition-danger,
+.theme-admonition-danger p {
+    @apply tw-bg-red-200 tw-text-red-900;
+}
+.theme-admonition-danger svg {
+    @apply !tw-fill-red-500;
+}
