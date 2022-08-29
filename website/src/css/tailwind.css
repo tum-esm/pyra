@@ -31,3 +31,11 @@ p {
 
     @apply tw-text-sm tw-font-normal;
 }
+
+.theme-doc-footer-edit-meta-row {
+    @apply tw-text-xs tw-font-medium tw-underline;
+}
+
+.theme-doc-footer-edit-meta-row svg {
+    @apply tw-hidden;
+}

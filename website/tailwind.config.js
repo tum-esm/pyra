@@ -23,8 +23,22 @@ const customColors = {
 
     red: colors.red,
     green: colors.green,
-    blue: colors.blue,
     yellow: colors.yellow,
+
+    blue: {
+        50: '#DCEEFB',
+        75: '#c9e7fc',
+        100: '#B6E0FE',
+        150: '#9DD2F9',
+        200: '#84C5F4',
+        300: '#62B0E8',
+        400: '#4098D7',
+        500: '#2680C2',
+        600: '#186FAF',
+        700: '#0F609B',
+        800: '#0A558C',
+        900: '#003E6B',
+    },
 
     teal: {
         50: '#f0fdfa',
