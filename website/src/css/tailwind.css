@@ -20,6 +20,10 @@ p {
     @apply tw-text-gray-800;
 }
 
+p {
+    @apply tw-text-justify;
+}
+
 .footer--dark {
     --ifm-footer-background-color: #0b111f; /* slate-950 */
     --ifm-footer-color: white;
