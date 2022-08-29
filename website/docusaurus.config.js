@@ -37,7 +37,10 @@ const config = {
                         'https://github.com/tum-esm/pyra/tree/main/website/',
                 },
                 theme: {
-                    customCss: require.resolve('./src/css/custom.css'),
+                    customCss: [
+                        require.resolve('./src/css/custom.css'),
+                        require.resolve('./src/css/tailwind.css'),
+                    ],
                 },
             }),
         ],
@@ -56,6 +59,8 @@ const config = {
                 logo: {
                     alt: 'PYRA 4 Logo',
                     src: 'img/logo.svg',
+                    width: 32,
+                    height: 32,
                 },
                 items: [
                     {
