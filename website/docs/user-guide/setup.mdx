@@ -5,11 +5,48 @@ sidebar_label: Setup
 
 # Hot to set it up
 
-TODO: Software dependencies
-TODO: PYRA Setup tool
-TODO: Directory structure
-TODO: INFO about release numbers
-TODO: pyra-cli config
+## Software Requirements
+
+**1. OPUS and CamTracker**
+
+We are using OPUS 7.8.44 and Camtracker 3.9.2015.02.03.
+
+**2. Python 3.10**
+
+https://www.python.org/
+
+Add environment variables to point the `python` command (and `pip`) to the Python3.10 interpreter.
+
+TODO
+
+<!--
+Search “Edit the system environment variables” -> Environment Variables -> System variables -> Edit PATH for new Python 3.10
+C:\Users\username\AppData\Local\Programs\Python\Launcher
+
+Add pip from python/scripts also to the Environment Variables
+-->
+
+:::note
+
+Your might not be allowed to executed `.ps1` script due to your ExecutionPolicy. This can be circumvented with the following command (credits to https://stackoverflow.com/a/49112322/8255842):
+
+```bash
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+```
+
+:::
+
+**3. Install Poetry**
+
+https://python-poetry.org/
+
+**4. GitHub CLI**
+
+https://cli.github.com/
+
+## PYRA Setup Tool & Directory Structure
+
+The **PYRA Setup Tool** can be used to install and migrate between PYRA versions. The tool looks for the "Documents" directory on your system and generates a directory structure like this:
 
 ```
 📁 <DOCUMENTS DIR>
@@ -19,8 +56,28 @@ TODO: pyra-cli config
         📁 ...
 ```
 
-:::caution
+The installation steps this tool automates:
 
-Please only use the releases starting with `4.0.5`. The ones before are alpha and beta releases that have bugs and inconsistencies.
+1. Downloads each releases codebaee
+2. Installs all python dependencies into the global python interpreter environment
+3. Downloads and runs the installer (manual steps required)
+4. Creates desktop shortcuts to the `pyra-x.y.z` directory
+5. (Optional) Migrates the `config.json` file (so that all settings do not have to be reentered with every upgrade)
 
-:::
+The tool can be found here: https://github.com/tum-esm/pyra-setup-tool
+
+## Releases
+
+All PYRA releases can be found here: https://github.com/tum-esm/pyra/releases. Please only use the releases starting with `4.0.5`. The ones before are alpha and beta releases that have bugs and inconsistencies.
+
+## PYRA CLI Setup
+
+TODO: Add `<DOCUMENTS DIR>/pyra/pyra-cli.bat` alias to path variables
+
+## Error Email Setup
+
+TODO
+
+<!--With Gmail accounts, "Less Secure Apps" have been deactivated. https://support.google.com/accounts/answer/6010255?hl=de&visit_id=637914296292859831-802637670&p=less-secure-apps&rd=1
+
+Solution: Use "App passwords", which require 2FA-->
