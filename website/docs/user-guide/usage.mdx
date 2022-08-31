@@ -88,7 +88,189 @@ In the configuration tab you can select measurement triggers that should be cons
 
 ## Command Line Interface (CLI)
 
-TODO: list of cli commands
+### Help Menu
+
+Top level help menu:
+
+```bash
+pyra-cli --help
+# Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...
+#
+# Options:
+#   --help  Show this message and exit.
+#
+# Commands:
+#   config
+#   core
+#   logs
+#   plc
+#   remove-filelocks  Remove all filelocks.
+#   state
+```
+
+Help menu of individual command groups:
+
+```bash
+pyra-cli config --help
+# Usage: pyra-cli config [OPTIONS] COMMAND [ARGS]...
+#
+# Options:
+#   --help  Show this message and exit.
+#
+# Commands:
+#   get       Read the current config.json file.
+#   update    Set the config.json file.
+#   validate  Validate the current config.json file.
+```
+
+Help menu of individual commands:
+
+```bash
+pyra-cli config update --help
+# Usage: pyra-cli config update [OPTIONS] [CONTENT]
+#
+#   Set config. Pass the JSON directly or via a file path. Only a subset of the
+#   required config variables has to be passed. The non-occuring values will be
+#   reused from the current config.
+#
+#   The required schema can be found in the documentation.
+#
+# Options:
+#   --help  Show this message and exit.
+```
+
+### Config Update
+
+Running `pyra-cli config update "{\"general\":{\"seconds_per_core_interval\": 20}}"` will update the number of seconds pyra spends in one loop. The same command can be achieved in Python without all the escaping done manually:
+
+```python
+import json
+import os
+
+update = {
+    "seconds_per_core_interval": 20
+}
+
+cli_command = f"pyra-cli config update {json.dumps(update)}"
+```
+
+PYRA will validate the structure of the update and enforce some rules on the parameter values (value range, file exists, etc.)
+
+<img
+    src='/img/docs/cli-config-update-example.png'
+    className='tw-rounded tw-mb-4'
+/>
+
+### Config Validation Rules
+
+The expected schema (used in `/packages/ui/src/custom-types.ts`):
+
+```typescript
+export type config = {
+    general: {
+        seconds_per_core_interval: number;
+        test_mode: boolean;
+        station_id: string;
+        min_sun_elevation: number;
+    };
+    opus: {
+        em27_ip: string;
+        executable_path: string;
+        experiment_path: string;
+        macro_path: string;
+        username: string;
+        password: string;
+    };
+    camtracker: {
+        config_path: string;
+        executable_path: string;
+        learn_az_elev_path: string;
+        sun_intensity_path: string;
+        motor_offset_threshold: number;
+    };
+    error_email: {
+        sender_address: string;
+        sender_password: string;
+        notify_recipients: boolean;
+        recipients: string;
+    };
+    measurement_decision: {
+        mode: 'automatic' | 'manual' | 'cli';
+        manual_decision_result: boolean;
+        cli_decision_result: boolean;
+    };
+    measurement_triggers: {
+        consider_time: boolean;
+        consider_sun_elevation: boolean;
+        consider_helios: boolean;
+        start_time: { hour: number; minute: number; second: number };
+        stop_time: { hour: number; minute: number; second: number };
+        min_sun_elevation: number;
+    };
+    tum_plc: null | {
+        ip: string;
+        version: number;
+        controlled_by_user: boolean;
+    };
+    helios: null | {
+        camera_id: number;
+        evaluation_size: number;
+        seconds_per_interval: number;
+        measurement_threshold: number;
+        edge_detection_threshold: number;
+        save_images: boolean;
+    };
+    upload: null | {
+        host: string;
+        user: string;
+        password: string;
+        upload_ifgs: boolean;
+        src_directory_ifgs: string;
+        dst_directory_ifgs: string;
+        remove_src_ifgs_after_upload: boolean;
+        upload_helios: boolean;
+        dst_directory_helios: string;
+        remove_src_helios_after_upload: boolean;
+    };
+};
+```
+
+The value rules to be validated (used in `/packages/core/types/config.py`):
+
+```python
+assertions: list[Callable[[], None]] = [
+    lambda: assert_min_max("general.seconds_per_core_interval", 5, 600),
+    lambda: assert_min_max("general.min_sun_elevation", 0, 90),
+    lambda: assert_ip_address("opus.em27_ip"),
+    lambda: assert_file_path("opus.executable_path"),
+    lambda: assert_file_path("opus.experiment_path"),
+    lambda: assert_file_path("opus.macro_path"),
+    lambda: assert_file_path("camtracker.config_path"),
+    lambda: assert_file_path("camtracker.executable_path"),
+    lambda: assert_file_path("camtracker.learn_az_elev_path"),
+    lambda: assert_file_path("camtracker.sun_intensity_path"),
+    lambda: assert_min_max("camtracker.motor_offset_threshold", -360, 360),
+    lambda: assert_min_max("measurement_triggers.min_sun_elevation", 0, 90),
+    lambda: assert_min_max("measurement_triggers.start_time.hour", 0, 23),
+    lambda: assert_min_max("measurement_triggers.stop_time.hour", 0, 23),
+    lambda: assert_min_max("measurement_triggers.start_time.minute", 0, 59),
+    lambda: assert_min_max("measurement_triggers.stop_time.minute", 0, 59),
+    lambda: assert_min_max("measurement_triggers.start_time.second", 0, 59),
+    lambda: assert_min_max("measurement_triggers.stop_time.second", 0, 59),
+    lambda: assert_ip_address("tum_plc.ip"),
+    lambda: assert_min_max("helios.camera_id", 0, 999999),
+    lambda: assert_min_max("helios.evaluation_size", 1, 100),
+    lambda: assert_min_max("helios.seconds_per_interval", 5, 600),
+    lambda: assert_min_max("helios.measurement_threshold", 0.1, 1),
+    lambda: assert_ip_address("upload.host"),
+]
+```
+
+:::info
+
+With `pyra-cli config get` only the schema will be validated, not the value rules. This is because the GUI can deal with invalid values but not with an invalid schema.
+
+:::
 
 ## Error Emails
 
