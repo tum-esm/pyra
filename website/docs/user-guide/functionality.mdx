@@ -2,6 +2,14 @@
 sidebar_position: 1
 ---
 
+import Abbreviation from '@site/src/components/abbreviation';
+
 # Functionality
 
-Occaecat est duis esse pariatur. Dolor commodo excepteur duis magna culpa sint. Officia officia esse cupidatat reprehenderit veniam incididunt laborum ex. Ut cupidatat deserunt id excepteur quis velit amet sunt enim voluptate ad. Ad do cillum eiusmod ullamco est eiusmod ullamco dolore eiusmod consequat exercitation laborum voluptate. Fugiat incididunt dolor cupidatat officia incididunt ad labore excepteur dolore proident anim sunt. Commodo esse laborum sint cupidatat excepteur cillum.
+When doing measurements with an EM27/SUN, you need to run CamTracker - the software that tracks the sun position and operates the mirrors accordingly - and OPUS - the software that send commands to the EM27/SUN and collects the output data into interferogram-files.
+
+PYRA is able handle both interfaces to start and stop measurements activity. This can either be done manually (clicking a button in the <Abbreviation short='GUI' />), automatic, or via a <Abbreviation short='CLI' />-command.
+
+Based on certain conditions - time, sun angle, or sun condition (see "Helios") - PYRA decides whether to conduct measurements or not.
+
+Additionally, PYRA permanently logs, what it is doing and sends out emails when errors occur and when they have been resolved.
