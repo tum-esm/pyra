@@ -1,9 +1,13 @@
 import React from 'react';
 
-type ShortKey = 'GUI' | 'CLI';
+type ShortKey = 'GUI' | 'CLI' | 'CI' | 'API' | 'PLC' | 'JOSS';
 const translations: Record<ShortKey, string> = {
     GUI: 'Graphical User Interface',
     CLI: 'Command Line Interface',
+    CI: 'Continuous Integration',
+    API: 'Application Programming Interface',
+    PLC: 'Programmable Logic Controller',
+    JOSS: 'The Journal of Open Source Software',
 };
 
 export default function Abbreviation(props: { short: ShortKey }): JSX.Element {

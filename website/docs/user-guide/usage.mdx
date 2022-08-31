@@ -3,29 +3,68 @@ sidebar_position: 3
 sidebar_label: Usage
 ---
 
+import Abbreviation from '@site/src/components/abbreviation';
+
 # How to use it
 
 ## Parts of PYRA
 
-TODO: Mention Core, CLI and GUI
+The three parts of PYRA are:
 
-## GUI
+-   **PYRA Core:** Running in the background, looping over all automation steps infinitely in a defined interval.
+-   **PYRA CLI:** Command Line Interface (CLI) used to interact with PYRA Core
+-   **PYRA UI:** Graphical user Interface (GUI) used to interact with PYRA Core and send PYRA CLI commands
 
-TODO: GUI
-TODO: Mention reload Bug
+## PYRA Core
+
+For a description of how the core works, please read the [Developer Guide](/docs/category/developer-guide).
+
+## Graphical user Interface (GUI)
+
+The is how the GUI looks. The tab "PLC Controls" only appear when you have configured the [TUM PLC](/docs/user-guide/tum-plc-and-helios).
+
+<img src='/img/docs/overview-tab.png' className='tw-rounded-lg tw-mb-4' />
+
+When changes are made to the `config.json` file directly (not from the GUI), a popup will appear, telling you to reload the window:
+
+<img src='/img/docs/config-file-reload.png' className='tw-rounded-lg tw-mb-4' />
+
+:::note
+
+We are currently experiencing a Bug on some systems that the "config has changed, reload required" popup shows up when changes were made through the GUI. Also, the popup appears multiple times. This should be resolved in the future.
+
+The issue progress can be tracked here: https://github.com/tum-esm/pyra/issues/106
+
+:::
 
 ## Logs
 
-TODO: Screenshot from GUI
-TODO: Mention location where to find log files
+PYRA will store all of its activity in log files. The files `info.log` and `debug.log` will only contain logs from the past hour. Older log lines will be archived periodically to keep the main log files easy to parse.
+
+```
+📁 <DOCUMENTS DIR>
+    📁 pyra
+        📁 pyra-x.y.z
+            📁 logs
+                📄 info.log
+                📄 debug.log
+                📁 archive
+                    📄 YYYYMMDD-info.log
+                    📄 YYYYMMDD-debug.log
+                    📄 ...
+```
+
+Inside the logs tab the content from the log files will be fetched every 10 seconds. The debug level includes more information. The log-fetching can be paused (on the "live" button) for analyzing logs in detail. There is a button that opens the `pyra/pyra-x.y.z/logs` folder in the file explorer.
+
+<img src='/img/docs/logs-tab.png' className='tw-rounded-lg tw-mb-4' />
 
 ## Triggers
 
 TODO: GUI Screenshot
 TODO: Manual mode
-TODO:
+TODO: CLI mode
 
-## CLI
+## Command Line Interface (CLI)
 
 TODO: list of cli commands
 
@@ -33,18 +72,22 @@ TODO: list of cli commands
 
 Whenever PYRA encounters any errors, it sends out emails to a list of recipients. An "error resolved" email helps with self-resolving issues and team-communication - so that others get notified when one person fixed the problem.
 
-The "CoverError" below comes from the TUM PLC Module controlling our weather protection enclosure.
-
 **When errors occur:**
 
 <img
-    src='/img/docs/pyra-email-error-occured.png'
-    className='tw-mb-2 tw-rounded-lg'
+    src='/img/docs/email-error-occured.png'
+    className='tw-rounded-lg tw-mb-4'
 />
 
 **When errors are resolved:**
 
 <img
-    src='/img/docs/pyra-email-errors-resolved.png'
-    className='tw-mb-2 tw-rounded-lg'
+    src='/img/docs/email-errors-resolved.png'
+    className='tw-rounded-lg tw-mb-4'
 />
+
+:::note
+
+The "CoverError" comes from the TUM <Abbreviation short="PLC"/> Module controlling our weather protection enclosure.
+
+:::
