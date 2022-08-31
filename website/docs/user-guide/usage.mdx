@@ -58,11 +58,33 @@ Inside the logs tab the content from the log files will be fetched every 10 seco
 
 <img src='/img/docs/logs-tab.png' className='tw-rounded-lg tw-mb-4' />
 
-## Triggers
+## Measurement Modes and Triggers
 
-TODO: GUI Screenshot
-TODO: Manual mode
-TODO: CLI mode
+The **"measurement decision"** (whether measurements should run or not) depends on the **"measurement mode"**:
+
+-   **Automatic mode:** Measurement decision is made based on defined triggers (see below)
+-   **Manual mode:** A start/stop button for manual control
+-   **CLI mode:** The config contains a field, where the CLI can add a decision result
+
+:::tip
+
+You can use CLI mode when you already have build a system that evaluates measurements conditions and want to use PYRA for the rest of the operation. Respective CLI commands can be found in the [next section](#command-line-interface-cli).
+
+:::
+
+In the automation tab, PYRA's measurement mode can be selected.
+
+<img src='/img/docs/measurement-modes.png' className='tw-rounded-lg tw-mb-4' />
+
+In the configuration tab you can select measurement triggers that should be considered in automatic mode
+
+<img src='/img/docs/triggers-config.png' className='tw-rounded-lg tw-mb-4' />
+
+:::note
+
+**"Helios"** is our own module to determine whether direct sunlight (required by the EM27/SUN) is present or not. Read about it [here](/docs/user-guide/tum-plc-and-helios).
+
+:::
 
 ## Command Line Interface (CLI)
 

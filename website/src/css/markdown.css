@@ -24,3 +24,11 @@ p {
 p {
     @apply tw-text-justify;
 }
+
+.theme-code-block {
+    @apply !tw-shadow-none;
+}
+
+.theme-code-block pre {
+    @apply !tw-bg-gray-150;
+}
