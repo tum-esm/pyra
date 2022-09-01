@@ -2,13 +2,11 @@
 sidebar_position: 1
 ---
 
-import Abbreviation from '@site/src/components/abbreviation';
-
 # Functionality
 
 When doing measurements with an EM27/SUN, you need to run CamTracker - the software that tracks the sun position and operates the mirrors accordingly - and OPUS - the software that send commands to the EM27/SUN and collects the output data into interferogram-files.
 
-PYRA is able handle both interfaces to start and stop measurements activity. This can either be done manually (clicking a button in the <Abbreviation short='GUI' />), automatic, or via a <Abbreviation short='CLI' />-command.
+PYRA is able handle both interfaces to start and stop measurements activity. This can either be done manually (clicking a button in the GUI, automatic, or via a CLI-command.
 
 Based on certain conditions - time, sun angle, or sun condition (see "Helios") - PYRA decides whether to conduct measurements or not.
 
