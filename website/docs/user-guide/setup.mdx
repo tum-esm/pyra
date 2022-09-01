@@ -57,7 +57,7 @@ $ python --version
 Python 3.10.x
 ```
 
-If your `python` command doesn't resolve to the installed version, you can read into https://geek-university.com/add-python-to-the-windows-path/.
+If your `python` command doesn't resolve to the installed version, please look at the section ["Add Environment Paths"](#add-environment-paths) and add the path ".../Python310" and "Python310/Scripts" where you just installed Python.
 
 ### Install Poetry
 
@@ -95,6 +95,43 @@ The installation steps this tool automates:
 3. Downloads and runs the installer (manual steps required)
 4. Creates desktop shortcuts to the `pyra-x.y.z` directory
 5. (Optional) Migrates the `config.json` file (so that all settings do not have to be reentered with every upgrade)
+
+## PYRA CLI Command
+
+You need to actively tell Windows about the `pyra-cli` command. When using the installer, it will tell you which path to [add to the environment variables](#add-environment-paths) on every install process.
+
+<img
+    src='/img/docs/pyra-cli-path-request.png'
+    className='tw-rounded-lg tw-mb-4'
+/>
+
+## Add Environment Paths
+
+1. Look for the "Edit the system environment variables" utility
+
+<img
+    src='/img/docs/environment-path-manual-1.png'
+    className='tw-rounded-lg tw-mb-4'
+    style={{ maxWidth: 600 }}
+/>
+
+2. Click on "Environment Variables"
+
+<img
+    src='/img/docs/environment-path-manual-2.png'
+    className='tw-rounded-lg tw-mb-4'
+    style={{ maxWidth: 600 }}
+/>
+
+3. Select "PATH" in the system section and click on "Edit"
+
+<img
+    src='/img/docs/environment-path-manual-3.png'
+    className='tw-rounded-lg tw-mb-4'
+    style={{ maxWidth: 600 }}
+/>
+
+4. Add the required paths to the list
 
 ## Releases
 
