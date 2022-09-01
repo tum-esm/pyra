@@ -47,3 +47,5 @@ packages/ui/node_modules/
 .vscode/
 .idea
 hidden
+website/.docusaurus
+website/node_modules
