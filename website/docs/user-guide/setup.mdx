@@ -7,25 +7,6 @@ sidebar_label: Setup
 
 ## Software Requirements
 
-**1. OPUS and CamTracker**
-
-We are using OPUS 7.8.44 and Camtracker 3.9.2015.02.03.
-
-**2. Python 3.10**
-
-https://www.python.org/
-
-Add environment variables to point the `python` command (and `pip`) to the Python3.10 interpreter.
-
-TODO
-
-<!--
-Search “Edit the system environment variables” -> Environment Variables -> System variables -> Edit PATH for new Python 3.10
-C:\Users\username\AppData\Local\Programs\Python\Launcher
-
-Add pip from python/scripts also to the Environment Variables
--->
-
 :::note
 
 Your might not be allowed to executed `.ps1` script due to your ExecutionPolicy. This can be circumvented with the following command (credits to https://stackoverflow.com/a/49112322/8255842):
@@ -36,11 +17,53 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
 
 :::
 
-**3. Install Poetry**
+### OPUS and CamTracker
+
+We are using OPUS 7.8.44 and Camtracker 3.9.2015.02.03.
+
+### Python 3.10
+
+https://www.python.org/
+
+You want your python3.10 interpreter to be available under `python`. Therefore you need to add environment variables to point the `python` command (and `pip`) to the Python3.10 interpreter by checking the box marked in the image below.
+
+<img
+    src='/img/docs/python-310-path-automatic.png'
+    className='tw-rounded-lg tw-mb-4'
+    style={{ maxWidth: 600 }}
+/>
+
+<div className='tw-mb-2'>
+    <span className='tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5'>
+        Incomplete installation:
+    </span>
+</div>
+
+```
+$ python --version
+Python was not found; run without arguments to install
+from the Microsoft Store, or disable this shortcut from
+Settings > Manage App Execution Aliases.
+```
+
+<div className='tw-mb-2'>
+    <span className='tw-bg-green-200 tw-text-green-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5'>
+        Complete installation:
+    </span>
+</div>
+
+```
+$ python --version
+Python 3.10.x
+```
+
+If your `python` command doesn't resolve to the installed version, you can read into https://geek-university.com/add-python-to-the-windows-path/.
+
+### Install Poetry
 
 https://python-poetry.org/
 
-**4. GitHub CLI**
+### GitHub CLI
 
 https://cli.github.com/
 
@@ -56,6 +79,15 @@ The [**PYRA Setup Tool**](https://github.com/tum-esm/pyra-setup-tool) can be use
         📁 ...
 ```
 
+Download and run it with:
+
+```bash
+cd ~/Documents
+gh repo clone tum-esm/pyra-setup-tool
+cd pyra-setup-tool
+python run.py
+```
+
 The installation steps this tool automates:
 
 1. Downloads each releases codebase
@@ -64,15 +96,9 @@ The installation steps this tool automates:
 4. Creates desktop shortcuts to the `pyra-x.y.z` directory
 5. (Optional) Migrates the `config.json` file (so that all settings do not have to be reentered with every upgrade)
 
-The tool can be found here: https://github.com/tum-esm/pyra-setup-tool
-
 ## Releases
 
 All PYRA releases can be found here: https://github.com/tum-esm/pyra/releases. Please only use the releases starting with `4.0.5`. The ones before are alpha and beta releases that have bugs and inconsistencies.
-
-## PYRA CLI Setup
-
-TODO: Add `<DOCUMENTS DIR>/pyra/pyra-cli.bat` alias to path variables
 
 ## Error Email Setup
 
