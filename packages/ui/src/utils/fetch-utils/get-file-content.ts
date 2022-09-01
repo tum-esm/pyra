@@ -2,11 +2,12 @@ import { readTextFile } from '@tauri-apps/api/fs';
 import { BaseDirectory, join } from '@tauri-apps/api/path';
 
 async function getFileContent(filePath: string) {
-    let baseDir = BaseDirectory.Document;
-    let absoluteFilePath = await join('pyra-4', ...filePath.split('/'));
+    let baseDir: 7 | 8;
+    let absoluteFilePath: string;
     switch (import.meta.env.VITE_ENVIRONMENT) {
-        // on my personal machine
+        // on moritz personal machine
         case 'development-moritz':
+            baseDir = BaseDirectory.Document;
             absoluteFilePath = await join('research', 'pyra-4', ...filePath.split('/'));
             break;
 
@@ -14,6 +15,13 @@ async function getFileContent(filePath: string) {
         // hence, we cannot use that one since some script do not run there
         case 'development-R19':
             baseDir = BaseDirectory.Download;
+            absoluteFilePath = await join('pyra-4', ...filePath.split('/'));
+            break;
+
+        // on all other systems (no development of PYRA)
+        default:
+            baseDir = BaseDirectory.Document;
+            absoluteFilePath = await join('pyra', `pyra-${APP_VERSION}`, ...filePath.split('/'));
             break;
     }
     console.debug(`Reading file: "${absoluteFilePath}" in directory "${baseDir}"`);

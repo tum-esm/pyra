@@ -41,18 +41,10 @@
             "fs": {
                 "readFile": true,
                 "scope": [
-                    "$DOWNLOAD/*/pyra-4/logs/*",
-                    "$DOWNLOAD\\pyra-4\\logs\\*",
-                    "$DOCUMENT/*/pyra-4/logs/*",
-                    "$DOCUMENT\\pyra-4\\logs\\*",
-                    "$DOWNLOAD/*/pyra-4/config/*",
-                    "$DOWNLOAD\\pyra-4\\config\\*",
-                    "$DOCUMENT/*/pyra-4/config/*",
-                    "$DOCUMENT\\pyra-4\\config\\*",
-                    "$DOWNLOAD/*/pyra-4/runtime-data/*",
-                    "$DOWNLOAD\\pyra-4\\runtime-data\\*",
-                    "$DOCUMENT/*/pyra-4/runtime-data/*",
-                    "$DOCUMENT\\pyra-4\\runtime-data\\*"
+                    "$DOWNLOAD/*/pyra-4.0.5/*",
+                    "$DOWNLOAD\\pyra-4.0.5\\*",
+                    "$DOCUMENT/*/pyra-4.0.5/*",
+                    "$DOCUMENT\\pyra-4.0.5\\*"
                 ]
             }
         },

@@ -1,9 +1,9 @@
 import { documentDir, join, downloadDir } from '@tauri-apps/api/path';
 
 async function getProjectDirPath() {
-    let projectDirPath = await join(await documentDir(), 'pyra-4');
+    let projectDirPath: string;
     switch (import.meta.env.VITE_ENVIRONMENT) {
-        // on my personal machine
+        // on moritz personal machine
         case 'development-moritz':
             projectDirPath = await join(await documentDir(), 'research', 'pyra-4');
             break;
@@ -12,6 +12,11 @@ async function getProjectDirPath() {
         // hence, we cannot use that one since some script do not run there
         case 'development-R19':
             projectDirPath = await join(await downloadDir(), 'pyra-4');
+            break;
+
+        // on all other systems (no development of PYRA)
+        default:
+            projectDirPath = await join(await documentDir(), 'pyra', `pyra-${APP_VERSION}`);
             break;
     }
     return projectDirPath;
