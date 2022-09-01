@@ -9,9 +9,15 @@ sidebar_label: Setup
 
 :::note
 
-Your might not be allowed to executed `.ps1` script due to your ExecutionPolicy. This can be circumvented with the following command (credits to https://stackoverflow.com/a/49112322/8255842):
+The following manual steps are only required once per PYRA computer - when setting it up initially. All future updates and new installations of PYRA can be done with the [PYRA Setup Tool](#pyra-setup-tool) with no manual steps.
 
-```bash
+:::
+
+:::tip
+
+In some cases you might get an error message saying that "executing `.ps1` scripts is not allowed due to an ExecutionPolicy". This can be solved with the following command (credits to https://stackoverflow.com/a/49112322/8255842):
+
+```
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
 ```
 
@@ -67,7 +73,7 @@ https://python-poetry.org/
 
 https://cli.github.com/
 
-## PYRA Setup Tool & Directory Structure
+## PYRA Setup Tool
 
 The [**PYRA Setup Tool**](https://github.com/tum-esm/pyra-setup-tool) can be used to install and migrate between PYRA versions. The tool looks for the "Documents" directory on your system and generates a directory structure like this:
 
@@ -100,10 +106,13 @@ The installation steps this tool automates:
 
 You need to actively tell Windows about the `pyra-cli` command. When using the installer, it will tell you which path to [add to the environment variables](#add-environment-paths) on every install process.
 
-<img
-    src='/img/docs/pyra-cli-path-request.png'
-    className='tw-rounded-lg tw-mb-4'
-/>
+<img src='/img/docs/pyra-cli-path-request.png' className='tw-rounded tw-mb-4' />
+
+:::note
+
+The edit of the path variable is only required once per PYRA computer - when setting it up initially.
+
+:::
 
 ## Add Environment Paths
 
