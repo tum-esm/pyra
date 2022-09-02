@@ -39,6 +39,7 @@ export namespace customTypes {
         | 'upload';
     export type config = {
         general: {
+            version: '4.0.5';
             seconds_per_core_interval: number;
             test_mode: boolean;
             station_id: string;
@@ -108,6 +109,7 @@ export namespace customTypes {
     // I have not found a more elegant way yet to generate a partialConfig type
     export type partialConfig = {
         general?: {
+            version?: '4.0.5';
             seconds_per_core_interval?: number;
             test_mode?: boolean;
             station_id?: string;

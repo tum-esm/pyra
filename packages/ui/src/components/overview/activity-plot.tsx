@@ -27,8 +27,8 @@ function ActivityPlot() {
             .reduceLogLines(currentInfoLogLines, '3 iterations')
             .join('\n');
         measurementsAreRunning =
-            joined_logs.includes(' - INFO - Measurements should be running is set to: true') &&
-            !joined_logs.includes(' - INFO - Measurements should be running is set to: false');
+            joined_logs.includes(' - INFO - Measurements should be running is set to: True') &&
+            !joined_logs.includes(' - INFO - Measurements should be running is set to: False');
         errorIsPresent =
             joined_logs.includes(' - EXCEPTION - ') &&
             !joined_logs.includes(' - ERROR - Invalid config, waiting 10 seconds');

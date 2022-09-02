@@ -33,6 +33,7 @@ def get_plc_interface() -> Optional[interfaces.PLCInterface]:
         plc_interface.connect()
     except Exception as e:
         print_red(f"{e}")
+        return None
 
     return plc_interface
 

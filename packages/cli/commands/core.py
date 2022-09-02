@@ -77,18 +77,20 @@ def _stop_pyra_core() -> None:
         utils.Logger.log_activity_event("stop-core")
 
         config = interfaces.ConfigInterface.read()
-        if config["general"]["test_mode"] or (config["tum_plc"] is None):
+        if config["general"]["test_mode"]:
+            print_green("Skipping TUM_PLC, CamTracker, and OPUS in test mode")
             return
 
         config = interfaces.ConfigInterface().read()
 
-        try:
-            enclosure = modules.enclosure_control.EnclosureControl(config)
-            enclosure.force_cover_close()
-            enclosure.plc_interface.disconnect()
-            print_green("Successfully closed cover")
-        except Exception as e:
-            print_red(f"Failed to close cover: {e}")
+        if config["tum_plc"] is not None:
+            try:
+                enclosure = modules.enclosure_control.EnclosureControl(config)
+                enclosure.force_cover_close()
+                enclosure.plc_interface.disconnect()
+                print_green("Successfully closed cover")
+            except Exception as e:
+                print_red(f"Failed to close cover: {e}")
 
         try:
             tracking = modules.sun_tracking.SunTracking(config)

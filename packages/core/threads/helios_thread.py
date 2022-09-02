@@ -1,11 +1,11 @@
 from datetime import datetime
 import os
+import threading
 import time
 import cv2 as cv
 import numpy as np
 from typing import Any, Literal, Optional
 from packages.core import types, utils, interfaces
-from .abstract_thread_base import AbstractThreadBase
 
 logger = utils.Logger(origin="helios")
 
@@ -267,7 +267,7 @@ class _Helios:
         return _Helios.determine_frame_status(frame, save_image)
 
 
-class HeliosThread(AbstractThreadBase):
+class HeliosThread:
     """
     Thread for determining the current sun conditions in a
     parallel mainloop.
@@ -289,17 +289,45 @@ class HeliosThread(AbstractThreadBase):
     """
 
     def __init__(self, config: types.ConfigDict) -> None:
-        super().__init__(config, "helios")
+        self.__thread = threading.Thread(target=HeliosThread.main)
+        self.__logger: utils.Logger = utils.Logger(origin="helios")
+        self.config: types.ConfigDict = config
+        self.is_initialized = False
 
-    def should_be_running(self) -> bool:
+    def update_thread_state(self, new_config: types.ConfigDict) -> None:
+        """
+        Make sure that the thread loop is (not) running,
+        based on config.upload
+        """
+        self.config = new_config
+        should_be_running = HeliosThread.should_be_running(self.config)
+
+        if should_be_running and (not self.is_initialized):
+            self.__logger.info("Starting the thread")
+            self.is_initialized = True
+            self.__thread.start()
+
+        # set up a new thread instance for the next time the thread should start
+        if self.is_initialized:
+            if self.__thread.is_alive():
+                self.__logger.debug("Thread is alive")
+            else:
+                self.__logger.debug("Thread is not alive, running teardown")
+                self.__thread.join()
+                self.__thread = threading.Thread(target=HeliosThread.main)
+                self.is_initialized = False
+
+    @staticmethod
+    def should_be_running(config: types.ConfigDict) -> bool:
         """Should the thread be running? (based on config.upload)"""
         return (
-            (not self.config["general"]["test_mode"])
-            and (self.config["helios"] is not None)
-            and (self.config["measurement_triggers"]["consider_helios"])
+            (not config["general"]["test_mode"])
+            and (config["helios"] is not None)
+            and (config["measurement_triggers"]["consider_helios"])
         )
 
-    def main(self, headless: bool = False) -> None:
+    @staticmethod
+    def main(headless: bool = False) -> None:
         """
         Main entrypoint of the thread.
 
@@ -311,10 +339,9 @@ class HeliosThread(AbstractThreadBase):
         if headless:
             logger = utils.Logger(origin="helios", just_print=True)
         _CONFIG = interfaces.ConfigInterface.read()
-        self.config = _CONFIG
 
         # Check for termination
-        if (_CONFIG["helios"] is None) or (not self.should_be_running()):
+        if (_CONFIG["helios"] is None) or (not HeliosThread.should_be_running(_CONFIG)):
             return
 
         status_history = utils.RingList(_CONFIG["helios"]["evaluation_size"])
@@ -327,7 +354,7 @@ class HeliosThread(AbstractThreadBase):
             _CONFIG = interfaces.ConfigInterface.read()
 
             # Check for termination
-            if (_CONFIG["helios"] is None) or (not self.should_be_running()):
+            if (_CONFIG["helios"] is None) or (not HeliosThread.should_be_running(_CONFIG)):
                 return
 
             try:

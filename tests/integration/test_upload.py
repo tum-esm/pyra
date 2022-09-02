@@ -15,10 +15,6 @@ sys.path.append(PROJECT_DIR)
 
 from packages.core import threads
 
-# TODO: in headless-upload mode, do not loop infinitely
-# TODO: test without removal (+ rerunning)
-# TODO: test with removal
-
 # 1. Before upload, create a dst dir that does not
 #    exist on the remote dir
 # 2. After upload, download dst dir and compare to
@@ -118,7 +114,7 @@ def test_upload(original_config, populated_upload_test_directories, fabric_conne
     config["general"]["test_mode"] = False
     config["upload"] = upload_config
     with open(os.path.join(PROJECT_DIR, "config", "config.json"), "w") as f:
-        json.dump(config, f)
+        json.dump(config, f, indent=4)
 
     checksums = {
         "local-1": {
@@ -154,7 +150,7 @@ def test_upload(original_config, populated_upload_test_directories, fabric_conne
     config["upload"]["remove_src_ifgs_after_upload"] = True
     config["upload"]["remove_src_helios_after_upload"] = True
     with open(os.path.join(PROJECT_DIR, "config", "config.json"), "w") as f:
-        json.dump(config, f)
+        json.dump(config, f, indent=4)
 
     threads.UploadThread(config).main(headless=True)
 

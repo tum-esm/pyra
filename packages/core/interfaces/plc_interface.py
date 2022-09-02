@@ -134,10 +134,10 @@ class PLCInterface:
         start_time = time.time()
 
         while True:
-            try:
-                if (time.time() - start_time) > 30:
-                    raise Snap7Exception("Connect to PLC timed out.")
+            if (time.time() - start_time) > 30:
+                raise Snap7Exception("Connect to PLC timed out.")
 
+            try:
                 self.plc.connect(self.plc_ip, 0, 1)
                 time.sleep(0.2)
 
@@ -222,7 +222,7 @@ class PLCInterface:
         s = self.specification
 
         return {
-            "last_read_time": datetime.now().strftime("%Y:%m:%d"),
+            "last_read_time": datetime.now().strftime("%H:%M:%S"),
             "actors": {
                 "fan_speed": _get_int(s["actors"]["fan_speed"]),
                 "current_angle": _get_int(s["actors"]["current_angle"]),

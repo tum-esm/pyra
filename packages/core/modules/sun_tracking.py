@@ -66,13 +66,22 @@ class SunTracking:
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
         # is only considered if tracking is already up for at least 5 minutes.
-        if (
-            self.ct_application_running()
-            and (time.time() - self.last_start_time) > 300
-            and not self.validate_tracker_position()
-        ):
-            logger.info("CamTracker Motor Position is over threshold.")
-            logger.info("Stop CamTracker. Preparing for reinitialization.")
+        if not self.ct_application_running():
+            logger.debug("CamTracker is not running")
+            return
+
+        if (time.time() - self.last_start_time) < 300:
+            logger.debug(
+                "Skipping motor validation when CamTracker "
+                + "has been started less than 5 minutes ago"
+            )
+            return
+
+        if self.validate_tracker_position():
+            logger.debug("CamTracker motor position is valid.")
+        else:
+            logger.info("CamTracker motor position is over threshold.")
+            logger.info("Stopping CamTracker. Preparing for reinitialization.")
             self.stop_sun_tracking_automation()
 
     def ct_application_running(self) -> bool:
@@ -85,6 +94,8 @@ class SunTracking:
         ct_path = self._CONFIG["camtracker"]["executable_path"]
         process_name = os.path.basename(ct_path)
 
+        # TODO: Check whether this list makes sense with
+        #       respect to psutil's return types
         return interfaces.OSInterface.get_process_status(process_name) in [
             "running",
             "start_pending",
@@ -103,7 +114,7 @@ class SunTracking:
         """
 
         # delete stop.txt file in camtracker folder if present
-        self.clean_stop_file()
+        self.remove_stop_file()
 
         ct_path = self._CONFIG["camtracker"]["executable_path"]
 
@@ -129,11 +140,10 @@ class SunTracking:
 
         # create stop.txt file in camtracker folder
         camtracker_directory = os.path.dirname(self._CONFIG["camtracker"]["executable_path"])
+        with open(os.path.join(camtracker_directory, "stop.txt"), "w") as f:
+            f.write("")
 
-        f = open(os.path.join(camtracker_directory, "stop.txt"), "w")
-        f.close()
-
-    def clean_stop_file(self) -> None:
+    def remove_stop_file(self) -> None:
         """This function removes the stop.txt file to allow CamTracker to restart."""
 
         camtracker_directory = os.path.dirname(self._CONFIG["camtracker"]["executable_path"])
@@ -161,6 +171,8 @@ class SunTracking:
         ct_logfile_path = self._CONFIG["camtracker"]["learn_az_elev_path"]
         assert os.path.isfile(ct_logfile_path), "camtracker logfile not found"
 
+        # TODO: Seek the last line directly instead of reading the whole file
+        # See https://stackoverflow.com/a/54278929/8255842
         with open(ct_logfile_path) as f:
             last_line = f.readlines()[-1]
 
@@ -175,7 +187,7 @@ class SunTracking:
             raise AssertionError(f'invalid last logfile line "{last_line}"')
 
         # convert julian day to greg calendar as tuple (Year, Month, Day)
-        jddate = jdcal.jd2gcal(float(last_line[0]), 0)[:3]
+        jddate = jdcal.jd2gcal(float_values[0], 0)[:3]
 
         # assert that the log file is up-to-date
         now = datetime.datetime.now()

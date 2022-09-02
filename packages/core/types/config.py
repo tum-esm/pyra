@@ -12,6 +12,7 @@ TimeDictPartial = TypedDict(
 class ConfigSubDicts:
     @staticmethod
     class General(TypedDict):
+        version: Literal["4.0.5"]
         seconds_per_core_interval: float
         test_mode: bool
         station_id: str
