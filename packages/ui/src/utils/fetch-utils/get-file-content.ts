@@ -15,7 +15,7 @@ async function getFileContent(filePath: string) {
         // hence, we cannot use that one since some script do not run there
         case 'development-R19':
             baseDir = BaseDirectory.Download;
-            absoluteFilePath = await join('pyra-4', ...filePath.split('/'));
+            absoluteFilePath = await join('pyra', `pyra-${APP_VERSION}`, ...filePath.split('/'));
             break;
 
         // on all other systems (no development of PYRA)

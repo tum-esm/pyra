@@ -11,7 +11,7 @@ async function getProjectDirPath() {
         // on the R19 laptop the Documents folder is a network directory
         // hence, we cannot use that one since some script do not run there
         case 'development-R19':
-            projectDirPath = await join(await downloadDir(), 'pyra-4');
+            projectDirPath = await join(await downloadDir(), 'pyra', `pyra-${APP_VERSION}`);
             break;
 
         // on all other systems (no development of PYRA)

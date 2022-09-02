@@ -46,7 +46,7 @@ export default function LogTab() {
             // hence, we cannot use that one since some script do not run there
             case 'development-R19':
                 baseDir = await downloadDir();
-                filePath = await join('pyra-4', 'logs');
+                filePath = await join('pyra', `pyra-${APP_VERSION}`, 'logs');
                 break;
 
             // on all other systems (no development of PYRA)
