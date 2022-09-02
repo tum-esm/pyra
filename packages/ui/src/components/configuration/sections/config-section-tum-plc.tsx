@@ -13,7 +13,7 @@ export default function ConfigSectionTumPlc() {
     function addDefault() {
         update({
             tum_plc: {
-                ip: '10.0.0.4',
+                ip: '10.10.0.4',
                 version: 1,
                 controlled_by_user: false,
             },

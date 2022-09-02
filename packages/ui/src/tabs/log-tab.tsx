@@ -33,11 +33,12 @@ export default function LogTab() {
     }, [debugLogLines, infoLogLines, logLevel, renderedLogScope]);
 
     async function openLogsFolder() {
-        let baseDir = await documentDir();
-        let filePath = await join('pyra-4', 'logs');
+        let baseDir: string;
+        let filePath: string;
         switch (import.meta.env.VITE_ENVIRONMENT) {
-            // on my personal machine
+            // on moritz personal machine
             case 'development-moritz':
+                baseDir = await documentDir();
                 filePath = await join('research', 'pyra-4', 'logs');
                 break;
 
@@ -45,6 +46,13 @@ export default function LogTab() {
             // hence, we cannot use that one since some script do not run there
             case 'development-R19':
                 baseDir = await downloadDir();
+                filePath = await join('pyra', `pyra-${APP_VERSION}`, 'logs');
+                break;
+
+            // on all other systems (no development of PYRA)
+            default:
+                baseDir = await documentDir();
+                filePath = await join('pyra', `pyra-${APP_VERSION}`, 'logs');
                 break;
         }
 

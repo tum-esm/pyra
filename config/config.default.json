@@ -1,5 +1,6 @@
 {
     "general": {
+        "version": "4.0.5",
         "seconds_per_core_interval": 30,
         "test_mode": false,
         "station_id": "...",
@@ -34,7 +35,7 @@
     "measurement_triggers": {
         "consider_time": true,
         "consider_sun_elevation": true,
-        "consider_vbdsd": false,
+        "consider_helios": false,
         "start_time": {
             "hour": 7,
             "minute": 0,
@@ -48,5 +49,6 @@
         "min_sun_elevation": 0
     },
     "tum_plc": null,
-    "vbdsd": null
+    "helios": null,
+    "upload": null
 }

@@ -30,9 +30,9 @@ function MeasurementTriggerInfo() {
     const measurementTriggers = reduxUtils.useTypedSelector(
         (s) => s.config.central?.measurement_triggers
     );
-    const centralConfigVBDSD = reduxUtils.useTypedSelector((s) => s.config.central?.vbdsd);
+    const centralConfigHelios = reduxUtils.useTypedSelector((s) => s.config.central?.helios);
 
-    if (measurementTriggers === undefined || centralConfigVBDSD === undefined) {
+    if (measurementTriggers === undefined || centralConfigHelios === undefined) {
         return <></>;
     }
     return (
@@ -63,13 +63,14 @@ function MeasurementTriggerInfo() {
                         </>,
                     ],
                     [
-                        measurementTriggers.consider_vbdsd,
-                        'VBDSD Result',
+                        measurementTriggers.consider_helios,
+                        'Helios Result',
                         <>
-                            {!measurementTriggers.consider_vbdsd && 'ignored'}
-                            {measurementTriggers.consider_vbdsd && centralConfigVBDSD === null && (
-                                <span className="text-red-500 uppercase">not configured!</span>
-                            )}
+                            {!measurementTriggers.consider_helios && 'ignored'}
+                            {measurementTriggers.consider_helios &&
+                                centralConfigHelios === null && (
+                                    <span className="text-red-500 uppercase">not configured!</span>
+                                )}
                         </>,
                     ],
                 ].map((row: any, i) => (

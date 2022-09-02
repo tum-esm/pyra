@@ -4,5 +4,4 @@ from . import (
     opus_measurement,
     sun_tracking,
     system_checks,
-    vbdsd,
 )

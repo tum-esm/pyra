@@ -39,10 +39,10 @@ export default function ConfigSectionMeasurementTriggers() {
             />
             <div className="h-0 -mt-4" />
             <configurationComponents.ConfigElementToggle
-                title="Consider VBDSD"
-                value={localSectionConfig.consider_vbdsd}
-                setValue={(v: boolean) => update({ measurement_triggers: { consider_vbdsd: v } })}
-                oldValue={centralSectionConfig.consider_vbdsd}
+                title="Consider Helios"
+                value={localSectionConfig.consider_helios}
+                setValue={(v: boolean) => update({ measurement_triggers: { consider_helios: v } })}
+                oldValue={centralSectionConfig.consider_helios}
             />
             <div className="w-full h-px mb-6 -mt-2 bg-gray-300" />
             <configurationComponents.ConfigElementTime

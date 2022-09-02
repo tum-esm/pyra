@@ -286,8 +286,8 @@ export default function ControlTab() {
     }
 
     return (
-        <div className={'w-full relative px-6 py-6 flex-col-left gap-y-4'}>
-            <div className="flex-row-left gap-x-2">
+        <div className={'w-full relative py-4 flex-col-left gap-y-4'}>
+            <div className="w-full px-6 flex-row-left gap-x-2">
                 <div>PLC is controlled by:</div>
                 <essentialComponents.Toggle
                     value={plcIsControlledByUser ? 'user' : 'automation'}
@@ -302,9 +302,18 @@ export default function ControlTab() {
                         {!plcIsControlledByUser && 'You cannot send any commands to the PLC'}
                     </div>
                 )}
+                <div className="flex-grow" />
+                <div className="px-2 py-0.5 text-sm text-green-100 bg-green-900 rounded shadow-sm">
+                    Last PLC-read:{' '}
+                    {coreState === undefined ||
+                    coreState?.enclosure_plc_readings.last_read_time === null ||
+                    coreState?.enclosure_plc_readings.last_read_time === undefined
+                        ? '...'
+                        : coreState.enclosure_plc_readings.last_read_time}
+                </div>
             </div>
             <div className="w-full h-px my-0 bg-gray-300" />
-            <div className="flex flex-col w-full text-sm gap-y-2">
+            <div className="flex flex-col w-full px-6 text-sm gap-y-2">
                 {pyraIsInTestMode && (
                     <div className="flex-row-center">
                         No PLC connection when pyra is in test mode

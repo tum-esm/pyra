@@ -1,0 +1,76 @@
+name: 'test-on-push-to-main'
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    test-typescript-codebase:
+        runs-on: ubuntu-latest
+        steps:
+            # check-out repo and set-up python
+            - name: Check out repository
+              uses: actions/checkout@v3
+            - name: Set up NodeJS with Yarn
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '14'
+                  cache: 'yarn'
+                  cache-dependency-path: packages/ui/yarn.lock
+            - name: Install dependencies
+              run: yarn install
+              working-directory: packages/ui
+            - name: Build frontend
+              run: yarn build
+              working-directory: packages/ui
+
+    test-python-codebase:
+        runs-on: ubuntu-latest
+        steps:
+            # check-out repo and set-up python
+            - name: Check out repository
+              uses: actions/checkout@v3
+            - name: Set up Python 3.10.6
+              id: setup-python
+              uses: actions/setup-python@v3
+              with:
+                  python-version: 3.10.6
+
+            # install & configure poetry
+            - name: Install Poetry
+              uses: snok/install-poetry@v1
+              with:
+                  virtualenvs-create: true
+                  virtualenvs-in-project: true
+                  installer-parallel: true
+
+            # load cached venv if cache exists
+            - name: Load cached venv
+              id: cached-poetry-dependencies
+              uses: actions/cache@v3
+              with:
+                  path: .venv
+                  key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+
+            # install dependencies if cache does not exist
+            - name: Install dependencies
+              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+              run: poetry install --no-interaction --no-root
+
+            # install your root project, if required
+            - name: Install library
+              run: poetry install --no-interaction
+
+            # run test suite
+            - name: Run mypy static type analysis
+              run: |
+                  source .venv/bin/activate
+                  bash scripts/run_type_analysis.sh
+            - name: Run pytest tests
+              run: |
+                  source .venv/bin/activate
+                  pytest -m "ci" --cov=packages tests
+                  coverage report
