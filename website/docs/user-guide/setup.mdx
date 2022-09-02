@@ -69,9 +69,11 @@ If your `python` command doesn't resolve to the installed version, please look a
 
 https://python-poetry.org/
 
-### GitHub CLI
+### Git & GitHub CLI
 
-https://cli.github.com/
+https://git-scm.com/ and https://cli.github.com/
+
+_These two are used by the setup tool._
 
 ## PYRA Setup Tool
 
@@ -85,12 +87,17 @@ The [**PYRA Setup Tool**](https://github.com/tum-esm/pyra-setup-tool) can be use
         📁 ...
 ```
 
-Download and run it with:
+**On the first time, clone the setup tool repo:**
 
-```bash
+```
 cd ~/Documents
-gh repo clone tum-esm/pyra-setup-tool
-cd pyra-setup-tool
+gh repo clone tum-esm/pyra-setup-tool --dir
+```
+
+**Run the tool with (from this point on it will autoupdate itself):**
+
+```
+cd ~/Documents/pyra-setup-tool
 python run.py
 ```
 
