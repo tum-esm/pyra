@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pyra"
-version = "4.0.4"
-description = ""
+version = "4.0.5"
+description = "operate an EM27 station autonomously"
 authors = ["Patrick Aigner <patrick.aigner@tum.de>", "Moritz Makowski <moritz.makowski@tum.de>"]
 
 [tool.poetry.dependencies]
@@ -16,11 +16,20 @@ opencv-python = "4.5.5.64"
 astropy = "5.0.4"
 jdcal = "1.4.1"
 psutil = "5.9.1"
+fabric = "^2.7.1"
+pydantic = "^1.9.2"
+tqdm = "^4.64.0"
+colorama = "^0.4.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "7.1.2"
 black = "22.3.0"
 deepdiff = "^5.8.1"
+mypy = "^0.971"
+types-paramiko = "^2.11.3"
+types-invoke = "^1.7.3"
+types-psutil = "^5.9.5"
+pytest-cov = "^3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -28,3 +37,29 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 95
+
+[tool.mypy]
+strict = true
+implicit_reexport = true
+no_warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+    "astropy.*",
+    "cv2",
+    "fabric.*",
+    "jdcal",
+    "snap7",
+    "snap7.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    'ignore:the imp module is deprecated in favour of importlib:DeprecationWarning',
+    'ignore:getargs:DeprecationWarning',
+]
+markers = [
+    "ci: can be run in a CI environment",
+    "integration: can only be run on a configured system",
+]

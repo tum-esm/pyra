@@ -1,8 +1,9 @@
 import json
 import subprocess
+import pytest
 import os
 from deepdiff import DeepDiff
-from ..fixtures import original_config
+from ..fixtures import sample_config
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
@@ -11,7 +12,7 @@ PYRA_CLI_PATH = os.path.join(PROJECT_DIR, "packages", "cli", "main.py")
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 
 
-def assert_config_file_content(expected_content: dict, message: str):
+def assert_config_file_content(expected_content: dict, message: str) -> None:
     with open(CONFIG_FILE_PATH, "r") as f:
         actual_content = json.load(f)
 
@@ -22,7 +23,7 @@ def assert_config_file_content(expected_content: dict, message: str):
     assert difference == {}, f"{message}: {difference}"
 
 
-def run_cli_command(command: list[str]):
+def run_cli_command(command: list[str]) -> str:
     process = subprocess.run(
         [INTERPRETER_PATH, PYRA_CLI_PATH, *command],
         stderr=subprocess.PIPE,
@@ -36,7 +37,8 @@ def run_cli_command(command: list[str]):
     return stdout
 
 
-def test_get_config(original_config):
+@pytest.mark.ci
+def test_get_config(sample_config) -> None:
     # get config from cli
     stdout = run_cli_command(["config", "get"])
     config_object_1 = json.loads(stdout)
@@ -45,12 +47,14 @@ def test_get_config(original_config):
     assert_config_file_content(config_object_1, "output from cli does not match file content")
 
 
-def test_validate_current_config(original_config):
+@pytest.mark.ci
+def test_validate_current_config(sample_config) -> None:
     stdout = run_cli_command(["config", "validate"])
     assert stdout.startswith("Current config file is valid")
 
 
-def test_update_config(original_config):
+@pytest.mark.ci
+def test_update_config(sample_config) -> None:
 
     updates = [
         {"general": {"seconds_per_core_interval": False}},
@@ -65,9 +69,9 @@ def test_update_config(original_config):
     # run "pyra-cli config update" for some invalid variables
     for update in updates:
         stdout = run_cli_command(["config", "update", json.dumps(update)])
-        assert "Error in new config string" in stdout
+        assert "config is invalid" in stdout
 
-    assert_config_file_content(original_config, "config.json should not have changed")
+    assert_config_file_content(sample_config, "config.json should not have changed")
 
     updates = [
         {"general": {"seconds_per_core_interval": 400}},
@@ -95,14 +99,15 @@ def test_update_config(original_config):
     for index, update in enumerate(updates):
         stdout = run_cli_command(["config", "update", json.dumps(update)])
         assert "Updated config file" in stdout
-        original_config = transform(original_config, index)
+        sample_config = transform(sample_config, index)
 
-        assert_config_file_content(original_config, "config.json did not update as expected")
+        assert_config_file_content(sample_config, "config.json did not update as expected")
 
 
-def test_add_default_config(original_config):
+@pytest.mark.ci
+def test_add_default_config(sample_config) -> None:
 
-    cases = {"vbdsd": None, "tum_plc": None}
+    cases = {"helios": None, "tum_plc": None}
 
     for c in cases:
         with open(os.path.join(PROJECT_DIR, "config", f"{c}.config.default.json"), "r") as f:
@@ -111,14 +116,14 @@ def test_add_default_config(original_config):
     for c in cases:
         stdout = run_cli_command(["config", "update", json.dumps({c: None})])
         assert "Updated config file" in stdout
-        original_config[c] = None
+        sample_config[c] = None
 
-    assert_config_file_content(original_config, "config.json is in an unexpected state")
+    assert_config_file_content(sample_config, "config.json is in an unexpected state")
 
     for c in cases:
         stdout = run_cli_command(["config", "update", json.dumps({c: cases[c]})])
         assert "Updated config file" in stdout
-        original_config[c] = cases[c]
+        sample_config[c] = cases[c]
         assert_config_file_content(
-            original_config, f'config.json does not include the "{c}" config'
+            sample_config, f'config.json does not include the "{c}" config'
         )

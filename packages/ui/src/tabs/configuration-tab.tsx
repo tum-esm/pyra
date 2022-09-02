@@ -13,7 +13,8 @@ const sections: { key: customTypes.configSectionKey; label: string }[] = [
     { key: 'error_email', label: 'Error Email' },
     { key: 'measurement_triggers', label: 'Triggers' },
     { key: 'tum_plc', label: 'TUM PLC' },
-    { key: 'vbdsd', label: 'VBDSD' },
+    { key: 'helios', label: 'Helios' },
+    { key: 'upload', label: 'Upload' },
 ];
 export default function ConfigurationTab() {
     const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
@@ -109,7 +110,8 @@ export default function ConfigurationTab() {
                     <configurationComponents.ConfigSectionMeasurementTriggers />
                 )}
                 {activeKey === 'tum_plc' && <configurationComponents.ConfigSectionTumPlc />}
-                {activeKey === 'vbdsd' && <configurationComponents.ConfigSectionVbdsd />}
+                {activeKey === 'helios' && <configurationComponents.ConfigSectionHelios />}
+                {activeKey === 'upload' && <configurationComponents.ConfigSectionUpload />}
                 {configIsDiffering && (
                     <configurationComponents.SavingOverlay
                         {...{

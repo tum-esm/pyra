@@ -1,7 +1,0 @@
-{
-    "camera_id": 0,
-    "evaluation_size": 15,
-    "seconds_per_interval": 6,
-    "measurement_threshold": 0.6,
-    "save_images": false
-}

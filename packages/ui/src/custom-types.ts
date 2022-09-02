@@ -35,9 +35,11 @@ export namespace customTypes {
         | 'error_email'
         | 'measurement_triggers'
         | 'tum_plc'
-        | 'vbdsd';
+        | 'helios'
+        | 'upload';
     export type config = {
         general: {
+            version: '4.0.5';
             seconds_per_core_interval: number;
             test_mode: boolean;
             station_id: string;
@@ -72,7 +74,7 @@ export namespace customTypes {
         measurement_triggers: {
             consider_time: boolean;
             consider_sun_elevation: boolean;
-            consider_vbdsd: boolean;
+            consider_helios: boolean;
             start_time: { hour: number; minute: number; second: number };
             stop_time: { hour: number; minute: number; second: number };
             min_sun_elevation: number;
@@ -82,18 +84,32 @@ export namespace customTypes {
             version: number;
             controlled_by_user: boolean;
         };
-        vbdsd: null | {
+        helios: null | {
             camera_id: number;
             evaluation_size: number;
             seconds_per_interval: number;
             measurement_threshold: number;
+            edge_detection_threshold: number;
             save_images: boolean;
+        };
+        upload: null | {
+            host: string;
+            user: string;
+            password: string;
+            upload_ifgs: boolean;
+            src_directory_ifgs: string;
+            dst_directory_ifgs: string;
+            remove_src_ifgs_after_upload: boolean;
+            upload_helios: boolean;
+            dst_directory_helios: string;
+            remove_src_helios_after_upload: boolean;
         };
     };
 
     // I have not found a more elegant way yet to generate a partialConfig type
     export type partialConfig = {
         general?: {
+            version?: '4.0.5';
             seconds_per_core_interval?: number;
             test_mode?: boolean;
             station_id?: string;
@@ -128,7 +144,7 @@ export namespace customTypes {
         measurement_triggers?: {
             consider_time?: boolean;
             consider_sun_elevation?: boolean;
-            consider_vbdsd?: boolean;
+            consider_helios?: boolean;
             start_time?: { hour?: number; minute?: number; second?: number };
             stop_time?: { hour?: number; minute?: number; second?: number };
             min_sun_elevation?: number;
@@ -138,16 +154,30 @@ export namespace customTypes {
             version?: number;
             controlled_by_user?: boolean;
         };
-        vbdsd?: null | {
+        helios?: null | {
             camera_id?: number;
             evaluation_size?: number;
             seconds_per_interval?: number;
             measurement_threshold?: number;
+            edge_detection_threshold?: number;
             save_images?: boolean;
+        };
+        upload?: null | {
+            host?: string;
+            user?: string;
+            password?: string;
+            upload_ifgs?: boolean;
+            src_directory_ifgs?: string;
+            dst_directory_ifgs?: string;
+            remove_src_ifgs_after_upload?: boolean;
+            upload_helios?: boolean;
+            dst_directory_helios?: string;
+            remove_src_helios_after_upload?: boolean;
         };
     };
 
     export type enclosurePlcReadings = {
+        last_read_time: string | null;
         actors: {
             fan_speed: number | null;
             current_angle: number | null;
@@ -186,6 +216,7 @@ export namespace customTypes {
     };
 
     export type partialEnclosurePlcReadings = {
+        last_read_time?: string;
         actors?: {
             fan_speed?: number;
             current_angle?: number;
@@ -231,7 +262,7 @@ export namespace customTypes {
     };
 
     export type coreState = {
-        vbdsd_indicates_good_conditions: boolean | null;
+        helios_indicates_good_conditions: boolean | null;
         measurements_should_be_running: boolean;
         enclosure_plc_readings: enclosurePlcReadings;
         os_state: OSState;

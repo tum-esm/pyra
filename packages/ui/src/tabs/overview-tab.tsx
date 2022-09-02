@@ -6,14 +6,13 @@ import { customTypes } from '../custom-types';
 import toast from 'react-hot-toast';
 import { mean } from 'lodash';
 
-
-function SystemRow(props: { label: string, value: React.ReactNode }) {
-    return (<div className="w-full pl-2 flex-row-left">
-        <div className="w-32">{props.label}:</div>
-        <div className="min-w-[2rem]">
-            {props.value}
+function SystemRow(props: { label: string; value: React.ReactNode }) {
+    return (
+        <div className="w-full pl-2 flex-row-left">
+            <div className="w-32">{props.label}:</div>
+            <div className="min-w-[2rem]">{props.value}</div>
         </div>
-    </div>)
+    );
 }
 
 export default function OverviewTab() {
@@ -78,9 +77,7 @@ export default function OverviewTab() {
     const allInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
     const currentInfoLogLines = allInfoLogLines?.slice(-10);
 
-    function renderSystemBar(
-        value: null | number | number[]
-    ) {
+    function renderSystemBar(value: null | number | number[]) {
         if (value === null) {
             return '-';
         }
@@ -100,38 +97,32 @@ export default function OverviewTab() {
         );
     }
 
-    function renderString(
-        value: null | string | number,
-        options?: { appendix: string }
-    ) {
+    function renderString(value: null | string | number, options?: { appendix: string }) {
         if (value === null) {
             return '-';
         } else {
-            return `${value}${options !== undefined ? options.appendix : ""}`;
+            return `${value}${options !== undefined ? options.appendix : ''}`;
         }
     }
 
-    function renderBoolean(
-        value: null | boolean
-    ) {
+    function renderBoolean(value: null | boolean) {
         if (value === null) {
             return '-';
         } else {
-            return value ? "Yes" : "No";
+            return value ? 'Yes' : 'No';
         }
     }
 
     return (
-        <div className={'flex-col-center w-full gap-y-4 pt-4 pb-12 px-6'}>
-            <div className="w-full text-sm h-7 flex-row-left">
+        <div
+            className={'flex-col-center w-full gap-y-6 pt-4 pb-12 px-6 relative overflow-x-hidden'}
+        >
+            <div className="w-full text-sm h-7 flex-row-left gap-x-1">
                 <essentialComponents.Ping state={true} />
-                <span className="ml-2.5 mr-1">
-                    pyra-core is running with process ID {pyraCorePID}
-                </span>
-            </div>
-            <div className="w-full -mt-2 text-sm font-normal flex-row-left">
+                <span className="ml-1">pyra-core is running with process ID {pyraCorePID}</span>
+                <span className="w-8" />
                 <essentialComponents.Ping state={measurementDecisionResult} />
-                <span className="ml-2.5 mr-1">Measurements are currently</span>
+                <span className="ml-1">Measurements are currently</span>
                 {measurementDecisionResult === undefined && <essentialComponents.Spinner />}
                 {!(measurementDecisionResult === undefined) && (
                     <>
@@ -145,9 +136,8 @@ export default function OverviewTab() {
                     </strong>
                 )}
             </div>
-            <div className="w-full h-px bg-gray-300" />
             <overviewComponents.ActivityPlot />
-            <div className="w-full h-px bg-gray-300" />
+            <div className="w-[calc(100%+6rem)] -ml-6 h-px bg-gray-300" />
             {coreState === undefined && (
                 <div className="w-full pl-2 text-sm flex-row-left gap-x-2">
                     State is loading <essentialComponents.Spinner />
@@ -167,28 +157,37 @@ export default function OverviewTab() {
                     </div>
                 )}
             {coreState !== undefined && (
-                <div className="flex flex-row items-start justify-start w-full">
+                <div className="grid w-full grid-cols-2">
                     <div
                         className={
-                            'flex-col items-start justify-start pr-3 text-sm gap-y-1 h-full ' +
+                            'flex-col items-start justify-start pr-3 text-sm gap-y-1 ' +
                             'border-r border-gray-300 min-w-[16rem]'
                         }
                     >
                         <SystemRow
                             label="Temperature"
-                            value={renderString(coreState.enclosure_plc_readings.sensors.temperature, { appendix: "°C" })}
+                            value={renderString(
+                                coreState.enclosure_plc_readings.sensors.temperature,
+                                { appendix: '°C' }
+                            )}
                         />
                         <SystemRow
                             label="Reset needed"
-                            value={renderBoolean(coreState.enclosure_plc_readings.state.reset_needed)}
+                            value={renderBoolean(
+                                coreState.enclosure_plc_readings.state.reset_needed
+                            )}
                         />
                         <SystemRow
                             label="Motor failed"
-                            value={renderBoolean(coreState.enclosure_plc_readings.state.motor_failed)}
+                            value={renderBoolean(
+                                coreState.enclosure_plc_readings.state.motor_failed
+                            )}
                         />
                         <SystemRow
                             label="Cover is closed"
-                            value={renderBoolean(coreState.enclosure_plc_readings.state.cover_closed)}
+                            value={renderBoolean(
+                                coreState.enclosure_plc_readings.state.cover_closed
+                            )}
                         />
                         <SystemRow
                             label="Rain detected"
@@ -205,7 +204,7 @@ export default function OverviewTab() {
                     </div>
                     <div className="flex-col items-start justify-start pl-3 text-sm">
                         <SystemRow
-                            label='Last boot time'
+                            label="Last boot time"
                             value={renderString(coreState.os_state.last_boot_time)}
                         />
                         <SystemRow
@@ -223,8 +222,8 @@ export default function OverviewTab() {
                     </div>
                 </div>
             )}
-            <div className="w-full h-px bg-gray-300" />
-            <div className="w-full pl-2 -mb-1 text-sm">Last 10 log lines:</div>
+            <div className="w-[calc(100%+6rem)] -ml-6 h-px bg-gray-300" />
+            <div className="w-full pl-2 -mb-1 text-sm font-semibold">Last 10 log lines:</div>
             <div
                 className={
                     'w-full !mb-0 bg-white flex-grow text-xs ' +

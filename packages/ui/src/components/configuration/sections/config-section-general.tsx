@@ -44,7 +44,7 @@ export default function ConfigSectionGeneral() {
             />
             <div className="w-full -mt-[1.125rem] pl-[12.5rem] text-xs text-blue-600 flex-row-left gap-x-1">
                 <div className="w-4 h-4 text-blue-400">{ICONS.info}</div>The TUM PLC will start its
-                operation one degree earlier. VBDSD will start at this angle.
+                operation one degree earlier. Helios will start at this angle.
             </div>
         </>
     );
