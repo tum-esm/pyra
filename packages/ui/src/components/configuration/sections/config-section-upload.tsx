@@ -101,6 +101,7 @@ export default function ConfigSectionUpload() {
                 oldValue={
                     centralSectionConfig !== null ? centralSectionConfig.src_directory_ifgs : 'null'
                 }
+                showFileSelector
             />
             <configurationComponents.ConfigElementText
                 title="IFG Destination Directory (Server Side)"
