@@ -91,7 +91,7 @@ The [**PYRA Setup Tool**](https://github.com/tum-esm/pyra-setup-tool) can be use
 
 ```
 cd %userprofile%/Documents
-gh repo clone tum-esm/pyra-setup-tool --dir
+gh repo clone tum-esm/pyra-setup-tool
 ```
 
 **Run the tool with (from this point on it will autoupdate itself):**
@@ -151,12 +151,28 @@ The edit of the path variable is only required once per PYRA computer - when set
 
 ## Releases
 
-All PYRA releases can be found here: https://github.com/tum-esm/pyra/releases. Please only use the releases starting with `4.0.5`. The ones before are alpha and beta releases that have bugs and inconsistencies.
+All PYRA releases can be found here: <span className="tw-break-all">https://github.com/tum-esm/pyra/releases</span>. Please only use the releases starting with `4.0.5`. The ones before are alpha and beta releases that have bugs and inconsistencies.
 
 ## Error Email Setup
 
-TODO
+In order for PYRA to send you error emails (see [Usage section](/docs/user-guide/usage#error-emails)), you need an email account that allows this kind of connection.
 
-<!--With Gmail accounts, "Less Secure Apps" have been deactivated. https://support.google.com/accounts/answer/6010255?hl=de&visit_id=637914296292859831-802637670&p=less-secure-apps&rd=1
+We are using Gmail for this. You have to use an "App Password" for PYRA which requires 2FA for your Google Account. Please refer to this article on how to set up an "App Password": <span className="tw-break-all">https://support.google.com/accounts/answer/185833</span>. Inside the config-tab you have to add this "App Password" to receive emails:
 
-Solution: Use "App passwords", which require 2FA-->
+<img src='/img/docs/email-config.png' className='tw-rounded-lg tw-mb-4' />
+
+:::note
+
+There is a test script to test whether email sending works. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).
+
+We will probably add a button "test emailing" to that config tab at some point: https://github.com/tum-esm/pyra/issues/109
+
+:::
+
+:::caution
+
+The Gmail password and the "App Password" are not the same.
+
+Whenever changing/resetting the Gmail password, all "App Passwords" will be invalidated.
+
+:::
