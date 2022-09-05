@@ -86,6 +86,12 @@ In the configuration tab you can select measurement triggers that should be cons
 
 ## Command Line Interface (CLI)
 
+:::tip
+
+Everything that can be seen/clicked in the GUI can also be read/written via the CLI.
+
+:::
+
 ### Help Menu
 
 Top level help menu:
@@ -166,6 +172,7 @@ The expected schema (used in `/packages/ui/src/custom-types.ts`):
 ```typescript
 export type config = {
     general: {
+        version: '4.0.5';
         seconds_per_core_interval: number;
         test_mode: boolean;
         station_id: string;
