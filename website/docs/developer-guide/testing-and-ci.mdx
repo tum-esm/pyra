@@ -1,0 +1,68 @@
+---
+sidebar_position: 4
+sidebar_label: Testing & CI
+---
+
+# Testing and Continuous Integration
+
+## Testing Strategy
+
+The full software only runs when OPUS and CamTracker are installed and an EM27 is connected. However, in test-mode the software can run on its own without interacting with any modules that require a special setup. Most functionality is tested by running the software and conducting measurements. Since PYRA only starts/stops the measurement process but does not affect output files, these output files from OPUS do not have to be tested.
+
+TODO: Mention emailing
+
+## Testing with Pytest
+
+Testing is done using [pytest](https://github.com/pytest-dev/pytest/). All tests can be found in the `tests/` directory. There are two type of test functions:
+
+```python
+# can be run without config.json/hardware setup
+@pytest.mark.ci
+def test_something():
+    pass
+
+# require config.json and hardware setup
+@pytest.mark.integration
+def test_something_else():
+    pass
+```
+
+Run the two test categories with:
+
+```bash
+pytest -m "ci" tests
+pytest -m "integration" tests
+```
+
+## Static Typing for PYRA Core and CLI
+
+All out python code contains static type annotations. We are using [MyPy](https://github.com/python/mypy) to test the code's integrity. Run this analysis using:
+
+```bash
+bash scripts/run_type_analysis.sh
+```
+
+We are using the strict mypy settings with a few exceptions that can be found in `pyproject.toml`.
+
+## Static Typing for PYRA UI
+
+The whole frontend is written in [Typescript](https://github.com/microsoft/TypeScript). Testing the code's integrity can be done by building the frontend:
+
+```bash
+cd packages/ui
+yarn build
+```
+
+## Continuous Integration
+
+TODO: Refactor this section
+
+TODO: Testing
+
+TODO: Building the frontend
+
+TODO: Building the documentation
+
+<!--**Continuous Integration:** The CI-Pipeline runs every time a commit/a series of commits is added to the `release` branch. The CI compiles and bundles the frontend code into an installable windows-application. Then it creates a new release draft and attaches the `.msi` file to the draft. We can then manually add the release description and submit the release.
+
+**Testing (not in an active CI):** We could add automated tests to the main- and integration branches. However, most things we could test make use of OPUS, Camtracker, Helios, or the enclosure, hence we can only do a subset of our tests in an isolated CI environment without the system present.-->
