@@ -16,7 +16,7 @@ from packages.cli.commands import (
 )
 
 
-@click.command()
+@click.command(help="Print Pyra version and code directory path.")
 def print_cli_information() -> None:
     click.echo(
         click.style(

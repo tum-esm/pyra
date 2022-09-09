@@ -24,7 +24,9 @@ def print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
-@click.command(help="Read the current config.json file.")
+@click.command(
+    help="Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence."
+)
 @with_filelock(CONFIG_LOCK_PATH)
 def _get_config() -> None:
     if not os.path.isfile(CONFIG_FILE_PATH):
@@ -41,7 +43,7 @@ def _get_config() -> None:
 
 @click.command(
     short_help="Set the config.json file.",
-    help=f"Set config. Pass the JSON directly or via a file path. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation.",
+    help=f"Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
 )
 @click.argument("content", default="{}")
 @with_filelock(CONFIG_LOCK_PATH)
@@ -77,7 +79,7 @@ def _update_config(content: str) -> None:
 
 
 @click.command(
-    help=f"Validate the current config.json file.\n\nThe required schema can be found in the documentation."
+    help=f"Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
 )
 @with_filelock(CONFIG_LOCK_PATH)
 def _validate_current_config() -> None:

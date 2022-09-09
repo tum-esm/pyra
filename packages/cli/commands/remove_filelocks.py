@@ -14,8 +14,7 @@ def print_red(text: str) -> None:
 
 
 @click.command(
-    help="Remove all filelocks. Helpful when any of the programs crashed "
-    + "during writing to a file. Should not be necessary normally."
+    help="Remove all filelocks. Helpful when any of the programs crashed during writing to a file. Normally, this should not be necessary."
 )
 def remove_filelocks() -> None:
     lock_files = [
