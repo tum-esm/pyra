@@ -99,8 +99,6 @@ class SunTracking:
         ct_path = self._CONFIG["camtracker"]["executable_path"]
         process_name = os.path.basename(ct_path)
 
-        # TODO: Check whether this list makes sense with
-        #       respect to psutil's return types
         return interfaces.OSInterface.get_process_status(process_name) in [
             "running",
             "start_pending",
@@ -178,8 +176,6 @@ class SunTracking:
         ct_logfile_path = self._CONFIG["camtracker"]["learn_az_elev_path"]
         assert os.path.isfile(ct_logfile_path), "camtracker logfile not found"
 
-        # TODO: Seek the last line directly instead of reading the whole file
-        # See https://stackoverflow.com/a/54278929/8255842
         with open(ct_logfile_path) as f:
             last_line = f.readlines()[-1]
 

@@ -148,15 +148,6 @@ class OpusMeasurement:
         logger.info(f"Loaded new OPUS experiment: {experiment_path}")
         self.current_experiment = experiment_path
 
-        # TODO: why does the following logic not work anymore
-        """
-        if "OK" in answer:
-            logger.info("Loaded new OPUS experiment: {}.".format(full_path))
-            self.current_experiment = full_path
-        else:
-            logger.info("Could not load OPUS experiment as expected.")
-        """
-
     def start_macro(self) -> None:
         """Starts a new macro in OPUS over DDE connection."""
         assert sys.platform == "win32"
@@ -170,17 +161,6 @@ class OpusMeasurement:
         macro_path = self._CONFIG["opus"]["macro_path"]
         answer = self.conversation.Request(f"RUN_MACRO {macro_path}")
         logger.info(f"Started OPUS macro: {macro_path}")
-
-        # TODO: why does the following logic not work anymore
-        """
-        active_macro_id = str(answer[4:-1])
-        StateInterface.update({"active_opus_macro_id": active_macro_id}, persistent=True)
-
-        if "OK" in answer:
-            logger.info(f"Started OPUS macro: {macro_basename} with id: {active_macro_id}.")
-        else:
-            logger.info(f"Could not start OPUS macro with id: {active_macro_id} as expected.")
-        """
 
     def stop_macro(self) -> None:
         """Stops the currently running macro in OPUS over DDE connection."""
@@ -196,15 +176,6 @@ class OpusMeasurement:
         answer = self.conversation.Request("KILL_MACRO " + macro_path)
         logger.info(f"Stopped OPUS macro: {macro_path}")
 
-        # TODO: why does the following logic not work anymore
-        """
-        if "OK" in answer:
-            logger.info(f"Stopped OPUS macro: {macro_basename} with id: {active_macro_id}.")
-            StateInterface.update({"active_opus_macro_id": None}, persistent=True)
-        else:
-            logger.info(f"Could not stop OPUS macro with id: {active_macro_id} as expected.")
-        """
-
     def close_opus(self) -> None:
         """Closes OPUS via DDE call."""
         assert sys.platform == "win32"
@@ -215,14 +186,6 @@ class OpusMeasurement:
             return
         answer = self.conversation.Request("CLOSE_OPUS")
         logger.info("Stopped OPUS.exe")
-
-        # TODO: why does the following logic not work anymore
-        """
-        if "OK" in answer:
-            logger.info("Stopped OPUS.exe")
-        else:
-            logger.info("No response for OPUS.exe close request.")
-        """
 
     def __shutdown_dde_server(self) -> None:
         """Note the underlying DDE object (ie, Server, Topics and Items) are

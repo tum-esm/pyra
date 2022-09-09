@@ -90,8 +90,6 @@ class EnclosureControl:
                 )
                 self.plc_interface.connect()
 
-            # TODO: possibly end function if plc is not connected
-
             # Reads and returns the latest PLC database states
             try:
                 self.plc_state = self.plc_interface.read()

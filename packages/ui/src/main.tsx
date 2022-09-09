@@ -30,7 +30,6 @@ export default function Main() {
             setPyraCorePID(pid);
             setBackendIntegrity('valid');
         } catch {
-            // TODO: add message to queue
             setPyraCorePID(undefined);
         }
     }

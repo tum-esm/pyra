@@ -40,28 +40,6 @@ class OSInterface:
                 "Disk space is less than 10%. This is bad for the OS stability."
             )
 
-    # TODO: function is not working as expected. Needs revision.
-    @staticmethod
-    def get_connection_status(
-        ip: str,
-    ) -> str:
-        """
-        Takes ip address as input str: i.e. 10.10.0.4
-        Checks the ip connection for that address.
-        """
-
-        connections = psutil.net_connections(kind="inet4")
-
-        for connection in connections:
-            if connection.laddr:
-                if connection.laddr.ip == ip:
-                    return connection.status
-            if connection.raddr:
-                if connection.raddr.ip == ip:
-                    return connection.status
-
-        return "NO_INFO"
-
     @staticmethod
     def get_system_battery() -> int:
         """
@@ -93,23 +71,7 @@ class OSInterface:
     @staticmethod
     def get_process_status(
         process_name: str,
-    ) -> Literal[
-        "running",
-        "sleeping",
-        "disk-sleep",
-        "stopped",
-        "tracing-stop",
-        "zombie",
-        "dead",
-        "wake-kill",
-        "waking",
-        "idle",
-        "locked",
-        "waiting",
-        "suspended",
-        "parked",
-        "not-found",
-    ]:
+    ) -> str:
         """
         Takes a process name "*.exe" and returns its OS process
         status (see return types).
