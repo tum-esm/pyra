@@ -16,11 +16,21 @@ from packages.cli.commands import (
 )
 
 
+@click.command()
+def print_cli_information() -> None:
+    click.echo(
+        click.style(
+            f'This CLI is running Pyra version 4.0.5 in directory "{PROJECT_DIR}".', fg="green"
+        )
+    )
+
+
 @click.group()
 def cli() -> None:
     pass
 
 
+cli.add_command(print_cli_information, name="info")
 cli.add_command(config_command_group, name="config")
 cli.add_command(core_command_group, name="core")
 cli.add_command(logs_command_group, name="logs")
