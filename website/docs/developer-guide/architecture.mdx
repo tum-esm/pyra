@@ -4,38 +4,52 @@ sidebar_position: 1
 
 # Architecture
 
-TODO: Architecture drawings
+**The hierachy between the three parts of Pyra:**
+
+<img
+    src='/drawings/exports/package-architecture.png'
+    className='tw-mb-2 tw-rounded-lg'
+/>
+
+**Inside Pyra Core's mainloop:**
+
+-   the Core will start the Upload- and Helios-Thread when they should be running but are not
+-   the Core will infinitely loop over the modules `MeasurementConditions`, `EnclosureControl`, `SunTracking`, `OpusMeasurements`, and `SystemChecks`
+-   the threads will stop themselves based on the config
+
+**The communication via the `state.json` file:**
+
+<img
+    src='/drawings/exports/state-architecture.png'
+    className='tw-mb-2 tw-rounded-lg'
+/>
+
+:::note
+
+What each module does is described on a high level in the paper (link coming soon) and in detail in the code's comments. We try to avoid duplicating information (code comments and documentation), because slightly out of sync descriptions can be very confising.
+
+:::
 
 ## Pyre Core Directory structure
 
 ### Responsibilities
 
-`types` contains all types used in the codebase. The whole codebase contains static type hints. A static type analysis can be done using `mypy` (see `scripts/`).
-
-`utils` contains all supporting functionality used in one or more places.
-
-`interfaces` includes the "low-level" code to interact with the PLC, the operating system, and the config- and state-files.
-
-`modules` contains the different steps that PYRA Core runs sequentially on the main thread.
-
-`threads` contains the logic that PYRA Core runs in parallel to the main thread.
+-   `types` contains all types used in the codebase. The whole codebase contains static type hints. A static type analysis can be done using `mypy` (see `scripts/`).
+-   `utils` contains all supporting functionality used in one or more places.
+-   `interfaces` includes the "low-level" code to interact with the PLC, the operating system, and the config- and state-files.
+-   `modules` contains the different steps that PYRA Core runs sequentially on the main thread.
+-   `threads` contains the logic that PYRA Core runs in parallel to the main thread.
 
 ### Import hierarchy
 
--   `types` doesn't import any other code from PYRA Core
--   `utils` can import `types`
--   `interfaces` can import `types` and `utils`
--   `modules` and `threads` can import `interfaces`, `types`, and `utils`
--   `main.py` can import all of the above
-
 ```mermaid
   graph LR;
-      A["types"] --> B;
-      B["utils"] --> C;
-      C["interfaces"] --> D;
-      C --> E;
-      D["modules"] --> F;
-      E["threads"] --> F["main.py"];
+      A["types"] -- imported by --> B;
+      B["utils"] -- imported by --> C;
+      C["interfaces"] -- imported by --> D;
+      C -- imported by --> E;
+      D["modules"] -- imported by --> F;
+      E["threads"] -- imported by --> F["main.py"];
 ```
 
 _\* the graph is transient_
