@@ -4,15 +4,15 @@ sidebar_position: 5
 
 # TUM PLC & Helios
 
-The hardware for the TUM weather protection enclosure and Helios setup are not available to buy off the shelf yet. Please [contact us](/docs/contact) if you are interested in acquiring the same setup.
+The hardware for the TUM weather protection enclosure and Helios setup is not available to buy off the shelf yet. Please [contact us](/docs/contact) if you are interested in acquiring the same setup.
 
 <img src='/img/docs/muccnet-image-roof.jpg' className='tw-mb-6 tw-rounded-lg' />
 
 ## What does Helios do?
 
-Helios evaluates the current sun state - whether direct or diffuse sunlight is present. Most EM27/SUN applications require direct sunlight for measurement data to be useful. Additionally, CamTracker will loose track of the sun with very diffuse light conditions and requires a restart.
+Helios evaluates the current sun state - whether direct or diffuse sunlight is present. Most EM27/SUN applications require direct sunlight for measurement data to be useful. Additionally, CamTracker will lose track of the sun with very diffuse light conditions and requires a restart.
 
-With Helios you can make your EM27/SUN measure only when favorable conditions are present which significantly prolongs the lifetime of all hardware components.
+With Helios, you can make your EM27/SUN measure only when favorable conditions are present which significantly prolongs the lifetime of all hardware components.
 
 The helios hardware is made up of a transparent globe with black stripes glued to it and a translucent milky glass with a camera pointing upwards attached below.
 
@@ -23,7 +23,7 @@ The helios hardware is made up of a transparent globe with black stripes glued t
     />
 </div>
 
-Helios will periodically take images with that camera, process it, and evaluate shadow conditions. The processing will detect the lense circle and cut off the outer 10% of the radius - a lot of unwanted shadows can occur on the edges due to dirt from outside. Finally it will use a canny edge filter and count the pixels where "fast transitions between light and dark" can be found. If the pixel-count is above a certain threshold (configurable), the sunlight conditions are categorized as "good".
+Helios will periodically take images with that camera, process them, and evaluate shadow conditions. The processing will detect the lens circle and cut off the outer 10% of the radius - a lot of unwanted shadows can occur on the edges due to dirt from the outside. Finally, it will use a canny edge filter and count the pixels where "fast transitions between light and dark" can be found. If the pixel count is above a certain threshold (configurable), the sunlight conditions are categorized as "good".
 
 Example images in **bad** conditions:
 

@@ -113,7 +113,7 @@ assertions: list[Callable[[], None]] = [
 
 ## `state.json` and `persistent-state.json`
 
-The state-file is generated under `runtime-data/state.json`. PYRA Core writes its internal values to this files. The state-file is used to communicate between modules as well as with the "outside" world (UI, CLI). Its schema:
+The state file is generated under `runtime-data/state.json`. Pyra Core writes its internal values to this file. The state file is used to communicate between modules as well as with the "outside" world (UI, CLI). Its schema:
 
 ```typescript
 type coreState = {
@@ -166,7 +166,7 @@ type coreState = {
 };
 ```
 
-The persistent-state-file is generated under `logs/persistent-state.json`. It is currently only used by the Core and will not be resetted with a restart of the Core. Its schema:
+The persistent-state file is generated under `logs/persistent-state.json`. It is currently only used by the Core and will not be reset with a restart of the Core. Its schema:
 
 ```typescript
 type persistentCoreState = {
@@ -177,7 +177,7 @@ type persistentCoreState = {
 
 ## Validation strategy
 
-MyPy will make full use of the schemas included above (see [testing](/docs/developer-guide/testing-and-ci)). Whenever loading the config- or state-files, the respective schema validation will run. Hence, PYRA will detect when a JSON file does not have the expected schema and raise a precise Exception. All internal code interfaces (function calls, etc.) are covered by the strict MyPy validation.
+MyPy will make full use of the schemas included above (see [testing](/docs/developer-guide/testing-and-ci)). Whenever loading the config- or state files, the respective schema validation will run. Hence, Pyra will detect when a JSON file does not have the expected schema and raise a precise Exception. All internal code interfaces (function calls, etc.) are covered by the strict MyPy validation.
 
 :::info
 
@@ -187,7 +187,7 @@ With `pyra-cli config get` only the schema will be validated, not the value rule
 
 ## How the UI reads logs and state
 
-The UI reads the log files and the state file periodically using [Tauri's filesystem API](https://tauri.app/v1/api/js/modules/fs). We tried using sockets or filewatchers, but both did not work well on windows and reading it periodically is the most simplistic implementation.
+The UI reads the log files and the state file periodically using [Tauri's filesystem API](https://tauri.app/v1/api/js/modules/fs). We tried using sockets or file watchers, but both did not work well on windows, and reading it periodically is the most simplistic implementation.
 
 ## Logging
 
@@ -212,7 +212,7 @@ logger = utils.Logger()
 logger = utils.Logger(origin="camtracker")
 ```
 
-Messages from all log levels can be found in `logs/debug.log`, messages from levels INFO/WARNING/CRITICAL/ERROR can be found in `logs/info.log`.
+Messages from all log levels can be found in `logs/debug.log`, and messages from levels INFO/WARNING/CRITICAL/ERROR can be found in `logs/info.log`.
 
 ## Activity Log
 

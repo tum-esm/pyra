@@ -7,7 +7,7 @@ sidebar_label: External Interfaces
 
 ## OPUS
 
-We are using the `pywin32` Python library which provides an interface to the [Windows DDE APIs](https://en.wikipedia.org/wiki/Dynamic_Data_Exchange). Pyra Core uses DDE to communicate with OPUS: Loading experiment files, starting and stopping macros, stopping OPUS itself.
+We are using the `pywin32` Python library which provides an interface to the [Windows DDE APIs](https://en.wikipedia.org/wiki/Dynamic_Data_Exchange). Pyra Core uses DDE to communicate with OPUS: Loading experiment files, starting and stopping macros, and stopping OPUS itself.
 
 ```python
 import dde
@@ -31,7 +31,7 @@ logger.info(f"Started OPUS macro: {macro_path}")
 
 We are working on improving the reliability of that connection: https://github.com/tum-esm/pyra/issues/124
 
-In the current version we did not figure out how to process the answers from the OPUS DDE server. When using the same conversation to start and stop a macro, we do not need a Macro ID (which should be inside the answer). But when using a different conversation (e.g. from the CLI's stop-core-command), we need a Macro ID that we don't have. Hence, we currently terminate the two OPUS processes "opus.exe" and "OpusCore.exe" manually isntead of sending "Stop Macro" and "Stop OPUS" commands and waiting for a graceful shutdown.
+In the current version, we did not figure out how to process the answers from the OPUS DDE server. When using the same conversation to start and stop a macro, we do not need a Macro ID (which should be inside the answer). But when using a different conversation (e.g. from the CLI's stop-core command), we need a Macro ID that we don't have. Hence, we currently terminate the two OPUS processes "opus.exe" and "OpusCore.exe" manually instead of sending "Stop Macro" and "Stop OPUS" commands and waiting for a graceful shutdown.
 
 :::
 

@@ -7,7 +7,7 @@ sidebar_label: Upload
 
 ## Interferogram Directory Structure
 
-We have set up out OPUS macro files to produce a directory structure like this:
+We have set up our OPUS macro files to produce a directory structure like this:
 
 ```
 📁 <IFG OUTPOUT DIR>
@@ -23,7 +23,7 @@ We have set up out OPUS macro files to produce a directory structure like this:
 
 :::note
 
-When using [Helios](/docs/user-guide/tum-plc-and-helios), saved images will be stored inside `/logs/helios/` in the same directory structure as the ifg output dir. This is why the upload can be used for both types of data.
+When using [Helios](/docs/user-guide/tum-plc-and-helios), saved images will be stored inside `/logs/helios/` in the same directory structure as the ifg output-dir. This is why the upload can be used for both types of data.
 
 We will expand this to be useable for an arbitrary number of directories in the future: See [Roadmap](/docs/developer-guide/roadmap#upload-improvements).
 
@@ -31,9 +31,9 @@ We will expand this to be useable for an arbitrary number of directories in the 
 
 ## How the Upload works
 
-We are using the python library [fabric](https://www.fabfile.org/) that supplies a high level API for SSH clients.
+We are using the python library [fabric](https://www.fabfile.org/) that supplies a high-level API for SSH clients.
 
-The upload uses a `upload-meta.json` file in each `YYYYMMDD` directory to save the upload state.
+The upload uses an `upload-meta.json` file in each `YYYYMMDD` directory to save the upload state.
 
 ```json
 {
@@ -51,7 +51,7 @@ The upload uses a `upload-meta.json` file in each `YYYYMMDD` directory to save t
 3. When files are found in the `fileList` that are not present locally: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
 4. When the remote meta says `complete=True` but there are local files not in `fileList`: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
 5. For every file that is found locally but not in the server side meta, upload it with `scp`
-6. Every 25 files - for performance reasons - update the server side meta file
+6. Every 25 files - for performance reasons - update the server-side meta-file
 7. Upload the file `/scripts/get_upload_dir_checksum.py` to the server and calculate the checksum of the `YYYYMMDD` directory that is on the server (based on `fileList`).
 8. Calculate the local checksum using the same script
 9. When both checksums match, set `complete=True` in the remote meta and possibly remove the local `YYYYMMDD` directory
@@ -65,7 +65,7 @@ Whenever the upload encounters an invalid state, it raises an `InvalidUploadStat
 -   Files from the local `YYYYMMDD` directory were removed manually
 -   The remote meta file was manipulated by hand
 
-The idea of the `complete=true` flag is that the postprocessing should only consider data where the upload is complete. This completeness cannot de guaranteed by a mandatory time delay because when the measurement computers don't have internet for a while, they could upload it after that delay threshold.
+The idea of the `complete=true` flag is that the postprocessing should only consider data where the upload is complete. This completeness cannot be guaranteed by a mandatory time delay because when the measurement computers don't have internet for a while, they could upload it after that delay threshold.
 
 ## Measures to ensure upload integrity
 
@@ -73,4 +73,4 @@ The idea of the `complete=true` flag is that the postprocessing should only cons
 
 2. The `complete=true` flag will also only be set, when the checksums match
 
-3. There is a test script that generates a bunch of sample directories and sample files, runs the upload and checks the final upload state. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).
+3. There is a test script that generates a bunch of sample directories and sample files, runs the upload, and checks the final upload state. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).

@@ -15,7 +15,7 @@ The following manual steps are only required once per PYRA computer - when setti
 
 :::tip
 
-In some cases you might get an error message saying that "executing `.ps1` scripts is not allowed due to an ExecutionPolicy". This can be solved with the following command (credits to https://stackoverflow.com/a/49112322/8255842):
+In some cases, you might get an error message saying that "executing `.ps1` scripts is not allowed due to an ExecutionPolicy". This can be solved with the following command (credits to https://stackoverflow.com/a/49112322/8255842):
 
 ```
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
@@ -94,7 +94,7 @@ cd %userprofile%/Documents
 gh repo clone tum-esm/pyra-setup-tool
 ```
 
-**Run the tool with (from this point on it will autoupdate itself):**
+**Run the tool with (from this point on it will auto-update itself):**
 
 ```
 cd %userprofile%/Documents/pyra-setup-tool
@@ -155,9 +155,9 @@ All PYRA releases can be found here: <span className="tw-break-all">https://gith
 
 ## Error Email Setup
 
-In order for PYRA to send you error emails (see [Usage section](/docs/user-guide/usage#error-emails)), you need an email account that allows this kind of connection.
+For Pyra to send you error emails (see [Usage section](/docs/user-guide/usage#error-emails)), you need an email account that allows this kind of connection.
 
-We are using Gmail for this. You have to use an "App Password" for PYRA which requires 2FA for your Google Account. Please refer to this article on how to set up an "App Password": <span className="tw-break-all">https://support.google.com/accounts/answer/185833</span>. Inside the config-tab you have to add this "App Password" to receive emails:
+We are using Gmail for this. You have to use an "App Password" for PYRA which requires 2FA for your Google Account. Please refer to this article on how to set up an "App Password": <span className="tw-break-all">https://support.google.com/accounts/answer/185833</span>. Inside the config tab you have to add this "App Password" to receive emails:
 
 <img src='/img/docs/email-config.png' className='tw-rounded-lg tw-mb-4' />
 
