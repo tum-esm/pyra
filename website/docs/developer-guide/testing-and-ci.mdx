@@ -7,7 +7,7 @@ sidebar_label: Testing & CI
 
 ## Testing Strategy
 
-The full software only runs when OPUS and CamTracker are installed and an EM27 is connected. However, in test-mode, the software can run on its own without interacting with any modules that require a special setup. Most functionality is tested by running the software and conducting measurements. Since PYRA only starts/stops the measurement process but does not affect output files, these output files from OPUS do not have to be tested.
+The full software only runs when OPUS and CamTracker are installed and an EM27 is connected. However, in test-mode, the software can run on its own without interacting with any modules that require a special setup. Most functionality is tested by running the software and conducting measurements. Since Pyra only starts/stops the measurement process but does not affect output files, these output files from OPUS do not have to be tested.
 
 ## Testing with Pytest
 
@@ -39,7 +39,7 @@ python -m pytest tests/integration/test_emailing.py
 python -m pytest tests/integration/test_upload.py
 ```
 
-## Static Typing for PYRA Core and CLI
+## Static Typing for Pyra Core and CLI
 
 All out python code contains static type annotations. We are using [MyPy](https://github.com/python/mypy) to test the code's integrity. Run this analysis using:
 
@@ -49,7 +49,7 @@ bash scripts/run_type_analysis.sh
 
 We are using the strict MyPy settings with a few exceptions that can be found in `pyproject.toml`.
 
-## Static Typing for PYRA UI
+## Static Typing for Pyra UI
 
 The whole frontend is written in [Typescript](https://github.com/microsoft/TypeScript). Testing the code's integrity can be done by building the UI:
 

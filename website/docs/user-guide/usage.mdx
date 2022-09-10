@@ -5,15 +5,15 @@ sidebar_label: Usage
 
 # How to use it
 
-## Parts of PYRA
+## Parts of Pyra
 
-The three parts of PYRA are:
+The three parts of Pyra are:
 
--   **PYRA Core:** Running in the background, looping over all automation steps infinitely in a defined interval.
--   **PYRA CLI:** Command Line Interface (CLI) used to interact with PYRA Core
--   **PYRA UI:** Graphical user Interface (GUI) used to interact with PYRA Core and send PYRA CLI commands
+-   **Pyra Core:** Running in the background, looping over all automation steps infinitely in a defined interval.
+-   **Pyra CLI:** Command Line Interface (CLI) used to interact with Pyra Core
+-   **Pyra UI:** Graphical user Interface (GUI) used to interact with Pyra Core and send Pyra CLI commands
 
-## PYRA Core
+## Pyra Core
 
 For a description of how the core works, please read the [Developer Guide](/docs/category/developer-guide).
 
@@ -37,7 +37,7 @@ The issue progress can be tracked here: https://github.com/tum-esm/pyra/issues/1
 
 ## Logs
 
-PYRA will store all of its activity in log files. The files `info.log` and `debug.log` will only contain logs from the past hour. Older log lines will be archived periodically to keep the main log files easy to parse.
+Pyra will store all of its activity in log files. The files `info.log` and `debug.log` will only contain logs from the past hour. Older log lines will be archived periodically to keep the main log files easy to parse.
 
 ```
 📁 <DOCUMENTS DIR>
@@ -70,7 +70,7 @@ CLI mode can be used when you have already built a system that evaluates measure
 
 :::
 
-In the automation tab, PYRA's measurement mode can be selected.
+In the automation tab, Pyra's measurement mode can be selected.
 
 <img src='/img/docs/measurement-modes.png' className='tw-rounded-lg tw-mb-4' />
 
@@ -155,7 +155,7 @@ update = {"seconds_per_core_interval": 20}
 os.system(f"pyra-cli config update {json.dumps(update)}")
 ```
 
-PYRA will validate the structure of the update and enforce some rules on the parameter values (value range, file exists, etc.)
+Pyra will validate the structure of the update and enforce some rules on the parameter values (value range, file exists, etc.)
 
 <img
     src='/img/docs/cli-config-update-example.png'
@@ -166,7 +166,7 @@ The developer docs contain a [full list of schema and value requirements](/docs/
 
 ## Error Emails
 
-Whenever PYRA encounters any errors, it sends out emails to a list of recipients. An "error resolved" email helps with self-resolving issues and team communication - so that others get notified when one person fixed the problem.
+Whenever Pyra encounters any errors, it sends out emails to a list of recipients. An "error resolved" email helps with self-resolving issues and team communication - so that others get notified when one person fixed the problem.
 
 **When errors occur:**
 

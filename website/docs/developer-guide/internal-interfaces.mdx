@@ -7,7 +7,7 @@ sidebar_label: Internal Interfaces
 
 ## `config.json`
 
-The config file under `config/config.json` contains all parameters to tweak PYRA's operation. Its schema:
+The config file under `config/config.json` contains all parameters to tweak Pyra's operation. Its schema:
 
 ```typescript
 export type config = {
@@ -231,6 +231,6 @@ export type activityHistory = {
 }[];
 ```
 
-## PYRA CLI commands from UI
+## Pyra CLI commands from UI
 
-All write operations from the UI (update config, etc.) are done by running PYRA CLI commands. This is the reason why we have to use the global Python interpreter instead of a virtual environment: We did not make it work that the [shell-interface from Tauri](https://tauri.app/v1/api/js/modules/shell) can make use of a virtual environment.
+All write operations from the UI (update config, etc.) are done by running Pyra CLI commands. This is the reason why we have to use the global Python interpreter instead of a virtual environment: We did not make it work that the [shell-interface from Tauri](https://tauri.app/v1/api/js/modules/shell) can make use of a virtual environment.

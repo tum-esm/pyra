@@ -32,3 +32,10 @@ p {
 .theme-code-block pre {
     @apply !tw-bg-gray-150;
 }
+
+p code,
+li code,
+h2 code,
+h3 code {
+    @apply tw-border-0 tw-px-1 tw-py-0.5 tw-rounded tw-bg-gray-150 tw-text-gray-800;
+}
