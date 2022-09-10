@@ -1,4 +1,4 @@
-name: 'test-on-push-to-main'
+name: 'test-on-main'
 on:
     push:
         branches:
