@@ -1,51 +1,26 @@
-# python
+# development
 .venv
 *.pyc
 .pytest_cache
 __pycache__
 .coverage
 test-tmp/
-
-# config
-config/config.json
-config/config.tmp.json
-config/*.lock
-.env
-packages/cli/alias/pyra-cli.bat
-
-# logs
-*.log
-logs/.logs.lock
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
+.DS_Store
+.vscode/
+.idea
+hidden/
 
 # runtime data
 pids
+*.log
+.env
 *.pid
 *.seed
-*.pid.lock
-.DS_Store
+*.lock
 *.dat
 *.txt
 runtime-data/
-pyra-core-process-state.json
-logs/persistent-state.json
-logs/activity/*.json
-logs/**/*.jpg
-!logs/helios/.gitkeep
-logs/helios/*
-
-# pyra ui
-packages/electron-ui/node_modules/
-packages/electron-ui/.webpack/
-packages/electron-ui/out/
-packages/ui/node_modules/
-
-# development
-.vscode/
-.idea
-hidden
-website/.docusaurus
-website/node_modules
+config/**/*.json
+!config/**/*.default.json
+logs/**/*
+!logs/**/.gitkeep
