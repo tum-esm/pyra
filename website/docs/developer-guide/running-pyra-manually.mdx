@@ -2,22 +2,45 @@
 sidebar_position: 4
 ---
 
-# Running PYRA manually
+# Running Pyra manually
 
-## Running PYRA Core
+## Install dependencies
 
-TODO
+Dependency management is done using [Poetry](https://python-poetry.org). Use `poetry install` to install all dependencies in the currently activated interpreter environment.
 
-## Running the Upload/Helios thread on their own
+## Pyra Core
 
-TODO
+Normally, Pyra should be started via the CLI:
+
+```bash
+pyra-cli core start
+pyra-cli core is-running
+pyra-cli core stop
+```
+
+The start-command will execute `python run-pyra-core.py` in a background process.
+
+## Upload/Helios threads
+
+In Pyra Core's regular operation, it will start and stop the upload and Helios in dedicated threads. These threads will write their output into the Core's log files. You can run these two threads headlessly (without Pyra Core) and they will print all of their logs to the console:
+
+```bash
+python run-headless-helios-thread.py
+python run-headless-upload-thread.py
+```
 
 ## Developing the frontend
 
-TODO: `yarn develop`
+Inside the `packages/ui` directory:
 
-TODO: `yarn build`
+-   `yarn` will install all dependencies
+-   `yarn tauri dev` will start a development server (with hot reload)
+-   `yarn tauri build` will bundle the Tauri application and put the installer for your operating system into teh `packages/ui/src-tauri/target/release/bundle` directory
 
 ## Building the documentation
 
-TODO
+Inside the `website` directory:
+
+-   `yarn` will install all dependencies
+-   `yarn develop` will start a development server (with hot reload)
+-   `yarn build` will render the static HTML and bundle the SPA into the `website/build` directory
