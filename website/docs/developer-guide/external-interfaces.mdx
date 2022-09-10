@@ -13,10 +13,45 @@ TODO: Stop (opus.exe + opuscore.exe)
 
 ## CamTracker
 
-TODO: learn az elev logs (see if drifting)
-TODO: suninten (sun state)
-TODO: stop.txt
+The `CamTrackerConfig.txt` file contains coordinates that Pyra Core uses in its Astronomy utility class. The coordinates can be found by looking for the `$1` mark inside the file:
+
+```
+...
+
+$1
+48.15
+11.57
+0.54
+
+...
+```
+
+The `LEARN_Az_Elev.dat` file contains CamTracker's logs about mirror position and currently estimated sun position. Pyra Core Example:
+
+```dat
+Julian Date, Tracker Elevation, Tracker Azimuth, Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px
+ 2458332.922778,107.490800,149.545000,0.197305,0.188938,705.047211
+ 2458332.922836,107.494400,149.761400,0.192179,0.365420,736.914133
+ 2458332.922905,107.498400,150.208200,0.188914,0.778934,736.914133
+ 2458332.922975,107.499200,149.811600,0.179557,0.335728,736.914133
+ 2458332.923032,107.508400,149.647800,0.182958,0.145281,736.914133
+ ...
+```
+
+The `SunIntensity.dat` file contains CamTracker's own evaluation of the sun conditions. This is currently not used in Pyra Core but might be in the future. Example:
+
+```dat
+Julian Date, Date UTC[yyyy/MM/dd HH:mm:ss], Intensity[px*ms], big and small obj good
+ 2457057.199028, 2015/02/03 16:46:36, 0.000000,     good
+ 2457057.200347, 2015/02/03 16:48:30, 0.000000,     good
+ 2458332.906019, 2018/08/02 09:44:40, 0.000000,     good
+ 2458332.906088, 2018/08/02 09:44:46,      nan,      bad
+ 2458332.906169, 2018/08/02 09:44:53,      nan,      bad
+ ...
+```
+
+When stopping CamTracker, we have to add a `stop.txt` inside CamTracker's code directory and the application will shut down gracefully.
 
 ## TUM PLC
 
-TODO: Using snap 7 library
+We are using the Snap7 Python library to communicate with the TUM PLC. Here is a manual for the underlying Snap7 API: http://snap7.sourceforge.net/sharp7.html
