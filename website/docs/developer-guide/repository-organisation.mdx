@@ -59,19 +59,26 @@ graph TD;
     F["any-branch"]-- "on-demand to bundle the UI" -->G["prerelease"];
 ```
 
-<!--TODO: add mermaid drawing of branch hierarchy-->
+## Issues and Releases
 
-## TODO Issues and Releases
+Things we work on are managed via issues - which are bundled into milestones (each milestone represents a release). The issues should be closed once they are on the `main` branch via commit messages or pull requests ("closes #87", "fixes #70", etc. see [this list of keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)).
 
-**Issues:** Things we work on are managed via issues - which are bundled into milestones (each milestone represents a release). The issues should be closed once they are on the `main` branch via commit messages ("closes #87", "fixes #70", etc. see [this list of keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)). Issues that have been finished but are not on the `main` branch yet, can be labeled using the white label "implemented". This way, we can oversee incompleted issues, but don't forget to merge them.
+**Issue Labels:**
 
-<!--TODO: mention "backlog" label -->
-<!--TODO: mention "Update: ..." label -->
-<!--TODO: add colors to labels in text-->
+-   <span className='tw-bg-gray-200 tw-text-gray-700 tw-px-1.5 tw-py-0.5 tw-rounded tw-font-mono tw-text-sm tw-font-bold'>
+        implemented
+    </span>
+    : Issues that have been finished but are not on the `main` branch yet.
+-   <span className='tw-bg-gray-800 tw-text-gray-150 tw-px-1.5 tw-py-0.5 tw-rounded tw-font-mono tw-text-sm tw-font-bold'>
+        backlog
+    </span>
+    : Issues that are not urgent (feature ideas, improvements, etc.)
+-   <span className='tw-bg-purple-800 tw-text-purple-50 tw-px-1.5 tw-py-0.5 tw-rounded tw-font-mono tw-text-sm tw-font-bold'>
+        Update: ...
+    </span>
+    : Used, once we have a set of things for a good release package
 
-## Release Cycle
-
-TODO: How often, features, etc. (take the one from README)
+Planned releases are described in the [Roadmap](/docs/developer-guide/roadmap) section.
 
 :::info
 
