@@ -20,11 +20,11 @@ fabric = "^2.7.1"
 pydantic = "^1.9.2"
 tqdm = "^4.64.0"
 colorama = "^0.4.5"
+deepdiff = "^5.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "7.1.2"
 black = "22.3.0"
-deepdiff = "^5.8.1"
 mypy = "^0.971"
 types-paramiko = "^2.11.3"
 types-invoke = "^1.7.3"

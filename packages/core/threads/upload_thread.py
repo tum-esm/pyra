@@ -5,8 +5,8 @@ import os
 import shutil
 import threading
 from typing import Optional
+import deepdiff
 import invoke
-import paramiko
 import time
 import fabric.connection, fabric.transfer
 import re
@@ -345,111 +345,87 @@ class UploadThread:
 
         while True:
             try:
+                logger.info("Starting iteration")
                 config = interfaces.ConfigInterface.read()
-                upload_config = config["upload"]
-                logger.info("Starting iteration, loading new config")
 
-                if (upload_config is None) or config["general"]["test_mode"]:
-                    logger.info("Ending mainloop")
+                if config["upload"] is None:
+                    logger.info("Ending thread (upload config is null)")
+                    return
+                if config["general"]["test_mode"]:
+                    logger.info("Ending thread (Pyra is in test mode)")
                     return
 
                 try:
-                    connection = fabric.connection.Connection(
-                        f"{upload_config['user']}@{upload_config['host']}",
-                        connect_kwargs={"password": upload_config["password"]},
-                        connect_timeout=5,
-                    )
-                    transfer_process = fabric.transfer.Transfer(connection)
-                except TimeoutError as e:
-                    logger.error(f"could not reach host, waiting 5 minutes: {e}")
-                    if headless:
-                        break
-                    time.sleep(300)
-                    continue
-                except paramiko.ssh_exception.AuthenticationException as e:
-                    logger.error(f"failed to authenticate, waiting 2 minutes: {e}")
-                    if headless:
-                        break
-                    time.sleep(120)
-                    continue
-
-                restart_mainloop = False
-                for category in ["helios", "ifgs"]:
-                    if restart_mainloop:
-                        break
-
-                    if category == "helios":
-                        if upload_config["upload_helios"]:
-                            src_path = os.path.join(PROJECT_DIR, "logs", "helios")
-                            dst_path = upload_config["dst_directory_helios"]
-                            remove_files_after_upload = upload_config[
-                                "remove_src_helios_after_upload"
-                            ]
-                        else:
-                            continue
-                    else:
-                        if upload_config["upload_ifgs"]:
-                            src_path = upload_config["src_directory_ifgs"]
-                            dst_path = upload_config["dst_directory_ifgs"]
-                            remove_files_after_upload = upload_config[
-                                "remove_src_ifgs_after_upload"
-                            ]
-                            if not os.path.isdir(src_path):
-                                logger.error(
-                                    f'config.upload.src_directory_ifgs ("{src_path}") is not a directory'
-                                )
-                                continue
-                        else:
-                            continue
-
-                    src_date_strings = DirectoryUploadClient.get_directories_to_be_uploaded(
-                        src_path
-                    )
-                    for date_string in src_date_strings:
-                        new_config = interfaces.ConfigInterface.read()
-                        new_upload_config = new_config["upload"]
-
-                        # check for termination before processing each directory
-                        if (new_upload_config is None) or new_config["general"]["test_mode"]:
-                            return
-
-                        # if the config changes, the mainloop should start over
-                        if any(
-                            [
-                                upload_config[key] != new_upload_config[key]  # type: ignore
-                                for key in upload_config.keys()
-                            ]
-                        ):
-                            logger.info("Change in config.upload has been detected")
-                            restart_mainloop = True  # stops outer loop (ifg, helios)
-                            break  # stops inner loop (ifg-/helios-dates)
-
-                        try:
-                            logger.info(f"Starting to process {date_string}")
-                            DirectoryUploadClient(
-                                date_string,
-                                src_path,
-                                dst_path,
-                                remove_files_after_upload,
-                                connection,
-                                transfer_process,
-                            ).run()
-                        except InvalidUploadState as e:
-                            logger.error(
-                                f"uploading {date_string} is stuck in invalid state: {e}"
-                            )
+                    upload_is_complete = UploadThread.upload_all_files(config)
+                except interfaces.SSHInterface.ConnectionError as e:
+                    logger.error(f"could not connect to host: {e}")
+                    if not headless:
+                        logger.info(f"waiting 5 minutes")
+                        time.sleep(300)
+                        continue
 
                 if headless:
-                    break
+                    return
 
-                # Close SSH and SCP connections
-                connection.close()
-
-                if not restart_mainloop:
-                    # Wait 10 minutes before checking all directories again
-                    logger.debug("Finished iteration, sleeping 10 minutes")
-                    time.sleep(600)
+                # Wait 20 minutes before checking all directories again
+                if upload_is_complete:
+                    logger.debug("Finished iteration, sleeping 15 minutes")
+                    time.sleep(900)
             except Exception as e:
-                logger.error("Error inside upload thread")
+                logger.error(f"Error inside upload thread: {e}")
                 logger.exception(e)
                 return
+
+    @staticmethod
+    def upload_all_files(config: types.ConfigDict) -> bool:
+        """
+        Returns True if all file uploads have been finished. Returns False
+        if the config has change during upload -> restart with new parameters.
+        """
+
+        upload_config = config["upload"]
+        assert upload_config is not None
+
+        # this will be quite simplified by the "Update: Upload Improvements"
+        categories = []
+        categories += ["helios"] if upload_config["upload_helios"] else []
+        categories += ["ifgs"] if upload_config["upload_ifgs"] else []
+
+        for category in categories:
+            if category == "helios":
+                src_path = os.path.join(PROJECT_DIR, "logs", "helios")
+                dst_path = upload_config["dst_directory_helios"]
+                remove_files_after_upload = upload_config["remove_src_helios_after_upload"]
+            else:
+                src_path = upload_config["src_directory_ifgs"]
+                dst_path = upload_config["dst_directory_ifgs"]
+                remove_files_after_upload = upload_config["remove_src_ifgs_after_upload"]
+
+            src_date_strings = DirectoryUploadClient.get_directories_to_be_uploaded(src_path)
+            for date_string in src_date_strings:
+
+                # abort the upload process when upload config changes
+                new_config = interfaces.ConfigInterface.read()
+                difference = deepdiff.DeepDiff(upload_config, new_config["upload"])
+                if len(difference) != 0:
+                    logger.info("Change in config.upload has been detected")
+                    return False
+
+                with interfaces.SSHInterface.use(config) as (
+                    connection,
+                    transfer_process,
+                ):
+                    try:
+                        logger.info(f"Starting to process {date_string}")
+                        DirectoryUploadClient(
+                            date_string,
+                            src_path,
+                            dst_path,
+                            remove_files_after_upload,
+                            connection,
+                            transfer_process,
+                        ).run()
+                    except InvalidUploadState as e:
+                        logger.error(f"uploading {date_string} is stuck in invalid state: {e}")
+
+        return True
