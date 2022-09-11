@@ -51,6 +51,7 @@ module = [
     "jdcal",
     "snap7",
     "snap7.*",
+    "deepdiff"
 ]
 ignore_missing_imports = true
 
