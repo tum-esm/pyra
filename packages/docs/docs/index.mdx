@@ -8,27 +8,38 @@ title: Index
 
 ## What is Pyra?
 
-Pyra (name based on [Python](<https://en.wikipedia.org/wiki/Python_(programming_language)>) and [Ra](https://en.wikipedia.org/wiki/Ra)) is a software that automates the operation of [EM27/SUN](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/remote-sensing/em27-sun-solar-absorption-spectrometer.html) measurement setups. Operating EM27/SUN devices normally requires a lot of human interaction. Pyra makes it possible to operate these devices 24/7 with almost no human interaction.
+Pyra (name based on [Python](<https://en.wikipedia.org/wiki/Python_(programming_language)>) and [Ra](https://en.wikipedia.org/wiki/Ra)) is a software that automates the operation of [EM27/SUN](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/remote-sensing/em27-sun-solar-absorption-spectrometer.html) measurement setups. Operating EM27/SUN devices requires a lot of human interaction. Pyra makes it possible to autonomously operate these devices 24/7.
 
-Pyra has enabled us - the [Associate Professorship of Environmental Sensing and Modeling](https://www.ee.cit.tum.de/en/esm/home/) at the [Technical University of Munich](https://www.tum.de/en/) - to collect 3 years of continuous data from 5 stations around the city of Munich using [MUCCnet](https://atmosphere.ei.tum.de/). Pyra 1 to 3 has been experimental software tools improved internally over the last 5 years.
+Pyra has enabled the [Technical University of Munich](https://www.tum.de/en/) to collect continuous data from 5 stations around the city of Munich since 2019 using [MUCCnet](https://atmosphere.ei.tum.de/). Pyra versions 1 to 3 have been experimental tools improved internally since 2016.
 
 <img src='/img/docs/muccnet-image-roof.jpg' className='tw-mb-2 tw-rounded-lg' />
 
-The goal of version 4 of this software is to make it even more stable, easy to understand and extend, and usable by other EM27/SUN-equipped teams.
+The goal of Pyra version 4 is to make it even more stable, easy to understand and extend, and usable by the broad EM27/SUN community.
 
-<!-- TODO: Link to Pyra 4 lincense file -->
-
-The software has a GPLv3 license and is [open-source on GitHub](https://github.com/tum-esm/pyra). We are currently in the review process of a paper for [JOSS (The Journal of Open Source Software)](https://joss.theoj.org/). Whenever using Pyra, please make sure to cite the codebase - or the paper once available.
+The software is licensed under GPLv3 and is [open-sourced on GitHub](https://github.com/tum-esm/pyra). Whenever using Pyra, please make sure to cite the codebase.
 
 ## About This Documentation
 
-This documentation page serves as a guide for both users and developers. By user, we mean people running Pyra on their EM27/SUN stations. By developers, we mean people working on the Pyra 4 codebase itself.
+This documentation page serves as a guide for both users and developers. By user, we mean people operating Pyra on their EM27/SUN stations. By developers, we target people working on the Pyra 4 codebase itself.
 
-**For users** it contains an overview of [what Pyra 4 does](/docs/user-guide/functionality), how to [set it up](/docs/user-guide/setup), how to [use it and work with the command line interface](/docs/user-guide/usage), how the [upload](/docs/user-guide/upload) works, and what the [TUM PLC and Helios](/docs/user-guide/tum-plc-and-helios).
+**For users:**
 
-**For developers** it contains a high level view of the [architecture](/docs/developer-guide/architecture), the [interfaces between program parts](/docs/developer-guide/internal-interfaces), the [interfaces to external programs](/docs/developer-guide/external-interfaces), how to [manually run the parts of Pyra](/docs/developer-guide/running-pyra-manually), how [the repository is organised](/docs/developer-guide/repository-organisation), and how [testing and continuous integration](/docs/developer-guide/repository-organisation) is set up.
+-   Overview of [what Pyra 4 does](/docs/user-guide/functionality)
+-   How to [set it up](/docs/user-guide/setup)
+-   How to [use it and work with the command line interface](/docs/user-guide/usage)
+-   How the [upload](/docs/user-guide/upload) works
+-   What the [TUM PLC and Helios](/docs/user-guide/tum-plc-and-helios)
 
-The **[Contact section](/docs/contact)** contains author and contact information as well as ways to report bugs and suggest features.
+**For developers:**
+
+-   High level view of the [architecture](/docs/developer-guide/architecture)
+-   [Interfaces between program parts](/docs/developer-guide/internal-interfaces)
+-   [Interfaces to external programs](/docs/developer-guide/external-interfaces)
+-   How to [manually run the parts of Pyra](/docs/developer-guide/running-pyra-manually)
+-   How [the repository is organised](/docs/developer-guide/repository-organisation)
+-   How [testing and continuous integration](/docs/developer-guide/repository-organisation) is set up
+
+The [contact section](/docs/contact) contains author and contact information as well as ways to report bugs and suggest new features.
 
 :::info
 

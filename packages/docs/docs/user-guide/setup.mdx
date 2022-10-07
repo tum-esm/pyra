@@ -9,7 +9,7 @@ sidebar_label: Setup
 
 :::note
 
-The following manual steps are only required once per Pyra computer - when setting it up initially. All future updates and new installations of Pyra can be done with the [Pyra Setup Tool](#pyra-setup-tool) with no manual steps.
+The following manual steps are only required at initial system setup. All future updates and new installations of Pyra can be done with the [Pyra Setup Tool](#pyra-setup-tool).
 
 :::
 
@@ -25,13 +25,13 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
 
 ### OPUS and CamTracker
 
-We are using OPUS 7.8.44 and Camtracker 3.9.2015.02.03.
+Integration tests are done using **OPUS 7.8.44** and **Camtracker 3.9.2015.02.03**.
 
 ### Python 3.10
 
 https://www.python.org/
 
-You want your python3.10 interpreter to be available under `python`. Therefore you need to add environment variables to point the `python` command (and `pip`) to the Python3.10 interpreter by checking the box marked in the image below.
+Your system's python3.10 interpreter should be available as shell environment variable `python`. Therefore you need to add system environment variables to point the `python` command (and `pip`) to the Python3.10 interpreter by checking the box marked in the image below.
 
 <img
     src='/img/docs/python-310-path-automatic.png'
@@ -73,7 +73,11 @@ https://python-poetry.org/
 
 https://git-scm.com/ and https://cli.github.com/
 
-_These two are used by the setup tool._
+:::info
+
+Git and the GitHub CLI are used by the Pyra Setup Tool.
+
+:::
 
 ## Pyra Setup Tool
 
@@ -87,27 +91,33 @@ The [**Pyra Setup Tool**](https://github.com/tum-esm/pyra-setup-tool) can be use
         📁 ...
 ```
 
-**On the first time, clone the setup tool repo:**
+On the first time, clone the setup tool repo:
 
-```
+```bash
 cd %userprofile%/Documents
 gh repo clone tum-esm/pyra-setup-tool
 ```
 
+The setup tool uses the `colorama` library:
+
+```bash
+pip install colorama
+```
+
 **Run the tool with (from this point on it will auto-update itself):**
 
-```
+```bash
 cd %userprofile%/Documents/pyra-setup-tool
 python run.py
 ```
 
-The installation steps this tool automates:
+The setup tool automates the following steps:
 
-1. Downloads each releases codebase
-2. Installs all python dependencies into the global python interpreter environment
-3. Downloads and runs the installer (manual steps required)
-4. Creates desktop shortcuts to the `pyra-x.y.z` directory
-5. (Optional) Migrates the `config.json` file (so that all settings do not have to be reentered with every upgrade)
+1. Download each releases codebase
+2. Install all python dependencies into the global python interpreter environment
+3. Download and runs the GUI installer
+4. Create desktop shortcuts to the `pyra-x.y.z` directory
+5. (Optional) Migrate the `config.json` file to keep previous settings
 
 ## Pyra CLI Command
 
