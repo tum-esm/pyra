@@ -28,6 +28,7 @@ sidebar_position: 6
     📁 core                              (entry point is "main.py")
     📁 cli                               (entry point is "main.py")
     📁 ui                                (project structure based on Tauri and Vite)
+    📁 docs                              (documentation generate with Docusaurus)
 
 📁 runtime-data                      (where pyra core will put temporary data)
 
@@ -40,15 +41,18 @@ sidebar_position: 6
     📁 cli                               (can be run in a CI environment)
     📁 integration                       (can only be run on working EM27 systems)
     📁 repository                        (can be run in a CI environment)
-
-📁 website                           (documentation generate with Docusaurus)
 ```
 
 ## Branch Structure
 
 **Branches:** `development-...`, `integration-x.y.z`, `main`, `release`, `prerelease`
 
-**Hierarchy:** `development-...` contains stuff in active development and will be merged into `integration-x.y.z`. `integration-x.y.z`: Is used during active integration on the stations and will be merged into `main`. `main` contains the latest running version that passed the integration and will be merged into `release` once enough changes have accumulated. Any branch can be released into `prerelease` to run the CI-Pipeline on demand. `prerelease` will not be merged into anything else and is just used for development purposes.
+**Hierarchy:**
+
+-   `development-...` contains stuff in active development and will be merged into `integration-x.y.z`.
+-   `integration-x.y.z` is used during active integration on the stations and will be merged into `main`.
+-   `main` contains the latest running version that passed the integration and will be merged into `release` once enough changes have accumulated. Any branch can be released into `prerelease` to run the CI-Pipeline on demand.
+-   `prerelease` will not be merged into anything else and is just used for development purposes.
 
 ```mermaid
 graph TD;
@@ -74,7 +78,7 @@ Things we work on are managed via issues - which are bundled into milestones (ea
     </span>
     : Issues that are not urgent (feature ideas, improvements, etc.)
 -   <span className='tw-bg-purple-800 tw-text-purple-50 tw-px-1.5 tw-py-0.5 tw-rounded tw-font-mono tw-text-sm tw-font-bold'>
-        Update: ...
+        update: ...
     </span>
     : Used, once we have a set of things for a good release package
 
@@ -82,7 +86,7 @@ Planned releases are described on [GitHub](https://github.com/tum-esm/pyra/miles
 
 :::info
 
-We integrate new releases on two different machines (**ma** and **mb**). When the new software is running smoothly for some time, we make it an official release.
+We integrate new releases on two different machines. When the new software is running smoothly for some time, we make it an official release.
 
 :::
 

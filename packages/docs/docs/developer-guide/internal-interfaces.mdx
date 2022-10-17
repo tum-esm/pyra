@@ -7,7 +7,7 @@ sidebar_label: Internal Interfaces
 
 ## `config.json`
 
-The config file under `config/config.json` contains all parameters to tweak Pyra's operation. Its schema:
+The config file under `config/config.json` contains all parameters to tweak Pyra's operation. Schema:
 
 ```typescript
 export type config = {
@@ -177,7 +177,7 @@ type persistentCoreState = {
 
 ## Validation strategy
 
-MyPy will make full use of the schemas included above (see [testing](/docs/developer-guide/testing-and-ci)). Whenever loading the config- or state files, the respective schema validation will run. Hence, Pyra will detect when a JSON file does not have the expected schema and raise a precise Exception. All internal code interfaces (function calls, etc.) are covered by the strict MyPy validation.
+[MyPy](https://github.com/python/mypy) will make full use of the schemas included above (see [testing](/docs/developer-guide/testing-and-ci)). Whenever loading the config- or state files, the respective schema validation will run. Hence, Pyra will detect when a JSON file does not have the expected schema and raise a precise Exception. All internal code interfaces (function calls, etc.) are covered by the strict MyPy validation.
 
 :::info
 
@@ -187,7 +187,7 @@ With `pyra-cli config get` only the schema will be validated, not the value rule
 
 ## How the UI reads logs and state
 
-The UI reads the log files and the state file periodically using [Tauri's filesystem API](https://tauri.app/v1/api/js/modules/fs). We tried using sockets or file watchers, but both did not work well on windows, and reading it periodically is the most simplistic implementation.
+The UI reads the log files and the state file periodically using [Tauri's filesystem API](https://tauri.app/v1/api/js/modules/fs). We tested using sockets or file watchers, but both did not work well on windows, and reading it periodically is the most basic implementation.
 
 ## Logging
 

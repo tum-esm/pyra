@@ -32,7 +32,7 @@ python -m pytest -m "ci" tests
 python -m pytest -m "integration" tests
 ```
 
-Then the following can be used to test whether **emailing and uploading** is configured correctly:
+The following can be used to test whether **emailing and uploading** is configured correctly:
 
 ```bash
 python -m pytest tests/integration/test_emailing.py
@@ -41,7 +41,7 @@ python -m pytest tests/integration/test_upload.py
 
 ## Static Typing for Pyra Core and CLI
 
-All out python code contains static type annotations. We are using [MyPy](https://github.com/python/mypy) to test the code's integrity. Run this analysis using:
+All our python code contains static type annotations. We are using [MyPy](https://github.com/python/mypy) to test the code's integrity. Run this analysis using:
 
 ```bash
 bash scripts/run_type_analysis.sh
@@ -68,6 +68,6 @@ yarn build
 
 :::info
 
-The `release` branch should only contain code from the latest official release. Use the prerelease branch to bundle the installable UI on-demand.
+The `release` branch should only contain code from the latest official release. Use the `prerelease` branch to bundle the installable UI on-demand.
 
 :::

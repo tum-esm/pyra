@@ -13,9 +13,9 @@ sidebar_position: 1
 
 **Inside Pyra Core's main loop:**
 
--   the Core will start the Upload- and Helios-Thread when they should be running but are not
--   the Core will infinitely loop over the modules `MeasurementConditions`, `EnclosureControl`, `SunTracking`, `OpusMeasurements`, and `SystemChecks`
--   the threads will stop themselves based on the config
+-   The Core will infinitely loop over the modules `MeasurementConditions`, `EnclosureControl`, `SunTracking`, `OpusMeasurements`, and `SystemChecks`
+-   The Core will start the Upload- and Helios-Thread when they should be running but are not
+-   The threads will stop themselves based on the config
 
 **The communication via the `state.json` file:**
 
@@ -24,11 +24,8 @@ sidebar_position: 1
     className='tw-mb-2 tw-rounded-lg'
 />
 
-:::note
-
-What each module does is described on a high level in the paper (link coming soon) and in detail in the code's comments. We try to avoid duplicating information (code comments and documentation) because slightly out-of-sync descriptions can be very confusing.
-
-:::
+<br />
+<br />
 
 ## Pyre Core Directory structure
 

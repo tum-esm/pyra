@@ -6,7 +6,7 @@ sidebar_position: 4
 
 ## Install dependencies
 
-Dependency management is done using [Poetry](https://python-poetry.org). Use `poetry install` to install all dependencies in the currently activated interpreter environment.
+Dependency management is done using [Poetry](https://python-poetry.org). `poetry install` installs all dependencies in the currently activated interpreter environment.
 
 ## Pyra Core
 
@@ -22,14 +22,14 @@ The start command will execute `python run-pyra-core.py` in a background process
 
 ## Upload/Helios threads
 
-In Pyra Core's regular operation, it will start and stop the upload and Helios in dedicated threads. These threads will write their output into the Core's log files. You can run these two threads headlessly (without Pyra Core) and they will print all of their logs to the console:
+In Pyra Core's regular operation, it will start and stop Upload and Helios in dedicated threads. These threads will write their output into the Core's log files. You can run these two threads in headless mode (without Pyra Core) and they will print all of their logs to the console:
 
 ```bash
 python run-headless-helios-thread.py
 python run-headless-upload-thread.py
 ```
 
-## Developing the frontend
+## Building the frontend
 
 Inside the `packages/ui` directory:
 
@@ -39,8 +39,8 @@ Inside the `packages/ui` directory:
 
 ## Building the documentation
 
-Inside the `website` directory:
+Inside the `packages/docs` directory:
 
 -   `yarn` will install all dependencies
 -   `yarn develop` will start a development server (with hot reload)
--   `yarn build` will render the static HTML and bundle the SPA into the `website/build` directory
+-   `yarn build` will render the static HTML and bundle the SPA into the `packages/docs/build` directory

@@ -23,7 +23,7 @@ We have set up our OPUS macro files to produce a directory structure like this:
 
 :::note
 
-When using [Helios](/docs/user-guide/tum-plc-and-helios), saved images will be stored inside `/logs/helios/` in the same directory structure as the ifg output-dir. This is why the upload can be used for both types of data.
+When using [Helios](/docs/user-guide/tum-plc-and-helios), saved images will be stored inside `/logs/helios/` in the same directory structure as the interferogram output directory. This is why the upload can be used for both types of data.
 
 We will expand this to be useable for an arbitrary number of directories in the future: See [GitHub](https://github.com/tum-esm/pyra/issues?q=is%3Aissue+is%3Aopen+label%3A%22Update%3A+Upload+Improvements%22).
 
@@ -46,9 +46,9 @@ The upload uses an `upload-meta.json` file in each `YYYYMMDD` directory to save 
 
 **Upload steps:**
 
-1. If the server side `upload-meta.json` already exists, download it
-2. If it doesn't exist, create an empty `upload-meta.json` and upload it to the server
-3. When files are found in the `fileList` that are not present locally: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
+1. Create an empty `upload-meta.json` for new upload processes and upload it to the server
+2. Download the `upload-meta.json` from the server if upload has been started before but interrupted
+3. When files are found in the `fileList` that do not exist locally: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
 4. When the remote meta says `complete=True` but there are local files not in `fileList`: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
 5. For every file that is found locally but not in the server side meta, upload it with `scp`
 6. Every 25 files - for performance reasons - update the server-side meta-file
@@ -60,17 +60,17 @@ The upload uses an `upload-meta.json` file in each `YYYYMMDD` directory to save 
 
 Whenever the upload encounters an invalid state, it raises an `InvalidUploadState` exception, which appears in the logs, and continues with the next `YYYYMMDD` directory. Possible causes are:
 
--   The Upload thread crashed during the removal of the local `YYYYMMDD` directory
+-   The upload thread crashed during the removal of the local `YYYYMMDD` directory
 -   Files to the local `YYYYMMDD` directory were added after that day
 -   Files from the local `YYYYMMDD` directory were removed manually
 -   The remote meta file was manipulated by hand
 
-The idea of the `complete=true` flag is that the postprocessing should only consider data where the upload is complete. This completeness cannot be guaranteed by a mandatory time delay because when the measurement computers don't have internet for a while, they could upload it after that delay threshold.
+The idea of the `complete=true` flag is that the postprocessing should only consider data where the upload is complete.
 
 ## Measures to ensure upload integrity
 
-1. The local file will only be deleted when the checksums of the local and remote directory are equal: Every missing or additional file in the `fileList` will change the checksum and so does every single flipped bit.
+1. The local files will only be deleted when the checksums of the local and remote directory are equal: Every missing, additional or modified file in the `fileList` will change the checksum.
 
-2. The `complete=true` flag will also only be set, when the checksums match
+2. The `complete=true` flag will also only be set, when the checksums match.
 
 3. There is a test script that generates a bunch of sample directories and sample files, runs the upload, and checks the final upload state. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).
