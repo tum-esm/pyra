@@ -8,6 +8,8 @@ The hardware for the TUM weather protection enclosure and Helios setup is not av
 
 <img src='/img/docs/muccnet-image-roof.jpg' className='tw-mb-6 tw-rounded-lg' />
 
+The TUM hardware used by [MUCCnet](https://atmosphere.ei.tum.de/) has been described in [Dietrich et al. 2021 (https://doi.org/10.5194/amt-14-1111-2021)](https://doi.org/10.5194/amt-14-1111-2021).
+
 ## What does Helios do?
 
 Helios evaluates the current sun state - whether direct or diffuse sunlight is present. EM27/SUN applications require direct sunlight for measurement data to be useful. Additionally, CamTracker will lose track of the sun with very diffuse light conditions and requires a restart.
@@ -25,28 +27,26 @@ Helios will periodically take images with that camera, process them, and evaluat
 
 Example images in **bad** conditions:
 
-<div className='tw-flex tw-items-center tw-justify-center tw-w-full tw-gap-x-2 -tw-mt-3 tw-mb-4'>
+<div className='tw-flex tw-flex-col xl:tw-flex-row tw-items-center tw-justify-center tw-w-full tw-gap-x-2 tw-gap-y-2 -tw-mt-3 tw-mb-4'>
     <img
         src='/img/docs/helios-example-image-bad-raw.jpg'
-        className='tw-rounded-lg !tw-h-48'
+        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
     />
     <img
         src='/img/docs/helios-example-image-bad-processed.jpg'
-        className='tw-rounded-lg !tw-h-48'
+        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
     />
 </div>
 
 Example images in **good** conditions:
 
-<div className='tw-flex tw-items-center tw-justify-center tw-w-full tw-gap-x-2 -tw-mt-3 tw-mb-4'>
+<div className='tw-flex tw-flex-col xl:tw-flex-row tw-items-center tw-justify-center tw-w-full tw-gap-x-2 tw-gap-y-2 -tw-mt-3 tw-mb-4'>
     <img
         src='/img/docs/helios-example-image-good-raw.jpg'
-        className='tw-rounded-lg !tw-h-48'
+        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
     />
     <img
         src='/img/docs/helios-example-image-good-processed.jpg'
-        className='tw-rounded-lg !tw-h-48'
+        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
     />
 </div>
-
-TODO: Add link to MUCCnet paper
