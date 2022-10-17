@@ -1,0 +1,27 @@
+---
+sidebar_position: 4
+sidebar_label: Upload in Detail
+---
+
+# The Upload Process in Detail
+
+## Upload Steps
+
+1. Create an empty `upload-meta.json` for new upload processes and upload it to the server
+2. Download the `upload-meta.json` from the server if upload has been started before but interrupted
+3. When files are found in the `fileList` that do not exist locally: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
+4. When the remote meta says `complete=True` but there are local files not in `fileList`: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
+5. For every file that is found locally but not in the server side meta, upload it with `scp`
+6. Every 25 files - for performance reasons - update the server-side meta-file
+7. Upload the file `/scripts/get_upload_dir_checksum.py` to the server and calculate the checksum of the `YYYYMMDD` directory that is on the server (based on `fileList`).
+8. Calculate the local checksum using the same script
+9. When both checksums match, set `complete=True` in the remote meta and possibly remove the local `YYYYMMDD` directory
+
+## Causes for an `InvalidUploadState` exception
+
+Whenever the upload encounters an invalid state, it raises an `InvalidUploadState` exception, which appears in the logs, and continues with the next `YYYYMMDD` directory. Possible causes are:
+
+-   The upload thread crashed during the removal of the local `YYYYMMDD` directory
+-   Files to the local `YYYYMMDD` directory were added after that day
+-   Files from the local `YYYYMMDD` directory were removed manually
+-   The remote meta file was manipulated by hand
