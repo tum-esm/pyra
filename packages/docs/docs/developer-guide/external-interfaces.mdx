@@ -7,7 +7,7 @@ sidebar_label: External Interfaces
 
 ## OPUS
 
-We are using the `pywin32` Python library which provides an interface to the [Windows DDE APIs](https://en.wikipedia.org/wiki/Dynamic_Data_Exchange). Pyra Core uses DDE to communicate with OPUS: Loading experiment files, starting and stopping macros, and stopping OPUS itself.
+We are using the `pywin32` Python library, which provides an interface to the [Windows DDE APIs](https://en.wikipedia.org/wiki/Dynamic_Data_Exchange). Pyra Core uses DDE to communicate with OPUS: Loading experiment files, starting and stopping macros, and stopping OPUS itself.
 
 ```python
 import dde
@@ -60,7 +60,7 @@ Julian Date, Tracker Elevation, Tracker Azimuth, Elev Offset from Astro, Az Offs
  ...
 ```
 
-The `SunIntensity.dat` file contains CamTracker's own evaluation of the sun conditions. This is currently not used in Pyra Core but might be in the future. Example:
+The `SunIntensity.dat` file contains CamTracker's own evaluation of the sun conditions. This is currently not used in Pyra Core, but might be in the future. Example:
 
 ```dat
 Julian Date, Date UTC[yyyy/MM/dd HH:mm:ss], Intensity[px*ms], big and small obj good
