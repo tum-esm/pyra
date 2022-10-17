@@ -134,7 +134,7 @@ pyra-cli config update --help
 # Usage: pyra-cli config update [OPTIONS] [CONTENT]
 #
 #   Set config. Pass the JSON directly or via a file path. Only a subset of the
-#   required config variables has to be passed. The non-occuring values will be
+#   required config variables has to be passed. The non-occurring values will be
 #   reused from the current config.
 #
 #   The required schema can be found in the documentation.
@@ -155,7 +155,7 @@ update = {"seconds_per_core_interval": 20}
 os.system(f"pyra-cli config update {json.dumps(update)}")
 ```
 
-Pyra will validate the structure of the update and enforce some rules on the parameter values (value range, file exists, etc.)
+Pyra will validate the structure of the update and enforce some rules on the parameter values (value range, the file exists, etc.)
 
 <img
     src='/img/docs/cli-config-update-example.png'

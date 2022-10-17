@@ -50,7 +50,7 @@ The idea of the `complete=true` flag is that the post-processing should only con
 
 1. The `complete=true` flag will also only be set, when the checksums match.
 
-2. The local files will only be deleted when the checksums of the local and remote directory are equal: Every missing, additional or modified file in the `fileList` will change the checksum.
+2. The local files will only be deleted when the checksums of the local and remote directory are equal: Every missing, additional, or modified file in the `fileList` will change the checksum.
 
 3. We wrote a test script that generates a bunch of sample directories and sample files, runs the upload, and checks the final upload state. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).
 

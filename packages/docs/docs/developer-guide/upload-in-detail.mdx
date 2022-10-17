@@ -8,7 +8,7 @@ sidebar_label: Upload in Detail
 ## Upload Steps
 
 1. Create an empty `upload-meta.json` for new upload processes and upload it to the server
-2. Download the `upload-meta.json` from the server if upload has been started before but interrupted
+2. Download the `upload-meta.json` from the server if the upload has been started before but interrupted
 3. When files are found in the `fileList` that do not exist locally: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
 4. When the remote meta says `complete=True` but there are local files not in `fileList`: <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">raise an exception</span>
 5. For every file that is found locally but not in the server side meta, upload it with `scp`
