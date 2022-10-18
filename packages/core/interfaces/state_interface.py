@@ -115,6 +115,11 @@ class StateInterface:
     @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def read() -> types.StateDict:
         """Read the state file and return its content"""
+        return StateInterface.read_without_filelock()
+
+    @staticmethod
+    def read_without_filelock() -> types.StateDict:
+        """Read the state file and return its content"""
         try:
             with open(STATE_FILE_PATH, "r") as f:
                 new_object: types.StateDict = json.load(f)
@@ -129,6 +134,11 @@ class StateInterface:
     @staticmethod
     @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def read_persistent() -> types.PersistentStateDict:
+        """Read the persistent state file and return its content"""
+        return StateInterface.read_persistent_without_filelock()
+
+    @staticmethod
+    def read_persistent_without_filelock() -> types.PersistentStateDict:
         """Read the persistent state file and return its content"""
         try:
             with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
@@ -149,7 +159,7 @@ class StateInterface:
         The update object should only include the properties to be
         changed in contrast to containing the whole file.
         """
-        current_state = StateInterface.read()
+        current_state = StateInterface.read_without_filelock()
         new_state = utils.update_dict_recursively(current_state, update)
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
@@ -163,7 +173,7 @@ class StateInterface:
         changed in contrast to containing the whole file.
         """
 
-        current_state = StateInterface.read_persistent()
+        current_state = StateInterface.read_persistent_without_filelock()
         new_state = utils.update_dict_recursively(current_state, update)
         with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
