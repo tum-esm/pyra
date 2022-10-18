@@ -124,6 +124,7 @@ class StateInterface:
             logger.warning("reinitializing the corrupted state file")
             with open(STATE_FILE_PATH, "w") as f:
                 json.dump(EMPTY_STATE_OBJECT, f, indent=4)
+            return EMPTY_STATE_OBJECT
 
     @staticmethod
     @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
@@ -138,6 +139,7 @@ class StateInterface:
             logger.warning("reinitializing the corrupted persistent state file")
             with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
                 json.dump(EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
+            return EMPTY_PERSISTENT_STATE_OBJECT
 
     @staticmethod
     @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
