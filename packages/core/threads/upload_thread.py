@@ -18,6 +18,12 @@ logger = utils.Logger(origin="upload")
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
+# when a connection error occurs, wait a few minutes until trying again
+CONNECTION_ERROR_IDLE_MINUTES = 5
+
+# when an iteration is finished, wait a few minutes until checking again
+ITERATION_END_IDLE_MINUTES = 10
+
 
 class InvalidUploadState(Exception):
     pass
@@ -360,17 +366,18 @@ class UploadThread:
                 except interfaces.SSHInterface.ConnectionError as e:
                     logger.error(f"could not connect to host: {e}")
                     if not headless:
-                        logger.info(f"waiting 5 minutes")
-                        time.sleep(300)
+                        logger.info(f"waiting {CONNECTION_ERROR_IDLE_MINUTES} minutes")
+                        time.sleep(CONNECTION_ERROR_IDLE_MINUTES * 60)
                         continue
 
                 if headless:
                     return
 
-                # Wait 20 minutes before checking all directories again
                 if upload_is_complete:
-                    logger.debug("Finished iteration, sleeping 15 minutes")
-                    time.sleep(900)
+                    logger.debug(
+                        f"Finished iteration, sleeping {ITERATION_END_IDLE_MINUTES} minutes"
+                    )
+                    time.sleep(ITERATION_END_IDLE_MINUTES * 60)
             except Exception as e:
                 logger.error(f"Error inside upload thread: {e}")
                 logger.exception(e)
