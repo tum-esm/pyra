@@ -50,7 +50,9 @@ def get_current_log_lines() -> list[str]:
     log_lines_in_email: list[str] = []
     included_iterations = 0
     for l in latest_log_lines[::-1]:
-        if ("Starting iteration" in l) or ("Starting mainloop" in l):
+        if ("main - INFO - Starting iteration" in l) or (
+            "main - INFO - Starting mainloop" in l
+        ):
             included_iterations += 1
         log_lines_in_email.append(l)
         if included_iterations == 2:

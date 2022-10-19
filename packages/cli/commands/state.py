@@ -10,23 +10,19 @@ STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
 
 
 @click.command(help="Read the current state.json file.")
-@click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
+@click.option("--indent", is_flag=True, help="Print the JSON in an indented manner")
 @utils.with_filelock(STATE_LOCK_PATH)
-def _get_state(no_indent: bool) -> None:
+def _get_state(indent: bool) -> None:
     if not os.path.isfile(STATE_FILE_PATH):
         interfaces.StateInterface.initialize()
 
     with open(STATE_FILE_PATH, "r") as f:
         try:
             state_content = json.load(f)
-            assert isinstance(state_content, dict)
-            assert isinstance(state_content["measurements_should_be_running"], bool)
-            assert isinstance(state_content["enclosure_plc_readings"], dict)
-            assert isinstance(state_content["os_state"], dict)
         except:
             raise AssertionError("file not in a valid json format")
 
-    click.echo(json.dumps(state_content, indent=(None if no_indent else 2)))
+    click.echo(json.dumps(state_content, indent=(2 if indent else None)))
 
 
 @click.group()

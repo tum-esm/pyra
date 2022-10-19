@@ -10,6 +10,7 @@ export default function ConfigElementText(props: {
     disabled?: boolean;
     numeric?: boolean;
     postfix?: string;
+    showFileSelector?: boolean;
 }) {
     const { title, value, oldValue, setValue, disabled, numeric, postfix } = props;
 
@@ -24,7 +25,7 @@ export default function ConfigElementText(props: {
         return `${v}`.replace(/[^\d\.]/g, '');
     }
 
-    const showfileSelector = title.endsWith('Path');
+    const showfileSelector = title.endsWith('Path') || props.showFileSelector;
     const hasBeenModified = !functionalUtils.deepEqual(oldValue, value);
 
     return (

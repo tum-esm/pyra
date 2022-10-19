@@ -20,7 +20,7 @@ def assert_config_file_content(expected_content: dict, message: str) -> None:
     print(f"expected_content: {json.dumps(expected_content, indent=4)}")
 
     difference = DeepDiff(expected_content, actual_content)
-    assert difference == {}, f"{message}: {difference}"
+    assert len(difference) == 0, f"{message}: {difference}"
 
 
 def run_cli_command(command: list[str]) -> str:

@@ -106,6 +106,7 @@ def _set_cover_angle(angle: str) -> None:
         ), "angle has to be 0° or between 110° and 250°"
 
         plc_interface.set_manual_control(True)
+        plc_interface.set_sync_to_tracker(False)
         plc_interface.set_cover_angle(new_cover_angle)
         plc_interface.set_manual_control(False)
         wait_until_cover_is_at_angle(plc_interface, new_cover_angle)

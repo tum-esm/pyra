@@ -1,7 +1,5 @@
 from typing import Optional, TypedDict
 
-# TODO: use tuples (3 ints vs 4 ints)
-
 
 class _PlcSpecificationDictActors(TypedDict):
     current_angle: list[int]
