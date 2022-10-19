@@ -70,6 +70,8 @@ EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
     "current_exceptions": [],
 }
 
+logger = utils.Logger(origin="state-interface")
+
 
 class StateInterface:
     @staticmethod
@@ -113,19 +115,41 @@ class StateInterface:
     @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def read() -> types.StateDict:
         """Read the state file and return its content"""
-        with open(STATE_FILE_PATH, "r") as f:
-            new_object: types.StateDict = json.load(f)
-            types.validate_state_dict(new_object)
-            return new_object
+        return StateInterface.read_without_filelock()
+
+    @staticmethod
+    def read_without_filelock() -> types.StateDict:
+        """Read the state file and return its content"""
+        try:
+            with open(STATE_FILE_PATH, "r") as f:
+                new_object: types.StateDict = json.load(f)
+                types.validate_state_dict(new_object)
+                return new_object
+        except (FileNotFoundError, json.JSONDecodeError):
+            logger.warning("reinitializing the corrupted state file")
+            with open(STATE_FILE_PATH, "w") as f:
+                json.dump(EMPTY_STATE_OBJECT, f, indent=4)
+            return EMPTY_STATE_OBJECT
 
     @staticmethod
     @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
     def read_persistent() -> types.PersistentStateDict:
         """Read the persistent state file and return its content"""
-        with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
-            new_object: types.PersistentStateDict = json.load(f)
-            types.validate_persistent_state_dict(new_object)
-            return new_object
+        return StateInterface.read_persistent_without_filelock()
+
+    @staticmethod
+    def read_persistent_without_filelock() -> types.PersistentStateDict:
+        """Read the persistent state file and return its content"""
+        try:
+            with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
+                new_object: types.PersistentStateDict = json.load(f)
+                types.validate_persistent_state_dict(new_object)
+                return new_object
+        except (FileNotFoundError, json.JSONDecodeError):
+            logger.warning("reinitializing the corrupted persistent state file")
+            with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
+                json.dump(EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
+            return EMPTY_PERSISTENT_STATE_OBJECT
 
     @staticmethod
     @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
@@ -135,10 +159,7 @@ class StateInterface:
         The update object should only include the properties to be
         changed in contrast to containing the whole file.
         """
-
-        with open(STATE_FILE_PATH, "r") as f:
-            current_state = json.load(f)
-
+        current_state = StateInterface.read_without_filelock()
         new_state = utils.update_dict_recursively(current_state, update)
         with open(STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
@@ -152,10 +173,7 @@ class StateInterface:
         changed in contrast to containing the whole file.
         """
 
-        with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
-            current_state = json.load(f)
-            types.validate_persistent_state_dict(current_state)
-
+        current_state = StateInterface.read_persistent_without_filelock()
         new_state = utils.update_dict_recursively(current_state, update)
         with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)

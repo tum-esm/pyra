@@ -10,7 +10,6 @@ logger = utils.Logger(origin="plc-interface")
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
-# TODO: use tuples (3 ints vs 4 ints)
 PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PlcSpecificationDict] = {
     1: {
         "actors": {
@@ -198,8 +197,6 @@ class PLCInterface:
         Read the whole state of the PLC
         """
 
-        # TODO: self.plc.read_multi_vars()
-
         plc_db_content: dict[int, int] = {}
         plc_db_size = {1: {3: 6, 8: 26, 25: 10}, 2: {3: 5, 6: 17, 8: 25}}[self.plc_version]
 
@@ -336,7 +333,6 @@ class PLCInterface:
         if self.__read_bool(spec) != new_state:
             raise PLCInterface.PLCError("PLC state did not change")
 
-        # TODO: check whether this results in a circular import
         interfaces.StateInterface.update({"enclosure_plc_readings": partial_plc_state})
 
     def set_power_camera(self, new_state: bool) -> None:

@@ -1,5 +1,6 @@
 import os
 import time
+from typing import Optional
 import jdcal
 import datetime
 from packages.core import types, utils, interfaces
@@ -77,12 +78,16 @@ class SunTracking:
             )
             return
 
-        if self.validate_tracker_position():
-            logger.debug("CamTracker motor position is valid.")
+        tracker_position_is_valid = self.validate_tracker_position()
+        if tracker_position_is_valid is None:
+            logger.debug("CamTracker motor position is unknown (last log line too old).")
         else:
-            logger.info("CamTracker motor position is over threshold.")
-            logger.info("Stopping CamTracker. Preparing for reinitialization.")
-            self.stop_sun_tracking_automation()
+            if tracker_position_is_valid:
+                logger.debug("CamTracker motor position is valid.")
+            else:
+                logger.info("CamTracker motor position is over threshold.")
+                logger.info("Stopping CamTracker. Preparing for reinitialization.")
+                self.stop_sun_tracking_automation()
 
     def ct_application_running(self) -> bool:
         """Checks if CamTracker is already running by identifying the active window.
@@ -94,8 +99,6 @@ class SunTracking:
         ct_path = self._CONFIG["camtracker"]["executable_path"]
         process_name = os.path.basename(ct_path)
 
-        # TODO: Check whether this list makes sense with
-        #       respect to psutil's return types
         return interfaces.OSInterface.get_process_status(process_name) in [
             "running",
             "start_pending",
@@ -152,7 +155,9 @@ class SunTracking:
         if os.path.exists(stop_file_path):
             os.remove(stop_file_path)
 
-    def read_ct_log_learn_az_elev(self) -> tuple[float, float, float, float, float, float]:
+    def read_ct_log_learn_az_elev(
+        self,
+    ) -> Optional[tuple[float, float, float, float, float, float]]:
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
 
         Returns a list of string parameter: [
@@ -171,8 +176,6 @@ class SunTracking:
         ct_logfile_path = self._CONFIG["camtracker"]["learn_az_elev_path"]
         assert os.path.isfile(ct_logfile_path), "camtracker logfile not found"
 
-        # TODO: Seek the last line directly instead of reading the whole file
-        # See https://stackoverflow.com/a/54278929/8255842
         with open(ct_logfile_path) as f:
             last_line = f.readlines()[-1]
 
@@ -191,15 +194,12 @@ class SunTracking:
 
         # assert that the log file is up-to-date
         now = datetime.datetime.now()
-        assert jddate == (
-            now.year,
-            now.month,
-            now.day,
-        ), f'date in file is too old: "{last_line}"'
+        if jddate != (now.year, now.month, now.day):
+            return None
 
         return float_values  # type: ignore
 
-    def validate_tracker_position(self) -> bool:
+    def validate_tracker_position(self) -> Optional[bool]:
         """Reads motor offsets and compares it with defined threshold.
         The motor offset defines the difference between the current active and calculated sun
         angle.
@@ -211,6 +211,8 @@ class SunTracking:
 
         # fails if file integrity is broken
         tracker_status = self.read_ct_log_learn_az_elev()
+        if tracker_status is None:
+            return None
 
         elev_offset: float = tracker_status[3]
         az_offeset: float = tracker_status[4]

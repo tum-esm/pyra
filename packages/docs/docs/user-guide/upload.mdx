@@ -1,0 +1,61 @@
+---
+sidebar_position: 4
+sidebar_label: Upload
+---
+
+# The Upload Process
+
+## Interferograms Directory Structure
+
+We have set up our OPUS macro files to produce a directory structure like this:
+
+```
+📁 <IFG OUTPOUT DIR>
+    📁 YYYYMMDD
+        📄 stationid-YYYYMMDD.0001
+        📄 stationid-YYYYMMDD.0002
+        📄 ...
+    📁 YYYYMMDD
+        📄 stationid-YYYYMMDD.0001
+        📄 stationid-YYYYMMDD.0002
+        📄 ...
+```
+
+:::note
+
+When using [Helios](/docs/user-guide/tum-plc-and-helios), saved images will be stored inside `/logs/helios/` in the same directory structure as the interferograms output directory. This is why the upload can be used for both types of data.
+
+We will expand this to be useable for an arbitrary number of directories in the future: See [GitHub](https://github.com/tum-esm/pyra/issues?q=is%3Aissue+is%3Aopen+label%3A%22Update%3A+Upload+Improvements%22).
+
+:::
+
+## How the Upload works
+
+The upload uses an `upload-meta.json` file in each `YYYYMMDD` directory to save the upload state. You should not modify this file or the `YYYYMMDD` directories manually! Example file:
+
+```json
+{
+    "complete": false,
+    "fileList": ["file 1", "file 2", "..."],
+    "createdTime": 0,
+    "lastModifiedTime": 0
+}
+```
+
+The upload can handle interruptions and continue where it was stopped. After uploading each directory, Pyra will calculate a checksum locally and remotely - this is why the server needs to have Python 3.10 installed. Only when the checksums match, the `upload-meta.json` will get a `complete = true` indicator.
+
+The idea of the `complete=true` flag is that the post-processing should only consider data where the upload is complete.
+
+## Measures to ensure upload integrity
+
+1. The `complete=true` flag will also only be set, when the checksums match.
+
+2. The local files will only be deleted when the checksums of the local and remote directory are equal: Every missing, additional, or modified file in the `fileList` will change the checksum.
+
+3. We wrote a test script that generates a bunch of sample directories and sample files, runs the upload, and checks the final upload state. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).
+
+:::note
+
+More details about the indiviual upload steps can be found [in the developer guide](/docs/developer-guide/upload-in-detail).
+
+:::

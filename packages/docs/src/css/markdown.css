@@ -1,0 +1,41 @@
+h1 {
+    @apply tw-text-4xl !tw-mt-0 !tw-mb-4;
+}
+
+h2 {
+    @apply tw-text-3xl !tw-mt-0 !tw-mb-3;
+}
+
+h2:not(:first-of-type) {
+    @apply !tw-mt-10;
+}
+
+h3 {
+    @apply tw-text-2xl !tw-mt-6 !tw-mb-2;
+}
+
+h1,
+h2,
+h3,
+p {
+    @apply tw-text-gray-800;
+}
+
+p {
+    @apply tw-text-justify;
+}
+
+.theme-code-block {
+    @apply !tw-shadow-none;
+}
+
+.theme-code-block pre {
+    @apply !tw-bg-gray-150;
+}
+
+p code,
+li code,
+h2 code,
+h3 code {
+    @apply tw-border-0 tw-px-1 tw-py-0.5 tw-rounded tw-bg-gray-150 tw-text-gray-800;
+}

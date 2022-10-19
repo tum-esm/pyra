@@ -4,10 +4,6 @@ import astropy.time as astropy_time
 import astropy.units as astropy_units
 from packages.core import types
 
-# TODO: pass config via functions instea of indirectly more code  but way simpler
-
-# TODO: add static typic (simplify code while doing that (less astropy stuff))
-
 
 class Astronomy:
     CONFIG: Optional[types.ConfigDict] = None

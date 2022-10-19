@@ -48,7 +48,7 @@ def terminate_processes() -> list[int]:
 
 
 @click.command(
-    help="Start pyra-core as a background process. " + "Prevents spawning multiple processes"
+    help="Start pyra-core as a background process. Return the process id. Prevents spawning multiple processes."
 )
 def _start_pyra_core() -> None:
     existing_pid = process_is_running()
@@ -64,7 +64,9 @@ def _start_pyra_core() -> None:
         print_green(f"Started background process with PID {p.pid}")
 
 
-@click.command(help="Stop the pyra-core background process")
+@click.command(
+    help="Stop the pyra-core background process. Return the process id of terminated processes. This command will force quit the OPUS process."
+)
 def _stop_pyra_core() -> None:
     termination_pids = terminate_processes()
     if len(termination_pids) == 0:
@@ -113,7 +115,7 @@ def _stop_pyra_core() -> None:
             print_red(f"Failed to close OPUS: {e}")
 
 
-@click.command(help="Checks whether the pyra-core background process is running")
+@click.command(help="Checks whether the pyra-core background process is running.")
 def _pyra_core_is_running() -> None:
     existing_pid = process_is_running()
     if existing_pid is not None:

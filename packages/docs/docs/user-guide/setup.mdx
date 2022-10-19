@@ -1,0 +1,194 @@
+---
+sidebar_position: 2
+sidebar_label: Setup
+---
+
+# Hot to set it up
+
+## Software Requirements
+
+:::note
+
+The following manual steps are only required at the initial system setup. All future updates and new installations of Pyra can be done with the [Pyra Setup Tool](#pyra-setup-tool).
+
+:::
+
+:::tip
+
+In some cases, you might get an error message saying that "executing `.ps1` scripts is not allowed due to an ExecutionPolicy". This can be solved with the following command (credits to https://stackoverflow.com/a/49112322/8255842):
+
+```
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+```
+
+:::
+
+### OPUS and CamTracker
+
+Integration tests are done using **OPUS 7.8.44** and **CamTracker 3.9.2015.02.03**.
+
+### Python 3.10
+
+https://www.python.org/
+
+Your system's python3.10 interpreter should be available as shell environment variable `python`. Therefore, you need to add system environment variables to point the `python` command (and `pip`) to the Python3.10 interpreter by checking the box marked in the image below.
+
+<img
+    src='/img/docs/python-310-path-automatic.png'
+    className='tw-rounded-lg tw-mb-4'
+    style={{ width: 600 }}
+/>
+
+<div className='tw-mb-2'>
+    <span className='tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5'>
+        Incomplete installation:
+    </span>
+</div>
+
+```
+$ python --version
+Python was not found; run without arguments to install
+from the Microsoft Store, or disable this shortcut from
+Settings > Manage App Execution Aliases.
+```
+
+<div className='tw-mb-2'>
+    <span className='tw-bg-green-200 tw-text-green-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5'>
+        Complete installation:
+    </span>
+</div>
+
+```
+$ python --version
+Python 3.10.x
+```
+
+If your `python` command doesn't resolve to the installed version, please look at the section ["Add Environment Paths"](#add-environment-paths) and add the path ".../Python310" and "Python310/Scripts" where you just installed Python.
+
+### Install Poetry
+
+https://python-poetry.org/
+
+### Git & GitHub CLI
+
+https://git-scm.com/ and https://cli.github.com/
+
+:::info
+
+Git and the GitHub CLI are used by the Pyra Setup Tool.
+
+:::
+
+## Pyra Setup Tool
+
+The [**Pyra Setup Tool**](https://github.com/tum-esm/pyra-setup-tool) can be used to install and migrate between Pyra versions. The tool looks for the "Documents" directory on your system and generates a directory structure like this:
+
+```
+📁 <DOCUMENTS DIR>
+    📁 pyra
+        📁 pyra-4.0.5
+        📁 pyra-4.0.6
+        📁 ...
+```
+
+On the first time, clone the setup tool repo:
+
+```bash
+cd %userprofile%/Documents
+gh repo clone tum-esm/pyra-setup-tool
+```
+
+The setup tool uses the `colorama` library:
+
+```bash
+pip install colorama
+```
+
+**Run the tool with (from this point on it will auto-update itself):**
+
+```bash
+cd %userprofile%/Documents/pyra-setup-tool
+python run.py
+```
+
+The setup tool automates the following steps:
+
+1. Download each release's codebase
+2. Install all python dependencies into the global python interpreter environment
+3. Download and runs the GUI installer
+4. Create desktop shortcuts to the `pyra-x.y.z` directory
+5. (Optional) Migrate the `config.json` file to keep the previous settings
+
+## Pyra CLI Command
+
+You need to actively tell Windows about the `pyra-cli` command. When using the installer, it will tell you which path to [add to the environment variables](#add-environment-paths) on every install process.
+
+<img src='/img/docs/pyra-cli-path-request.png' className='tw-rounded tw-mb-4' />
+
+:::note
+
+The edit of the path variable is only required once per Pyra computer - when setting it up initially.
+
+:::
+
+## Add Environment Paths
+
+1. Look for the "Edit the system environment variables" utility
+
+<img
+    src='/img/docs/environment-path-manual-1.png'
+    className='tw-rounded-lg tw-mb-4'
+    style={{ width: 600 }}
+/>
+
+2. Click on "Environment Variables"
+
+<img
+    src='/img/docs/environment-path-manual-2.png'
+    className='tw-rounded-lg tw-mb-4'
+    style={{ width: 600 }}
+/>
+
+3. Select "PATH" in the system section and click on "Edit"
+
+<img
+    src='/img/docs/environment-path-manual-3.png'
+    className='tw-rounded-lg tw-mb-4'
+    style={{ width: 600 }}
+/>
+
+4. Add the required paths to the list
+
+## Releases
+
+All Pyra releases can be found here: <span className="tw-break-all">https://github.com/tum-esm/pyra/releases</span>. Please only use the releases starting with `4.0.5`. Older versions are experimental.
+
+## Error Email Setup
+
+For Pyra to send you error emails (see [Usage section](/docs/user-guide/usage#error-emails)), you need an email account that allows this kind of connection.
+
+We are using Gmail for this. You have to use an "App Password" for Pyra, which requires 2FA for your Google Account. Please refer to this article on how to set up an "App Password": <span className="tw-break-all">https://support.google.com/accounts/answer/185833</span>. Inside the config tab, you have to add this "App Password" to receive emails:
+
+<img src='/img/docs/email-config.png' className='tw-rounded-lg tw-mb-4' />
+
+:::note
+
+There is a test script to test whether email sending works. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).
+
+We plan to add a button "test emailing" to the config tab: https://github.com/tum-esm/pyra/issues/109
+
+:::
+
+:::caution
+
+The "Gmail password" and the "app password" are not the same.
+
+Whenever changing/resetting the "Gmail password", all "app passwords" will be invalidated.
+
+:::
+
+## Upload
+
+You need a server running Linux that Pyra can connect to via SSH - using a password. The server has to have `python3.10` installed.
+
+In the config.upload section, you can set connection details, and source and destination directories for your interferograms. How the upload works is described [here](/docs/user-guide/upload) in detail.

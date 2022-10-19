@@ -28,7 +28,9 @@ def _read_logs(level: str) -> None:
         print_red("Level has to be either INFO or DEBUG.")
 
 
-@click.command(help="Archive the current log files.")
+@click.command(
+    help="Archive the current log files. This command will write all log lines from the current info.log and debug.log files into the logs/archive directory."
+)
 def _archive_logs() -> None:
     Logger.archive()
     print_green("done!")

@@ -28,7 +28,6 @@ class _Helios:
 
     @staticmethod
     def init(camera_id: int, retries: int = 5) -> None:
-        # TODO: Why is this necessary?
         _Helios.cam = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
         assert _Helios.cam is not None
         _Helios.cam.release()

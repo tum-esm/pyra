@@ -1,0 +1,52 @@
+---
+sidebar_position: 5
+---
+
+# TUM PLC & Helios
+
+The hardware for the TUM weather protection enclosure and Helios setup is not available to buy off the shelf yet. Please [contact us](/docs/contact) if you are interested in acquiring our hardware.
+
+<img src='/img/docs/muccnet-image-roof.jpg' className='tw-mb-6 tw-rounded-lg' />
+
+The TUM hardware used by [MUCCnet](https://atmosphere.ei.tum.de/) has been described in [Dietrich et al. 2021 (https://doi.org/10.5194/amt-14-1111-2021)](https://doi.org/10.5194/amt-14-1111-2021).
+
+## What does Helios do?
+
+Helios evaluates the current sun state - whether direct or diffuse sunlight is present. EM27/SUN applications require direct sunlight for measurement data to be useful. Additionally, CamTracker will lose track of the sun with very diffuse light conditions and requires a restart.
+
+The Helios hardware is made up of a transparent globe with black stripes glued to it and a translucent milky glass with a camera pointing upwards attached below.
+
+<div className='tw-flex tw-justify-center tw-w-full'>
+    <img
+        src='/img/docs/helios-hardware.png'
+        className='tw-mb-2 tw-rounded-lg !tw-h-64'
+    />
+</div>
+
+Helios will periodically take images with that camera, process them, and evaluate shadow conditions. The processing will detect the lens circle and cut off the outer 10% of the radius - a lot of unwanted shadows can occur on the edges due to dirt from the outside. Finally, it will use a canny edge filter and count the pixels where "fast transitions between light and dark" can be found. If the pixel count is above a certain threshold (configurable), the sunlight conditions are categorized as "good".
+
+Example images in **bad** conditions:
+
+<div className='tw-flex tw-flex-col xl:tw-flex-row tw-items-center tw-justify-center tw-w-full tw-gap-x-2 tw-gap-y-2 -tw-mt-3 tw-mb-4'>
+    <img
+        src='/img/docs/helios-example-image-bad-raw.jpg'
+        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
+    />
+    <img
+        src='/img/docs/helios-example-image-bad-processed.jpg'
+        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
+    />
+</div>
+
+Example images in **good** conditions:
+
+<div className='tw-flex tw-flex-col xl:tw-flex-row tw-items-center tw-justify-center tw-w-full tw-gap-x-2 tw-gap-y-2 -tw-mt-3 tw-mb-4'>
+    <img
+        src='/img/docs/helios-example-image-good-raw.jpg'
+        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
+    />
+    <img
+        src='/img/docs/helios-example-image-good-processed.jpg'
+        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
+    />
+</div>
