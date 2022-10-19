@@ -15,8 +15,8 @@ filelock._error.Timeout: The file lock 'C:\Users\ga56fem\Downloads\pyra\pyra-4.0
 
 You can use the CLI command `pyra-cli remove-filelocks` to resolve that.
 
-```note
+:::note
 
 We are using the python library `filelock` to enforce exclusive use of state- and log-files: There should not be two processes interacting with one of these files at the same time. This is necessary because we have at least 4 processes that work with these files: the CLI and the main-, upload- and helios-thread.
 
-```
+:::
