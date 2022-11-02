@@ -86,6 +86,12 @@ async function createConfig() {
                     theme: lightCodeTheme,
                     darkTheme: darkCodeTheme,
                 },
+                algolia: {
+                    appId: 'HVYNW5V940',
+                    apiKey: '6f156c973f748938883016d17df0fbf7', // public API key
+                    indexName: 'pyra-4',
+                    searchPagePath: false,
+                },
             }),
     };
 }
