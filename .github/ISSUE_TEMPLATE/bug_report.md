@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: "<add title here>"
-labels: status:inbox, type:bug
+labels: needs-triage, type:bug
 assignees: dostuffthatmatters
 
 ---

@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title: "<add title here>"
-labels: status:inbox, type:feature
+labels: needs-triage, type:feature
 assignees: dostuffthatmatters
 
 ---
