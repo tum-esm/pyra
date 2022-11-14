@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[bug report] <add title here>"
-labels: request
+title: "<add title here>"
+labels: status:inbox, type:bug
 assignees: dostuffthatmatters
 
 ---

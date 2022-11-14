@@ -1,8 +1,8 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: "[feature request] <add title here>"
-labels: request
+title: "<add title here>"
+labels: status:inbox, type:feature
 assignees: dostuffthatmatters
 
 ---
