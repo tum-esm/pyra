@@ -24,7 +24,6 @@ on:
             - 'netlify.toml'
             - '.github/workflows/*.yml'
             - '!.github/workflows/test-python-codebase-on-main.yml'
-
 jobs:
     test:
         runs-on: ubuntu-latest
