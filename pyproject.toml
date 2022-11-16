@@ -20,6 +20,7 @@ fabric = "^2.7.1"
 pydantic = "^1.9.2"
 tqdm = "^4.64.0"
 colorama = "^0.4.5"
+deepdiff = "^6.2.1"
 
 [tool.poetry.group.helios]
 optional = true
