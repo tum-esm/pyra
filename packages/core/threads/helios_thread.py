@@ -189,64 +189,15 @@ class _Helios:
         For a given frame, determine whether the conditions are
         good (direct sunlight, returns 1) or bad (diffuse light
         or darkness, returns 0).
-
-        1. Downscale image (faster processing)
-        2. Convert to grayscale image
-        3. Determine position and size of circular opening
-        4. Determine edges in image (canny edge filter)
-        5. Only consider edges inside 0.9 * circleradius
-        6. If number of edge-pixels is > x: return 1; else: return 0;
         """
 
         assert _CONFIG is not None
         assert _CONFIG["helios"] is not None
 
-        # transform image from 1280x720 to 640x360
-        downscaled_image = cv.resize(frame, None, fx=0.5, fy=0.5)
-
-        # for each rgb pixel [234,234,234] only consider the gray value (234)
-        single_valued_pixels = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)
-
-        # determine lense position and size from binary mask
-        binary_mask = utils.ImageProcessing.get_binary_mask(single_valued_pixels)
-        circle_cx, circle_cy, circle_r = utils.ImageProcessing.get_circle_location(binary_mask)
-
-        # only consider edges and make them bold
-        edges_only: cv.Mat = np.array(cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32)
-        edges_only_dilated: cv.Mat = cv.dilate(
-            edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
+        edge_fraction, status = utils.ImageProcessing.evaluate_helios_image(
+            frame, _CONFIG["helios"]["edge_detection_threshold"], save_image
         )
-
-        # blacken the outer 10% of the circle radius
-        edges_only_dilated *= utils.ImageProcessing.get_circle_mask(
-            edges_only_dilated.shape, round(circle_r * 0.9), circle_cx, circle_cy
-        )
-
-        # determine how many pixels inside the circle are made up of "edge pixels"
-        pixels_inside_circle: int = np.sum(binary_mask)
-        status: Literal[1, 0] = 0
-        if pixels_inside_circle != 0:
-            edge_fraction = round((np.sum(edges_only_dilated) / 255) / pixels_inside_circle, 6)
-            sufficient_edge_fraction = (
-                edge_fraction >= _CONFIG["helios"]["edge_detection_threshold"]
-            )
-            status = 1 if sufficient_edge_fraction else 0
-
         logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
-
-        if save_image:
-            now = datetime.now()
-            img_timestamp = now.strftime("%Y%m%d-%H%M%S")
-            raw_img_name = f"{img_timestamp}-{status}-raw.jpg"
-            processed_img_name = f"{img_timestamp}-{status}-processed.jpg"
-            processed_frame = utils.ImageProcessing.add_markings_to_image(
-                edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
-            )
-            img_directory_path = os.path.join(IMG_DIR, now.strftime("%Y%m%d"))
-            if not os.path.exists(img_directory_path):
-                os.mkdir(img_directory_path)
-            cv.imwrite(os.path.join(img_directory_path, raw_img_name), frame)
-            cv.imwrite(os.path.join(img_directory_path, processed_img_name), processed_frame)
 
         return status
 
