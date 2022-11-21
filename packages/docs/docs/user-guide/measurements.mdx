@@ -1,0 +1,169 @@
+---
+sidebar_position: 4
+sidebar_label: Measurements
+---
+
+# How to Start and Stop Measurements via CLI and UI
+
+## Measurement Modes and Triggers
+
+The **measurement decision** (whether measurements should run or not) depends on the **measurement mode**:
+
+-   **Automatic mode:** Measurement decision is made based on defined triggers (see below)
+-   **Manual mode:** A start/stop button for manual control
+-   **CLI mode:** The config contains a field, where the CLI can add a decision result
+
+:::tip
+
+CLI mode can be used when you have already built a system that evaluates measurement conditions, and want to use Pyra for the rest of the operation. Respective CLI commands can be found in the [next section](#cli-command-line-interface).
+
+:::
+
+In the automation tab, Pyra's measurement mode can be selected.
+
+<img src='/img/docs/measurement-modes.png' className='tw-rounded-lg tw-mb-4' />
+
+In the configuration tab, you can select measurement triggers that should be considered in automatic mode
+
+<img src='/img/docs/triggers-config.png' className='tw-rounded-lg tw-mb-4' />
+
+:::note
+
+**Helios** is our module to determine whether direct sunlight (required by the EM27/SUN) is present or not. Read about it [here](/docs/user-guide/tum-plc-and-helios).
+
+:::
+
+## CLI (Command Line Interface)
+
+:::tip
+
+Everything that can be seen/clicked in the GUI can also be read/written via the CLI.
+
+The usage of any command is explained in its help menu (available in the terminal).
+
+:::
+
+### CLI: Help Menu Examples
+
+Top-level menu:
+
+```bash
+pyra-cli --help
+# Usage: pyra-cli [OPTIONS] COMMAND [ARGS]...
+#
+# Options:
+#   --help  Show this message and exit.
+#
+# Commands:
+#   config
+#   core
+#   logs
+#   plc
+#   remove-filelocks  Remove all filelocks.
+#   state
+```
+
+Command group menu:
+
+```bash
+pyra-cli config --help
+# Usage: pyra-cli config [OPTIONS] COMMAND [ARGS]...
+#
+# Options:
+#   --help  Show this message and exit.
+#
+# Commands:
+#   get       Read the current config.json file.
+#   update    Set the config.json file.
+#   validate  Validate the current config.json file.
+```
+
+Individual command menus:
+
+```bash
+pyra-cli config update --help
+# Usage: pyra-cli config update [OPTIONS] [CONTENT]
+#
+#   Set config. Pass the JSON directly or via a file path. Only a subset of the
+#   required config variables has to be passed. The non-occurring values will be
+#   reused from the current config.
+#
+#   The required schema can be found in the documentation.
+#
+# Options:
+#   --help  Show this message and exit.
+```
+
+### CLI: Config Update
+
+Running the following command will update the number of seconds Pyra spends in one loop:
+
+```bash
+pyra-cli config update "{\"general\":{\"seconds_per_core_interval\":20}}\"
+```
+
+The same command can be achieved in Python without all the escaping done manually:
+
+```python
+import json
+import os
+import subprocess
+
+def run_pyra_cli_config_update(update: dict) -> str:
+    p = subprocess.run(
+        args=["pyra-cli.bat", "config", "update", json.dumps(update)],
+        cwd=os.path.join(os.environ["USERPROFILE"], "Documents","pyra"),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    stderr, stdout = p.stderr.decode().strip(), p.stdout.decode().strip()
+    assert p.returncode == 0, f"pyra-cli config update failed: {stderr}"
+    return stdout
+
+
+update = {"general": {"seconds_per_core_interval": 20}}
+print(run_pyra_cli_config_update(update))
+```
+
+Pyra will validate the structure of the update and enforce some rules on the parameter values (value range, file existence, etc.)
+
+<img
+    src='/img/docs/cli-config-update-example.png'
+    className='tw-rounded tw-mb-4'
+/>
+
+The developer docs contain a [full list of schema and value requirements](/docs/developer-guide/internal-interfaces) for the config file.
+
+### Starting and Stopping Measurements via CLI
+
+1. Set Pyra's measurement mode to "CLI mode" using the UI, or the CLI:
+
+```bash
+pyra-cli config update "{\"measurement_decision\": {\"mode\": \"cli\"}}"
+```
+
+```python
+update = {"measurement_decision": {"mode": "cli"}}
+run_pyra_cli_config_update(update)
+```
+
+2. Update the CLI's decision on whether or not to measure using the CLI:
+
+```bash
+pyra-cli config update "{\"measurement_decision\": {\"cli_decision_result\": true}}"
+pyra-cli config update "{\"measurement_decision\": {\"cli_decision_result\": false}}"
+```
+
+```python
+update = {"measurement_decision": {"cli_decision_result": True}}
+run_pyra_cli_config_update(update)
+
+update = {"measurement_decision": {"cli_decision_result": False}}
+run_pyra_cli_config_update(update)
+```
+
+:::info
+
+The CLI **does not** offer commands for starting and stopping CamTracker or OPUS directly because this conflicts with PYRA Core's management of these applications.
+
+:::

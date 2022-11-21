@@ -22,7 +22,7 @@ p {
 }
 
 p {
-    @apply tw-text-justify;
+    @apply tw-text-left;
 }
 
 .theme-code-block {
