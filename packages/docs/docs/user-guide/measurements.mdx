@@ -3,7 +3,7 @@ sidebar_position: 4
 sidebar_label: Measurements
 ---
 
-# How to conduct measurements
+# How to Start and Stop Measurements via CLI and UI
 
 ## Measurement Modes and Triggers
 
@@ -15,7 +15,7 @@ The **measurement decision** (whether measurements should run or not) depends on
 
 :::tip
 
-CLI mode can be used when you have already built a system that evaluates measurement conditions and want to use Pyra for the rest of the operation. Respective CLI commands can be found in the [next section](#command-line-interface-cli).
+CLI mode can be used when you have already built a system that evaluates measurement conditions, and want to use Pyra for the rest of the operation. Respective CLI commands can be found in the [next section](#command-line-interface-cli).
 
 :::
 
@@ -39,7 +39,7 @@ In the configuration tab, you can select measurement triggers that should be con
 
 Everything that can be seen/clicked in the GUI can also be read/written via the CLI.
 
-The usage of any command is explained in its help menu (available in command line).
+The usage of any command is explained in its help menu (available in the terminal).
 
 :::
 
@@ -125,7 +125,7 @@ update = {"general": {"seconds_per_core_interval": 20}}
 print(run_pyra_cli_config_update(update))
 ```
 
-Pyra will validate the structure of the update and enforce some rules on the parameter values (value range, file existance, etc.)
+Pyra will validate the structure of the update and enforce some rules on the parameter values (value range, file existence, etc.)
 
 <img
     src='/img/docs/cli-config-update-example.png'
@@ -134,7 +134,7 @@ Pyra will validate the structure of the update and enforce some rules on the par
 
 The developer docs contain a [full list of schema and value requirements](/docs/developer-guide/internal-interfaces) for the config file.
 
-### CLI: Starting and stopping measurements via CLI
+### Starting and Stopping Measurements via CLI
 
 1. Set Pyra's measurement mode to "CLI mode" using the UI, or the CLI:
 
