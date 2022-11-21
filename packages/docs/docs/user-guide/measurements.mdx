@@ -33,17 +33,19 @@ In the configuration tab, you can select measurement triggers that should be con
 
 :::
 
-## Command Line Interface (CLI)
+## CLI (Command Line Interface)
 
 :::tip
 
 Everything that can be seen/clicked in the GUI can also be read/written via the CLI.
 
+The usage of any command is explained in its help menu (available in command line).
+
 :::
 
-### Help Menu
+### CLI: Help Menu Examples
 
-Top-level help menu:
+Top-level menu:
 
 ```bash
 pyra-cli --help
@@ -61,7 +63,7 @@ pyra-cli --help
 #   state
 ```
 
-The help menu of individual command groups:
+Command group menu:
 
 ```bash
 pyra-cli config --help
@@ -76,7 +78,7 @@ pyra-cli config --help
 #   validate  Validate the current config.json file.
 ```
 
-The help menu of individual commands:
+Individual command menus:
 
 ```bash
 pyra-cli config update --help
@@ -92,19 +94,38 @@ pyra-cli config update --help
 #   --help  Show this message and exit.
 ```
 
-### Config Update
+### CLI: Config Update
 
-Running `pyra-cli config update "{\"general\":{\"seconds_per_core_interval\": 20}}"` will update the number of seconds Pyra spends in one loop. The same command can be achieved in Python without all the escaping done manually:
+Running the following command will update the number of seconds Pyra spends in one loop:
+
+```bash
+pyra-cli config update "{\"general\":{\"seconds_per_core_interval\":20}}\"
+```
+
+The same command can be achieved in Python without all the escaping done manually:
 
 ```python
 import json
 import os
+import subprocess
 
-update = {"seconds_per_core_interval": 20}
-os.system(f"pyra-cli config update {json.dumps(update)}")
+def run_pyra_cli_config_update(update: dict) -> str:
+    p = subprocess.run(
+        args=["pyra-cli.bat", "config", "update", json.dumps(update)],
+        cwd=os.path.join(os.environ["USERPROFILE"], "Documents","pyra"),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    stderr, stdout = p.stderr.decode().strip(), p.stdout.decode().strip()
+    assert p.returncode == 0, f"pyra-cli config update failed: {stderr}"
+    return stdout
+
+
+update = {"general": {"seconds_per_core_interval": 20}}
+print(run_pyra_cli_config_update(update))
 ```
 
-Pyra will validate the structure of the update and enforce some rules on the parameter values (value range, the file exists, etc.)
+Pyra will validate the structure of the update and enforce some rules on the parameter values (value range, file existance, etc.)
 
 <img
     src='/img/docs/cli-config-update-example.png'
@@ -112,3 +133,31 @@ Pyra will validate the structure of the update and enforce some rules on the par
 />
 
 The developer docs contain a [full list of schema and value requirements](/docs/developer-guide/internal-interfaces) for the config file.
+
+### CLI: Starting and stopping measurements via CLI
+
+1. Set Pyra's measurement mode to "CLI mode" using the UI, or the CLI:
+
+```bash
+pyra-cli config update "{\"measurement_decision\": {\"mode\": \"cli\"}}"
+```
+
+```python
+update = {"measurement_decision": {"mode": "cli"}}
+run_pyra_cli_config_update(update)
+```
+
+2. Update the CLI's decision on whether to measure or not using the CLI:
+
+```bash
+pyra-cli config update "{\"measurement_decision\": {\"cli_decision_result\": true}}"
+pyra-cli config update "{\"measurement_decision\": {\"cli_decision_result\": false}}"
+```
+
+```python
+update = {"measurement_decision": {"cli_decision_result": True}}
+run_pyra_cli_config_update(update)
+
+update = {"measurement_decision": {"cli_decision_result": False}}
+run_pyra_cli_config_update(update)
+```
