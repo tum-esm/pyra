@@ -1,33 +1,32 @@
-name: 'test-on-main'
+name: 'test-python-codebase-on-main'
 on:
     push:
         branches:
             - main
+        paths-ignore:
+            - 'packages/core/ui/**'
+            - 'packages/core/docs/**'
+            - '.gitignore'
+            - 'README.md'
+            - 'LICENSE.md'
+            - 'netlify.toml'
+            - '.github/workflows/*.yml'
+            - '!.github/workflows/test-python-codebase-on-main.yml'
     pull_request:
         branches:
             - main
+        paths-ignore:
+            - 'packages/core/ui/**'
+            - 'packages/core/docs/**'
+            - '.gitignore'
+            - 'README.md'
+            - 'LICENSE.md'
+            - 'netlify.toml'
+            - '.github/workflows/*.yml'
+            - '!.github/workflows/test-python-codebase-on-main.yml'
 
 jobs:
-    test-typescript-codebase:
-        runs-on: ubuntu-latest
-        steps:
-            # check-out repo and set-up python
-            - name: Check out repository
-              uses: actions/checkout@v3
-            - name: Set up NodeJS with Yarn
-              uses: actions/setup-node@v3
-              with:
-                  node-version: '14'
-                  cache: 'yarn'
-                  cache-dependency-path: packages/ui/yarn.lock
-            - name: Install dependencies
-              run: yarn install
-              working-directory: packages/ui
-            - name: Build frontend
-              run: yarn build
-              working-directory: packages/ui
-
-    test-python-codebase:
+    test:
         runs-on: ubuntu-latest
         steps:
             # check-out repo and set-up python
@@ -58,11 +57,7 @@ jobs:
             # install dependencies if cache does not exist
             - name: Install dependencies
               if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-              run: poetry install --no-interaction --no-root
-
-            # install your root project, if required
-            - name: Install library
-              run: poetry install --no-interaction
+              run: poetry install --no-interaction --with dev,helios
 
             # run test suite
             - name: Run mypy static type analysis
