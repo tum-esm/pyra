@@ -259,7 +259,7 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
         lambda: assert_min_max("helios.camera_id", 0, 999999),
         lambda: assert_min_max("helios.evaluation_size", 1, 100),
         lambda: assert_min_max("helios.seconds_per_interval", 5, 600),
-        lambda: assert_min_max("helios.measurement_threshold", 0.1, 1),
+        lambda: assert_min_max("helios.edge_detection_threshold", 0, 1),
         lambda: assert_ip_address("upload.host"),
     ]
 
