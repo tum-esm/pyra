@@ -88,7 +88,6 @@ export namespace customTypes {
             camera_id: number;
             evaluation_size: number;
             seconds_per_interval: number;
-            measurement_threshold: number;
             edge_detection_threshold: number;
             save_images: boolean;
         };
@@ -158,7 +157,6 @@ export namespace customTypes {
             camera_id?: number;
             evaluation_size?: number;
             seconds_per_interval?: number;
-            measurement_threshold?: number;
             edge_detection_threshold?: number;
             save_images?: boolean;
         };

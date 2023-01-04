@@ -16,8 +16,7 @@ export default function ConfigSectionHelios() {
                 camera_id: 0,
                 evaluation_size: 15,
                 seconds_per_interval: 6,
-                measurement_threshold: 0.6,
-                edge_detection_threshold: 0.02,
+                edge_detection_threshold: 0.01,
                 save_images: false,
             },
         });
@@ -92,17 +91,6 @@ export default function ConfigSectionHelios() {
                 }
                 numeric
                 postfix="image(s)"
-            />
-            <configurationComponents.ConfigElementText
-                title="Measurement Threshold"
-                value={localSectionConfig.measurement_threshold}
-                setValue={(v: any) => update({ helios: { measurement_threshold: v } })}
-                oldValue={
-                    centralSectionConfig !== null
-                        ? centralSectionConfig.measurement_threshold
-                        : 'null'
-                }
-                numeric
             />
             <configurationComponents.ConfigElementText
                 title="Edge Detection Threshold"
