@@ -127,9 +127,7 @@ class ImageProcessing:
         return img
 
     @staticmethod
-    def evaluate_helios_image(
-        frame: cv.Mat, edge_detection_threshold: float, save_image: bool
-    ) -> tuple[float, Literal[0, 1]]:
+    def evaluate_helios_image(frame: cv.Mat, save_image: bool) -> float:
         """
         For a given frame determine the number of "edge pixels" with
         respect to the inner 90% of the lense diameter and the "status".
@@ -142,7 +140,7 @@ class ImageProcessing:
         4. Determine edges in image (canny edge filter)
         5. Only consider edges inside 0.9 * circleradius
 
-        Returns tuple("edge pixel fraction", "status").
+        Returns the "edge pixel fraction"
         """
 
         # transform image from 1280x720 to 640x360
@@ -172,13 +170,13 @@ class ImageProcessing:
         status: Literal[0, 1] = 0
         if pixels_inside_circle != 0:
             edge_fraction = round((np.sum(edges_only_dilated) / 255) / pixels_inside_circle, 6)
-            status = 1 if (edge_fraction >= edge_detection_threshold) else 0
 
         if save_image:
             now = datetime.now()
             img_timestamp = now.strftime("%Y%m%d-%H%M%S")
-            raw_img_name = f"{img_timestamp}-{status}-raw.jpg"
-            processed_img_name = f"{img_timestamp}-{status}-processed.jpg"
+            edge_fraction_str = str(edge_fraction) + ("0" * (8 - len(str(edge_fraction))))
+            raw_img_name = f"{img_timestamp}-{edge_fraction_str}-raw.jpg"
+            processed_img_name = f"{img_timestamp}-{edge_fraction_str}-processed.jpg"
             processed_frame = ImageProcessing._add_markings_to_image(
                 edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
             )
@@ -188,4 +186,4 @@ class ImageProcessing:
             cv.imwrite(os.path.join(img_directory_path, raw_img_name), frame)
             cv.imwrite(os.path.join(img_directory_path, processed_img_name), processed_frame)
 
-        return edge_fraction, status
+        return edge_fraction

@@ -184,29 +184,12 @@ class _Helios:
             _Helios.current_exposure = new_exposure
 
     @staticmethod
-    def determine_frame_status(frame: cv.Mat, save_image: bool) -> Literal[0, 1]:
-        """
-        For a given frame, determine whether the conditions are
-        good (direct sunlight, returns 1) or bad (diffuse light
-        or darkness, returns 0).
-        """
-
-        assert _CONFIG is not None
-        assert _CONFIG["helios"] is not None
-
-        edge_fraction, status = utils.ImageProcessing.evaluate_helios_image(
-            frame, _CONFIG["helios"]["edge_detection_threshold"], save_image
-        )
-        logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
-
-        return status
-
-    @staticmethod
-    def run(save_image: bool) -> Literal[0, 1]:
+    def run(save_image: bool) -> float:
         """
         Take an image and evaluate the sun conditions.
-
         Run autoexposure function every 3 minutes.
+
+        Returns the edge fraction
         """
         now = time.time()
         if (now - _Helios.last_autoexposure_time) > 180:
@@ -214,7 +197,11 @@ class _Helios:
             _Helios.last_autoexposure_time = now
 
         frame = _Helios.take_image()
-        return _Helios.determine_frame_status(frame, save_image)
+
+        edge_fraction = utils.ImageProcessing.evaluate_helios_image(frame, save_image)
+        logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
+
+        return edge_fraction
 
 
 class HeliosThread:
@@ -294,7 +281,8 @@ class HeliosThread:
         if (_CONFIG["helios"] is None) or (not HeliosThread.should_be_running(_CONFIG)):
             return
 
-        status_history = utils.RingList(_CONFIG["helios"]["evaluation_size"])
+        # a list storing the last n calculated edge fractions
+        edge_fraction_history = utils.RingList(_CONFIG["helios"]["evaluation_size"])
         current_state = None
 
         repeated_camera_error_count = 0
@@ -315,13 +303,14 @@ class HeliosThread:
                     _Helios.init(_CONFIG["helios"]["camera_id"])
 
                 # reinit if parameter changes
-                new_size = _CONFIG["helios"]["evaluation_size"]
-                if status_history.maxsize() != new_size:
+                current_max_history_size = edge_fraction_history.get_max_size()
+                new_max_history_size = _CONFIG["helios"]["evaluation_size"]
+                if current_max_history_size != new_max_history_size:
                     logger.debug(
                         "Size of Helios history has changed: "
-                        + f"{status_history.maxsize()} -> {new_size}"
+                        + f"{current_max_history_size} -> {new_max_history_size}"
                     )
-                    status_history.reinitialize(new_size)
+                    edge_fraction_history.set_max_size(new_max_history_size)
 
                 # sleep while sun angle is too low
                 if (
@@ -345,7 +334,9 @@ class HeliosThread:
                 # at the 4th time the camera is not able to take an image
                 # an Exception will be raised (and Helios will be restarted)
                 try:
-                    status = _Helios.run(headless or _CONFIG["helios"]["save_images"])
+                    new_edge_fraction = _Helios.run(
+                        headless or _CONFIG["helios"]["save_images"]
+                    )
                     repeated_camera_error_count = 0
                 except CameraError as e:
                     repeated_camera_error_count += 1
@@ -361,16 +352,21 @@ class HeliosThread:
                         continue
 
                 # append sun status to status history
-                status_history.append(status)
+                edge_fraction_history.append(new_edge_fraction)
                 logger.debug(
-                    f"New Helios status: {status}. Current history: {status_history.get()}"
+                    f"New Helios edge_fraction: {new_edge_fraction}. "
+                    + f"Current history: {edge_fraction_history.get()}"
                 )
 
                 # evaluate sun state only if list is filled
                 new_state = None
-                if status_history.size() == status_history.maxsize():
-                    score = status_history.sum() / status_history.size()
-                    new_state = score > _CONFIG["helios"]["measurement_threshold"]
+                if edge_fraction_history.is_full():
+                    average_edge_fraction = (
+                        edge_fraction_history.sum() / edge_fraction_history.get_max_size()
+                    )
+                    new_state = (
+                        average_edge_fraction > _CONFIG["helios"]["edge_detection_threshold"]
+                    )
 
                 if current_state != new_state:
                     logger.info(
@@ -391,7 +387,7 @@ class HeliosThread:
                     time.sleep(time_to_wait)
 
             except Exception as e:
-                status_history.empty()
+                edge_fraction_history.clear()
                 _Helios.deinit()
 
                 logger.error(f"error in HeliosThread: {repr(e)}")
