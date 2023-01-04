@@ -1,58 +1,48 @@
 class RingList:
-    """
-    Base code created by Flavio Catalani on Tue, 5 Jul 2005 (PSF).
-    Added empty(), sum(), and reinitialize() functions.
+    def __init__(self, max_size: float):
+        assert max_size > 0, "a max_size of zero doesn't make any sense"
+        self.__max_size: float = max_size
+        self.__data: list[float] = [0] * max_size
+        self.__current_index: int = -1  # -1 means empty
 
-    https://code.activestate.com/recipes/435902-ring-list-a-fixed-size-circular-list/
-    """
+    def clear(self) -> None:
+        """removes all elements"""
+        self.__current_index: int = -1
 
-    def __init__(self, length: int):
-        self.__max__: int = length
-        self.__data__: list[int] = []
-        self.__full__: int = 0
-        self.__cur__: int = 0
+    def append(self, x: float) -> None:
+        """appends an element to the list"""
+        self.__current_index += 1
+        bounded_current_index = self.__current_index % self.__max_size
+        self.__data[bounded_current_index] = x
 
-    def empty(self) -> None:
-        self.__data__ = []
-        self.__full__ = 0
-        self.__cur__ = 0
+    def get(self) -> list[float]:
+        """returns the list of elements"""
+        # list is full
+        if self.__current_index >= (self.__max_size - 1):
+            bounded_current_index = self.__current_index % self.__max_size
+            return (
+                self.__data[bounded_current_index + 1 : self.__max_size + 1]
+                + self.__data[0 : bounded_current_index + 1]
+            )
 
-    def append(self, x: int) -> None:
-        if self.__full__ == 1:
-            for i in range(0, self.__cur__ - 1):
-                self.__data__[i] = self.__data__[i + 1]
-            self.__data__[self.__cur__ - 1] = x
-        else:
-            self.__data__.append(x)
-            self.__cur__ += 1
-            if self.__cur__ == self.__max__:
-                self.__full__ = 1
+        # list is not empty but not full
+        elif self.__current_index >= 0:
+            return self.__data[0 : self.__current_index + 1]
 
-    def get(self) -> list[int]:
-        return self.__data__
+        # list is empty
+        return []
 
-    def remove(self) -> None:
-        if self.__cur__ > 0:
-            del self.__data__[self.__cur__ - 1]
-            self.__cur__ -= 1
-
-    def size(self) -> int:
-        return self.__cur__
-
-    def maxsize(self) -> int:
-        return self.__max__
-
-    def sum(self) -> int:
+    def sum(self) -> float:
+        """returns the max size of the list"""
         return sum(self.get())
 
-    def reinitialize(self, length: int) -> None:
-        self.__max__ = length
-        self.__full__ = 0
-        self.__cur__ = 0
-        handover_list = self.get()
-        self.__data__ = []
-
-        for item in handover_list:
+    def set_maxsize(self, new_max_size: int) -> None:
+        """sets a new max size"""
+        current_list = self.get()
+        self.__max_size = new_max_size
+        self.__data = [0] * new_max_size
+        self.__current_index = -1
+        for item in current_list:
             self.append(item)
 
     def __str__(self) -> str:
