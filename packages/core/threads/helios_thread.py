@@ -4,7 +4,7 @@ import threading
 import time
 import cv2 as cv
 import numpy as np
-from typing import Any, Literal, Optional
+from typing import Any, Optional
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="helios")
@@ -283,7 +283,7 @@ class HeliosThread:
 
         # a list storing the last n calculated edge fractions
         edge_fraction_history = utils.RingList(_CONFIG["helios"]["evaluation_size"])
-        current_state = None
+        current_state: Optional[bool] = None
 
         repeated_camera_error_count = 0
 
@@ -319,7 +319,7 @@ class HeliosThread:
                     None, _CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg
                 ):
                     logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
-                    if current_state != None:
+                    if current_state is not None:
                         interfaces.StateInterface.update(
                             {"helios_indicates_good_conditions": False}
                         )
@@ -364,9 +364,19 @@ class HeliosThread:
                     average_edge_fraction = (
                         edge_fraction_history.sum() / edge_fraction_history.get_max_size()
                     )
-                    new_state = (
-                        average_edge_fraction > _CONFIG["helios"]["edge_detection_threshold"]
-                    )
+
+                    # eliminating quickly alternating decisions
+                    # see https://github.com/tum-esm/pyra/issues/148
+
+                    # if not running and above upper threshold -> stop
+                    upper_ef_threshold = _CONFIG["helios"]["edge_detection_threshold"]
+                    if current_state and average_edge_fraction >= upper_ef_threshold:
+                        new_state = True
+
+                    # if already running and below lower threshold -> stop
+                    lower_ef_threshold = upper_ef_threshold * 0.7
+                    if current_state and average_edge_fraction <= lower_ef_threshold:
+                        new_state = False
 
                 if current_state != new_state:
                     logger.info(
