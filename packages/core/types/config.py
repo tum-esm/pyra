@@ -120,7 +120,6 @@ class ConfigSubDicts:
         camera_id: int
         evaluation_size: int
         seconds_per_interval: float
-        measurement_threshold: float
         edge_detection_threshold: float
         save_images: bool
 
@@ -129,7 +128,6 @@ class ConfigSubDicts:
         camera_id: int
         evaluation_size: int
         seconds_per_interval: float
-        measurement_threshold: float
         edge_detection_threshold: float
         save_images: bool
 
