@@ -16,19 +16,24 @@ def test_ring_list() -> None:
 
     # list is empty at first
     assert ring_list.get() == []
+    assert ring_list.get_max_size() == 4
+    assert not ring_list.is_full()
 
     # appending one element
     ring_list.append(23.5)
     assert ring_list.get() == [23.5]
+    assert not ring_list.is_full()
 
     # order of appending elements
     ring_list.append(3)
     assert ring_list.get() == [23.5, 3]
+    assert not ring_list.is_full()
 
     # number of stored elements is correct
     ring_list.append(4)
     ring_list.append(5)
     assert ring_list.get() == [23.5, 3, 4, 5]
+    assert ring_list.is_full()
 
     # sum works
     assert ring_list.sum() == 35.5
@@ -36,6 +41,7 @@ def test_ring_list() -> None:
     # overflowing works as expected
     ring_list.append(6)
     assert ring_list.get() == [3, 4, 5, 6]
+    assert ring_list.is_full()
 
     # sum still works
     assert ring_list.sum() == 18
@@ -47,6 +53,7 @@ def test_ring_list() -> None:
     ring_list.append(10)
     ring_list.append(11)
     assert ring_list.get() == [8, 9, 10, 11]
+    assert ring_list.is_full()
 
     # clearing the list
     ring_list.clear()
@@ -65,19 +72,26 @@ def test_ring_list() -> None:
     assert ring_list.get() == [14, 15, 16, 17]
 
     # reducing the size
-    ring_list.set_maxsize(2)
+    ring_list.set_max_size(2)
+    assert ring_list.get_max_size() == 2
     assert ring_list.get() == [16, 17]
     ring_list.append(18)
     assert ring_list.get() == [17, 18]
+    assert ring_list.is_full()
 
     # increasing the size
-    ring_list.set_maxsize(6)
+    ring_list.set_max_size(6)
     assert ring_list.get() == [17, 18]
+    assert not ring_list.is_full()
     ring_list.append(19)
     assert ring_list.get() == [17, 18, 19]
     ring_list.append(20)
     ring_list.append(21)
     ring_list.append(22)
     assert ring_list.get() == [17, 18, 19, 20, 21, 22]
+    assert ring_list.is_full()
+
+    # overflowing still works
     ring_list.append(23)
     assert ring_list.get() == [18, 19, 20, 21, 22, 23]
+    assert ring_list.is_full()
