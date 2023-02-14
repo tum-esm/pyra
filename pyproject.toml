@@ -2,7 +2,10 @@
 name = "pyra"
 version = "4.0.6"
 description = "operate an EM27 station autonomously"
-authors = ["Patrick Aigner <patrick.aigner@tum.de>", "Moritz Makowski <moritz.makowski@tum.de>"]
+authors = [
+    "Patrick Aigner <patrick.aigner@tum.de>",
+    "Moritz Makowski <moritz.makowski@tum.de>"
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -21,13 +24,6 @@ pydantic = "^1.9.2"
 tqdm = "^4.64.0"
 colorama = "^0.4.5"
 deepdiff = "^6.2.1"
-
-[tool.poetry.group.helios]
-optional = true
-
-# libraries only used when running the helios analysis scripts
-[tool.poetry.group.helios.dependencies]
-scipy = "^1.9.3"
 
 [tool.poetry.group.dev]
 optional = true
