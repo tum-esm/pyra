@@ -31,7 +31,7 @@ jobs:
               id: cached-poetry-dependencies
               uses: actions/cache@v3
               with:
-                  path: src-tauri/target
+                  path: packages/ui/src-tauri/target
                   key: tauri-stuff-${{ runner.os }}
 
             - name: install app dependencies and build it
