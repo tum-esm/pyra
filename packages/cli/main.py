@@ -14,13 +14,16 @@ from packages.cli.commands import (
     remove_filelocks,
     state_command_group,
 )
+from packages.core.interfaces import ConfigInterface
 
 
 @click.command(help="Print Pyra version and code directory path.")
 def print_cli_information() -> None:
+    config = ConfigInterface.read()
     click.echo(
         click.style(
-            f'This CLI is running Pyra version 4.0.5 in directory "{PROJECT_DIR}".', fg="green"
+            f'This CLI is running Pyra version {config["general"]["version"]} in directory "{PROJECT_DIR}".',
+            fg="green",
         )
     )
 
