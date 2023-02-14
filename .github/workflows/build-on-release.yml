@@ -19,7 +19,7 @@ jobs:
               with:
                   node-version: 16
                   cache: 'yarn'
-                  cache-dependency-path: yarn.lock
+                  cache-dependency-path: packages/ui/yarn.lock
 
             - name: install Rust stable
               uses: actions-rs/toolchain@v1
