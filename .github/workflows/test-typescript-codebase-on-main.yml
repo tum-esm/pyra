@@ -17,18 +17,20 @@ jobs:
     test:
         runs-on: ubuntu-latest
         steps:
-            # check-out repo and set-up python
             - name: Check out repository
               uses: actions/checkout@v3
+
             - name: Set up NodeJS with Yarn
               uses: actions/setup-node@v3
               with:
                   node-version: '14'
                   cache: 'yarn'
                   cache-dependency-path: packages/ui/yarn.lock
+
             - name: Install dependencies
-              run: yarn install
+              run: yarn install --frozen-lockfile
               working-directory: packages/ui
+
             - name: Build frontend
               run: yarn build
               working-directory: packages/ui
