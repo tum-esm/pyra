@@ -81,7 +81,7 @@ class OpusMeasurement:
         self.check_for_experiment_change()
 
         # checks IP connection to FTIR spectrometer
-        if self.__is_em27_responsive:
+        if self.__is_em27_responsive():
             logger.debug("Successful ping to EM27.")
         else:
             logger.info("EM27 seems to be disconnected.")

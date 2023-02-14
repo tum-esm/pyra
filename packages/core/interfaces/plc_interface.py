@@ -197,7 +197,7 @@ class PLCInterface:
         Read the whole state of the PLC
         """
 
-        plc_db_content: dict[int, int] = {}
+        plc_db_content: dict[int, bytearray] = {}
         plc_db_size = {1: {3: 6, 8: 26, 25: 10}, 2: {3: 5, 6: 17, 8: 25}}[self.plc_version]
 
         for db_index, db_size in plc_db_size.items():

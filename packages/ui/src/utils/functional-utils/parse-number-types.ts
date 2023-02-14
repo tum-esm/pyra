@@ -48,9 +48,6 @@ export default function parseNumberTypes(newConfig: customTypes.config): customT
                       camera_id: parseFloat(`${newConfig.helios.camera_id}`),
                       evaluation_size: parseFloat(`${newConfig.helios.evaluation_size}`),
                       seconds_per_interval: parseFloat(`${newConfig.helios.seconds_per_interval}`),
-                      measurement_threshold: parseFloat(
-                          `${newConfig.helios.measurement_threshold}`
-                      ),
                       edge_detection_threshold: parseFloat(
                           `${newConfig.helios.edge_detection_threshold}`
                       ),

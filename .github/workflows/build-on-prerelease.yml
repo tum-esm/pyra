@@ -1,4 +1,4 @@
-name: 'build-on-release'
+name: 'build-on-prerelease'
 on:
     push:
         branches:
@@ -13,16 +13,32 @@ jobs:
         runs-on: windows-latest
         steps:
             - uses: actions/checkout@v2
-            - name: setup node
-              uses: actions/setup-node@v1
+
+            - name: Set up NodeJS with Yarn
+              uses: actions/setup-node@v3
               with:
                   node-version: 16
+                  cache: 'yarn'
+                  cache-dependency-path: packages/ui/yarn.lock
+
             - name: install Rust stable
               uses: actions-rs/toolchain@v1
               with:
                   toolchain: stable
+
+            # load cached tauri stuff
+            - name: Load cached tauri stuff
+              id: cached-poetry-dependencies
+              uses: actions/cache@v3
+              with:
+                  path: packages/ui/src-tauri/target
+                  key: tauri-stuff-${{ runner.os }}
+
             - name: install app dependencies and build it
-              run: yarn && yarn build
+              run: |
+                  yarn install --frozen-lockfile
+                  yarn build
+
             - uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

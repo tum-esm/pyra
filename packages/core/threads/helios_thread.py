@@ -4,7 +4,7 @@ import threading
 import time
 import cv2 as cv
 import numpy as np
-from typing import Any, Literal, Optional
+from typing import Any, Optional
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="helios")
@@ -169,7 +169,7 @@ class _Helios:
             img = _Helios.take_image(trow_away_white_images=False)
             mean_color = round(np.mean(img), 3)
             exposure_results.append({"exposure": e, "mean": mean_color})
-            img = utils.ImageProcessing.add_text_to_image(
+            img = utils.HeliosImageProcessing.add_text_to_image(
                 img, f"mean={mean_color}", color=(0, 0, 255)
             )
             cv.imwrite(os.path.join(AUTOEXPOSURE_IMG_DIR, f"exposure-{e}.jpg"), img)
@@ -184,78 +184,12 @@ class _Helios:
             _Helios.current_exposure = new_exposure
 
     @staticmethod
-    def determine_frame_status(frame: cv.Mat, save_image: bool) -> Literal[0, 1]:
-        """
-        For a given frame, determine whether the conditions are
-        good (direct sunlight, returns 1) or bad (diffuse light
-        or darkness, returns 0).
-
-        1. Downscale image (faster processing)
-        2. Convert to grayscale image
-        3. Determine position and size of circular opening
-        4. Determine edges in image (canny edge filter)
-        5. Only consider edges inside 0.9 * circleradius
-        6. If number of edge-pixels is > x: return 1; else: return 0;
-        """
-
-        assert _CONFIG is not None
-        assert _CONFIG["helios"] is not None
-
-        # transform image from 1280x720 to 640x360
-        downscaled_image = cv.resize(frame, None, fx=0.5, fy=0.5)
-
-        # for each rgb pixel [234,234,234] only consider the gray value (234)
-        single_valued_pixels = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)
-
-        # determine lense position and size from binary mask
-        binary_mask = utils.ImageProcessing.get_binary_mask(single_valued_pixels)
-        circle_cx, circle_cy, circle_r = utils.ImageProcessing.get_circle_location(binary_mask)
-
-        # only consider edges and make them bold
-        edges_only: cv.Mat = np.array(cv.Canny(single_valued_pixels, 40, 40), dtype=np.float32)
-        edges_only_dilated: cv.Mat = cv.dilate(
-            edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-        )
-
-        # blacken the outer 10% of the circle radius
-        edges_only_dilated *= utils.ImageProcessing.get_circle_mask(
-            edges_only_dilated.shape, round(circle_r * 0.9), circle_cx, circle_cy
-        )
-
-        # determine how many pixels inside the circle are made up of "edge pixels"
-        pixels_inside_circle: int = np.sum(binary_mask)
-        status: Literal[1, 0] = 0
-        if pixels_inside_circle != 0:
-            edge_fraction = round((np.sum(edges_only_dilated) / 255) / pixels_inside_circle, 6)
-            sufficient_edge_fraction = (
-                edge_fraction >= _CONFIG["helios"]["edge_detection_threshold"]
-            )
-            status = 1 if sufficient_edge_fraction else 0
-
-        logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
-
-        if save_image:
-            now = datetime.now()
-            img_timestamp = now.strftime("%Y%m%d-%H%M%S")
-            raw_img_name = f"{img_timestamp}-{status}-raw.jpg"
-            processed_img_name = f"{img_timestamp}-{status}-processed.jpg"
-            processed_frame = utils.ImageProcessing.add_markings_to_image(
-                edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
-            )
-            img_directory_path = os.path.join(IMG_DIR, now.strftime("%Y%m%d"))
-            if not os.path.exists(img_directory_path):
-                os.mkdir(img_directory_path)
-            cv.imwrite(os.path.join(img_directory_path, raw_img_name), frame)
-            cv.imwrite(os.path.join(img_directory_path, processed_img_name), processed_frame)
-
-        return status
-
-    @staticmethod
-    def run(save_image: bool) -> Literal[0, 1]:
+    def run(save_image: bool) -> float:
         """
         Take an image and evaluate the sun conditions.
-
         Run autoexposure function every 3 minutes.
+
+        Returns the edge fraction
         """
         now = time.time()
         if (now - _Helios.last_autoexposure_time) > 180:
@@ -263,7 +197,11 @@ class _Helios:
             _Helios.last_autoexposure_time = now
 
         frame = _Helios.take_image()
-        return _Helios.determine_frame_status(frame, save_image)
+
+        edge_fraction = utils.HeliosImageProcessing.get_edge_fraction(frame, save_image)
+        logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
+
+        return edge_fraction
 
 
 class HeliosThread:
@@ -343,8 +281,9 @@ class HeliosThread:
         if (_CONFIG["helios"] is None) or (not HeliosThread.should_be_running(_CONFIG)):
             return
 
-        status_history = utils.RingList(_CONFIG["helios"]["evaluation_size"])
-        current_state = None
+        # a list storing the last n calculated edge fractions
+        edge_fraction_history = utils.RingList(_CONFIG["helios"]["evaluation_size"])
+        current_state: Optional[bool] = None
 
         repeated_camera_error_count = 0
 
@@ -364,22 +303,24 @@ class HeliosThread:
                     _Helios.init(_CONFIG["helios"]["camera_id"])
 
                 # reinit if parameter changes
-                new_size = _CONFIG["helios"]["evaluation_size"]
-                if status_history.maxsize() != new_size:
+                current_max_history_size = edge_fraction_history.get_max_size()
+                new_max_history_size = _CONFIG["helios"]["evaluation_size"]
+                if current_max_history_size != new_max_history_size:
                     logger.debug(
                         "Size of Helios history has changed: "
-                        + f"{status_history.maxsize()} -> {new_size}"
+                        + f"{current_max_history_size} -> {new_max_history_size}"
                     )
-                    status_history.reinitialize(new_size)
+                    edge_fraction_history.set_max_size(new_max_history_size)
 
                 # sleep while sun angle is too low
                 if (
                     not headless
                 ) and utils.Astronomy.get_current_sun_elevation().is_within_bounds(
-                    None, _CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg
+                    None,
+                    _CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg,
                 ):
                     logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
-                    if current_state != None:
+                    if current_state is not None:
                         interfaces.StateInterface.update(
                             {"helios_indicates_good_conditions": False}
                         )
@@ -394,7 +335,9 @@ class HeliosThread:
                 # at the 4th time the camera is not able to take an image
                 # an Exception will be raised (and Helios will be restarted)
                 try:
-                    status = _Helios.run(headless or _CONFIG["helios"]["save_images"])
+                    new_edge_fraction = _Helios.run(
+                        headless or _CONFIG["helios"]["save_images"]
+                    )
                     repeated_camera_error_count = 0
                 except CameraError as e:
                     repeated_camera_error_count += 1
@@ -410,16 +353,38 @@ class HeliosThread:
                         continue
 
                 # append sun status to status history
-                status_history.append(status)
+                edge_fraction_history.append(new_edge_fraction)
                 logger.debug(
-                    f"New Helios status: {status}. Current history: {status_history.get()}"
+                    f"New Helios edge_fraction: {new_edge_fraction}. "
+                    + f"Current history: {edge_fraction_history.get()}"
                 )
 
                 # evaluate sun state only if list is filled
-                new_state = None
-                if status_history.size() == status_history.maxsize():
-                    score = status_history.sum() / status_history.size()
-                    new_state = score > _CONFIG["helios"]["measurement_threshold"]
+                new_state = current_state
+                if edge_fraction_history.is_full():
+                    average_edge_fraction = float(
+                        edge_fraction_history.sum() / edge_fraction_history.get_max_size()
+                    )
+
+                    # eliminating quickly alternating decisions
+                    # see https://github.com/tum-esm/pyra/issues/148
+
+                    upper_ef_threshold = _CONFIG["helios"]["edge_detection_threshold"]
+                    lower_ef_threshold = upper_ef_threshold * 0.7
+                    if current_state is None:
+                        new_state = average_edge_fraction >= upper_ef_threshold
+                    else:
+                        # if already running and below lower threshold -> stop
+                        if current_state and (average_edge_fraction <= lower_ef_threshold):
+                            new_state = False
+
+                        # if not running and above upper threshold -> start
+                        if (not current_state) and (
+                            average_edge_fraction >= upper_ef_threshold
+                        ):
+                            new_state = True
+
+                logger.debug(f"State: {'GOOD' if (new_state == True) else 'BAD'}")
 
                 if current_state != new_state:
                     logger.info(
@@ -440,9 +405,10 @@ class HeliosThread:
                     time.sleep(time_to_wait)
 
             except Exception as e:
-                status_history.empty()
+                edge_fraction_history.clear()
                 _Helios.deinit()
 
                 logger.error(f"error in HeliosThread: {repr(e)}")
+                logger.exception(e)
                 logger.info(f"sleeping 30 seconds, reinitializing HeliosThread")
                 time.sleep(30)

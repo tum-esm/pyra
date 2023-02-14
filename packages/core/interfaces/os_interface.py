@@ -1,4 +1,3 @@
-from typing import Literal
 import psutil
 import datetime
 
@@ -46,15 +45,15 @@ class OSInterface:
         Returns system battery in percent as an integer (1-100).
         Returns 100 if device has no battery.
         """
-        battery_state = psutil.sensors_battery()
+        battery_state: psutil.sbattery | None = psutil.sensors_battery()  # type:ignore
         if battery_state is not None:
-            return battery_state.percent
+            return battery_state.percent  # type:ignore
         return 100
 
     @staticmethod
     def validate_system_battery() -> None:
         """Raises LowEnergyError if system battery runs lower than 20%."""
-        battery_state = psutil.sensors_battery()
+        battery_state: psutil.sbattery | None = psutil.sensors_battery()  # type:ignore
         if battery_state is not None:
             if battery_state.percent < 20:
                 raise OSInterface.LowEnergyError(
