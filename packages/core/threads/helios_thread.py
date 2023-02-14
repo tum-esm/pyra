@@ -316,7 +316,8 @@ class HeliosThread:
                 if (
                     not headless
                 ) and utils.Astronomy.get_current_sun_elevation().is_within_bounds(
-                    None, _CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg
+                    None,
+                    _CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg,
                 ):
                     logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                     if current_state is not None:
@@ -359,24 +360,31 @@ class HeliosThread:
                 )
 
                 # evaluate sun state only if list is filled
-                new_state = None
+                new_state = current_state
                 if edge_fraction_history.is_full():
-                    average_edge_fraction = (
+                    average_edge_fraction = float(
                         edge_fraction_history.sum() / edge_fraction_history.get_max_size()
                     )
 
                     # eliminating quickly alternating decisions
                     # see https://github.com/tum-esm/pyra/issues/148
 
-                    # if not running and above upper threshold -> start
                     upper_ef_threshold = _CONFIG["helios"]["edge_detection_threshold"]
-                    if current_state and average_edge_fraction >= upper_ef_threshold:
-                        new_state = True
-
-                    # if already running and below lower threshold -> stop
                     lower_ef_threshold = upper_ef_threshold * 0.7
-                    if current_state and average_edge_fraction <= lower_ef_threshold:
-                        new_state = False
+                    if current_state is None:
+                        new_state = average_edge_fraction >= upper_ef_threshold
+                    else:
+                        # if already running and below lower threshold -> stop
+                        if current_state and (average_edge_fraction <= lower_ef_threshold):
+                            new_state = False
+
+                        # if not running and above upper threshold -> start
+                        if (not current_state) and (
+                            average_edge_fraction >= upper_ef_threshold
+                        ):
+                            new_state = True
+
+                logger.debug(f"State: {'GOOD' if (new_state == True) else 'BAD'}")
 
                 if current_state != new_state:
                     logger.info(
@@ -401,5 +409,6 @@ class HeliosThread:
                 _Helios.deinit()
 
                 logger.error(f"error in HeliosThread: {repr(e)}")
+                logger.exception(e)
                 logger.info(f"sleeping 30 seconds, reinitializing HeliosThread")
                 time.sleep(30)
