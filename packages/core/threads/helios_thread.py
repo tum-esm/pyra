@@ -169,7 +169,7 @@ class _Helios:
             img = _Helios.take_image(trow_away_white_images=False)
             mean_color = round(np.mean(img), 3)
             exposure_results.append({"exposure": e, "mean": mean_color})
-            img = utils.ImageProcessing.add_text_to_image(
+            img = utils.HeliosImageProcessing.add_text_to_image(
                 img, f"mean={mean_color}", color=(0, 0, 255)
             )
             cv.imwrite(os.path.join(AUTOEXPOSURE_IMG_DIR, f"exposure-{e}.jpg"), img)
@@ -198,7 +198,7 @@ class _Helios:
 
         frame = _Helios.take_image()
 
-        edge_fraction = utils.ImageProcessing.evaluate_helios_image(frame, save_image)
+        edge_fraction = utils.HeliosImageProcessing.get_edge_fraction(frame, save_image)
         logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
 
         return edge_fraction
@@ -368,7 +368,7 @@ class HeliosThread:
                     # eliminating quickly alternating decisions
                     # see https://github.com/tum-esm/pyra/issues/148
 
-                    # if not running and above upper threshold -> stop
+                    # if not running and above upper threshold -> start
                     upper_ef_threshold = _CONFIG["helios"]["edge_detection_threshold"]
                     if current_state and average_edge_fraction >= upper_ef_threshold:
                         new_state = True
