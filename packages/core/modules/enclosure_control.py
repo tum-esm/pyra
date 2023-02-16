@@ -158,17 +158,17 @@ class EnclosureControl:
 
         # Allows for PLC connection downtime of 10 minutes before an error is raised.
         # Allows PLC connection to heal itself.
-        except Snap7Exception as e:
+        except (Snap7Exception, RuntimeError) as e:
             logger.exception(e)
             now = time.time()
             seconds_since_error_occured = now - self.last_plc_connection_time
             if seconds_since_error_occured > 600:
                 raise interfaces.PLCInterface.PLCError(
-                    "Snap7Exception persisting for 10+ minutes"
+                    "Snap7Exception/RuntimeError persisting for 10+ minutes"
                 )
             else:
                 logger.info(
-                    f"Snap7Exception persisting for {round(seconds_since_error_occured/60, 2)}"
+                    f"Snap7Exception/RuntimeError persisting for {round(seconds_since_error_occured/60, 2)}"
                     + " minutes. Sending email at 10 minutes."
                 )
 
