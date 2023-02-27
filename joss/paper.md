@@ -67,7 +67,7 @@ Previous versions of _Pyra_ were successfully operated during measurement campai
 
 # Summary
 
-_Pyra_ consists of three different parts (\autoref{fig:Architecture}): _Pyra Core_ (continuous background process), _Pyra Command Line Interface (Pyra CLI)_, and _Pyra User Interface (Pyra UI)_ (both are used for on-demand user interaction with _Pyra Core_). Measurements with an EM27/SUN require you to run CamTracker [@gisi2011camtracker], a software that tracks the sun position and operates the mirrors accordingly, and OPUS[^17], a software that sends commands to the EM27/SUN and collects the output data into interferogram files. As CamTracker and the fully supported OPUS version depend on a Windows Operating System, _Pyra_ is also required to be run on Windows for full functionality. 
+_Pyra_ consists of three different parts (\autoref{fig:Architecture}): _Pyra Core_ (continuous background process), _Pyra Command Line Interface (Pyra CLI)_, and _Pyra User Interface (Pyra UI)_ (both are used for on-demand user interaction with _Pyra Core_). Measurements with an EM27/SUN require to run CamTracker [@gisi2011camtracker], a software that tracks the sun position and operates the mirrors accordingly, and OPUS[^17], a software that sends commands to the EM27/SUN and collects the output data into interferogram files. As CamTracker and the fully supported OPUS version depend on a Windows Operating System, _Pyra_ is also required to be run on Windows for full functionality. 
 
 ![The interaction between Pyra's software components.\label{fig:Architecture}](architecture-drawing.png){ width=100% }
 
