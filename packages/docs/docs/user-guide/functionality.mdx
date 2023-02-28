@@ -4,10 +4,12 @@ sidebar_position: 1
 
 # Functionality
 
-Measurements with an EM27/SUN require you to run CamTracker - the software that tracks the sun position and operates the mirrors accordingly - and OPUS - the software that sends commands to the EM27/SUN and collects the output data into interferogram files.
+Measurements with an EM27/SUN require you to run CamTracker - the software that tracks the sun position and operates the mirrors accordingly - and OPUS - the software that sends commands to the EM27/SUN and collects the output data into interferogram files. Fully automated setups usually have a weather protection enclosure and possibly custom hardware to evaluate measurement conditions.
+
+<img src='/drawings/exports/setup.png' className='tw-rounded-lg tw-mb-4' />
+
+Pyra bridges the gap between the components required to automate your EM27/SUN setup. Based on certain conditions - time, sun angle, or sun condition (see [User Guide > TUM PLC and Helios](/docs/user-guide/tum-plc-and-helios)) - Pyra decides whether to perform measurements or not. This decision can also be outsourced to your own logic and passed to Pyra via CLI commands or done manually with a button in the UI (see [User Guide > Measurements](/docs/user-guide/measurements)).
 
 <img src='/img/docs/overview-tab.png' className='tw-rounded-lg tw-mb-4' />
 
-Based on certain conditions - time, sun angle, or sun condition (see [Helios](/docs/user-guide/tum-plc-and-helios)) - Pyra decides whether to perform measurements or not.
-
-Pyra can handle both interfaces to start and stop measurement activity. This can either be done manually (clicking a button in the GUI), automatically or via a CLI command. In addition, Pyra monitors the measurement process and operating system stability (disk space, CPU usage, etc.), permanently logs its activity, and sends out emails when errors occur/have been resolved.
+Pyra monitors the measurement process and operating system stability (disk space, CPU usage, etc.), permanently logs its activity and sends emails when errors occur/have been resolved.
