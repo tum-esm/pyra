@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -o errexit
 
 echo "Removing old mypy cache"
