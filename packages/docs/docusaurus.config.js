@@ -47,6 +47,7 @@ async function createConfig() {
                             require.resolve('./src/css/navigation.css'),
                             require.resolve('./src/css/markdown.css'),
                             require.resolve('./src/css/admonitions.css'),
+                            require.resolve('./src/css/api.css'),
                         ],
                     },
                 }),
@@ -83,8 +84,8 @@ async function createConfig() {
                     copyright: `© ${new Date().getFullYear()} - Associate Professorship of Environmental Sensing and Modeling - Technical University of Munich`,
                 },
                 prism: {
-                    theme: lightCodeTheme,
-                    darkTheme: darkCodeTheme,
+                    theme: require('prism-react-renderer/themes/github'),
+                    additionalLanguages: ['python'],
                 },
                 algolia: {
                     appId: 'HVYNW5V940',
