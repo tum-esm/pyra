@@ -12,7 +12,7 @@
     list_class_variables_in_index = True
     sort_identifiers = True
     show_type_annotations = True
-
+    
     # Show collapsed source code block next to each item.
     # Disabling this can improve rendering speed of large modules.
     show_source_code = False
@@ -31,7 +31,7 @@
     link_prefix = ''
 
     # Enable syntax highlighting for code/source blocks by including Highlight.js
-    syntax_highlighting = False
+    syntax_highlighting = True
 
     # Set the style keyword such as 'atom-one-light' or 'github-gist'
     #     Options: https://github.com/highlightjs/highlight.js/tree/master/src/styles

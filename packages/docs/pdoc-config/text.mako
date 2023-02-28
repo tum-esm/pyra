@@ -1,273 +1,172 @@
-<%
-  import os
+## Define mini-templates for each portion of the doco.
 
-  import pdoc
-  from pdoc.html_helpers import extract_toc, glimpse, to_html as _to_html, format_git_link
+<%!
+def indent(s, spaces=4):
+    new = s.replace('\n', '\n' + ' ' * spaces)
+    return ' ' * spaces + new.strip()
 
+def render_py_function_def(func) -> str:
+    params = func.params(annotate=True)
+    params_str = ""
+    if len(params) > 0:
+        params_str = "\n"
+        for p in func.params(annotate=True):
+            params_str += "\t" + str(p).replace("\xa0", " ") + ",\n"
 
-  def link(dobj: pdoc.Doc, name=None):
-    name = name or dobj.qualname + ('()' if isinstance(dobj, pdoc.Function) else '')
-    if isinstance(dobj, pdoc.External) and not external_links:
-        return name
-    url = dobj.url(relative_to=module, link_prefix=link_prefix,
-                   top_ancestor=not show_inherited_members).replace('.html','')
-    ## Replace "." with "_" because Docusarus doesn't seem to like "." in custom heading ids.
-    return '<a title="{}" href="{}">{}</a>'.format(dobj.refname, url.replace('.', '_'), name)
-
-
-  def to_html(text):
-    return _to_html(text, docformat=docformat, module=module, link=link, latex_math=latex_math).replace('<h2 ','<h5 ').replace('</h2>','</h5>').replace('<strong>','').replace('</strong>', '')
-
-
-  def get_annotation(bound_method, sep=':'):
-    annot = show_type_annotations and bound_method(link=link) or ''
-    if annot:
-        annot = ' ' + sep + '\N{NBSP}' + annot
-    return annot
+    return f"{func.funcdef()} {func.name}({params_str}) -> {func.return_annotation()}"
 %>
 
-<%def name="ident(name)"><span className="ident">${name}</span></%def>
+<%def name="deflist(s)">:${indent(s)[1:]}</%def>
 
-<%def name="show_desc(d, short=False)">
-  <%
-  inherits = ' inherited' if d.inherits else ''
-  docstring = glimpse(d.docstring) if short or inherits else d.docstring
-  %>
-  % if d.inherits:
-*Inherited from:*
-          % if hasattr(d.inherits, 'cls'):
-<code>${link(d.inherits.cls)}</code>.<code>${link(d.inherits, d.name)}</code>
-          % else:
-<code>${link(d.inherits)}</code>
-          % endif
-  % endif
-${docstring | to_html}
+<%def name="h3(s)">### ${s}
 </%def>
 
-<%def name="show_module(module)">
-  <%
+<%def name="function(func, h_level)" buffered="True">
+${'##' if h_level == 'h2' else '###'} `${func.name}`
+
+```py
+${render_py_function_def(func)}
+```
+
+${func.docstring}
+
+<br/>
+</%def>
+
+<%def name="variable(var)" buffered="True">
+<%
+annot = show_type_annotations and var.type_annotation() or ''
+if annot:
+    annot = ': ' + annot
+%>
+`${var.name}${annot}`
+${var.docstring | deflist}
+</%def>
+
+<%def name="class_(cls)" buffered="True">
+`${cls.name}(${", ".join(cls.params(annotate=show_type_annotations))})`
+${cls.docstring | deflist}
+<%
+  class_vars = cls.class_variables(show_inherited_members, sort=sort_identifiers)
+  static_methods = cls.functions(show_inherited_members, sort=sort_identifiers)
+  inst_vars = cls.instance_variables(show_inherited_members, sort=sort_identifiers)
+  methods = cls.methods(show_inherited_members, sort=sort_identifiers)
+  mro = cls.mro()
+  subclasses = cls.subclasses()
+%>
+% if mro:
+${h3('Ancestors (in MRO)')}
+% for c in mro:
+* ${c.refname}
+% endfor
+
+% endif
+% if subclasses:
+${h3('Descendants')}
+% for c in subclasses:
+* ${c.refname}
+% endfor
+
+## =======================
+## CLASS VARIABLES/METHODS
+
+% endif
+    % if class_vars:
+
+${h3('Class variables')}
+% for v in class_vars:
+${variable(v) | indent}
+
+    % endfor
+% endif
+
+## -----------------------
+
+% if static_methods:
+
+${h3('Static methods')}
+
+    % for f in static_methods:
+
+${function(f, "h3")}
+
+    % endfor
+% endif
+
+## -----------------------
+
+% if inst_vars:
+
+${h3('Instance variables')}
+
+% for v in inst_vars:
+
+${variable(v) | indent}
+
+    % endfor
+% endif
+
+## -----------------------
+
+% if methods:
+
+${h3('Methods')}
+
+    % for m in methods:
+
+${function(m, "h3")}
+
+    % endfor
+% endif
+
+</%def>
+
+## Start the output logic for an entire module.
+
+<%
   variables = module.variables(sort=sort_identifiers)
   classes = module.classes(sort=sort_identifiers)
   functions = module.functions(sort=sort_identifiers)
   submodules = module.submodules()
-  %>
+  heading = 'Namespace' if module.is_namespace else 'Module'
+%>
 
-  <%def name="show_func(f, is_method=False)">
-<div className='api'>
+${heading} ${module.name}
+=${'=' * (len(module.name) + len(heading))}
+${module.docstring}
 
-    % if is_method:
-${"####"} ${f.name} <a name="${f.refname}"/>
-    % else:
-${"###"} ${f.name} <a name="${f.refname}"/>
-    % endif
 
-        <%
-            params = ', '.join(f.params(annotate=show_type_annotations, link=link))
-            return_type = get_annotation(f.return_annotation, '\N{non-breaking hyphen}>')
-        %>
-
-<div className='api__body'>
-<div className='api__signature'>
-${f.funcdef()} ${ident(f.name)}(${params})${return_type}
-</div>
-
-<div className='api__description'>
-${show_desc(f)}
-</div>
-</div>
-
-</div>
-  </%def>
-
----
-title: ${'Namespace' if module.is_namespace else  \
-                      'Package' if module.is_package and not module.supermodule else \
-                      'Module'} ${module.name}
----
-
-${module.docstring | to_html}
-
-    % if submodules:
-<h2 className="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
+% if submodules:
+Sub-modules
+-----------
     % for m in submodules:
-<dt><code className="name">${link(m)}</code></dt>
-<dd>${show_desc(m, short=True)}</dd>
+* ${m.name}
     % endfor
-</dl>
-    % endif
+% endif
 
-    % if variables:
-<h2 className="section-title" id="header-variables">Global variables</h2>
-<dl>
+% if variables:
+Variables
+---------
     % for v in variables:
-      <% return_type = get_annotation(v.type_annotation) %>
-<dt id="${v.refname}"><code className="name">var ${ident(v.name)}${return_type}</code></dt>
-<dd>${show_desc(v)}</dd>
-    % endfor
-</dl>
-    % endif
+${variable(v)}
 
-    % if functions:
-${"##"} Functions
+    % endfor
+% endif
+
+% if functions:
+Functions
+---------
     % for f in functions:
-      ${show_func(f)}
+${function(f, "h2")}
+
     % endfor
-    % endif
+% endif
 
-    % if classes:
-
-${"##"} Classes
-
+% if classes:
+Classes
+-------
     % for c in classes:
-      <%
-      class_vars = c.class_variables(show_inherited_members, sort=sort_identifiers)
-      smethods = c.functions(show_inherited_members, sort=sort_identifiers)
-      inst_vars = c.instance_variables(show_inherited_members, sort=sort_identifiers)
-      methods = c.methods(show_inherited_members, sort=sort_identifiers)
-      mro = c.mro()
-      subclasses = c.subclasses()
-      params = ', '.join(c.params(annotate=show_type_annotations, link=link))
-      %>
+${class_(c)}
 
-<div className='api'>
-
-${"###"} ${c.name} ${"{#" + c.refname.replace('.', '_') + "}"}
-
-<div className='api__body'>
-
-<div className='api__signature'>
-          % if params:
-class ${ident(c.name)}(${params})
-          % else:
-class ${ident(c.name)}
-          % endif
-</div>
-
-
-<div className='api__description'>
-${show_desc(c)}
-</div>
-
-
-      % if class_vars:
-${"####"} Class variables
-
-<div className='api__body'>
-
-          % for v in class_vars:
-              <% return_type = get_annotation(v.type_annotation) %>
-
-<div id="${v.refname}" className='api__signature'>
-var ${ident(v.name)}${return_type}
-</div>
-
-<div className='api__description'>
-${show_desc(v)}
-</div>
-
-          % endfor
-
-</div>
-
-      % endif
-
-      % if smethods:
-
-${"####"} Static methods
-
-<div className='api__body'>
-
-
-          % for f in smethods:
-              ${show_func(f, True)}
-          % endfor
-
-</div>
-
-      % endif
-
-      % if inst_vars:
-
-${"####"} Instance variables
-
-<div className='api__body'>
-
-          % for v in inst_vars:
-              <% return_type = get_annotation(v.type_annotation) %>
-<div id="${v.refname}" className='api__signature'>
-var ${ident(v.name)}${return_type}
-</div>
-
-<div className='api__description'>
-${show_desc(v)}
-</div>
-          % endfor
-
-</div>
-
-      % endif
-
-      % if methods:
-
-${"####"} Methods
-
-<div className='api__body'>
-
-
-          % for f in methods:
-              ${show_func(f, True)}
-          % endfor
-
-</div>
-
-      % endif
-
-
-      % if mro:
-${"####"} Ancestors
-
-          % for cls in mro:
-- ${link(cls)}
-          % endfor
-
-      %endif
-
-      % if subclasses:
-${"####"} Subclasses
-
-          % for sub in subclasses:
-- ${link(sub)}
-          % endfor
-
-      % endif
-
-      % if not show_inherited_members:
-          <%
-              members = c.inherited_members()
-          %>
-          % if members:
-
-${"####"} Inherited members
-
-              % for cls, mems in members:
-- ${link(cls)}:
-                          % for m in mems:
-    - ${link(m, name=m.name)}
-                          % endfor
-              % endfor
-
-          % endif
-      % endif
-
-
-
-</div>
-
-</div>
     % endfor
-    % endif
-</%def>
-
-
-${show_module(module)}
+% endif
