@@ -34,6 +34,7 @@ types-paramiko = "^2.11.3"
 types-invoke = "^1.7.3"
 pytest-cov = "^3.0.0"
 types-psutil = "^5.9.5.5"
+pdoc3 = "^0.10.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -10,8 +10,7 @@ PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 INTERPRETER_PATH = (
     "python" if os.name != "posix" else os.path.join(PROJECT_DIR, ".venv", "bin", "python")
 )
-CORE_SCRIPT_PATH = os.path.join(PROJECT_DIR, "run-pyra-core.py")
-SERVER_SCRIPT_PATH = os.path.join(PROJECT_DIR, "packages", "server", "main.py")
+CORE_SCRIPT_PATH = os.path.join(PROJECT_DIR, "run_pyra_core.py")
 
 
 def print_green(text: str) -> None:
