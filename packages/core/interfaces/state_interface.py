@@ -80,17 +80,25 @@ class StateInterface:
         """
         This will create two files:
 
-        1. runtime-data/state.json: {
+        1. runtime-data/state.json:
+
+        ```json
+        {
             "helios_indicates_good_conditions": ...,
             "measurements_should_be_running": ...,
             "enclosure_plc_readings": {...},
             "os_state": {...}
         }
+        ```
 
-        2. logs/persistent-state.json: {
+        2. logs/persistent-state.json:
+
+        ```json
+        {
             "active_opus_macro_id": ...,
             "current_exceptions": []
         }
+        ```
 
         The state.json file will be cleared with every restart
         of PYRA Core. The persistent-state.json will only be
