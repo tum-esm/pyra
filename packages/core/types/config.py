@@ -3,10 +3,16 @@ import pydantic
 from typing import Any, Callable, Literal, Optional, TypedDict
 
 
-TimeDict = TypedDict("TimeDict", {"hour": int, "minute": int, "second": int})
-TimeDictPartial = TypedDict(
-    "TimeDictPartial", {"hour": int, "minute": int, "second": int}, total=False
-)
+class TimeDict(TypedDict):
+    hour: int
+    minute: int
+    second: int
+
+
+class TimeDictPartial(TypedDict, total=False):
+    hour: int
+    minute: int
+    second: int
 
 
 class ConfigSubDicts:

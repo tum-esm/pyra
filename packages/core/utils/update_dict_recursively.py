@@ -9,25 +9,28 @@ def update_dict_recursively(old_object: Any, new_object: Any) -> Any:
     but not int->dict or list->int.
 
     example:
+
+    ```python
     old_object = {
-        a: 3,
-        b: {
-            c: 50,
-            e: null
+        "a": 3,
+        "b": {
+            "c": 50,
+            "e": null
         }
     }
     new_object = {
-        b: {
-            e: 80
+        "b": {
+            "e": 80
         }
     }
     returned_object = {
-        a: 3,
-        b: {
-            c: 50,
-            e: 80
+        "a": 3,
+        "b": {
+            "c": 50,
+            "e": 80
         }
     }
+    ```
     """
 
     if old_object is None or new_object is None:

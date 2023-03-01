@@ -170,6 +170,9 @@ class PLCInterface:
     # DIRECT READ FUNCTIONS
 
     def rain_is_detected(self) -> bool:
+        """
+        Reads the single value "state.rain"
+        """
         return self.__read_bool(self.specification["state"]["rain"])
 
     def cover_is_closed(self) -> bool:

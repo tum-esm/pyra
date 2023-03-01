@@ -91,6 +91,7 @@ class DirectoryUploadClient:
         3.10 installed and will raise an exception if its
         not present.
         """
+
         local_script_path = os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
         remote_script_path = f"{self.dst_path}/get_upload_dir_checksum.py"
         self.transfer_process.put(local_script_path, remote_script_path)
@@ -121,6 +122,7 @@ class DirectoryUploadClient:
         on the server - which also has a meta file in
         its dst directory with the same contents
         """
+
         hasher = hashlib.md5()
         for filename in sorted(self.meta_content["fileList"]):
             filepath = os.path.join(self.src_path, self.date_string, filename)
@@ -135,6 +137,7 @@ class DirectoryUploadClient:
         """
         Download the remote meta file to the local src directory
         """
+
         if os.path.isfile(self.src_meta_path):
             os.remove(self.src_meta_path)
         self.transfer_process.get(self.dst_meta_path, self.src_meta_path)
@@ -156,6 +159,7 @@ class DirectoryUploadClient:
         Update the local upload-meta.json file and overwrite
         the meta file on the server when sync==True
         """
+
         if update is not None:
             self.meta_content.update(update)
             self.meta_content.update({"lastModifiedTime": round(time.time(), 3)})
@@ -282,26 +286,32 @@ class UploadThread:
     macro file.
 
     The expected file structure looks like this:
-    📁 <src-dir> and <dst-dir>
-        📁 <YYYYMMDD>
-            📄 <file 1>
-            📄 <file 2>
-        📁 <YYYYMMDD>
-            📄 <file 1>
-            📄 <file 2>
+
+    ```
+    📁 srcdir/dstdir
+        📁 YYYYMMDD
+            📄 filename1
+            📄 filename2
+        📁 YYYYMMDD
+            📄 filename1
+            📄 filename2
         📁 ...
+    ```
 
     Each YYYYMMDD folder will be uploaded independently. During
     its upload the process will store its progress inside a file
     "YYYYMMDD/upload-meta.json" (locally and remotely).
 
     The upload-meta.json file looks like this:
+
+    ```json
     {
         "complete": bool,
-        "fileList": [<file 1>, <file 2>, ...],
+        "fileList": [filename1, filename2, ...],
         "createdTime": float,
         "lastModifiedTime": float
     }
+    ```
 
     This function only does one loop in headless mode.
     """
