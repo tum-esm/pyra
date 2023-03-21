@@ -1,0 +1,144 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.modules.sun_tracking`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L12"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `SunTracking`
+SunTracking manages the software CamTracker. CamTracker controls moveable mirrors attached to the FTIR spectrometer EM27. These mirrors are sync with the current sun position to ensure direct sun light to be directed into the instrument. SunTracking will initialize CamTracker according to the current value of StateInterface: measurements_should_be_running. 
+
+These mirrors are initialized at startup of CamTracker if it is called with the additional parameter "-autostart". CamTracker can be gracefully shut down with creating a stop.txt file in its directory. CamTracker creates multiple logfiles at run time that give information on its current status of tracking the sun. Most importantly motor offsets tells the difference between current sun angle and calculated sun positions. It happens from time to time that SunTracker fails to track the sun and is unable to reinitialize the tracking. If a certain motor offset threshold is reached the only way to fix the offset is to restart CamTracker. 
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L27"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `__init__`
+
+```python
+__init__(initial_config: ConfigDict)
+```
+
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L92"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `ct_application_running`
+
+```python
+ct_application_running() → bool
+```
+
+Checks if CamTracker is already running by identifying the active window. 
+
+False if Application is currently not running on OS True if Application is currently running on OS 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L158"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `read_ct_log_learn_az_elev`
+
+```python
+read_ct_log_learn_az_elev() → Optional[tuple[float, float, float, float, float, float]]
+```
+
+Reads the CamTracker Logfile: LEARN_Az_Elev.dat. 
+
+Returns a list of string parameter: [  Julian Date,  Tracker Elevation,  Tracker Azimuth,  Elev Offset from Astro,  Az Offset from Astro,  Ellipse distance/px ] 
+
+Raises AssertionError if log file is invalid. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L149"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `remove_stop_file`
+
+```python
+remove_stop_file() → None
+```
+
+This function removes the stop.txt file to allow CamTracker to restart. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L33"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `run`
+
+```python
+run(new_config: ConfigDict) → None
+```
+
+Called in every cycle of the main loop. Redas StateInterface: measurements_should_be_running and starts and stops CamTracker tracking. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L110"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `start_sun_tracking_automation`
+
+```python
+start_sun_tracking_automation() → None
+```
+
+Uses os.startfile() to start up the CamTracker executable with additional parameter "-automation". The paramter - automation will instruct CamTracker to automatically move the mirrors to the expected sun position during startup. 
+
+Removes stop.txt file in CamTracker directory if present. This file is the current way of gracefully shutting down CamTracker and move the mirrors back to parking position. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L136"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `stop_sun_tracking_automation`
+
+```python
+stop_sun_tracking_automation() → None
+```
+
+Tells the CamTracker application to end program and move mirrors to parking position. 
+
+CamTracker has an internal check for a stop.txt file in its directory. After detection it will move it's mirrors to parking position and end itself. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L223"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `test_setup`
+
+```python
+test_setup() → None
+```
+
+Function to test the functonality of this module. Starts up CamTracker to initialize the tracking mirrors. Then moves mirrors back to parking position and shuts dosn CamTracker. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/sun_tracking.py#L202"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `validate_tracker_position`
+
+```python
+validate_tracker_position() → Optional[bool]
+```
+
+Reads motor offsets and compares it with defined threshold. The motor offset defines the difference between the current active and calculated sun angle. 
+
+Returns True -> Offsets are within threshold False -> CamTracker lost sun position 
+
+

@@ -1,0 +1,77 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/cli/commands/plc.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `cli.commands.plc`
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/cli/commands/plc.py#L22"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `get_plc_interface`
+
+```python
+get_plc_interface() → Optional[PLCInterface]
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/cli/commands/plc.py#L71"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `wait_until_cover_is_at_angle`
+
+```python
+wait_until_cover_is_at_angle(
+    plc_interface: PLCInterface,
+    new_cover_angle: int,
+    timeout: float = 15
+) → None
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/with_filelock.py#L117"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `enable_user_control_in_config`
+
+```python
+enable_user_control_in_config() → None
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/cli/commands/plc.py#L146"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `set_boolean_plc_state`
+
+```python
+set_boolean_plc_state(
+    state: str,
+    get_setter_function: Callable[[PLCInterface], Callable[[bool], NoneType]]
+) → None
+```
+
+
+
+
+
+

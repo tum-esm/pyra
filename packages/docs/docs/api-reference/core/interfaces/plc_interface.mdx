@@ -1,0 +1,276 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.interfaces.plc_interface`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L89"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `PLCInterface`
+https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf 
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L104"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `__init__`
+
+```python
+__init__(plc_version: Literal[1, 2], plc_ip: str) → None
+```
+
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L126"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `connect`
+
+```python
+connect() → None
+```
+
+Connects to the PLC Snap7. Times out after 30 seconds. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L176"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `cover_is_closed`
+
+```python
+cover_is_closed() → bool
+```
+
+Reads the single value "state.cover_closed" 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L152"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `disconnect`
+
+```python
+disconnect() → None
+```
+
+Disconnects from the PLC Snap7 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L188"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `get_cover_angle`
+
+```python
+get_cover_angle() → int
+```
+
+Reads the single value "actors.current_angle" 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L164"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `is_responsive`
+
+```python
+is_responsive() → bool
+```
+
+Pings the PLC 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L170"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `rain_is_detected`
+
+```python
+rain_is_detected() → bool
+```
+
+Reads the single value "state.rain" 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L196"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `read`
+
+```python
+read() → PlcStateDict
+```
+
+Read the whole state of the PLC 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L415"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `reset`
+
+```python
+reset() → None
+```
+
+Does not check, whether the value has been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L182"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `reset_is_needed`
+
+```python
+reset_is_needed() → bool
+```
+
+Reads the single value "state.reset_needed" 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L399"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_auto_temperature`
+
+```python
+set_auto_temperature(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L424"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_cover_angle`
+
+```python
+set_cover_angle(value: int) → None
+```
+
+Does not check, whether the value has been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L391"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_manual_control`
+
+```python
+set_manual_control(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L407"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_manual_temperature`
+
+```python
+set_manual_temperature(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L339"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_power_camera`
+
+```python
+set_power_camera(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L347"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_power_computer`
+
+```python
+set_power_computer(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L356"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_power_heater`
+
+```python
+set_power_heater(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L364"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_power_router`
+
+```python
+set_power_router(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L373"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_power_spectrometer`
+
+```python
+set_power_spectrometer(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L383"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `set_sync_to_tracker`
+
+```python
+set_sync_to_tracker(new_state: bool) → None
+```
+
+Raises PLCInterface.PLCError, if value hasn't been changed 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/plc_interface.py#L111"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `update_config`
+
+```python
+update_config(new_plc_version: Literal[1, 2], new_plc_ip: str) → None
+```
+
+Update the internally used config (executed at the) beginning of enclosure-control's run-function. 
+
+Reconnecting to PLC, when IP has changed. 
+
+

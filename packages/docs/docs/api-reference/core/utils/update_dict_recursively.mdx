@@ -1,0 +1,50 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/update_dict_recursively.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.utils.update_dict_recursively`
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/update_dict_recursively.py#L4"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `update_dict_recursively`
+
+```python
+update_dict_recursively(old_object: Any, new_object: Any) → Any
+```
+
+For a given dict, update it recursively from a new dict. It will not add any properties and assert that the types remain the same (or null). null->int or int->null is possible but not int->dict or list->int. 
+
+
+
+**example:**
+ 
+
+```python
+old_object = {
+     "a": 3,
+     "b": {
+         "c": 50,
+         "e": null
+     }
+}
+new_object = {
+     "b": {
+         "e": 80
+     }
+}
+returned_object = {
+     "a": 3,
+     "b": {
+         "c": 50,
+         "e": 80
+     }
+}
+``` 
+
+

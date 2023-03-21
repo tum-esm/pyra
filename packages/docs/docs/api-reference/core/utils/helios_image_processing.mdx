@@ -1,0 +1,74 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/helios_image_processing.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.utils.helios_image_processing`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/helios_image_processing.py#L13"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `HeliosImageProcessing`
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/helios_image_processing.py#L116"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `add_markings_to_image`
+
+```python
+add_markings_to_image(
+    img: Mat,
+    edge_fraction: float,
+    circle_cx: int,
+    circle_cy: int,
+    circle_r: int
+) → Mat
+```
+
+Put text for edge fraction and mark circles in image 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/helios_image_processing.py#L126"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `add_text_to_image`
+
+```python
+add_text_to_image(
+    img: Mat,
+    text: str,
+    color: tuple[int, int, int] = (200, 0, 0)
+) → Mat
+```
+
+Put some text on the bottom left of an image 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/helios_image_processing.py#L142"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `get_edge_fraction`
+
+```python
+get_edge_fraction(frame: Mat, save_image: bool = False) → float
+```
+
+For a given frame determine the number of "edge pixels" with respect to the inner 90% of the lense diameter and the "status". The status is 1 when the edge pixels are above the given threshold and 0 otherwise. 
+
+1. Downscale image (faster processing) 2. Convert to grayscale image 3. Determine position and size of circular opening 4. Determine edges in image (canny edge filter) 5. Only consider edges inside 0.9 * circleradius 
+
+Returns the "edge pixel fraction" 
+
+

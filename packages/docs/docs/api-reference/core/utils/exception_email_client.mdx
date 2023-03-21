@@ -1,0 +1,86 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/exception_email_client.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.utils.exception_email_client`
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/exception_email_client.py#L15"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `get_pyra_version`
+
+```python
+get_pyra_version() → str
+```
+
+Get the current PYRA version from the UI's package.json file 
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/exception_email_client.py#L23"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `get_commit_sha`
+
+```python
+get_commit_sha() → Optional[str]
+```
+
+Get the current commit sha of the PYRA codebase Returns None if git is not installed or directory is a git repository. 
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/exception_email_client.py#L43"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `get_current_log_lines`
+
+```python
+get_current_log_lines() → list[str]
+```
+
+Get the log line from the current info.log file. Only returns the log lines from the latest two iterations. 
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/exception_email_client.py#L63"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `ExceptionEmailClient`
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/exception_email_client.py#L124"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `handle_occured_exception`
+
+```python
+handle_occured_exception(config: ConfigDict, exception: Exception) → None
+```
+
+Send out an email that a new exception has occured on this station. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/exception_email_client.py#L87"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `handle_resolved_exception`
+
+```python
+handle_resolved_exception(config: ConfigDict) → None
+```
+
+Send out an email that all exceptions have been resolved on this station. 
+
+
