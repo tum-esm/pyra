@@ -47,7 +47,6 @@ async function createConfig() {
                             require.resolve('./src/css/navigation.css'),
                             require.resolve('./src/css/markdown.css'),
                             require.resolve('./src/css/admonitions.css'),
-                            require.resolve('./src/css/api.css'),
                         ],
                     },
                 }),

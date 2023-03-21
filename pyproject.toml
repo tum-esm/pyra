@@ -18,7 +18,7 @@ python-snap7 = "^1.1"
 opencv-python = "^4.5.5.64"
 astropy = "^5.0.4"
 jdcal = "^1.4.1"
-psutil = "5.9.1"
+psutil = "5.9.4"
 fabric = "^2.7.1"
 pydantic = "^1.9.2"
 tqdm = "^4.64.0"
@@ -26,6 +26,7 @@ colorama = "^0.4.5"
 deepdiff = "^6.2.1"
 
 # libraries only used in development
+tum-esm-utils = "^1.1.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.1.2"
 black = "^22.3.0"
@@ -34,7 +35,7 @@ types-paramiko = "^2.11.3"
 types-invoke = "^1.7.3"
 pytest-cov = "^3.0.0"
 types-psutil = "^5.9.5.5"
-pdoc3 = "^0.10.0"
+lazydocs = "^0.4.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
