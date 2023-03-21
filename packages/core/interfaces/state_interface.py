@@ -3,20 +3,17 @@ import os
 import shutil
 from packages.core import types, utils
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
+_STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".state.lock")
 
-CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
-CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
-STATE_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".state.lock")
+_RUNTIME_DATA_PATH = os.path.join(_PROJECT_DIR, "runtime-data")
+_STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "runtime-data", "state.json")
 
-RUNTIME_DATA_PATH = os.path.join(PROJECT_DIR, "runtime-data")
-STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
-
-PERSISTENT_STATE_FILE_PATH = os.path.join(PROJECT_DIR, "logs", "persistent-state.json")
+_PERSISTENT_STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "persistent-state.json")
 
 
-EMPTY_STATE_OBJECT: types.StateDict = {
+_EMPTY_STATE_OBJECT: types.StateDict = {
     "helios_indicates_good_conditions": None,
     "measurements_should_be_running": False,
     "enclosure_plc_readings": {
@@ -65,7 +62,7 @@ EMPTY_STATE_OBJECT: types.StateDict = {
     },
 }
 
-EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
+_EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
     "active_opus_macro_id": None,
     "current_exceptions": [],
 }
@@ -75,7 +72,7 @@ logger = utils.Logger(origin="state-interface")
 
 class StateInterface:
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
+    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
     def initialize() -> None:
         """
         This will create two files:
@@ -106,21 +103,21 @@ class StateInterface:
         """
 
         # clear runtime-data directory
-        if os.path.exists(RUNTIME_DATA_PATH):
-            shutil.rmtree(RUNTIME_DATA_PATH)
-        os.mkdir(RUNTIME_DATA_PATH)
+        if os.path.exists(_RUNTIME_DATA_PATH):
+            shutil.rmtree(_RUNTIME_DATA_PATH)
+        os.mkdir(_RUNTIME_DATA_PATH)
 
         # create the state file
-        with open(STATE_FILE_PATH, "w") as f:
-            json.dump(EMPTY_STATE_OBJECT, f, indent=4)
+        with open(_STATE_FILE_PATH, "w") as f:
+            json.dump(_EMPTY_STATE_OBJECT, f, indent=4)
 
         # possibly create the persistent state file
-        if not os.path.isfile(PERSISTENT_STATE_FILE_PATH):
-            with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
-                json.dump(EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
+        if not os.path.isfile(_PERSISTENT_STATE_FILE_PATH):
+            with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
+                json.dump(_EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
 
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
+    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
     def read() -> types.StateDict:
         """Read the state file and return its content"""
         return StateInterface.read_without_filelock()
@@ -129,18 +126,18 @@ class StateInterface:
     def read_without_filelock() -> types.StateDict:
         """Read the state file and return its content"""
         try:
-            with open(STATE_FILE_PATH, "r") as f:
+            with open(_STATE_FILE_PATH, "r") as f:
                 new_object: types.StateDict = json.load(f)
                 types.validate_state_dict(new_object)
                 return new_object
         except (FileNotFoundError, json.JSONDecodeError):
             logger.warning("reinitializing the corrupted state file")
-            with open(STATE_FILE_PATH, "w") as f:
-                json.dump(EMPTY_STATE_OBJECT, f, indent=4)
-            return EMPTY_STATE_OBJECT
+            with open(_STATE_FILE_PATH, "w") as f:
+                json.dump(_EMPTY_STATE_OBJECT, f, indent=4)
+            return _EMPTY_STATE_OBJECT
 
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
+    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
     def read_persistent() -> types.PersistentStateDict:
         """Read the persistent state file and return its content"""
         return StateInterface.read_persistent_without_filelock()
@@ -149,18 +146,18 @@ class StateInterface:
     def read_persistent_without_filelock() -> types.PersistentStateDict:
         """Read the persistent state file and return its content"""
         try:
-            with open(PERSISTENT_STATE_FILE_PATH, "r") as f:
+            with open(_PERSISTENT_STATE_FILE_PATH, "r") as f:
                 new_object: types.PersistentStateDict = json.load(f)
                 types.validate_persistent_state_dict(new_object)
                 return new_object
         except (FileNotFoundError, json.JSONDecodeError):
             logger.warning("reinitializing the corrupted persistent state file")
-            with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
-                json.dump(EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
-            return EMPTY_PERSISTENT_STATE_OBJECT
+            with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
+                json.dump(_EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
+            return _EMPTY_PERSISTENT_STATE_OBJECT
 
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
+    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
     def update(update: types.StateDictPartial) -> None:
         """
         Update the (persistent) state file and return its content.
@@ -169,11 +166,11 @@ class StateInterface:
         """
         current_state = StateInterface.read_without_filelock()
         new_state = utils.update_dict_recursively(current_state, update)
-        with open(STATE_FILE_PATH, "w") as f:
+        with open(_STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
 
     @staticmethod
-    @utils.with_filelock(STATE_LOCK_PATH, timeout=10)
+    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
     def update_persistent(update: types.PersistentStateDictPartial) -> None:
         """
         Update the (persistent) state file and return its content.
@@ -183,5 +180,5 @@ class StateInterface:
 
         current_state = StateInterface.read_persistent_without_filelock()
         new_state = utils.update_dict_recursively(current_state, update)
-        with open(PERSISTENT_STATE_FILE_PATH, "w") as f:
+        with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)

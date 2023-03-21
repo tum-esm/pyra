@@ -2,9 +2,9 @@ import click
 import os
 import sys
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
-sys.path.append(PROJECT_DIR)
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(os.path.abspath(__file__))))
+sys.path.append(_PROJECT_DIR)
 
 from packages.cli.commands import (
     config_command_group,
@@ -22,7 +22,7 @@ def print_cli_information() -> None:
     config = ConfigInterface.read()
     click.echo(
         click.style(
-            f'This CLI is running Pyra version {config["general"]["version"]} in directory "{PROJECT_DIR}".',
+            f'This CLI is running Pyra version {config["general"]["version"]} in directory "{_PROJECT_DIR}".',
             fg="green",
         )
     )

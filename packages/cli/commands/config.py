@@ -2,36 +2,32 @@ import json
 import shutil
 import click
 import os
-import sys
 from packages.core import types
 from packages.core.utils import with_filelock, update_dict_recursively
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-DEFAULT_CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.default.json")
-CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
-CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
+_DEFAULT_CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.default.json")
+_CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
+_CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
 
-sys.path.append(PROJECT_DIR)
-
-
-def print_green(text: str) -> None:
+def _print_green(text: str) -> None:
     click.echo(click.style(text, fg="green"))
 
 
-def print_red(text: str) -> None:
+def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
 @click.command(
     help="Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence."
 )
-@with_filelock(CONFIG_LOCK_PATH)
+@with_filelock(_CONFIG_LOCK_PATH)
 def _get_config() -> None:
-    if not os.path.isfile(CONFIG_FILE_PATH):
-        shutil.copyfile(DEFAULT_CONFIG_FILE_PATH, CONFIG_FILE_PATH)
-    with open(CONFIG_FILE_PATH, "r") as f:
+    if not os.path.isfile(_CONFIG_FILE_PATH):
+        shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
+    with open(_CONFIG_FILE_PATH, "r") as f:
         try:
             content = json.load(f)
         except:
@@ -46,59 +42,59 @@ def _get_config() -> None:
     help=f"Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
 )
 @click.argument("content", default="{}")
-@with_filelock(CONFIG_LOCK_PATH)
+@with_filelock(_CONFIG_LOCK_PATH)
 def _update_config(content: str) -> None:
     # try to load the dict
     try:
         new_partial_json = json.loads(content)
     except:
-        print_red("content argument is not a valid JSON string")
+        _print_red("content argument is not a valid JSON string")
         return
 
     # validate the dict's integrity
     try:
         types.validate_config_dict(new_partial_json, partial=True)
     except Exception as e:
-        print_red(str(e))
+        _print_red(str(e))
         return
 
     # load the current json file
     try:
-        with open(CONFIG_FILE_PATH, "r") as f:
+        with open(_CONFIG_FILE_PATH, "r") as f:
             current_json = json.load(f)
     except:
-        print_red("Could not load the current config.json file")
+        _print_red("Could not load the current config.json file")
         return
 
     # merge current config and new partial config
     merged_json = update_dict_recursively(current_json, new_partial_json)
-    with open(CONFIG_FILE_PATH, "w") as f:
+    with open(_CONFIG_FILE_PATH, "w") as f:
         json.dump(merged_json, f, indent=4)
 
-    print_green("Updated config file")
+    _print_green("Updated config file")
 
 
 @click.command(
     help=f"Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
 )
-@with_filelock(CONFIG_LOCK_PATH)
+@with_filelock(_CONFIG_LOCK_PATH)
 def _validate_current_config() -> None:
     # load the current json file
     try:
-        with open(CONFIG_FILE_PATH, "r") as f:
+        with open(_CONFIG_FILE_PATH, "r") as f:
             current_json = json.load(f)
     except:
-        print_red("Could not load the current config.json file")
+        _print_red("Could not load the current config.json file")
         return
 
     # validate its integrity
     try:
         types.validate_config_dict(current_json, partial=False)
     except Exception as e:
-        print_red(str(e))
+        _print_red(str(e))
         return
 
-    print_green(f"Current config file is valid")
+    _print_green(f"Current config file is valid")
 
 
 @click.group()

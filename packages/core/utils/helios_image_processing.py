@@ -5,9 +5,9 @@ from typing import Optional
 import cv2 as cv
 import numpy as np
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-IMG_DIR = os.path.join(PROJECT_DIR, "logs", "helios")
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
+_IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios")
 
 
 class HeliosImageProcessing:
@@ -189,7 +189,7 @@ class HeliosImageProcessing:
         if save_image:
             now = datetime.now()
             img_timestamp = now.strftime("%Y%m%d-%H%M%S")
-            img_directory_path = os.path.join(IMG_DIR, now.strftime("%Y%m%d"))
+            img_directory_path = os.path.join(_IMG_DIR, now.strftime("%Y%m%d"))
             if not os.path.exists(img_directory_path):
                 os.mkdir(img_directory_path)
 

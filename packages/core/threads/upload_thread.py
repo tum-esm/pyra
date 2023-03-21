@@ -15,14 +15,14 @@ from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="upload")
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 
 # when a connection error occurs, wait a few minutes until trying again
-CONNECTION_ERROR_IDLE_MINUTES = 5
+_CONNECTION_ERROR_IDLE_MINUTES = 5
 
 # when an iteration is finished, wait a few minutes until checking again
-ITERATION_END_IDLE_MINUTES = 10
+_ITERATION_END_IDLE_MINUTES = 10
 
 
 class InvalidUploadState(Exception):
@@ -92,7 +92,7 @@ class DirectoryUploadClient:
         not present.
         """
 
-        local_script_path = os.path.join(PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
+        local_script_path = os.path.join(_PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
         remote_script_path = f"{self.dst_path}/get_upload_dir_checksum.py"
         self.transfer_process.put(local_script_path, remote_script_path)
 
@@ -376,8 +376,8 @@ class UploadThread:
                 except interfaces.SSHInterface.ConnectionError as e:
                     logger.error(f"could not connect to host: {e}")
                     if not headless:
-                        logger.info(f"waiting {CONNECTION_ERROR_IDLE_MINUTES} minutes")
-                        time.sleep(CONNECTION_ERROR_IDLE_MINUTES * 60)
+                        logger.info(f"waiting {_CONNECTION_ERROR_IDLE_MINUTES} minutes")
+                        time.sleep(_CONNECTION_ERROR_IDLE_MINUTES * 60)
                         continue
 
                 if headless:
@@ -385,9 +385,9 @@ class UploadThread:
 
                 if upload_is_complete:
                     logger.debug(
-                        f"Finished iteration, sleeping {ITERATION_END_IDLE_MINUTES} minutes"
+                        f"Finished iteration, sleeping {_ITERATION_END_IDLE_MINUTES} minutes"
                     )
-                    time.sleep(ITERATION_END_IDLE_MINUTES * 60)
+                    time.sleep(_ITERATION_END_IDLE_MINUTES * 60)
             except Exception as e:
                 logger.error(f"Error inside upload thread: {e}")
                 logger.exception(e)
@@ -410,7 +410,7 @@ class UploadThread:
 
         for category in categories:
             if category == "helios":
-                src_path = os.path.join(PROJECT_DIR, "logs", "helios")
+                src_path = os.path.join(_PROJECT_DIR, "logs", "helios")
                 dst_path = upload_config["dst_directory_helios"]
                 remove_files_after_upload = upload_config["remove_src_helios_after_upload"]
             else:
