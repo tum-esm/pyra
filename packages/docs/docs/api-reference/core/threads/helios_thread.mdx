@@ -1,0 +1,91 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/threads/helios_thread.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.threads.helios_thread`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/threads/helios_thread.py#L17"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `CameraError`
+
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/threads/helios_thread.py#L205"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `HeliosThread`
+Thread for determining the current sun conditions in a parallel mainloop. 
+
+"Good" sun conditions with respect to EM27 measurements means direct sunlight, i.e. no clouds in front of the sun. Interferograms recored in diffuse light conditions result in a concentration timeseries (after retrieval) with a very large standard deviation. 
+
+Direct sunlight can be determined by "hard" shadows, i.e. quick transitions between light and dark surfaces. This thread periodically takes images in a special camera setup and uses edge detected to determine how many hard shadows it can find in the image. 
+
+The result of this constant sunlight evaluation is written to the StateInterface. 
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/threads/helios_thread.py#L226"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `__init__`
+
+```python
+__init__(config: ConfigDict) → None
+```
+
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/threads/helios_thread.py#L264"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `main`
+
+```python
+main(headless: bool = False) → None
+```
+
+Main entrypoint of the thread. 
+
+headless mode = don't write to log files, print to console, save all images 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/threads/helios_thread.py#L255"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `should_be_running`
+
+```python
+should_be_running(config: ConfigDict) → bool
+```
+
+Should the thread be running? (based on config.upload) 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/threads/helios_thread.py#L232"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `update_thread_state`
+
+```python
+update_thread_state(new_config: ConfigDict) → None
+```
+
+Make sure that the thread loop is (not) running, based on config.upload 
+
+

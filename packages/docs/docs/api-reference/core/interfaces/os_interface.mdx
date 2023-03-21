@@ -1,0 +1,121 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.interfaces.os_interface`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L5"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `OSInterface`
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L14"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `get_cpu_usage`
+
+```python
+get_cpu_usage() → list[float]
+```
+
+returns cpu_percent for all cores -> list [cpu1%, cpu2%,...] 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L27"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `get_disk_space`
+
+```python
+get_disk_space() → float
+```
+
+Returns disk space used in % as float. 
+-> tuple (total, used, free, percent) 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L63"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `get_last_boot_time`
+
+```python
+get_last_boot_time() → str
+```
+
+Returns last OS boot time. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L19"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `get_memory_usage`
+
+```python
+get_memory_usage() → float
+```
+
+returns -> tuple (total, available, percent, used, free, active, inactive, buffers, cached, shared, slab) 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L70"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `get_process_status`
+
+```python
+get_process_status(process_name: str) → str
+```
+
+Takes a process name "*.exe" and returns its OS process status (see return types). 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L42"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `get_system_battery`
+
+```python
+get_system_battery() → int
+```
+
+Returns system battery in percent as an integer (1-100). Returns 100 if device has no battery. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L34"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `validate_disk_space`
+
+```python
+validate_disk_space() → None
+```
+
+Raises an error if the diskspace is less than 10% 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/os_interface.py#L53"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `validate_system_battery`
+
+```python
+validate_system_battery() → None
+```
+
+Raises LowEnergyError if system battery runs lower than 20%. 
+
+

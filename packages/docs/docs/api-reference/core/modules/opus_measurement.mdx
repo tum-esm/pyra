@@ -1,0 +1,189 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.modules.opus_measurement`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L19"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `OpusMeasurement`
+OPUS Measurements manages the FTIR spectrometer measurement software OPUS. It allows to remotely communicate with OPUS via a DDE connection and trigger different commands. 
+
+OPUS needs an experiment file and can perform continious measurements with parameters passed by a macro file. These files can be loaded via commands over the active DDE connection. 
+
+During the day it makes sure that OPUS up and running and reloads the latest experiment if it was changed by the operator. During night OPUS is shut down to reset after a full day of measurements. Day and night is defined by the set sun angle in the config. 
+
+OPUSMeasurement will start and stop Macros according to the current value of StateInterface: measurements_should_be_running. 
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L34"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `__init__`
+
+```python
+__init__(initial_config: ConfigDict)
+```
+
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L270"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `automated_process_handling`
+
+```python
+automated_process_handling() → None
+```
+
+Start OPUS.exe if not running and sun angle conditions satisfied. Shuts down OPUS.exe if running and sun angle conditions not satisfied. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L311"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `check_for_experiment_change`
+
+```python
+check_for_experiment_change() → None
+```
+
+Compares the experiment in the config with the current active experiment. To reload an experiment during an active macro the macro needs to be stopped first. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L179"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `close_opus`
+
+```python
+close_opus() → None
+```
+
+Closes OPUS via DDE call. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L138"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `load_experiment`
+
+```python
+load_experiment() → None
+```
+
+Loads a new experiment in OPUS over DDE connection. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L259"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `low_sun_angle_present`
+
+```python
+low_sun_angle_present() → bool
+```
+
+Checks defined sun angle in config. Closes OPUS at the end of the day to start up fresh the next day. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L233"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `opus_application_running`
+
+```python
+opus_application_running() → bool
+```
+
+Checks if OPUS is already running by identifying the window. 
+
+
+
+**Returns:**
+ False if Application is currently not running on OS True if Application is currently running on OS 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L54"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `run`
+
+```python
+run(new_config: ConfigDict) → None
+```
+
+Called in every cycle of the main loop. Starts and stops OPUS.exe based on the present sun angle. Reads StateInterface: measurements_should_be_running and starts and stops the OPUS macro. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L151"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `start_macro`
+
+```python
+start_macro() → None
+```
+
+Starts a new macro in OPUS over DDE connection. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L213"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `start_opus`
+
+```python
+start_opus() → None
+```
+
+Starts the OPUS.exe with os.startfile(). This simulates a user click on the executable. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L165"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `stop_macro`
+
+```python
+stop_macro() → None
+```
+
+Stops the currently running macro in OPUS over DDE connection. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L327"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `test_setup`
+
+```python
+test_setup() → None
+```
+
+Function to test the functonality of this module. Starts up OPUS, loads an experiment, starts a macro and stops it after 10s. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/modules/opus_measurement.py#L296"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `wait_for_opus_startup`
+
+```python
+wait_for_opus_startup() → None
+```
+
+Checks for OPUS to be running. Breaks out of the loop after a defined time. 
+
+

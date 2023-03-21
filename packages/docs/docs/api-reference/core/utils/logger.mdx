@@ -1,0 +1,134 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.utils.logger`
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L18"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>function</kbd> `log_line_has_time`
+
+```python
+log_line_has_time(log_line: str) → bool
+```
+
+Returns true when a give log line (string) starts with a valid date. This is not true for exception tracebacks. This log line time is used to determine which file to archive logs lines into. 
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L31"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `Logger`
+
+
+
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L34"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `__init__`
+
+```python
+__init__(origin: str = 'pyra.core', just_print: bool = False) → None
+```
+
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L86"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `archive`
+
+```python
+archive(keep_last_hour: bool = False) → None
+```
+
+Move all log lines in "logs/info.log" and "logs/debug.log" into an archive file ("logs/archive/YYYYMMDD-debug.log", "...info.log"). 
+
+With keep_last_hour = True, log lines less than an hour old will remain. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L38"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `debug`
+
+```python
+debug(message: str) → None
+```
+
+Write a debug log (to debug only). Used for verbose output 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L50"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `error`
+
+```python
+error(message: str) → None
+```
+
+Write an error log (to debug and info) 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L54"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `exception`
+
+```python
+exception(e: Exception) → None
+```
+
+Log the traceback of an exception 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L42"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `info`
+
+```python
+info(message: str) → None
+```
+
+Write an info log (to debug and info) 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L138"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `log_activity_event`
+
+```python
+log_activity_event(event_label: str) → None
+```
+
+Log things like: * start-measurements * stop-measurements * error-occured * errors-resolved * start-core * stop-core 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/logger.py#L46"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `warning`
+
+```python
+warning(message: str) → None
+```
+
+Write a warning log (to debug and info) 
+
+

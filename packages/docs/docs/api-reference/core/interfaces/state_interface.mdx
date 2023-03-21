@@ -1,0 +1,130 @@
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/state_interface.py#L0"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+# <kbd>module</kbd> `core.interfaces.state_interface`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/state_interface.py#L73"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+## <kbd>class</kbd> `StateInterface`
+
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/with_filelock.py#L74"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `initialize`
+
+```python
+initialize() → None
+```
+
+This will create two files: 
+
+1. runtime-data/state.json: 
+
+```json
+{
+     "helios_indicates_good_conditions": ...,
+     "measurements_should_be_running": ...,
+     "enclosure_plc_readings": {...},
+     "os_state": {...}
+}
+``` 
+
+2. logs/persistent-state.json: 
+
+```json
+{
+     "active_opus_macro_id": ...,
+     "current_exceptions": []
+}
+``` 
+
+The state.json file will be cleared with every restart of PYRA Core. The persistent-state.json will only be created, when it does not exist yet. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/with_filelock.py#L119"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `read`
+
+```python
+read() → StateDict
+```
+
+Read the state file and return its content 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/with_filelock.py#L139"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `read_persistent`
+
+```python
+read_persistent() → PersistentStateDict
+```
+
+Read the persistent state file and return its content 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/state_interface.py#L145"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `read_persistent_without_filelock`
+
+```python
+read_persistent_without_filelock() → PersistentStateDict
+```
+
+Read the persistent state file and return its content 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/interfaces/state_interface.py#L125"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `read_without_filelock`
+
+```python
+read_without_filelock() → StateDict
+```
+
+Read the state file and return its content 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/with_filelock.py#L159"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `update`
+
+```python
+update(update: StateDictPartial) → None
+```
+
+Update the (persistent) state file and return its content. The update object should only include the properties to be changed in contrast to containing the whole file. 
+
+---
+
+<a href="https://github.com/tum-esm/pyr/tree/main/packages/packages/core/utils/with_filelock.py#L172"><img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" /></a>
+
+### <kbd>method</kbd> `update_persistent`
+
+```python
+update_persistent(update: PersistentStateDictPartial) → None
+```
+
+Update the (persistent) state file and return its content. The update object should only include the properties to be changed in contrast to containing the whole file. 
+
+
