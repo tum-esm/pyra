@@ -5,18 +5,17 @@ import click
 import os
 from packages.core import types, utils, interfaces, modules
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-STATE_FILE_PATH = os.path.join(PROJECT_DIR, "runtime-data", "state.json")
-CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
-CONFIG_LOCK_PATH = os.path.join(PROJECT_DIR, "config", ".config.lock")
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
+_CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
+_CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
 
-def print_green(text: str) -> None:
+def _print_green(text: str) -> None:
     click.echo(click.style(text, fg="green"))
 
 
-def print_red(text: str) -> None:
+def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
@@ -32,7 +31,7 @@ def get_plc_interface() -> Optional[interfaces.PLCInterface]:
         )
         plc_interface.connect()
     except Exception as e:
-        print_red(f"{e}")
+        _print_red(f"{e}")
         return None
 
     return plc_interface
@@ -44,7 +43,7 @@ def _read(no_indent: bool) -> None:
     plc_interface = get_plc_interface()
     if plc_interface is not None:
         plc_readings = plc_interface.read()
-        print_green(json.dumps(plc_readings, indent=(None if no_indent else 2)))
+        _print_green(json.dumps(plc_readings, indent=(None if no_indent else 2)))
         plc_interface.disconnect()
 
 
@@ -65,7 +64,7 @@ def _reset() -> None:
                 )
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
-        print_green("Ok")
+        _print_green("Ok")
         plc_interface.disconnect()
 
 
@@ -111,20 +110,20 @@ def _set_cover_angle(angle: str) -> None:
         plc_interface.set_manual_control(False)
         wait_until_cover_is_at_angle(plc_interface, new_cover_angle)
 
-        print_green("Ok")
+        _print_green("Ok")
         plc_interface.disconnect()
 
 
-@utils.with_filelock(CONFIG_LOCK_PATH)
+@utils.with_filelock(_CONFIG_LOCK_PATH)
 def enable_user_control_in_config() -> None:
-    with open(CONFIG_FILE_PATH, "r") as f:
+    with open(_CONFIG_FILE_PATH, "r") as f:
         config = json.load(f)
     types.validate_config_dict(config)
 
     verified_config: types.ConfigDict = config
     if verified_config["tum_plc"] is not None:
         verified_config["tum_plc"]["controlled_by_user"] = True
-        with open(CONFIG_FILE_PATH, "w") as f:
+        with open(_CONFIG_FILE_PATH, "w") as f:
             json.dump(verified_config, f, indent=4)
 
 
@@ -140,7 +139,7 @@ def _close_cover() -> None:
         plc_interface.set_manual_control(False)
         wait_until_cover_is_at_angle(plc_interface, 0)
 
-        print_green("Ok")
+        _print_green("Ok")
         plc_interface.disconnect()
 
 
@@ -152,7 +151,7 @@ def set_boolean_plc_state(
     if plc_interface is not None:
         assert state in ["true", "false"], 'state has to be either "true" or "false"'
         get_setter_function(plc_interface)(state == "true")
-        print_green("Ok")
+        _print_green("Ok")
         plc_interface.disconnect()
 
 

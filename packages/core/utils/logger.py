@@ -4,11 +4,11 @@ import os
 import traceback
 import filelock
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-INFO_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "info.log")
-DEBUG_LOG_FILE = os.path.join(PROJECT_DIR, "logs", "debug.log")
-LOG_FILES_LOCK = os.path.join(PROJECT_DIR, "logs", ".logs.lock")
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
+_INFO_LOG_FILE = os.path.join(_PROJECT_DIR, "logs", "info.log")
+_DEBUG_LOG_FILE = os.path.join(_PROJECT_DIR, "logs", "debug.log")
+_LOG_FILES_LOCK = os.path.join(_PROJECT_DIR, "logs", ".logs.lock")
 
 # The logging module behaved very weird with the setup we have
 # therefore I am just formatting and appending the log lines
@@ -71,11 +71,11 @@ class Logger:
         if self.just_print:
             print(log_string, end="")
         else:
-            with filelock.FileLock(LOG_FILES_LOCK, timeout=10):
-                with open(DEBUG_LOG_FILE, "a") as f1:
+            with filelock.FileLock(_LOG_FILES_LOCK, timeout=10):
+                with open(_DEBUG_LOG_FILE, "a") as f1:
                     f1.write(log_string)
                 if level != "DEBUG":
-                    with open(INFO_LOG_FILE, "a") as f2:
+                    with open(_INFO_LOG_FILE, "a") as f2:
                         f2.write(log_string)
 
         # Archive lines older than 60 minutes, every 10 minutes
@@ -92,8 +92,8 @@ class Logger:
         With keep_last_hour = True, log lines less than an hour old will
         remain.
         """
-        with filelock.FileLock(LOG_FILES_LOCK, timeout=10):
-            with open(DEBUG_LOG_FILE, "r") as f:
+        with filelock.FileLock(_LOG_FILES_LOCK, timeout=10):
+            with open(_DEBUG_LOG_FILE, "r") as f:
                 log_lines_in_file = f.readlines()
             if len(log_lines_in_file) == 0:
                 return
@@ -110,9 +110,9 @@ class Logger:
                     lines_to_be_kept = log_lines_in_file[index:]
                     break
 
-            with open(DEBUG_LOG_FILE, "w") as f:
+            with open(_DEBUG_LOG_FILE, "w") as f:
                 f.writelines(lines_to_be_kept)
-            with open(INFO_LOG_FILE, "w") as f:
+            with open(_INFO_LOG_FILE, "w") as f:
                 f.writelines([l for l in lines_to_be_kept if " - DEBUG - " not in l])
 
             if len(lines_to_be_archived) == 0:
@@ -131,7 +131,7 @@ class Logger:
 
             for date in archive_log_date_groups.keys():
                 for t in ["info", "debug"]:
-                    filename = os.path.join(PROJECT_DIR, "logs", "archive", f"{date}-{t}.log")
+                    filename = os.path.join(_PROJECT_DIR, "logs", "archive", f"{date}-{t}.log")
                     with open(filename, "a") as f:
                         f.writelines(archive_log_date_groups[date][t] + [""])
 
@@ -156,9 +156,9 @@ class Logger:
         ]
         now = datetime.now()
         filename = now.strftime("activity-%Y-%m-%d.json")
-        filepath = os.path.join(PROJECT_DIR, "logs", "activity", filename)
+        filepath = os.path.join(_PROJECT_DIR, "logs", "activity", filename)
 
-        with filelock.FileLock(LOG_FILES_LOCK, timeout=10):
+        with filelock.FileLock(_LOG_FILES_LOCK, timeout=10):
             if os.path.isfile(filepath):
                 with open(filepath, "r") as f:
                     current_activity = json.load(f)

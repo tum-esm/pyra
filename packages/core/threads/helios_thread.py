@@ -1,4 +1,3 @@
-from datetime import datetime
 import os
 import threading
 import time
@@ -9,10 +8,9 @@ from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="helios")
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
-IMG_DIR = os.path.join(PROJECT_DIR, "logs", "helios")
-AUTOEXPOSURE_IMG_DIR = os.path.join(PROJECT_DIR, "logs", "helios-autoexposure")
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
+_AUTOEXPOSURE_IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios-autoexposure")
 _CONFIG: Optional[types.ConfigDict] = None
 
 
@@ -172,7 +170,7 @@ class _Helios:
             img = utils.HeliosImageProcessing.add_text_to_image(
                 img, f"mean={mean_color}", color=(0, 0, 255)
             )
-            cv.imwrite(os.path.join(AUTOEXPOSURE_IMG_DIR, f"exposure-{e}.jpg"), img)
+            cv.imwrite(os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{e}.jpg"), img)
 
         logger.debug(f"exposure results: {exposure_results}")
 

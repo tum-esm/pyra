@@ -6,11 +6,11 @@ from packages.core import types, utils, interfaces
 
 
 # these imports are provided by pywin32
-win32ui: Any = None
-dde: Any = None
+_win32ui: Any = None
+_dde: Any = None
 if sys.platform == "win32":
-    import win32ui  # type: ignore
-    import dde  # type: ignore
+    import win32ui as _win32ui  # type: ignore
+    import dde as _dde  # type: ignore
 
 
 logger = utils.Logger(origin="opus-measurement")
@@ -45,9 +45,9 @@ class OpusMeasurement:
         assert sys.platform == "win32"
 
         # note: dde servers talk to dde servers
-        self.server = dde.CreateServer()
+        self.server = _dde.CreateServer()
         self.server.Create("Client")
-        self.conversation = dde.CreateConversation(self.server)
+        self.conversation = _dde.CreateConversation(self.server)
         self.last_cycle_automation_status = 0
         self.initialized = True
 
@@ -127,9 +127,9 @@ class OpusMeasurement:
             # destroy socket
             self.__destroy_dde_server()
             # reconnect socket
-            self.server = dde.CreateServer()
+            self.server = _dde.CreateServer()
             self.server.Create("Client")
-            self.conversation = dde.CreateConversation(self.server)
+            self.conversation = _dde.CreateConversation(self.server)
             self.__connect_to_dde_opus()
 
             # retest DDE connection
@@ -247,13 +247,13 @@ class OpusMeasurement:
             f"OPUS - Operator: {opus_username}  (Administrator) - [Display - default.ows]"
         )
         try:
-            if win32ui.FindWindow(
+            if _win32ui.FindWindow(
                 None,
                 opus_windows_name,
             ):
                 return True
             return False
-        except win32ui.error:
+        except _win32ui.error:
             return False
 
     def low_sun_angle_present(self) -> bool:

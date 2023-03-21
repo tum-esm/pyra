@@ -7,10 +7,8 @@ from snap7.exceptions import Snap7Exception
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="plc-interface")
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
 
-PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PlcSpecificationDict] = {
+_PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PlcSpecificationDict] = {
     1: {
         "actors": {
             "current_angle": [25, 6, 2],
@@ -106,7 +104,7 @@ class PLCInterface:
     def __init__(self, plc_version: Literal[1, 2], plc_ip: str) -> None:
         self.plc_version = plc_version
         self.plc_ip = plc_ip
-        self.specification = PLC_SPECIFICATION_VERSIONS[plc_version]
+        self.specification = _PLC_SPECIFICATION_VERSIONS[plc_version]
 
     # CONNECTION/CLASS MANAGEMENT
 
@@ -122,7 +120,7 @@ class PLCInterface:
             self.disconnect()
             self.plc_version = new_plc_version
             self.plc_ip = new_plc_ip
-            self.specification = PLC_SPECIFICATION_VERSIONS[self.plc_version]
+            self.specification = _PLC_SPECIFICATION_VERSIONS[self.plc_version]
             self.connect()
 
     def connect(self) -> None:

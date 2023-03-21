@@ -8,13 +8,13 @@ import traceback
 from typing import Optional
 from packages.core import types
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 
 
 def get_pyra_version() -> str:
     """Get the current PYRA version from the UI's package.json file"""
-    with open(os.path.join(PROJECT_DIR, "packages", "ui", "package.json")) as f:
+    with open(os.path.join(_PROJECT_DIR, "packages", "ui", "package.json")) as f:
         pyra_version: str = json.load(f)["version"]
     assert pyra_version.startswith("4.")
     return pyra_version
@@ -44,7 +44,7 @@ def get_current_log_lines() -> list[str]:
     """Get the log line from the current info.log file. Only
     returns the log lines from the latest two iterations.
     """
-    with open(f"{PROJECT_DIR}/logs/info.log") as f:
+    with open(f"{_PROJECT_DIR}/logs/info.log") as f:
         latest_log_lines = f.readlines()
 
     log_lines_in_email: list[str] = []
