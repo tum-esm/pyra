@@ -1,9 +1,9 @@
 h1 {
-    @apply tw-text-4xl !tw-mt-0 !tw-mb-4;
+    @apply tw-text-2xl !tw-mt-0 !tw-mb-4;
 }
 
 h2 {
-    @apply tw-text-3xl !tw-mt-0 !tw-mb-3;
+    @apply tw-text-xl !tw-mt-0 !tw-mb-3;
 }
 
 h2:not(:first-of-type) {
@@ -11,7 +11,7 @@ h2:not(:first-of-type) {
 }
 
 h3 {
-    @apply tw-text-2xl !tw-mt-6 !tw-mb-2;
+    @apply tw-text-lg !tw-mt-6 !tw-mb-2;
 }
 
 h1,
@@ -35,6 +35,7 @@ p {
 
 p code,
 li code,
+h1 code,
 h2 code,
 h3 code {
     @apply tw-border-0 tw-px-1 tw-py-0.5 tw-rounded tw-bg-gray-150 tw-text-gray-800;

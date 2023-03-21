@@ -1,0 +1,9 @@
+hr {
+    margin: 4em 0;
+    height: 0;
+}
+
+kbd {
+    @apply tw-rounded tw-font-bold tw-border-0 tw-shadow-none tw-px-1.5;
+    @apply tw-text-amber-900 tw-bg-amber-200;
+}
