@@ -27,7 +27,8 @@
     @apply hover:!tw-bg-gray-100 hover:tw-text-gray-800;
 }
 
-.menu__caret:before {
+.menu__caret:before,
+.menu__link--sublist-caret::after {
     background: url('/img/icons/icon-cheveron-up.svg') 50% / 2rem 2rem !important;
 }
 
