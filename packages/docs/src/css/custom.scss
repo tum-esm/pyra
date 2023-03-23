@@ -52,3 +52,60 @@
 .theme-doc-sidebar-item-category-level-1 {
     @apply tw-pt-4;
 }
+
+.alert--success {
+    /*--ifm-alert-background-color: blue;
+    --ifm-alert-background-color-highlight: green;
+    --ifm-alert-foreground-color: red;
+    --ifm-alert-border-color: yellow;*/
+}
+
+.alert--secondary {
+    --ifm-alert-background-color: #f1f5f9;
+    --ifm-alert-background-color-highlight: #e2e8f0;
+    --ifm-alert-foreground-color: #0f172a;
+}
+
+:root {
+    --ifm-alert-border-radius: 4px;
+    --ifm-alert-border-left-width: 0;
+    --ifm-alert-shadow: 0;
+
+    --ifm-code-background: #e2e8f0;
+    .markdown {
+        p,
+        h1,
+        h2,
+        h3,
+        h4,
+        li {
+            code {
+                border: 0;
+                padding: 2px 5px;
+                border-radius: 4px;
+            }
+        }
+    }
+}
+
+kbd {
+    @apply tw-rounded tw-font-bold tw-border-0 tw-shadow-none tw-px-1.5;
+    @apply tw-text-amber-900 tw-bg-amber-200;
+}
+
+hr {
+    margin: 4em 0;
+    height: 0;
+}
+
+p code,
+li code,
+h1 code,
+h2 code,
+h3 code {
+    @apply tw-border-0 tw-rounded tw-bg-gray-150 tw-text-gray-800;
+}
+
+.theme-code-block {
+    box-shadow: none !important;
+}
