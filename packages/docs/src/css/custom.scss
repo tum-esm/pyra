@@ -1,0 +1,54 @@
+:root {
+    --ifm-font-family-base: 'Rubik', sans-serif;
+    --ifm-heading-font-weight: 600;
+
+    --ifm-breadcrumb-border-radius: 3px;
+    --ifm-breadcrumb-item-background-active: #e2e8f0;
+    --ifm-breadcrumb-padding-vertical: 1.5px;
+    --ifm-breadcrumb-padding-horizontal: 8px;
+    --ifm-breadcrumb-color-active: #1e293b;
+}
+
+.markdown * {
+    --ifm-h1-font-size: 2rem !important;
+    --ifm-h2-font-size: 1.75rem !important;
+    --ifm-h3-font-size: 1.5rem !important;
+    --ifm-h4-font-size: 1.25rem !important;
+}
+
+.docItemContainer_node_modules-\@docusaurus-theme-classic-lib-theme-DocItem-Layout-styles-module {
+    max-width: 70ch;
+    margin: 3rem auto;
+    min-height: calc(100vh - 8rem);
+}
+
+.menu__caret:before,
+.menu__link--sublist-caret:after {
+    background: url('/img/icons/icon-cheveron-up.svg') 50% / 1.25rem 1.25rem;
+}
+
+:root .navbar {
+    display: none;
+}
+
+.theme-back-to-top-button {
+    display: none;
+}
+
+.theme-doc-breadcrumbs .breadcrumbs .breadcrumbs__item:first-child {
+    display: none;
+}
+
+.theme-doc-sidebar-item-category {
+    .menu__link {
+        @apply tw-font-medium tw-text-gray-800 tw-text-sm;
+    }
+
+    .menu__link--sublist {
+        @apply tw-font-semibold tw-text-gray-950 tw-text-base;
+    }
+}
+
+.theme-doc-sidebar-item-category-level-1 {
+    @apply tw-pt-4;
+}
