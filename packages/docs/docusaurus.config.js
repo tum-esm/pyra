@@ -29,6 +29,8 @@ async function createConfig() {
             locales: ['en'],
         },
 
+        plugins: ['docusaurus-plugin-sass'],
+
         presets: [
             [
                 'classic',
@@ -42,6 +44,10 @@ async function createConfig() {
                         remarkPlugins: [mdxMermaid.default],
                     },
                     theme: {
+                        customCss: [
+                            require.resolve('./src/css/fonts.css'),
+                            require.resolve('./src/css/custom.scss'),
+                        ],
                         /*require.resolve('./src/css/ifm-settings.css'),
                                 require.resolve('./src/css/navigation.css'),
                                 require.resolve('./src/css/markdown.css'),
@@ -76,6 +82,7 @@ async function createConfig() {
                             ariaLabel: 'GitHub repository',
                         },
                     ],
+                    hideOnScroll: true,
                 },
                 footer: {
                     style: 'dark',
