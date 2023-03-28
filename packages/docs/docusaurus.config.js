@@ -45,6 +45,7 @@ async function createConfig() {
                     },
                     theme: {
                         customCss: [
+                            require.resolve('./src/css/tailwind.css'),
                             require.resolve('./src/css/fonts.css'),
                             require.resolve('./src/css/custom.scss'),
                         ],

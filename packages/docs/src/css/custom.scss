@@ -9,6 +9,21 @@
     --ifm-breadcrumb-color-active: #1e293b;
 }
 
+.footer--dark {
+    --ifm-footer-background-color: #0f172a;
+}
+
+.pagination-nav__link {
+    @apply tw-border tw-border-slate-300 tw-shadow;
+}
+
+.pagination-nav__label {
+    &::after,
+    &::before {
+        @apply tw-hidden;
+    }
+}
+
 .markdown * {
     --ifm-h1-font-size: 2rem !important;
     --ifm-h2-font-size: 1.75rem !important;
@@ -47,6 +62,10 @@
     .menu__link--sublist {
         @apply tw-font-semibold tw-text-gray-950 tw-text-base;
     }
+}
+
+.theme-doc-sidebar-item-category-level-2 .menu__link--sublist {
+    @apply tw-font-medium tw-text-gray-800 tw-text-sm;
 }
 
 .theme-doc-sidebar-item-category-level-1 {
