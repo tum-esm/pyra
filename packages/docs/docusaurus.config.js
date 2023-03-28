@@ -45,7 +45,7 @@ async function createConfig() {
                     out: 'api-reference/ui',
                     watch: false,
                     sidebar: {
-                        categoryLabel: 'ui',
+                        categoryLabel: 'UI',
                         position: 3,
                     },
                     readme: 'none',
