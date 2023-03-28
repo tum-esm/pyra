@@ -63,7 +63,7 @@ jobs:
               run: |
                   source .venv/bin/activate
                   bash scripts/check_static_types.sh
-            - name: Run pytest tests
+            - name: Run pytests
               run: |
                   source .venv/bin/activate
                   pytest -m "ci" --cov=packages tests 
