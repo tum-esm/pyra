@@ -29,7 +29,29 @@ async function createConfig() {
             locales: ['en'],
         },
 
-        plugins: ['docusaurus-plugin-sass'],
+        plugins: [
+            'docusaurus-plugin-sass',
+            [
+                'docusaurus-plugin-typedoc',
+                {
+                    entryPoints: [
+                        '../ui/src/custom-types.ts',
+                        '../ui/src/assets/index.ts',
+                        '../ui/src/components/index.ts',
+                        '../ui/src/tabs/index.ts',
+                        '../ui/src/utils/index.ts',
+                    ],
+                    tsconfig: '../ui/tsconfig.json',
+                    out: 'api-reference/ui',
+                    watch: false,
+                    sidebar: {
+                        categoryLabel: 'ui',
+                        position: 3,
+                    },
+                    readme: 'none',
+                },
+            ],
+        ],
 
         presets: [
             [
