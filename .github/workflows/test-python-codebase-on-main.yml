@@ -37,8 +37,8 @@ jobs:
               id: cached-poetry-dependencies
               uses: actions/cache@v3
               with:
-                  path: sensor/.venv
-                  key: venv-${{ runner.os }}-3.9.16-${{ hashFiles('sensor/poetry.lock') }}
+                  path: .venv
+                  key: venv-${{ runner.os }}-3.9.16-${{ hashFiles('poetry.lock') }}
 
             # generate venv if not in cache
             - name: Set up Python 3.9.16
