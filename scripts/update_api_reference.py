@@ -5,14 +5,15 @@ import tum_esm_utils
 
 root_src_path = "packages/docs/docs/api-reference-raw"
 root_dst_path = "packages/docs/docs/api-reference"
-repo_url = "https://github.com/tum-esm/pyr"
+repo_url = "https://github.com/tum-esm/pyra"
 
 stdout = tum_esm_utils.shell.run_shell_command(
-    f"lazydocs --output-path ./{root_src_path} --src-base-url {repo_url}/tree/main/packages --no-watermark packages"
+    f"lazydocs --output-path ./{root_src_path} --src-base-url {repo_url}/tree/main --no-watermark packages"
 )
 
-if os.path.isdir(root_dst_path):
-    shutil.rmtree(root_dst_path)
+for p in ["core", "cli"]:
+    if os.path.isdir(f"{root_dst_path}/{p}"):
+        shutil.rmtree(f"{root_dst_path}/{p}")
 
 dst_file_paths = [(f[:-3].replace(".", "/")) for f in os.listdir(root_src_path)]
 print(dst_file_paths)
@@ -35,10 +36,14 @@ for src_path in sorted(os.listdir(root_src_path), key=len):
     with open(abs_src_path) as f:
         original_content = f.read()
     with open(abs_dst_path, "w") as f:
+        f.write("---\nhide_table_of_contents: true\n")
+        if abs_dst_path.endswith("main.mdx"):
+            f.write("sidebar_position: 1\n")
+        f.write("\n---\n\n")
         f.write(
             original_content.replace(
-                '<img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square" />',
-                '<img align="right" style={{float: "right"}} src="https://img.shields.io/badge/-source-cccccc?style=flat-square" />',
+                '><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square" />',
+                'className="SourceCodeLinkBadge">source code',
             )
         )
 
@@ -49,3 +54,9 @@ with open(f"{root_dst_path}/_category_.json", "w") as f:
     json.dump(
         {"label": "API Reference", "position": 6, "link": {"type": "generated-index"}}, f
     )
+
+with open(f"{root_dst_path}/core/_category_.json", "w") as f:
+    json.dump({"label": "CORE", "position": 1}, f)
+
+with open(f"{root_dst_path}/cli/_category_.json", "w") as f:
+    json.dump({"label": "CLI", "position": 2}, f)
