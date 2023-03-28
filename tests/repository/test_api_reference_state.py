@@ -1,24 +1,32 @@
-from typing import Callable
+import os
+import shutil
 import pytest
 import tum_esm_utils
 
 PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=3)
 
 
-get_api_reference_checksum: Callable[[], str] = lambda: tum_esm_utils.shell.run_shell_command(
-    "find packages/docs/docs/api-reference -type f -exec md5sum {} + | LC_ALL=C sort | md5sum",
-    working_directory=PROJECT_DIR,
-)
+src = f"{PROJECT_DIR}/packages/docs/docs/api-reference"
+dst = f"{PROJECT_DIR}/packages/docs/docs/api-reference-backup"
 
 
 @pytest.mark.ci
 def test_api_reference_state() -> None:
-    checksum_before_update = get_api_reference_checksum()
-    checksum_before_update_2 = get_api_reference_checksum()
-    assert checksum_before_update == checksum_before_update_2, "weird things are happening"
+    shutil.copytree(src, dst)
 
     tum_esm_utils.shell.run_shell_command(
         "python scripts/update_api_reference.py", working_directory=PROJECT_DIR
     )
-    checksum_after_update = get_api_reference_checksum()
-    assert checksum_before_update == checksum_after_update, "API reference is not up to date"
+    os.system(f"ls -lahg {PROJECT_DIR}/packages/docs/docs/")
+    a = os.system(f"diff --recursive {src} {dst}")
+    assert a == 0
+
+    assert (
+        tum_esm_utils.shell.run_shell_command(
+            "diff --recursive packages/docs/docs/api-reference packages/docs/docs/api-reference-backup",
+            working_directory=PROJECT_DIR,
+        )
+        == ""
+    )
+
+    shutil.rmtree(dst)

@@ -39,11 +39,14 @@ for src_path in sorted(os.listdir(root_src_path), key=len):
         f.write("---\nhide_table_of_contents: true\n")
         if abs_dst_path.endswith("main.mdx"):
             f.write("sidebar_position: 1\n")
-        f.write("\n---\n\n")
+        f.write("---\n\n")
         f.write(
             original_content.replace(
                 '><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square" />',
-                'className="SourceCodeLinkBadge">source code',
+                ' className="SourceCodeLinkBadge">source code',
+            ).replace(
+                '><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square">',
+                ' className="SourceCodeLinkBadge">source code',
             )
         )
 
