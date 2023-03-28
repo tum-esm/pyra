@@ -38,14 +38,14 @@ jobs:
               uses: actions/cache@v3
               with:
                   path: .venv
-                  key: venv-${{ runner.os }}-3.9.16-${{ hashFiles('poetry.lock') }}
+                  key: venv-${{ runner.os }}-3.10.6-${{ hashFiles('poetry.lock') }}
 
             # generate venv if not in cache
-            - name: Set up Python 3.9.16
+            - name: Set up Python 3.10.6
               if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               uses: actions/setup-python@v4
               with:
-                  python-version: 3.9.16
+                  python-version: 33.10.6
             - name: Install Poetry
               if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               uses: snok/install-poetry@v1
