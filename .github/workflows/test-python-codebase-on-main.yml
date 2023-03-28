@@ -62,5 +62,5 @@ jobs:
             - name: Run pytest tests
               run: |
                   source $VENV
-                  pytest -m "ci" --cov=packages tests
+                  pytest -m "ci" --cov=packages tests 
                   coverage report
