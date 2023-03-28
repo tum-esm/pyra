@@ -17,16 +17,8 @@ def test_api_reference_state() -> None:
     tum_esm_utils.shell.run_shell_command(
         "python scripts/update_api_reference.py", working_directory=PROJECT_DIR
     )
-    os.system(f"ls -lahg {PROJECT_DIR}/packages/docs/docs/")
+
     a = os.system(f"diff --recursive {src} {dst}")
     assert a == 0
-
-    assert (
-        tum_esm_utils.shell.run_shell_command(
-            "diff --recursive packages/docs/docs/api-reference packages/docs/docs/api-reference-backup",
-            working_directory=PROJECT_DIR,
-        )
-        == ""
-    )
 
     shutil.rmtree(dst)

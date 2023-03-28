@@ -56,12 +56,22 @@ jobs:
                   installer-parallel: true
             - name: Install dependencies
               if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-              run: poetry install
+              run: |
+                  python -m venv .venv
+                  source .venv/bin/activate
+                  which python
+                  python --version
+                  poetry install --with=dev
 
             # run test suite
             - name: Run mypy static type analysis
               run: |
+                  ls -lahg .
+                  which python
+                  pip list
                   source .venv/bin/activate
+                  which python
+                  pip list
                   bash scripts/check_static_types.sh
             - name: Run pytest tests
               run: |
