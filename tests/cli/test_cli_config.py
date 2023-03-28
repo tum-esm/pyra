@@ -1,5 +1,6 @@
 import json
 import subprocess
+from typing import Any
 import pytest
 import os
 from deepdiff import DeepDiff
@@ -12,7 +13,7 @@ PYRA_CLI_PATH = os.path.join(PROJECT_DIR, "packages", "cli", "main.py")
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 
 
-def assert_config_file_content(expected_content: dict, message: str) -> None:
+def assert_config_file_content(expected_content: dict[Any, Any], message: str) -> None:
     with open(CONFIG_FILE_PATH, "r") as f:
         actual_content = json.load(f)
 
@@ -38,7 +39,7 @@ def run_cli_command(command: list[str]) -> str:
 
 
 @pytest.mark.ci
-def test_get_config(sample_config) -> None:
+def test_get_config(sample_config: Any) -> None:
     # get config from cli
     stdout = run_cli_command(["config", "get"])
     config_object_1 = json.loads(stdout)
@@ -48,13 +49,13 @@ def test_get_config(sample_config) -> None:
 
 
 @pytest.mark.ci
-def test_validate_current_config(sample_config) -> None:
+def test_validate_current_config(sample_config: Any) -> None:
     stdout = run_cli_command(["config", "validate"])
     assert stdout.startswith("Current config file is valid")
 
 
 @pytest.mark.ci
-def test_update_config(sample_config) -> None:
+def test_update_config(sample_config: Any) -> None:
 
     updates = [
         {"general": {"seconds_per_core_interval": False}},
@@ -81,7 +82,7 @@ def test_update_config(sample_config) -> None:
         {"measurement_triggers": {"stop_time": {"hour": 7, "minute": 0}}},
     ]
 
-    def transform(o: dict, i: int):
+    def transform(o: dict[Any, Any], i: int) -> dict[Any, Any]:
         if i == 0:
             o["general"]["seconds_per_core_interval"] = 400
         if i == 1:
@@ -105,7 +106,7 @@ def test_update_config(sample_config) -> None:
 
 
 @pytest.mark.ci
-def test_add_default_config(sample_config) -> None:
+def test_add_default_config(sample_config: Any) -> None:
 
     cases = {"helios": None, "tum_plc": None}
 

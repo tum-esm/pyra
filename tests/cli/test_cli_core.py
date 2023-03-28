@@ -2,6 +2,7 @@ from datetime import datetime
 import subprocess
 import os
 import time
+from typing import Any
 import pytest
 from ..fixtures import sample_config, empty_logs
 
@@ -27,7 +28,7 @@ def run_cli_command(command: list[str]) -> str:
 
 
 @pytest.mark.ci
-def test_start_stop_procedure(sample_config, empty_logs) -> None:
+def test_start_stop_procedure(sample_config: Any, empty_logs: Any) -> None:
     # terminate all pyra-core processes
     run_cli_command(["core", "stop"])
 
