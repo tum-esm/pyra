@@ -31,36 +31,40 @@ jobs:
             # check-out repo
             - name: Check out repository
               uses: actions/checkout@v3
-            - name: Set up Python 3.10.6
+
+            # load cached venv if cache exists
+            - name: Load cached venv
+              id: cached-poetry-dependencies
+              uses: actions/cache@v3
+              with:
+                  path: sensor/.venv
+                  key: venv-${{ runner.os }}-3.9.16-${{ hashFiles('sensor/poetry.lock') }}
+
+            # generate venv if not in cache
+            - name: Set up Python 3.9.16
+              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               uses: actions/setup-python@v4
               with:
-                  python-version: 3.10.6
-
-            - name: Install and configure Poetry
+                  python-version: 3.9.16
+            - name: Install Poetry
+              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               uses: snok/install-poetry@v1
               with:
                   version: 1.3.2
                   virtualenvs-create: true
                   virtualenvs-in-project: true
                   installer-parallel: true
-
-            - name: Load cached venv
-              id: cached-poetry-dependencies
-              uses: actions/cache@v3
-              with:
-                  path: ~/.cache
-                  key: venv-${{ runner.os }}-3.10.6-${{ hashFiles('poetry.lock') }}
-
             - name: Install dependencies
-              run: poetry install --no-interaction --no-root
+              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+              run: poetry install --with=dev
 
             # run test suite
             - name: Run mypy static type analysis
               run: |
-                  source $VENV
+                  source .venv/bin/activated
                   bash scripts/check_static_types.sh
             - name: Run pytest tests
               run: |
-                  source $VENV
+                  source .venv/bin/activated
                   pytest -m "ci" --cov=packages tests 
                   coverage report
