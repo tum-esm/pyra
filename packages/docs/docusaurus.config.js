@@ -80,7 +80,6 @@ async function createConfig() {
                             href: 'https://github.com/tum-esm/pyra',
                             position: 'right',
                             className: 'header-github-link',
-                            ariaLabel: 'GitHub repository',
                         },
                     ],
                     hideOnScroll: true,
