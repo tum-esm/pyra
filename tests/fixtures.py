@@ -2,6 +2,7 @@ import json
 import os
 import random
 import shutil
+from typing import Any
 import pytest
 import fabric.connection
 
@@ -68,7 +69,7 @@ def save_file(original_path: str, temporary_path: str, test_content: str) -> Non
         f.write(test_content)
 
 
-def restore_file(original_path: str, temporary_path: str):
+def restore_file(original_path: str, temporary_path: str) -> None:
     os.remove(original_path)
     try:
         os.rename(temporary_path, original_path)
@@ -77,7 +78,7 @@ def restore_file(original_path: str, temporary_path: str):
 
 
 @pytest.fixture()
-def sample_config():
+def sample_config() -> Any:
     """
     Store the original config.json file under a different name.
     Restore it after the tests are done.
@@ -97,7 +98,7 @@ def sample_config():
 
 
 @pytest.fixture()
-def original_config():
+def original_config() -> Any:
     """
     Store the original config.json file under a different name.
     Restore it after the tests are done.
@@ -120,7 +121,7 @@ def original_config():
 
 
 @pytest.fixture()
-def empty_logs():
+def empty_logs() -> Any:
     """
     Store the original info.log and debug.log file under a
     different name. Restore them after the tests are done.
@@ -143,7 +144,7 @@ def empty_logs():
 
 
 @pytest.fixture
-def populated_upload_test_directories():
+def populated_upload_test_directories() -> Any:
     """
     Store the content of the logs/helios directory under a
     different name
@@ -222,7 +223,7 @@ def popuplate_upload_test_directory(dir_path: str) -> list[str]:
 
 
 @pytest.fixture
-def fabric_connection():
+def fabric_connection() -> Any:
     """
     Supply a fabric SSH connection
     """

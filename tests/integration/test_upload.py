@@ -1,6 +1,7 @@
 import subprocess
 import json
 import sys
+from typing import Any
 import invoke
 import paramiko
 import os
@@ -58,7 +59,7 @@ def get_remote_checksum(
 
 def assert_remote_meta_completeness(
     dir_path: str, dates: list[str], connection: fabric.connection.Connection
-) -> str:
+) -> None:
     for date in sorted(dates):
         p: invoke.runners.Result = connection.run(
             f"cat {dir_path}/{date}/upload-meta.json", hide=True, in_stream=False
@@ -68,7 +69,9 @@ def assert_remote_meta_completeness(
 
 
 @pytest.mark.integration
-def test_upload(original_config, populated_upload_test_directories, fabric_connection) -> None:
+def test_upload(
+    original_config: Any, populated_upload_test_directories: Any, fabric_connection: Any
+) -> None:
     upload_config = original_config["upload"]
     assert upload_config is not None, "config.upload is null"
 
