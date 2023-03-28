@@ -9,6 +9,7 @@ test-tmp/
 .vscode/
 .idea
 hidden/
+packages/docs/docs/api-reference/ui
 
 # runtime data
 pids
