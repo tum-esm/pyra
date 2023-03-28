@@ -13,6 +13,9 @@ get_api_reference_checksum = lambda: tum_esm_utils.shell.run_shell_command(
 @pytest.mark.ci
 def test_api_reference_state() -> None:
     checksum_before_update = get_api_reference_checksum()
+    checksum_before_update_2 = get_api_reference_checksum()
+    assert checksum_after_update == checksum_before_update_2, "weird things are happening"
+
     tum_esm_utils.shell.run_shell_command(
         "python scripts/update_api_reference.py", working_directory=PROJECT_DIR
     )
