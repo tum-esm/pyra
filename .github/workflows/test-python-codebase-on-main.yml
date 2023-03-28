@@ -45,7 +45,7 @@ jobs:
               if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               uses: actions/setup-python@v4
               with:
-                  python-version: 33.10.6
+                  python-version: 3.10.6
             - name: Install Poetry
               if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               uses: snok/install-poetry@v1
