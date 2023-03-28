@@ -1,11 +1,10 @@
 ---
 hide_table_of_contents: true
-
 ---
 
 <!-- markdownlint-disable -->
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L0"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L0" className="SourceCodeLinkBadge">source code</a>
 
 # <kbd>module</kbd> `core.threads.upload_thread`
 
@@ -16,7 +15,7 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L28"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L28" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `InvalidUploadState`
 
@@ -29,12 +28,12 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L32"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L32" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `DirectoryUploadClient`
 This is the client that is concerned with uploading one specific directory. run() will perform the actual upload process. 
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L38"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L38" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -58,7 +57,7 @@ __init__(
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L262"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L262" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_directories_to_be_uploaded`
 
@@ -72,7 +71,7 @@ get_directories_to_be_uploaded(data_path: str) → list[str]
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L172"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L172" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `run`
 
@@ -87,7 +86,7 @@ Perform the whole upload process for a given directory.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L276"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L276" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `UploadThread`
 Thread for uploading all interferograms from a specific directory to a server via SSH. The local files will only be removed (optional) if the files on the server generate the same MD5 checksum as the local files. 
@@ -122,7 +121,7 @@ The upload-meta.json file looks like this:
 
 This function only does one loop in headless mode. 
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L319"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L319" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -139,7 +138,7 @@ __init__(config: ConfigDict) → None
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L350"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L350" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `main`
 
@@ -153,7 +152,7 @@ headless mode = don't write to log files, print to console
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L325"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L325" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `update_thread_state`
 
@@ -165,7 +164,7 @@ Make sure that the thread loop is (not) running, based on config.upload
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L396"className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L396" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `upload_all_files`
 
