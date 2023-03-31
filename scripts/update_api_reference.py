@@ -54,9 +54,7 @@ shutil.rmtree(root_src_path)
 
 
 with open(f"{root_dst_path}/_category_.json", "w") as f:
-    json.dump(
-        {"label": "API Reference", "position": 6, "link": {"type": "generated-index"}}, f
-    )
+    json.dump({"label": "API Reference", "position": 6}, f)
 
 with open(f"{root_dst_path}/core/_category_.json", "w") as f:
     json.dump({"label": "CORE", "position": 1}, f)

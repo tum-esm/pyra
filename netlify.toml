@@ -1,3 +1,4 @@
 [build]
-  publish = "packages/docs/build"
-  command = "cd packages/docs && yarn build"
+  base = "packages/docs/"
+  publish = "build"
+  command = "pwd && ls -lahg . && ls -lahg .. && yarn build"
