@@ -1,4 +1,3 @@
 [build]
-  base = "packages/docs/"
-  publish = "build"
-  command = "yarn build"
+  publish = "packages/docs/build"
+  command = "cd packages/docs && yarn build"

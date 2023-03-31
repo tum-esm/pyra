@@ -1,3 +1,6 @@
+@tailwind components;
+@tailwind utilities;
+
 :root {
     --ifm-font-family-base: 'Rubik', sans-serif;
     --ifm-heading-font-weight: 600;
@@ -7,6 +10,19 @@
     --ifm-breadcrumb-padding-vertical: 1.5px;
     --ifm-breadcrumb-padding-horizontal: 8px;
     --ifm-breadcrumb-color-active: #1e293b;
+
+    .col {
+        /*--ifm-col-width: 100% !important;*/
+        --ifm-spacing-horizontal: calc((100% - 70ch) / 2);
+    }
+
+    .theme-doc-sidebar-menu {
+        padding-bottom: 4rem !important;
+    }
+
+    .breadcrumbs {
+        padding-top: 2rem !important;
+    }
 }
 
 .footer--dark {
@@ -29,12 +45,6 @@
     --ifm-h2-font-size: 1.75rem !important;
     --ifm-h3-font-size: 1.5rem !important;
     --ifm-h4-font-size: 1.25rem !important;
-}
-
-.docItemContainer_node_modules-\@docusaurus-theme-classic-lib-theme-DocItem-Layout-styles-module {
-    max-width: 50rem;
-    margin: 3rem auto;
-    min-height: calc(100vh - 8rem);
 }
 
 .menu__caret:before,
