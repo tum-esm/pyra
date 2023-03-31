@@ -49,6 +49,9 @@ async function createConfig() {
                         position: 3,
                     },
                     readme: 'none',
+                    frontmatter: {
+                        hide_table_of_contents: true,
+                    },
                 },
             ],
         ],
