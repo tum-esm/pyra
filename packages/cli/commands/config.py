@@ -1,3 +1,5 @@
+"""Read or update the `config.json` file."""
+
 import json
 import shutil
 import click

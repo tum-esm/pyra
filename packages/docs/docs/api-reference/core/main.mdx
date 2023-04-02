@@ -15,27 +15,6 @@ sidebar_position: 1
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/main.py#L9" className="SourceCodeLinkBadge">source code</a>
-
-## <kbd>function</kbd> `update_exception_state`
-
-```python
-update_exception_state(
-    config: ConfigDict,
-    current_exceptions: list[str],
-    new_exception: Optional[Exception]
-) → list[str]
-```
-
-Take a list of current_exceptions (all exceptions that are present from the last mainloop iteration, possibly empty) and a new_exception (the one that happened in this loop, possibly None). 
-
-If the new_exception is None, all exceptions have been resolved resolved: send a "resolved" email in case the current_exceptions was not empty yet. 
-
-If the new_exception is not None, if it is not already in the list of current_exceptions: append it to that list and send a "new error occured" email. 
-
-
----
-
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/main.py#L50" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>function</kbd> `run`
@@ -44,6 +23,14 @@ If the new_exception is not None, if it is not already in the list of current_ex
 run() → None
 ```
 
-The mainloop of PYRA Core. This function will loop infinitely. It loads the config file, validates it runs every module one by one, and possibly restarts the upload- and helios-thread. 
+The entrypoint of PYRA Core. 
+
+This function infinitely loops over a sequence of modules: 
+
+1. Read the config 2. Check whether `HeliosThread` and `UploadThread` are running 3. Possibly start/stop the threads according to the config 4. Run `MeasurementConditions` module 5. Run `EnclosureControl` module 6. Run `SunTracking` module 7. Run `OpusMeasurement` module 8. Run `SystemChecks` module 
+
+The mainloop logs all exceptions and sends out emails when new exceptions occur and when all exceptions have been resolved. 
+
+**Terminology:** modules are executed one by one in each mainloop iteration. Threads are executed in parallel to the mainloop and are started/stopped according to the config. 
 
 

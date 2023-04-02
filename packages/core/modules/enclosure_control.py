@@ -6,20 +6,21 @@ logger = utils.Logger(origin="enclosure-control")
 
 
 class EnclosureControl:
-    """
-    EnclosureControl allows to interact with TUM made weather protected enclosures that allow a
-    24/7 deployment of the FTIR spectrometer EM27/Sun in the field. The class takes the latest
-    decision from measurement_conditions.py (StateInterface: measurements_should_be_running) and
-    communicates with the enclosure's built in Siemens S7 PLC to read and write parameters to its
-    database (PLCInterface). Additionally, it powers down the spectrometer during dusk to extend
-    the overall spectrometer lifetime. During dawn, it powers up the spectrometer to prepare and
-    warm it up for the next measurement day. At initialization, the PLC is set to control the
-    ambient enclosure temperature in automatic mode.
-    During flank changes of measurements_should_be_running it either tells the enclosure to
-    open up the cover to allow direct sunlight to hit the CamTracker mirrors or close the cover
-    to protect the instrument. Instrument protection from bad weather conditions is always
-    prioritised over a slight maximization of measurement uptime.
-    """
+    """EnclosureControl allows to interact with TUM made weather protected
+    enclosures that allow a 24/7 deployment of the FTIR spectrometer EM27/Sun
+    in the field. The class takes the latest decision from
+    `measurement_conditions.py` (StateInterface: measurements_should_be_running)
+    and communicates with the enclosure's built in Siemens S7 PLC to read and
+    write parameters to its database (PLCInterface). Additionally, it powers
+    down the spectrometer during dusk to extend the overall spectrometer
+    lifetime. During dawn, it powers up the spectrometer to prepare and warm it
+    up for the next measurement day. At initialization, the PLC is set to control
+    the ambient enclosure temperature in automatic mode. During flank changes of
+    measurements_should_be_running it either tells the enclosure to open up the
+    cover to allow direct sunlight to hit the CamTracker mirrors or close the
+    cover to protect the instrument. Instrument protection from bad weather
+    conditions is always prioritised over a slight maximization of measurement
+    uptime."""
 
     @staticmethod
     class CoverError(Exception):

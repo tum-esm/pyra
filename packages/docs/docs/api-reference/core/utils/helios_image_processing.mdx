@@ -18,16 +18,16 @@ hide_table_of_contents: true
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L13" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `HeliosImageProcessing`
+Class for processing images from the Helios camera. 
 
-
-
+See https://pyra.esm.ei.tum.de/docs/user-guide/tum-plc-and-helios#what-does-helios-do for more information on Helios. 
 
 
 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L116" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L126" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `add_markings_to_image`
 
@@ -41,11 +41,11 @@ add_markings_to_image(
 ) → Mat
 ```
 
-Put text for edge fraction and mark circles in image 
+Put text for edge fraction and mark circles in image. 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L126" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L141" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `add_text_to_image`
 
@@ -61,7 +61,7 @@ Put some text on the bottom left of an image
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L142" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L160" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_edge_fraction`
 
@@ -73,6 +73,6 @@ For a given frame determine the number of "edge pixels" with respect to the inne
 
 1. Downscale image (faster processing) 2. Convert to grayscale image 3. Determine position and size of circular opening 4. Determine edges in image (canny edge filter) 5. Only consider edges inside 0.9 * circleradius 
 
-Returns the "edge pixel fraction" 
+Returns the "edge pixel fraction". 
 
 

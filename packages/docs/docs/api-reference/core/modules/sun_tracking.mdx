@@ -20,9 +20,9 @@ hide_table_of_contents: true
 ## <kbd>class</kbd> `SunTracking`
 SunTracking manages the software CamTracker. CamTracker controls moveable mirrors attached to the FTIR spectrometer EM27. These mirrors are sync with the current sun position to ensure direct sun light to be directed into the instrument. SunTracking will initialize CamTracker according to the current value of StateInterface: measurements_should_be_running. 
 
-These mirrors are initialized at startup of CamTracker if it is called with the additional parameter "-autostart". CamTracker can be gracefully shut down with creating a stop.txt file in its directory. CamTracker creates multiple logfiles at run time that give information on its current status of tracking the sun. Most importantly motor offsets tells the difference between current sun angle and calculated sun positions. It happens from time to time that SunTracker fails to track the sun and is unable to reinitialize the tracking. If a certain motor offset threshold is reached the only way to fix the offset is to restart CamTracker. 
+These mirrors are initialized at startup of CamTracker if it is called with the additional parameter `-autostart`. CamTracker can be gracefully shut down with creating a stop.txt file in its directory. CamTracker creates multiple logfiles at run time that give information on its current status of tracking the sun. Most importantly motor offsets tells the differencebetween current sun angle and calculated sun positions. It happens from time to time that SunTracker fails to track the sun and is unable to reinitialize the tracking. If a certain motor offset threshold is reached the only way to fix the offset is to restart CamTracker. 
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L27" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L30" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -39,7 +39,7 @@ __init__(initial_config: ConfigDict)
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L92" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L95" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `ct_application_running`
 
@@ -53,7 +53,7 @@ False if Application is currently not running on OS True if Application is curre
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L158" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L161" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `read_ct_log_learn_az_elev`
 
@@ -69,7 +69,7 @@ Raises AssertionError if log file is invalid.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L149" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L152" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `remove_stop_file`
 
@@ -81,7 +81,7 @@ This function removes the stop.txt file to allow CamTracker to restart.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L33" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L36" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `run`
 
@@ -93,7 +93,7 @@ Called in every cycle of the main loop. Redas StateInterface: measurements_shoul
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L110" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L113" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `start_sun_tracking_automation`
 
@@ -107,7 +107,7 @@ Removes stop.txt file in CamTracker directory if present. This file is the curre
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L136" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L139" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `stop_sun_tracking_automation`
 
@@ -121,7 +121,7 @@ CamTracker has an internal check for a stop.txt file in its directory. After det
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L223" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L226" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `test_setup`
 
@@ -133,7 +133,7 @@ Function to test the functonality of this module. Starts up CamTracker to initia
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L202" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L205" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `validate_tracker_position`
 

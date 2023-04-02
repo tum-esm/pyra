@@ -21,7 +21,10 @@ def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
-def process_is_running() -> Optional[int]:
+# TODO: use tum_esm_utils
+
+
+def _process_is_running() -> Optional[int]:
     for p in psutil.process_iter():
         try:
             arguments = p.cmdline()
@@ -32,7 +35,10 @@ def process_is_running() -> Optional[int]:
     return None
 
 
-def terminate_processes() -> list[int]:
+# TODO: use tum_esm_utils
+
+
+def _terminate_processes() -> list[int]:
     termination_pids: list[int] = []
     for p in psutil.process_iter():
         try:
@@ -50,7 +56,7 @@ def terminate_processes() -> list[int]:
     help="Start pyra-core as a background process. Return the process id. Prevents spawning multiple processes."
 )
 def _start_pyra_core() -> None:
-    existing_pid = process_is_running()
+    existing_pid = _process_is_running()
     if existing_pid is not None:
         _print_red(f"Background process already exists with PID {existing_pid}")
     else:
@@ -67,7 +73,7 @@ def _start_pyra_core() -> None:
     help="Stop the pyra-core background process. Return the process id of terminated processes. This command will force quit the OPUS process."
 )
 def _stop_pyra_core() -> None:
-    termination_pids = terminate_processes()
+    termination_pids = _terminate_processes()
     if len(termination_pids) == 0:
         _print_red("No active process to be terminated")
     else:
@@ -116,7 +122,7 @@ def _stop_pyra_core() -> None:
 
 @click.command(help="Checks whether the pyra-core background process is running.")
 def _pyra_core_is_running() -> None:
-    existing_pid = process_is_running()
+    existing_pid = _process_is_running()
     if existing_pid is not None:
         _print_green(f"pyra-core is running with PID {existing_pid}")
     else:

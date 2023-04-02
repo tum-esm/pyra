@@ -1,4 +1,10 @@
+# TODO: use tum_esm_utils
+
+
 class RingList:
+    """TO BE REMOVED IN 4.0.8: Pyra will use `RingList` from
+    `tum_esm_utils` instead."""
+
     def __init__(self, max_size: int):
         assert max_size > 0, "a max_size of zero doesn't make any sense"
         self._max_size: int = max_size

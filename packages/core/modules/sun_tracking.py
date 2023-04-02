@@ -10,19 +10,22 @@ logger = utils.Logger(origin="sun-tracking")
 
 
 class SunTracking:
-    """SunTracking manages the software CamTracker. CamTracker controls moveable mirrors attached
-    to the FTIR spectrometer EM27. These mirrors are sync with the current sun position to ensure
-    direct sun light to be directed into the instrument. SunTracking will initialize CamTracker
-    according to the current value of StateInterface: measurements_should_be_running.
+    """SunTracking manages the software CamTracker. CamTracker controls
+    moveable mirrors attached to the FTIR spectrometer EM27. These mirrors
+    are sync with the current sun position to ensure direct sun light to
+    be directed into the instrument. SunTracking will initialize CamTracker
+    according to the current value of StateInterface:
+    measurements_should_be_running.
 
-    These mirrors are initialized at startup of CamTracker if it is called with the additional
-    parameter "-autostart". CamTracker can be gracefully shut down with creating a stop.txt file
-    in its directory. CamTracker creates multiple logfiles at run time that give information on
-    its current status of tracking the sun. Most importantly motor offsets tells the difference
-    between current sun angle and calculated sun positions. It happens from time to time that
-    SunTracker fails to track the sun and is unable to reinitialize the tracking. If a certain
-    motor offset threshold is reached the only way to fix the offset is to restart CamTracker.
-    """
+    These mirrors are initialized at startup of CamTracker if it is called
+    with the additional parameter `-autostart`. CamTracker can be gracefully
+    shut down with creating a stop.txt file in its directory. CamTracker
+    creates multiple logfiles at run time that give information on its
+    current status of tracking the sun. Most importantly motor offsets tells
+    the differencebetween current sun angle and calculated sun positions. It
+    happens from time to time that SunTracker fails to track the sun and is
+    unable to reinitialize the tracking. If a certain motor offset threshold
+    is reached the only way to fix the offset is to restart CamTracker."""
 
     def __init__(self, initial_config: types.ConfigDict):
         self._CONFIG = initial_config

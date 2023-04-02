@@ -17,21 +17,25 @@ def is_time_trigger_active(
 
 
 class MeasurementConditions:
-    """MeasurementConditions allows operation in three different modes: Manual, Automatic, Manual,
-    and CLI. Whenever a decision is made the parameter measurements_should_be_running in
-    StateInterface is updated.
+    """MeasurementConditions allows operation in three different modes:
+    Manual, Automatic, Manual, and CLI. Whenever a decision is made the
+    parameter measurements_should_be_running in StateInterface is updated.
 
-    In Manual mode, the user has full control over whether measurements should be active. The user-
-    controlled state can be controlled by the Pyra UI.
+    In Manual mode, the user has full control over whether measurements
+    should be active. The user-controlled state can be controlled by the
+    Pyra UI.
 
-    In Automatic mode, three different triggers are considered: Sun Elevation, Time, and Helios
-    State. These triggers may also be active in any combination at the same time. Measurements are
-    only set to be running if all triggers agree, while measurements will be set to be not active
-    if at least one of the active triggers decides to stop measurements.
+    In Automatic mode, three different triggers are considered: Sun
+    Elevation, Time, and Helios State. These triggers may also be active
+    in any combination at the same time. Measurements are only set to be
+    running if all triggers agree, while measurements will be set to be
+    not active if at least one of the active triggers decides to stop
+    measurements.
 
-    In CLI mode, triggers from external sources can be considered. This option is available for
-    custom-built systems or sensors not part of Pyra-4. It is also possible in this mode to move the
-    measurement control to remote systems i.e. by ssh."""
+    In CLI mode, triggers from external sources can be considered. This
+    option is available for custom-built systems or sensors not part of
+    Pyra 4. It is also possible in this mode to move the measurement
+    control to remote systems i.e. by SSH."""
 
     def __init__(self, initial_config: types.ConfigDict) -> None:
         self._CONFIG = initial_config

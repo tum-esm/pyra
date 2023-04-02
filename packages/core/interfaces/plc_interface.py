@@ -87,7 +87,10 @@ _PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PlcSpecificationDict] = {
 
 
 class PLCInterface:
-    """https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf"""
+    """Uses the snap7 library to connect to the Siemens PLC operating the
+    enclosure hardware.
+
+    Manual: https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf"""
 
     @staticmethod
     class PLCError(Exception):
@@ -327,7 +330,7 @@ class PLCInterface:
         """
         1. low-level direct-write new_state to PLC according to spec
         2. low-level direct-read of plc's value according to spec
-        3. raise PLCInterface.PLCError if value is different
+        3. raise `PLCInterface.PLCError` if value is different
         4. write update to StateInterface if update was successful
         """
         self.__write_bool(spec, new_state)
@@ -337,7 +340,7 @@ class PLCInterface:
         interfaces.StateInterface.update({"enclosure_plc_readings": partial_plc_state})
 
     def set_power_camera(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         self.__update_bool(
             new_state,
             self.specification["power"]["camera"],
@@ -345,7 +348,7 @@ class PLCInterface:
         )
 
     def set_power_computer(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         assert self.specification["power"]["computer"] is not None
         self.__update_bool(
             new_state,
@@ -354,7 +357,7 @@ class PLCInterface:
         )
 
     def set_power_heater(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         self.__update_bool(
             new_state,
             self.specification["power"]["heater"],

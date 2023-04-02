@@ -1,3 +1,5 @@
+"""Read current `info.log`/`debug.log` files."""
+
 import click
 import os
 from packages.core.utils import with_filelock, Logger

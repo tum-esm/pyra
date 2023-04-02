@@ -12,29 +12,19 @@ hide_table_of_contents: true
 
 
 
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L18" className="SourceCodeLinkBadge">source code</a>
-
-## <kbd>function</kbd> `log_line_has_time`
-
-```python
-log_line_has_time(log_line: str) → bool
-```
-
-Returns true when a give log line (string) starts with a valid date. This is not true for exception tracebacks. This log line time is used to determine which file to archive logs lines into. 
-
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L31" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L32" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `Logger`
+A reimplementation of the logging module. 
 
+_Why?_ The `logging` module from the Python standard library is kind of hard to configure with some setups we have on the server-side. That is why we have decided to use a custom logging class in some of our bigger projects instead. 
 
+This class is simply formatting log lines, appending them to the log files and providing a simple API. 
 
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L34" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L46" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -42,16 +32,16 @@ Returns true when a give log line (string) starts with a valid date. This is not
 __init__(origin: str = 'pyra.core', just_print: bool = False) → None
 ```
 
+Create a new logger instance. 
 
-
-
+With `just_print = True`, the log lines will be formatted like in the log files but only printed to the console. 
 
 
 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L86" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L107" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `archive`
 
@@ -65,7 +55,7 @@ With keep_last_hour = True, log lines less than an hour old will remain.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L38" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L59" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `debug`
 
@@ -77,7 +67,7 @@ Write a debug log (to debug only). Used for verbose output
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L50" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L71" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `error`
 
@@ -89,7 +79,7 @@ Write an error log (to debug and info)
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L54" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L75" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `exception`
 
@@ -101,7 +91,7 @@ Log the traceback of an exception
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L42" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L63" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `info`
 
@@ -113,19 +103,23 @@ Write an info log (to debug and info)
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L138" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L159" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `log_activity_event`
 
 ```python
-log_activity_event(event_label: str) → None
+log_activity_event(
+    event_label: Literal['start-measurements', 'stop-measurements', 'error-occured', 'errors-resolved', 'start-core', 'stop-core']
+) → None
 ```
 
-Log things like: * start-measurements * stop-measurements * error-occured * errors-resolved * start-core * stop-core 
+Log an activity event to "logs/activity/YYYY-MM-DD.json". 
+
+The activity events are way easier to parse for the UI than the full log files. 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L46" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L67" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `warning`
 
