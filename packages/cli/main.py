@@ -1,3 +1,6 @@
+"""Pyra CLI entry point. Use `pyra-cli --help`/`pyra-cli $command --help`
+to see all available commands.`"""
+
 import click
 import os
 import sys
