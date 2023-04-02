@@ -32,11 +32,11 @@ hide_table_of_contents: true
 
 ### Responsibilities
 
--   `types` contains all types used in the codebase. The whole codebase contains static type hints. A static-type analysis can be done using MyPy (see `scripts/`).
+-   `types` contains all types used in the codebase. The whole codebase has static-type hints. A static-type analysis can be done using MyPy (see `scripts/`).
 -   `utils` contains all supporting functionality used in one or more places.
 -   `interfaces` includes the "low-level" code to interact with the PLC, the operating system, and the config- and state files.
--   `modules` contains the different steps that Pyra Core runs sequentially on the main thread.
--   `threads` contains the logic that Pyra Core runs in parallel to the main thread.
+-   `modules` contains the steps Pyra Core runs sequentially on the main thread.
+-   `threads` contains the logic that Pyra Core runs parallel to the main thread.
 
 ### Import hierarchy
 

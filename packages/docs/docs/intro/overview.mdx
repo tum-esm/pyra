@@ -10,9 +10,9 @@ hide_table_of_contents: true
 
 ## What is Pyra?
 
-Pyra (name based on [Python](<https://en.wikipedia.org/wiki/Python_(programming_language)>) and [Ra](https://en.wikipedia.org/wiki/Ra)) is a software that automates the operation of [EM27/SUN](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/remote-sensing/em27-sun-solar-absorption-spectrometer.html) measurement setups. Operating EM27/SUN devices requires a lot of human interaction. Pyra makes it possible to autonomously operate these devices 24/7.
+Pyra (name based on [Python](<https://en.wikipedia.org/wiki/Python_(programming_language)>) and [Ra](https://en.wikipedia.org/wiki/Ra)) is a software that automates the operation of [EM27/SUN](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/remote-sensing/em27-sun-solar-absorption-spectrometer.html) measurement setups. Operating EM27/SUN devices requires a lot of human interaction. Pyra makes it possible to operate these devices 24/7 autonomously.
 
-Pyra has enabled the [Technical University of Munich](https://www.tum.de/en/) to collect continuous data from 5 stations around the city of Munich since 2019 using [MUCCnet](https://atmosphere.ei.tum.de/). Versions 1 to 3 of Pyra have been experimental tools, improved internally since 2016.
+Pyra has enabled the [Technical University of Munich](https://www.tum.de/en/) to collect continuous data from 5 stations around the city of Munich since 2019 using [MUCCnet](https://atmosphere.ei.tum.de/). Versions 1 to 3 of Pyra have been experimental tools improved internally since 2016.
 
 <img src='/img/docs/muccnet-image-roof.jpg' className='tw-mb-2 tw-rounded-lg' />
 
@@ -43,10 +43,13 @@ This documentation page serves as a guide for both users and developers. By user
 -   How [the repository is organized](/docs/developer-guide/repository-organization)
 -   How [testing and continuous integration](/docs/developer-guide/testing-and-ci) is set up
 
-The [contact section](/docs/intro/contact) contains author and contact information, as well as ways to report bugs and suggest new features.
+The [contact section](/docs/intro/contact) contains author and contact information and ways to report bugs and suggest new features.
 
 :::info
 
-This documentation is **not an API reference**. Pyra 4's code is statically typed, and all functions contain doc strings - hence, the API reference is in the codebase itself. The developer guide serves as a high-level intro to the codebase structure.
+Pyra 4 is _not_ built to be imported as a library but rather to be run as a standalone program. The desired way to interact with Pyra 4 programmatically
+is via the CLI.
+
+If you want to extend Pyra 4 itself, the developer guide serves as a high-level introduction to the codebase structure. All code is statically typed, and all functions contain doc strings.
 
 :::

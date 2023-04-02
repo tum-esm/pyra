@@ -7,7 +7,7 @@ hide_table_of_contents: true
 
 ## Install dependencies
 
-Dependency management is done using [Poetry](https://python-poetry.org). `poetry install` installs all dependencies in the currently activated interpreter environment.
+Dependency management uses [Poetry](https://python-poetry.org). `poetry install` installs all dependencies in the currently activated interpreter environment.
 
 ## Pyra Core
 
@@ -23,7 +23,7 @@ The start command will execute `python run-pyra-core.py` in a background process
 
 ## Upload/Helios threads
 
-In Pyra Core's regular operation, it will start and stop Upload and Helios in dedicated threads. These threads will write their output into the Core's log files. You can run these two threads in headless mode (without Pyra Core) and they will print all of their logs to the console:
+In Pyra Core's regular operation, it will start and stop Upload and Helios in dedicated threads. These threads will write their output into the Core's log files. You can run these two threads in headless mode (without Pyra Core), and they will print all of their logs to the console:
 
 ```bash
 python run-headless-helios-thread.py
