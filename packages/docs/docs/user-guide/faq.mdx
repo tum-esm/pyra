@@ -8,7 +8,7 @@ hide_table_of_contents: true
 
 ## Pyra Shows a `filelock._error.Timeout` Exception
 
-In theory it is possible that Pyra encounters a deadlock when reading state or log files - although we have never encountered it yet. The error message will say something like this:
+In theory, it is possible that Pyra encounters a deadlock when reading state or log files - although we have never encountered it yet. The error message will say something like this:
 
 ```
 filelock._error.Timeout: The file lock 'C:\Users\ga56fem\Downloads\pyra\pyra-4.0.6\config\.state.lock' could not be acquired.
@@ -18,6 +18,6 @@ You can use the CLI command `pyra-cli remove-filelocks` to resolve that.
 
 :::note
 
-We are using the python library `filelock` to enforce exclusive use of state- and log-files: There should not be two processes interacting with one of these files at the same time. This is necessary because we have at least 4 processes that work with these files: the CLI and the main-, upload- and helios-thread.
+We are using the python library `filelock` to enforce exclusive use of state- and log-files: There should not be two processes interacting with one of these files simultaneously. This is necessary because we have at least 4 processes that work with these files: the CLI and the main-, upload- and helios-thread.
 
 :::

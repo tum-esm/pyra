@@ -8,7 +8,7 @@ hide_table_of_contents: true
 
 ## OPUS
 
-We are using the `pywin32` Python library, which provides an interface to the [Windows DDE APIs](https://en.wikipedia.org/wiki/Dynamic_Data_Exchange). Pyra Core uses DDE to communicate with OPUS: Loading experiment files, starting and stopping macros, and stopping OPUS itself.
+We use the `pywin32` Python library, which provides an interface to the [Windows DDE APIs](https://en.wikipedia.org/wiki/Dynamic_Data_Exchange). Pyra Core uses DDE to communicate with OPUS: Loading experiment files, starting and stopping macros, and stopping OPUS itself.
 
 ```python
 import dde
@@ -36,7 +36,7 @@ We are working on improving the reliability of that connection: https://github.c
 
 ## CamTracker
 
-The `CamTrackerConfig.txt` file contains coordinates that Pyra Core uses in its Astronomy utility class. The coordinates can be found by looking for the `$1` mark inside the file:
+The `CamTrackerConfig.txt` file contains geographical coordinates Pyra Core uses in its Astronomy utility class. The coordinates can be found by looking for the `$1` mark inside the file:
 
 ```
 ...
@@ -49,7 +49,7 @@ $1
 ...
 ```
 
-The `LEARN_Az_Elev.dat` file contains CamTracker's logs about mirror position and currently estimated sun position. Example:
+The `LEARN_Az_Elev.dat` file contains CamTracker's logs about the mirror position and the currently estimated sun position. Example:
 
 ```dat
 Julian Date, Tracker Elevation, Tracker Azimuth, Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px
@@ -61,7 +61,7 @@ Julian Date, Tracker Elevation, Tracker Azimuth, Elev Offset from Astro, Az Offs
  ...
 ```
 
-The `SunIntensity.dat` file contains CamTracker's own evaluation of the sun conditions. This is currently not used in Pyra Core, but might be in the future. Example:
+The `SunIntensity.dat` file contains CamTracker's own evaluation of the sun conditions. This is currently not used in Pyra Core, but it might be in the future. Example:
 
 ```dat
 Julian Date, Date UTC[yyyy/MM/dd HH:mm:ss], Intensity[px*ms], big and small obj good
@@ -73,7 +73,7 @@ Julian Date, Date UTC[yyyy/MM/dd HH:mm:ss], Intensity[px*ms], big and small obj 
  ...
 ```
 
-When stopping CamTracker, we have to add a `stop.txt` inside CamTracker's code directory and the application will shut down gracefully.
+When stopping CamTracker, we have to add a `stop.txt` inside CamTracker's code directory, and the application will shut down gracefully.
 
 ## TUM PLC
 

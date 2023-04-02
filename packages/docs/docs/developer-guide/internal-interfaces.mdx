@@ -13,7 +13,7 @@ The config file under `config/config.json` contains all parameters to tweak Pyra
 ```typescript
 export type config = {
     general: {
-        version: '4.0.5';
+        version: '4.0.7';
         seconds_per_core_interval: number;
         test_mode: boolean;
         station_id: string;
@@ -181,7 +181,7 @@ type persistentCoreState = {
 
 :::info
 
-With `pyra-cli config get` only the schema will be validated, not the value rules. This is because the GUI can deal with invalid values, but not with an invalid schema.
+With `pyra-cli config get`, only the schema will be validated, not the value rules. This command is necessary because the UI can deal with invalid values, but not with an invalid schema.
 
 :::
 
@@ -216,7 +216,7 @@ Messages from all log levels can be found in `logs/debug.log`, and messages from
 
 ## Activity Log
 
-_Pyra Core_ will write important events to "activity logs" stored in `logs/activity/activity-YYYY-MM-DD.json`. This is duplicate information as in the regular log files, but significantly easier to parse.
+_Pyra Core_ will write important events to "activity logs" stored in `logs/activity/activity-YYYY-MM-DD.json`. This is the same information as in the regular log files but significantly easier to parse.
 
 ```typescript
 export type activityHistory = {
@@ -233,4 +233,4 @@ export type activityHistory = {
 
 ## Pyra CLI commands from UI
 
-All write operations from the UI (update config, etc.) are done by running Pyra CLI commands. This is the reason why we have to use the global Python interpreter instead of a virtual environment: We did not make it work that the [shell interface from Tauri](https://tauri.app/v1/api/js/modules/shell) can make use of a virtual environment.
+All write operations from the UI (update config, etc.) are done by running Pyra CLI commands. This is why we have to use the global Python interpreter instead of a virtual environment: We did not make it work that the [shell interface from Tauri](https://tauri.app/v1/api/js/modules/shell) can make use of a virtual environment.
