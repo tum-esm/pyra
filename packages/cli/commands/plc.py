@@ -1,3 +1,5 @@
+"""Interact with the PLC that controls the enclosure hardware."""
+
 import json
 import time
 from typing import Callable, Optional
@@ -19,7 +21,7 @@ def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
-def get_plc_interface() -> Optional[interfaces.PLCInterface]:
+def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
     config = interfaces.ConfigInterface.read()
     plc_interface = None
 
@@ -40,7 +42,7 @@ def get_plc_interface() -> Optional[interfaces.PLCInterface]:
 @click.command(help="Read current state from plc.")
 @click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
 def _read(no_indent: bool) -> None:
-    plc_interface = get_plc_interface()
+    plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_readings = plc_interface.read()
         _print_green(json.dumps(plc_readings, indent=(None if no_indent else 2)))
@@ -49,7 +51,7 @@ def _read(no_indent: bool) -> None:
 
 @click.command(help="Run plc function 'reset()'")
 def _reset() -> None:
-    plc_interface = get_plc_interface()
+    plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_interface.reset()
 
@@ -97,7 +99,7 @@ def wait_until_cover_is_at_angle(
 @click.command(help="Run plc function 'move_cover()'")
 @click.argument("angle")
 def _set_cover_angle(angle: str) -> None:
-    plc_interface = get_plc_interface()
+    plc_interface = _get_plc_interface()
     if plc_interface is not None:
         new_cover_angle = int("".join([c for c in str(angle) if c.isnumeric() or c == "."]))
         assert (new_cover_angle == 0) or (
@@ -131,7 +133,7 @@ def enable_user_control_in_config() -> None:
 def _close_cover() -> None:
     enable_user_control_in_config()
 
-    plc_interface = get_plc_interface()
+    plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_interface.set_sync_to_tracker(False)
         plc_interface.set_manual_control(True)
@@ -143,11 +145,11 @@ def _close_cover() -> None:
         plc_interface.disconnect()
 
 
-def set_boolean_plc_state(
+def _set_boolean_plc_state(
     state: str,
     get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool], None]],
 ) -> None:
-    plc_interface = get_plc_interface()
+    plc_interface = _get_plc_interface()
     if plc_interface is not None:
         assert state in ["true", "false"], 'state has to be either "true" or "false"'
         get_setter_function(plc_interface)(state == "true")
@@ -158,43 +160,43 @@ def set_boolean_plc_state(
 @click.command(help="Run plc function 'set_sync_to_tracker()'")
 @click.argument("state")
 def _set_sync_to_tracker(state: str) -> None:
-    set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
+    _set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
 
 
 @click.command(help="Run plc function 'set_auto_temperature()'")
 @click.argument("state")
 def _set_auto_temperature(state: str) -> None:
-    set_boolean_plc_state(state, lambda p: p.set_auto_temperature)
+    _set_boolean_plc_state(state, lambda p: p.set_auto_temperature)
 
 
 @click.command(help="Run plc function 'set_power_heater()'")
 @click.argument("state")
 def _set_heater_power(state: str) -> None:
-    set_boolean_plc_state(state, lambda p: p.set_power_heater)
+    _set_boolean_plc_state(state, lambda p: p.set_power_heater)
 
 
 @click.command(help="Run plc function 'set_power_heater()'")
 @click.argument("state")
 def _set_camera_power(state: str) -> None:
-    set_boolean_plc_state(state, lambda p: p.set_power_camera)
+    _set_boolean_plc_state(state, lambda p: p.set_power_camera)
 
 
 @click.command(help="Run plc function 'set_power_router()'")
 @click.argument("state")
 def _set_router_power(state: str) -> None:
-    set_boolean_plc_state(state, lambda p: p.set_power_router)
+    _set_boolean_plc_state(state, lambda p: p.set_power_router)
 
 
 @click.command(help="Run plc function 'set_power_spectrometer()'")
 @click.argument("state")
 def _set_spectrometer_power(state: str) -> None:
-    set_boolean_plc_state(state, lambda p: p.set_power_spectrometer)
+    _set_boolean_plc_state(state, lambda p: p.set_power_spectrometer)
 
 
 @click.command(help="Run plc function 'set_power_computer()'")
 @click.argument("state")
 def _set_computer_power(state: str) -> None:
-    set_boolean_plc_state(state, lambda p: p.set_power_computer)
+    _set_boolean_plc_state(state, lambda p: p.set_power_computer)
 
 
 @click.group()

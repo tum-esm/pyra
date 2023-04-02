@@ -11,8 +11,11 @@ _IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios")
 
 
 class HeliosImageProcessing:
+    """Class for processing images from the Helios camera.
 
-    # circle code adapted from https://stackoverflow.com/a/39074620/8255842
+    See https://pyra.esm.ei.tum.de/docs/user-guide/tum-plc-and-helios#what-does-helios-do
+    for more information on Helios."""
+
     @staticmethod
     def _get_circle_mask(
         img_shape: tuple[int, int],
@@ -24,15 +27,22 @@ class HeliosImageProcessing:
         input: image width/height, circle radius/center_x/center_y
 
         output: binary mask (2D array) like
-        [[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-        [0 0 0 0 0 0 1 1 1 1 1 0 0 0 0 0]
-        [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0]
-        [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0]
-        [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0]
-        [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0]
-        [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0]
-        [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0]
-        [0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0]]
+
+        ```
+        [
+            [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0],
+            [0 0 0 0 0 0 1 1 1 1 1 0 0 0 0 0],
+            [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0],
+            [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0],
+            [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0],
+            [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0],
+            [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0],
+            [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0],
+            [0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0]
+        ]
+        ```
+
+        This code was adapted from https://stackoverflow.com/a/39074620/8255842.
         """
 
         y, x = np.indices(img_shape)
@@ -115,9 +125,14 @@ class HeliosImageProcessing:
 
     @staticmethod
     def add_markings_to_image(
-        img: cv.Mat, edge_fraction: float, circle_cx: int, circle_cy: int, circle_r: int
+        img: cv.Mat,
+        edge_fraction: float,
+        circle_cx: int,
+        circle_cy: int,
+        circle_r: int,
     ) -> cv.Mat:
-        """Put text for edge fraction and mark circles in image"""
+        """Put text for edge fraction and mark circles in image."""
+
         img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
         img = cv.circle(img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2)
         img = HeliosImageProcessing.add_text_to_image(img, f"{round(edge_fraction * 100, 2)}%")
@@ -125,9 +140,12 @@ class HeliosImageProcessing:
 
     @staticmethod
     def add_text_to_image(
-        img: cv.Mat, text: str, color: tuple[int, int, int] = (200, 0, 0)
+        img: cv.Mat,
+        text: str,
+        color: tuple[int, int, int] = (200, 0, 0),
     ) -> cv.Mat:
         """Put some text on the bottom left of an image"""
+
         cv.putText(
             img,
             text=text,
@@ -153,7 +171,7 @@ class HeliosImageProcessing:
         4. Determine edges in image (canny edge filter)
         5. Only consider edges inside 0.9 * circleradius
 
-        Returns the "edge pixel fraction"
+        Returns the "edge pixel fraction".
         """
 
         # transform image from 1280x720 to 640x360

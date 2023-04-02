@@ -1,12 +1,12 @@
 import os
 import time
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from packages.core import types, utils, interfaces, modules, threads
 
 logger = utils.Logger(origin="main")
 
 
-def update_exception_state(
+def _update_exception_state(
     config: types.ConfigDict, current_exceptions: list[str], new_exception: Optional[Exception]
 ) -> list[str]:
     """
@@ -48,11 +48,27 @@ def update_exception_state(
 
 
 def run() -> None:
+    """The entrypoint of PYRA Core.
+
+    This function infinitely loops over a sequence of modules:
+
+    1. Read the config
+    2. Check whether `HeliosThread` and `UploadThread` are running
+    3. Possibly start/stop the threads according to the config
+    4. Run `MeasurementConditions` module
+    5. Run `EnclosureControl` module
+    6. Run `SunTracking` module
+    7. Run `OpusMeasurement` module
+    8. Run `SystemChecks` module
+
+    The mainloop logs all exceptions and sends out emails when new exceptions
+    occur and when all exceptions have been resolved.
+
+    **Terminology:** modules are executed one by one in each mainloop iteration.
+    Threads are executed in parallel to the mainloop and are started/stopped
+    according to the config.
     """
-    The mainloop of PYRA Core. This function will loop infinitely.
-    It loads the config file, validates it runs every module one by
-    one, and possibly restarts the upload- and helios-thread.
-    """
+
     interfaces.StateInterface.initialize()
     logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
 
@@ -69,7 +85,7 @@ def run() -> None:
 
     # these modules will be executed one by one in each
     # mainloop iteration
-    mainloop_modules: Any = [
+    mainloop_modules: list[Any] = [
         modules.measurement_conditions.MeasurementConditions(config),
         modules.enclosure_control.EnclosureControl(config),
         modules.sun_tracking.SunTracking(config),
@@ -121,7 +137,7 @@ def run() -> None:
         # update the list of currently present exceptions
         # send error emails on new exceptions, send resolved
         # emails when no errors are present anymore
-        current_exceptions = update_exception_state(config, current_exceptions, new_exception)
+        current_exceptions = _update_exception_state(config, current_exceptions, new_exception)
 
         # wait rest of loop time
         logger.info("Ending iteration")

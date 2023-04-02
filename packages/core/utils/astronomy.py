@@ -5,7 +5,13 @@ import astropy.units as astropy_units
 from packages.core import types
 
 
+# TODO: replace this with a better library
+
+
 class Astronomy:
+    """Provides a method to compute the current sun elevation
+    based on the coordinates from the CamTracker config file."""
+
     CONFIG: Optional[types.ConfigDict] = None
     units = astropy_units
 

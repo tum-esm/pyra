@@ -203,8 +203,7 @@ class _Helios:
 
 
 class HeliosThread:
-    """
-    Thread for determining the current sun conditions in a
+    """Thread for determining the current sun conditions in a
     parallel mainloop.
 
     "Good" sun conditions with respect to EM27 measurements

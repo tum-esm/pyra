@@ -274,11 +274,12 @@ class DirectoryUploadClient:
 
 
 class UploadThread:
-    """
-    Thread for uploading all interferograms from a specific
-    directory to a server via SSH. The local files will only
-    be removed (optional) if the files on the server generate
-    the same MD5 checksum as the local files.
+    """Thread for uploading all interferograms from a
+    specific directory to a server via SSH.
+
+    The local files will only be removed (optional) if the
+    files on the server generate the same MD5 checksum as
+    the local files.
 
     The source directory where OPUS puts the interferograms
     can be configured with config.upload.src_directory_ifgs.

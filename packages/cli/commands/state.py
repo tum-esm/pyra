@@ -1,3 +1,5 @@
+"""Read the current state.json file."""
+
 import json
 import click
 import os

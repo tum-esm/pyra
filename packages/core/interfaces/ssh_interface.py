@@ -6,6 +6,21 @@ import fabric.connection, fabric.transfer
 
 
 class SSHInterface:
+    """Provides a context manager to establish a SSH connection to the
+    upload server.
+
+    Example Usage:
+
+    ```python
+    with SSHInterface.use(config) as (connection, transfer_process):
+        transfer_process.put(
+            local="local/path/to/file",
+            remote="remote/path/to/file",
+        )
+        connection.run("command")
+    ```
+    """
+
     @staticmethod
     class ConnectionError(Exception):
         """raised when SSH connection could not be established"""

@@ -18,16 +18,25 @@ hide_table_of_contents: true
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/ssh_interface.py#L8" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `SSHInterface`
+Provides a context manager to establish a SSH connection to the upload server. 
 
+Example Usage: 
 
-
+```python
+with SSHInterface.use(config) as (connection, transfer_process):
+     transfer_process.put(
+         local="local/path/to/file",
+         remote="remote/path/to/file",
+     )
+     connection.run("command")
+``` 
 
 
 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/core/interfaces/ssh_interface/use#L13" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/core/interfaces/ssh_interface/use#L28" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `use`
 

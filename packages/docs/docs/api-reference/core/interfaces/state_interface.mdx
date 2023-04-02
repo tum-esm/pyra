@@ -18,26 +18,11 @@ hide_table_of_contents: true
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L73" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `StateInterface`
+Use JSON files to communicate state between different parts of Pyra Core, and between Core and CLI/UI. 
 
+The `runtime-data/state.json` file will be cleared with every restart of PYRA Core. The `logs/persistent-state.json` will only be created, when it does not exist yet. 
 
-
-
-
-
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L74" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `initialize`
-
-```python
-initialize() → None
-```
-
-This will create two files: 
-
-1. runtime-data/state.json: 
+`runtime-data/state.json`: 
 
 ```json
 {
@@ -48,7 +33,7 @@ This will create two files:
 }
 ``` 
 
-2. logs/persistent-state.json: 
+`logs/persistent-state.json`: 
 
 ```json
 {
@@ -57,11 +42,24 @@ This will create two files:
 }
 ``` 
 
-The state.json file will be cleared with every restart of PYRA Core. The persistent-state.json will only be created, when it does not exist yet. 
+
+
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L119" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L101" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `initialize`
+
+```python
+initialize() → None
+```
+
+Clear `state.json`, create empty `prersistent-state.json` if it does not exist yet. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L121" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `read`
 
@@ -73,7 +71,7 @@ Read the state file and return its content
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L139" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L141" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `read_persistent`
 
@@ -85,7 +83,7 @@ Read the persistent state file and return its content
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L145" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L147" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `read_persistent_without_filelock`
 
@@ -97,7 +95,7 @@ Read the persistent state file and return its content
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L125" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L127" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `read_without_filelock`
 
@@ -109,7 +107,7 @@ Read the state file and return its content
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L159" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L161" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `update`
 
@@ -121,7 +119,7 @@ Update the (persistent) state file and return its content. The update object sho
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L172" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L173" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `update_persistent`
 

@@ -12,18 +12,23 @@ _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 
 
-def get_pyra_version() -> str:
+def _get_pyra_version() -> str:
     """Get the current PYRA version from the UI's package.json file"""
+
     with open(os.path.join(_PROJECT_DIR, "packages", "ui", "package.json")) as f:
         pyra_version: str = json.load(f)["version"]
     assert pyra_version.startswith("4.")
     return pyra_version
 
 
-def get_commit_sha() -> Optional[str]:
+# TODO: get rid of commit sha
+
+
+def _get_commit_sha() -> Optional[str]:
     """Get the current commit sha of the PYRA codebase
     Returns None if git is not installed or directory is
     a git repository."""
+
     commit_sha_process = subprocess.run(
         ["git", "rev-parse", "--verify", "HEAD", "--short"],
         stdout=subprocess.PIPE,
@@ -40,10 +45,10 @@ def get_commit_sha() -> Optional[str]:
         return None
 
 
-def get_current_log_lines() -> list[str]:
+def _get_current_log_lines() -> list[str]:
     """Get the log line from the current info.log file. Only
-    returns the log lines from the latest two iterations.
-    """
+    returns the log lines from the latest two iterations."""
+
     with open(f"{_PROJECT_DIR}/logs/info.log") as f:
         latest_log_lines = f.readlines()
 
@@ -60,9 +65,20 @@ def get_current_log_lines() -> list[str]:
     return log_lines_in_email[::-1]
 
 
+# TODO: make SMTP server configurable
+
+
 class ExceptionEmailClient:
+    """Provide functionality to send emails when an exception
+    occurs/is resolved."""
+
     @staticmethod
-    def _send_email(config: types.ConfigDict, text: str, html: str, subject: str) -> None:
+    def _send_email(
+        config: types.ConfigDict,
+        text: str,
+        html: str,
+        subject: str,
+    ) -> None:
         sender_email = config["error_email"]["sender_address"]
         sender_password = config["error_email"]["sender_password"]
         recipients = config["error_email"]["recipients"].replace(" ", "").split(",")
@@ -86,12 +102,12 @@ class ExceptionEmailClient:
 
     @staticmethod
     def handle_resolved_exception(config: types.ConfigDict) -> None:
-        """Send out an email that all exceptions have been resolved
-        on this station."""
+        """Send out an email that all exceptions have been resolved."""
+
         if not config["error_email"]["notify_recipients"]:
             return
 
-        current_log_lines = get_current_log_lines()
+        current_log_lines = _get_current_log_lines()
 
         logs = "".join(current_log_lines)
         pre_tag = '<pre style="background-color: #f1f5f9; color: #334155; padding: 8px 8px 12px 12px; border-radius: 3px; max-width: full; overflow-x: scroll;">'
@@ -123,14 +139,14 @@ class ExceptionEmailClient:
 
     @staticmethod
     def handle_occured_exception(config: types.ConfigDict, exception: Exception) -> None:
-        """Send out an email that a new exception has occured
-        on this station."""
+        """Send out an email that a new exception has occured."""
+
         if not config["error_email"]["notify_recipients"]:
             return
 
-        pyra_version = get_pyra_version()
-        commit_sha = get_commit_sha()
-        current_log_lines = get_current_log_lines()
+        pyra_version = _get_pyra_version()
+        commit_sha = _get_commit_sha()
+        current_log_lines = _get_current_log_lines()
 
         tb = "\n".join(traceback.format_exception(exception))
         logs = "".join(current_log_lines)

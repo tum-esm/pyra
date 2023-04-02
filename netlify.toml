@@ -1,4 +1,4 @@
 [build]
   base = "packages/docs/"
   publish = "build"
-  command = "pwd && ls -lahg . && ls -lahg .. && yarn build"
+  command = "yarn build"

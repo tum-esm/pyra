@@ -17,19 +17,21 @@ logger = utils.Logger(origin="opus-measurement")
 
 
 class OpusMeasurement:
-    """OPUS Measurements manages the FTIR spectrometer measurement software OPUS. It allows to
-    remotely communicate with OPUS via a DDE connection and trigger different commands.
+    """OPUS Measurements manages the FTIR spectrometer measurement software
+    OPUS. It allows to remotely communicate with OPUS via a DDE connection
+    and trigger different commands.
 
-    OPUS needs an experiment file and can perform continious measurements with parameters passed
-    by a macro file. These files can be loaded via commands over the active DDE connection.
+    OPUS needs an experiment file and can perform continious measurements
+    with parameters passed by a macro file. These files can be loaded via
+    commands over the active DDE connection.
 
-    During the day it makes sure that OPUS up and running and reloads the latest experiment if it
-    was changed by the operator. During night OPUS is shut down to reset after a full day of
-    measurements. Day and night is defined by the set sun angle in the config.
+    During the day it makes sure that OPUS up and running and reloads the
+    latest experiment if it was changed by the operator. During night OPUS
+    is shut down to reset after a full day of measurements. Day and night
+    is defined by the set sun angle in the config.
 
-    OPUSMeasurement will start and stop Macros according to the current value of StateInterface:
-    measurements_should_be_running.
-    """
+    OPUSMeasurement will start and stop Macros according to the current
+    value of StateInterface: measurements_should_be_running."""
 
     def __init__(self, initial_config: types.ConfigDict):
         self._CONFIG = initial_config
