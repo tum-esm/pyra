@@ -29,6 +29,10 @@
     --ifm-footer-background-color: #0f172a;
 }
 
+.pagination-nav {
+    --ifm-spacing-horizontal: 1rem;
+}
+
 .pagination-nav__link {
     @apply tw-border tw-border-slate-300 tw-shadow;
 }
