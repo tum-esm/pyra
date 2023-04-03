@@ -14,7 +14,7 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L198" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L461" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>function</kbd> `validate_config_dict`
 
@@ -36,9 +36,15 @@ This should always be used when loading the object from a JSON file!
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L6" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `TimeDict`
+TypedDict: 
 
-
-
+```ts
+{
+     hour: int;
+     minute: int;
+     second: int;
+}
+``` 
 
 
 
@@ -46,12 +52,10 @@ This should always be used when loading the object from a JSON file!
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L12" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L23" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `TimeDictPartial`
-
-
-
+TypedDict: like `TimeDict`, but all fields are optional. 
 
 
 
@@ -59,12 +63,10 @@ This should always be used when loading the object from a JSON file!
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L18" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L31" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `ConfigSubDicts`
-
-
-
+Class that contains TypedDicts for sections of the config file. 
 
 
 
@@ -72,12 +74,104 @@ This should always be used when loading the object from a JSON file!
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L167" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L328" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `ConfigDict`
+TypedDict: 
 
+```ts
+{
+     general: {
+         version: "4.0.7";
+         seconds_per_core_interval: float;
+         test_mode: bool;
+         station_id: str;
+         min_sun_elevation: float;
+     },
+     opus: {
+         em27_ip: str;
+         executable_path: str;
+         experiment_path: str;
+         macro_path: str;
+         username: str;
+         password: str;
+     },
+     camtracker: {
+         config_path: str;
+         executable_path: str;
+         learn_az_elev_path: str;
+         sun_intensity_path: str;
+         motor_offset_threshold: float;
+     },
+     error_email: {
+         sender_address: str;
+         sender_password: str;
+         notify_recipients: bool;
+         recipients: str;
+     },
+     measurement_decision: {
+         mode: "automatic" | "manual" | "cli";
+         manual_decision_result: bool;
+         cli_decision_result: bool;
+     },
+     measurement_triggers: {
+         consider_time: bool;
+         consider_sun_elevation: bool;
+         consider_helios: bool;
+         start_time: {
+             hour: int;
+             minute: int;
+             second: int;
+         };
+         stop_time: {
+             hour: int;
+             minute: int;
+             second: int;
+         };
+         min_sun_elevation: float;
+     },
+     tum_plc: null | {
+         ip: str;
+         version: 1 | 2;
+         controlled_by_user: bool;
+     },
+     helios: null | {
+         camera_id: int;
+         evaluation_size: int;
+         seconds_per_interval: float;
+         edge_detection_threshold: float;
+         save_images: bool;
+     },
+     upload: null | {
+         host: str;
+         user: str;
+         password: str;
+         upload_ifgs: bool;
+         src_directory_ifgs: str;
+         dst_directory_ifgs: str;
+         remove_src_ifgs_after_upload: bool;
+         upload_helios: bool;
+         dst_directory_helios: str;
+         remove_src_helios_after_upload: bool;
+     },
+}
+``` 
 
+Or expressed using `ConfigSubDicts`: 
 
+```ts
+{
+     general: ConfigSubDicts.General;
+     opus: ConfigSubDicts.Opus;
+     camtracker: ConfigSubDicts.Camtracker;
+     error_email: ConfigSubDicts.ErrorEmail;
+     measurement_decision: ConfigSubDicts.MeasurementDecision;
+     measurement_triggers: ConfigSubDicts.MeasurementTriggers;
+     tum_plc: null | ConfigSubDicts.TumPlc;
+     helios: null | ConfigSubDicts.Helios;
+     upload: null | ConfigSubDicts.Upload;
+}
+``` 
 
 
 
@@ -85,12 +179,10 @@ This should always be used when loading the object from a JSON file!
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L179" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L437" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `ConfigDictPartial`
-
-
-
+TypedDict: like `ConfigDict`, but all fields are optional. 
 
 
 
@@ -98,7 +190,7 @@ This should always be used when loading the object from a JSON file!
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L191" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L451" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `ValidationError`
 Will be raised in any custom checks on config dicts have failed: file-existence, ip-format, min/max-range 

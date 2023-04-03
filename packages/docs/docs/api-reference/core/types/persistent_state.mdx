@@ -14,7 +14,7 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/persistent_state.py#L15" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/persistent_state.py#L27" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>function</kbd> `validate_persistent_state_dict`
 
@@ -32,9 +32,14 @@ This should always be used when loading the object from a JSON file!
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/persistent_state.py#L5" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PersistentStateDict`
+TypedDict: 
 
-
-
+```ts
+{
+     active_opus_macro_id: number | null,
+     current_exceptions: string[]
+}
+``` 
 
 
 
@@ -42,12 +47,10 @@ This should always be used when loading the object from a JSON file!
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/persistent_state.py#L10" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/persistent_state.py#L20" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PersistentStateDictPartial`
-
-
-
+TypedDict: like `PersistentStateDict`, but all fields are optional. 
 
 
 
