@@ -18,9 +18,48 @@ hide_table_of_contents: true
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_state.py#L90" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PlcStateDict`
+TypeDict: 
 
-
-
+```ts
+{
+     last_read_time: string | null,
+     actors: {
+         fan_speed: number | null,
+         current_angle: number | null
+     },
+     control: {
+         auto_temp_mode: boolean | null,
+         manual_control: boolean | null,
+         manual_temp_mode: boolean | null,
+         sync_to_tracker: boolean | null
+     },
+     sensors: {
+         humidity: number | null,
+         temperature: number | null
+     },
+     state: {
+         cover_closed: boolean | null,
+         motor_failed: boolean | null,
+         rain: boolean | null,
+         reset_needed: boolean | null,
+         ups_alert: boolean | null
+     },
+     power: {
+         camera: boolean | null,
+         computer: boolean | null,
+         heater: boolean | null,
+         router: boolean | null,
+         spectrometer: boolean | null
+     },
+     connections: {
+         camera: boolean | null,
+         computer: boolean | null,
+         heater: boolean | null,
+         router: boolean | null,
+         spectrometer: boolean | null
+     }
+}
+``` 
 
 
 
@@ -28,12 +67,10 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_state.py#L100" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_state.py#L144" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PlcStateDictPartial`
-
-
-
+TypedDict: like `PlcStateDict`, but all fields are optional. 
 
 
 

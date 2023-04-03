@@ -18,9 +18,13 @@ hide_table_of_contents: true
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L12" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `with_filelock`
-TO BE REMOVED IN 4.0.8: Pyra will use `with_filelock` from `tum_esm_utils` instead. 
+Decorator that wraps a semaphor around a function. 
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L16" className="SourceCodeLinkBadge">source code</a>
+FileLock = Mark, that a file is being used and other programs should not interfere. A file "*.lock" will be created and the content of this file will make the wrapped function possibly wait until other programs are done using it. 
+
+See https://en.wikipedia.org/wiki/Semaphore_(programming) 
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/with_filelock.py#L23" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 

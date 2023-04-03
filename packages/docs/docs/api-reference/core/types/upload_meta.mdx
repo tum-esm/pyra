@@ -14,7 +14,7 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/upload_meta.py#L19" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/upload_meta.py#L33" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>function</kbd> `validate_upload_meta_dict`
 
@@ -32,9 +32,16 @@ This should always be used when loading the object from a JSON file!
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/upload_meta.py#L5" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `UploadMetaDict`
+TypedDict: 
 
-
-
+```ts
+{
+     complete: boolean,
+     fileList: string[],
+     createdTime: number,
+     lastModifiedTime: number
+}
+``` 
 
 
 
@@ -42,12 +49,10 @@ This should always be used when loading the object from a JSON file!
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/upload_meta.py#L12" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/upload_meta.py#L24" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `UploadMetaDictPartial`
-
-
-
+TypedDict: like `UploadMetaDict`, but all fields are optional. 
 
 
 
