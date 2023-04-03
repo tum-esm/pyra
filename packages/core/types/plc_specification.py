@@ -46,6 +46,54 @@ class _PlcSpecificationDictConnections(TypedDict):
 
 
 class PlcSpecificationDict(TypedDict):
+    """TypedDict:
+
+    ```ts
+    {
+        actors: {
+            current_angle: number[],
+            fan_speed: number[],
+            move_cover: number[],
+            nominal_angle: number[]
+        },
+        control: {
+            auto_control: number[],
+            auto_temp_mode: number[],
+            manual_control: number[],
+            manual_temp_mode: number[],
+            reset: number[],
+            sync_to_tracker: number[]
+        },
+        sensors: {
+            angle: number[],
+            humidity: number[],
+            temperature: number[]
+        },
+        state: {
+            cover_closed: number[],
+            motor_failed: number[],
+            rain: number[],
+            reset_needed: number[],
+            ups_alert: number[]
+        },
+        power: {
+            camera: number[],
+            computer: number[],
+            heater: number[],
+            router: number[],
+            spectrometer: number[]
+        },
+        connections: {
+            camera: number[],
+            computer: number[],
+            heater: number[],
+            router: number[],
+            spectrometer: number[]
+        }
+    }
+    ```
+    """
+
     actors: _PlcSpecificationDictActors
     control: _PlcSpecificationDictControl
     sensors: _PlcSpecificationDictSensors

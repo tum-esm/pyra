@@ -3,11 +3,23 @@ from typing import Any, Optional, TypedDict
 
 
 class PersistentStateDict(TypedDict):
+    """TypedDict:
+
+    ```ts
+    {
+        active_opus_macro_id: number | null,
+        current_exceptions: string[]
+    }
+    ```
+    """
+
     active_opus_macro_id: Optional[int]
     current_exceptions: list[str]
 
 
 class PersistentStateDictPartial(TypedDict, total=False):
+    """TypedDict: like `PersistentStateDict`, but all fields are optional."""
+
     active_opus_macro_id: Optional[int]
     current_exceptions: list[str]
 

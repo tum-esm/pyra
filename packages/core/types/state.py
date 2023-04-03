@@ -11,6 +11,23 @@ class _OSStateDict(TypedDict):
 
 
 class StateDict(TypedDict):
+    """TypedDict:
+
+    ```ts
+    {
+        helios_indicates_good_conditions: boolean | null,
+        measurements_should_be_running: boolean,
+        enclosure_plc_readings: PlcStateDict,
+        os_state: {
+            cpu_usage: number[] | null,
+            memory_usage: number | null,
+            last_boot_time: string | null,
+            filled_disk_space_fraction: number | null
+        }
+    }
+    ```
+    """
+
     helios_indicates_good_conditions: Optional[bool]
     measurements_should_be_running: bool
     enclosure_plc_readings: PlcStateDict
@@ -18,6 +35,8 @@ class StateDict(TypedDict):
 
 
 class StateDictPartial(TypedDict, total=False):
+    """TypedDict: like `StateDict`, but all fields are optional."""
+
     helios_indicates_good_conditions: Optional[int]
     measurements_should_be_running: bool
     enclosure_plc_readings: Union[PlcStateDict, PlcStateDictPartial]

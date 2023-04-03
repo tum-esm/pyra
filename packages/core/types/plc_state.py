@@ -88,6 +88,50 @@ class _PlcStateDictConnectionsPartial(TypedDict, total=False):
 
 
 class PlcStateDict(TypedDict):
+    """TypeDict:
+
+    ```ts
+    {
+        last_read_time: string | null,
+        actors: {
+            fan_speed: number | null,
+            current_angle: number | null
+        },
+        control: {
+            auto_temp_mode: boolean | null,
+            manual_control: boolean | null,
+            manual_temp_mode: boolean | null,
+            sync_to_tracker: boolean | null
+        },
+        sensors: {
+            humidity: number | null,
+            temperature: number | null
+        },
+        state: {
+            cover_closed: boolean | null,
+            motor_failed: boolean | null,
+            rain: boolean | null,
+            reset_needed: boolean | null,
+            ups_alert: boolean | null
+        },
+        power: {
+            camera: boolean | null,
+            computer: boolean | null,
+            heater: boolean | null,
+            router: boolean | null,
+            spectrometer: boolean | null
+        },
+        connections: {
+            camera: boolean | null,
+            computer: boolean | null,
+            heater: boolean | null,
+            router: boolean | null,
+            spectrometer: boolean | null
+        }
+    }
+    ```
+    """
+
     last_read_time: Optional[str]
     actors: _PlcStateDictActors
     control: _PlcStateDictControl
@@ -98,6 +142,8 @@ class PlcStateDict(TypedDict):
 
 
 class PlcStateDictPartial(TypedDict, total=False):
+    """TypedDict: like `PlcStateDict`, but all fields are optional."""
+
     last_read_time: Optional[str]
     actors: _PlcStateDictActorsPartial
     control: _PlcStateDictControlPartial

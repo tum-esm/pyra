@@ -4,20 +4,48 @@ from typing import Any, Callable, Literal, Optional, TypedDict
 
 
 class TimeDict(TypedDict):
+    """TypedDict:
+
+    ```ts
+    {
+        hour: int;
+        minute: int;
+        second: int;
+    }
+    ```
+    """
+
     hour: int
     minute: int
     second: int
 
 
 class TimeDictPartial(TypedDict, total=False):
+    """TypedDict: like `TimeDict`, but all fields are optional."""
+
     hour: int
     minute: int
     second: int
 
 
 class ConfigSubDicts:
+    """Class that contains TypedDicts for sections of the config file."""
+
     @staticmethod
     class General(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            version: "4.0.7";
+            seconds_per_core_interval: float;
+            test_mode: bool;
+            station_id: str;
+            min_sun_elevation: float;
+        }
+        ```
+        """
+
         version: Literal["4.0.7"]
         seconds_per_core_interval: float
         test_mode: bool
@@ -26,6 +54,9 @@ class ConfigSubDicts:
 
     @staticmethod
     class GeneralPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.General`, but all fields are
+        optional."""
+
         seconds_per_core_interval: float
         test_mode: bool
         station_id: str
@@ -33,6 +64,20 @@ class ConfigSubDicts:
 
     @staticmethod
     class Opus(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            em27_ip: str;
+            executable_path: str;
+            experiment_path: str;
+            macro_path: str;
+            username: str;
+            password: str;
+        }
+        ```
+        """
+
         em27_ip: str
         executable_path: str
         experiment_path: str
@@ -42,6 +87,9 @@ class ConfigSubDicts:
 
     @staticmethod
     class OpusPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.Opus`, but all fields are
+        optional."""
+
         em27_ip: str
         executable_path: str
         experiment_path: str
@@ -51,6 +99,19 @@ class ConfigSubDicts:
 
     @staticmethod
     class Camtracker(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            config_path: str;
+            executable_path: str;
+            learn_az_elev_path: str;
+            sun_intensity_path: str;
+            motor_offset_threshold: float;
+        }
+        ```
+        """
+
         config_path: str
         executable_path: str
         learn_az_elev_path: str
@@ -59,6 +120,9 @@ class ConfigSubDicts:
 
     @staticmethod
     class CamtrackerPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.Camtracker` but all fields
+        are optional."""
+
         config_path: str
         executable_path: str
         learn_az_elev_path: str
@@ -67,6 +131,18 @@ class ConfigSubDicts:
 
     @staticmethod
     class ErrorEmail(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            sender_address: str;
+            sender_password: str;
+            notify_recipients: bool;
+            recipients: str;
+        }
+        ```
+        """
+
         sender_address: str
         sender_password: str
         notify_recipients: bool
@@ -74,6 +150,9 @@ class ConfigSubDicts:
 
     @staticmethod
     class ErrorEmailPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.ErrorEmail` but all fields
+        are optional."""
+
         sender_address: str
         sender_password: str
         notify_recipients: bool
@@ -81,18 +160,46 @@ class ConfigSubDicts:
 
     @staticmethod
     class MeasurementDecision(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            mode: "automatic" | "manual" | "cli";
+            manual_decision_result: bool;
+            cli_decision_result: bool;
+        }
+        ```
+        """
+
         mode: Literal["automatic", "manual", "cli"]
         manual_decision_result: bool
         cli_decision_result: bool
 
     @staticmethod
     class MeasurementDecisionPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.MeasurementDecision` but
+        all fields are optional."""
+
         mode: Literal["automatic", "manual", "cli"]
         manual_decision_result: bool
         cli_decision_result: bool
 
     @staticmethod
     class MeasurementTriggers(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            consider_time: bool;
+            consider_sun_elevation: bool;
+            consider_helios: bool;
+            start_time: TimeDict;
+            stop_time: TimeDict;
+            min_sun_elevation: float;
+        }
+        ```
+        """
+
         consider_time: bool
         consider_sun_elevation: bool
         consider_helios: bool
@@ -102,6 +209,9 @@ class ConfigSubDicts:
 
     @staticmethod
     class MeasurementTriggersPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.MeasurementTriggers` but
+        all fields are optional."""
+
         consider_time: bool
         consider_sun_elevation: bool
         consider_helios: bool
@@ -111,18 +221,45 @@ class ConfigSubDicts:
 
     @staticmethod
     class TumPlc(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            ip: str;
+            version: 1 | 2;
+            controlled_by_user: bool;
+        }
+        ```
+        """
+
         ip: str
         version: Literal[1, 2]
         controlled_by_user: bool
 
     @staticmethod
     class TumPlcPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.TumPlc`, but all fields are
+        optional."""
+
         ip: str
         version: Literal[1, 2]
         controlled_by_user: bool
 
     @staticmethod
     class Helios(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            camera_id: int;
+            evaluation_size: int;
+            seconds_per_interval: float;
+            edge_detection_threshold: float;
+            save_images: bool;
+        }
+        ```
+        """
+
         camera_id: int
         evaluation_size: int
         seconds_per_interval: float
@@ -131,6 +268,9 @@ class ConfigSubDicts:
 
     @staticmethod
     class HeliosPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.Helios`, but all fields are
+        optional."""
+
         camera_id: int
         evaluation_size: int
         seconds_per_interval: float
@@ -139,6 +279,24 @@ class ConfigSubDicts:
 
     @staticmethod
     class Upload(TypedDict):
+        """TypedDict:
+
+        ```ts
+        {
+            host: str;
+            user: str;
+            password: str;
+            upload_ifgs: bool;
+            src_directory_ifgs: str;
+            dst_directory_ifgs: str;
+            remove_src_ifgs_after_upload: bool;
+            upload_helios: bool;
+            dst_directory_helios: str;
+            remove_src_helios_after_upload: bool;
+        }
+        ```
+        """
+
         host: str
         user: str
         password: str
@@ -152,6 +310,9 @@ class ConfigSubDicts:
 
     @staticmethod
     class UploadPartial(TypedDict, total=False):
+        """TypedDict: like `ConfigSubDicts.Upload`, but all fields are
+        optional."""
+
         host: str
         user: str
         password: str
@@ -165,6 +326,103 @@ class ConfigSubDicts:
 
 
 class ConfigDict(TypedDict):
+    """TypedDict:
+
+    ```ts
+    {
+        general: {
+            version: "4.0.7";
+            seconds_per_core_interval: float;
+            test_mode: bool;
+            station_id: str;
+            min_sun_elevation: float;
+        },
+        opus: {
+            em27_ip: str;
+            executable_path: str;
+            experiment_path: str;
+            macro_path: str;
+            username: str;
+            password: str;
+        },
+        camtracker: {
+            config_path: str;
+            executable_path: str;
+            learn_az_elev_path: str;
+            sun_intensity_path: str;
+            motor_offset_threshold: float;
+        },
+        error_email: {
+            sender_address: str;
+            sender_password: str;
+            notify_recipients: bool;
+            recipients: str;
+        },
+        measurement_decision: {
+            mode: "automatic" | "manual" | "cli";
+            manual_decision_result: bool;
+            cli_decision_result: bool;
+        },
+        measurement_triggers: {
+            consider_time: bool;
+            consider_sun_elevation: bool;
+            consider_helios: bool;
+            start_time: {
+                hour: int;
+                minute: int;
+                second: int;
+            };
+            stop_time: {
+                hour: int;
+                minute: int;
+                second: int;
+            };
+            min_sun_elevation: float;
+        },
+        tum_plc: null | {
+            ip: str;
+            version: 1 | 2;
+            controlled_by_user: bool;
+        },
+        helios: null | {
+            camera_id: int;
+            evaluation_size: int;
+            seconds_per_interval: float;
+            edge_detection_threshold: float;
+            save_images: bool;
+        },
+        upload: null | {
+            host: str;
+            user: str;
+            password: str;
+            upload_ifgs: bool;
+            src_directory_ifgs: str;
+            dst_directory_ifgs: str;
+            remove_src_ifgs_after_upload: bool;
+            upload_helios: bool;
+            dst_directory_helios: str;
+            remove_src_helios_after_upload: bool;
+        },
+    }
+    ```
+
+    Or expressed using `ConfigSubDicts`:
+
+    ```ts
+    {
+        general: ConfigSubDicts.General;
+        opus: ConfigSubDicts.Opus;
+        camtracker: ConfigSubDicts.Camtracker;
+        error_email: ConfigSubDicts.ErrorEmail;
+        measurement_decision: ConfigSubDicts.MeasurementDecision;
+        measurement_triggers: ConfigSubDicts.MeasurementTriggers;
+        tum_plc: null | ConfigSubDicts.TumPlc;
+        helios: null | ConfigSubDicts.Helios;
+        upload: null | ConfigSubDicts.Upload;
+    }
+    ```
+    """
+
     general: ConfigSubDicts.General
     opus: ConfigSubDicts.Opus
     camtracker: ConfigSubDicts.Camtracker
@@ -177,6 +435,8 @@ class ConfigDict(TypedDict):
 
 
 class ConfigDictPartial(TypedDict, total=False):
+    """TypedDict: like `ConfigDict`, but all fields are optional."""
+
     general: ConfigSubDicts.GeneralPartial
     opus: ConfigSubDicts.OpusPartial
     camtracker: ConfigSubDicts.CamtrackerPartial
@@ -193,6 +453,9 @@ class ValidationError(Exception):
     Will be raised in any custom checks on config dicts
     have failed: file-existence, ip-format, min/max-range
     """
+
+
+# TODO: fully use Pydantic for validation
 
 
 def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = False) -> None:
