@@ -70,7 +70,7 @@ def _reset() -> None:
         plc_interface.disconnect()
 
 
-def wait_until_cover_is_at_angle(
+def _wait_until_cover_is_at_angle(
     plc_interface: interfaces.PLCInterface, new_cover_angle: int, timeout: float = 15
 ) -> None:
     # waiting until cover is at this angle
@@ -110,14 +110,14 @@ def _set_cover_angle(angle: str) -> None:
         plc_interface.set_sync_to_tracker(False)
         plc_interface.set_cover_angle(new_cover_angle)
         plc_interface.set_manual_control(False)
-        wait_until_cover_is_at_angle(plc_interface, new_cover_angle)
+        _wait_until_cover_is_at_angle(plc_interface, new_cover_angle)
 
         _print_green("Ok")
         plc_interface.disconnect()
 
 
 @utils.with_filelock(_CONFIG_LOCK_PATH)
-def enable_user_control_in_config() -> None:
+def _enable_user_control_in_config() -> None:
     with open(_CONFIG_FILE_PATH, "r") as f:
         config = json.load(f)
     types.validate_config_dict(config)
@@ -131,7 +131,7 @@ def enable_user_control_in_config() -> None:
 
 @click.command(help="Run plc function 'force_cover_close()'")
 def _close_cover() -> None:
-    enable_user_control_in_config()
+    _enable_user_control_in_config()
 
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
@@ -139,7 +139,7 @@ def _close_cover() -> None:
         plc_interface.set_manual_control(True)
         plc_interface.set_cover_angle(0)
         plc_interface.set_manual_control(False)
-        wait_until_cover_is_at_angle(plc_interface, 0)
+        _wait_until_cover_is_at_angle(plc_interface, 0)
 
         _print_green("Ok")
         plc_interface.disconnect()

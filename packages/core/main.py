@@ -53,12 +53,19 @@ def run() -> None:
     This function infinitely loops over a sequence of modules:
 
     1. Read the config
+
     2. Check whether `HeliosThread` and `UploadThread` are running
+
     3. Possibly start/stop the threads according to the config
+
     4. Run `MeasurementConditions` module
+
     5. Run `EnclosureControl` module
+
     6. Run `SunTracking` module
+
     7. Run `OpusMeasurement` module
+
     8. Run `SystemChecks` module
 
     The mainloop logs all exceptions and sends out emails when new exceptions

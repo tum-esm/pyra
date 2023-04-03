@@ -10,8 +10,15 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 class with_filelock:
-    """TO BE REMOVED IN 4.0.8: Pyra will use `with_filelock` from
-    `tum_esm_utils` instead."""
+    """Decorator that wraps a semaphor around a function.
+
+    FileLock = Mark, that a file is being used and other programs
+    should not interfere. A file "*.lock" will be created and the
+    content of this file will make the wrapped function possibly
+    wait until other programs are done using it.
+
+    See https://en.wikipedia.org/wiki/Semaphore_(programming)
+    """
 
     def __init__(self, file_lock_path: str, timeout: float = -1) -> None:
         """A timeout of -1 means that the code waits forever"""
