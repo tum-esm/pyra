@@ -1,3 +1,5 @@
+"""Start and stop the pyra-core background process."""
+
 import subprocess
 from typing import Optional
 import click

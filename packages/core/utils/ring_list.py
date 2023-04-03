@@ -2,8 +2,7 @@
 
 
 class RingList:
-    """TO BE REMOVED IN 4.0.8: Pyra will use `RingList` from
-    `tum_esm_utils` instead."""
+    """RingBuffer: a list with a fixed size, new elements overwrite old ones."""
 
     def __init__(self, max_size: int):
         assert max_size > 0, "a max_size of zero doesn't make any sense"
