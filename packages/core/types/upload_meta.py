@@ -3,6 +3,18 @@ from typing import Any, Optional, TypedDict
 
 
 class UploadMetaDict(TypedDict):
+    """TypedDict:
+
+    ```ts
+    {
+        complete: boolean,
+        fileList: string[],
+        createdTime: number,
+        lastModifiedTime: number
+    }
+    ```
+    """
+
     complete: bool
     fileList: list[str]
     createdTime: float
@@ -10,6 +22,8 @@ class UploadMetaDict(TypedDict):
 
 
 class UploadMetaDictPartial(TypedDict, total=False):
+    """TypedDict: like `UploadMetaDict`, but all fields are optional."""
+
     complete: bool
     fileList: list[str]
     createdTime: float
