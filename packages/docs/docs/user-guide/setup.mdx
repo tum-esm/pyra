@@ -72,17 +72,13 @@ If your `python` command doesn't resolve to the installed version, please look a
 
 ### Install Poetry
 
-https://python-poetry.org/
+`poetry`: https://python-poetry.org/
 
-### Git & GitHub CLI
+### Git, Curl, and Tar
 
-https://git-scm.com/ and https://cli.github.com/
+`git`: https://git-scm.com/
 
-:::info
-
-Git and the GitHub CLI are used by the Pyra Setup Tool.
-
-:::
+`curl` and `tar` should be preinstalled on Windows 10 or newer.
 
 ## Pyra Setup Tool
 
@@ -100,7 +96,7 @@ On the first time, clone the setup tool repo:
 
 ```bash
 cd %userprofile%/Documents
-gh repo clone tum-esm/pyra-setup-tool
+git clone https://github.com/tum-esm/pyra-setup-tool
 ```
 
 The setup tool uses the `colorama` library:
@@ -123,6 +119,12 @@ The setup tool automates the following steps:
 3. Download and runs the GUI installer
 4. Create desktop shortcuts to the `pyra-x.y.z` directory
 5. (Optional) Migrate the `config.json` file to keep the previous settings
+
+:::note
+
+The UI installer can take a while to finish. Please be patient.
+
+:::
 
 ## Pyra CLI Command
 
