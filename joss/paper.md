@@ -95,7 +95,7 @@ Since the measurement data will be post-processed and used on other machines, _P
 
 _Pyra CLI_ is designed to offer a text-based interface, which allows full control over _Pyra Core_ without the need for a graphical user interface. Switching to CLI mode enables different teams of the community to easily integrate Pyra into their existing hardware solutions and keep their custom control logic for measurements. It is possible to temporarily disable external CLI-based measurement decisions by switching back to Manual mode.
 
-The CLI is structured into different command groups (config, core, logs, plc, state). The config commands can read and write the `config.json` file and validate its structural integrity before updating to a new configuration, while the state commands read the latest content of `state.json`. The core commands allow direct interaction with the _Pyra Core_ process and manage that only one instance of the _Pyra Core_ process is running at the same time. The PLC commands interact with the integrated sensors and actors inside the TUM enclosures.
+The CLI is structured into different command groups (config, core, logs, plc, state). The config commands can read and write the `config.json` file and validate its structural integrity before updating to a new configuration, while the state commands read the latest content of `state.json`. The core commands allow direct interaction with the _Pyra Core_ process and ensure that only one instance of the _Pyra Core_ process is running at a time. The PLC commands interact with the integrated sensors and actors inside the TUM enclosures.
 
 _Pyra CLI_ is also integrated into _Pyra UI_ and handles communication between the graphical user interface and _Pyra Core_. 
 
@@ -114,9 +114,9 @@ The _Pyra_ codebase consists of three software stacks: The Core and the CLI are 
 
 For _Pyra Core_ and _Pyra CLI_, we are using Python 3.10 and Python Poetry[^4] as the dependency management tool. All Python libraries in use can be found in the `pyproject.toml` file. Tests can be run using pytest[^5]. The whole codebase has static type annotations which can be checked using MyPy[^6]. In addition to that, we are reusing the static type annotations to validate the JSON files loaded from the location file system with pydantic[^16].
 
-_Pyra UI_ is written in HTML/CSS and TypeScript using the ReactJS framework[^7] and TailwindCSS[^8]. We are using Vite[^9] as a build tool and Tauri[^10] to bundle the web-based UI into a Windows 10 application. The libraries used by the UI codebase can be found in `packages/ui/package.json`.
+_Pyra UI_ is written in HTML/CSS and TypeScript using the ReactJS framework[^7] and TailwindCSS[^8]. We are using Vite[^9] as a build tool and Tauri[^10] to bundle the web-based UI into a Windows application. The libraries used by the UI codebase can be found in `packages/ui/package.json`.
 
-The _Pyra Setup Tool_ depends on Git[^11] and the GitHub CLI[^12] and also comes with a `pyproject.toml` file. _Pyra_ itself communicates with OPUS and CamTracker[^13].
+The _Pyra Setup Tool_ depends on Git[^11] and also comes with a `pyproject.toml` file. _Pyra_ itself communicates with OPUS and CamTracker[^13].
 
 # Author Contributions
 
@@ -139,7 +139,6 @@ This research has been supported by the Deutsche Forschungsgemeinschaft (DFG, Ge
 [^9]: https://vitejs.dev/
 [^10]: https://tauri.studio/
 [^11]: https://git-scm.com/
-[^12]: https://cli.github.com/
 [^13]: https://www.bruker.com/en/products-and-solutions/infrared-and-raman/remote-sensing/em27-sun-solar-absorption-spectrometer.html
 [^16]: https://github.com/pydantic/pydantic
 [^17]: https://www.bruker.com/en/products-and-solutions/infrared-and-raman/opus-spectroscopy-software.html
