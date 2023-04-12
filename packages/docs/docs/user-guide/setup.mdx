@@ -14,16 +14,6 @@ The following manual steps are only required at the initial system setup. All fu
 
 :::
 
-:::tip
-
-Sometimes, you might get an error message saying that "executing `.ps1` scripts is not allowed due to an ExecutionPolicy". This can be solved with the following command (credits to https://stackoverflow.com/a/49112322/8255842):
-
-```
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
-```
-
-:::
-
 ### OPUS and CamTracker
 
 Our integration tests use **OPUS 7.8.44** and **CamTracker 3.9.2015.02.03**. Both OPUS and CamTracker are not really available to download, but you will receive them when buying an EM27/SUN system.
@@ -91,6 +81,8 @@ The [**Pyra Setup Tool**](https://github.com/tum-esm/pyra-setup-tool) can be use
         📁 pyra-4.0.6
         📁 ...
 ```
+
+**The setup tool requires you to use a unix-like shell environment (bash/sh/zsh/..., _not_ powershell).**
 
 On the first time, clone the setup tool repo:
 
