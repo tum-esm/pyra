@@ -11,8 +11,9 @@
     --ifm-breadcrumb-padding-horizontal: 8px;
     --ifm-breadcrumb-color-active: #1e293b;
 
-    .col {
-        /*--ifm-col-width: 100% !important;*/
+    .docMainContainer_node_modules-\@docusaurus-theme-classic-lib-theme-DocPage-Layout-Main-styles-module
+        .col {
+        --ifm-col-width: 100% !important;
         --ifm-spacing-horizontal: calc((100% - 70ch) / 2);
     }
 
@@ -56,10 +57,6 @@
     background: url('/img/icons/icon-cheveron-up.svg') 50% / 1.25rem 1.25rem;
 }
 
-/*:root .navbar {
-    display: none;
-}*/
-
 .theme-back-to-top-button {
     display: none;
 }
@@ -75,6 +72,10 @@
 
     .menu__link--sublist {
         @apply tw-font-semibold tw-text-gray-950 tw-text-base;
+    }
+
+    .theme-doc-sidebar-item-category-level-2 .menu__link--sublist {
+        @apply tw-font-medium tw-text-gray-800 tw-text-sm;
     }
 }
 
