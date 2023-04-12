@@ -11,9 +11,8 @@
     --ifm-breadcrumb-padding-horizontal: 8px;
     --ifm-breadcrumb-color-active: #1e293b;
 
-    .docMainContainer_node_modules-\@docusaurus-theme-classic-lib-theme-DocPage-Layout-Main-styles-module
-        .col {
-        --ifm-col-width: 100% !important;
+    .docMainContainer_gTbr .col {
+        /*--ifm-col-width: 100% !important;*/
         --ifm-spacing-horizontal: calc((100% - 70ch) / 2);
     }
 
