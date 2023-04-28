@@ -4,11 +4,14 @@
 
 **Contributor Guide: [https://pyra.esm.ei.tum.de/docs/contributor-guide/becoming-a-contributor](https://pyra.esm.ei.tum.de/docs/contributor-guide/becoming-a-contributor)**
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-python-codebase-on-main.yml?branch=main&color=86efac&label=python%20tests%20on%20main%20branch&style=for-the-badge)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-typescript-codebase-on-main.yml?branch=main&color=86efac&label=typescript%20tests%20on%20main%20branch&style=for-the-badge)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-python-codebase-on-main.yml?branch=main&color=22c55e&label=python%20tests%20on%20main%20branch&style=flat)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-typescript-codebase-on-main.yml?branch=main&color=22c55e&label=typescript%20tests%20on%20main%20branch&style=flat)
 <br/>
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/tum-esm/pyra?display_name=tag&label=latest%20release&color=fcd34d&style=for-the-badge)](https://github.com/tum-esm/pyra/releases)
-[![GitHub](https://img.shields.io/github/license/tum-esm/pyra?color=fcd34d&style=for-the-badge)](https://github.com/tum-esm/pyra/blob/main/LICENSE.md)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/tum-esm/pyra?display_name=tag&label=latest%20release&color=0ea5e9&style=flat)](https://github.com/tum-esm/pyra/releases)
+[![GitHub](https://img.shields.io/github/license/tum-esm/pyra?color=0ea5e9&style=flat)](https://github.com/tum-esm/pyra/blob/main/LICENSE.md)
+[![status](https://joss.theoj.org/papers/d47b5197eb098bccfbd27b6a6c441cb4/status.svg)](https://joss.theoj.org/papers/d47b5197eb098bccfbd27b6a6c441cb4)
+
+<br/>
 
 ## What is Pyra?
 
