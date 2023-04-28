@@ -1,4 +1,4 @@
-# PYRA
+# PYRA: Automated EM27/SUN Greenhouse Gas Measurement Software
 
 **Documentation: [pyra.esm.ei.tum.de/docs](https://pyra.esm.ei.tum.de/docs)**
 
