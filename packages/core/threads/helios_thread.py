@@ -310,12 +310,9 @@ class HeliosThread:
                     edge_fraction_history.set_max_size(new_max_history_size)
 
                 # sleep while sun angle is too low
-                if (not headless) and utils.Astronomy.get_current_sun_elevation(
-                    _CONFIG
-                ).is_within_bounds(
-                    None,
-                    _CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg,
-                ):
+                current_sun_elevation = utils.Astronomy.get_current_sun_elevation(_CONFIG)
+                min_sun_elevation = _CONFIG["general"]["min_sun_elevation"]
+                if (not headless) and (current_sun_elevation > min_sun_elevation):
                     logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                     if current_state is not None:
                         interfaces.StateInterface.update(
