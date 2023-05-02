@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Any, Optional, Union
+from typing import Any, Optional
 from packages.core import types, utils, interfaces, modules, threads
 
 logger = utils.Logger(origin="main")
@@ -90,8 +90,12 @@ def run() -> None:
             logger.error("Invalid config, waiting 10 seconds")
             time.sleep(10)
 
+    logger.info("Loading astronomical dataset")
+    utils.Astronomy.load_astronomical_dataset()
+
     # these modules will be executed one by one in each
     # mainloop iteration
+    logger.info("Initializing mainloop modules")
     mainloop_modules: list[Any] = [
         modules.measurement_conditions.MeasurementConditions(config),
         modules.enclosure_control.EnclosureControl(config),
@@ -104,6 +108,7 @@ def run() -> None:
     # dedicated mainloop in a parallel thread if the
     # respective service is configured. The threads itself
     # load the config periodically and stop themselves
+    logger.info("Initializing threads")
     helios_thread_instance = threads.HeliosThread(config)
     upload_thread_instance = threads.UploadThread(config)
 
