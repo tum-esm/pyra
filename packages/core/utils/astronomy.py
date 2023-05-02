@@ -1,7 +1,9 @@
 import os
 from typing import Any, Optional
+import pendulum
 import skyfield.api
 import tum_esm_utils
+from datetime import datetime
 from packages.core import types
 
 
@@ -23,7 +25,13 @@ class Astronomy:
             Astronomy._PLANETS = skyfield.api.load_file(filepath)
 
     @staticmethod
-    def get_current_sun_elevation(config: types.ConfigDict) -> float:
+    def get_current_sun_elevation(
+        config: types.ConfigDict,
+        lat: Optional[float] = None,
+        lon: Optional[float] = None,
+        alt: Optional[float] = None,
+        datetime_object: Optional[pendulum.DateTime] = None,
+    ) -> float:
         """Computes current sun elevation in degree, based on the
         coordinates from the CamTracker config file."""
 
@@ -31,21 +39,25 @@ class Astronomy:
         earth = Astronomy._PLANETS["Earth"]
         sun = Astronomy._PLANETS["Sun"]
 
-        with open(config["camtracker"]["config_path"], "r") as f:
-            _lines = f.readlines()
+        if datetime_object is not None:
+            current_time = skyfield.api.load.timescale().from_datetime(
+                datetime.fromtimestamp(datetime_object.timestamp(), tz=skyfield.api.utc)
+            )
+        else:
+            current_time = skyfield.api.load.timescale().now()
 
-        # find $1 marker
-        _marker_line_index: Optional[int] = None
-        for n, line in enumerate(_lines):
-            if line == "$1\n":
-                _marker_line_index = n
+        if any([c is None for c in [lat, lon, alt]]):
+            with open(config["camtracker"]["config_path"], "r") as f:
+                _lines = f.readlines()
+            _marker_line_index: Optional[int] = None
+            for n, line in enumerate(_lines):
+                if line == "$1\n":
+                    _marker_line_index = n
+            assert _marker_line_index is not None, "Camtracker config file is not valid"
+            lat = float(_lines[_marker_line_index + 1].strip())
+            lon = float(_lines[_marker_line_index + 2].strip())
+            alt = float(_lines[_marker_line_index + 3].strip())
 
-        assert _marker_line_index is not None, "Camtracker config file is not valid"
-        lat = float(_lines[_marker_line_index + 1].strip())
-        lon = float(_lines[_marker_line_index + 2].strip())
-        alt = float(_lines[_marker_line_index + 3].strip())
-
-        current_time = skyfield.api.load.timescale().now()
         current_position = earth + skyfield.api.wgs84.latlon(
             latitude_degrees=lat,
             longitude_degrees=lon,
