@@ -102,7 +102,7 @@ class MeasurementConditions:
         # Evaluate sun elevation if trigger is active
         if triggers["consider_sun_elevation"]:
             logger.info("Sun elevation as a trigger is considered.")
-            current_sun_elevation = utils.Astronomy.get_current_sun_elevation()
+            current_sun_elevation = utils.Astronomy.get_current_sun_elevation(self._CONFIG)
             min_sun_elevation = max(
                 self._CONFIG["general"]["min_sun_elevation"], triggers["min_sun_elevation"]
             )

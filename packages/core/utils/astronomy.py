@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 import astropy.coordinates as astropy_coordinates
 import astropy.time as astropy_time
 import astropy.units as astropy_units
@@ -12,17 +12,14 @@ class Astronomy:
     """Provides a method to compute the current sun elevation
     based on the coordinates from the CamTracker config file."""
 
-    CONFIG: Optional[types.ConfigDict] = None
     units = astropy_units
 
     @staticmethod
-    def get_current_sun_elevation() -> Any:
+    def get_current_sun_elevation(config: types.ConfigDict) -> Any:
         """Computes current sun elevation in degree, based on the
         coordinates from the CamTracker config file."""
 
-        assert Astronomy.CONFIG is not None, "astronomy has no config yet"
-
-        with open(Astronomy.CONFIG["camtracker"]["config_path"], "r") as f:
+        with open(config["camtracker"]["config_path"], "r") as f:
             _lines = f.readlines()
 
         # find $1 marker
