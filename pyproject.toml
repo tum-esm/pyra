@@ -58,7 +58,8 @@ module = [
     "snap7.*",
     "deepdiff",
     "psutil",
-    "skyfield.*"
+    "skyfield.*",
+    "pendulum"
 ]
 ignore_missing_imports = true
 

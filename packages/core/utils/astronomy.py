@@ -41,7 +41,7 @@ class Astronomy:
 
         if datetime_object is not None:
             current_time = skyfield.api.load.timescale().from_datetime(
-                datetime.fromtimestamp(datetime_object.timestamp(), tz=skyfield.api.utc)
+                datetime.fromtimestamp(datetime_object.timestamp(), tz=skyfield.api.utc)  # type: ignore
             )
         else:
             current_time = skyfield.api.load.timescale().now()
