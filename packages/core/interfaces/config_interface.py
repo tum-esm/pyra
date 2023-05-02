@@ -24,5 +24,4 @@ class ConfigInterface:
             types.validate_config_dict(new_object)
             config: types.ConfigDict = new_object
 
-        utils.Astronomy.CONFIG = config
         return config

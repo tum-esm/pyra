@@ -264,7 +264,9 @@ class OpusMeasurement:
 
         assert sys.platform == "win32"
 
-        sun_angle_is_low: bool = utils.Astronomy.get_current_sun_elevation().is_within_bounds(
+        sun_angle_is_low: bool = utils.Astronomy.get_current_sun_elevation(
+            self._CONFIG
+        ).is_within_bounds(
             None, self._CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg
         )
         return sun_angle_is_low
