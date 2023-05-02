@@ -1,21 +1,18 @@
-from typing import Any
-import astropy.coordinates as astropy_coordinates
-import astropy.time as astropy_time
-import astropy.units as astropy_units
+from typing import Optional
+import skyfield.api
 from packages.core import types
 
-
-# TODO: replace this with a better library
+_PLANETS = skyfield.api.load("de421.bsp")
+_EARTH = _PLANETS["earth"]
+_SUN = _PLANETS["Sun"]
 
 
 class Astronomy:
     """Provides a method to compute the current sun elevation
     based on the coordinates from the CamTracker config file."""
 
-    units = astropy_units
-
     @staticmethod
-    def get_current_sun_elevation(config: types.ConfigDict) -> Any:
+    def get_current_sun_elevation(config: types.ConfigDict) -> float:
         """Computes current sun elevation in degree, based on the
         coordinates from the CamTracker config file."""
 
@@ -23,7 +20,7 @@ class Astronomy:
             _lines = f.readlines()
 
         # find $1 marker
-        _marker_line_index = None
+        _marker_line_index: Optional[int] = None
         for n, line in enumerate(_lines):
             if line == "$1\n":
                 _marker_line_index = n
@@ -33,14 +30,13 @@ class Astronomy:
         lon = float(_lines[_marker_line_index + 2].strip())
         alt = float(_lines[_marker_line_index + 3].strip())
 
-        now = astropy_time.Time.now()
-
-        altaz = astropy_coordinates.AltAz(
-            location=astropy_coordinates.EarthLocation.from_geodetic(
-                height=alt, lat=lat, lon=lon
-            ),
-            obstime=now,
+        current_time = skyfield.api.load.timescale().now()
+        current_position = _EARTH + skyfield.api.wgs84.latlon(
+            latitude_degrees=lat,
+            longitude_degrees=lon,
+            elevation_m=alt,
         )
-        sun = astropy_coordinates.get_sun(now)
-        sun_angle_deg = sun.transform_to(altaz).alt
-        return sun_angle_deg
+
+        sun_pos = current_position.at(current_time).observe(_SUN).apparent()
+        altitude, _, _ = sun_pos.altaz()
+        return float(altitude.degrees)

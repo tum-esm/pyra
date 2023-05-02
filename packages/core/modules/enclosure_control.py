@@ -236,18 +236,17 @@ class EnclosureControl:
         """
 
         current_sun_elevation = utils.Astronomy.get_current_sun_elevation(self.config)
-        min_power_elevation = (
-            self.config["general"]["min_sun_elevation"] - 1
-        ) * utils.Astronomy.units.deg
+        min_power_elevation = self.config["general"]["min_sun_elevation"] - 1
+        sun_is_above_minimum = current_sun_elevation >= min_power_elevation
+        spectrometer_is_powered = self.plc_state["power"]["spectrometer"]
 
-        if current_sun_elevation is not None:
-            sun_is_above_minimum = current_sun_elevation >= min_power_elevation
-            if sun_is_above_minimum and (not self.plc_state["power"]["spectrometer"]):
-                self.plc_interface.set_power_spectrometer(True)
-                logger.info("Powering up the spectrometer.")
-            if (not sun_is_above_minimum) and self.plc_state["power"]["spectrometer"]:
-                self.plc_interface.set_power_spectrometer(False)
-                logger.info("Powering down the spectrometer.")
+        if sun_is_above_minimum and (not spectrometer_is_powered):
+            self.plc_interface.set_power_spectrometer(True)
+            logger.info("Powering up the spectrometer.")
+
+        if (not sun_is_above_minimum) and spectrometer_is_powered:
+            self.plc_interface.set_power_spectrometer(False)
+            logger.info("Powering down the spectrometer.")
 
     def sync_cover_to_measurement_status(self) -> None:
         """Checks for flank changes in parameter measurement_should_be_running.

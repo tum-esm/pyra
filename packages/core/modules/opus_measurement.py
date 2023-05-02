@@ -258,18 +258,16 @@ class OpusMeasurement:
         except _win32ui.error:
             return False
 
-    def low_sun_angle_present(self) -> bool:
+    def sun_angle_is_too_low(self) -> bool:
         """Checks defined sun angle in config. Closes OPUS at the end of the day to start up fresh
         the next day."""
 
         assert sys.platform == "win32"
 
-        sun_angle_is_low: bool = utils.Astronomy.get_current_sun_elevation(
-            self._CONFIG
-        ).is_within_bounds(
-            None, self._CONFIG["general"]["min_sun_elevation"] * utils.Astronomy.units.deg
+        return (
+            utils.Astronomy.get_current_sun_elevation(self._CONFIG)
+            < self._CONFIG["general"]["min_sun_elevation"]
         )
-        return sun_angle_is_low
 
     def automated_process_handling(self) -> None:
         """Start OPUS.exe if not running and sun angle conditions satisfied.
@@ -277,7 +275,17 @@ class OpusMeasurement:
         """
         assert sys.platform == "win32"
 
-        if not self.low_sun_angle_present():
+        if self.sun_angle_is_too_low():
+            # Close OPUS if running
+            if self.opus_application_running():
+                logger.debug("Requesting OPUS night shutdown.")
+                # CLOSE_OPUS needs all macros closed to work. stop_macro() is
+                # called just in case
+                self.stop_macro()
+                time.sleep(5)
+                self.close_opus()
+
+        else:
             # start OPUS if not currently running
             if not self.opus_application_running():
                 logger.info("Start OPUS.")
@@ -287,15 +295,6 @@ class OpusMeasurement:
                 self.load_experiment()
                 # returns to give OPUS time to start until next call of run()
                 return
-        if self.low_sun_angle_present():
-            # Close OPUS if running
-            if self.opus_application_running():
-                logger.debug("Requesting OPUS night shutdown.")
-                # CLOSE_OPUS needs all macros closed to work. stop_macro() is
-                # called just in case
-                self.stop_macro()
-                time.sleep(5)
-                self.close_opus()
 
     def wait_for_opus_startup(self) -> None:
         """Checks for OPUS to be running. Breaks out of the loop after a defined time."""
