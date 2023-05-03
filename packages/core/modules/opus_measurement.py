@@ -34,10 +34,10 @@ class OpusMeasurement:
     value of StateInterface: measurements_should_be_running."""
 
     def __init__(self, initial_config: types.ConfigDict):
-        self._CONFIG = initial_config
+        self.config = initial_config
         self.initialized = False
-        self.current_experiment = self._CONFIG["opus"]["experiment_path"]
-        if self._CONFIG["general"]["test_mode"] or (sys.platform != "win32"):
+        self.current_experiment = self.config["opus"]["experiment_path"]
+        if self.config["general"]["test_mode"] or (sys.platform != "win32"):
             return
 
         self.__initialize()
@@ -59,8 +59,8 @@ class OpusMeasurement:
         measurements_should_be_running and starts and stops the OPUS macro."""
 
         # loads latest config
-        self._CONFIG = new_config
-        if self._CONFIG["general"]["test_mode"] or (sys.platform != "win32"):
+        self.config = new_config
+        if self.config["general"]["test_mode"] or (sys.platform != "win32"):
             logger.debug("Skipping OpusMeasurement in test mode and on non-windows systems")
             return
 
@@ -69,7 +69,7 @@ class OpusMeasurement:
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
-        if self._CONFIG["general"]["test_mode"]:
+        if self.config["general"]["test_mode"]:
             logger.info("Test mode active.")
             return
 
@@ -142,7 +142,7 @@ class OpusMeasurement:
         assert sys.platform == "win32"
 
         self.__connect_to_dde_opus()
-        experiment_path = self._CONFIG["opus"]["experiment_path"]
+        experiment_path = self.config["opus"]["experiment_path"]
 
         if not self.__test_dde_connection():
             return
@@ -160,7 +160,7 @@ class OpusMeasurement:
             return
 
         # load macro
-        macro_path = self._CONFIG["opus"]["macro_path"]
+        macro_path = self.config["opus"]["macro_path"]
         answer = self.conversation.Request(f"RUN_MACRO {macro_path}")
         logger.info(f"Started OPUS macro: {macro_path}")
 
@@ -174,7 +174,7 @@ class OpusMeasurement:
             return
 
         # stop macro
-        macro_path = os.path.basename(self._CONFIG["opus"]["macro_path"])
+        macro_path = os.path.basename(self.config["opus"]["macro_path"])
         answer = self.conversation.Request("KILL_MACRO " + macro_path)
         logger.info(f"Stopped OPUS macro: {macro_path}")
 
@@ -209,16 +209,16 @@ class OpusMeasurement:
         False -> Not Connected"""
         assert sys.platform == "win32"
 
-        response = os.system("ping -n 1 " + self._CONFIG["opus"]["em27_ip"])
+        response = os.system("ping -n 1 " + self.config["opus"]["em27_ip"])
         return response == 0
 
     def start_opus(self) -> None:
         """Starts the OPUS.exe with os.startfile(). This simulates a user click on the executable."""
         assert sys.platform == "win32"
 
-        opus_path = self._CONFIG["opus"]["executable_path"]
-        opus_username = self._CONFIG["opus"]["username"]
-        opus_password = self._CONFIG["opus"]["password"]
+        opus_path = self.config["opus"]["executable_path"]
+        opus_username = self.config["opus"]["username"]
+        opus_password = self.config["opus"]["password"]
 
         # works only > python3.10
         # without cwd CT will have trouble loading its internal database)
@@ -244,7 +244,7 @@ class OpusMeasurement:
         # FindWindow(className, windowName)
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
-        opus_username = self._CONFIG["opus"]["username"]
+        opus_username = self.config["opus"]["username"]
         opus_windows_name = (
             f"OPUS - Operator: {opus_username}  (Administrator) - [Display - default.ows]"
         )
@@ -265,8 +265,8 @@ class OpusMeasurement:
         assert sys.platform == "win32"
 
         return (
-            utils.Astronomy.get_current_sun_elevation(self._CONFIG)
-            < self._CONFIG["general"]["min_sun_elevation"]
+            utils.Astronomy.get_current_sun_elevation(self.config)
+            < self.config["general"]["min_sun_elevation"]
         )
 
     def automated_process_handling(self) -> None:
@@ -317,7 +317,7 @@ class OpusMeasurement:
         """
         assert sys.platform == "win32"
 
-        if self._CONFIG["opus"]["experiment_path"] != self.current_experiment:
+        if self.config["opus"]["experiment_path"] != self.current_experiment:
             if interfaces.StateInterface.read_persistent()["active_opus_macro_id"] == None:
                 self.load_experiment()
             else:

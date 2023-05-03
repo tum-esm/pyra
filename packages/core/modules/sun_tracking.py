@@ -28,9 +28,9 @@ class SunTracking:
     is reached the only way to fix the offset is to restart CamTracker."""
 
     def __init__(self, initial_config: types.ConfigDict):
-        self._CONFIG = initial_config
+        self.config = initial_config
         self.last_start_time = time.time()
-        if self._CONFIG["general"]["test_mode"]:
+        if self.config["general"]["test_mode"]:
             return
 
     def run(self, new_config: types.ConfigDict) -> None:
@@ -39,10 +39,10 @@ class SunTracking:
         tracking."""
 
         # update to latest config
-        self._CONFIG = new_config
+        self.config = new_config
 
         # Skip rest of the function if test mode is active
-        if self._CONFIG["general"]["test_mode"]:
+        if self.config["general"]["test_mode"]:
             logger.debug("Skipping SunTracking in test mode")
             return
 
@@ -99,7 +99,7 @@ class SunTracking:
         True if Application is currently running on OS
         """
 
-        ct_path = self._CONFIG["camtracker"]["executable_path"]
+        ct_path = self.config["camtracker"]["executable_path"]
         process_name = os.path.basename(ct_path)
 
         return interfaces.OSInterface.get_process_status(process_name) in [
@@ -122,7 +122,7 @@ class SunTracking:
         # delete stop.txt file in camtracker folder if present
         self.remove_stop_file()
 
-        ct_path = self._CONFIG["camtracker"]["executable_path"]
+        ct_path = self.config["camtracker"]["executable_path"]
 
         # works only > python3.10
         # without cwd CT will have trouble loading its internal database)
@@ -145,14 +145,14 @@ class SunTracking:
         """
 
         # create stop.txt file in camtracker folder
-        camtracker_directory = os.path.dirname(self._CONFIG["camtracker"]["executable_path"])
+        camtracker_directory = os.path.dirname(self.config["camtracker"]["executable_path"])
         with open(os.path.join(camtracker_directory, "stop.txt"), "w") as f:
             f.write("")
 
     def remove_stop_file(self) -> None:
         """This function removes the stop.txt file to allow CamTracker to restart."""
 
-        camtracker_directory = os.path.dirname(self._CONFIG["camtracker"]["executable_path"])
+        camtracker_directory = os.path.dirname(self.config["camtracker"]["executable_path"])
         stop_file_path = os.path.join(camtracker_directory, "stop.txt")
 
         if os.path.exists(stop_file_path):
@@ -176,7 +176,7 @@ class SunTracking:
         """
 
         # read azimuth and elevation motor offsets from camtracker logfiles
-        ct_logfile_path = self._CONFIG["camtracker"]["learn_az_elev_path"]
+        ct_logfile_path = self.config["camtracker"]["learn_az_elev_path"]
         assert os.path.isfile(ct_logfile_path), "camtracker logfile not found"
 
         with open(ct_logfile_path) as f:
@@ -219,7 +219,7 @@ class SunTracking:
 
         elev_offset: float = tracker_status[3]
         az_offeset: float = tracker_status[4]
-        threshold: float = self._CONFIG["camtracker"]["motor_offset_threshold"]
+        threshold: float = self.config["camtracker"]["motor_offset_threshold"]
 
         return (abs(elev_offset) <= threshold) and (abs(az_offeset) <= threshold)
 
