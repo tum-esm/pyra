@@ -832,6 +832,39 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "polars"
+version = "0.17.11"
+description = "Blazingly fast DataFrame library"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "polars-0.17.11-cp37-abi3-macosx_10_7_x86_64.whl", hash = "sha256:07ecde540830bad035fecadbd07721a0dd3cba5887ba6d49844242de83a9ace8"},
+    {file = "polars-0.17.11-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:accf4719953f0e2f27db4c87e3ebac9569ebce8675fe3c6b710af2c313aedb81"},
+    {file = "polars-0.17.11-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:38db6e92726c36ffd80fc39c511c725c34391b4b33a1fb1d2866cbe14d7c9c07"},
+    {file = "polars-0.17.11-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:54aca5e4cb157cd3d177fe46c6f5b167cd2dd466d2fa4b8a7ff65c3e627a1037"},
+    {file = "polars-0.17.11-cp37-abi3-win_amd64.whl", hash = "sha256:2b8d7055809017f0d1aab122cd5a818d502086f2ed7d57c2e5057f7374aa9831"},
+    {file = "polars-0.17.11.tar.gz", hash = "sha256:103579cf6f1784740f88fc1510c4f349ebdf062d093a4155d87d09a80d40b342"},
+]
+
+[package.dependencies]
+typing_extensions = {version = ">=4.0.1", markers = "python_version < \"3.11\""}
+
+[package.extras]
+all = ["polars[connectorx,deltalake,fsspec,matplotlib,numpy,pandas,pyarrow,sqlalchemy,timezone,xlsx2csv,xlsxwriter]"]
+connectorx = ["connectorx"]
+deltalake = ["deltalake (>=0.8.0)"]
+fsspec = ["fsspec"]
+matplotlib = ["matplotlib"]
+numpy = ["numpy (>=1.16.0)"]
+pandas = ["pandas", "pyarrow (>=7.0.0)"]
+pyarrow = ["pyarrow (>=7.0.0)"]
+sqlalchemy = ["pandas", "sqlalchemy"]
+timezone = ["backports.zoneinfo", "tzdata"]
+xlsx2csv = ["xlsx2csv (>=0.8.0)"]
+xlsxwriter = ["xlsxwriter"]
+
+[[package]]
 name = "psutil"
 version = "5.9.4"
 description = "Cross-platform lib for process and system monitoring in Python."
@@ -1064,14 +1097,14 @@ files = [
 
 [[package]]
 name = "requests"
-version = "2.28.2"
+version = "2.29.0"
 description = "Python HTTP for Humans."
 category = "main"
 optional = false
-python-versions = ">=3.7, <4"
+python-versions = ">=3.7"
 files = [
-    {file = "requests-2.28.2-py3-none-any.whl", hash = "sha256:64299f4909223da747622c030b781c0d7811e359c37124b4bd368fb8c6518baa"},
-    {file = "requests-2.28.2.tar.gz", hash = "sha256:98b1b2782e3c6c4904938b84c0eb932721069dfdb9134313beff7c83c2df24bf"},
+    {file = "requests-2.29.0-py3-none-any.whl", hash = "sha256:e8f3c9be120d3333921d213eef078af392fba3933ab7ed2d1cba3b56f2568c3b"},
+    {file = "requests-2.29.0.tar.gz", hash = "sha256:f2e34a75f4749019bb0e3effb66683630e4ffeaf75819fb51bebef1bf5aef059"},
 ]
 
 [package.dependencies]
@@ -1221,19 +1254,20 @@ telegram = ["requests"]
 
 [[package]]
 name = "tum-esm-utils"
-version = "1.3.0"
+version = "1.5.1"
 description = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "tum_esm_utils-1.3.0-py3-none-any.whl", hash = "sha256:f4833efab76ac6f7c16b20007fc268f48c84e4b363b2c77d5add754b44d857b7"},
-    {file = "tum_esm_utils-1.3.0.tar.gz", hash = "sha256:b0925b9b0d3fa915126724c4627a6827052094ae0f052241f6e77c7c030207b3"},
+    {file = "tum_esm_utils-1.5.1-py3-none-any.whl", hash = "sha256:d7e3726366adea4f404f49ea15efa2f02529c8b26102ae611b58e1d8a584ebbf"},
+    {file = "tum_esm_utils-1.5.1.tar.gz", hash = "sha256:aa0de88eea17b6cc95256d62b669162d7f6dc638115298bbd24fb7df62ee3149"},
 ]
 
 [package.dependencies]
 filelock = ">=3.10.0,<4.0.0"
 pendulum = ">=2.1.2,<3.0.0"
+polars = ">=0.17.11,<0.18.0"
 psutil = ">=5.9.4,<6.0.0"
 requests = ">=2.28.2,<3.0.0"
 
@@ -1329,4 +1363,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.*"
-content-hash = "cedaf0f74a6b729a6ba73926fcaad2c79fa34af4ac537b27ec5f39e3f612e1df"
+content-hash = "029efae69df9435aa197db782c1d42bca8f021a0ff2af5c1eef8d83ce09ec0d6"
