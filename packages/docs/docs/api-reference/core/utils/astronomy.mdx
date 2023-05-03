@@ -11,28 +11,51 @@ hide_table_of_contents: true
 
 
 
+**Global Variables**
+---------------
+- **PROJECT_DIR**
 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/astronomy.py#L11" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/astronomy.py#L13" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `Astronomy`
-Provides a method to compute the current sun elevation based on the coordinates from the CamTracker config file. 
+
+
+
 
 
 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/astronomy.py#L18" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/astronomy.py#L27" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_current_sun_elevation`
 
 ```python
-get_current_sun_elevation() → Any
+get_current_sun_elevation(
+    config: ConfigDict,
+    lat: Optional[float] = None,
+    lon: Optional[float] = None,
+    alt: Optional[float] = None,
+    datetime_object: Optional[DateTime] = None
+) → float
 ```
 
-calc_sun_angle_deg(location loc): Computes and returns the current sun angle in degree, based on the location loc, computed by get_tracker_position(), and current time. Therefore, the pack- ages time and astrophy are required. 
+Computes current sun elevation in degree, based on the coordinates from the CamTracker config file. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/astronomy.py#L16" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `load_astronomical_dataset`
+
+```python
+load_astronomical_dataset() → None
+```
+
+Loads the astronomical dataset DE421 from the NASA JPL website, see https://ssd.jpl.nasa.gov/planets/eph_export.html. 
 
 

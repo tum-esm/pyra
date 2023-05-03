@@ -26,7 +26,7 @@ During the day it makes sure that OPUS up and running and reloads the latest exp
 
 OPUSMeasurement will start and stop Macros according to the current value of StateInterface: measurements_should_be_running. 
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L36" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L37" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -43,7 +43,7 @@ __init__(initial_config: ConfigDict)
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L272" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L305" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `automated_process_handling`
 
@@ -55,7 +55,7 @@ Start OPUS.exe if not running and sun angle conditions satisfied. Shuts down OPU
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L313" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L350" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `check_for_experiment_change`
 
@@ -67,7 +67,7 @@ Compares the experiment in the config with the current active experiment. To rel
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L181" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L209" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `close_opus`
 
@@ -79,7 +79,7 @@ Closes OPUS via DDE call.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L140" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L165" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `load_experiment`
 
@@ -91,19 +91,7 @@ Loads a new experiment in OPUS over DDE connection.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L261" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `low_sun_angle_present`
-
-```python
-low_sun_angle_present() → bool
-```
-
-Checks defined sun angle in config. Closes OPUS at the end of the day to start up fresh the next day. 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L235" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L268" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `opus_application_running`
 
@@ -120,7 +108,7 @@ Checks if OPUS is already running by identifying the window.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L56" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L80" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `run`
 
@@ -132,7 +120,7 @@ Called in every cycle of the main loop. Starts and stops OPUS.exe based on the p
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L153" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L179" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `start_macro`
 
@@ -144,7 +132,7 @@ Starts a new macro in OPUS over DDE connection.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L215" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L246" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `start_opus`
 
@@ -156,7 +144,7 @@ Starts the OPUS.exe with os.startfile(). This simulates a user click on the exec
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L167" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L193" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `stop_macro`
 
@@ -168,7 +156,19 @@ Stops the currently running macro in OPUS over DDE connection.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L329" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L294" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `sun_angle_is_too_low`
+
+```python
+sun_angle_is_too_low() → bool
+```
+
+Checks defined sun angle in config. Closes OPUS at the end of the day to start up fresh the next day. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L367" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `test_setup`
 
@@ -180,7 +180,7 @@ Function to test the functonality of this module. Starts up OPUS, loads an exper
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L298" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L333" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `wait_for_opus_startup`
 
