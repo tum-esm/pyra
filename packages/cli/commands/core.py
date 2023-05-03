@@ -4,7 +4,9 @@ import subprocess
 from typing import Optional
 import click
 import os
+import filelock
 import psutil
+import tum_esm_utils
 from packages.core import utils, interfaces, modules
 
 dir = os.path.dirname
@@ -13,6 +15,14 @@ _INTERPRETER_PATH = (
     "python" if os.name != "posix" else os.path.join(_PROJECT_DIR, ".venv", "bin", "python")
 )
 _CORE_SCRIPT_PATH = os.path.join(_PROJECT_DIR, "run_pyra_core.py")
+
+_run_pyra_core_lock = filelock.FileLock(
+    os.path.join(
+        tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=5),
+        "run_pyra_core.lock",
+    ),
+    timeout=0.5,
+)
 
 
 def _print_green(text: str) -> None:
@@ -61,14 +71,22 @@ def _start_pyra_core() -> None:
     existing_pid = _process_is_running()
     if existing_pid is not None:
         _print_red(f"Background process already exists with PID {existing_pid}")
-    else:
-        p = subprocess.Popen(
-            [_INTERPRETER_PATH, _CORE_SCRIPT_PATH],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        utils.Logger.log_activity_event("start-core")
-        _print_green(f"Started background process with PID {p.pid}")
+        return
+
+    try:
+        _run_pyra_core_lock.acquire()
+        _run_pyra_core_lock.release()
+    except filelock.Timeout:
+        _print_red("PyraCore process already exists with unknown PID")
+        return
+
+    p = subprocess.Popen(
+        [_INTERPRETER_PATH, _CORE_SCRIPT_PATH],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    utils.Logger.log_activity_event("start-core")
+    _print_green(f"Started background process with PID {p.pid}")
 
 
 @click.command(
