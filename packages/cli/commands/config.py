@@ -7,7 +7,6 @@ import os
 
 import tum_esm_utils
 from packages.core import types
-from packages.core.utils import update_dict_recursively
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -77,7 +76,10 @@ def _update_config(content: str) -> None:
         return
 
     # merge current config and new partial config
-    merged_json = update_dict_recursively(current_json, new_partial_json)
+    merged_json = tum_esm_utils.datastructures.merge_dicts(
+        current_json,
+        new_partial_json,
+    )
     with open(_CONFIG_FILE_PATH, "w") as f:
         json.dump(merged_json, f, indent=4)
 
