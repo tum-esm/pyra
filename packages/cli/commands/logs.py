@@ -2,7 +2,9 @@
 
 import click
 import os
-from packages.core.utils import with_filelock, Logger
+
+import tum_esm_utils
+from packages.core.utils import Logger
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -21,7 +23,10 @@ def _print_red(text: str) -> None:
 
 @click.command(help="Read the current info.log or debug.log file.")
 @click.option("--level", default="INFO", help="Log level INFO or DEBUG")
-@with_filelock(_LOG_FILES_LOCK)
+@tum_esm_utils.decorators.with_filelock(
+    lockfile_path=_LOG_FILES_LOCK,
+    timeout=5,
+)
 def _read_logs(level: str) -> None:
     if level in ["INFO", "DEBUG"]:
         with open(_INFO_LOG_FILE if level == "INFO" else _DEBUG_LOG_FILE, "r") as f:

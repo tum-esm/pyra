@@ -4,8 +4,10 @@ import json
 import shutil
 import click
 import os
+
+import tum_esm_utils
 from packages.core import types
-from packages.core.utils import with_filelock, update_dict_recursively
+from packages.core.utils import update_dict_recursively
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -25,7 +27,10 @@ def _print_red(text: str) -> None:
 @click.command(
     help="Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence."
 )
-@with_filelock(_CONFIG_LOCK_PATH)
+@tum_esm_utils.decorators.with_filelock(
+    lockfile_path=_CONFIG_LOCK_PATH,
+    timeout=5,
+)
 def _get_config() -> None:
     if not os.path.isfile(_CONFIG_FILE_PATH):
         shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
@@ -44,7 +49,10 @@ def _get_config() -> None:
     help=f"Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
 )
 @click.argument("content", default="{}")
-@with_filelock(_CONFIG_LOCK_PATH)
+@tum_esm_utils.decorators.with_filelock(
+    lockfile_path=_CONFIG_LOCK_PATH,
+    timeout=5,
+)
 def _update_config(content: str) -> None:
     # try to load the dict
     try:
@@ -79,7 +87,10 @@ def _update_config(content: str) -> None:
 @click.command(
     help=f"Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
 )
-@with_filelock(_CONFIG_LOCK_PATH)
+@tum_esm_utils.decorators.with_filelock(
+    lockfile_path=_CONFIG_LOCK_PATH,
+    timeout=5,
+)
 def _validate_current_config() -> None:
     # load the current json file
     try:

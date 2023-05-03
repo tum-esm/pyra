@@ -1,7 +1,8 @@
 import json
 import os
 from typing import Any
-from packages.core import types, utils
+import tum_esm_utils
+from packages.core import types
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -12,7 +13,10 @@ _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
 class ConfigInterface:
     @staticmethod
-    @utils.with_filelock(_CONFIG_LOCK_PATH, timeout=10)
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_CONFIG_LOCK_PATH,
+        timeout=10,
+    )
     def read() -> types.ConfigDict:
         """
         Read the contents of the current config.json file.
