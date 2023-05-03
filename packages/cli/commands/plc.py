@@ -5,6 +5,8 @@ import time
 from typing import Callable, Optional
 import click
 import os
+
+import tum_esm_utils
 from packages.core import types, utils, interfaces, modules
 
 _dir = os.path.dirname
@@ -116,7 +118,10 @@ def _set_cover_angle(angle: str) -> None:
         plc_interface.disconnect()
 
 
-@utils.with_filelock(_CONFIG_LOCK_PATH)
+@tum_esm_utils.decorators.with_filelock(
+    lockfile_path=_CONFIG_FILE_PATH,
+    timeout=5,
+)
 def _enable_user_control_in_config() -> None:
     with open(_CONFIG_FILE_PATH, "r") as f:
         config = json.load(f)

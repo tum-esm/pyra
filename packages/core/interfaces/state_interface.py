@@ -1,6 +1,8 @@
 import json
 import os
 import shutil
+
+import tum_esm_utils
 from packages.core import types, utils
 
 _dir = os.path.dirname
@@ -99,7 +101,10 @@ class StateInterface:
     ```"""
 
     @staticmethod
-    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_STATE_LOCK_PATH,
+        timeout=10,
+    )
     def initialize() -> None:
         """Clear `state.json`, create empty `prersistent-state.json` if
         it does not exist yet."""
@@ -119,7 +124,10 @@ class StateInterface:
                 json.dump(_EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
 
     @staticmethod
-    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_STATE_LOCK_PATH,
+        timeout=10,
+    )
     def read() -> types.StateDict:
         """Read the state file and return its content"""
         return StateInterface.read_without_filelock()
@@ -139,7 +147,10 @@ class StateInterface:
             return _EMPTY_STATE_OBJECT
 
     @staticmethod
-    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_STATE_LOCK_PATH,
+        timeout=10,
+    )
     def read_persistent() -> types.PersistentStateDict:
         """Read the persistent state file and return its content"""
         return StateInterface.read_persistent_without_filelock()
@@ -159,7 +170,10 @@ class StateInterface:
             return _EMPTY_PERSISTENT_STATE_OBJECT
 
     @staticmethod
-    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_STATE_LOCK_PATH,
+        timeout=10,
+    )
     def update(update: types.StateDictPartial) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be
@@ -171,7 +185,10 @@ class StateInterface:
             json.dump(new_state, f, indent=4)
 
     @staticmethod
-    @utils.with_filelock(_STATE_LOCK_PATH, timeout=10)
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_STATE_LOCK_PATH,
+        timeout=10,
+    )
     def update_persistent(update: types.PersistentStateDictPartial) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be

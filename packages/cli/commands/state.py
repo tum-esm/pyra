@@ -3,6 +3,8 @@
 import json
 import click
 import os
+
+import tum_esm_utils
 from packages.core import utils, interfaces
 
 _dir = os.path.dirname
@@ -13,7 +15,10 @@ _STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".state.lock")
 
 @click.command(help="Read the current state.json file.")
 @click.option("--indent", is_flag=True, help="Print the JSON in an indented manner")
-@utils.with_filelock(_STATE_LOCK_PATH)
+@tum_esm_utils.decorators.with_filelock(
+    lockfile_path=_STATE_LOCK_PATH,
+    timeout=5,
+)
 def _get_state(indent: bool) -> None:
     if not os.path.isfile(_STATE_FILE_PATH):
         interfaces.StateInterface.initialize()
