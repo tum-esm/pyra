@@ -57,16 +57,19 @@ def test_start_stop_procedure(sample_config: Any, empty_logs: Any) -> None:
 
     with open(INFO_LOG_PATH, "r") as f:
         info_log_lines = f.readlines()
-    assert len(info_log_lines) >= 3
+    assert len(info_log_lines) >= 6
 
-    print("first three log lines:\n" + "".join(info_log_lines[:3]) + "\n")
+    print("first three log lines:\n" + "".join(info_log_lines[:6]) + "\n")
     expected_lines = [
         f"main - INFO - Starting mainloop inside process with PID {pid}",
+        "main - INFO - Loading astronomical dataset",
+        "main - INFO - Initializing mainloop modules",
+        "main - INFO - Initializing threads",
         "main - INFO - Starting iteration",
         "main - INFO - pyra-core in test mode",
     ]
     now = datetime.utcnow()
-    for expected_line, actual_line in zip(expected_lines, info_log_lines[:3]):
+    for expected_line, actual_line in zip(expected_lines, info_log_lines[:6]):
         line_time = datetime.strptime(actual_line[:19], "%Y-%m-%d %H:%M:%S")
 
         print(
