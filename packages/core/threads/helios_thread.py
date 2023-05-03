@@ -4,6 +4,8 @@ import time
 import cv2 as cv
 import numpy as np
 from typing import Any, Optional
+
+import tum_esm_utils
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="helios")
@@ -279,7 +281,9 @@ class HeliosThread:
             return
 
         # a list storing the last n calculated edge fractions
-        edge_fraction_history = utils.RingList(_CONFIG["helios"]["evaluation_size"])
+        edge_fraction_history = tum_esm_utils.datastructures.RingList(
+            max_size=_CONFIG["helios"]["evaluation_size"]
+        )
         current_state: Optional[bool] = None
 
         repeated_camera_error_count = 0
