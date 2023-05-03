@@ -2,6 +2,7 @@ import os
 import sys
 import time
 from typing import Any
+import psutil
 from packages.core import types, utils, interfaces
 
 
@@ -47,6 +48,29 @@ class OpusMeasurement:
         """Initialize the DDE connection and sets up the conversaton."""
 
         assert sys.platform == "win32"
+
+        # Force close all OPUS instances that are running to prevent
+        # Pyra opening multiple instances of OPUS
+        if self.opus_application_running():
+            logger.debug("Force-closing OPUS")
+            processes = [p.name() for p in psutil.process_iter()]
+            opus_processes = list(
+                filter(
+                    lambda p: ("opus.exe" in p.lower()) or ("opuscore.exe" in p.lower()),
+                    processes,
+                )
+            )
+            logger.debug(f"Found {len(opus_processes)} OPUS processes: {opus_processes}")
+
+            try:
+                for p in opus_processes:
+                    exit_code = os.system(f"taskkill /f /im {p}")
+                    assert (
+                        exit_code == 0
+                    ), f'taskkill  of "{p}" ended with an exit_code of {exit_code}'
+                    logger.debug(f'Successfully closed OPUS instance "{p}"')
+            except Exception as e:
+                logger.warning(f"Failed to close OPUS: {e}")
 
         # note: dde servers talk to dde servers
         self.server = _dde.CreateServer()
