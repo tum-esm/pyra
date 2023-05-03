@@ -180,7 +180,7 @@ class StateInterface:
         changed in contrast to containing the whole file."""
 
         current_state = StateInterface.read_without_filelock()
-        new_state = utils.update_dict_recursively(current_state, update)
+        new_state = tum_esm_utils.datastructures.merge_dicts(current_state, update)
         with open(_STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
 
@@ -195,6 +195,6 @@ class StateInterface:
         changed in contrast to containing the whole file."""
 
         current_state = StateInterface.read_persistent_without_filelock()
-        new_state = utils.update_dict_recursively(current_state, update)
+        new_state = tum_esm_utils.datastructures.merge_dicts(current_state, update)
         with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
             json.dump(new_state, f, indent=4)
