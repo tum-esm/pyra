@@ -128,6 +128,7 @@ class EnclosureControl:
                 logger.debug(
                     "Skipping EnclosureControl because enclosure is controlled by user"
                 )
+                self.last_plc_connection_time = time.time()
                 return
 
             # Dawn/dusk detection: powerup/down spectrometer at a defined sun angle
