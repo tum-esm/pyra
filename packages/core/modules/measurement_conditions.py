@@ -38,22 +38,22 @@ class MeasurementConditions:
     control to remote systems i.e. by SSH."""
 
     def __init__(self, initial_config: types.ConfigDict) -> None:
-        self._CONFIG = initial_config
+        self.config = initial_config
 
     def run(self, new_config: types.ConfigDict) -> None:
         """Called in every cycle of the main loop.
         Updates StateInterface: measurements_should_be_running based on the selected mode, triggers
         and present conditions."""
 
-        self._CONFIG = new_config
+        self.config = new_config
 
         # Skip rest of the function if test mode is active
-        if self._CONFIG["general"]["test_mode"]:
+        if self.config["general"]["test_mode"]:
             logger.debug("Skipping MeasurementConditions in test mode")
             return
 
         logger.info("Running MeasurementConditions")
-        decision = self._CONFIG["measurement_decision"]
+        decision = self.config["measurement_decision"]
         logger.debug(f"Decision mode for measurements is: {decision['mode']}.")
 
         # Selection and evaluation of the current set measurement mode
@@ -85,8 +85,8 @@ class MeasurementConditions:
         Reads the config to consider activated measurement triggers. Evaluates active measurement
         triggers and combines their states by logical conjunction.
         """
-        triggers = self._CONFIG["measurement_triggers"]
-        if self._CONFIG["helios"] is None:
+        triggers = self.config["measurement_triggers"]
+        if self.config["helios"] is None:
             triggers["consider_helios"] = False
 
         # If not triggers are considered during automatic mode return False
@@ -102,9 +102,9 @@ class MeasurementConditions:
         # Evaluate sun elevation if trigger is active
         if triggers["consider_sun_elevation"]:
             logger.info("Sun elevation as a trigger is considered.")
-            current_sun_elevation = utils.Astronomy.get_current_sun_elevation(self._CONFIG)
+            current_sun_elevation = utils.Astronomy.get_current_sun_elevation(self.config)
             min_sun_elevation = max(
-                self._CONFIG["general"]["min_sun_elevation"], triggers["min_sun_elevation"]
+                self.config["general"]["min_sun_elevation"], triggers["min_sun_elevation"]
             )
             if current_sun_elevation > min_sun_elevation:
                 logger.debug("Sun angle is above threshold.")
@@ -115,7 +115,7 @@ class MeasurementConditions:
         # Evaluate time if trigger is active
         if triggers["consider_time"]:
             logger.info("Time as a trigger is considered.")
-            time_is_valid = is_time_trigger_active(self._CONFIG)
+            time_is_valid = is_time_trigger_active(self.config)
             logger.debug(f"Time conditions are {'' if time_is_valid else 'not '}fulfilled.")
             if not time_is_valid:
                 return False

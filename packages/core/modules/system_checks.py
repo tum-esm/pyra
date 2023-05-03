@@ -12,10 +12,10 @@ class SystemChecks:
     StateInterface."""
 
     def __init__(self, initial_config: types.ConfigDict):
-        self._CONFIG = initial_config
+        self.config = initial_config
 
     def run(self, new_config: types.ConfigDict) -> None:
-        self._CONFIG = new_config
+        self.config = new_config
         logger.info("Running SystemChecks")
 
         # check os system stability
