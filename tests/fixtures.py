@@ -11,7 +11,7 @@ EXISTING_TEST_FILE_PATH = os.path.join(PROJECT_DIR, "pyproject.toml")
 
 SAMPLE_CONFIG = {
     "general": {
-        "version": "4.0.7",
+        "version": "4.0.8",
         "seconds_per_core_interval": 30,
         "test_mode": True,
         "station_id": "...",
