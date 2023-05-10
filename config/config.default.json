@@ -1,6 +1,6 @@
 {
     "general": {
-        "version": "4.0.7",
+        "version": "4.0.8",
         "seconds_per_core_interval": 30,
         "test_mode": false,
         "station_id": "...",

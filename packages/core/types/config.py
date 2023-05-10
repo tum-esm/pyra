@@ -37,7 +37,7 @@ class ConfigSubDicts:
 
         ```ts
         {
-            version: "4.0.7";
+            version: "4.0.8";
             seconds_per_core_interval: float;
             test_mode: bool;
             station_id: str;
@@ -46,7 +46,7 @@ class ConfigSubDicts:
         ```
         """
 
-        version: Literal["4.0.7"]
+        version: Literal["4.0.8"]
         seconds_per_core_interval: float
         test_mode: bool
         station_id: str
@@ -331,7 +331,7 @@ class ConfigDict(TypedDict):
     ```ts
     {
         general: {
-            version: "4.0.7";
+            version: "4.0.8";
             seconds_per_core_interval: float;
             test_mode: bool;
             station_id: str;
