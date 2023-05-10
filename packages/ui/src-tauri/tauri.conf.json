@@ -41,10 +41,10 @@
             "fs": {
                 "readFile": true,
                 "scope": [
-                    "$DOWNLOAD/*/pyra-4.0.7/*",
-                    "$DOWNLOAD\\pyra-4.0.7\\*",
-                    "$DOCUMENT/*/pyra-4.0.7/*",
-                    "$DOCUMENT\\pyra-4.0.7\\*"
+                    "$DOWNLOAD/*/pyra-4.*/*",
+                    "$DOWNLOAD\\pyra-4.*\\*",
+                    "$DOCUMENT/*/pyra-4.*/*",
+                    "$DOCUMENT\\pyra-4.*\\*"
                 ]
             }
         },
