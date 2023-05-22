@@ -297,7 +297,6 @@ class HeliosThread:
                 return
 
             try:
-
                 # init camera connection
                 if _Helios.cam is None:
                     logger.info(f"Initializing Helios camera")
@@ -316,7 +315,10 @@ class HeliosThread:
                 # sleep while sun angle is too low
                 current_sun_elevation = utils.Astronomy.get_current_sun_elevation(_CONFIG)
                 min_sun_elevation = _CONFIG["general"]["min_sun_elevation"]
-                if (not headless) and (current_sun_elevation > min_sun_elevation):
+                helios_should_be_running = headless or (
+                    current_sun_elevation > min_sun_elevation
+                )
+                if not helios_should_be_running:
                     logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                     if current_state is not None:
                         interfaces.StateInterface.update(
