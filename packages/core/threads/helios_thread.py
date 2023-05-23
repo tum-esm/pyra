@@ -169,6 +169,7 @@ class _Helios:
 
         logger.debug(f"exposure results: {exposure_results}")
 
+        assert len(exposure_results) > 0, "no possible exposures found"
         new_exposure = int(min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"])
         _Helios.update_camera_settings(exposure=new_exposure)
 
