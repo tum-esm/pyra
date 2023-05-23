@@ -3,7 +3,7 @@ import threading
 import time
 import cv2 as cv
 import numpy as np
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 import tum_esm_utils
 from packages.core import types, utils, interfaces
@@ -47,15 +47,7 @@ class _Helios:
                     ), "did not find any available exposures"
 
                 _Helios.current_exposure = min(_Helios.available_exposures)
-                _Helios.update_camera_settings(
-                    width=1280,
-                    height=720,
-                    exposure=min(_Helios.available_exposures),
-                    brightness=64,
-                    contrast=64,
-                    saturation=0,
-                    gain=0,
-                )
+                _Helios.update_camera_settings(exposure=_Helios.current_exposure)
                 return
             else:
                 time.sleep(2)
@@ -80,7 +72,7 @@ class _Helios:
         """
         assert _Helios.cam is not None, "camera is not initialized yet"
 
-        possible_values = []
+        possible_values: list[int] = []
         for exposure in range(-20, 20):
             _Helios.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
             if _Helios.cam.get(cv.CAP_PROP_EXPOSURE) == exposure:
@@ -90,13 +82,13 @@ class _Helios:
 
     @staticmethod
     def update_camera_settings(
-        exposure: Optional[int] = None,
-        brightness: Optional[int] = None,
-        contrast: Optional[int] = None,
-        saturation: Optional[int] = None,
-        gain: Optional[int] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
+        exposure: int,
+        brightness: int = 64,
+        contrast: int = 64,
+        saturation: int = 0,
+        gain: int = 0,
+        width: int = 1280,
+        height: int = 720,
     ) -> None:
         """
         Update the settings of the connected camera. Which settings are
@@ -114,15 +106,14 @@ class _Helios:
             "saturation": (cv.CAP_PROP_SATURATION, saturation),
             "gain": (cv.CAP_PROP_GAIN, gain),
         }
-        for property_name in properties:
-            key, value = properties[property_name]
-            if value is not None:
-                _Helios.cam.set(key, value)
-                if property_name not in ["width", "height"]:
-                    new_value = _Helios.cam.get(key)
-                    assert (
-                        new_value == value
-                    ), f"could not set {property_name} to {value}, value is still at {new_value}"
+        for property_name, (key, value) in properties.items():
+            _Helios.cam.set(key, value)
+            if property_name not in ["width", "height"]:
+                new_value = _Helios.cam.get(key)
+                if new_value != value:
+                    logger.warning(
+                        f"could not set {property_name} to {value}, value is still at {new_value}"
+                    )
 
         # throw away some images after changing settings. I don't know
         # why this is necessary, but it resolves a lot of issues
@@ -160,23 +151,25 @@ class _Helios:
         to the value where the overall mean pixel value color is
         closest to 50.
         """
-        assert _Helios.available_exposures is not None
+        assert _Helios.available_exposures is not None, "camera is not initialized yet"
+        assert _Helios.cam is not None, "camera is not initialized yet"
         assert len(_Helios.available_exposures) > 0
 
-        exposure_results = []
-        for e in _Helios.available_exposures:
-            _Helios.update_camera_settings(exposure=e)
-            img = _Helios.take_image(trow_away_white_images=False)
+        exposure_results: list[dict[Literal["exposure", "mean"], int | float]] = []
+        for exposure in _Helios.available_exposures:
+            _Helios.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
+            assert _Helios.cam.get(cv.CAP_PROP_EXPOSURE) == exposure, f"could not set exposure to {exposure}"
+            img: Any = _Helios.take_image(trow_away_white_images=False)
             mean_color = round(np.mean(img), 3)
-            exposure_results.append({"exposure": e, "mean": mean_color})
+            exposure_results.append({"exposure": exposure, "mean": mean_color})
             img = utils.HeliosImageProcessing.add_text_to_image(
                 img, f"mean={mean_color}", color=(0, 0, 255)
             )
-            cv.imwrite(os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{e}.jpg"), img)
+            cv.imwrite(os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}.jpg"), img)
 
         logger.debug(f"exposure results: {exposure_results}")
 
-        new_exposure = min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"]  # type: ignore
+        new_exposure = int(min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"])
         _Helios.update_camera_settings(exposure=new_exposure)
 
         if new_exposure != _Helios.current_exposure:
