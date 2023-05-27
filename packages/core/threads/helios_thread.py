@@ -157,20 +157,44 @@ class _Helios:
 
         exposure_results: list[dict[Literal["exposure", "mean"], int | float]] = []
         for exposure in _Helios.available_exposures:
+            # set new exposure and wait 0.3s after setting it
             _Helios.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
-            assert _Helios.cam.get(cv.CAP_PROP_EXPOSURE) == exposure, f"could not set exposure to {exposure}"
-            img: Any = _Helios.take_image(trow_away_white_images=False)
-            mean_color = round(np.mean(img), 3)
-            exposure_results.append({"exposure": exposure, "mean": mean_color})
-            img = utils.HeliosImageProcessing.add_text_to_image(
-                img, f"mean={mean_color}", color=(0, 0, 255)
-            )
-            cv.imwrite(os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}.jpg"), img)
+            time.sleep(0.2)
+            assert (
+                _Helios.cam.get(cv.CAP_PROP_EXPOSURE) == exposure
+            ), f"could not set exposure to {exposure}"
+
+            # throw away some images after changing settings. I don't know
+            # why this is necessary, but it resolves a lot of issues
+            for _ in range(3):
+                _Helios.cam.read()
+
+            # take 3 images and wait 0.1s before each image
+            NUMBER_OF_EXPOSURE_IMAGES = 3
+            mean_colors: list[float] = []
+            for i in range(NUMBER_OF_EXPOSURE_IMAGES):
+                time.sleep(0.1)
+                img: Any = _Helios.take_image(trow_away_white_images=False)
+                mean_colors.append(round(np.mean(img), 3))
+                img = utils.HeliosImageProcessing.add_text_to_image(
+                    img, f"mean={mean_colors[-1]}", color=(0, 0, 255)
+                )
+                cv.imwrite(
+                    os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i+1}.jpg"), img
+                )
+
+            # calculate mean color of all 3 images
+            exposure_results.append({"exposure": exposure, "means": mean_colors})
 
         logger.debug(f"exposure results: {exposure_results}")
 
         assert len(exposure_results) > 0, "no possible exposures found"
-        new_exposure = int(min(exposure_results, key=lambda r: abs(r["mean"] - 50))["exposure"])
+        new_exposure = int(
+            min(
+                exposure_results,
+                key=lambda r: abs(sum(r["means"]) / NUMBER_OF_EXPOSURE_IMAGES - 50),
+            )["exposure"]
+        )
         _Helios.update_camera_settings(exposure=new_exposure)
 
         if new_exposure != _Helios.current_exposure:
