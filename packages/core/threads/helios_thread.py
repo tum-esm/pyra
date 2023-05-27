@@ -4,6 +4,7 @@ import time
 import cv2 as cv
 import numpy as np
 from typing import Any, Literal, Optional
+import pydantic
 
 import tum_esm_utils
 from packages.core import types, utils, interfaces
@@ -162,7 +163,12 @@ class _Helios:
         assert _Helios.cam is not None, "camera is not initialized yet"
         assert len(_Helios.available_exposures) > 0
 
-        exposure_results: list[dict[Literal["exposure", "mean"], int | float]] = []
+        class ExposureResult(pydantic.BaseModel):
+            exposure: int
+            means: list[float]
+
+        exposure_results: list[ExposureResult] = []
+
         for exposure in _Helios.available_exposures:
             # set new exposure and wait 0.3s after setting it
             _Helios.cam.set(cv.CAP_PROP_EXPOSURE, exposure)
@@ -182,7 +188,7 @@ class _Helios:
             for i in range(NUMBER_OF_EXPOSURE_IMAGES):
                 time.sleep(0.1)
                 img: Any = _Helios.take_image(trow_away_white_images=False)
-                mean_colors.append(round(np.mean(img), 3))
+                mean_colors.append(round(float(np.mean(img)), 3))
                 img = utils.HeliosImageProcessing.add_text_to_image(
                     img, f"mean={mean_colors[-1]}", color=(0, 0, 255)
                 )
@@ -191,12 +197,12 @@ class _Helios:
                 )
 
             # calculate mean color of all 3 images
-            exposure_results.append({"exposure": exposure, "means": mean_colors})
+            exposure_results.append(ExposureResult(exposure=exposure, means=mean_colors))
 
         logger.debug(f"exposure results: {exposure_results}")
 
         means: list[float] = [
-            sum(r["means"]) / NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results
+            sum(r.means) / NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results
         ]
         for m1, m2 in zip(means[:-1], means[1:]):
             assert m1 < m2 + 5, "mean colors should increase with increasing exposure"
@@ -205,8 +211,8 @@ class _Helios:
         new_exposure = int(
             min(
                 exposure_results,
-                key=lambda r: abs(sum(r["means"]) / NUMBER_OF_EXPOSURE_IMAGES - 50),
-            )["exposure"]
+                key=lambda r: abs(sum(r.means) / NUMBER_OF_EXPOSURE_IMAGES - 50),
+            ).exposure
         )
         _Helios.update_camera_settings(exposure=new_exposure)
 
