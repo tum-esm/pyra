@@ -195,6 +195,12 @@ class _Helios:
 
         logger.debug(f"exposure results: {exposure_results}")
 
+        means: list[float] = [
+            sum(r["means"]) / NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results
+        ]
+        for m1, m2 in zip(means[:-1], means[1:]):
+            assert m1 < m2 + 5, "mean colors should increase with increasing exposure"
+
         assert len(exposure_results) > 0, "no possible exposures found"
         new_exposure = int(
             min(
