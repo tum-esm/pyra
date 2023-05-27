@@ -145,12 +145,19 @@ class _Helios:
 
     @staticmethod
     def adjust_exposure() -> None:
-        """
-        This function will loop over all available exposures and
-        take one image for each exposure. Then it sets exposure
-        to the value where the overall mean pixel value color is
-        closest to 50.
-        """
+        """This function will loop over all available exposures and
+        take one image for each exposure. Then it sets exposure to
+        the value where the overall mean pixel value color is closest
+        to 50.
+
+        **For every exposure:**
+
+        1. set new exposure
+        2. 0.3s sleep
+        3. image 1 -> 0.1s sleep -> image 2 -> 0.1s sleep -> image 3
+        8. calculate mean color of all 3 images
+        9. save images to disk"""
+
         assert _Helios.available_exposures is not None, "camera is not initialized yet"
         assert _Helios.cam is not None, "camera is not initialized yet"
         assert len(_Helios.available_exposures) > 0
@@ -205,12 +212,12 @@ class _Helios:
     def run(save_image: bool) -> float:
         """
         Take an image and evaluate the sun conditions.
-        Run autoexposure function every 3 minutes.
+        Run autoexposure function every 5 minutes.
 
         Returns the edge fraction
         """
         now = time.time()
-        if (now - _Helios.last_autoexposure_time) > 180:
+        if (now - _Helios.last_autoexposure_time) > 300:
             _Helios.adjust_exposure()
             _Helios.last_autoexposure_time = now
 
