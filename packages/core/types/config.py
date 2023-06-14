@@ -516,7 +516,7 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
         lambda: assert_file_path("camtracker.executable_path"),
         lambda: assert_file_path("camtracker.learn_az_elev_path"),
         lambda: assert_file_path("camtracker.sun_intensity_path"),
-        lambda: assert_min_max("camtracker.motor_offset_threshold", -360, 360),
+        lambda: assert_min_max("camtracker.motor_offset_threshold", 0, 360),
         lambda: assert_min_max("measurement_triggers.min_sun_elevation", 0, 90),
         lambda: assert_min_max("measurement_triggers.start_time.hour", 0, 23),
         lambda: assert_min_max("measurement_triggers.stop_time.hour", 0, 23),
