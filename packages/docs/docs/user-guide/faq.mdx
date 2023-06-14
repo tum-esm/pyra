@@ -33,3 +33,24 @@ You can use the CLI command `pyra-cli remove-filelocks` to resolve that.
 We are using the python library `filelock` to enforce exclusive use of state- and log-files: There should not be two processes simultaneously interacting with one of these files. This is necessary because we have at least 4 processes that work with these files: the CLI and the main-, upload- and helios-thread.
 
 :::
+
+## Pyra Shuts Down The CamTracker Very Frequently
+
+There is a config setting `config.camtracker.motor_offset_threshold`, by default set to `10` degrees.
+
+CamTracker reports its motor's offset from the theoretical sun position every few seconds. When the CamTracker has been on for at least 5 minutes, Pyra will check whether that reported offset is greater than the threshold. If so, Pyra will restart the CamTracker because this might mean that the CamTracker has lost the sun and is tracking something else in the sky.
+
+In normal operation, you would see (debug) log lines like this every iteration:
+
+```log
+DEBUG - CamTracker motor position is valid
+```
+
+If the motor position is not valid, you would see something like this:
+
+```log
+INFO - CamTracker motor position is over threshold.
+INFO - Stopping CamTracker. Preparing for reinitialization.
+```
+
+If that restart happens too often for your use case, you can increase this factor - or set it to `360` to disable it completely.
