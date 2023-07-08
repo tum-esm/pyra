@@ -3,7 +3,9 @@
 set -o errexit
 
 echo "Removing old mypy cache"
-rm -rf .mypy_cache 
+rm -rf .mypy_cache/packages
+rm -rf .mypy_cache/tests
+rm -rf .mypy_cache/run_pyra_core.*
 
 echo "Checking run_pyra_core.py"
 mypy run_pyra_core.py
