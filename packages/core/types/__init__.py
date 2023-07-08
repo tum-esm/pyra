@@ -1,7 +1,7 @@
 from .config import ConfigDict, ConfigDictPartial, ConfigSubDicts
 from .config import validate_config_dict
 
-from .plc_specification import PlcSpecificationDict
+from .plc_specification import PlcSpecification
 
 from .plc_state import PlcState
 
