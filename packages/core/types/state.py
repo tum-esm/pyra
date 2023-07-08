@@ -3,7 +3,7 @@ import json
 import os
 import pydantic
 from typing import Literal, Optional
-from .plc_state import PlcStateDict
+from .plc_state import PlcState
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -21,7 +21,7 @@ class _OSStateDict(pydantic.BaseModel):
 class State(pydantic.BaseModel):
     helios_indicates_good_conditions: Literal["yes", "no", "inconclusive"] = "no"
     measurements_should_be_running: bool = False
-    enclosure_plc_readings: PlcStateDict = PlcStateDict()
+    enclosure_plc_readings: PlcState = PlcState()
     os_state: _OSStateDict = _OSStateDict()
 
     @staticmethod

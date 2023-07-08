@@ -1,5 +1,8 @@
 from typing import Optional, TypedDict
 
+# TODO: use pydantic models
+# TODO: use tuples instead of lists
+
 
 class _PlcSpecificationDictActors(TypedDict):
     current_angle: list[int]

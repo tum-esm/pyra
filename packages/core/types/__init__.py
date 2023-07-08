@@ -3,7 +3,7 @@ from .config import validate_config_dict
 
 from .plc_specification import PlcSpecificationDict
 
-from .plc_state import PlcStateDict, PlcStateDictPartial
+from .plc_state import PlcState
 
 from .state import State, PersistentState
 

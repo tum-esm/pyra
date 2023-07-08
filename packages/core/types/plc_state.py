@@ -1,153 +1,53 @@
-from typing import Optional, TypedDict
+from typing import Optional
+import pydantic
 
 
-class _PlcStateDictActors(TypedDict):
-    fan_speed: Optional[int]
-    current_angle: Optional[int]
+class _PlcStateActors(pydantic.BaseModel):
+    fan_speed: Optional[int] = None
+    current_angle: Optional[int] = None
 
 
-class _PlcStateDictActorsPartial(TypedDict, total=False):
-    camera: Optional[bool]
-    fan_speed: Optional[int]
-    current_angle: Optional[int]
+class _PlcStateControl(pydantic.BaseModel):
+    auto_temp_mode: Optional[bool] = None
+    manual_control: Optional[bool] = None
+    manual_temp_mode: Optional[bool] = None
+    sync_to_tracker: Optional[bool] = None
 
 
-class _PlcStateDictControl(TypedDict):
-    auto_temp_mode: Optional[bool]
-    manual_control: Optional[bool]
-    manual_temp_mode: Optional[bool]
-    sync_to_tracker: Optional[bool]
+class _PlcStateSensors(pydantic.BaseModel):
+    humidity: Optional[int] = None
+    temperature: Optional[int] = None
 
 
-class _PlcStateDictControlPartial(TypedDict, total=False):
-    camera: Optional[bool]
-    auto_temp_mode: Optional[bool]
-    manual_control: Optional[bool]
-    manual_temp_mode: Optional[bool]
-    sync_to_tracker: Optional[bool]
+class _PlcStateState(pydantic.BaseModel):
+    cover_closed: Optional[bool] = None
+    motor_failed: Optional[bool] = None
+    rain: Optional[bool] = None
+    reset_needed: Optional[bool] = None
+    ups_alert: Optional[bool] = None
 
 
-class _PlcStateDictSensors(TypedDict):
-    humidity: Optional[int]
-    temperature: Optional[int]
+class _PlcStatePower(pydantic.BaseModel):
+    camera: Optional[bool] = None
+    computer: Optional[bool] = None
+    heater: Optional[bool] = None
+    router: Optional[bool] = None
+    spectrometer: Optional[bool] = None
 
 
-class _PlcStateDictSensorsPartial(TypedDict, total=False):
-    camera: Optional[bool]
-    humidity: Optional[int]
-    temperature: Optional[int]
+class _PlcStateConnections(pydantic.BaseModel):
+    camera: Optional[bool] = None
+    computer: Optional[bool] = None
+    heater: Optional[bool] = None
+    router: Optional[bool] = None
+    spectrometer: Optional[bool] = None
 
 
-class _PlcStateDictState(TypedDict):
-    cover_closed: Optional[bool]
-    motor_failed: Optional[bool]
-    rain: Optional[bool]
-    reset_needed: Optional[bool]
-    ups_alert: Optional[bool]
-
-
-class _PlcStateDictStatePartial(TypedDict, total=False):
-    camera: Optional[bool]
-    cover_closed: Optional[bool]
-    motor_failed: Optional[bool]
-    rain: Optional[bool]
-    reset_needed: Optional[bool]
-    ups_alert: Optional[bool]
-
-
-class _PlcStateDictPower(TypedDict):
-    camera: Optional[bool]
-    computer: Optional[bool]
-    heater: Optional[bool]
-    router: Optional[bool]
-    spectrometer: Optional[bool]
-
-
-class _PlcStateDictPowerPartial(TypedDict, total=False):
-    camera: Optional[bool]
-    computer: Optional[bool]
-    heater: Optional[bool]
-    router: Optional[bool]
-    spectrometer: Optional[bool]
-
-
-class _PlcStateDictConnections(TypedDict):
-    camera: Optional[bool]
-    computer: Optional[bool]
-    heater: Optional[bool]
-    router: Optional[bool]
-    spectrometer: Optional[bool]
-
-
-class _PlcStateDictConnectionsPartial(TypedDict, total=False):
-    camera: Optional[bool]
-    computer: Optional[bool]
-    heater: Optional[bool]
-    router: Optional[bool]
-    spectrometer: Optional[bool]
-
-
-class PlcStateDict(TypedDict):
-    """TypeDict:
-
-    ```ts
-    {
-        last_read_time: string | null,
-        actors: {
-            fan_speed: number | null,
-            current_angle: number | null
-        },
-        control: {
-            auto_temp_mode: boolean | null,
-            manual_control: boolean | null,
-            manual_temp_mode: boolean | null,
-            sync_to_tracker: boolean | null
-        },
-        sensors: {
-            humidity: number | null,
-            temperature: number | null
-        },
-        state: {
-            cover_closed: boolean | null,
-            motor_failed: boolean | null,
-            rain: boolean | null,
-            reset_needed: boolean | null,
-            ups_alert: boolean | null
-        },
-        power: {
-            camera: boolean | null,
-            computer: boolean | null,
-            heater: boolean | null,
-            router: boolean | null,
-            spectrometer: boolean | null
-        },
-        connections: {
-            camera: boolean | null,
-            computer: boolean | null,
-            heater: boolean | null,
-            router: boolean | null,
-            spectrometer: boolean | null
-        }
-    }
-    ```
-    """
-
-    last_read_time: Optional[str]
-    actors: _PlcStateDictActors
-    control: _PlcStateDictControl
-    sensors: _PlcStateDictSensors
-    state: _PlcStateDictState
-    power: _PlcStateDictPower
-    connections: _PlcStateDictConnections
-
-
-class PlcStateDictPartial(TypedDict, total=False):
-    """TypedDict: like `PlcStateDict`, but all fields are optional."""
-
-    last_read_time: Optional[str]
-    actors: _PlcStateDictActorsPartial
-    control: _PlcStateDictControlPartial
-    sensors: _PlcStateDictSensorsPartial
-    state: _PlcStateDictStatePartial
-    power: _PlcStateDictPowerPartial
-    connections: _PlcStateDictConnectionsPartial
+class PlcState(pydantic.BaseModel):
+    last_read_time: Optional[str] = None
+    actors: _PlcStateActors = _PlcStateActors()
+    control: _PlcStateControl = _PlcStateControl()
+    sensors: _PlcStateSensors = _PlcStateSensors()
+    state: _PlcStateState = _PlcStateState()
+    power: _PlcStatePower = _PlcStatePower()
+    connections: _PlcStateConnections = _PlcStateConnections()
