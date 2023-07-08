@@ -1,13 +1,15 @@
 import os
 import time
-from typing import Any, Optional
+from typing import Callable, Literal, Optional
 from packages.core import types, utils, interfaces, modules, threads
 
 logger = utils.Logger(origin="main")
 
 
 def _update_exception_state(
-    config: types.ConfigDict, current_exceptions: list[str], new_exception: Optional[Exception]
+    config: types.ConfigDict,
+    current_exceptions: list[str],
+    new_exception: Optional[Exception],
 ) -> list[str]:
     """
     Take a list of current_exceptions (all exceptions that are
@@ -96,12 +98,26 @@ def run() -> None:
     # these modules will be executed one by one in each
     # mainloop iteration
     logger.info("Initializing mainloop modules")
-    mainloop_modules: list[Any] = [
-        modules.measurement_conditions.MeasurementConditions(config),
-        modules.enclosure_control.EnclosureControl(config),
-        modules.sun_tracking.SunTracking(config),
-        modules.opus_measurement.OpusMeasurement(config),
-        modules.system_checks.SystemChecks(config),
+    mainloop_modules: list[
+        tuple[
+            Literal[
+                "measurement-conditions",
+                "enclosure-control",
+                "sun-tracking",
+                "opus-measurement",
+                "system-checks",
+            ],
+            Callable[[types.ConfigDict], None],
+        ]
+    ] = [
+        (
+            "measurement-conditions",
+            modules.measurement_conditions.MeasurementConditions(config).run,
+        ),
+        ("enclosure-control", modules.enclosure_control.EnclosureControl(config).run),
+        ("sun-tracking", modules.sun_tracking.SunTracking(config).run),
+        ("opus-measurement", modules.opus_measurement.OpusMeasurement(config).run),
+        ("system-checks", modules.system_checks.SystemChecks(config).run),
     ]
 
     # these thread classes always exist and start their
@@ -139,17 +155,28 @@ def run() -> None:
         # encounters an exception, this inner loop stops
         # and the exception will be processed (logs, emails)
         new_exception = None
-        try:
-            for m in mainloop_modules:
-                m.run(config)
-        except Exception as e:
-            new_exception = e
-            logger.exception(new_exception)
+        for module_name, module_function in mainloop_modules:
+            try:
+                module_function(config)
+            except Exception as e:
+                new_exception = e
+                logger.exception(new_exception)
 
-        # update the list of currently present exceptions
-        # send error emails on new exceptions, send resolved
-        # emails when no errors are present anymore
-        current_exceptions = _update_exception_state(config, current_exceptions, new_exception)
+                # update the list of currently present exceptions
+                # send error emails on new exceptions, send resolved
+                # emails when no errors are present anymore
+                current_exceptions = _update_exception_state(
+                    config, current_exceptions, new_exception
+                )
+                if module_name == "measurement-conditions":
+                    logger.debug(
+                        "Skipping remaining modules due to exception in measurement-conditions"
+                    )
+                    break
+
+        # send resolved email if no exceptions are present anymore
+        if new_exception is None:
+            current_exceptions = _update_exception_state(config, current_exceptions, None)
 
         # wait rest of loop time
         logger.info("Ending iteration")
