@@ -114,8 +114,7 @@ class StateInterface:
 
         # possibly create the persistent state file
         if not os.path.isfile(_PERSISTENT_STATE_FILE_PATH):
-            with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
-                json.dump(types.PersistentState(), f, indent=4)
+            types.PersistentState().dump()
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
@@ -147,15 +146,11 @@ class StateInterface:
     def read_persistent_without_filelock() -> types.PersistentState:
         """Read the persistent state file and return its content"""
         try:
-            with open(_PERSISTENT_STATE_FILE_PATH, "r") as f:
-                current_object = json.load(f)
-                assert isinstance(current_object, dict)
-                return types.PersistentState(**current_object)
+            return types.PersistentState.load()
         except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
             logger.warning("reinitializing the corrupted persistent state file")
             new_object = types.PersistentState()
-            with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
-                json.dump(new_object.model_dump(), f, indent=4)
+            new_object.dump()
             return new_object
 
     @staticmethod
@@ -182,5 +177,4 @@ class StateInterface:
             current_state.active_opus_macro_id = update.active_opus_macro_id
         if update.current_exceptions is not None:
             current_state.current_exceptions = update.current_exceptions
-        with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
-            json.dump(current_state.model_dump(), f, indent=4)
+        current_state.dump()
