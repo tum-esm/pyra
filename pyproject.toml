@@ -19,12 +19,12 @@ opencv-python = "4.7.0.72"
 jdcal = "1.4.1"
 psutil = "5.9.4"
 fabric = "2.7.1"
-pydantic = "1.10.7"
 tqdm = "4.65.0"
 colorama = "0.4.6"
 deepdiff = "6.3.0"
 skyfield = "^1.46"
 tum-esm-utils = "^1.5.2"
+pydantic = "^2.0.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.2.2"
