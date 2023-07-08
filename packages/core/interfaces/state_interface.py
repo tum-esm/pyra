@@ -1,6 +1,8 @@
+from __future__ import annotations
 import json
 import os
 import shutil
+from pydantic_core._pydantic_core import ValidationError
 
 import tum_esm_utils
 from packages.core import types, utils
@@ -64,11 +66,6 @@ _EMPTY_STATE_OBJECT: types.StateDict = {
     },
 }
 
-_EMPTY_PERSISTENT_STATE_OBJECT: types.PersistentStateDict = {
-    "active_opus_macro_id": None,
-    "current_exceptions": [],
-}
-
 logger = utils.Logger(origin="state-interface")
 
 
@@ -101,10 +98,7 @@ class StateInterface:
     ```"""
 
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(
-        lockfile_path=_STATE_LOCK_PATH,
-        timeout=10,
-    )
+    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
     def initialize() -> None:
         """Clear `state.json`, create empty `prersistent-state.json` if
         it does not exist yet."""
@@ -121,13 +115,10 @@ class StateInterface:
         # possibly create the persistent state file
         if not os.path.isfile(_PERSISTENT_STATE_FILE_PATH):
             with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
-                json.dump(_EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
+                json.dump(types.PersistentState(), f, indent=4)
 
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(
-        lockfile_path=_STATE_LOCK_PATH,
-        timeout=10,
-    )
+    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
     def read() -> types.StateDict:
         """Read the state file and return its content"""
         return StateInterface.read_without_filelock()
@@ -147,33 +138,28 @@ class StateInterface:
             return _EMPTY_STATE_OBJECT
 
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(
-        lockfile_path=_STATE_LOCK_PATH,
-        timeout=10,
-    )
-    def read_persistent() -> types.PersistentStateDict:
+    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
+    def read_persistent() -> types.PersistentState:
         """Read the persistent state file and return its content"""
         return StateInterface.read_persistent_without_filelock()
 
     @staticmethod
-    def read_persistent_without_filelock() -> types.PersistentStateDict:
+    def read_persistent_without_filelock() -> types.PersistentState:
         """Read the persistent state file and return its content"""
         try:
             with open(_PERSISTENT_STATE_FILE_PATH, "r") as f:
-                new_object: types.PersistentStateDict = json.load(f)
-                types.validate_persistent_state_dict(new_object)
-                return new_object
-        except (FileNotFoundError, json.JSONDecodeError):
+                current_object = json.load(f)
+                assert isinstance(current_object, dict)
+                return types.PersistentState(**current_object)
+        except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
             logger.warning("reinitializing the corrupted persistent state file")
+            new_object = types.PersistentState()
             with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
-                json.dump(_EMPTY_PERSISTENT_STATE_OBJECT, f, indent=4)
-            return _EMPTY_PERSISTENT_STATE_OBJECT
+                json.dump(new_object.model_dump(), f, indent=4)
+            return new_object
 
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(
-        lockfile_path=_STATE_LOCK_PATH,
-        timeout=10,
-    )
+    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
     def update(update: types.StateDictPartial) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be
@@ -185,16 +171,16 @@ class StateInterface:
             json.dump(new_state, f, indent=4)
 
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(
-        lockfile_path=_STATE_LOCK_PATH,
-        timeout=10,
-    )
-    def update_persistent(update: types.PersistentStateDictPartial) -> None:
+    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
+    def update_persistent(update: types.PersistentStatePartial) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be
         changed in contrast to containing the whole file."""
 
         current_state = StateInterface.read_persistent_without_filelock()
-        new_state = tum_esm_utils.datastructures.merge_dicts(current_state, update)
+        if update.active_opus_macro_id is not None:
+            current_state.active_opus_macro_id = update.active_opus_macro_id
+        if update.current_exceptions is not None:
+            current_state.current_exceptions = update.current_exceptions
         with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
-            json.dump(new_state, f, indent=4)
+            json.dump(current_state.model_dump(), f, indent=4)

@@ -355,7 +355,7 @@ class OpusMeasurement:
         assert sys.platform == "win32"
 
         if self.config["opus"]["experiment_path"] != self.current_experiment:
-            if interfaces.StateInterface.read_persistent()["active_opus_macro_id"] == None:
+            if interfaces.StateInterface.read_persistent().active_opus_macro_id == -1:
                 self.load_experiment()
             else:
                 self.stop_macro()
