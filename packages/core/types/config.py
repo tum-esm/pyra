@@ -552,8 +552,8 @@ def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = F
 
 
 class _ValidationModel(pydantic.BaseModel):
-    regular: Optional[ConfigDict]
-    partial: Optional[ConfigDictPartial]
+    regular: Optional[ConfigDict] = None
+    partial: Optional[ConfigDictPartial] = None
 
     class Config:
         extra = "forbid"

@@ -58,5 +58,5 @@ def validate_state_dict(o: Any, partial: bool = False) -> None:
 
 
 class _ValidationModel(pydantic.BaseModel):
-    regular: Optional[StateDict]
-    partial: Optional[StateDictPartial]
+    regular: Optional[StateDict] = None
+    partial: Optional[StateDictPartial] = None

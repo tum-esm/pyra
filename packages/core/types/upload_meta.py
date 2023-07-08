@@ -45,5 +45,5 @@ def validate_upload_meta_dict(o: Any, partial: bool = False) -> None:
 
 
 class _ValidationModel(pydantic.BaseModel):
-    regular: Optional[UploadMetaDict]
-    partial: Optional[UploadMetaDictPartial]
+    regular: Optional[UploadMetaDict] = None
+    partial: Optional[UploadMetaDictPartial] = None
