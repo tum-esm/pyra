@@ -3,69 +3,13 @@ import json
 import os
 import shutil
 from pydantic_core._pydantic_core import ValidationError
-
 import tum_esm_utils
 from packages.core import types, utils
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".state.lock")
-
 _RUNTIME_DATA_PATH = os.path.join(_PROJECT_DIR, "runtime-data")
-_STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "runtime-data", "state.json")
-
-_PERSISTENT_STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "persistent-state.json")
-
-
-_EMPTY_STATE_OBJECT: types.StateDict = {
-    "helios_indicates_good_conditions": None,
-    "measurements_should_be_running": False,
-    "enclosure_plc_readings": {
-        "last_read_time": None,
-        "actors": {
-            "fan_speed": None,
-            "current_angle": None,
-        },
-        "control": {
-            "auto_temp_mode": None,
-            "manual_control": None,
-            "manual_temp_mode": None,
-            "sync_to_tracker": None,
-        },
-        "sensors": {
-            "humidity": None,
-            "temperature": None,
-        },
-        "state": {
-            "cover_closed": None,
-            "motor_failed": None,
-            "rain": None,
-            "reset_needed": None,
-            "ups_alert": None,
-        },
-        "power": {
-            "camera": None,
-            "computer": None,
-            "heater": None,
-            "router": None,
-            "spectrometer": None,
-        },
-        "connections": {
-            "camera": None,
-            "computer": None,
-            "heater": None,
-            "router": None,
-            "spectrometer": None,
-        },
-    },
-    "os_state": {
-        "cpu_usage": None,
-        "memory_usage": None,
-        "last_boot_time": None,
-        "filled_disk_space_fraction": None,
-    },
-}
-
 logger = utils.Logger(origin="state-interface")
 
 
@@ -109,32 +53,30 @@ class StateInterface:
         os.mkdir(_RUNTIME_DATA_PATH)
 
         # create the state file
-        with open(_STATE_FILE_PATH, "w") as f:
-            json.dump(_EMPTY_STATE_OBJECT, f, indent=4)
+        types.State().dump()
 
         # possibly create the persistent state file
-        if not os.path.isfile(_PERSISTENT_STATE_FILE_PATH):
+        try:
+            types.PersistentState.load()
+        except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
             types.PersistentState().dump()
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def read() -> types.StateDict:
+    def read() -> types.State:
         """Read the state file and return its content"""
         return StateInterface.read_without_filelock()
 
     @staticmethod
-    def read_without_filelock() -> types.StateDict:
+    def read_without_filelock() -> types.State:
         """Read the state file and return its content"""
         try:
-            with open(_STATE_FILE_PATH, "r") as f:
-                new_object: types.StateDict = json.load(f)
-                types.validate_state_dict(new_object)
-                return new_object
-        except (FileNotFoundError, json.JSONDecodeError):
+            return types.State.load()
+        except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
             logger.warning("reinitializing the corrupted state file")
-            with open(_STATE_FILE_PATH, "w") as f:
-                json.dump(_EMPTY_STATE_OBJECT, f, indent=4)
-            return _EMPTY_STATE_OBJECT
+            new_object = types.State()
+            new_object.dump()
+            return new_object
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
@@ -155,15 +97,25 @@ class StateInterface:
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def update(update: types.StateDictPartial) -> None:
+    def update(update: types.StatePartial) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be
         changed in contrast to containing the whole file."""
 
         current_state = StateInterface.read_without_filelock()
-        new_state = tum_esm_utils.datastructures.merge_dicts(current_state, update)
-        with open(_STATE_FILE_PATH, "w") as f:
-            json.dump(new_state, f, indent=4)
+        if update.helios_indicates_good_conditions is not None:
+            current_state.helios_indicates_good_conditions = (
+                update.helios_indicates_good_conditions
+            )
+        if update.measurements_should_be_running is not None:
+            current_state.measurements_should_be_running = (
+                update.measurements_should_be_running
+            )
+        if update.enclosure_plc_readings is not None:
+            current_state.enclosure_plc_readings = update.enclosure_plc_readings
+        if update.os_state is not None:
+            current_state.os_state = update.os_state
+        current_state.dump()
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
