@@ -63,9 +63,12 @@ def _reset() -> None:
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
-                interfaces.StateInterface.update(
-                    {"enclosure_plc_readings": {"state": {"reset_needed": False}}}
-                )
+
+                def apply_state_update(state: types.State) -> types.State:
+                    state.enclosure_plc_readings["state"]["reset_needed"] = False
+                    return state
+
+                interfaces.StateInterface.update(apply_state_update)
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
         _print_green("Ok")
@@ -82,14 +85,13 @@ def _wait_until_cover_is_at_angle(
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
-            interfaces.StateInterface.update(
-                {
-                    "enclosure_plc_readings": {
-                        "actors": {"current_angle": new_cover_angle},
-                        "state": {"cover_closed": new_cover_angle == 0},
-                    }
-                }
-            )
+
+            def apply_state_update(state: types.State) -> types.State:
+                state.enclosure_plc_readings["actors"]["current_angle"] = new_cover_angle
+                state.enclosure_plc_readings["state"]["cover_closed"] = new_cover_angle == 0
+                return state
+
+            interfaces.StateInterface.update(apply_state_update)
             break
 
         if running_time > timeout:

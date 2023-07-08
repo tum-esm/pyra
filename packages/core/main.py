@@ -40,10 +40,11 @@ def _update_exception_state(
                 logger.info(f"All exceptions have been resolved.")
                 utils.Logger.log_activity_event("errors-resolved")
 
-        # if no errors until now
-        interfaces.StateInterface.update_persistent(
-            types.PersistentStatePartial(current_exceptions=current_exceptions)
-        )
+        def apply_state_update(state: types.PersistentState) -> types.PersistentState:
+            state.current_exceptions = updated_current_exceptions
+            return state
+
+        interfaces.StateInterface.update_persistent(apply_state_update)
         return updated_current_exceptions
 
     except Exception as e:

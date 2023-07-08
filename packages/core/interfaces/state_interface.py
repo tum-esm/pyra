@@ -2,6 +2,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+from typing import Callable
 from pydantic_core._pydantic_core import ValidationError
 import tum_esm_utils
 from packages.core import types, utils
@@ -97,36 +98,22 @@ class StateInterface:
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def update(update: types.StatePartial) -> None:
+    def update(apply_update: Callable[[types.State], types.State]) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be
         changed in contrast to containing the whole file."""
 
         current_state = StateInterface.read_without_filelock()
-        if update.helios_indicates_good_conditions is not None:
-            current_state.helios_indicates_good_conditions = (
-                update.helios_indicates_good_conditions
-            )
-        if update.measurements_should_be_running is not None:
-            current_state.measurements_should_be_running = (
-                update.measurements_should_be_running
-            )
-        if update.enclosure_plc_readings is not None:
-            current_state.enclosure_plc_readings = update.enclosure_plc_readings
-        if update.os_state is not None:
-            current_state.os_state = update.os_state
-        current_state.dump()
+        apply_update(current_state).dump()
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def update_persistent(update: types.PersistentStatePartial) -> None:
+    def update_persistent(
+        apply_update: Callable[[types.PersistentState], types.PersistentState]
+    ) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be
         changed in contrast to containing the whole file."""
 
         current_state = StateInterface.read_persistent_without_filelock()
-        if update.active_opus_macro_id is not None:
-            current_state.active_opus_macro_id = update.active_opus_macro_id
-        if update.current_exceptions is not None:
-            current_state.current_exceptions = update.current_exceptions
-        current_state.dump()
+        apply_update(current_state).dump()

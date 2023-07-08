@@ -42,13 +42,6 @@ class State(pydantic.BaseModel):
             json.dump(self.model_dump(), f, indent=4)
 
 
-class StatePartial(pydantic.BaseModel):
-    helios_indicates_good_conditions: Optional[Literal["yes", "no", "inconclusive"]] = None
-    measurements_should_be_running: Optional[bool] = None
-    enclosure_plc_readings: Optional[PlcStateDict] = None
-    os_state: Optional[_OSStateDict] = None
-
-
 class PersistentState(pydantic.BaseModel):
     """A pydantic model for the persistent state file."""
 
@@ -71,10 +64,3 @@ class PersistentState(pydantic.BaseModel):
 
         with open(_PERSISTENT_STATE_FILE_PATH, "w") as f:
             json.dump(self.model_dump(), f, indent=4)
-
-
-class PersistentStatePartial(pydantic.BaseModel):
-    """A pydantic model for the persistent state file."""
-
-    active_opus_macro_id: Optional[int] = None
-    current_exceptions: Optional[list[str]] = None

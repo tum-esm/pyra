@@ -63,9 +63,10 @@ class MeasurementConditions:
             measurements_should_be_running = decision["cli_decision_result"]
         if decision["mode"] == "automatic":
             measurements_should_be_running = self._get_automatic_decision()
+        assert isinstance(measurements_should_be_running, bool)
 
         if (
-            interfaces.StateInterface.read()["measurements_should_be_running"]
+            interfaces.StateInterface.read().measurements_should_be_running
             != measurements_should_be_running
         ):
             utils.Logger.log_activity_event(
@@ -75,10 +76,12 @@ class MeasurementConditions:
         logger.info(
             f"Measurements should be running is set to: {measurements_should_be_running}."
         )
-        # Update of the StateInterface with the latest measurement decision
-        interfaces.StateInterface.update(
-            {"measurements_should_be_running": measurements_should_be_running}
-        )
+
+        def apply_state_update(state: types.State) -> types.State:
+            state.measurements_should_be_running = measurements_should_be_running
+            return state
+
+        interfaces.StateInterface.update(apply_state_update)
 
     def _get_automatic_decision(self) -> bool:
         """Evaluates the activated automatic mode triggers (Sun Angle, Time, Helios).
@@ -124,17 +127,15 @@ class MeasurementConditions:
         # Helios runs in a thread and evaluates the sun conditions consistanly during day.
         if triggers["consider_helios"]:
             logger.info("Helios as a trigger is considered.")
-            helios_result = interfaces.StateInterface.read()[
-                "helios_indicates_good_conditions"
-            ]
+            helios_result = interfaces.StateInterface.read().helios_indicates_good_conditions
 
-            if helios_result is None:
+            if helios_result == "inconclusive":
                 logger.debug(f"Helios does not nave enough images yet.")
                 return False
 
             logger.debug(
-                f"Helios indicates {'good' if helios_result else 'bad'} sun conditions."
+                f"Helios indicates {'good' if helios_result == 'yes' else 'bad'} sun conditions."
             )
-            return helios_result
+            return helios_result == "yes"
 
         return True

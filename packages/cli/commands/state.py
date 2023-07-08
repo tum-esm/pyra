@@ -5,7 +5,7 @@ import click
 import os
 
 import tum_esm_utils
-from packages.core import utils, interfaces
+from packages.core import interfaces
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))

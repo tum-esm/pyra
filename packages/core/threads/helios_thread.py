@@ -358,9 +358,12 @@ class HeliosThread:
                 if not helios_should_be_running:
                     logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
                     if current_state is not None:
-                        interfaces.StateInterface.update(
-                            {"helios_indicates_good_conditions": False}
-                        )
+
+                        def apply_state_update(state: types.State) -> types.State:
+                            state.helios_indicates_good_conditions = "no"
+                            return state
+
+                        interfaces.StateInterface.update(apply_state_update)
                         current_state = None
                         # reinit for next day
                         _Helios.deinit()
@@ -397,7 +400,7 @@ class HeliosThread:
                 )
 
                 # evaluate sun state only if list is filled
-                new_state = current_state
+                new_state: Optional[bool] = current_state
                 if edge_fraction_history.is_full():
                     average_edge_fraction = float(
                         edge_fraction_history.sum() / edge_fraction_history.get_max_size()
@@ -427,9 +430,18 @@ class HeliosThread:
                     logger.info(
                         f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
                     )
-                    interfaces.StateInterface.update(
-                        {"helios_indicates_good_conditions": new_state}
-                    )
+
+                    def apply_state_update(state: types.State) -> types.State:
+                        state.helios_indicates_good_conditions = (
+                            "inconclusive"
+                            if (new_state is None)
+                            else "yes"
+                            if new_state
+                            else "no"
+                        )
+                        return state
+
+                    interfaces.StateInterface.update(apply_state_update)
                     current_state = new_state
 
                 # wait rest of loop time

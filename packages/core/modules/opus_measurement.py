@@ -114,9 +114,9 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = interfaces.StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        measurements_should_be_running = (
+            interfaces.StateInterface.read().measurements_should_be_running
+        )
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: start macro

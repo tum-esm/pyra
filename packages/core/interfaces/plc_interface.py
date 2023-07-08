@@ -90,7 +90,8 @@ class PLCInterface:
     """Uses the snap7 library to connect to the Siemens PLC operating the
     enclosure hardware.
 
-    Manual: https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf"""
+    Manual: https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
+    """
 
     @staticmethod
     class PLCError(Exception):
@@ -325,7 +326,10 @@ class PLCInterface:
     # PLC.POWER SETTERS
 
     def __update_bool(
-        self, new_state: bool, spec: list[int], partial_plc_state: types.PlcStateDictPartial
+        self,
+        new_state: bool,
+        spec: list[int],
+        partial_plc_state: types.PlcStateDictPartial,
     ) -> None:
         """
         1. low-level direct-write new_state to PLC according to spec
@@ -337,7 +341,12 @@ class PLCInterface:
         if self.__read_bool(spec) != new_state:
             raise PLCInterface.PLCError("PLC state did not change")
 
-        interfaces.StateInterface.update({"enclosure_plc_readings": partial_plc_state})
+        def apply_state_update(state: types.State) -> types.State:
+            # TODO: fix this recursive update
+            # state.enclosure_plc_readings = partial_plc_state
+            return state
+
+        interfaces.StateInterface.update(apply_state_update)
 
     def set_power_camera(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""

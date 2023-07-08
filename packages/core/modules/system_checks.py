@@ -37,13 +37,11 @@ class SystemChecks:
         # raises error if system battery is below 20%
         interfaces.OSInterface.validate_system_battery()
 
-        interfaces.StateInterface.update(
-            {
-                "os_state": {
-                    "cpu_usage": cpu_usage,
-                    "memory_usage": memory_usage,
-                    "last_boot_time": last_boot_time,
-                    "filled_disk_space_fraction": disk_space,
-                }
-            }
-        )
+        def apply_state_update(state: types.State) -> types.State:
+            state.os_state.cpu_usage = cpu_usage
+            state.os_state.memory_usage = memory_usage
+            state.os_state.last_boot_time = last_boot_time
+            state.os_state.filled_disk_space_fraction = disk_space
+            return state
+
+        interfaces.StateInterface.update(apply_state_update)

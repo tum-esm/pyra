@@ -75,9 +75,9 @@ class EnclosureControl:
         logger.info("Running EnclosureControl")
 
         # Check for current measurement status
-        self.measurements_should_be_running = interfaces.StateInterface.read()[
-            "measurements_should_be_running"
-        ]
+        self.measurements_should_be_running = (
+            interfaces.StateInterface.read().measurements_should_be_running
+        )
 
         # Updates the current loop to the latest config.
         # Performs a connect to the PLC for the duration of this loop.
@@ -99,7 +99,12 @@ class EnclosureControl:
 
             # Push the latest readout of the PLC state to the StateInterface
             logger.info("New continuous readings.")
-            interfaces.StateInterface.update({"enclosure_plc_readings": self.plc_state})
+
+            def apply_state_update(state: types.State) -> types.State:
+                state.enclosure_plc_readings = self.plc_state
+                return state
+
+            interfaces.StateInterface.update(apply_state_update)
 
             # Check for critial error: Motor Failed Flag in PLC. In case of present
             # motor failed flag the cover might not be closed in bad weather
