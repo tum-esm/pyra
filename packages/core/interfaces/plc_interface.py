@@ -221,12 +221,12 @@ class PLCInterface:
 
         logger.debug(f"new plc bulk read: {plc_db_content}")
 
-        def _get_int(spec: Optional[list[int]]) -> Optional[int]:
+        def _get_int(spec: Optional[tuple[int, int, int]]) -> Optional[int]:
             if spec is None:
                 return None
             return snap7.util.get_int(plc_db_content[spec[0]], spec[1])  # type: ignore
 
-        def _get_bool(spec: Optional[list[int]]) -> Optional[bool]:
+        def _get_bool(spec: Optional[tuple[int, int, int, int]]) -> Optional[bool]:
             if spec is None:
                 return None
             return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])  # type: ignore
@@ -286,14 +286,12 @@ class PLCInterface:
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
             time.sleep(2)
 
-    def __read_int(self, action: list[int]) -> int:
+    def __read_int(self, action: tuple[int, int, int]) -> int:
         """
         Reads an INT value in the PLC database.
 
         action is tuple: db_number, start, size
         """
-        assert len(action) == 3
-
         msg: bytearray = self.plc.db_read(*action)
         value: int = snap7.util.get_int(msg, 0)
 
@@ -301,9 +299,8 @@ class PLCInterface:
 
         return value
 
-    def __write_int(self, action: list[int], value: int) -> None:
+    def __write_int(self, action: tuple[int, int, int], value: int) -> None:
         """Changes an INT value in the PLC database."""
-        assert len(action) == 3
         db_number, start, size = action
 
         msg = bytearray(size)
@@ -312,9 +309,8 @@ class PLCInterface:
 
         self.__sleep_while_cpu_is_busy()
 
-    def __read_bool(self, action: list[int]) -> bool:
+    def __read_bool(self, action: tuple[int, int, int, int]) -> bool:
         """Reads a BOOL value in the PLC database."""
-        assert len(action) == 4
         db_number, start, size, bool_index = action
 
         msg: bytearray = self.plc.db_read(db_number, start, size)
@@ -324,9 +320,8 @@ class PLCInterface:
 
         return value
 
-    def __write_bool(self, action: list[int], value: bool) -> None:
+    def __write_bool(self, action: tuple[int, int, int, int], value: bool) -> None:
         """Changes a BOOL value in the PLC database."""
-        assert len(action) == 4
         db_number, start, size, bool_index = action
 
         msg = self.plc.db_read(db_number, start, size)
@@ -337,7 +332,7 @@ class PLCInterface:
 
     # PLC.POWER SETTERS
 
-    def __update_bool(self, new_state: bool, spec: list[int]) -> None:
+    def __update_bool(self, new_state: bool, spec: tuple[int, int, int, int]) -> None:
         """
         1. low-level direct-write new_state to PLC according to spec
         2. low-level direct-read of plc's value according to spec
