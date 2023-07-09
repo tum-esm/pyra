@@ -1,26 +1,27 @@
 import sys
 import os
-import json
 import hashlib
+import pathlib
+
 
 assert len(sys.argv) == 2, 'call this script with "python <scriptname> <directoryname>"'
 assert sys.version.startswith("3.10"), "script requires Python 3.10"
 
 # check whether upload directory and meta file exist
-upload_directory = sys.argv[1]
-upload_meta_path = os.path.join(upload_directory, "upload-meta.json")
+upload_directory = sys.argv[1].rstrip("/")
 assert os.path.isdir(upload_directory), f'"{upload_directory}" is not a directory'
-assert os.path.isfile(upload_meta_path), f'"{upload_meta_path}" is not a file'
+date_string = upload_directory.split("/")[-1]
 
-# get and validate fileList
-with open(upload_meta_path) as f:
-    upload_meta = json.load(f)
-file_list = upload_meta["fileList"]
-assert isinstance(file_list, list), f"upload_meta.fileList is not a list"
+
+ifg_files: list[str] = []
+for p in pathlib.Path(upload_directory).glob(f"*{date_string}*"):
+    if p.is_file():
+        ifg_files.append(str(p))
+
 
 # calculate checksum over all files (sorted)
 hasher = hashlib.md5()
-for filename in sorted(file_list):
+for filename in sorted(ifg_files):
     filepath = os.path.join(upload_directory, filename)
     with open(filepath, "rb") as f:
         hasher.update(f.read())
