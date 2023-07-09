@@ -4,7 +4,6 @@ import json
 import os
 import shutil
 import threading
-from typing import Optional
 import deepdiff
 import invoke
 import time
@@ -51,34 +50,32 @@ class DirectoryUploadClient:
         self.connection = connection
         self.transfer_process = transfer_process
 
-        self.src_meta_path = os.path.join(self.src_path, self.date_string, "upload-meta.json")
-        self.dst_meta_path = os.path.join(
-            f"{self.dst_path}/{self.date_string}/upload-meta.json"
-        )
-
         assert self.transfer_process.is_remote_dir(
             self.dst_path
         ), f"remote {self.dst_path} is not a directory"
 
-        self.meta_content: types.UploadMetaDict = {
-            "complete": False,
-            "fileList": [],
-            "createdTime": round(time.time(), 3),
-            "lastModifiedTime": round(time.time(), 3),
-        }
+        src_file_path = os.path.join(self.src_path, self.date_string, "upload-meta.json")
+        dst_file_path = os.path.join(f"{self.dst_path}/{self.date_string}/upload-meta.json")
 
-    def __initialize_remote_dir(self) -> None:
-        """
-        If the respective dst directory does not exist,
-        create the directory and add a fresh upload-meta.json
-        file to it.
-        """
+        # TODO: push error raising into init function
         dst_dir_path = f"{self.dst_path}/{self.date_string}"
-        if not self.transfer_process.is_remote_dir(dst_dir_path):
+        if self.transfer_process.is_remote_dir(dst_dir_path):
+            try:
+                self.meta = types.UploadMeta.init_from_remote(
+                    src_file_path, dst_file_path, self.transfer_process
+                )
+            except (
+                FileNotFoundError,
+                AssertionError,
+                json.JSONDecodeError,
+                pydantic.ValidationError,
+            ) as e:
+                raise InvalidUploadState(str(e))
+        else:
             self.connection.run(f"mkdir {dst_dir_path}", hide=True, in_stream=False)
-            with open(self.src_meta_path, "w") as f:
-                json.dump(self.meta_content, f, indent=4)
-            self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
+            self.meta = types.UploadMeta.init_from_local(
+                src_file_path, dst_file_path, self.transfer_process
+            )
 
     def __get_remote_directory_checksum(self) -> str:
         """
@@ -116,15 +113,13 @@ class DirectoryUploadClient:
             )
 
     def __get_local_directory_checksum(self) -> str:
-        """
-        Calculate checksum over all files listed in the
+        """Calculate checksum over all files listed in the
         upload-meta.json file. The same logic will run
         on the server - which also has a meta file in
-        its dst directory with the same contents
-        """
+        its dst directory with the same contents"""
 
         hasher = hashlib.md5()
-        for filename in sorted(self.meta_content["fileList"]):
+        for filename in sorted(self.meta.fileList):
             filepath = os.path.join(self.src_path, self.date_string, filename)
             with open(filepath, "rb") as f:
                 hasher.update(f.read())
@@ -132,42 +127,6 @@ class DirectoryUploadClient:
         # output hashsum - with a status code of 0 the programs
         # stdout is a checksum, otherwise it is a traceback
         return hasher.hexdigest()
-
-    def __fetch_meta(self) -> None:
-        """
-        Download the remote meta file to the local src directory
-        """
-
-        if os.path.isfile(self.src_meta_path):
-            os.remove(self.src_meta_path)
-        self.transfer_process.get(self.dst_meta_path, self.src_meta_path)
-        try:
-            assert os.path.isfile(self.src_meta_path)
-            with open(self.src_meta_path, "r") as f:
-                new_meta_content = json.load(f)
-                types.validate_upload_meta_dict(new_meta_content)
-                self.meta_content = new_meta_content
-        except (AssertionError, json.JSONDecodeError, pydantic.ValidationError) as e:
-            raise InvalidUploadState(str(e))
-
-    def __update_meta(
-        self,
-        update: Optional[types.UploadMetaDictPartial] = None,
-        sync_remote_meta: bool = True,
-    ) -> None:
-        """
-        Update the local upload-meta.json file and overwrite
-        the meta file on the server when sync==True
-        """
-
-        if update is not None:
-            self.meta_content.update(update)
-            self.meta_content.update({"lastModifiedTime": round(time.time(), 3)})
-            with open(self.src_meta_path, "w") as f:
-                json.dump(self.meta_content, f, indent=4)
-
-        if sync_remote_meta:
-            self.transfer_process.put(self.src_meta_path, self.dst_meta_path)
 
     def run(self) -> None:
         """
@@ -185,15 +144,12 @@ class DirectoryUploadClient:
         7. Optionally remove local ifgs
         """
 
-        self.__initialize_remote_dir()
-        self.__fetch_meta()
-
         # determine files present in src and dst directory
         # files should be named like "<anything>YYYYMMDD<anything>"
         ifg_file_pattern = re.compile("^.*" + self.date_string + ".*$")
         raw_src_files = os.listdir(os.path.join(self.src_path, self.date_string))
         src_file_set = set([f for f in raw_src_files if ifg_file_pattern.match(f)])
-        dst_file_set = set(self.meta_content["fileList"])
+        dst_file_set = set(self.meta.fileList)
 
         # determine file differences between src and dst
         files_missing_in_dst = src_file_set.difference(dst_file_set)
@@ -207,7 +163,7 @@ class DirectoryUploadClient:
         # if there are files that have not been uploaded,
         # assert that the remote meta also indicates an
         # incomplete upload state
-        if (len(files_missing_in_dst) != 0) and self.meta_content["complete"]:
+        if (len(files_missing_in_dst) != 0) and self.meta.complete:
             raise InvalidUploadState(
                 "missing files on dst but remote meta contains complete=True"
             )
@@ -219,15 +175,14 @@ class DirectoryUploadClient:
                 os.path.join(self.src_path, self.date_string, f),
                 f"{self.dst_path}/{self.date_string}/{f}",
             )
+            self.meta.fileList.append(f)
+
             # update the local meta in every loop, but only
             # sync the remote meta every 25 iterations
-            self.__update_meta(
-                update={"fileList": [*self.meta_content["fileList"], f]},
-                sync_remote_meta=(i % 25 == 0),
+            sync_remote_meta = ((i + 1) % 25 == 0) or (i == len(files_missing_in_dst) - 1)
+            self.meta.dump(
+                transfer_process=self.transfer_process if sync_remote_meta else None
             )
-
-        # make sure that the remote meta is synced
-        self.__update_meta()
 
         # raise an exception if the checksums do not match
         remote_checksum = self.__get_remote_directory_checksum()
@@ -239,7 +194,8 @@ class DirectoryUploadClient:
             )
 
         # only set meta.complete to True, when the checksums match
-        self.__update_meta(update={"complete": True})
+        self.meta.complete = True
+        self.meta.dump(transfer_process=self.transfer_process)
         logger.info(f"Successfully uploaded {self.date_string}")
 
         # only remove src if configured and checksums match
@@ -421,7 +377,6 @@ class UploadThread:
 
             src_date_strings = DirectoryUploadClient.get_directories_to_be_uploaded(src_path)
             for date_string in src_date_strings:
-
                 # abort the upload process when upload config changes
                 new_config = interfaces.ConfigInterface.read()
                 difference = deepdiff.DeepDiff(upload_config, new_config["upload"])
@@ -429,10 +384,7 @@ class UploadThread:
                     logger.info("Change in config.upload has been detected")
                     return False
 
-                with interfaces.SSHInterface.use(config) as (
-                    connection,
-                    transfer_process,
-                ):
+                with interfaces.SSHInterface.use(config) as (connection, transfer_process):
                     try:
                         logger.info(f"Starting to process {date_string}")
                         DirectoryUploadClient(
