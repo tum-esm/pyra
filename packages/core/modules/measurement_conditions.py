@@ -77,7 +77,7 @@ class MeasurementConditions:
             f"Measurements should be running is set to: {measurements_should_be_running}."
         )
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.measurements_should_be_running = measurements_should_be_running
             return state
 

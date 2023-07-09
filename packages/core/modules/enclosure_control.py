@@ -100,7 +100,7 @@ class EnclosureControl:
             # Push the latest readout of the PLC state to the StateInterface
             logger.info("New continuous readings.")
 
-            def apply_state_update(state: types.State) -> types.State:
+            def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
                 state.enclosure_plc_readings = self.plc_state
                 return state
 

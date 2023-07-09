@@ -347,7 +347,7 @@ class PLCInterface:
 
         self.__update_bool(new_state, self.specification.power.camera)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.power.camera = new_state
             return state
 
@@ -359,7 +359,7 @@ class PLCInterface:
 
         self.__update_bool(new_state, self.specification.power.computer)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.power.computer = new_state
             return state
 
@@ -370,7 +370,7 @@ class PLCInterface:
 
         self.__update_bool(new_state, self.specification.power.heater)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.power.heater = new_state
             return state
 
@@ -382,7 +382,7 @@ class PLCInterface:
         assert self.specification.power.router is not None
         self.__update_bool(new_state, self.specification.power.router)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.power.router = new_state
             return state
 
@@ -393,7 +393,7 @@ class PLCInterface:
 
         self.__update_bool(new_state, self.specification.power.spectrometer)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.power.spectrometer = new_state
             return state
 
@@ -405,7 +405,7 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.sync_to_tracker)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.control.sync_to_tracker = new_state
             return state
 
@@ -415,7 +415,7 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_control)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.control.manual_control = new_state
             return state
 
@@ -425,7 +425,7 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.auto_temp_mode)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.control.auto_temp_mode = new_state
             return state
 
@@ -435,7 +435,7 @@ class PLCInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_temp_mode)
 
-        def apply_state_update(state: types.State) -> types.State:
+        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
             state.enclosure_plc_readings.control.manual_temp_mode = new_state
             return state
 

@@ -18,14 +18,14 @@ class _OSStateDict(pydantic.BaseModel):
     filled_disk_space_fraction: Optional[float] = None
 
 
-class State(pydantic.BaseModel):
+class PyraCoreState(pydantic.BaseModel):
     helios_indicates_good_conditions: Literal["yes", "no", "inconclusive"] = "no"
     measurements_should_be_running: bool = False
     enclosure_plc_readings: PlcState = PlcState()
     os_state: _OSStateDict = _OSStateDict()
 
     @staticmethod
-    def load() -> State:
+    def load() -> PyraCoreState:
         """Load the state from the file system. Possibly raises
         FileNotFoundError, json.JSONDecodeError, AssertionError, or
         ValidationError."""
@@ -33,7 +33,7 @@ class State(pydantic.BaseModel):
         with open(_STATE_FILE_PATH, "r") as f:
             current_object = json.load(f)
             assert isinstance(current_object, dict)
-            return State(**current_object)
+            return PyraCoreState(**current_object)
 
     def dump(self) -> None:
         """Dump the persistent state to the file system."""
@@ -42,14 +42,14 @@ class State(pydantic.BaseModel):
             json.dump(self.model_dump(), f, indent=4)
 
 
-class PersistentState(pydantic.BaseModel):
+class PyraCoreStatePersistent(pydantic.BaseModel):
     """A pydantic model for the persistent state file."""
 
     active_opus_macro_id: int = -1
     current_exceptions: list[str] = []
 
     @staticmethod
-    def load() -> PersistentState:
+    def load() -> PyraCoreStatePersistent:
         """Load the persistent state from the file system. Possibly raises
         FileNotFoundError, json.JSONDecodeError, AssertionError, or
         ValidationError."""
@@ -57,7 +57,7 @@ class PersistentState(pydantic.BaseModel):
         with open(_PERSISTENT_STATE_FILE_PATH, "r") as f:
             current_object = json.load(f)
             assert isinstance(current_object, dict)
-            return PersistentState(**current_object)
+            return PyraCoreStatePersistent(**current_object)
 
     def dump(self) -> None:
         """Dump the persistent state to the file system."""

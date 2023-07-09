@@ -40,7 +40,9 @@ def _update_exception_state(
                 logger.info(f"All exceptions have been resolved.")
                 utils.Logger.log_activity_event("errors-resolved")
 
-        def apply_state_update(state: types.PersistentState) -> types.PersistentState:
+        def apply_state_update(
+            state: types.PyraCoreStatePersistent,
+        ) -> types.PyraCoreStatePersistent:
             state.current_exceptions = updated_current_exceptions
             return state
 

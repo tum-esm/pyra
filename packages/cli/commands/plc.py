@@ -64,7 +64,7 @@ def _reset() -> None:
             running_time += 2
             if not plc_interface.reset_is_needed():
 
-                def apply_state_update(state: types.State) -> types.State:
+                def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
                     state.enclosure_plc_readings.state.reset_needed = False
                     return state
 
@@ -86,7 +86,7 @@ def _wait_until_cover_is_at_angle(
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
 
-            def apply_state_update(state: types.State) -> types.State:
+            def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
                 state.enclosure_plc_readings.actors.current_angle = new_cover_angle
                 state.enclosure_plc_readings.state.cover_closed = new_cover_angle == 0
                 return state

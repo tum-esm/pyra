@@ -54,51 +54,51 @@ class StateInterface:
         os.mkdir(_RUNTIME_DATA_PATH)
 
         # create the state file
-        types.State().dump()
+        types.PyraCoreState().dump()
 
         # possibly create the persistent state file
         try:
-            types.PersistentState.load()
+            types.PyraCoreStatePersistent.load()
         except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
-            types.PersistentState().dump()
+            types.PyraCoreStatePersistent().dump()
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def read() -> types.State:
+    def read() -> types.PyraCoreState:
         """Read the state file and return its content"""
         return StateInterface.read_without_filelock()
 
     @staticmethod
-    def read_without_filelock() -> types.State:
+    def read_without_filelock() -> types.PyraCoreState:
         """Read the state file and return its content"""
         try:
-            return types.State.load()
+            return types.PyraCoreState.load()
         except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
             logger.warning("reinitializing the corrupted state file")
-            new_object = types.State()
+            new_object = types.PyraCoreState()
             new_object.dump()
             return new_object
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def read_persistent() -> types.PersistentState:
+    def read_persistent() -> types.PyraCoreStatePersistent:
         """Read the persistent state file and return its content"""
         return StateInterface.read_persistent_without_filelock()
 
     @staticmethod
-    def read_persistent_without_filelock() -> types.PersistentState:
+    def read_persistent_without_filelock() -> types.PyraCoreStatePersistent:
         """Read the persistent state file and return its content"""
         try:
-            return types.PersistentState.load()
+            return types.PyraCoreStatePersistent.load()
         except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
             logger.warning("reinitializing the corrupted persistent state file")
-            new_object = types.PersistentState()
+            new_object = types.PyraCoreStatePersistent()
             new_object.dump()
             return new_object
 
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def update(apply_update: Callable[[types.State], types.State]) -> None:
+    def update(apply_update: Callable[[types.PyraCoreState], types.PyraCoreState]) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be
         changed in contrast to containing the whole file."""
@@ -109,7 +109,7 @@ class StateInterface:
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
     def update_persistent(
-        apply_update: Callable[[types.PersistentState], types.PersistentState]
+        apply_update: Callable[[types.PyraCoreStatePersistent], types.PyraCoreStatePersistent]
     ) -> None:
         """Update the (persistent) state file and return its content.
         The update object should only include the properties to be
