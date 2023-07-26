@@ -1,0 +1,18 @@
+name: Feature Request
+description: Suggest an idea for this project
+title: "[FEATURE]: "
+labels: ["needs-triage"]
+assignees:
+  - dostuffthatmatters
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **🍀 Thanks for taking the time to submit your feature idea!**
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe your feature idea. Does it solve an existing problem? Feel free to add images or drawings.
+    validations:
+      required: true
