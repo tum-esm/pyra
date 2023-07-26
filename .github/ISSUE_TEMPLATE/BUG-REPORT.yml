@@ -1,4 +1,4 @@
-name: Bug Report (new)
+name: Bug Report
 description: File a bug report
 title: "[Bug]: "
 labels: ["needs-triage"]
@@ -16,28 +16,28 @@ body:
     validations:
       required: true
   - type: input
-    id: version
+    id: pyra-version
     attributes:
       label: Pyra Version
       placeholder: 4.X.Y
     validations:
       required: true
   - type: input
-    id: version
+    id: opus-version
     attributes:
       label: OPUS Version
       placeholder: 7.8.* / 8.2.* / ...
     validations:
       required: false
   - type: input
-    id: version
+    id: camtracker-version
     attributes:
       label: CamTracker Version
       placeholder: 3.9.* / ...
     validations:
       required: false
   - type: input
-    id: version
+    id: windows-version
     attributes:
       label: Windows Version
       placeholder: 10 / ...
