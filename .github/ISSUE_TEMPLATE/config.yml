@@ -2,3 +2,4 @@ blank_issues_enabled: true
 contact_links:
   - name: Pyra Documentation
     url: https://pyra.esm.ei.tum.de/docs
+    about: Maybe your question is already answered in the documentation?
