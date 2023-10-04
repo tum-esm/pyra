@@ -1,13 +1,13 @@
 import pytest
-from packages.core import utils, interfaces
+from packages.core import utils, types
 
 
 @pytest.mark.integration
 def test_emailing() -> None:
-    _CONFIG = interfaces.ConfigInterface().read()
+    config = types.Config.load()
 
     try:
         raise Exception("some exception name")
     except Exception as e:
-        utils.ExceptionEmailClient.handle_occured_exception(_CONFIG, e)
-        utils.ExceptionEmailClient.handle_resolved_exception(_CONFIG)
+        utils.ExceptionEmailClient.handle_occured_exception(config, e)
+        utils.ExceptionEmailClient.handle_resolved_exception(config)

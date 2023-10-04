@@ -13,21 +13,25 @@ from packages.core import types
 
 @pytest.mark.ci
 def test_default_config() -> None:
-    with open(os.path.join(CONFIG_DIR, "config.default.json"), "r") as f:
-        config = json.load(f)
-    types.validate_config_dict(config, skip_filepaths=True)
 
-    with open(os.path.join(CONFIG_DIR, "tum_plc.config.default.json"), "r") as f:
-        config_tum_plc = json.load(f)
-    config["tum_plc"] = config_tum_plc
-    types.validate_config_dict(config, skip_filepaths=True)
+    with open(os.path.join(CONFIG_DIR, "config.default.json"), "r") as f:
+        config = types.Config.load(f.read(), ignore_path_existence=True)
+
+    assert config.tum_plc is None
+    assert config.helios is None
+    assert config.upload is None
+    config_dict = config.model_dump()
+
+    with open(
+        os.path.join(CONFIG_DIR, "tum_plc.config.default.json"), "r"
+    ) as f:
+        config_dict["tum_plc"] = json.load(f)
 
     with open(os.path.join(CONFIG_DIR, "helios.config.default.json"), "r") as f:
-        config_helios = json.load(f)
-    config["helios"] = config_helios
-    types.validate_config_dict(config, skip_filepaths=True)
+        config_dict["helios"] = json.load(f)
 
     with open(os.path.join(CONFIG_DIR, "upload.config.default.json"), "r") as f:
-        config_upload = json.load(f)
-    config["upload"] = config_upload
-    types.validate_config_dict(config, skip_filepaths=True)
+        config_dict["upload"] = json.load(f)
+
+    # validate the full config with all optional subconfigs
+    config = types.Config.load(config_dict, ignore_path_existence=True)

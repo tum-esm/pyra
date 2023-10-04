@@ -15,7 +15,7 @@ from packages.core import types, utils
 
 
 @pytest.mark.ci
-def test_astronomy(sample_config: types.ConfigDict) -> None:
+def test_astronomy(sample_config: types.Config) -> None:
     try:
         utils.Astronomy.get_current_sun_elevation(sample_config)
         raise Exception("Failed to warn about not loaded astronomy data.")
@@ -31,7 +31,7 @@ def test_astronomy(sample_config: types.ConfigDict) -> None:
         f.write("48.137154\n")
         f.write("11.576124\n")
         f.write("515\n")
-    sample_config["camtracker"]["config_path"] = tmp_filename
+    sample_config.camtracker.config_path.root = tmp_filename
 
     # test whether elevation is correctly computed using the config file
     e1 = utils.Astronomy.get_current_sun_elevation(sample_config)
