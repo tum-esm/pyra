@@ -5,8 +5,9 @@
 **Contributor Guide:** https://pyra.esm.ei.tum.de/docs/contributor-guide/becoming-a-contributor
 
 [![status](https://joss.theoj.org/papers/d47b5197eb098bccfbd27b6a6c441cb4/status.svg)](https://joss.theoj.org/papers/d47b5197eb098bccfbd27b6a6c441cb4)
-[![GitHub](https://img.shields.io/github/license/tum-esm/pyra?color=f43f5e&style=flat)](https://github.com/tum-esm/pyra/blob/main/LICENSE.md)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/tum-esm/pyra?display_name=tag&label=latest%20release&color=f43f5e&style=flat)](https://github.com/tum-esm/pyra/releases)
+![](https://badgen.net/github/license/tum-esm/pyra?color=e11d48)
+![](https://badgen.net/github/release/tum-esm/pyra/stable?label=latest%20release&color=e11d48)
+[![](https://badgen.net/github/checks/tum-esm/pyra/main?icon=github&label=ci%20tests)](https://github.com/tum-esm/pyra/actions)
 
 <br/>
 
