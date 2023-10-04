@@ -185,8 +185,7 @@ class SunTracking:
         ct_logfile_path = self.config.camtracker.learn_az_elev_path.root
         assert os.path.isfile(ct_logfile_path), "camtracker logfile not found"
 
-        with open(ct_logfile_path) as f:
-            last_line = f.readlines()[-1]
+        last_line = utils.read_last_file_line(ct_logfile_path)
 
         # last_line: [Julian Date, Tracker Elevation, Tracker Azimuth,
         # Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px]
