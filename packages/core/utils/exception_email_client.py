@@ -25,7 +25,7 @@ def _get_current_log_lines() -> list[str]:
     """Get the log line from the current info.log file. Only
     returns the log lines from the latest two iterations."""
 
-    with open(f"{_PROJECT_DIR}/logs/info.log") as f:
+    with open(f"{_PROJECT_DIR}/logs/debug.log") as f:
         latest_log_lines = f.readlines()
 
     log_lines_in_email: list[str] = []
