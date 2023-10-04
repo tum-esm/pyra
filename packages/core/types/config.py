@@ -1,303 +1,201 @@
+from __future__ import annotations
+from typing import Literal, Optional
 import os
 import pydantic
-from typing import Any, Callable, Literal, Optional, TypedDict
+import tum_esm_utils
+
+PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
+CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 
 
-class TimeDict(TypedDict):
-    """TypedDict:
+class StrictFilePath(pydantic.RootModel):
+    root: str
 
-    ```ts
-    {
-        hour: int;
-        minute: int;
-        second: int;
-    }
-    ```
-    """
-
-    hour: int
-    minute: int
-    second: int
+    @pydantic.field_validator('root')
+    @classmethod
+    def file_should_exist(cls, v: str) -> str:
+        if not os.path.isfile(v):
+            raise ValueError('File does not exist')
+        return v
 
 
-class TimeDictPartial(TypedDict, total=False):
-    """TypedDict: like `TimeDict`, but all fields are optional."""
+class StrictDirectoryPath(pydantic.RootModel):
+    root: str
 
-    hour: int
-    minute: int
-    second: int
+    @pydantic.field_validator('root')
+    @classmethod
+    def directory_should_exist(cls, v: str) -> str:
+        if not os.path.isdir(v):
+            raise ValueError('File does not exist')
+        return v
 
 
-class ConfigSubDicts:
+class StrictIPAdress(pydantic.RootModel):
+    root: str = pydantic.Field(
+        ..., pattern=r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?"
+    )
+
+
+class TimeDict(pydantic.BaseModel):
+    hour: int = pydantic.Field(..., ge=0, le=23)
+    minute: int = pydantic.Field(..., ge=0, le=59)
+    second: int = pydantic.Field(..., ge=0, le=59)
+
+
+class TimeDictPartial(pydantic.BaseModel):
+    hour: Optional[int] = pydantic.Field(None, ge=0, le=23)
+    minute: Optional[int] = pydantic.Field(None, ge=0, le=59)
+    second: Optional[int] = pydantic.Field(None, ge=0, le=59)
+
+
+class SubConfigs:
     """Class that contains TypedDicts for sections of the config file."""
-
     @staticmethod
-    class General(TypedDict):
-        """TypedDict:
-
-        ```ts
-        {
-            version: "4.0.8";
-            seconds_per_core_interval: float;
-            test_mode: bool;
-            station_id: str;
-            min_sun_elevation: float;
-        }
-        ```
-        """
-
+    class General(pydantic.BaseModel):
         version: Literal["4.0.8"]
-        seconds_per_core_interval: float
+        seconds_per_core_interval: float = pydantic.Field(..., ge=5, le=600)
         test_mode: bool
         station_id: str
-        min_sun_elevation: float
+        min_sun_elevation: float = pydantic.Field(..., ge=0, le=90)
 
     @staticmethod
-    class GeneralPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.General`, but all fields are
-        optional."""
+    class GeneralPartial(pydantic.BaseModel):
+        """Like `SubConfigs.General`, but all fields are optional."""
 
-        seconds_per_core_interval: float
-        test_mode: bool
-        station_id: str
-        min_sun_elevation: float
+        seconds_per_core_interval: Optional[float] = None
+        test_mode: Optional[bool] = None
+        station_id: Optional[str] = None
+        min_sun_elevation: Optional[float] = None
 
     @staticmethod
-    class Opus(TypedDict):
-        """TypedDict:
-
-        ```ts
-        {
-            em27_ip: str;
-            executable_path: str;
-            experiment_path: str;
-            macro_path: str;
-            username: str;
-            password: str;
-        }
-        ```
-        """
-
-        em27_ip: str
-        executable_path: str
-        experiment_path: str
-        macro_path: str
+    class Opus(pydantic.BaseModel):
+        em27_ip: StrictIPAdress
+        executable_path: StrictFilePath
+        experiment_path: StrictFilePath
+        macro_path: StrictFilePath
         username: str
         password: str
 
     @staticmethod
-    class OpusPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.Opus`, but all fields are
-        optional."""
+    class OpusPartial(pydantic.BaseModel):
+        """Like `SubConfigs.Opus`, but all fields are optional."""
 
-        em27_ip: str
-        executable_path: str
-        experiment_path: str
-        macro_path: str
-        username: str
-        password: str
-
-    @staticmethod
-    class Camtracker(TypedDict):
-        """TypedDict:
-
-        ```ts
-        {
-            config_path: str;
-            executable_path: str;
-            learn_az_elev_path: str;
-            sun_intensity_path: str;
-            motor_offset_threshold: float;
-        }
-        ```
-        """
-
-        config_path: str
-        executable_path: str
-        learn_az_elev_path: str
-        sun_intensity_path: str
-        motor_offset_threshold: float
+        em27_ip: Optional[StrictIPAdress] = None
+        executable_path: Optional[StrictFilePath] = None
+        experiment_path: Optional[StrictFilePath] = None
+        macro_path: Optional[StrictFilePath] = None
+        username: Optional[str] = None
+        password: Optional[str] = None
 
     @staticmethod
-    class CamtrackerPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.Camtracker` but all fields
-        are optional."""
-
-        config_path: str
-        executable_path: str
-        learn_az_elev_path: str
-        sun_intensity_path: str
-        motor_offset_threshold: float
+    class Camtracker(pydantic.BaseModel):
+        config_path: StrictFilePath
+        executable_path: StrictFilePath
+        learn_az_elev_path: StrictFilePath
+        sun_intensity_path: StrictFilePath
+        motor_offset_threshold: float = pydantic.Field(..., ge=0, le=360)
 
     @staticmethod
-    class ErrorEmail(TypedDict):
-        """TypedDict:
+    class CamtrackerPartial(pydantic.BaseModel):
+        """Like `SubConfigs.Camtracker` but all fields are optional."""
 
-        ```ts
-        {
-            sender_address: str;
-            sender_password: str;
-            notify_recipients: bool;
-            recipients: str;
-        }
-        ```
-        """
+        config_path: Optional[StrictFilePath] = None
+        executable_path: Optional[StrictFilePath] = None
+        learn_az_elev_path: Optional[StrictFilePath] = None
+        sun_intensity_path: Optional[StrictFilePath] = None
+        motor_offset_threshold: Optional[float] = pydantic.Field(
+            None, ge=0, le=360
+        )
 
+    @staticmethod
+    class ErrorEmail(pydantic.BaseModel):
         sender_address: str
         sender_password: str
         notify_recipients: bool
         recipients: str
 
     @staticmethod
-    class ErrorEmailPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.ErrorEmail` but all fields
-        are optional."""
+    class ErrorEmailPartial(pydantic.BaseModel):
+        """Like `SubConfigs.ErrorEmail` but all fields are optional."""
 
-        sender_address: str
-        sender_password: str
-        notify_recipients: bool
-        recipients: str
+        sender_address: Optional[str] = None
+        sender_password: Optional[str] = None
+        notify_recipients: Optional[bool] = None
+        recipients: Optional[str] = None
 
     @staticmethod
-    class MeasurementDecision(TypedDict):
-        """TypedDict:
-
-        ```ts
-        {
-            mode: "automatic" | "manual" | "cli";
-            manual_decision_result: bool;
-            cli_decision_result: bool;
-        }
-        ```
-        """
-
+    class MeasurementDecision(pydantic.BaseModel):
         mode: Literal["automatic", "manual", "cli"]
         manual_decision_result: bool
         cli_decision_result: bool
 
     @staticmethod
-    class MeasurementDecisionPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.MeasurementDecision` but
-        all fields are optional."""
+    class MeasurementDecisionPartial(pydantic.BaseModel):
+        """Like `SubConfigs.MeasurementDecision` but all fields are optional."""
 
-        mode: Literal["automatic", "manual", "cli"]
-        manual_decision_result: bool
-        cli_decision_result: bool
+        mode: Optional[Literal["automatic", "manual", "cli"]] = None
+        manual_decision_result: Optional[bool] = None
+        cli_decision_result: Optional[bool] = None
 
     @staticmethod
-    class MeasurementTriggers(TypedDict):
-        """TypedDict:
-
-        ```ts
-        {
-            consider_time: bool;
-            consider_sun_elevation: bool;
-            consider_helios: bool;
-            start_time: TimeDict;
-            stop_time: TimeDict;
-            min_sun_elevation: float;
-        }
-        ```
-        """
-
+    class MeasurementTriggers(pydantic.BaseModel):
         consider_time: bool
         consider_sun_elevation: bool
         consider_helios: bool
         start_time: TimeDict
         stop_time: TimeDict
-        min_sun_elevation: float
+        min_sun_elevation: float = pydantic.Field(..., ge=0, le=90)
 
     @staticmethod
-    class MeasurementTriggersPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.MeasurementTriggers` but
-        all fields are optional."""
+    class MeasurementTriggersPartial(pydantic.BaseModel):
+        """Like `SubConfigs.MeasurementTriggers` but all fields are optional."""
 
-        consider_time: bool
-        consider_sun_elevation: bool
-        consider_helios: bool
-        start_time: TimeDictPartial
-        stop_time: TimeDictPartial
-        min_sun_elevation: float
+        consider_time: Optional[bool] = None
+        consider_sun_elevation: Optional[bool] = None
+        consider_helios: Optional[bool] = None
+        start_time: Optional[TimeDictPartial] = None
+        stop_time: Optional[TimeDictPartial] = None
+        min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
 
     @staticmethod
-    class TumPlc(TypedDict):
-        """TypedDict:
-
-        ```ts
-        {
-            ip: str;
-            version: 1 | 2;
-            controlled_by_user: bool;
-        }
-        ```
-        """
-
-        ip: str
+    class TumPlc(pydantic.BaseModel):
+        ip: StrictIPAdress
         version: Literal[1, 2]
         controlled_by_user: bool
 
     @staticmethod
-    class TumPlcPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.TumPlc`, but all fields are
-        optional."""
+    class TumPlcPartial(pydantic.BaseModel):
+        """Like `SubConfigs.TumPlc`, but all fields are optional."""
 
-        ip: str
-        version: Literal[1, 2]
-        controlled_by_user: bool
+        ip: Optional[StrictIPAdress] = None
+        version: Optional[Literal[1, 2]] = None
+        controlled_by_user: Optional[bool] = None
 
     @staticmethod
-    class Helios(TypedDict):
-        """TypedDict:
-
-        ```ts
-        {
-            camera_id: int;
-            evaluation_size: int;
-            seconds_per_interval: float;
-            edge_detection_threshold: float;
-            save_images: bool;
-        }
-        ```
-        """
-
-        camera_id: int
-        evaluation_size: int
-        seconds_per_interval: float
-        edge_detection_threshold: float
+    class Helios(pydantic.BaseModel):
+        camera_id: int = pydantic.Field(..., ge=0, le=999999)
+        evaluation_size: int = pydantic.Field(..., ge=1, le=100)
+        seconds_per_interval: float = pydantic.Field(..., ge=5, le=600)
+        edge_detection_threshold: float = pydantic.Field(..., ge=0, le=1)
         save_images: bool
 
     @staticmethod
-    class HeliosPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.Helios`, but all fields are
-        optional."""
+    class HeliosPartial(pydantic.BaseModel):
+        """Like `SubConfigs.Helios`, but all fields are optional."""
 
-        camera_id: int
-        evaluation_size: int
-        seconds_per_interval: float
-        edge_detection_threshold: float
-        save_images: bool
+        camera_id: Optional[int] = pydantic.Field(None, ge=0, le=999999)
+        evaluation_size: Optional[int] = pydantic.Field(None, ge=1, le=100)
+        seconds_per_interval: Optional[float] = pydantic.Field(
+            None, ge=5, le=600
+        )
+        edge_detection_threshold: Optional[float] = pydantic.Field(
+            None, ge=0, le=1
+        )
+        save_images: Optional[bool] = None
 
     @staticmethod
-    class Upload(TypedDict):
-        """TypedDict:
-
-        ```ts
-        {
-            host: str;
-            user: str;
-            password: str;
-            upload_ifgs: bool;
-            src_directory_ifgs: str;
-            dst_directory_ifgs: str;
-            remove_src_ifgs_after_upload: bool;
-            upload_helios: bool;
-            dst_directory_helios: str;
-            remove_src_helios_after_upload: bool;
-        }
-        ```
-        """
-
-        host: str
+    class Upload(pydantic.BaseModel):
+        host: StrictIPAdress
         user: str
         password: str
         upload_ifgs: bool
@@ -309,251 +207,47 @@ class ConfigSubDicts:
         remove_src_helios_after_upload: bool
 
     @staticmethod
-    class UploadPartial(TypedDict, total=False):
-        """TypedDict: like `ConfigSubDicts.Upload`, but all fields are
-        optional."""
+    class UploadPartial(pydantic.BaseModel):
+        """Like `SubConfigs.Upload`, but all fields are optional."""
 
-        host: str
-        user: str
-        password: str
-        upload_ifgs: bool
-        src_directory_ifgs: str
-        dst_directory_ifgs: str
-        remove_src_ifgs_after_upload: bool
-        upload_helios: bool
-        dst_directory_helios: str
-        remove_src_helios_after_upload: bool
-
-
-class ConfigDict(TypedDict):
-    """TypedDict:
-
-    ```ts
-    {
-        general: {
-            version: "4.0.8";
-            seconds_per_core_interval: float;
-            test_mode: bool;
-            station_id: str;
-            min_sun_elevation: float;
-        },
-        opus: {
-            em27_ip: str;
-            executable_path: str;
-            experiment_path: str;
-            macro_path: str;
-            username: str;
-            password: str;
-        },
-        camtracker: {
-            config_path: str;
-            executable_path: str;
-            learn_az_elev_path: str;
-            sun_intensity_path: str;
-            motor_offset_threshold: float;
-        },
-        error_email: {
-            sender_address: str;
-            sender_password: str;
-            notify_recipients: bool;
-            recipients: str;
-        },
-        measurement_decision: {
-            mode: "automatic" | "manual" | "cli";
-            manual_decision_result: bool;
-            cli_decision_result: bool;
-        },
-        measurement_triggers: {
-            consider_time: bool;
-            consider_sun_elevation: bool;
-            consider_helios: bool;
-            start_time: {
-                hour: int;
-                minute: int;
-                second: int;
-            };
-            stop_time: {
-                hour: int;
-                minute: int;
-                second: int;
-            };
-            min_sun_elevation: float;
-        },
-        tum_plc: null | {
-            ip: str;
-            version: 1 | 2;
-            controlled_by_user: bool;
-        },
-        helios: null | {
-            camera_id: int;
-            evaluation_size: int;
-            seconds_per_interval: float;
-            edge_detection_threshold: float;
-            save_images: bool;
-        },
-        upload: null | {
-            host: str;
-            user: str;
-            password: str;
-            upload_ifgs: bool;
-            src_directory_ifgs: str;
-            dst_directory_ifgs: str;
-            remove_src_ifgs_after_upload: bool;
-            upload_helios: bool;
-            dst_directory_helios: str;
-            remove_src_helios_after_upload: bool;
-        },
-    }
-    ```
-
-    Or expressed using `ConfigSubDicts`:
-
-    ```ts
-    {
-        general: ConfigSubDicts.General;
-        opus: ConfigSubDicts.Opus;
-        camtracker: ConfigSubDicts.Camtracker;
-        error_email: ConfigSubDicts.ErrorEmail;
-        measurement_decision: ConfigSubDicts.MeasurementDecision;
-        measurement_triggers: ConfigSubDicts.MeasurementTriggers;
-        tum_plc: null | ConfigSubDicts.TumPlc;
-        helios: null | ConfigSubDicts.Helios;
-        upload: null | ConfigSubDicts.Upload;
-    }
-    ```
-    """
-
-    general: ConfigSubDicts.General
-    opus: ConfigSubDicts.Opus
-    camtracker: ConfigSubDicts.Camtracker
-    error_email: ConfigSubDicts.ErrorEmail
-    measurement_decision: ConfigSubDicts.MeasurementDecision
-    measurement_triggers: ConfigSubDicts.MeasurementTriggers
-    tum_plc: Optional[ConfigSubDicts.TumPlc]
-    helios: Optional[ConfigSubDicts.Helios]
-    upload: Optional[ConfigSubDicts.Upload]
+        host: Optional[StrictIPAdress] = None
+        user: Optional[str] = None
+        password: Optional[str] = None
+        upload_ifgs: Optional[bool] = None
+        src_directory_ifgs: Optional[str] = None
+        dst_directory_ifgs: Optional[str] = None
+        remove_src_ifgs_after_upload: Optional[bool] = None
+        upload_helios: Optional[bool] = None
+        dst_directory_helios: Optional[str] = None
+        remove_src_helios_after_upload: Optional[bool] = None
 
 
-class ConfigDictPartial(TypedDict, total=False):
-    """TypedDict: like `ConfigDict`, but all fields are optional."""
+class Config(pydantic.BaseModel):
+    general: SubConfigs.General
+    opus: SubConfigs.Opus
+    camtracker: SubConfigs.Camtracker
+    error_email: SubConfigs.ErrorEmail
+    measurement_decision: SubConfigs.MeasurementDecision
+    measurement_triggers: SubConfigs.MeasurementTriggers
+    tum_plc: Optional[SubConfigs.TumPlc] = None
+    helios: Optional[SubConfigs.Helios] = None
+    upload: Optional[SubConfigs.Upload] = None
 
-    general: ConfigSubDicts.GeneralPartial
-    opus: ConfigSubDicts.OpusPartial
-    camtracker: ConfigSubDicts.CamtrackerPartial
-    error_email: ConfigSubDicts.ErrorEmailPartial
-    measurement_decision: ConfigSubDicts.MeasurementDecisionPartial
-    measurement_triggers: ConfigSubDicts.MeasurementTriggersPartial
-    tum_plc: Optional[ConfigSubDicts.TumPlcPartial]
-    helios: Optional[ConfigSubDicts.HeliosPartial]
-    upload: Optional[ConfigSubDicts.UploadPartial]
-
-
-class ValidationError(Exception):
-    """
-    Will be raised in any custom checks on config dicts
-    have failed: file-existence, ip-format, min/max-range
-    """
+    @staticmethod
+    def load() -> Config:
+        with open(CONFIG_FILE_PATH) as f:
+            return Config.model_validate_json(f.read())
 
 
-# TODO: fully use Pydantic for validation
+class ConfigPartial(pydantic.BaseModel):
+    """Like `ConfigDict`, but all fields are optional."""
 
-
-def validate_config_dict(o: Any, partial: bool = False, skip_filepaths: bool = False) -> None:
-    """
-    Check, whether a given object is a correct ConfigDict
-    Raises a pydantic.ValidationError if the object is invalid.
-
-    This should always be used when loading the object from a
-    JSON file!
-    """
-    try:
-        if partial:
-            _ValidationModel(partial=o)
-        else:
-            _ValidationModel(regular=o)
-    except pydantic.ValidationError as e:
-        pretty_error_messages = []
-        for error in e.errors():
-            fields = [str(f) for f in error["loc"][1:] if f not in ["__root__"]]
-            pretty_error_messages.append(f"{'.'.join(fields)} -> {error['msg']}")
-        raise ValidationError(f"config is invalid: {', '.join(pretty_error_messages)}")
-
-    new_object: ConfigDict = o
-
-    def get_nested_dict_property(property_path: str) -> Any:
-        prop = new_object
-        for key in property_path.split("."):
-            prop = prop[key]  # type: ignore
-        return prop
-
-    def assert_min_max(property_path: str, min_value: float, max_value: float) -> None:
-        prop: float = get_nested_dict_property(property_path)
-        error_message = f"config.{property_path} must be in range [{min_value}, {max_value}]"
-        assert prop >= min_value, error_message
-        assert prop <= max_value, error_message
-
-    def assert_file_path(property_path: str) -> None:
-        prop: str = get_nested_dict_property(property_path)
-        if not skip_filepaths:
-            assert os.path.isfile(prop), f"config.{property_path} is not a file"
-
-    def assert_ip_address(property_path: str) -> None:
-        prop: str = get_nested_dict_property(property_path)
-        error_message = f"config.{property_path} is not a valid ip address"
-        values: list[str] = prop.split(".")
-        assert len(values) == 4, error_message
-        assert all([x.isnumeric() for x in values]), error_message
-        assert all([0 <= int(x) <= 255 for x in values]), error_message
-
-    assertions: list[Callable[[], None]] = [
-        lambda: assert_min_max("general.seconds_per_core_interval", 5, 600),
-        lambda: assert_min_max("general.min_sun_elevation", 0, 90),
-        lambda: assert_ip_address("opus.em27_ip"),
-        lambda: assert_file_path("opus.executable_path"),
-        lambda: assert_file_path("opus.experiment_path"),
-        lambda: assert_file_path("opus.macro_path"),
-        lambda: assert_file_path("camtracker.config_path"),
-        lambda: assert_file_path("camtracker.executable_path"),
-        lambda: assert_file_path("camtracker.learn_az_elev_path"),
-        lambda: assert_file_path("camtracker.sun_intensity_path"),
-        lambda: assert_min_max("camtracker.motor_offset_threshold", 0, 360),
-        lambda: assert_min_max("measurement_triggers.min_sun_elevation", 0, 90),
-        lambda: assert_min_max("measurement_triggers.start_time.hour", 0, 23),
-        lambda: assert_min_max("measurement_triggers.stop_time.hour", 0, 23),
-        lambda: assert_min_max("measurement_triggers.start_time.minute", 0, 59),
-        lambda: assert_min_max("measurement_triggers.stop_time.minute", 0, 59),
-        lambda: assert_min_max("measurement_triggers.start_time.second", 0, 59),
-        lambda: assert_min_max("measurement_triggers.stop_time.second", 0, 59),
-        lambda: assert_ip_address("tum_plc.ip"),
-        lambda: assert_min_max("helios.camera_id", 0, 999999),
-        lambda: assert_min_max("helios.evaluation_size", 1, 100),
-        lambda: assert_min_max("helios.seconds_per_interval", 5, 600),
-        lambda: assert_min_max("helios.edge_detection_threshold", 0, 1),
-        lambda: assert_ip_address("upload.host"),
-    ]
-
-    # this does not check for a valid upload.src_directory_ifgs path
-    # since the thread itself will check for this
-
-    pretty_error_messages = []
-
-    for assertion in assertions:
-        try:
-            assertion()
-        except AssertionError as a:
-            pretty_error_messages.append(a.args[0])
-        except (TypeError, KeyError):
-            # Will be ignored because the structure is already
-            # validated. Occurs when property is missing
-            pass
-
-    if len(pretty_error_messages) > 0:
-        raise ValidationError(f"config is invalid: {', '.join(pretty_error_messages)}")
-
-
-class _ValidationModel(pydantic.BaseModel):
-    regular: Optional[ConfigDict] = None
-    partial: Optional[ConfigDictPartial] = None
-
-    class Config:
-        extra = "forbid"
+    general: Optional[SubConfigs.GeneralPartial] = None
+    opus: Optional[SubConfigs.OpusPartial] = None
+    camtracker: Optional[SubConfigs.CamtrackerPartial] = None
+    error_email: Optional[SubConfigs.ErrorEmailPartial] = None
+    measurement_decision: Optional[SubConfigs.MeasurementDecisionPartial] = None
+    measurement_triggers: Optional[SubConfigs.MeasurementTriggersPartial] = None
+    tum_plc: Optional[SubConfigs.TumPlcPartial] = None
+    helios: Optional[SubConfigs.HeliosPartial] = None
+    upload: Optional[SubConfigs.UploadPartial] = None
