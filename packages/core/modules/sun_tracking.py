@@ -79,13 +79,13 @@ class SunTracking:
             )
             return
 
-        tracker_position_is_valid = self.validate_tracker_position()
-        if tracker_position_is_valid is None:
+        camtracker_state_is_valid = self.validate_camtracker_state()
+        if camtracker_state_is_valid is None:
             logger.debug(
                 "CamTracker motor position is unknown (last log line too old)."
             )
         else:
-            if tracker_position_is_valid:
+            if camtracker_state_is_valid:
                 logger.debug("CamTracker motor position is valid.")
             else:
                 logger.info("CamTracker motor position is over threshold.")
@@ -164,7 +164,7 @@ class SunTracking:
         if os.path.exists(stop_file_path):
             os.remove(stop_file_path)
 
-    def read_ct_log_learn_az_elev(
+    def _read_ct_log_learn_az_elev(
         self,
     ) -> Optional[tuple[datetime.datetime, float, float, float, float, float]]:
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
@@ -212,24 +212,37 @@ class SunTracking:
 
         # assert that the log file is up-to-date
         if logline_age_in_seconds > 300:
+            logger.warning(
+                f"Last line in CamTracker logfile is older than 5 minutes but from {logline_datetime}"
+            )
             return None
 
         return (logline_datetime, *float_values[1 :])
 
-    def validate_tracker_position(self) -> bool:
-        """Reads motor offsets and compares it with defined threshold.
-        The motor offset defines the difference between the current active and calculated sun
-        angle.
+    def validate_camtracker_state(self) -> Optional[bool]:
+        """Checks whether CamTracker is running and is pointing
+        in the right direction.
 
-        Returns
-        True -> Offsets are within threshold
-        False -> CamTracker lost sun position
+        Reads in the `LEARN_Az_Elev.dat` logfile, if the last line is older
+        than 5 minutes, the function returns `False`. because that means that
+        CamTracker is not running correctly.
+        
+        If `config.camtracker.restart_if_logs_are_too_old` is set to `False`
+        (the default), too old log lines will be ignored.
+
+        If the last logline is younger than 5 minutes, the function returns
+        `True` if the motor offsets are within the defined threshold.
+
+        Returns:  `True` if CamTracker is in a valid state and `False` otherwise.
         """
 
         # fails if file integrity is broken
-        tracker_status = self.read_ct_log_learn_az_elev()
+        tracker_status = self._read_ct_log_learn_az_elev()
         if tracker_status is None:
-            return None
+            if self.config.camtracker.restart_if_logs_are_too_old:
+                return False
+            else:
+                return None
 
         elev_offset: float = tracker_status[3]
         az_offeset: float = tracker_status[4]
