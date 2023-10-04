@@ -105,6 +105,7 @@ class SubConfigCamtracker(pydantic.BaseModel):
     learn_az_elev_path: StrictFilePath
     sun_intensity_path: StrictFilePath
     motor_offset_threshold: float = pydantic.Field(..., ge=0, le=360)
+    restart_if_logs_are_too_old: bool
 
 
 class SubConfigCamtrackerPartial(pydantic.BaseModel):
@@ -115,6 +116,7 @@ class SubConfigCamtrackerPartial(pydantic.BaseModel):
     learn_az_elev_path: Optional[StrictFilePath] = None
     sun_intensity_path: Optional[StrictFilePath] = None
     motor_offset_threshold: Optional[float] = pydantic.Field(None, ge=0, le=360)
+    restart_if_logs_are_too_old: Optional[bool] = None
 
 
 class SubConfigErrorEmail(pydantic.BaseModel):

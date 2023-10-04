@@ -1,7 +1,7 @@
 {
-    "camera_id": 0,
-    "evaluation_size": 15,
-    "seconds_per_interval": 6,
-    "edge_detection_threshold": 0.01,
-    "save_images": false
+  "camera_id": 0,
+  "evaluation_size": 15,
+  "seconds_per_interval": 6,
+  "edge_detection_threshold": 0.01,
+  "save_images": false
 }

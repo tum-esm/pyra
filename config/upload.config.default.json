@@ -1,12 +1,12 @@
 {
-    "host": "1.2.3.4",
-    "user": "...",
-    "password": "...",
-    "upload_ifgs": false,
-    "src_directory_ifgs": "...",
-    "dst_directory_ifgs": "...",
-    "remove_src_ifgs_after_upload": false,
-    "upload_helios": false,
-    "dst_directory_helios": "...",
-    "remove_src_helios_after_upload": true
+  "host": "1.2.3.4",
+  "user": "...",
+  "password": "...",
+  "upload_ifgs": false,
+  "src_directory_ifgs": "...",
+  "dst_directory_ifgs": "...",
+  "remove_src_ifgs_after_upload": false,
+  "upload_helios": false,
+  "dst_directory_helios": "...",
+  "remove_src_helios_after_upload": true
 }
