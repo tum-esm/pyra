@@ -41,9 +41,9 @@
             "fs": {
                 "readFile": true,
                 "scope": [
-                    "$DOWNLOAD\\pyra\\pyra-4.*\\**\\*",
-                    "$DOCUMENT/pyra/pyra-4.*/**/*",
-                    "$DOCUMENT\\pyra\\pyra-4.*\\**\\*"
+                    "$DOWNLOAD\\pyra\\pyra-4.*.*\\*",
+                    "$DOCUMENT\\pyra\\pyra-4.*.*\\*",
+                    "$DOCUMENT/work/esm/pyra/*"
                 ]
             }
         },

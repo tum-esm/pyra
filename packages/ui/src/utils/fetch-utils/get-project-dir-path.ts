@@ -5,7 +5,7 @@ async function getProjectDirPath() {
     switch (import.meta.env.VITE_ENVIRONMENT) {
         // on moritz personal machine
         case 'development-moritz':
-            projectDirPath = await join(await documentDir(), 'research', 'pyra-4');
+            projectDirPath = await join(await documentDir(), 'work', 'esm', 'pyra');
             break;
 
         // on the R19 laptop the Documents folder is a network directory

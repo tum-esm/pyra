@@ -8,7 +8,7 @@ async function getFileContent(filePath: string) {
         // on moritz personal machine
         case 'development-moritz':
             baseDir = BaseDirectory.Document;
-            absoluteFilePath = await join('research', 'pyra-4', ...filePath.split('/'));
+            absoluteFilePath = await join('work', 'esm', 'pyra', ...filePath.split('/'));
             break;
 
         // on the R19 laptop the Documents folder is a network directory
