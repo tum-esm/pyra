@@ -4,7 +4,7 @@ version = "4.0.8"
 description = "operate an EM27 station autonomously"
 authors = [
     "Patrick Aigner <patrick.aigner@tum.de>",
-    "Moritz Makowski <moritz.makowski@tum.de>"
+    "Moritz Makowski <moritz.makowski@tum.de>",
 ]
 
 [tool.poetry.dependencies]
@@ -12,7 +12,7 @@ python = "3.10.*"
 Cerberus = "1.3.4"
 numpy = "1.24.2"
 filelock = "3.10.7"
-pywin32 = { version = "303", markers = "sys_platform == 'win32'"}
+pywin32 = { version = "303", markers = "sys_platform == 'win32'" }
 click = "8.1.3"
 python-snap7 = "1.3"
 opencv-python = "4.7.0.72"
@@ -24,24 +24,28 @@ colorama = "0.4.6"
 deepdiff = "6.3.0"
 skyfield = "^1.46"
 tum-esm-utils = "^1.5.2"
-pydantic = "^2.0.2"
 mypy = "^1.4.1"
+pydantic = "^2.4.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.2.2"
-black = "22.12.0"
 types-paramiko = "2.12.0.3"
 types-invoke = "1.7.3.17"
 pytest-cov = "3.0.0"
 types-psutil = "5.9.5.11"
 lazydocs = "0.4.8"
+yapf = "^0.40.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 95
+[tool.yapf]
+based_on_style = "facebook"
+coalesce_brackets = true
+split_before_dict_set_generator = true
+each_dict_entry_on_separate_line = false
+spaces_around_subscript_colon = true
 
 [tool.mypy]
 strict = true
@@ -59,7 +63,7 @@ module = [
     "deepdiff",
     "psutil",
     "skyfield.*",
-    "pendulum"
+    "pendulum",
 ]
 ignore_missing_imports = true
 
