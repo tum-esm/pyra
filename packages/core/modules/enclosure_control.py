@@ -21,7 +21,6 @@ class EnclosureControl:
     cover to protect the instrument. Instrument protection from bad weather
     conditions is always prioritised over a slight maximization of measurement
     uptime."""
-
     @staticmethod
     class CoverError(Exception):
         pass
@@ -30,24 +29,24 @@ class EnclosureControl:
     class MotorFailedError(Exception):
         pass
 
-    def __init__(self, initial_config: types.ConfigDict):
+    def __init__(self, initial_config: types.Config):
         self.config = initial_config
         self.initialized = False
         self.last_plc_connection_time = time.time()
         self.motor_reset_needed_in_last_iteration = False
-        if self.config["general"]["test_mode"]:
+        if self.config.general.test_mode:
             return
 
-        if self.config["tum_plc"] is None:
+        if self.config.tum_plc is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
     def __initialize(self) -> None:
         """Initializes the default PLC settings at startup or activation in config."""
-        assert self.config["tum_plc"] is not None
+        assert self.config.tum_plc is not None
 
         self.plc_interface = interfaces.PLCInterface(
-            self.config["tum_plc"]["version"], self.config["tum_plc"]["ip"]
+            self.config.tum_plc.version, self.config.tum_plc.ip
         )
         self.plc_interface.connect()
         self.plc_interface.set_auto_temperature(True)
@@ -56,19 +55,19 @@ class EnclosureControl:
         self.last_cycle_automation_status = 0
         self.initialized = True
 
-    def run(self, new_config: types.ConfigDict) -> None:
+    def run(self, new_config: types.Config) -> None:
         """Called in every cycle of the main loop.
         Updates enclosure state based on the current automation status.
         """
         self.config = new_config
 
         # Skips the rest of run if module not activated in config
-        if self.config["tum_plc"] is None:
+        if self.config.tum_plc is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
         # Allows to run Pyra-4 without measurement system hardware present
-        if self.config["general"]["test_mode"]:
+        if self.config.general.test_mode:
             logger.debug("Skipping EnclosureControl in test mode")
             return
 
@@ -87,7 +86,8 @@ class EnclosureControl:
                 self.__initialize()
             else:
                 self.plc_interface.update_config(
-                    self.config["tum_plc"]["version"], self.config["tum_plc"]["ip"]
+                    self.config.tum_plc.version,
+                    self.config.tum_plc.ip,
                 )
                 self.plc_interface.connect()
 
@@ -100,7 +100,9 @@ class EnclosureControl:
             # Push the latest readout of the PLC state to the StateInterface
             logger.info("New continuous readings.")
 
-            def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
+            def apply_state_update(
+                state: types.PyraCoreState
+            ) -> types.PyraCoreState:
                 state.enclosure_plc_readings = self.plc_state
                 return state
 
@@ -129,7 +131,7 @@ class EnclosureControl:
                 self.motor_reset_needed_in_last_iteration = False
 
             # Skip writing to the PLC as the user took over control from the automation
-            if self.config["tum_plc"]["controlled_by_user"]:
+            if self.config.tum_plc.controlled_by_user:
                 logger.debug(
                     "Skipping EnclosureControl because enclosure is controlled by user"
                 )
@@ -187,7 +189,9 @@ class EnclosureControl:
         A movement of the cover during bad weather conditions shall not be allowed as instrument
         saefty is priotized higher than maximization of overall measurement uptime.
         """
-        logger.debug(f"Received request to move cover to position {value} degrees.")
+        logger.debug(
+            f"Received request to move cover to position {value} degrees."
+        )
 
         # rain check before moving cover. PLC will deny cover requests during rain anyway
         if self.plc_state.state.rain:
@@ -232,7 +236,9 @@ class EnclosureControl:
             elapsed_time = time.time() - start_time
             if elapsed_time > 60:
                 if throw_error:
-                    raise EnclosureControl.CoverError("Enclosure cover might be stuck.")
+                    raise EnclosureControl.CoverError(
+                        "Enclosure cover might be stuck."
+                    )
                 break
 
     def auto_set_power_spectrometer(self) -> None:
@@ -241,8 +247,10 @@ class EnclosureControl:
         spectrometer in the morning when minimum angle is satisfied.
         """
 
-        current_sun_elevation = utils.Astronomy.get_current_sun_elevation(self.config)
-        min_power_elevation = self.config["general"]["min_sun_elevation"] - 1
+        current_sun_elevation = utils.Astronomy.get_current_sun_elevation(
+            self.config
+        )
+        min_power_elevation = self.config.general.min_sun_elevation - 1
         sun_is_above_minimum = current_sun_elevation >= min_power_elevation
         spectrometer_is_powered = self.plc_state.power.spectrometer
 
@@ -284,7 +292,8 @@ class EnclosureControl:
 
         This functions allows to detect desync caused by previous user controlled decisions. It
         also functions as a failsafe to ensure weather protection of the instrument."""
-        if (not self.measurements_should_be_running) & (not self.plc_state.state.rain):
+        if (not self.measurements_should_be_running
+           ) & (not self.plc_state.state.rain):
             if not self.plc_state.state.cover_closed:
                 logger.info("Cover is still open. Trying to close again.")
                 self.force_cover_close()
@@ -297,10 +306,14 @@ class EnclosureControl:
         if self.measurements_should_be_running and (
             not self.plc_state.control.sync_to_tracker
         ):
-            logger.debug("Set sync to tracker to True to match measurement status.")
+            logger.debug(
+                "Set sync to tracker to True to match measurement status."
+            )
             self.plc_interface.set_sync_to_tracker(True)
         if (
             not self.measurements_should_be_running
         ) and self.plc_state.control.sync_to_tracker:
-            logger.debug("Set sync to tracker to False to match measurement status.")
+            logger.debug(
+                "Set sync to tracker to False to match measurement status."
+            )
             self.plc_interface.set_sync_to_tracker(False)

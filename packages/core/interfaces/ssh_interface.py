@@ -20,7 +20,6 @@ class SSHInterface:
         connection.run("command")
     ```
     """
-
     @staticmethod
     class ConnectionError(Exception):
         """raised when SSH connection could not be established"""
@@ -28,14 +27,15 @@ class SSHInterface:
     @staticmethod
     @contextlib.contextmanager
     def use(
-        config: types.ConfigDict,
-    ) -> Iterator[tuple[fabric.connection.Connection, fabric.transfer.Transfer]]:
-        assert config["upload"] is not None
+        config: types.Config,
+    ) -> Iterator[tuple[fabric.connection.Connection, fabric.transfer.Transfer]
+                 ]:
+        assert config.upload is not None
 
         try:
             connection = fabric.connection.Connection(
-                f"{config['upload']['user']}@{config['upload']['host']}",
-                connect_kwargs={"password": config["upload"]["password"]},
+                f"{config.upload.user}@{config.upload.host}",
+                connect_kwargs={"password": config.upload.password},
                 connect_timeout=5,
             )
             transfer_process = fabric.transfer.Transfer(connection)

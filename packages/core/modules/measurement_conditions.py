@@ -4,15 +4,12 @@ from packages.core import types, utils, interfaces
 logger = utils.Logger(origin="measurement-conditions")
 
 
-def is_time_trigger_active(
-    config: types.ConfigDict,
-) -> bool:
+def is_time_trigger_active(config: types.Config) -> bool:
     """Returns true if time triggers in the config specify
     that it should be measured right now"""
-    now = datetime.datetime.now()
-    current_time = datetime.time(now.hour, now.minute, now.second)
-    start_time = datetime.time(**config["measurement_triggers"]["start_time"])
-    end_time = datetime.time(**config["measurement_triggers"]["stop_time"])
+    current_time = datetime.datetime.now().time()
+    start_time = config.measurement_triggers.start_time.as_datettime_time()
+    end_time = config.measurement_triggers.stop_time.as_datettime_time()
     return (current_time > start_time) and (current_time < end_time)
 
 
@@ -36,11 +33,10 @@ class MeasurementConditions:
     option is available for custom-built systems or sensors not part of
     Pyra 4. It is also possible in this mode to move the measurement
     control to remote systems i.e. by SSH."""
-
-    def __init__(self, initial_config: types.ConfigDict) -> None:
+    def __init__(self, initial_config: types.Config) -> None:
         self.config = initial_config
 
-    def run(self, new_config: types.ConfigDict) -> None:
+    def run(self, new_config: types.Config) -> None:
         """Called in every cycle of the main loop.
         Updates StateInterface: measurements_should_be_running based on the selected mode, triggers
         and present conditions."""
@@ -48,20 +44,20 @@ class MeasurementConditions:
         self.config = new_config
 
         # Skip rest of the function if test mode is active
-        if self.config["general"]["test_mode"]:
+        if self.config.general.test_mode:
             logger.debug("Skipping MeasurementConditions in test mode")
             return
 
         logger.info("Running MeasurementConditions")
-        decision = self.config["measurement_decision"]
-        logger.debug(f"Decision mode for measurements is: {decision['mode']}.")
+        decision = self.config.measurement_decision
+        logger.debug(f"Decision mode for measurements is: {decision.mode}.")
 
         # Selection and evaluation of the current set measurement mode
-        if decision["mode"] == "manual":
-            measurements_should_be_running = decision["manual_decision_result"]
-        if decision["mode"] == "cli":
-            measurements_should_be_running = decision["cli_decision_result"]
-        if decision["mode"] == "automatic":
+        if decision.mode == "manual":
+            measurements_should_be_running = decision.manual_decision_result
+        if decision.mode == "cli":
+            measurements_should_be_running = decision.cli_decision_result
+        if decision.mode == "automatic":
             measurements_should_be_running = self._get_automatic_decision()
         assert isinstance(measurements_should_be_running, bool)
 
@@ -70,14 +66,17 @@ class MeasurementConditions:
             != measurements_should_be_running
         ):
             utils.Logger.log_activity_event(
-                "start-measurements" if measurements_should_be_running else "stop-measurements"
+                "start-measurements"
+                if measurements_should_be_running else "stop-measurements"
             )
 
         logger.info(
             f"Measurements should be running is set to: {measurements_should_be_running}."
         )
 
-        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
+        def apply_state_update(
+            state: types.PyraCoreState
+        ) -> types.PyraCoreState:
             state.measurements_should_be_running = measurements_should_be_running
             return state
 
@@ -88,26 +87,27 @@ class MeasurementConditions:
         Reads the config to consider activated measurement triggers. Evaluates active measurement
         triggers and combines their states by logical conjunction.
         """
-        triggers = self.config["measurement_triggers"]
-        if self.config["helios"] is None:
-            triggers["consider_helios"] = False
+        triggers = self.config.measurement_triggers
+        if self.config.helios is None:
+            triggers.consider_helios = False
 
         # If not triggers are considered during automatic mode return False
-        if not any(
-            [
-                triggers["consider_sun_elevation"],
-                triggers["consider_time"],
-                triggers["consider_helios"],
-            ]
-        ):
+        if not any([
+            triggers.consider_sun_elevation,
+            triggers.consider_time,
+            triggers.consider_helios,
+        ]):
             return False
 
         # Evaluate sun elevation if trigger is active
-        if triggers["consider_sun_elevation"]:
+        if triggers.consider_sun_elevation:
             logger.info("Sun elevation as a trigger is considered.")
-            current_sun_elevation = utils.Astronomy.get_current_sun_elevation(self.config)
+            current_sun_elevation = utils.Astronomy.get_current_sun_elevation(
+                self.config
+            )
             min_sun_elevation = max(
-                self.config["general"]["min_sun_elevation"], triggers["min_sun_elevation"]
+                self.config.general.min_sun_elevation,
+                triggers.min_sun_elevation
             )
             if current_sun_elevation > min_sun_elevation:
                 logger.debug("Sun angle is above threshold.")
@@ -116,18 +116,21 @@ class MeasurementConditions:
                 return False
 
         # Evaluate time if trigger is active
-        if triggers["consider_time"]:
+        if triggers.consider_time:
             logger.info("Time as a trigger is considered.")
             time_is_valid = is_time_trigger_active(self.config)
-            logger.debug(f"Time conditions are {'' if time_is_valid else 'not '}fulfilled.")
+            logger.debug(
+                f"Time conditions are {'' if time_is_valid else 'not '}fulfilled."
+            )
             if not time_is_valid:
                 return False
 
         # Read latest Helios decision from StateInterface if trigger is active
         # Helios runs in a thread and evaluates the sun conditions consistanly during day.
-        if triggers["consider_helios"]:
+        if triggers.consider_helios:
             logger.info("Helios as a trigger is considered.")
-            helios_result = interfaces.StateInterface.read().helios_indicates_good_conditions
+            helios_result = interfaces.StateInterface.read(
+            ).helios_indicates_good_conditions
 
             if helios_result == "inconclusive":
                 logger.debug(f"Helios does not nave enough images yet.")

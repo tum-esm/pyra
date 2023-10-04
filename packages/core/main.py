@@ -7,7 +7,7 @@ logger = utils.Logger(origin="main")
 
 
 def _update_exception_state(
-    config: types.ConfigDict,
+    config: types.Config,
     current_exceptions: list[str],
     new_exception: Optional[Exception],
 ) -> list[str]:
@@ -30,7 +30,9 @@ def _update_exception_state(
         if new_exception is not None:
             if type(new_exception).__name__ not in current_exceptions:
                 updated_current_exceptions.append(type(new_exception).__name__)
-                utils.ExceptionEmailClient.handle_occured_exception(config, new_exception)
+                utils.ExceptionEmailClient.handle_occured_exception(
+                    config, new_exception
+                )
                 if len(current_exceptions) == 0:
                     utils.Logger.log_activity_event("error-occured")
         else:
@@ -90,11 +92,11 @@ def run() -> None:
     # an invalid config, the mainloop cannot initialize
     while True:
         try:
-            config = interfaces.ConfigInterface.read()
+            config = types.Config.load()
             break
         except Exception as e:
             logger.exception(e)
-            logger.error("Invalid config, waiting 10 seconds")
+            logger.error("Could not load config, waiting 10 seconds")
             time.sleep(10)
 
     logger.info("Loading astronomical dataset")
@@ -103,25 +105,29 @@ def run() -> None:
     # these modules will be executed one by one in each
     # mainloop iteration
     logger.info("Initializing mainloop modules")
-    mainloop_modules: list[
-        tuple[
-            Literal[
-                "measurement-conditions",
-                "enclosure-control",
-                "sun-tracking",
-                "opus-measurement",
-                "system-checks",
-            ],
-            Callable[[types.ConfigDict], None],
-        ]
-    ] = [
+    mainloop_modules: list[tuple[
+        Literal[
+            "measurement-conditions",
+            "enclosure-control",
+            "sun-tracking",
+            "opus-measurement",
+            "system-checks",
+        ],
+        Callable[[types.Config], None],
+    ]] = [
         (
             "measurement-conditions",
             modules.measurement_conditions.MeasurementConditions(config).run,
         ),
-        ("enclosure-control", modules.enclosure_control.EnclosureControl(config).run),
+        (
+            "enclosure-control",
+            modules.enclosure_control.EnclosureControl(config).run
+        ),
         ("sun-tracking", modules.sun_tracking.SunTracking(config).run),
-        ("opus-measurement", modules.opus_measurement.OpusMeasurement(config).run),
+        (
+            "opus-measurement",
+            modules.opus_measurement.OpusMeasurement(config).run
+        ),
         ("system-checks", modules.system_checks.SystemChecks(config).run),
     ]
 
@@ -133,7 +139,8 @@ def run() -> None:
     helios_thread_instance = threads.HeliosThread(config)
     upload_thread_instance = threads.UploadThread(config)
 
-    current_exceptions = interfaces.StateInterface.read_persistent().current_exceptions
+    current_exceptions = interfaces.StateInterface.read_persistent(
+    ).current_exceptions
 
     while True:
         start_time = time.time()
@@ -141,7 +148,7 @@ def run() -> None:
 
         # load config at the beginning of each mainloop iteration
         try:
-            config = interfaces.ConfigInterface.read()
+            config = types.Config.load()
         except Exception as e:
             logger.error("Invalid config, waiting 10 seconds")
             time.sleep(10)
@@ -152,7 +159,7 @@ def run() -> None:
         helios_thread_instance.update_thread_state(config)
         upload_thread_instance.update_thread_state(config)
 
-        if config["general"]["test_mode"]:
+        if config.general.test_mode:
             logger.info("pyra-core in test mode")
             logger.debug("Skipping HeliosThread and UploadThread in test mode")
 
@@ -181,12 +188,14 @@ def run() -> None:
 
         # send resolved email if no exceptions are present anymore
         if new_exception is None:
-            current_exceptions = _update_exception_state(config, current_exceptions, None)
+            current_exceptions = _update_exception_state(
+                config, current_exceptions, None
+            )
 
         # wait rest of loop time
         logger.info("Ending iteration")
         elapsed_time = time.time() - start_time
-        time_to_wait = config["general"]["seconds_per_core_interval"] - elapsed_time
+        time_to_wait = config.general.seconds_per_core_interval - elapsed_time
         if time_to_wait > 0:
             logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
             time.sleep(time_to_wait)

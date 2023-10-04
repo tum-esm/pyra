@@ -1,5 +1,4 @@
-from .config import ConfigDict, ConfigDictPartial, ConfigSubDicts
-from .config import validate_config_dict
+from .config import Config, ConfigPartial, StrictIPAdress
 
 from .plc_specification import PlcSpecification
 from .plc_state import PlcState

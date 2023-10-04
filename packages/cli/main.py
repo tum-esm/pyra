@@ -1,6 +1,7 @@
 """Pyra CLI entry point. Use `pyra-cli --help`/`pyra-cli $command --help`
 to see all available commands.`"""
 
+from packages.core import types
 import click
 import os
 import sys
@@ -17,15 +18,15 @@ from packages.cli.commands import (
     remove_filelocks,
     state_command_group,
 )
-from packages.core.interfaces import ConfigInterface
 
 
 @click.command(help="Print Pyra version and code directory path.")
 def print_cli_information() -> None:
-    config = ConfigInterface.read()
+    config = types.Config.load()
     click.echo(
         click.style(
-            f'This CLI is running Pyra version {config["general"]["version"]} in directory "{_PROJECT_DIR}".',
+            f'This CLI is running Pyra version {config.general.version}' +
+            f' in directory "{_PROJECT_DIR}".',
             fg="green",
         )
     )
@@ -43,7 +44,6 @@ cli.add_command(logs_command_group, name="logs")
 cli.add_command(plc_command_group, name="plc")
 cli.add_command(remove_filelocks, name="remove-filelocks")
 cli.add_command(state_command_group, name="state")
-
 
 if __name__ == "__main__":
     cli.main(prog_name="pyra-cli")

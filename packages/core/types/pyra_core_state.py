@@ -8,7 +8,9 @@ from .plc_state import PlcState
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
-_PERSISTENT_STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "persistent-state.json")
+_PERSISTENT_STATE_FILE_PATH = os.path.join(
+    _PROJECT_DIR, "logs", "persistent-state.json"
+)
 
 
 class _OSStateDict(pydantic.BaseModel):
@@ -19,7 +21,8 @@ class _OSStateDict(pydantic.BaseModel):
 
 
 class PyraCoreState(pydantic.BaseModel):
-    helios_indicates_good_conditions: Literal["yes", "no", "inconclusive"] = "no"
+    helios_indicates_good_conditions: Literal["yes", "no",
+                                              "inconclusive"] = "no"
     measurements_should_be_running: bool = False
     enclosure_plc_readings: PlcState = PlcState()
     os_state: _OSStateDict = _OSStateDict()

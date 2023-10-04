@@ -10,7 +10,9 @@ from packages.core import types
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_DEFAULT_CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.default.json")
+_DEFAULT_CONFIG_FILE_PATH = os.path.join(
+    _PROJECT_DIR, "config", "config.default.json"
+)
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
 _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
@@ -23,29 +25,23 @@ def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
+@click.argument("indent", default=False, is_flag=True)
 @click.command(
-    help="Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence."
+    short_help="Read the config.json file.",
+    help=
+    "Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence.",
 )
-@tum_esm_utils.decorators.with_filelock(
-    lockfile_path=_CONFIG_LOCK_PATH,
-    timeout=5,
-)
-def _get_config() -> None:
+def _get_config(indent: bool) -> None:
     if not os.path.isfile(_CONFIG_FILE_PATH):
         shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
-    with open(_CONFIG_FILE_PATH, "r") as f:
-        try:
-            content = json.load(f)
-        except:
-            raise AssertionError("file not in a valid json format")
-
-    types.validate_config_dict(content, partial=False, skip_filepaths=True)
-    click.echo(json.dumps(content))
+    config = types.Config.load(ignore_path_existence=True)
+    click.echo(config.model_dump_json(indent=4 if indent else None))
 
 
 @click.command(
-    short_help="Set the config.json file.",
-    help=f"Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
+    short_help="Update the config.json file.",
+    help=
+    f"Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
 )
 @click.argument("content", default="{}")
 @tum_esm_utils.decorators.with_filelock(
@@ -53,61 +49,52 @@ def _get_config() -> None:
     timeout=5,
 )
 def _update_config(content: str) -> None:
-    # try to load the dict
     try:
-        new_partial_json = json.loads(content)
-    except:
-        _print_red("content argument is not a valid JSON string")
-        return
-
-    # validate the dict's integrity
-    try:
-        types.validate_config_dict(new_partial_json, partial=True)
+        current_config = types.Config.load(
+            with_filelock=False,
+            ignore_path_existence=True,
+        )
     except Exception as e:
-        _print_red(str(e))
-        return
-
-    # load the current json file
-    try:
-        with open(_CONFIG_FILE_PATH, "r") as f:
-            current_json = json.load(f)
-    except:
         _print_red("Could not load the current config.json file")
-        return
+        raise e
 
-    # merge current config and new partial config
-    merged_json = tum_esm_utils.datastructures.merge_dicts(
-        current_json,
-        new_partial_json,
-    )
+    try:
+        new_partial_config = types.ConfigPartial.load(
+            content,
+            ignore_path_existence=True,
+        )
+    except Exception as e:
+        _print_red("content argument is not a valid partial config")
+        raise e
+
+    try:
+        merged_config = types.Config.load(
+            tum_esm_utils.datastructures.merge_dicts(
+                current_config.model_dump(),
+                new_partial_config.model_dump(exclude_unset=True),
+            ),
+            ignore_path_existence=True,
+        )
+    except Exception as e:
+        _print_red("Could not merge the current config and the partial config")
+        raise e
+
     with open(_CONFIG_FILE_PATH, "w") as f:
-        json.dump(merged_json, f, indent=4)
+        f.write(merged_config.model_dump_json(indent=4))
 
     _print_green("Updated config file")
 
 
 @click.command(
-    help=f"Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
-)
-@tum_esm_utils.decorators.with_filelock(
-    lockfile_path=_CONFIG_LOCK_PATH,
-    timeout=5,
+    help=
+    f"Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
 )
 def _validate_current_config() -> None:
-    # load the current json file
     try:
-        with open(_CONFIG_FILE_PATH, "r") as f:
-            current_json = json.load(f)
-    except:
-        _print_red("Could not load the current config.json file")
-        return
-
-    # validate its integrity
-    try:
-        types.validate_config_dict(current_json, partial=False)
+        types.Config.load()
     except Exception as e:
-        _print_red(str(e))
-        return
+        _print_red(f"Current config file is invalid\n{e}")
+        exit(1)
 
     _print_green(f"Current config file is valid")
 

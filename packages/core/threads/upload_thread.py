@@ -33,7 +33,6 @@ class DirectoryUploadClient:
     This is the client that is concerned with uploading one specific
     directory. run() will perform the actual upload process.
     """
-
     def __init__(
         self,
         date_string: str,
@@ -54,8 +53,12 @@ class DirectoryUploadClient:
             self.dst_path
         ), f"remote {self.dst_path} is not a directory"
 
-        src_file_path = os.path.join(self.src_path, self.date_string, "upload-meta.json")
-        dst_file_path = os.path.join(f"{self.dst_path}/{self.date_string}/upload-meta.json")
+        src_file_path = os.path.join(
+            self.src_path, self.date_string, "upload-meta.json"
+        )
+        dst_file_path = os.path.join(
+            f"{self.dst_path}/{self.date_string}/upload-meta.json"
+        )
 
         # TODO: push error raising into init function
         dst_dir_path = f"{self.dst_path}/{self.date_string}"
@@ -72,7 +75,9 @@ class DirectoryUploadClient:
             ) as e:
                 raise InvalidUploadState(str(e))
         else:
-            self.connection.run(f"mkdir {dst_dir_path}", hide=True, in_stream=False)
+            self.connection.run(
+                f"mkdir {dst_dir_path}", hide=True, in_stream=False
+            )
             self.meta = types.UploadMeta.init_from_local(
                 src_file_path, dst_file_path, self.transfer_process
             )
@@ -89,14 +94,20 @@ class DirectoryUploadClient:
         not present.
         """
 
-        local_script_path = os.path.join(_PROJECT_DIR, "scripts", "get_upload_dir_checksum.py")
+        local_script_path = os.path.join(
+            _PROJECT_DIR, "scripts", "get_upload_dir_checksum.py"
+        )
         remote_script_path = f"{self.dst_path}/get_upload_dir_checksum.py"
         self.transfer_process.put(local_script_path, remote_script_path)
 
         try:
-            self.connection.run("python3.10 --version", hide=True, in_stream=False)
+            self.connection.run(
+                "python3.10 --version", hide=True, in_stream=False
+            )
         except invoke.exceptions.UnexpectedExit:
-            raise InvalidUploadState("python3.10 is not installed on the server")
+            raise InvalidUploadState(
+                "python3.10 is not installed on the server"
+            )
 
         try:
             remote_command = (
@@ -147,8 +158,12 @@ class DirectoryUploadClient:
         # determine files present in src and dst directory
         # files should be named like "<anything>YYYYMMDD<anything>"
         ifg_file_pattern = re.compile("^.*" + self.date_string + ".*$")
-        raw_src_files = os.listdir(os.path.join(self.src_path, self.date_string))
-        src_file_set = set([f for f in raw_src_files if ifg_file_pattern.match(f)])
+        raw_src_files = os.listdir(
+            os.path.join(self.src_path, self.date_string)
+        )
+        src_file_set = set([
+            f for f in raw_src_files if ifg_file_pattern.match(f)
+        ])
         dst_file_set = set(self.meta.fileList)
 
         # determine file differences between src and dst
@@ -179,9 +194,11 @@ class DirectoryUploadClient:
 
             # update the local meta in every loop, but only
             # sync the remote meta every 25 iterations
-            sync_remote_meta = ((i + 1) % 25 == 0) or (i == len(files_missing_in_dst) - 1)
+            sync_remote_meta = ((i + 1) % 25
+                                == 0) or (i == len(files_missing_in_dst) - 1)
             self.meta.dump(
-                transfer_process=self.transfer_process if sync_remote_meta else None
+                transfer_process=self.
+                transfer_process if sync_remote_meta else None
             )
 
         # raise an exception if the checksums do not match
@@ -189,8 +206,8 @@ class DirectoryUploadClient:
         local_checksum = self.__get_local_directory_checksum()
         if remote_checksum != local_checksum:
             raise InvalidUploadState(
-                f"checksums do not match, local={local_checksum} "
-                + f"remote={remote_checksum}"
+                f"checksums do not match, local={local_checksum} " +
+                f"remote={remote_checksum}"
             )
 
         # only set meta.complete to True, when the checksums match
@@ -208,8 +225,11 @@ class DirectoryUploadClient:
     @staticmethod
     def __is_valid_date(date_string: str) -> bool:
         try:
-            day_ending = datetime.strptime(f"{date_string} 23:59:59", "%Y%m%d %H:%M:%S")
-            seconds_since_day_ending = (datetime.now() - day_ending).total_seconds()
+            day_ending = datetime.strptime(
+                f"{date_string} 23:59:59", "%Y%m%d %H:%M:%S"
+            )
+            seconds_since_day_ending = (datetime.now() -
+                                        day_ending).total_seconds()
             assert seconds_since_day_ending >= 3600
             return True
         except (ValueError, AssertionError):
@@ -222,8 +242,8 @@ class DirectoryUploadClient:
 
         return list(
             filter(
-                lambda f: os.path.isdir(os.path.join(data_path, f))
-                and DirectoryUploadClient.__is_valid_date(f),
+                lambda f: os.path.isdir(os.path.join(data_path, f)) and
+                DirectoryUploadClient.__is_valid_date(f),
                 os.listdir(data_path),
             )
         )
@@ -272,22 +292,20 @@ class UploadThread:
 
     This function only does one loop in headless mode.
     """
-
-    def __init__(self, config: types.ConfigDict) -> None:
+    def __init__(self, config: types.Config) -> None:
         self.__thread = threading.Thread(target=UploadThread.main)
         self.__logger: utils.Logger = utils.Logger(origin="upload")
-        self.config: types.ConfigDict = config
+        self.config: types.Config = config
         self.is_initialized = False
 
-    def update_thread_state(self, new_config: types.ConfigDict) -> None:
+    def update_thread_state(self, new_config: types.Config) -> None:
         """
         Make sure that the thread loop is (not) running,
         based on config.upload
         """
         self.config = new_config
-        should_be_running = (new_config["upload"] is not None) and (
-            not new_config["general"]["test_mode"]
-        )
+        should_be_running = (new_config.upload is not None
+                            ) and (not new_config.general.test_mode)
 
         if should_be_running and (not self.is_initialized):
             self.__logger.info("Starting the thread")
@@ -319,12 +337,12 @@ class UploadThread:
         while True:
             try:
                 logger.info("Starting iteration")
-                config = interfaces.ConfigInterface.read()
+                config = types.Config.load()
 
-                if config["upload"] is None:
+                if config.upload is None:
                     logger.info("Ending thread (upload config is null)")
                     return
-                if config["general"]["test_mode"]:
+                if config.general.test_mode:
                     logger.info("Ending thread (Pyra is in test mode)")
                     return
 
@@ -333,7 +351,9 @@ class UploadThread:
                 except interfaces.SSHInterface.ConnectionError as e:
                     logger.error(f"could not connect to host: {e}")
                     if not headless:
-                        logger.info(f"waiting {_CONNECTION_ERROR_IDLE_MINUTES} minutes")
+                        logger.info(
+                            f"waiting {_CONNECTION_ERROR_IDLE_MINUTES} minutes"
+                        )
                         time.sleep(_CONNECTION_ERROR_IDLE_MINUTES * 60)
                         continue
 
@@ -351,40 +371,44 @@ class UploadThread:
                 return
 
     @staticmethod
-    def upload_all_files(config: types.ConfigDict) -> bool:
+    def upload_all_files(config: types.Config) -> bool:
         """
         Returns True if all file uploads have been finished. Returns False
         if the config has change during upload -> restart with new parameters.
         """
 
-        upload_config = config["upload"]
+        upload_config = config.upload
         assert upload_config is not None
 
         # this will be quite simplified by the "Update: Upload Improvements"
         categories = []
-        categories += ["helios"] if upload_config["upload_helios"] else []
-        categories += ["ifgs"] if upload_config["upload_ifgs"] else []
+        categories += ["helios"] if upload_config.upload_helios else []
+        categories += ["ifgs"] if upload_config.upload_ifgs else []
 
         for category in categories:
             if category == "helios":
                 src_path = os.path.join(_PROJECT_DIR, "logs", "helios")
-                dst_path = upload_config["dst_directory_helios"]
-                remove_files_after_upload = upload_config["remove_src_helios_after_upload"]
+                dst_path = upload_config.dst_directory_helios
+                remove_files_after_upload = upload_config.remove_src_helios_after_upload
             else:
-                src_path = upload_config["src_directory_ifgs"]
-                dst_path = upload_config["dst_directory_ifgs"]
-                remove_files_after_upload = upload_config["remove_src_ifgs_after_upload"]
+                src_path = upload_config.src_directory_ifgs
+                dst_path = upload_config.dst_directory_ifgs
+                remove_files_after_upload = upload_config.remove_src_ifgs_after_upload
 
-            src_date_strings = DirectoryUploadClient.get_directories_to_be_uploaded(src_path)
+            src_date_strings = DirectoryUploadClient.get_directories_to_be_uploaded(
+                src_path
+            )
             for date_string in src_date_strings:
                 # abort the upload process when upload config changes
-                new_config = interfaces.ConfigInterface.read()
-                difference = deepdiff.DeepDiff(upload_config, new_config["upload"])
+                new_config = types.Config.load()
+                difference = deepdiff.DeepDiff(upload_config, new_config.upload)
                 if len(difference) != 0:
                     logger.info("Change in config.upload has been detected")
                     return False
 
-                with interfaces.SSHInterface.use(config) as (connection, transfer_process):
+                with interfaces.SSHInterface.use(config) as (
+                    connection, transfer_process
+                ):
                     try:
                         logger.info(f"Starting to process {date_string}")
                         DirectoryUploadClient(
@@ -396,6 +420,8 @@ class UploadThread:
                             transfer_process,
                         ).run()
                     except InvalidUploadState as e:
-                        logger.error(f"uploading {date_string} is stuck in invalid state: {e}")
+                        logger.error(
+                            f"uploading {date_string} is stuck in invalid state: {e}"
+                        )
 
         return True

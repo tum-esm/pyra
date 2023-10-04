@@ -3,7 +3,7 @@ import threading
 import time
 import cv2 as cv
 import numpy as np
-from typing import Any, Literal, Optional
+from typing import Any, Optional
 import pydantic
 
 import tum_esm_utils
@@ -13,8 +13,10 @@ logger = utils.Logger(origin="helios")
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_AUTOEXPOSURE_IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios-autoexposure")
-_CONFIG: Optional[types.ConfigDict] = None
+_AUTOEXPOSURE_IMG_DIR = os.path.join(
+    _PROJECT_DIR, "logs", "helios-autoexposure"
+)
+_CONFIG: Optional[types.Config] = None
 
 
 class CameraError(Exception):
@@ -39,7 +41,8 @@ class _Helios:
 
             if _Helios.cam.isOpened():
                 if _Helios.available_exposures is None:
-                    _Helios.available_exposures = _Helios.get_available_exposures()
+                    _Helios.available_exposures = _Helios.get_available_exposures(
+                    )
                     logger.debug(
                         f"determined available exposures: {_Helios.available_exposures}"
                     )
@@ -48,7 +51,9 @@ class _Helios:
                     ), "did not find any available exposures"
 
                 _Helios.current_exposure = min(_Helios.available_exposures)
-                _Helios.update_camera_settings(exposure=_Helios.current_exposure)
+                _Helios.update_camera_settings(
+                    exposure=_Helios.current_exposure
+                )
                 return
             else:
                 time.sleep(2)
@@ -122,7 +127,9 @@ class _Helios:
             _Helios.cam.read()
 
     @staticmethod
-    def take_image(retries: int = 10, trow_away_white_images: bool = True) -> cv.Mat:
+    def take_image(
+        retries: int = 10, trow_away_white_images: bool = True
+    ) -> cv.Mat:
         """
         Take an image using the initialized camera. Raises an
         AssertionError if camera has not been set up.
@@ -193,31 +200,38 @@ class _Helios:
                     img, f"mean={mean_colors[-1]}", color=(0, 0, 255)
                 )
                 cv.imwrite(
-                    os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i+1}.jpg"), img
+                    os.path.join(
+                        _AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i+1}.jpg"
+                    ), img
                 )
 
             # calculate mean color of all 3 images
-            exposure_results.append(ExposureResult(exposure=exposure, means=mean_colors))
+            exposure_results.append(
+                ExposureResult(exposure=exposure, means=mean_colors)
+            )
 
         logger.debug(f"exposure results: {exposure_results}")
 
         means: list[float] = [
             sum(r.means) / NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results
         ]
-        for m1, m2 in zip(means[:-1], means[1:]):
+        for m1, m2 in zip(means[:-1], means[1 :]):
             assert m1 < m2 + 5, "mean colors should increase with increasing exposure"
 
         assert len(exposure_results) > 0, "no possible exposures found"
         new_exposure = int(
             min(
                 exposure_results,
-                key=lambda r: abs(sum(r.means) / NUMBER_OF_EXPOSURE_IMAGES - 50),
+                key=lambda r:
+                abs(sum(r.means) / NUMBER_OF_EXPOSURE_IMAGES - 50),
             ).exposure
         )
         _Helios.update_camera_settings(exposure=new_exposure)
 
         if new_exposure != _Helios.current_exposure:
-            logger.info(f"changing exposure: {_Helios.current_exposure} -> {new_exposure}")
+            logger.info(
+                f"changing exposure: {_Helios.current_exposure} -> {new_exposure}"
+            )
             _Helios.current_exposure = new_exposure
 
     @staticmethod
@@ -235,8 +249,12 @@ class _Helios:
 
         frame = _Helios.take_image()
 
-        edge_fraction = utils.HeliosImageProcessing.get_edge_fraction(frame, save_image)
-        logger.debug(f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}")
+        edge_fraction = utils.HeliosImageProcessing.get_edge_fraction(
+            frame, save_image
+        )
+        logger.debug(
+            f"exposure = {_Helios.current_exposure}, edge_fraction = {edge_fraction}"
+        )
 
         return edge_fraction
 
@@ -260,14 +278,13 @@ class HeliosThread:
     The result of this constant sunlight evaluation is written
     to the StateInterface.
     """
-
-    def __init__(self, config: types.ConfigDict) -> None:
+    def __init__(self, config: types.Config) -> None:
         self.__thread = threading.Thread(target=HeliosThread.main)
         self.__logger: utils.Logger = utils.Logger(origin="helios")
-        self.config: types.ConfigDict = config
+        self.config: types.Config = config
         self.is_initialized = False
 
-    def update_thread_state(self, new_config: types.ConfigDict) -> None:
+    def update_thread_state(self, new_config: types.Config) -> None:
         """
         Make sure that the thread loop is (not) running,
         based on config.upload
@@ -291,13 +308,11 @@ class HeliosThread:
                 self.is_initialized = False
 
     @staticmethod
-    def should_be_running(config: types.ConfigDict) -> bool:
+    def should_be_running(config: types.Config) -> bool:
         """Should the thread be running? (based on config.upload)"""
-        return (
-            (not config["general"]["test_mode"])
-            and (config["helios"] is not None)
-            and (config["measurement_triggers"]["consider_helios"])
-        )
+        return ((not config.general.test_mode) and
+                (config.helios is not None) and
+                (config.measurement_triggers.consider_helios))
 
     @staticmethod
     def main(headless: bool = False) -> None:
@@ -311,15 +326,16 @@ class HeliosThread:
 
         if headless:
             logger = utils.Logger(origin="helios", just_print=True)
-        _CONFIG = interfaces.ConfigInterface.read()
+        _CONFIG = types.Config.load()
 
         # Check for termination
-        if (_CONFIG["helios"] is None) or (not HeliosThread.should_be_running(_CONFIG)):
+        if ((_CONFIG.helios is None) or
+            (not HeliosThread.should_be_running(_CONFIG))):
             return
 
         # a list storing the last n calculated edge fractions
         edge_fraction_history = tum_esm_utils.datastructures.RingList(
-            max_size=_CONFIG["helios"]["evaluation_size"]
+            max_size=_CONFIG.helios.evaluation_size
         )
         current_state: Optional[bool] = None
 
@@ -327,36 +343,41 @@ class HeliosThread:
 
         while True:
             start_time = time.time()
-            _CONFIG = interfaces.ConfigInterface.read()
+            _CONFIG = types.Config.load()
 
             # Check for termination
-            if (_CONFIG["helios"] is None) or (not HeliosThread.should_be_running(_CONFIG)):
+            if ((_CONFIG.helios is None) or
+                (not HeliosThread.should_be_running(_CONFIG))):
                 return
 
             try:
                 # init camera connection
                 if _Helios.cam is None:
                     logger.info(f"Initializing Helios camera")
-                    _Helios.init(_CONFIG["helios"]["camera_id"])
+                    _Helios.init(_CONFIG.helios.camera_id)
 
                 # reinit if parameter changes
                 current_max_history_size = edge_fraction_history.get_max_size()
-                new_max_history_size = _CONFIG["helios"]["evaluation_size"]
+                new_max_history_size = _CONFIG.helios.evaluation_size
                 if current_max_history_size != new_max_history_size:
                     logger.debug(
-                        "Size of Helios history has changed: "
-                        + f"{current_max_history_size} -> {new_max_history_size}"
+                        "Size of Helios history has changed: " +
+                        f"{current_max_history_size} -> {new_max_history_size}"
                     )
                     edge_fraction_history.set_max_size(new_max_history_size)
 
                 # sleep while sun angle is too low
-                current_sun_elevation = utils.Astronomy.get_current_sun_elevation(_CONFIG)
-                min_sun_elevation = _CONFIG["general"]["min_sun_elevation"]
+                current_sun_elevation = utils.Astronomy.get_current_sun_elevation(
+                    _CONFIG
+                )
+                min_sun_elevation = _CONFIG.general.min_sun_elevation
                 helios_should_be_running = headless or (
                     current_sun_elevation > min_sun_elevation
                 )
                 if not helios_should_be_running:
-                    logger.debug("Current sun elevation below minimum: Waiting 5 minutes")
+                    logger.debug(
+                        "Current sun elevation below minimum: Waiting 5 minutes"
+                    )
                     if current_state is not None:
 
                         def apply_state_update(
@@ -378,7 +399,7 @@ class HeliosThread:
                 # an Exception will be raised (and Helios will be restarted)
                 try:
                     new_edge_fraction = _Helios.run(
-                        headless or _CONFIG["helios"]["save_images"]
+                        headless or _CONFIG.helios.save_images
                     )
                     repeated_camera_error_count = 0
                 except CameraError as e:
@@ -397,49 +418,52 @@ class HeliosThread:
                 # append sun status to status history
                 edge_fraction_history.append(new_edge_fraction)
                 logger.debug(
-                    f"New Helios edge_fraction: {new_edge_fraction}. "
-                    + f"Current history: {edge_fraction_history.get()}"
+                    f"New Helios edge_fraction: {new_edge_fraction}. " +
+                    f"Current history: {edge_fraction_history.get()}"
                 )
 
                 # evaluate sun state only if list is filled
                 new_state: Optional[bool] = current_state
                 if edge_fraction_history.is_full():
                     average_edge_fraction = float(
-                        edge_fraction_history.sum() / edge_fraction_history.get_max_size()
+                        edge_fraction_history.sum() /
+                        edge_fraction_history.get_max_size()
                     )
 
                     # eliminating quickly alternating decisions
                     # see https://github.com/tum-esm/pyra/issues/148
 
-                    upper_ef_threshold = _CONFIG["helios"]["edge_detection_threshold"]
+                    upper_ef_threshold = _CONFIG.helios.edge_detection_threshold
                     lower_ef_threshold = upper_ef_threshold * 0.7
                     if current_state is None:
                         new_state = average_edge_fraction >= upper_ef_threshold
                     else:
                         # if already running and below lower threshold -> stop
-                        if current_state and (average_edge_fraction <= lower_ef_threshold):
+                        if current_state and (
+                            average_edge_fraction <= lower_ef_threshold
+                        ):
                             new_state = False
 
                         # if not running and above upper threshold -> start
-                        if (not current_state) and (
-                            average_edge_fraction >= upper_ef_threshold
-                        ):
+                        if (not current_state
+                           ) and (average_edge_fraction >= upper_ef_threshold):
                             new_state = True
 
-                logger.debug(f"State: {'GOOD' if (new_state == True) else 'BAD'}")
+                logger.debug(
+                    f"State: {'GOOD' if (new_state == True) else 'BAD'}"
+                )
 
                 if current_state != new_state:
                     logger.info(
                         f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
                     )
 
-                    def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
+                    def apply_state_update(
+                        state: types.PyraCoreState
+                    ) -> types.PyraCoreState:
                         state.helios_indicates_good_conditions = (
-                            "inconclusive"
-                            if (new_state is None)
-                            else "yes"
-                            if new_state
-                            else "no"
+                            "inconclusive" if (new_state is None) else
+                            "yes" if new_state else "no"
                         )
                         return state
 
@@ -448,7 +472,7 @@ class HeliosThread:
 
                 # wait rest of loop time
                 elapsed_time = time.time() - start_time
-                time_to_wait = _CONFIG["helios"]["seconds_per_interval"] - elapsed_time
+                time_to_wait = _CONFIG.helios.seconds_per_interval - elapsed_time
                 if time_to_wait > 0:
                     logger.debug(
                         f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)."

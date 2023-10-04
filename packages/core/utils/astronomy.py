@@ -6,7 +6,6 @@ import tum_esm_utils
 from datetime import datetime
 from packages.core import types
 
-
 PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 
 
@@ -18,7 +17,9 @@ class Astronomy:
         """Loads the astronomical dataset DE421 from the NASA JPL website,
         see https://ssd.jpl.nasa.gov/planets/eph_export.html."""
 
-        filepath = os.path.join(PROJECT_DIR, "config", "astronomy_dataset_de421.bsp")
+        filepath = os.path.join(
+            PROJECT_DIR, "config", "astronomy_dataset_de421.bsp"
+        )
         assert os.path.isfile(filepath), "Astronomical dataset not found"
 
         if Astronomy._PLANETS is None:
@@ -26,7 +27,7 @@ class Astronomy:
 
     @staticmethod
     def get_current_sun_elevation(
-        config: types.ConfigDict,
+        config: types.Config,
         lat: Optional[float] = None,
         lon: Optional[float] = None,
         alt: Optional[float] = None,
@@ -40,14 +41,16 @@ class Astronomy:
         sun = Astronomy._PLANETS["Sun"]
 
         if datetime_object is not None:
+            current_timestamp = datetime_object.timestamp()  # type: ignore
+            assert isinstance(current_timestamp, float)
             current_time = skyfield.api.load.timescale().from_datetime(
-                datetime.fromtimestamp(datetime_object.timestamp(), tz=skyfield.api.utc)  # type: ignore
+                datetime.fromtimestamp(current_timestamp, tz=skyfield.api.utc)
             )
         else:
             current_time = skyfield.api.load.timescale().now()
 
         if any([c is None for c in [lat, lon, alt]]):
-            with open(config["camtracker"]["config_path"], "r") as f:
+            with open(config.camtracker.config_path.root, "r") as f:
                 _lines = f.readlines()
             _marker_line_index: Optional[int] = None
             for n, line in enumerate(_lines):

@@ -10,11 +10,10 @@ class SystemChecks:
     raises custom errors when the disk runs out of storage or the energy
     supply is not ensured. SystemChecks writes the latest readout into
     StateInterface."""
-
-    def __init__(self, initial_config: types.ConfigDict):
+    def __init__(self, initial_config: types.Config):
         self.config = initial_config
 
-    def run(self, new_config: types.ConfigDict) -> None:
+    def run(self, new_config: types.Config) -> None:
         self.config = new_config
         logger.info("Running SystemChecks")
 
@@ -23,7 +22,9 @@ class SystemChecks:
         logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
 
         memory_usage = interfaces.OSInterface.get_memory_usage()
-        logger.debug(f"Current v_memory usage for the system is {memory_usage}.")
+        logger.debug(
+            f"Current v_memory usage for the system is {memory_usage}."
+        )
 
         last_boot_time = interfaces.OSInterface.get_last_boot_time()
         logger.debug(f"The system is running since {last_boot_time}.")
@@ -37,7 +38,9 @@ class SystemChecks:
         # raises error if system battery is below 20%
         interfaces.OSInterface.validate_system_battery()
 
-        def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
+        def apply_state_update(
+            state: types.PyraCoreState
+        ) -> types.PyraCoreState:
             state.os_state.cpu_usage = cpu_usage
             state.os_state.memory_usage = memory_usage
             state.os_state.last_boot_time = last_boot_time

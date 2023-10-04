@@ -12,7 +12,6 @@ from packages.core import types, utils, interfaces, modules
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
-_CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
 
 def _print_green(text: str) -> None:
@@ -24,30 +23,36 @@ def _print_red(text: str) -> None:
 
 
 def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
-    config = interfaces.ConfigInterface.read()
+    config = types.Config.load()
     plc_interface = None
 
     try:
-        assert config["tum_plc"] is not None, "PLC not configured"
-        assert config["tum_plc"]["controlled_by_user"], "PLC is controlled by automation"
+        assert config.tum_plc is not None, "PLC not configured"
+        assert config.tum_plc.controlled_by_user, "PLC is controlled by automation"
         plc_interface = interfaces.PLCInterface(
-            config["tum_plc"]["version"], config["tum_plc"]["ip"]
+            config.tum_plc.version, config.tum_plc.ip
         )
         plc_interface.connect()
     except Exception as e:
-        _print_red(f"{e}")
-        return None
+        _print_red(str(e))
+        exit(1)
 
     return plc_interface
 
 
 @click.command(help="Read current state from plc.")
-@click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
+@click.option(
+    "--no-indent",
+    is_flag=True,
+    help="Do not print the JSON in an indented manner"
+)
 def _read(no_indent: bool) -> None:
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_readings = plc_interface.read()
-        _print_green(json.dumps(plc_readings, indent=(None if no_indent else 2)))
+        _print_green(
+            json.dumps(plc_readings, indent=(None if no_indent else 2))
+        )
         plc_interface.disconnect()
 
 
@@ -64,7 +69,9 @@ def _reset() -> None:
             running_time += 2
             if not plc_interface.reset_is_needed():
 
-                def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
+                def apply_state_update(
+                    state: types.PyraCoreState
+                ) -> types.PyraCoreState:
                     state.enclosure_plc_readings.state.reset_needed = False
                     return state
 
@@ -76,7 +83,9 @@ def _reset() -> None:
 
 
 def _wait_until_cover_is_at_angle(
-    plc_interface: interfaces.PLCInterface, new_cover_angle: int, timeout: float = 15
+    plc_interface: interfaces.PLCInterface,
+    new_cover_angle: int,
+    timeout: float = 15
 ) -> None:
     # waiting until cover is at this angle
     running_time = 0
@@ -86,7 +95,9 @@ def _wait_until_cover_is_at_angle(
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
 
-            def apply_state_update(state: types.PyraCoreState) -> types.PyraCoreState:
+            def apply_state_update(
+                state: types.PyraCoreState
+            ) -> types.PyraCoreState:
                 state.enclosure_plc_readings.actors.current_angle = new_cover_angle
                 state.enclosure_plc_readings.state.cover_closed = new_cover_angle == 0
                 return state
@@ -105,7 +116,9 @@ def _wait_until_cover_is_at_angle(
 def _set_cover_angle(angle: str) -> None:
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
-        new_cover_angle = int("".join([c for c in str(angle) if c.isnumeric() or c == "."]))
+        new_cover_angle = int(
+            "".join([c for c in str(angle) if c.isnumeric() or c == "."])
+        )
         assert (new_cover_angle == 0) or (
             new_cover_angle >= 110 and new_cover_angle <= 250
         ), "angle has to be 0° or between 110° and 250°"
@@ -125,15 +138,10 @@ def _set_cover_angle(angle: str) -> None:
     timeout=5,
 )
 def _enable_user_control_in_config() -> None:
-    with open(_CONFIG_FILE_PATH, "r") as f:
-        config = json.load(f)
-    types.validate_config_dict(config)
-
-    verified_config: types.ConfigDict = config
-    if verified_config["tum_plc"] is not None:
-        verified_config["tum_plc"]["controlled_by_user"] = True
-        with open(_CONFIG_FILE_PATH, "w") as f:
-            json.dump(verified_config, f, indent=4)
+    config = types.Config.load(with_filelock=False)
+    if config.tum_plc is not None:
+        config.tum_plc.controlled_by_user = True
+        config.dump(with_filelock=False)
 
 
 @click.command(help="Run plc function 'force_cover_close()'")
@@ -154,11 +162,14 @@ def _close_cover() -> None:
 
 def _set_boolean_plc_state(
     state: str,
-    get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool], None]],
+    get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool],
+                                                                      None]],
 ) -> None:
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
-        assert state in ["true", "false"], 'state has to be either "true" or "false"'
+        assert state in [
+            "true", "false"
+        ], 'state has to be either "true" or "false"'
         get_setter_function(plc_interface)(state == "true")
         _print_green("Ok")
         plc_interface.disconnect()
@@ -216,9 +227,13 @@ plc_command_group.add_command(_reset, name="reset")
 plc_command_group.add_command(_set_cover_angle, name="set-cover-angle")
 plc_command_group.add_command(_close_cover, name="close-cover")
 plc_command_group.add_command(_set_sync_to_tracker, name="set-sync-to-tracker")
-plc_command_group.add_command(_set_auto_temperature, name="set-auto-temperature")
+plc_command_group.add_command(
+    _set_auto_temperature, name="set-auto-temperature"
+)
 plc_command_group.add_command(_set_heater_power, name="set-heater-power")
 plc_command_group.add_command(_set_camera_power, name="set-camera-power")
 plc_command_group.add_command(_set_router_power, name="set-router-power")
-plc_command_group.add_command(_set_spectrometer_power, name="set-spectrometer-power")
+plc_command_group.add_command(
+    _set_spectrometer_power, name="set-spectrometer-power"
+)
 plc_command_group.add_command(_set_computer_power, name="set-computer-power")

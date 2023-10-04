@@ -4,14 +4,12 @@ import time
 from typing import Any
 from packages.core import types, utils, interfaces
 
-
 # these imports are provided by pywin32
 _win32ui: Any = None
 _dde: Any = None
 if sys.platform == "win32":
     import win32ui as _win32ui  # type: ignore
     import dde as _dde  # type: ignore
-
 
 logger = utils.Logger(origin="opus-measurement")
 
@@ -33,12 +31,11 @@ class OpusMeasurement:
 
     OPUSMeasurement will start and stop Macros according to the
     current value of StateInterface: measurements_should_be_running."""
-
-    def __init__(self, initial_config: types.ConfigDict):
+    def __init__(self, initial_config: types.Config):
         self.config = initial_config
         self.initialized = False
-        self.current_experiment = self.config["opus"]["experiment_path"]
-        if self.config["general"]["test_mode"] or (sys.platform != "win32"):
+        self.current_experiment = self.config.opus.experiment_path.root
+        if self.config.general.test_mode or (sys.platform != "win32"):
             return
 
         self.__initialize()
@@ -77,7 +74,7 @@ class OpusMeasurement:
         self.last_cycle_automation_status = 0
         self.initialized = True
 
-    def run(self, new_config: types.ConfigDict) -> None:
+    def run(self, new_config: types.Config) -> None:
         """Called in every cycle of the main loop. Starts and
         stops OPUS.exe based on the present sun angle. Reads
         StateInterface: measurements_should_be_running and starts
@@ -85,8 +82,10 @@ class OpusMeasurement:
 
         # loads latest config
         self.config = new_config
-        if self.config["general"]["test_mode"] or (sys.platform != "win32"):
-            logger.debug("Skipping OpusMeasurement in test mode and on non-windows systems")
+        if self.config.general.test_mode or (sys.platform != "win32"):
+            logger.debug(
+                "Skipping OpusMeasurement in test mode and on non-windows systems"
+            )
             return
 
         logger.info("Running OpusMeasurement")
@@ -94,7 +93,7 @@ class OpusMeasurement:
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
-        if self.config["general"]["test_mode"]:
+        if self.config.general.test_mode:
             logger.info("Test mode active.")
             return
 
@@ -168,7 +167,7 @@ class OpusMeasurement:
         assert sys.platform == "win32"
 
         self.__connect_to_dde_opus()
-        experiment_path = self.config["opus"]["experiment_path"]
+        experiment_path = self.config.opus.experiment_path.root
 
         if not self.__test_dde_connection():
             return
@@ -186,7 +185,7 @@ class OpusMeasurement:
             return
 
         # load macro
-        macro_path = self.config["opus"]["macro_path"]
+        macro_path = self.config.opus.macro_path
         answer = self.conversation.Request(f"RUN_MACRO {macro_path}")
         logger.info(f"Started OPUS macro: {macro_path}")
 
@@ -202,7 +201,7 @@ class OpusMeasurement:
             return
 
         # stop macro
-        macro_path = os.path.basename(self.config["opus"]["macro_path"])
+        macro_path = os.path.basename(self.config.opus.macro_path.root)
         answer = self.conversation.Request("KILL_MACRO " + macro_path)
         logger.info(f"Stopped OPUS macro: {macro_path}")
 
@@ -240,7 +239,7 @@ class OpusMeasurement:
 
         assert sys.platform == "win32"
 
-        response = os.system("ping -n 1 " + self.config["opus"]["em27_ip"])
+        response = os.system("ping -n 1 " + self.config.opus.em27_ip.root)
         return response == 0
 
     def start_opus(self) -> None:
@@ -249,9 +248,9 @@ class OpusMeasurement:
 
         assert sys.platform == "win32"
 
-        opus_path = self.config["opus"]["executable_path"]
-        opus_username = self.config["opus"]["username"]
-        opus_password = self.config["opus"]["password"]
+        opus_path = self.config.opus.executable_path.root
+        opus_username = self.config.opus.username
+        opus_password = self.config.opus.password
 
         # works only > python3.10
         # without cwd CT will have trouble loading its internal database)
@@ -277,7 +276,7 @@ class OpusMeasurement:
         # FindWindow(className, windowName)
         # className: String, The window class name to find, else None
         # windowName: String, The window name (ie,title) to find, else None
-        opus_username = self.config["opus"]["username"]
+        opus_username = self.config.opus.username
         opus_windows_name = (
             f"OPUS - Operator: {opus_username}  (Administrator) - [Display - default.ows]"
         )
@@ -299,7 +298,7 @@ class OpusMeasurement:
 
         return (
             utils.Astronomy.get_current_sun_elevation(self.config)
-            < self.config["general"]["min_sun_elevation"]
+            < self.config.general.min_sun_elevation
         )
 
     def automated_process_handling(self) -> None:
@@ -354,8 +353,9 @@ class OpusMeasurement:
 
         assert sys.platform == "win32"
 
-        if self.config["opus"]["experiment_path"] != self.current_experiment:
-            if interfaces.StateInterface.read_persistent().active_opus_macro_id == -1:
+        if self.config.opus.experiment_path.root != self.current_experiment:
+            if interfaces.StateInterface.read_persistent(
+            ).active_opus_macro_id == -1:
                 self.load_experiment()
             else:
                 self.stop_macro()
