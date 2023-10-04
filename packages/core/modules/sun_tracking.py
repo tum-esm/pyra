@@ -166,19 +166,16 @@ class SunTracking:
 
     def read_ct_log_learn_az_elev(
         self,
-    ) -> Optional[tuple[float, float, float, float, float, float]]:
+    ) -> Optional[tuple[datetime.datetime, float, float, float, float, float]]:
         """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
 
-        Returns a list of string parameter: [
-            Julian Date,
-            Tracker Elevation,
-            Tracker Azimuth,
-            Elev Offset from Astro,
-            Az Offset from Astro,
-            Ellipse distance/px
-        ]
+        Returns:  A list of string parameters [datetime, Tracker Elevation,
+                  Tracker Azimuth, Elev Offset from Astro, Az Offset from Astro,
+                  Ellipse distance/px] or None if the last log line is older than
+                  5 minutes.
 
-        Raises AssertionError if log file is invalid.
+        Raises:
+            AssertionError: if last log line is in an invalid format
         """
 
         # read azimuth and elevation motor offsets from camtracker logfiles
@@ -193,21 +190,33 @@ class SunTracking:
 
         try:
             assert len(str_values) == 6
-            float_values = tuple([float(v) for v in str_values])
+            float_values = (
+                float(str_values[0]),
+                float(str_values[1]),
+                float(str_values[2]),
+                float(str_values[3]),
+                float(str_values[4]),
+                float(str_values[5]),
+            )
         except (AssertionError, ValueError):
             raise AssertionError(f'invalid last logfile line "{last_line}"')
 
-        # convert julian day to greg calendar as tuple (Year, Month, Day)
-        jddate = jdcal.jd2gcal(float_values[0], 0)[: 3]
+        # convert julian day datetime
+        logline_datetime = (
+            datetime.datetime(1858, 11, 17) +
+            datetime.timedelta(float_values[0] - 2400000.500)
+        )
+
+        logline_age_in_seconds = (datetime.datetime.now() -
+                                  logline_datetime).total_seconds()
 
         # assert that the log file is up-to-date
-        now = datetime.datetime.now()
-        if jddate != (now.year, now.month, now.day):
+        if logline_age_in_seconds > 300:
             return None
 
-        return float_values  # type: ignore
+        return (logline_datetime, *float_values[1 :])
 
-    def validate_tracker_position(self) -> Optional[bool]:
+    def validate_tracker_position(self) -> bool:
         """Reads motor offsets and compares it with defined threshold.
         The motor offset defines the difference between the current active and calculated sun
         angle.
