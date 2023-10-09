@@ -51,8 +51,6 @@ function ActivityPlot() {
         measurementsAreRunning,
         errorIsPresent
     );
-    console.log(sections);
-
     const localUTCOffset = moment().utcOffset();
 
     return (

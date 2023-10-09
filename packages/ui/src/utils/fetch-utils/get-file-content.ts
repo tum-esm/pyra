@@ -24,7 +24,11 @@ async function getFileContent(filePath: string) {
             absoluteFilePath = await join('pyra', `pyra-${APP_VERSION}`, ...filePath.split('/'));
             break;
     }
-    console.debug(`Reading file: "${absoluteFilePath}" in directory "${baseDir}"`);
+    console.debug(
+        `Reading file: "~/${
+            baseDir === BaseDirectory.Document ? 'Documents' : 'Downloads'
+        }/${absoluteFilePath}"`
+    );
     return await readTextFile(absoluteFilePath, { dir: baseDir });
 }
 
