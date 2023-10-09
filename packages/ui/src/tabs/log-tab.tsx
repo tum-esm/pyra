@@ -1,36 +1,29 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { dialog, shell } from '@tauri-apps/api';
-import { fetchUtils, functionalUtils, reduxUtils } from '../utils';
+import { fetchUtils } from '../utils';
 import { essentialComponents } from '../components';
 import toast from 'react-hot-toast';
 import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
+import Toggle from '../components/essential/toggle';
+import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 
 export default function LogTab() {
-    const [logLevel, setLogLevel] = useState<'info' | 'debug'>('info');
     const [archiving, setArchiving] = useState(false);
+    const [logType, setLogType] = useState<'main' | 'upload' | 'helios'>('main');
 
-    const dispatch = reduxUtils.useTypedDispatch();
+    const [liveUpdateIsActice, setLiveUpdateIsActive] = useState(true);
+    const [renderedMainLogs, setRenderedMainLogs] = useState<string[] | undefined>(undefined);
+    const [renderedUploadLogs, setRenderedUploadLogs] = useState<string[] | undefined>(undefined);
+    const [renderedHeliosLogs, setRenderedHeliosLogs] = useState<string[] | undefined>(undefined);
 
-    const fetchUpdates = reduxUtils.useTypedSelector((s) => s.logs.fetchUpdates);
-    const setFetchUpdates = (f: boolean) => dispatch(reduxUtils.logsActions.setFetchUpdates(f));
-
-    const renderedLogScope = reduxUtils.useTypedSelector((s) => s.logs.renderedLogScope);
-    const setRenderedLogScope = (f: '3 iterations' | '5 minutes') =>
-        dispatch(reduxUtils.logsActions.setRenderedLogScope(f));
-
-    const debugLogLines = reduxUtils.useTypedSelector((s) => s.logs.debugLines);
-    const infoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
-
-    const renderedLogLines: string[] | undefined = useMemo(() => {
-        if (debugLogLines === undefined || infoLogLines === undefined) {
-            return undefined;
+    const { mainLogs, uploadLogs, heliosLogs, setLogs } = useLogsStore();
+    useEffect(() => {
+        if (liveUpdateIsActice) {
+            setRenderedMainLogs(mainLogs);
+            setRenderedUploadLogs(uploadLogs);
+            setRenderedHeliosLogs(heliosLogs);
         }
-        let leveledLines = logLevel === 'info' ? infoLogLines : debugLogLines;
-        if (renderedLogScope === '3 iterations') {
-            leveledLines = functionalUtils.reduceLogLines(leveledLines, '3 iterations');
-        }
-        return leveledLines;
-    }, [debugLogLines, infoLogLines, logLevel, renderedLogScope]);
+    }, [mainLogs, uploadLogs, heliosLogs, liveUpdateIsActice]);
 
     async function openLogsFolder() {
         let baseDir: string;
@@ -64,7 +57,7 @@ export default function LogTab() {
             setArchiving(true);
             const result = await fetchUtils.backend.archiveLogs();
             if (result.stdout.replace(/[\n\s]*/g, '') === 'done!') {
-                dispatch(reduxUtils.logsActions.set([]));
+                setLogs([]);
             } else {
                 console.error(
                     `Could not archive log files. processResult = ${JSON.stringify(result)}`
@@ -75,21 +68,26 @@ export default function LogTab() {
         }
     }
 
+    const renderedLogs =
+        logType === 'main'
+            ? renderedMainLogs
+            : logType === 'upload'
+            ? renderedUploadLogs
+            : renderedHeliosLogs;
+
     return (
         <div className={'flex flex-col w-full h-[calc(100vh-3.5rem)] pt-4 overflow-hidden '}>
             <div className="px-6 mb-4 flex-row-center gap-x-2">
-                <essentialComponents.LiveSwitch isLive={fetchUpdates} toggle={setFetchUpdates} />
-                <essentialComponents.Toggle
-                    value={logLevel}
-                    setValue={(s: any) => setLogLevel(s)}
-                    values={['info', 'debug']}
+                <essentialComponents.LiveSwitch
+                    isLive={liveUpdateIsActice}
+                    toggle={setLiveUpdateIsActive}
                 />
-                <essentialComponents.Toggle
-                    value={renderedLogScope}
-                    setValue={setRenderedLogScope}
-                    values={['3 iterations', '5 minutes']}
+                {mainLogs === undefined && <essentialComponents.Spinner />}
+                <Toggle
+                    value={logType}
+                    setValue={(lt: any) => setLogType(lt)}
+                    values={['main', 'upload', 'helios']}
                 />
-                {renderedLogLines === undefined && <essentialComponents.Spinner />}
                 <div className="flex-grow" />
                 <essentialComponents.Button onClick={openLogsFolder} variant="white">
                     open logs folder
@@ -104,12 +102,14 @@ export default function LogTab() {
                     'border-t border-gray-250 bg-whites flex-grow bg-white'
                 }
             >
-                {renderedLogLines !== undefined && (
+                {renderedLogs !== undefined && (
                     <>
-                        {renderedLogLines.map((l, i) => (
+                        {renderedLogs.map((l, i) => (
                             <essentialComponents.LogLine text={l} key={`${i} ${l}`} />
                         ))}
-                        {renderedLogLines.length == 0 && <strong>logs are empty</strong>}
+                        {renderedLogs.length == 0 && (
+                            <div className="px-4 py-2">logs are empty</div>
+                        )}
                     </>
                 )}
             </div>
