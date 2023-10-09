@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { mean } from 'lodash';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 import { IconActivityHeartbeat, IconCpu, IconTimelineEventText } from '@tabler/icons-react';
+import PyraCoreStatus from '../components/automation/pyra-core-status';
 
 function SystemRow(props: { label: string; value: React.ReactNode }) {
     return (
@@ -117,36 +118,30 @@ export default function OverviewTab() {
 
     return (
         <div className={'flex-col-center w-full pb-4 relative overflow-x-hidden bg-white'}>
-            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-sm font-medium bg-gray-100 gap-x-2">
-                <IconActivityHeartbeat size={20} className="text-gray-700" /> Pyra Core
+            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-base font-medium text-white bg-gray-800 gap-x-3">
+                <IconActivityHeartbeat size={20} className="text-gray-200" /> Pyra Core
             </div>
-            <div className="w-full p-4 border-t border-gray-300">
-                <div className="w-full p-4 text-sm h-7 flex-row-left gap-x-1">
-                    <essentialComponents.Ping state={true} />
-                    <span className="ml-1">pyra-core is running with process ID {pyraCorePID}</span>
-                    <span className="w-8" />
-                    <essentialComponents.Ping state={measurementDecisionResult} />
-                    <span className="ml-1">Measurements are currently</span>
-                    {measurementDecisionResult === undefined && <essentialComponents.Spinner />}
-                    {!(measurementDecisionResult === undefined) && (
-                        <>
-                            {!measurementDecisionResult && <>not running</>}
-                            {measurementDecisionResult && <>running</>}
-                        </>
-                    )}
-                    {measurementDecision?.mode !== undefined && (
-                        <strong className="ml-1 font-semibold">
-                            ({measurementDecision.mode} mode)
-                        </strong>
-                    )}
-                </div>
+
+            <PyraCoreStatus />
+            <div className="w-full p-4 text-sm border-t border-gray-200 flex-row-left gap-x-1">
+                <essentialComponents.Ping state={measurementDecisionResult} />
+                <span className="ml-1">Measurements are currently</span>
+                {measurementDecisionResult === undefined && <essentialComponents.Spinner />}
+                {!(measurementDecisionResult === undefined) && (
+                    <>
+                        {!measurementDecisionResult && <>not running</>}
+                        {measurementDecisionResult && <>running</>}
+                    </>
+                )}
+            </div>
+            <div className="w-full p-4 pt-2 border-t border-gray-200">
                 <overviewComponents.ActivityPlot />
             </div>
-            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-sm font-medium bg-gray-100 border-t-[1.5px] border-gray-800 gap-x-2">
-                <IconCpu size={20} className="text-gray-700" /> System State
+            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-base font-medium text-white bg-gray-800 gap-x-3">
+                <IconCpu size={20} className="text-gray-200" /> System State
             </div>
             {coreState === undefined && (
-                <div className="w-full p-4 text-sm bg-white border-t border-gray-300 flex-row-left gap-x-2">
+                <div className="w-full p-4 text-sm bg-white flex-row-left gap-x-2">
                     State is loading <essentialComponents.Spinner />
                 </div>
             )}
@@ -230,10 +225,10 @@ export default function OverviewTab() {
                 </div>
             )}
 
-            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-sm font-medium bg-gray-100 border-t-[1.5px] border-gray-800 gap-x-2">
-                <IconTimelineEventText size={20} className="text-gray-700" /> Recent Log Lines
+            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-base font-medium text-white bg-gray-800 gap-x-3">
+                <IconTimelineEventText size={20} className="text-gray-200" /> Recent Log Lines
             </div>
-            <div className="w-full overflow-hidden font-mono text-xs bg-white border-t border-gray-300">
+            <div className="w-full overflow-hidden font-mono text-xs bg-white">
                 {(currentInfoLogLines === undefined || currentInfoLogLines.length === 0) && (
                     <div className="p-2">
                         <essentialComponents.Spinner />
