@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { customTypes } from '../custom-types';
 import toast from 'react-hot-toast';
 import { mean } from 'lodash';
+import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 
 function SystemRow(props: { label: string; value: React.ReactNode }) {
     return (
@@ -74,8 +75,8 @@ export default function OverviewTab() {
         });
     }
 
-    const allInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
-    const currentInfoLogLines = allInfoLogLines?.slice(-10);
+    const { mainLogs } = useLogsStore();
+    const currentInfoLogLines = mainLogs?.slice(-10);
 
     function renderSystemBar(value: null | number | number[]) {
         if (value === null) {
@@ -114,9 +115,7 @@ export default function OverviewTab() {
     }
 
     return (
-        <div
-            className={'flex-col-center w-full gap-y-6 pt-4 pb-12 px-6 relative overflow-x-hidden'}
-        >
+        <div className={'flex-col-center w-full gap-y-6 pt-4 pb-8 px-6 relative overflow-x-hidden'}>
             <div className="w-full text-sm h-7 flex-row-left gap-x-1">
                 <essentialComponents.Ping state={true} />
                 <span className="ml-1">pyra-core is running with process ID {pyraCorePID}</span>
@@ -223,6 +222,7 @@ export default function OverviewTab() {
                 </div>
             )}
             <div className="w-[calc(100%+6rem)] -ml-6 h-px bg-gray-300" />
+
             <div className="w-full pl-2 -mb-1 text-sm font-semibold">Last 10 log lines:</div>
             <div
                 className={

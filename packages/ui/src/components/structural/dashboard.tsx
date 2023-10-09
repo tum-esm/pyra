@@ -6,6 +6,7 @@ import { customTypes } from '../../custom-types';
 import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
 import moment from 'moment';
+import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 
 const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
 
@@ -20,6 +21,8 @@ export default function Dashboard() {
 
     const fetchLogUpdates = reduxUtils.useTypedSelector((s) => s.logs.fetchUpdates);
 
+    const { setLogs } = useLogsStore();
+
     useEffect(() => {
         async function fetchStateFile() {
             const fileContent = await fetchUtils.getFileContent('runtime-data/state.json');
@@ -29,7 +32,7 @@ export default function Dashboard() {
         async function fetchLogFile() {
             if (fetchLogUpdates) {
                 const fileContent = await fetchUtils.getFileContent('logs/debug.log');
-                dispatch(reduxUtils.logsActions.set(fileContent.split('\n')));
+                setLogs(fileContent.split('\n'));
             }
         }
 
