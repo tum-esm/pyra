@@ -18,7 +18,8 @@
         "react-dom": "18.2.0",
         "react-hot-toast": "^2.2.0",
         "react-redux": "^8.0.2",
-        "socket.io-client": "^4.5.1"
+        "socket.io-client": "^4.5.1",
+        "zustand": "^4.4.3"
     },
     "devDependencies": {
         "@tailwindcss/forms": "0.5.6",
