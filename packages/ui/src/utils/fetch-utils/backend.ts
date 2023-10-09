@@ -35,7 +35,7 @@ const backend = {
         return await callCLI(['core', 'stop']);
     },
     getConfig: async (): Promise<ChildProcess> => {
-        return await callCLI(['config', 'get']);
+        return await callCLI(['config', 'get', '--no-indent', '--no-color']);
     },
     updateConfig: async (newConfig: customTypes.partialConfig): Promise<ChildProcess> => {
         return await callCLI(['config', 'update', JSON.stringify(newConfig)]);

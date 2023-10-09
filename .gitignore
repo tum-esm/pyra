@@ -5,6 +5,7 @@ test-tmp/
 .idea
 hidden/
 packages/docs/docs/api-reference/ui
+cli.sh
 
 # runtime data
 pids

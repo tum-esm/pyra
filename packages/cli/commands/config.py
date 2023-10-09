@@ -25,17 +25,33 @@ def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
-@click.argument("indent", default=False, is_flag=True)
+@click.option("--no-indent", default=False, is_flag=True)
+@click.option("--check-path-existence", default=False, is_flag=True)
+@click.option("--no-color", default=False, is_flag=True)
 @click.command(
     short_help="Read the config.json file.",
     help=
     "Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence.",
 )
-def _get_config(indent: bool) -> None:
+def _get_config(
+    no_indent: bool, check_path_existence: bool, no_color: bool
+) -> None:
     if not os.path.isfile(_CONFIG_FILE_PATH):
         shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
-    config = types.Config.load(ignore_path_existence=True)
-    click.echo(config.model_dump_json(indent=4 if indent else None))
+    try:
+        config = types.Config.load(
+            ignore_path_existence=(not check_path_existence)
+        )
+    except ValueError as e:
+        click.echo(click.style(e, fg=None if no_color else "red"))
+        exit(1)
+
+    click.echo(
+        click.style(
+            config.model_dump_json(indent=None if no_indent else 4),
+            fg=None if no_color else "green"
+        )
+    )
 
 
 @click.command(

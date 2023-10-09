@@ -43,7 +43,7 @@
                 "scope": [
                     "$DOWNLOAD\\pyra\\pyra-4.*.*\\*",
                     "$DOCUMENT\\pyra\\pyra-4.*.*\\*",
-                    "$DOCUMENT/work/esm/pyra/*"
+                    "$DOCUMENT/work/esm/pyra/**"
                 ]
             }
         },

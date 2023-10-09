@@ -1,7 +1,6 @@
 """Pyra CLI entry point. Use `pyra-cli --help`/`pyra-cli $command --help`
 to see all available commands.`"""
 
-from packages.core import types
 import click
 import os
 import sys
@@ -10,6 +9,7 @@ _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(os.path.abspath(__file__))))
 sys.path.append(_PROJECT_DIR)
 
+from packages.core import types
 from packages.cli.commands import (
     config_command_group,
     core_command_group,
