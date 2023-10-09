@@ -71,29 +71,26 @@ def _update_config(content: str) -> None:
             ignore_path_existence=True,
         )
     except Exception as e:
-        _print_red("Could not load the current config.json file")
-        raise e
+        raise RuntimeError(f"Could not load the current config.json file: {e}")
 
     try:
         new_partial_config = types.ConfigPartial.load(
             content,
             ignore_path_existence=True,
         )
-    except Exception as e:
-        _print_red("content argument is not a valid partial config")
-        raise e
+    except ValueError as e:
+        error_message = str(e)
+        _print_red(error_message)
+        exit(1)
 
-    try:
-        merged_config = types.Config.load(
-            tum_esm_utils.datastructures.merge_dicts(
-                current_config.model_dump(),
-                new_partial_config.model_dump(exclude_unset=True),
-            ),
-            ignore_path_existence=True,
-        )
-    except Exception as e:
-        _print_red("Could not merge the current config and the partial config")
-        raise e
+    merged_config_dicts = tum_esm_utils.datastructures.merge_dicts(
+        current_config.model_dump(),
+        new_partial_config.model_dump(exclude_unset=True),
+    )
+    merged_config = types.Config.load(
+        merged_config_dicts,
+        ignore_path_existence=True,
+    )
 
     with open(_CONFIG_FILE_PATH, "w") as f:
         f.write(merged_config.model_dump_json(indent=4))

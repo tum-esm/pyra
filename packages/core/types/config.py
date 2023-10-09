@@ -73,10 +73,12 @@ class SubConfigGeneral(pydantic.BaseModel):
 class SubConfigGeneralPartial(pydantic.BaseModel):
     """Like `SubConfigGeneral`, but all fields are optional."""
 
-    seconds_per_core_interval: Optional[float] = None
+    seconds_per_core_interval: Optional[float] = pydantic.Field(
+        None, ge=5, le=600
+    )
     test_mode: Optional[bool] = None
     station_id: Optional[str] = None
-    min_sun_elevation: Optional[float] = None
+    min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
 
 
 class SubConfigOpus(pydantic.BaseModel):
@@ -311,7 +313,9 @@ class Config(pydantic.BaseModel):
                 )
 
             # the "from None" suppresses the pydantic exception
-            raise ValueError(f"Config is invalid, {pretty_errors}") from None
+            raise ValueError(
+                f"Config is invalid: {','.join(pretty_errors)}"
+            ) from None
 
     def dump(self, with_filelock: bool = True) -> None:
         if with_filelock:
@@ -349,7 +353,11 @@ class ConfigPartial(pydantic.BaseModel):
                                     paths used in the whole config file will not be
                                     checked. Defaults to False.
         
-        Returns:  The loaded partial config object."""
+        Returns:  The loaded partial config object.
+        
+        Raises:
+            ValueError:  If the config file is invalid.
+        """
 
         try:
             return ConfigPartial.model_validate_json(
@@ -367,4 +375,6 @@ class ConfigPartial(pydantic.BaseModel):
                 )
 
             # the "from None" suppresses the pydantic exception
-            raise ValueError(f"Config is invalid, {pretty_errors}") from None
+            raise ValueError(
+                f"ConfigPartial is invalid: {','.join(pretty_errors)}"
+            ) from None
