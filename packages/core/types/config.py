@@ -63,7 +63,7 @@ class TimeDictPartial(pydantic.BaseModel):
 
 
 class SubConfigGeneral(pydantic.BaseModel):
-    version: Literal["4.0.8"]
+    version: Literal["4.1.0"]
     seconds_per_core_interval: float = pydantic.Field(..., ge=5, le=600)
     test_mode: bool
     station_id: str
@@ -258,22 +258,40 @@ class Config(pydantic.BaseModel):
                                     paths used in the whole config file will not be
                                     checked. Defaults to False.
         
-        Returns:  The loaded config object."""
+        Returns:  The loaded config object.
+        
+        Raises:
+            ValueError:  If the config file is invalid.
+        """
 
-        if config_object is not None:
-            if isinstance(config_object, dict):
-                return Config.model_validate(
-                    config_object,
-                    context={"ignore-path-existence": ignore_path_existence},
-                )
+        try:
+
+            if config_object is not None:
+                if isinstance(config_object, dict):
+                    return Config.model_validate(
+                        config_object,
+                        context={
+                            "ignore-path-existence": ignore_path_existence
+                        },
+                    )
+                else:
+                    return Config.model_validate_json(
+                        config_object,
+                        context={
+                            "ignore-path-existence": ignore_path_existence
+                        },
+                    )
+
+            if with_filelock:
+                with filelock.FileLock(_CONFIG_LOCK_PATH, timeout=10):
+                    with open(_CONFIG_FILE_PATH) as f:
+                        return Config.model_validate_json(
+                            f.read(),
+                            context={
+                                "ignore-path-existence": ignore_path_existence
+                            },
+                        )
             else:
-                return Config.model_validate_json(
-                    config_object,
-                    context={"ignore-path-existence": ignore_path_existence},
-                )
-
-        if with_filelock:
-            with filelock.FileLock(_CONFIG_LOCK_PATH, timeout=10):
                 with open(_CONFIG_FILE_PATH) as f:
                     return Config.model_validate_json(
                         f.read(),
@@ -281,12 +299,19 @@ class Config(pydantic.BaseModel):
                             "ignore-path-existence": ignore_path_existence
                         },
                     )
-        else:
-            with open(_CONFIG_FILE_PATH) as f:
-                return Config.model_validate_json(
-                    f.read(),
-                    context={"ignore-path-existence": ignore_path_existence},
+
+        except pydantic.ValidationError as e:
+            pretty_errors: list[str] = []
+            for er in e.errors():
+                location = ".".join([str(err) for err in er["loc"]])
+                message = er["msg"]
+                value = er["input"]
+                pretty_errors.append(
+                    f"Error in {location}: {message} (value: {value})"
                 )
+
+            # the "from None" suppresses the pydantic exception
+            raise ValueError(f"Config is invalid, {pretty_errors}") from None
 
     def dump(self, with_filelock: bool = True) -> None:
         if with_filelock:
@@ -326,7 +351,20 @@ class ConfigPartial(pydantic.BaseModel):
         
         Returns:  The loaded partial config object."""
 
-        return ConfigPartial.model_validate_json(
-            config_object,
-            context={"ignore-path-existence": ignore_path_existence},
-        )
+        try:
+            return ConfigPartial.model_validate_json(
+                config_object,
+                context={"ignore-path-existence": ignore_path_existence},
+            )
+        except pydantic.ValidationError as e:
+            pretty_errors: list[str] = []
+            for er in e.errors():
+                location = ".".join([str(err) for err in er["loc"]])
+                message = er["msg"]
+                value = er["input"]
+                pretty_errors.append(
+                    f"Error in {location}: {message} (value: {value})"
+                )
+
+            # the "from None" suppresses the pydantic exception
+            raise ValueError(f"Config is invalid, {pretty_errors}") from None
