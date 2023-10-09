@@ -2,6 +2,7 @@ import { range } from 'lodash';
 import moment from 'moment';
 import { functionalUtils, reduxUtils } from '../../utils';
 import { customTypes } from '../../custom-types';
+import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 
 function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
     let fraction = time.hour() / 24.0 + time.minute() / (24.0 * 60) + time.second() / (24.0 * 3600);
@@ -18,20 +19,22 @@ function ActivityPlot() {
     // " - EXCEPTION - "
 
     const rawActivityHistory = reduxUtils.useTypedSelector((s) => s.activity.history);
-    const currentInfoLogLines = reduxUtils.useTypedSelector((s) => s.logs.infoLines);
+    const { mainLogs } = useLogsStore();
 
     let measurementsAreRunning = false;
     let errorIsPresent = false;
-    if (currentInfoLogLines !== undefined) {
-        const joined_logs = functionalUtils
-            .reduceLogLines(currentInfoLogLines, '3 iterations')
-            .join('\n');
+    if (mainLogs !== undefined) {
+        let mainloopIterationLogs = mainLogs.join('\n').split('main - INFO - Starting iteration');
+        if (mainloopIterationLogs.length > 2) {
+            mainloopIterationLogs = mainloopIterationLogs.slice(0, 2);
+        }
+        const joinedLogs = mainloopIterationLogs.join('main - INFO - Starting iteration');
         measurementsAreRunning =
-            joined_logs.includes(' - INFO - Measurements should be running is set to: True') &&
-            !joined_logs.includes(' - INFO - Measurements should be running is set to: False');
+            joinedLogs.includes(' - INFO - Measurements should be running is set to: True') &&
+            !joinedLogs.includes(' - INFO - Measurements should be running is set to: False');
         errorIsPresent =
-            joined_logs.includes(' - EXCEPTION - ') &&
-            !joined_logs.includes(' - ERROR - Invalid config, waiting 10 seconds');
+            joinedLogs.includes(' - EXCEPTION - ') &&
+            !joinedLogs.includes(' - ERROR - Invalid config, waiting 10 seconds');
     }
 
     let activityHistory: customTypes.activityHistory = [];

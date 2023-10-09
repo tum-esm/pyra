@@ -19,8 +19,6 @@ export default function Dashboard() {
     const enclosureControlsIsVisible =
         centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
 
-    const fetchLogUpdates = reduxUtils.useTypedSelector((s) => s.logs.fetchUpdates);
-
     const { setLogs } = useLogsStore();
 
     useEffect(() => {
@@ -30,25 +28,21 @@ export default function Dashboard() {
         }
 
         async function fetchLogFile() {
-            if (fetchLogUpdates) {
-                const fileContent = await fetchUtils.getFileContent('logs/debug.log');
-                setLogs(fileContent.split('\n'));
-            }
+            const fileContent = await fetchUtils.getFileContent('logs/debug.log');
+            setLogs(fileContent.split('\n'));
         }
 
         async function fetchActivityFile() {
-            if (fetchLogUpdates) {
-                const filename = moment().format('YYYY-MM-DD');
-                try {
-                    const fileContent = await fetchUtils.getFileContent(
-                        `logs/activity/activity-${filename}.json`
-                    );
-                    // @ts-ignore
-                    dispatch(reduxUtils.activityActions.set(JSON.parse(fileContent)));
-                } catch (e) {
-                    console.debug(`Could not load activity file: ${e}`);
-                    dispatch(reduxUtils.activityActions.set([]));
-                }
+            const filename = moment().format('YYYY-MM-DD');
+            try {
+                const fileContent = await fetchUtils.getFileContent(
+                    `logs/activity/activity-${filename}.json`
+                );
+                // @ts-ignore
+                dispatch(reduxUtils.activityActions.set(JSON.parse(fileContent)));
+            } catch (e) {
+                console.debug(`Could not load activity file: ${e}`);
+                dispatch(reduxUtils.activityActions.set([]));
             }
         }
 
@@ -68,7 +62,7 @@ export default function Dashboard() {
             clearInterval(interval2);
             clearInterval(interval3);
         };
-    }, [dispatch, fetchLogUpdates, initialFetchTriggered]);
+    }, [dispatch, initialFetchTriggered]);
 
     useEffect(() => {
         async function fetchConfigFile() {
