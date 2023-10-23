@@ -17,8 +17,9 @@ async function initialAppState(
             | 'pyra-core is not running'
             | 'valid'
             | undefined
-    ) => void
-) {
+    ) => void,
+    setPyraCorePid: (value: number | undefined) => void
+): Promise<void> {
     setBackendIntegrity(undefined);
     console.debug('loading initial state ...');
 
@@ -51,13 +52,13 @@ async function initialAppState(
 
     const result3 = await backend.checkPyraCoreState();
     if (!result3.stdout.includes('pyra-core is running with PID')) {
-        dispatch(reduxUtils.coreProcessActions.set({ pid: -1 }));
+        setPyraCorePid(-1);
         setBackendIntegrity('pyra-core is not running');
         return;
     }
 
     const pid = parseInt(result3.stdout.replace(/[^\d]/g, ''));
-    dispatch(reduxUtils.coreProcessActions.set({ pid }));
+    setPyraCorePid(pid);
     setBackendIntegrity('valid');
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { essentialComponents } from '..';
 import { reduxUtils, fetchUtils } from '../../utils';
+import { Button } from '../ui/button';
+import { usePyraCoreStore } from '../../utils/zustand-utils/pyra-core-zustand';
 
 const LinkToInstallationInstructions = (props: { projectDirPath: string }) => (
     <>
@@ -17,10 +18,9 @@ export default function DisconnectedScreen(props: {
         | 'config is invalid'
         | 'pyra-core is not running';
     loadInitialAppState(): void;
-    startPyraCore(): void;
+    startPyraCore: () => Promise<void>;
 }) {
     const { backendIntegrity } = props;
-    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
     const [projectDirPath, setProjectDirPath] = useState('');
 
     useEffect(() => {
@@ -30,6 +30,12 @@ export default function DisconnectedScreen(props: {
 
         init();
     }, []);
+
+    function onButtonClick() {
+        ifbackendIntegrity === 'pyra-core is not running'
+            ? props.startPyraCore
+            : props.loadInitialAppState;
+    }
 
     return (
         <main className="flex flex-col items-center justify-center w-full h-full bg-gray-100 gap-y-4">
@@ -52,21 +58,15 @@ export default function DisconnectedScreen(props: {
                     </>
                 )}
             </div>
-            <essentialComponents.Button
+            <Button
                 onClick={
                     backendIntegrity === 'pyra-core is not running'
                         ? props.startPyraCore
                         : props.loadInitialAppState
                 }
-                variant="green"
-                spinner={
-                    backendIntegrity === 'pyra-core is not running' && pyraCorePID === undefined
-                }
             >
-                {backendIntegrity === 'pyra-core is not running'
-                    ? 'start core'
-                    : 'retry connection'}
-            </essentialComponents.Button>
+                {backendIntegrity === 'pyra-core is not running' ? 'start' : 'retry connection'}
+            </Button>
         </main>
     );
 }

@@ -3,6 +3,7 @@ import { ICONS } from './assets';
 import { fetchUtils, reduxUtils } from './utils';
 import { structuralComponents } from './components';
 import Dashboard from './components/structural/dashboard';
+import { usePyraCoreStore } from './utils/zustand-utils/pyra-core-zustand';
 
 export default function Main() {
     const [backendIntegrity, setBackendIntegrity] = useState<
@@ -11,31 +12,31 @@ export default function Main() {
 
     const dispatch = reduxUtils.useTypedDispatch();
 
-    const setPyraCorePID = (pid: number | undefined) =>
-        dispatch(reduxUtils.coreProcessActions.set({ pid }));
-
-    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
+    const { pyraCorePid, setPyraCorePid } = usePyraCoreStore();
 
     useEffect(() => {
-        if (pyraCorePID === -1 && backendIntegrity == 'valid') {
+        if (pyraCorePid === -1 && backendIntegrity == 'valid') {
             setBackendIntegrity('pyra-core is not running');
         }
-    }, [backendIntegrity, pyraCorePID]);
+    }, [backendIntegrity, pyraCorePid]);
 
-    async function startPyraCore() {
-        setPyraCorePID(undefined);
+    async function startPyraCore(): Promise<void> {
+        setPyraCorePid(undefined);
         try {
             const p = await fetchUtils.backend.startPyraCore();
             const pid = parseInt(p.stdout.replace(/[^\d]/g, ''));
-            setPyraCorePID(pid);
+            setPyraCorePid(pid);
             setBackendIntegrity('valid');
         } catch {
-            setPyraCorePID(undefined);
+            setPyraCorePid(undefined);
+            throw 'could not start pyra core';
         }
     }
 
     useEffect(() => {
-        fetchUtils.initialAppState(dispatch, setBackendIntegrity).catch(console.error);
+        fetchUtils
+            .initialAppState(dispatch, setBackendIntegrity, setPyraCorePid)
+            .catch(console.error);
     }, []);
 
     return (
@@ -49,7 +50,7 @@ export default function Main() {
                 <structuralComponents.DisconnectedScreen
                     backendIntegrity={backendIntegrity}
                     loadInitialAppState={() =>
-                        fetchUtils.initialAppState(dispatch, setBackendIntegrity)
+                        fetchUtils.initialAppState(dispatch, setBackendIntegrity, setPyraCorePid)
                     }
                     startPyraCore={startPyraCore}
                 />
