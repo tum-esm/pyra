@@ -70,7 +70,7 @@ function ActivityPlot() {
                         </div>
                     ))}
                 </div>
-                <div className={'relative flex-grow w-full h-6'}>
+                <div className={'relative flex-grow w-full h-9'}>
                     {range(1, 24).map((h) => (
                         <div
                             key={h}
@@ -81,7 +81,7 @@ function ActivityPlot() {
                     {sections.core.map((s) => (
                         <div
                             key={`core-${s.from}-${s.to}`}
-                            className="absolute z-20 h-1 bg-blue-400 rounded-full top-1"
+                            className="absolute z-20 h-2 bg-blue-400 rounded-sm top-1"
                             style={{
                                 left: timeToPercentage(moment(s.from, 'HH:mm:ss', true)),
                                 right: timeToPercentage(moment(s.to, 'HH:mm:ss', true), true),
@@ -92,7 +92,7 @@ function ActivityPlot() {
                     {sections.measurements.map((s) => (
                         <div
                             key={`measurements-${s.from}-${s.to}`}
-                            className="absolute z-20 h-1 bg-green-400 rounded-full top-2.5"
+                            className="absolute z-20 h-2 bg-green-400 rounded-sm top-3.5"
                             style={{
                                 left: timeToPercentage(moment(s.from, 'HH:mm:ss', true)),
                                 right: timeToPercentage(moment(s.to, 'HH:mm:ss', true), true),
@@ -103,7 +103,7 @@ function ActivityPlot() {
                     {sections.error.map((s) => (
                         <div
                             key={`error-${s.from}-${s.to}`}
-                            className="absolute z-20 h-1 bg-red-400 rounded-full top-4"
+                            className="absolute z-20 h-2 bg-red-400 rounded-sm top-6"
                             style={{
                                 left: timeToPercentage(moment(s.from, 'HH:mm:ss', true)),
                                 right: timeToPercentage(moment(s.to, 'HH:mm:ss', true), true),
@@ -115,12 +115,12 @@ function ActivityPlot() {
                     {/* blue label "now" */}
 
                     <div
-                        className="absolute z-30 w-[2.5px] -mx-px bg-gray-900 -top-0.5 h-7 rounded-full"
+                        className="absolute z-30 w-[2.5px] -mx-px bg-gray-900 -top-0.5 h-10 rounded-full"
                         style={{ left: timeToPercentage(now) }}
                     />
                     <div
                         className={
-                            'absolute -top-0.5 z-30 h-7 text-gray-900 flex-row-center ' +
+                            'absolute -top-0.5 z-30 h-10 text-gray-900 flex-row-center ' +
                             'px-1 text-xs font-medium'
                         }
                         style={
@@ -134,27 +134,22 @@ function ActivityPlot() {
                     {/* gray blocks of past and future time */}
                     <div
                         className="absolute top-0 z-0 h-full bg-gray-700 rounded-l"
-                        style={{ left: 0, right: timeToPercentage(now, true) }}
+                        style={{ left: -2, right: timeToPercentage(now, true) }}
                     />
                     <div
                         className="absolute top-0 z-20 h-full bg-gray-200 rounded-r"
-                        style={{ left: timeToPercentage(now), right: 0 }}
+                        style={{ left: timeToPercentage(now), right: -2 }}
                     />
                 </div>
-                <div className="relative w-full h-5 pt-1 text-xs font-medium text-gray-700 flex-row-center gap-x-4">
-                    <span className="flex-row-center gap-x-1">
-                        <div className={'flex-shrink-0 w-2.5 h-2.5 bg-blue-400 rounded-sm '} />
-                        core is running
+                <div className="relative flex flex-row items-center justify-start w-full mt-2 text-xs font-medium text-gray-700 gap-x-1">
+                    <span className="px-2 py-0.5 text-blue-800 bg-blue-200 rounded-lg">
+                        running
                     </span>
-                    <span className="flex-row-center gap-x-1">
-                        <div className={'flex-shrink-0 w-2.5 h-2.5 bg-green-400 rounded-sm '} />
+                    <span className="px-2 py-0.5 text-green-800 bg-green-200 rounded-lg">
                         measuring
                     </span>
-                    <span className="flex-row-center gap-x-1">
-                        <div className={'flex-shrink-0 w-2.5 h-2.5 bg-red-400 rounded-sm '} />
-                        error occured
-                    </span>
-                    <div className="absolute right-0">
+                    <span className="px-2 py-0.5 text-red-800 bg-red-200 rounded-lg">error</span>
+                    <div className="absolute right-0 text-slate-400">
                         times in UTC{localUTCOffset < 0 ? '' : '+'}
                         {localUTCOffset / 60}
                     </div>
