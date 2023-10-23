@@ -5,17 +5,39 @@ import { configurationComponents } from '../components';
 import toast from 'react-hot-toast';
 import { diff } from 'deep-diff';
 import { set } from 'lodash';
+import {
+    IconAdjustmentsFilled,
+    IconCpu,
+    IconFileUpload,
+    IconMail,
+    IconMicroscope,
+    IconSettings,
+    IconSunFilled,
+    TablerIconsProps,
+} from '@tabler/icons-react';
 
-const sections: { key: customTypes.configSectionKey; label: string }[] = [
-    { key: 'general', label: 'General' },
-    { key: 'opus', label: 'OPUS' },
-    { key: 'camtracker', label: 'CamTracker' },
-    { key: 'error_email', label: 'Error Email' },
-    { key: 'measurement_triggers', label: 'Triggers' },
-    { key: 'tum_plc', label: 'TUM PLC' },
-    { key: 'helios', label: 'Helios' },
-    { key: 'upload', label: 'Upload' },
+const sections: {
+    key: customTypes.configSectionKey;
+    label: string;
+    icon: (props: TablerIconsProps) => JSX.Element;
+}[] = [
+    { key: 'general', label: 'General', icon: IconSettings },
+    { key: 'opus', label: 'OPUS', icon: IconMicroscope },
+    { key: 'camtracker', label: 'CamTracker', icon: IconSunFilled },
+    { key: 'error_email', label: 'Error Email', icon: IconMail },
+    { key: 'measurement_triggers', label: 'Triggers', icon: IconAdjustmentsFilled },
+    { key: 'upload', label: 'Upload', icon: IconFileUpload },
 ];
+
+const hardwareSections: {
+    key: customTypes.configSectionKey;
+    label: string;
+    icon: (props: TablerIconsProps) => JSX.Element;
+}[] = [
+    { key: 'tum_plc', label: 'TUM PLC', icon: IconCpu },
+    { key: 'helios', label: 'Helios', icon: IconCpu },
+];
+
 export default function ConfigurationTab() {
     const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const localConfig = reduxUtils.useTypedSelector((s) => s.config.local);
@@ -74,8 +96,7 @@ export default function ConfigurationTab() {
         <div className={'w-full h-[calc(100vh-3.5rem)] relative flex flex-row'}>
             <div
                 className={
-                    'bg-white border-r border-gray-300 shadow ' +
-                    'flex flex-col py-3 z-10 w-44 h-full'
+                    'bg-white border-r border-gray-300 flex flex-col py-1 z-10 w-44 h-full flex-shrink-0'
                 }
             >
                 {sections.map((section) => (
@@ -83,21 +104,38 @@ export default function ConfigurationTab() {
                         key={section.key}
                         onClick={() => setActiveKey(section.key)}
                         className={
-                            'px-6 py-2.5 text-base font-semibold text-left ' +
-                            'flex-row-center gap-x-2 ' +
+                            'px-2.5 py-1.5 text-sm font-semibold text-left mx-2 my-1 rounded ' +
+                            'flex flex-row items-center justify-start gap-x-2.5 h-8 leading-5 ' +
                             (section.key === activeKey
                                 ? 'bg-blue-200 text-blue-950 '
                                 : 'text-gray-500 hover:bg-gray-150 hover:text-gray-700 ')
                         }
                     >
-                        {section.label}
-                        <div className="flex-grow" />
-                        <div
-                            className={
-                                'w-2 h-2 bg-blue-400 rounded-full ' +
-                                (section.key === activeKey ? 'bg-blue-400 ' : 'bg-transparent')
-                            }
+                        <section.icon
+                            size={16}
+                            className={section.key === activeKey ? 'opacity-100' : 'opacity-50'}
                         />
+                        <div>{section.label}</div>
+                    </button>
+                ))}
+                <div className="w-full h-px my-1 bg-slate-300 " />
+                {hardwareSections.map((section) => (
+                    <button
+                        key={section.key}
+                        onClick={() => setActiveKey(section.key)}
+                        className={
+                            'px-2.5 py-1.5 text-sm font-semibold text-left mx-2 my-1 rounded ' +
+                            'flex flex-row items-center justify-start gap-x-2.5 h-8 leading-5 ' +
+                            (section.key === activeKey
+                                ? 'bg-blue-200 text-blue-950 '
+                                : 'text-gray-500 hover:bg-gray-150 hover:text-gray-700 ')
+                        }
+                    >
+                        <section.icon
+                            size={16}
+                            className={section.key === activeKey ? 'opacity-100' : 'opacity-50'}
+                        />
+                        <div>{section.label}</div>
                     </button>
                 ))}
             </div>
