@@ -101,7 +101,7 @@ export default function OverviewTab() {
     return (
         <div className={'flex-col-center w-full pb-4 relative overflow-x-hidden bg-slate-50'}>
             <overviewComponents.PyraCoreStatus />
-            <div className="w-full px-4 py-4 pb-2 text-base font-semibold">Today's Activity</div>
+            <div className="w-full px-4 py-4 pb-0 text-base font-semibold">Today's Activity</div>
             <div className="w-full p-4 pt-0">
                 <overviewComponents.ActivityPlot />
             </div>
@@ -192,21 +192,16 @@ export default function OverviewTab() {
                     </div>
                 </div>
             )}
-            <div className="w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
+            <div className="w-full px-4 py-4 pb-0 text-base font-semibold border-t border-slate-200">
                 Measurement Decision
             </div>
-            <div className="w-full p-4 text-sm flex-row-left gap-x-1">
-                {pyraIsInTestMode && (
-                    <div className="w-full text-sm">
-                        No measurement decision when pyra is in test mode
-                    </div>
-                )}
-                {!pyraIsInTestMode && <overviewComponents.MeasurementDecisionStatus />}
+            <div className="w-full p-4 pt-2 text-sm flex-row-left gap-x-1">
+                <overviewComponents.MeasurementDecision />
             </div>
             <div className="w-full px-4 pt-3 pb-2 text-base font-semibold border-t border-slate-200">
                 Recent Log Lines
             </div>
-            <div className="w-[calc(100%-2rem)] mx-4 rounded-md overflow-hidden font-mono text-xs bg-white border border-slate-200 py-1">
+            <div className="w-[calc(100%-2rem)] mx-4 rounded-lg overflow-hidden font-mono text-xs bg-white border border-slate-200 py-1">
                 {(currentInfoLogLines === undefined || currentInfoLogLines.length === 0) && (
                     <div className="p-2">
                         <essentialComponents.Spinner />
