@@ -4,6 +4,7 @@ import { fetchUtils, reduxUtils } from './utils';
 import { structuralComponents } from './components';
 import Dashboard from './components/structural/dashboard';
 import { usePyraCoreStore } from './utils/zustand-utils/pyra-core-zustand';
+import { Toaster } from 'react-hot-toast';
 
 export default function Main() {
     const [backendIntegrity, setBackendIntegrity] = useState<
@@ -56,6 +57,7 @@ export default function Main() {
                 />
             )}
             {backendIntegrity === 'valid' && <Dashboard />}
+            <Toaster position="bottom-right" />
         </div>
     );
 }

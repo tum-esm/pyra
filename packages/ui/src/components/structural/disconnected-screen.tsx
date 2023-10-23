@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { reduxUtils, fetchUtils } from '../../utils';
+import { fetchUtils } from '../../utils';
 import { Button } from '../ui/button';
-import { usePyraCoreStore } from '../../utils/zustand-utils/pyra-core-zustand';
+import toast from 'react-hot-toast';
 
 const LinkToInstallationInstructions = (props: { projectDirPath: string }) => (
     <>
@@ -32,9 +32,15 @@ export default function DisconnectedScreen(props: {
     }, []);
 
     function onButtonClick() {
-        ifbackendIntegrity === 'pyra-core is not running'
-            ? props.startPyraCore
-            : props.loadInitialAppState;
+        if (backendIntegrity === 'pyra-core is not running') {
+            toast.promise(props.startPyraCore(), {
+                loading: 'Starting PYRA Core...',
+                success: 'PYRA Core started successfully',
+                error: 'Could not start PYRA Core',
+            });
+        } else {
+            props.loadInitialAppState();
+        }
     }
 
     return (
@@ -58,13 +64,7 @@ export default function DisconnectedScreen(props: {
                     </>
                 )}
             </div>
-            <Button
-                onClick={
-                    backendIntegrity === 'pyra-core is not running'
-                        ? props.startPyraCore
-                        : props.loadInitialAppState
-                }
-            >
+            <Button onClick={onButtonClick}>
                 {backendIntegrity === 'pyra-core is not running' ? 'start' : 'retry connection'}
             </Button>
         </main>

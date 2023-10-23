@@ -7,7 +7,6 @@ import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
 import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
-import { Toaster } from 'react-hot-toast';
 import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
@@ -136,7 +135,6 @@ export default function Dashboard() {
                     </div>
                 )}
             </main>
-            <Toaster position="bottom-right" />
         </div>
     );
 }
