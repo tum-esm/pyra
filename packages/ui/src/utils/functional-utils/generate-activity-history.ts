@@ -1,10 +1,10 @@
 import moment from 'moment';
-import { customTypes } from '../../custom-types';
+import { ActivityHistory } from '../zustand-utils/activity-zustand';
 
 type ActivitySection = { from: string; to: string };
 
 export default function generateActivityHistories(
-    activityHistory: customTypes.activityHistory,
+    activityHistory: ActivityHistory,
     measurementsAreRunning: boolean,
     errorIsPresent: boolean
 ): {
@@ -30,7 +30,7 @@ export default function generateActivityHistories(
     let measurementsHistory: ActivitySection[] = [];
     let errorHistory: ActivitySection[] = [];
 
-    const reversedActivityHistory: customTypes.activityHistory = JSON.parse(
+    const reversedActivityHistory: ActivityHistory = JSON.parse(
         JSON.stringify(activityHistory)
     ).reverse();
 

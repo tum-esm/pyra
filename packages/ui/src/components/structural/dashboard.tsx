@@ -8,6 +8,7 @@ import { dialog } from '@tauri-apps/api';
 import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 import { Toaster } from 'react-hot-toast';
+import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
 const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
@@ -22,6 +23,7 @@ export default function Dashboard() {
         centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
 
     const { setLogs } = useLogsStore();
+    const { setActivityHistory } = useActivityHistoryStore();
 
     useEffect(() => {
         async function fetchStateFile() {
@@ -41,10 +43,10 @@ export default function Dashboard() {
                     `logs/activity/activity-${filename}.json`
                 );
                 // @ts-ignore
-                dispatch(reduxUtils.activityActions.set(JSON.parse(fileContent)));
+                setActivityHistory(JSON.parse(fileContent));
             } catch (e) {
                 console.debug(`Could not load activity file: ${e}`);
-                dispatch(reduxUtils.activityActions.set([]));
+                setActivityHistory([]);
             }
         }
 

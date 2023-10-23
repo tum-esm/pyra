@@ -15,9 +15,6 @@ export namespace customTypes {
     export type reduxStateCoreProcess = {
         pid: number | undefined;
     };
-    export type reduxStateActivity = {
-        history: activityHistory | undefined;
-    };
     export type reduxState = {
         config: reduxStateConfig;
         logs: reduxStateLogs;
@@ -270,15 +267,4 @@ export namespace customTypes {
         measurements_should_be_running?: boolean;
         enclosure_plc_readings?: partialEnclosurePlcReadings;
     };
-
-    export type activityHistory = {
-        localTime: string;
-        event:
-            | 'start-core'
-            | 'stop-core'
-            | 'start-measurements'
-            | 'stop-measurements'
-            | 'error-occured'
-            | 'errors-resolved';
-    }[];
 }
