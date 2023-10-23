@@ -51,7 +51,7 @@ export default function Button(props: {
             type="button"
             onClick={props.disabled ? () => {} : onClick}
             className={
-                'flex-row-center flex-shrink-0 px-4 h-7 ' +
+                'flex-row-center flex-shrink-0 px-4 h-8 ' +
                 'focus:outline-none focus:ring-1 focus:z-20 ' +
                 'focus:border-blue-500 focus:ring-blue-500 ' +
                 'text-sm whitespace-nowrap text-center font-medium ' +

@@ -114,7 +114,7 @@ export default function Dashboard() {
             />
             <main
                 className={
-                    'flex-grow w-full bg-gray-75 ' + 'h-[calc(200vh-1.5rem)] overflow-y-auto'
+                    'flex-grow w-full bg-gray-50 ' + 'h-[calc(200vh-1.5rem)] overflow-y-auto'
                 }
             >
                 {[

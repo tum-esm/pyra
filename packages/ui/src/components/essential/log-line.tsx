@@ -22,7 +22,7 @@ export default function LogLine(props: { text: string }) {
     let textStyle: string;
     switch (logType) {
         case 'DEBUG':
-            textStyle = 'font-light text-gray-400';
+            textStyle = 'font-light text-gray-500';
             break;
         case 'WARNING':
         case 'CRITICAL':
@@ -37,9 +37,8 @@ export default function LogLine(props: { text: string }) {
     return (
         <>
             {(logMessage.includes('Starting mainloop') ||
-                logMessage.includes('Starting iteration') ||
-                logMessage.includes('Error in current config file')) && (
-                <hr className="w-full my-1.5 bg-gray-300 first:hidden h-px" />
+                logMessage.includes('Starting iteration')) && (
+                <hr className="w-full my-1.5 border-0 bg-gray-100 first:hidden h-px" />
             )}
             <div
                 className={

@@ -32,7 +32,7 @@ export default function Header(props: {
     return (
         <header className="z-50 flex flex-row items-center flex-shrink-0 w-full px-2 py-0 bg-gray-900 shadow h-14">
             <h1 className="pl-3 text-2xl font-semibold text-center text-white whitespace-nowrap">
-                PYRA <span className="pl-0.5 font-normal opacity-50">{APP_VERSION}</span>
+                PYRA <span className="pl-0.5 text-lg font-normal opacity-50">{APP_VERSION}</span>
             </h1>
             <div className="flex-grow " />
             <div className="flex flex-wrap justify-center px-4 py-2 gap-x-2 gap-y-2">
@@ -40,7 +40,7 @@ export default function Header(props: {
                     <button
                         key={i}
                         className={
-                            'px-3 py-1 rounded font-medium cursor-pointer text-base ' +
+                            'px-4 py-1.5 rounded font-medium cursor-pointer text-base ' +
                             (t === activeTab
                                 ? 'bg-gray-600 text-white '
                                 : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200')

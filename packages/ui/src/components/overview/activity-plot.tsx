@@ -74,7 +74,7 @@ function ActivityPlot() {
                     {range(1, 24).map((h) => (
                         <div
                             key={h}
-                            className="absolute top-0 z-10 w-[2px] h-6 bg-gray-100 -translate-x-px"
+                            className="absolute top-0 z-10 w-[1.5px] h-6 bg-gray-500 translate-x-[-1px]"
                             style={{ left: `${h / 0.24}%` }}
                         />
                     ))}
@@ -131,13 +131,13 @@ function ActivityPlot() {
                     >
                         now
                     </div>
-                    {/* gray block of future time */}
+                    {/* gray blocks of past and future time */}
                     <div
                         className="absolute top-0 z-0 h-full bg-gray-700 rounded-l"
                         style={{ left: 0, right: timeToPercentage(now, true) }}
                     />
                     <div
-                        className="absolute top-0 h-full bg-gray-200 rounded-r z-00"
+                        className="absolute top-0 z-20 h-full bg-gray-200 rounded-r"
                         style={{ left: timeToPercentage(now), right: 0 }}
                     />
                 </div>
