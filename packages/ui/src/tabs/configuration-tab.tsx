@@ -112,13 +112,13 @@ export default function ConfigurationTab() {
                         }
                     >
                         <section.icon
-                            size={16}
+                            size={14}
                             className={section.key === activeKey ? 'opacity-100' : 'opacity-50'}
                         />
                         <div>{section.label}</div>
                     </button>
                 ))}
-                <div className="w-full h-px my-1 bg-slate-300 " />
+                <div className="w-full h-px my-1 bg-slate-200 " />
                 {hardwareSections.map((section) => (
                     <button
                         key={section.key}
@@ -132,7 +132,7 @@ export default function ConfigurationTab() {
                         }
                     >
                         <section.icon
-                            size={16}
+                            size={14}
                             className={section.key === activeKey ? 'opacity-100' : 'opacity-50'}
                         />
                         <div>{section.label}</div>

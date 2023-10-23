@@ -40,7 +40,7 @@ export default function Header(props: {
                     <button
                         key={i}
                         className={
-                            'px-4 py-1.5 rounded font-medium cursor-pointer text-base ' +
+                            'px-4 py-1.5 rounded-md font-medium cursor-pointer text-base ' +
                             (t === activeTab
                                 ? 'bg-gray-600 text-white '
                                 : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200')
