@@ -1,7 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import configSlice from './config-slice';
 import coreStateSlice from './core-state-slice';
-import coreProcessSlice from './core-process-slice';
 import activitySlice from './activity-slice';
 
 export default configureStore({
@@ -9,6 +8,5 @@ export default configureStore({
         activity: activitySlice.reducer,
         config: configSlice.reducer,
         coreState: coreStateSlice.reducer,
-        coreProcess: coreProcessSlice.reducer,
     },
 });
