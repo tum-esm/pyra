@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { fetchUtils, reduxUtils } from '../../utils';
-import { OverviewTab, AutomationTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
+import { OverviewTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
 import { structuralComponents } from '../../components';
 import { customTypes } from '../../custom-types';
 import { diff } from 'deep-diff';
 import { dialog } from '@tauri-apps/api';
 import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
+import { Toaster } from 'react-hot-toast';
 
-const tabs = ['Overview', 'Automation', 'Configuration', 'Logs'];
+type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
+const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
-    const [activeTab, setActiveTab] = useState('Overview');
+    const [activeTab, setActiveTab] = useState<TabType>('Overview');
     const [initialFetchTriggered, setInitialFetchTriggered] = useState(false);
 
     const dispatch = reduxUtils.useTypedDispatch();
@@ -109,7 +111,7 @@ export default function Dashboard() {
                 {...{
                     tabs: [...tabs, ...(enclosureControlsIsVisible ? ['PLC Controls'] : [])],
                     activeTab,
-                    setActiveTab,
+                    setActiveTab: (t: any) => setActiveTab(t),
                 }}
             />
             <main
@@ -119,7 +121,6 @@ export default function Dashboard() {
             >
                 {[
                     ['Overview', <OverviewTab />],
-                    ['Automation', <AutomationTab />],
                     ['Configuration', <ConfigurationTab />],
                     ['Logs', <LogTab />],
                 ].map((t: any, i) => (
@@ -133,7 +134,7 @@ export default function Dashboard() {
                     </div>
                 )}
             </main>
-            <structuralComponents.MessageQueue />
+            <Toaster position="bottom-right" />
         </div>
     );
 }

@@ -6,8 +6,6 @@ import { customTypes } from '../custom-types';
 import toast from 'react-hot-toast';
 import { mean } from 'lodash';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
-import { IconActivityHeartbeat, IconCpu, IconTimelineEventText } from '@tabler/icons-react';
-import PyraCoreStatus from '../components/automation/pyra-core-status';
 
 function SystemRow(props: { label: string; value: React.ReactNode }) {
     return (
@@ -20,26 +18,6 @@ function SystemRow(props: { label: string; value: React.ReactNode }) {
 
 export default function OverviewTab() {
     const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
-    const pyraCorePID = reduxUtils.useTypedSelector((s) => s.coreProcess.pid);
-
-    const measurementDecision = reduxUtils.useTypedSelector(
-        (s) => s.config.central?.measurement_decision
-    );
-    const automaticMeasurementDecisionResult = reduxUtils.useTypedSelector(
-        (s) => s.coreState.body?.measurements_should_be_running
-    );
-    let measurementDecisionResult: boolean | undefined = undefined;
-    switch (measurementDecision?.mode) {
-        case 'manual':
-            measurementDecisionResult = measurementDecision.manual_decision_result;
-            break;
-        case 'cli':
-            measurementDecisionResult = measurementDecision.cli_decision_result;
-            break;
-        case 'automatic':
-            measurementDecisionResult = automaticMeasurementDecisionResult;
-            break;
-    }
 
     const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
     const dispatch = reduxUtils.useTypedDispatch();
@@ -80,6 +58,10 @@ export default function OverviewTab() {
     const { mainLogs } = useLogsStore();
     const currentInfoLogLines = mainLogs?.slice(-15);
 
+    const pyraIsInTestMode = reduxUtils.useTypedSelector(
+        (s) => s.config.central?.general.test_mode
+    );
+
     function renderSystemBar(value: null | number | number[]) {
         if (value === null) {
             return '-';
@@ -117,31 +99,17 @@ export default function OverviewTab() {
     }
 
     return (
-        <div className={'flex-col-center w-full pb-4 relative overflow-x-hidden bg-white'}>
-            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-base font-medium text-white bg-gray-800 gap-x-3">
-                <IconActivityHeartbeat size={20} className="text-gray-200" /> Pyra Core
-            </div>
-
-            <PyraCoreStatus />
-            <div className="w-full p-4 text-sm border-t border-gray-200 flex-row-left gap-x-1">
-                <essentialComponents.Ping state={measurementDecisionResult} />
-                <span className="ml-1">Measurements are currently</span>
-                {measurementDecisionResult === undefined && <essentialComponents.Spinner />}
-                {!(measurementDecisionResult === undefined) && (
-                    <>
-                        {!measurementDecisionResult && <>not running</>}
-                        {measurementDecisionResult && <>running</>}
-                    </>
-                )}
-            </div>
-            <div className="w-full p-4 pt-2 border-t border-gray-200">
+        <div className={'flex-col-center w-full pb-4 relative overflow-x-hidden bg-slate-50'}>
+            <overviewComponents.PyraCoreStatus />
+            <div className="w-full px-4 py-4 pb-2 text-base font-semibold">Today's Activity</div>
+            <div className="w-full p-4 pt-0">
                 <overviewComponents.ActivityPlot />
             </div>
-            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-base font-medium text-white bg-gray-800 gap-x-3">
-                <IconCpu size={20} className="text-gray-200" /> System State
+            <div className="w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
+                System Status
             </div>
             {coreState === undefined && (
-                <div className="w-full p-4 text-sm bg-white flex-row-left gap-x-2">
+                <div className="w-full p-4 text-sm flex-row-left gap-x-2">
                     State is loading <essentialComponents.Spinner />
                 </div>
             )}
@@ -224,11 +192,21 @@ export default function OverviewTab() {
                     </div>
                 </div>
             )}
-
-            <div className="flex flex-row items-center justify-start w-full px-4 py-2 text-base font-medium text-white bg-gray-800 gap-x-3">
-                <IconTimelineEventText size={20} className="text-gray-200" /> Recent Log Lines
+            <div className="w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
+                Measurement Decision
             </div>
-            <div className="w-full overflow-hidden font-mono text-xs bg-white">
+            <div className="w-full p-4 text-sm flex-row-left gap-x-1">
+                {pyraIsInTestMode && (
+                    <div className="w-full text-sm">
+                        No measurement decision when pyra is in test mode
+                    </div>
+                )}
+                {!pyraIsInTestMode && <overviewComponents.MeasurementDecisionStatus />}
+            </div>
+            <div className="w-full px-4 pt-3 pb-2 text-base font-semibold border-t border-slate-200">
+                Recent Log Lines
+            </div>
+            <div className="w-[calc(100%-2rem)] mx-4 rounded-md overflow-hidden font-mono text-xs bg-white border border-slate-200 py-1">
                 {(currentInfoLogLines === undefined || currentInfoLogLines.length === 0) && (
                     <div className="p-2">
                         <essentialComponents.Spinner />
