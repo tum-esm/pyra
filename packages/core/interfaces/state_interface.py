@@ -1,7 +1,8 @@
 from __future__ import annotations
+import contextlib
 import datetime
 import os
-from typing import Literal, Optional
+from typing import Generator, Literal, Optional
 import pydantic
 import tum_esm_utils
 from packages.core import utils, types
@@ -89,6 +90,37 @@ class StateInterface:
             state.current_exceptions = current_exceptions
         if enforce_none_values or (upload_is_running is not None):
             state.upload_is_running = upload_is_running
+
+        with open(_STATE_FILE_PATH, "w") as f:
+            f.write(state.model_dump_json(indent=4))
+
+    @staticmethod
+    @contextlib.contextmanager
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_STATE_LOCK_PATH, timeout=5
+    )
+    def update_state_in_context() -> Generator[StateObject, None, None]:
+        """Update the state file in a context manager.
+        
+        Example:
+        
+        ```python
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.helios_indicates_good_conditions = "yes"
+        ```
+
+        The file will be locked correctly, so that no other process can
+        interfere with the state file and the state
+        """
+
+        try:
+            with open(_STATE_FILE_PATH, "r") as f:
+                state = StateObject.model_validate_json(f.read())
+        except FileNotFoundError:
+            state = StateObject(last_updated=datetime.datetime.now())
+
+        state.last_updated = datetime.datetime.now()
+        yield state
 
         with open(_STATE_FILE_PATH, "w") as f:
             f.write(state.model_dump_json(indent=4))
