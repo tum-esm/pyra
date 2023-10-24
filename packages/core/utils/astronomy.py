@@ -1,9 +1,8 @@
 import os
 from typing import Any, Optional
-import pendulum
 import skyfield.api
 import tum_esm_utils
-from datetime import datetime
+import datetime
 from packages.core import types
 
 PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
@@ -31,7 +30,7 @@ class Astronomy:
         lat: Optional[float] = None,
         lon: Optional[float] = None,
         alt: Optional[float] = None,
-        datetime_object: Optional[pendulum.DateTime] = None,
+        datetime_object: Optional[datetime.datetime] = None,
     ) -> float:
         """Computes current sun elevation in degree, based on the
         coordinates from the CamTracker config file."""
@@ -44,7 +43,9 @@ class Astronomy:
             current_timestamp = datetime_object.timestamp()  # type: ignore
             assert isinstance(current_timestamp, float)
             current_time = skyfield.api.load.timescale().from_datetime(
-                datetime.fromtimestamp(current_timestamp, tz=skyfield.api.utc)
+                datetime.datetime.fromtimestamp(
+                    current_timestamp, tz=skyfield.api.utc
+                )
             )
         else:
             current_time = skyfield.api.load.timescale().now()

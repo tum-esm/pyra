@@ -53,15 +53,15 @@ def _date_to_filepath(date: datetime.date) -> str:
 def _load_current_activity_history() -> ActivityHistory:
     today = datetime.date.today()
 
-    with open(_date_to_filepath(today), "r") as f:
-        try:
+    try:
+        with open(_date_to_filepath(today), "r") as f:
             return ActivityHistory(datapoints=json.load(f), date=today)
-        except (
-            json.JSONDecodeError,
-            FileNotFoundError,
-            pydantic.ValidationError,
-        ):
-            return ActivityHistory(date=today)
+    except (
+        json.JSONDecodeError,
+        FileNotFoundError,
+        pydantic.ValidationError,
+    ):
+        return ActivityHistory(date=today)
 
 
 class ActivityHistoryInterface:

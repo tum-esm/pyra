@@ -24,7 +24,7 @@
   },
   "error_email": {
     "smtp_host": "smtp.gmail.com",
-    "smtp_port": 465,
+    "smtp_port": 587,
     "smtp_username": "technical-user@domain.com",
     "sender_password": "...",
     "sender_address": "technical-user@domain.com",
