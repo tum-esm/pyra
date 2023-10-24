@@ -1,3 +1,4 @@
+import tum_esm_utils
 from packages.core import types, utils, interfaces
 from packages.core.types.state import OperatingSystemState
 
@@ -19,18 +20,18 @@ class SystemChecks:
         logger.info("Running SystemChecks")
 
         # check os system stability
-        cpu_usage = interfaces.OSInterface.get_cpu_usage()
+        cpu_usage = tum_esm_utils.system.get_cpu_usage()
         logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
 
-        memory_usage = interfaces.OSInterface.get_memory_usage()
+        memory_usage = tum_esm_utils.system.get_memory_usage()
         logger.debug(
             f"Current v_memory usage for the system is {memory_usage}."
         )
 
-        last_boot_time = interfaces.OSInterface.get_last_boot_time()
+        last_boot_time = tum_esm_utils.system.get_last_boot_time()
         logger.debug(f"The system is running since {last_boot_time}.")
 
-        disk_space = interfaces.OSInterface.get_disk_space()
+        disk_space = tum_esm_utils.system.get_disk_space()
         logger.debug(f"The disk is currently filled with {disk_space}%.")
 
         # raises error if disk_space is below 10%
