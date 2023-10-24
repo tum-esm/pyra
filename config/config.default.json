@@ -23,8 +23,11 @@
     "restart_if_logs_are_too_old": false
   },
   "error_email": {
-    "sender_address": "technical-user@domain.com",
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 465,
+    "smtp_username": "technical-user@domain.com",
     "sender_password": "...",
+    "sender_address": "technical-user@domain.com",
     "notify_recipients": true,
     "recipients": "your@mail.com"
   },

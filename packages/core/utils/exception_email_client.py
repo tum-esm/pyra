@@ -58,8 +58,10 @@ class ExceptionEmailClient:
         html: str,
         subject: str,
     ) -> None:
+        smtp_username = config.error_email.smtp_username
+        smtp_password = config.error_email.smtp_password
+
         sender_email = config.error_email.sender_address
-        sender_password = config.error_email.sender_password
         recipients = config.error_email.recipients.replace(" ", "").split(",")
 
         message = MIMEMultipart("alternative")
@@ -73,13 +75,30 @@ class ExceptionEmailClient:
 
         # Create secure connection with server and send email
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(sender_email, sender_password)
-            server.sendmail(
-                from_addr=sender_email,
-                to_addrs=recipients,
-                msg=message.as_string()
+        if config.error_email.smtp_port == 587:
+            session = smtplib.SMTP(
+                config.error_email.smtp_host, config.error_email.smtp_port
             )
+            session.ehlo()
+            session.starttls()
+            session.login(
+                config.error_email.smtp_username,
+                config.error_email.smtp_password
+            )
+            session.sendmail(sender_email, recipients, message.as_string())
+            session.quit()
+        else:
+            with smtplib.SMTP_SSL(
+                config.error_email.smtp_host,
+                config.error_email.smtp_port,
+                context=context
+            ) as server:
+                server.login(smtp_username, smtp_password)
+                server.sendmail(
+                    from_addr=sender_email,
+                    to_addrs=recipients,
+                    msg=message.as_string()
+                )
 
     @staticmethod
     def handle_resolved_exception(config: types.Config) -> None:

@@ -122,8 +122,11 @@ class SubConfigCamtrackerPartial(pydantic.BaseModel):
 
 
 class SubConfigErrorEmail(pydantic.BaseModel):
+    smtp_host: str
+    smtp_port: Literal[465, 587]
+    smtp_username: str
+    smtp_password: str
     sender_address: str
-    sender_password: str
     notify_recipients: bool
     recipients: str
 
@@ -131,8 +134,11 @@ class SubConfigErrorEmail(pydantic.BaseModel):
 class SubConfigErrorEmailPartial(pydantic.BaseModel):
     """Like `SubConfigErrorEmail` but all fields are optional."""
 
+    smtp_host: Optional[str] = None
+    smtp_port: Optional[Literal[465, 587]] = None
+    smtp_username: Optional[str] = None
+    smtp_password: Optional[str] = None
     sender_address: Optional[str] = None
-    sender_password: Optional[str] = None
     notify_recipients: Optional[bool] = None
     recipients: Optional[str] = None
 
