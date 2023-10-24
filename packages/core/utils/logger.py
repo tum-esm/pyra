@@ -31,7 +31,7 @@ class Logger:
     log files and providing a simple API.
     """
 
-    last_archive_time = datetime.now()
+    last_archive_time = datetime.datetime(1970, 1, 1)
 
     def __init__(
         self,
