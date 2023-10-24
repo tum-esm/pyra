@@ -7,7 +7,7 @@ import click
 import os
 
 import tum_esm_utils
-from packages.core import types, utils, interfaces, modules
+from packages.core import types, interfaces, modules
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -68,14 +68,10 @@ def _reset() -> None:
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
-
-                def apply_state_update(
-                    state: types.PyraCoreState
-                ) -> types.PyraCoreState:
-                    state.enclosure_plc_readings.state.reset_needed = False
-                    return state
-
-                interfaces.StateInterface.update(apply_state_update)
+                with interfaces.StateInterface.update_state_in_context(
+                ) as state:
+                    if state.plc_state is not None:
+                        state.plc_state.state.reset_needed = False
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
         _print_green("Ok")
@@ -94,15 +90,11 @@ def _wait_until_cover_is_at_angle(
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
+            with interfaces.StateInterface.update_state_in_context() as state:
+                if state.plc_state is not None:
+                    state.plc_state.cover_angle = new_cover_angle
+                    state.plc_state.cover_closed = new_cover_angle == 0
 
-            def apply_state_update(
-                state: types.PyraCoreState
-            ) -> types.PyraCoreState:
-                state.enclosure_plc_readings.actors.current_angle = new_cover_angle
-                state.enclosure_plc_readings.state.cover_closed = new_cover_angle == 0
-                return state
-
-            interfaces.StateInterface.update(apply_state_update)
             break
 
         if running_time > timeout:

@@ -48,8 +48,9 @@ class SunTracking:
 
         # check for automation state flank changes
         measurements_should_be_running = (
-            interfaces.StateInterface.read().measurements_should_be_running
-        )
+            interfaces.StateInterface.load_state().
+            measurements_should_be_running
+        ) or False
 
         # main logic for active automation
         # start sun tracking if supposed to be running and not active

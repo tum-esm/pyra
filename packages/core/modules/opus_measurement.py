@@ -114,8 +114,9 @@ class OpusMeasurement:
 
         # check for automation state flank changes
         measurements_should_be_running = (
-            interfaces.StateInterface.read().measurements_should_be_running
-        )
+            interfaces.StateInterface.load_state().
+            measurements_should_be_running
+        ) or False
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: start macro
@@ -354,15 +355,11 @@ class OpusMeasurement:
         assert sys.platform == "win32"
 
         if self.config.opus.experiment_path.root != self.current_experiment:
-            if interfaces.StateInterface.read_persistent(
-            ).active_opus_macro_id == -1:
-                self.load_experiment()
-            else:
-                self.stop_macro()
-                time.sleep(5)
-                self.load_experiment()
-                time.sleep(5)
-                self.start_macro()
+            self.stop_macro()
+            time.sleep(5)
+            self.load_experiment()
+            time.sleep(5)
+            self.start_macro()
 
     def test_setup(self) -> None:
         """Function to test the functonality of this module. Starts

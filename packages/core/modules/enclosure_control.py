@@ -52,7 +52,7 @@ class EnclosureControl:
         self.plc_interface.set_auto_temperature(True)
         self.plc_state = self.plc_interface.read()
         logger.debug("Finished initial PLC setup.")
-        self.last_cycle_automation_status = 0
+        self.last_cycle_automation_status = False
         self.initialized = True
 
     def run(self, new_config: types.Config) -> None:
@@ -75,8 +75,9 @@ class EnclosureControl:
 
         # Check for current measurement status
         self.measurements_should_be_running = (
-            interfaces.StateInterface.read().measurements_should_be_running
-        )
+            interfaces.StateInterface.load_state().
+            measurements_should_be_running
+        ) or False
 
         # Updates the current loop to the latest config.
         # Performs a connect to the PLC for the duration of this loop.
@@ -98,15 +99,8 @@ class EnclosureControl:
                 logger.warning("Could not read PLC state in this loop.")
 
             # Push the latest readout of the PLC state to the StateInterface
-            logger.info("New continuous readings.")
-
-            def apply_state_update(
-                state: types.PyraCoreState
-            ) -> types.PyraCoreState:
-                state.enclosure_plc_readings = self.plc_state
-                return state
-
-            interfaces.StateInterface.update(apply_state_update)
+            logger.info("New PLC readings.")
+            interfaces.StateInterface.update_state(plc_state=self.plc_state)
 
             # Check for critial error: Motor Failed Flag in PLC. In case of present
             # motor failed flag the cover might not be closed in bad weather

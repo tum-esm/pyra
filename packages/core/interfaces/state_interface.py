@@ -20,9 +20,9 @@ class StateObject(pydantic.BaseModel):
     helios_indicates_good_conditions: Optional[Literal["yes", "no",
                                                        "inconclusive"]] = None
     measurements_should_be_running: Optional[bool] = None
-    plc_state: Optional[types.PLCState] = None
-    operating_system_state: Optional[types.OperatingSystemState] = None
-    active_opus_macro_id: Optional[int] = None
+    plc_state: types.PLCState = types.PLCState()
+    operating_system_state: types.OperatingSystemState = types.OperatingSystemState(
+    )
     current_exceptions: Optional[list[str]] = None
     upload_is_running: Optional[bool] = None
 
@@ -58,11 +58,10 @@ class StateInterface:
         measurements_should_be_running: Optional[bool] = None,
         plc_state: Optional[types.PLCState] = None,
         operating_system_state: Optional[types.OperatingSystemState] = None,
-        active_opus_macro_id: Optional[int] = None,
         current_exceptions: Optional[list[str]] = None,
         upload_is_running: Optional[bool] = None,
         enforce_none_values: bool = False,
-    ) -> StateObject:
+    ) -> None:
         """Update the state file. Values that are not explicitly set will not
         be changed in the state file. Only if `enforce_none_values` is set to
         `True`, all values not explicitly set will be set to `None`."""
@@ -81,11 +80,10 @@ class StateInterface:
         if enforce_none_values or (measurements_should_be_running is not None):
             state.measurements_should_be_running = measurements_should_be_running
         if enforce_none_values or (plc_state is not None):
-            state.enclosure_plc_readings = plc_state
+            state.plc_state = plc_state or types.PLCState()
         if enforce_none_values or (operating_system_state is not None):
-            state.os_state = operating_system_state
-        if enforce_none_values or (active_opus_macro_id is not None):
-            state.active_opus_macro_id = active_opus_macro_id
+            state.os_state = operating_system_state or types.OperatingSystemState(
+            )
         if enforce_none_values or (current_exceptions is not None):
             state.current_exceptions = current_exceptions
         if enforce_none_values or (upload_is_running is not None):

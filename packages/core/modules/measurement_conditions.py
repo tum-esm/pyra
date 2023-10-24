@@ -68,14 +68,9 @@ class MeasurementConditions:
         ActivityHistoryInterface.add_datapoint(
             is_measuring=measurements_should_be_running
         )
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.measurements_should_be_running = measurements_should_be_running
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        interfaces.StateInterface.update_state(
+            measurements_should_be_running=measurements_should_be_running
+        )
 
     def _get_automatic_decision(self) -> bool:
         """Evaluates the activated automatic mode triggers (Sun Angle, Time, Helios).
@@ -124,10 +119,10 @@ class MeasurementConditions:
         # Helios runs in a thread and evaluates the sun conditions consistanly during day.
         if triggers.consider_helios:
             logger.info("Helios as a trigger is considered.")
-            helios_result = interfaces.StateInterface.read(
+            helios_result = interfaces.StateInterface.load_state(
             ).helios_indicates_good_conditions
 
-            if helios_result == "inconclusive":
+            if helios_result == "inconclusive" or helios_result is None:
                 logger.debug(f"Helios does not nave enough images yet.")
                 return False
 

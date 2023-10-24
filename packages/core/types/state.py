@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 import pydantic
 
@@ -9,24 +10,24 @@ class OperatingSystemState(pydantic.BaseModel):
     filled_disk_space_fraction: Optional[float] = None
 
 
-class _PLCStateActors(pydantic.BaseModel):
+class PLCStateActors(pydantic.BaseModel):
     fan_speed: Optional[int] = None
     current_angle: Optional[int] = None
 
 
-class _PLCStateControl(pydantic.BaseModel):
+class PLCStateControl(pydantic.BaseModel):
     auto_temp_mode: Optional[bool] = None
     manual_control: Optional[bool] = None
     manual_temp_mode: Optional[bool] = None
     sync_to_tracker: Optional[bool] = None
 
 
-class _PLCStateSensors(pydantic.BaseModel):
+class PLCStateSensors(pydantic.BaseModel):
     humidity: Optional[int] = None
     temperature: Optional[int] = None
 
 
-class _PLCStateState(pydantic.BaseModel):
+class PLCStateState(pydantic.BaseModel):
     cover_closed: Optional[bool] = None
     motor_failed: Optional[bool] = None
     rain: Optional[bool] = None
@@ -34,7 +35,7 @@ class _PLCStateState(pydantic.BaseModel):
     ups_alert: Optional[bool] = None
 
 
-class _PLCStatePower(pydantic.BaseModel):
+class PLCStatePower(pydantic.BaseModel):
     camera: Optional[bool] = None
     computer: Optional[bool] = None
     heater: Optional[bool] = None
@@ -42,7 +43,7 @@ class _PLCStatePower(pydantic.BaseModel):
     spectrometer: Optional[bool] = None
 
 
-class _PLCStateConnections(pydantic.BaseModel):
+class PLCStateConnections(pydantic.BaseModel):
     camera: Optional[bool] = None
     computer: Optional[bool] = None
     heater: Optional[bool] = None
@@ -51,10 +52,10 @@ class _PLCStateConnections(pydantic.BaseModel):
 
 
 class PLCState(pydantic.BaseModel):
-    last_read_time: Optional[str] = None
-    actors: _PLCStateActors = _PLCStateActors()
-    control: _PLCStateControl = _PLCStateControl()
-    sensors: _PLCStateSensors = _PLCStateSensors()
-    state: _PLCStateState = _PLCStateState()
-    power: _PLCStatePower = _PLCStatePower()
-    connections: _PLCStateConnections = _PLCStateConnections()
+    last_full_fetch: Optional[datetime.datetime] = None
+    actors: PLCStateActors = PLCStateActors()
+    control: PLCStateControl = PLCStateControl()
+    sensors: PLCStateSensors = PLCStateSensors()
+    state: PLCStateState = PLCStateState()
+    power: PLCStatePower = PLCStatePower()
+    connections: PLCStateConnections = PLCStateConnections()

@@ -41,13 +41,9 @@ def _update_exception_state(
                 utils.ExceptionEmailClient.handle_resolved_exception(config)
                 logger.info(f"All exceptions have been resolved.")
 
-        def apply_state_update(
-            state: types.PyraCoreStatePersistent,
-        ) -> types.PyraCoreStatePersistent:
-            state.current_exceptions = updated_current_exceptions
-            return state
-
-        interfaces.StateInterface.update_persistent(apply_state_update)
+        interfaces.StateInterface.update_state(
+            current_exceptions=updated_current_exceptions
+        )
         return updated_current_exceptions
 
     except Exception as e:
@@ -84,7 +80,6 @@ def run() -> None:
     according to the config.
     """
 
-    interfaces.StateInterface.initialize()
     logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
 
     # Loop until a valid config has been found. Without
@@ -138,8 +133,13 @@ def run() -> None:
     helios_thread_instance = threads.HeliosThread(config)
     upload_thread_instance = threads.UploadThread(config)
 
-    current_exceptions = interfaces.StateInterface.read_persistent(
-    ).current_exceptions
+    current_exceptions = interfaces.StateInterface.load_state(
+    ).current_exceptions or []
+
+    logger.info("Removing temporary state from previous runs")
+    interfaces.StateInterface.update_state(
+        current_exceptions=current_exceptions, enforce_none_values=True
+    )
 
     # Before shutting down: save the current activity history and log
     # that the core is shutting down

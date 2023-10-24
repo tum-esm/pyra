@@ -1,4 +1,5 @@
 from packages.core import types, utils, interfaces
+from packages.core.types.state import OperatingSystemState
 
 logger = utils.Logger(origin="system-checks")
 
@@ -38,13 +39,11 @@ class SystemChecks:
         # raises error if system battery is below 20%
         interfaces.OSInterface.validate_system_battery()
 
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.os_state.cpu_usage = cpu_usage
-            state.os_state.memory_usage = memory_usage
-            state.os_state.last_boot_time = last_boot_time
-            state.os_state.filled_disk_space_fraction = disk_space
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        interfaces.StateInterface.update_state(
+            operating_system_state=OperatingSystemState(
+                cpu_usage=cpu_usage,
+                memory_usage=memory_usage,
+                last_boot_time=last_boot_time,
+                filled_disk_space_fraction=disk_space,
+            )
+        )

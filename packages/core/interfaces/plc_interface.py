@@ -117,7 +117,9 @@ class PLCInterface:
         """
 
     def __init__(
-        self, plc_version: Literal[1, 2], plc_ip: types.StrictIPAdress,
+        self,
+        plc_version: Literal[1, 2],
+        plc_ip: types.StrictIPAdress,
     ) -> None:
         self.plc_version = plc_version
         self.plc_ip = plc_ip.root
@@ -134,7 +136,8 @@ class PLCInterface:
 
         Reconnecting to PLC, when IP has changed.
         """
-        if (self.plc_version != new_plc_version) or (self.plc_ip != new_plc_ip.root):
+        if (self.plc_version
+            != new_plc_version) or (self.plc_ip != new_plc_ip.root):
             logger.debug("PLC ip has changed, reconnecting now")
             self.disconnect()
             self.plc_version = new_plc_version
@@ -212,7 +215,7 @@ class PLCInterface:
 
     # BULK READ
 
-    def read(self) -> types.PlcState:
+    def read(self) -> types.PLCState:
         """
         Read the whole state of the PLC
         """
@@ -245,45 +248,43 @@ class PLCInterface:
 
         s = self.specification
 
-        return types.PlcState(
-            **{
-                "last_read_time": datetime.now().strftime("%H:%M:%S"),
-                "actors": {
-                    "fan_speed": _get_int(s.actors.fan_speed),
-                    "current_angle": _get_int(s.actors.current_angle),
-                },
-                "control": {
-                    "auto_temp_mode": _get_bool(s.control.auto_temp_mode),
-                    "manual_control": _get_bool(s.control.manual_control),
-                    "manual_temp_mode": _get_bool(s.control.manual_temp_mode),
-                    "sync_to_tracker": _get_bool(s.control.sync_to_tracker),
-                },
-                "sensors": {
-                    "humidity": _get_int(s.sensors.humidity),
-                    "temperature": _get_int(s.sensors.temperature),
-                },
-                "state": {
-                    "cover_closed": _get_bool(s.state.cover_closed),
-                    "motor_failed": _get_bool(s.state.motor_failed),
-                    "rain": _get_bool(s.state.rain),
-                    "reset_needed": _get_bool(s.state.reset_needed),
-                    "ups_alert": _get_bool(s.state.ups_alert),
-                },
-                "power": {
-                    "camera": _get_bool(s.power.camera),
-                    "computer": _get_bool(s.power.computer),
-                    "heater": _get_bool(s.power.heater),
-                    "router": _get_bool(s.power.router),
-                    "spectrometer": _get_bool(s.power.spectrometer),
-                },
-                "connections": {
-                    "camera": _get_bool(s.connections.camera),
-                    "computer": _get_bool(s.connections.computer),
-                    "heater": _get_bool(s.connections.heater),
-                    "router": _get_bool(s.connections.router),
-                    "spectrometer": _get_bool(s.connections.spectrometer),
-                },
-            }
+        return types.PLCState(
+            last_full_fetch=datetime.now(),
+            actors=types.state.PLCStateActors(
+                fan_speed=_get_int(s.actors.fan_speed),
+                current_angle=_get_int(s.actors.current_angle),
+            ),
+            control=types.state.PLCStateControl(
+                auto_temp_mode=_get_bool(s.control.auto_temp_mode),
+                manual_control=_get_bool(s.control.manual_control),
+                manual_temp_mode=_get_bool(s.control.manual_temp_mode),
+                sync_to_tracker=_get_bool(s.control.sync_to_tracker),
+            ),
+            sensors=types.state.PLCStateSensors(
+                humidity=_get_int(s.sensors.humidity),
+                temperature=_get_int(s.sensors.temperature),
+            ),
+            state=types.state.PLCStateState(
+                cover_closed=_get_bool(s.state.cover_closed),
+                motor_failed=_get_bool(s.state.motor_failed),
+                rain=_get_bool(s.state.rain),
+                reset_needed=_get_bool(s.state.reset_needed),
+                ups_alert=_get_bool(s.state.ups_alert),
+            ),
+            power=types.state.PLCStatePower(
+                camera=_get_bool(s.power.camera),
+                computer=_get_bool(s.power.computer),
+                heater=_get_bool(s.power.heater),
+                router=_get_bool(s.power.router),
+                spectrometer=_get_bool(s.power.spectrometer),
+            ),
+            connections=types.state.PLCStateConnections(
+                camera=_get_bool(s.connections.camera),
+                computer=_get_bool(s.connections.computer),
+                heater=_get_bool(s.connections.heater),
+                router=_get_bool(s.connections.router),
+                spectrometer=_get_bool(s.connections.spectrometer),
+            ),
         )
 
     # LOW LEVEL READ FUNCTIONS
@@ -360,70 +361,35 @@ class PLCInterface:
 
     def set_power_camera(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
-
         self.__update_bool(new_state, self.specification.power.camera)
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.power.camera = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.power.camera = new_state
 
     def set_power_computer(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         assert self.specification.power.computer is not None
-
         self.__update_bool(new_state, self.specification.power.computer)
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.power.computer = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.power.computer = new_state
 
     def set_power_heater(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
-
         self.__update_bool(new_state, self.specification.power.heater)
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.power.heater = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.power.heater = new_state
 
     def set_power_router(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
-
-        assert self.specification.power.router is not None
+        assert self.specification.power.router is not None, "Router is not configured"
         self.__update_bool(new_state, self.specification.power.router)
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.power.router = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.power.router = new_state
 
     def set_power_spectrometer(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
-
         self.__update_bool(new_state, self.specification.power.spectrometer)
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.power.spectrometer = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.power.spectrometer = new_state
 
     # PLC.CONTROL SETTERS
 
@@ -432,38 +398,20 @@ class PLCInterface:
         self.__update_bool(
             new_state, self.specification.control.sync_to_tracker
         )
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.control.sync_to_tracker = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.control.sync_to_tracker = new_state
 
     def set_manual_control(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_control)
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.control.manual_control = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.control.manual_control = new_state
 
     def set_auto_temperature(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.auto_temp_mode)
-
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.control.auto_temp_mode = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.control.auto_temp_mode = new_state
 
     def set_manual_temperature(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
@@ -471,13 +419,8 @@ class PLCInterface:
             new_state, self.specification.control.manual_temp_mode
         )
 
-        def apply_state_update(
-            state: types.PyraCoreState
-        ) -> types.PyraCoreState:
-            state.enclosure_plc_readings.control.manual_temp_mode = new_state
-            return state
-
-        interfaces.StateInterface.update(apply_state_update)
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.plc_state.control.manual_temp_mode = new_state
 
     def reset(self) -> None:
         """Does not check, whether the value has been changed"""

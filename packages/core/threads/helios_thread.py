@@ -379,14 +379,9 @@ class HeliosThread:
                         "Current sun elevation below minimum: Waiting 5 minutes"
                     )
                     if current_state is not None:
-
-                        def apply_state_update(
-                            state: types.PyraCoreState,
-                        ) -> types.PyraCoreState:
-                            state.helios_indicates_good_conditions = "no"
-                            return state
-
-                        interfaces.StateInterface.update(apply_state_update)
+                        interfaces.StateInterface.update_state(
+                            helios_indicates_good_conditions="no"
+                        )
                         current_state = None
                         # reinit for next day
                         _Helios.deinit()
@@ -458,16 +453,13 @@ class HeliosThread:
                         f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
                     )
 
-                    def apply_state_update(
-                        state: types.PyraCoreState
-                    ) -> types.PyraCoreState:
-                        state.helios_indicates_good_conditions = (
-                            "inconclusive" if (new_state is None) else
-                            "yes" if new_state else "no"
+                    interfaces.StateInterface.update_state(
+                        helios_indicates_good_conditions=(
+                            "inconclusive" if (
+                                new_state is None
+                            ) else "yes" if new_state else "no"
                         )
-                        return state
-
-                    interfaces.StateInterface.update(apply_state_update)
+                    )
                     current_state = new_state
 
                 # wait rest of loop time
