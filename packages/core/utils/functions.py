@@ -7,9 +7,6 @@ def read_last_file_line(
 ) -> str:
     """Reads the last non empty line of a file"""
 
-    last_line: bytes = b""
-    new_character: bytes = b""
-
     with open(file_path, "rb") as f:
         f.seek(-1, os.SEEK_END)
 
@@ -25,6 +22,8 @@ def read_last_file_line(
             # now the cursor is right before the last
             # character that is not a newline or a space
 
+        last_line: bytes = b""
+        new_character: bytes = b""
         while True:
             new_character = f.read(1)
             if new_character == b"\n":
@@ -32,4 +31,4 @@ def read_last_file_line(
             last_line += new_character
             f.seek(-2, os.SEEK_CUR)
 
-    return last_line.decode().strip()[::-1]
+        return last_line.decode().strip()[::-1]
