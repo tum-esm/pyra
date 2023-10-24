@@ -20,9 +20,10 @@ class StateObject(pydantic.BaseModel):
                                                        "inconclusive"]] = None
     measurements_should_be_running: Optional[bool] = None
     plc_state: Optional[types.PLCState] = None
-    os_state: Optional[types.OperatingSystemState] = None
+    operating_system_state: Optional[types.OperatingSystemState] = None
     active_opus_macro_id: Optional[int] = None
     current_exceptions: Optional[list[str]] = None
+    upload_is_running: Optional[bool] = None
 
 
 class StateInterface:
@@ -32,6 +33,7 @@ class StateInterface:
     @staticmethod
     def load_state() -> StateObject:
         """Load the state from the state file."""
+
         try:
             with open(_STATE_FILE_PATH, "r") as f:
                 state = StateObject.model_validate_json(f.read())
@@ -53,25 +55,22 @@ class StateInterface:
                                                            "inconclusive"]
                                                   ] = None,
         measurements_should_be_running: Optional[bool] = None,
-        enclosure_plc_readings: Optional[dict] = None,
-        os_state: Optional[dict] = None,
+        plc_state: Optional[types.PLCState] = None,
+        operating_system_state: Optional[types.OperatingSystemState] = None,
         active_opus_macro_id: Optional[int] = None,
         current_exceptions: Optional[list[str]] = None,
+        upload_is_running: Optional[bool] = None,
         enforce_none_values: bool = False,
     ) -> StateObject:
+        """Update the state file. Values that are not explicitly set will not
+        be changed in the state file. Only if `enforce_none_values` is set to
+        `True`, all values not explicitly set will be set to `None`."""
+
         try:
             with open(_STATE_FILE_PATH, "r") as f:
                 state = StateObject.model_validate_json(f.read())
         except FileNotFoundError:
-            state = StateObject(
-                last_updated=datetime.datetime.now(),
-                helios_indicates_good_conditions=None,
-                measurements_should_be_running=None,
-                enclosure_plc_readings=None,
-                os_state=None,
-                active_opus_macro_id=None,
-                current_exceptions=None
-            )
+            state = StateObject(last_updated=datetime.datetime.now())
 
         state.last_updated = datetime.datetime.now()
         if enforce_none_values or (
@@ -80,14 +79,16 @@ class StateInterface:
             state.helios_indicates_good_conditions = helios_indicates_good_conditions
         if enforce_none_values or (measurements_should_be_running is not None):
             state.measurements_should_be_running = measurements_should_be_running
-        if enforce_none_values or (enclosure_plc_readings is not None):
-            state.enclosure_plc_readings = enclosure_plc_readings
-        if enforce_none_values or (os_state is not None):
-            state.os_state = os_state
+        if enforce_none_values or (plc_state is not None):
+            state.enclosure_plc_readings = plc_state
+        if enforce_none_values or (operating_system_state is not None):
+            state.os_state = operating_system_state
         if enforce_none_values or (active_opus_macro_id is not None):
             state.active_opus_macro_id = active_opus_macro_id
         if enforce_none_values or (current_exceptions is not None):
             state.current_exceptions = current_exceptions
+        if enforce_none_values or (upload_is_running is not None):
+            state.upload_is_running = upload_is_running
 
         with open(_STATE_FILE_PATH, "w") as f:
             f.write(state.model_dump_json(indent=4))
