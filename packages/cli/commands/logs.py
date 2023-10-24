@@ -1,4 +1,6 @@
-"""Read current `info.log`/`debug.log` files."""
+"""Read current `debug.log` log file."""
+
+# FIXME: remove this entirely with the next breaking release
 
 import click
 import os
@@ -8,13 +10,8 @@ from packages.core.utils import Logger
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_INFO_LOG_FILE = os.path.join(_PROJECT_DIR, "logs", "info.log")
 _DEBUG_LOG_FILE = os.path.join(_PROJECT_DIR, "logs", "debug.log")
 _LOG_FILES_LOCK = os.path.join(_PROJECT_DIR, "logs", ".logs.lock")
-
-
-def _print_green(text: str) -> None:
-    click.echo(click.style(text, fg="green"))
 
 
 def _print_red(text: str) -> None:
@@ -22,25 +19,31 @@ def _print_red(text: str) -> None:
 
 
 @click.command(help="Read the current info.log or debug.log file.")
-@click.option("--level", default="INFO", help="Log level INFO or DEBUG")
+@click.option("--level", default="DEBUG", help="Log level INFO or DEBUG")
 @tum_esm_utils.decorators.with_filelock(
     lockfile_path=_LOG_FILES_LOCK,
     timeout=5,
 )
 def _read_logs(level: str) -> None:
-    if level in ["INFO", "DEBUG"]:
-        with open(_INFO_LOG_FILE if level == "INFO" else _DEBUG_LOG_FILE, "r") as f:
-            click.echo("".join(f.readlines()))
-    else:
+    if level == "INFO":
+        _print_red(
+            "Pyra ^4.1 does not have info log files anymore, only debug log files."
+        )
+    if level not in ["INFO", "DEBUG"]:
         _print_red("Level has to be either INFO or DEBUG.")
+        exit(1)
+
+    with open(_DEBUG_LOG_FILE, "r") as f:
+        click.echo("".join(f.readlines()))
 
 
 @click.command(
-    help="Archive the current log files. This command will write all log lines from the current info.log and debug.log files into the logs/archive directory."
+    help=
+    "Archive the current log files. This command will write all log lines from the current info.log and debug.log files into the logs/archive directory."
 )
 def _archive_logs() -> None:
     Logger.archive()
-    _print_green("done!")
+    _print_red("this command is deprecated without a replacement")
 
 
 @click.group()
