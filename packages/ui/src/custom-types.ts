@@ -20,7 +20,6 @@ export namespace customTypes {
         logs: reduxStateLogs;
         coreState: reduxStateCoreState;
         coreProcess: reduxStateCoreProcess;
-        activity: reduxStateActivity;
     };
     export type intArray3 = [number, number, number];
     export type intArray4 = [number, number, number, number];

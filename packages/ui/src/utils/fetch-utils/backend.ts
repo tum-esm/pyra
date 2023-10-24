@@ -19,9 +19,6 @@ async function callCLI(args: string[]) {
 }
 
 const backend = {
-    archiveLogs: async (): Promise<ChildProcess> => {
-        return await callCLI(['logs', 'archive']);
-    },
     startPyraCore: async (): Promise<ChildProcess> => {
         return await callCLI(['core', 'start']);
     },

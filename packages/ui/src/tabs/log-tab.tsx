@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
-import { dialog, shell } from '@tauri-apps/api';
-import { fetchUtils } from '../utils';
+import { shell } from '@tauri-apps/api';
 import { essentialComponents } from '../components';
-import toast from 'react-hot-toast';
 import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
 import Toggle from '../components/essential/toggle';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 
 export default function LogTab() {
-    const [archiving, setArchiving] = useState(false);
     const [logType, setLogType] = useState<'main' | 'upload' | 'helios'>('main');
 
     const [liveUpdateIsActice, setLiveUpdateIsActive] = useState(true);
@@ -52,22 +49,6 @@ export default function LogTab() {
         await shell.open(await join(baseDir, filePath));
     }
 
-    async function archiveLogs() {
-        if (await dialog.confirm('Do you want to archive all current logs?', 'PyRa 4 UI')) {
-            setArchiving(true);
-            const result = await fetchUtils.backend.archiveLogs();
-            if (result.stdout.replace(/[\n\s]*/g, '') === 'done!') {
-                setLogs([]);
-            } else {
-                console.error(
-                    `Could not archive log files. processResult = ${JSON.stringify(result)}`
-                );
-                toast.error(`Could not archive log files, please look in the console for details`);
-            }
-            setArchiving(false);
-        }
-    }
-
     const renderedLogs =
         logType === 'main'
             ? renderedMainLogs
@@ -91,9 +72,6 @@ export default function LogTab() {
                 <div className="flex-grow" />
                 <essentialComponents.Button onClick={openLogsFolder} variant="white">
                     open logs folder
-                </essentialComponents.Button>
-                <essentialComponents.Button onClick={archiveLogs} variant="red" spinner={archiving}>
-                    archive logs
                 </essentialComponents.Button>
             </div>
             <div
