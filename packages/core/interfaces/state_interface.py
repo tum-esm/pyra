@@ -1,119 +1,93 @@
 from __future__ import annotations
-import json
+import datetime
 import os
-import shutil
-from typing import Callable
-from pydantic_core._pydantic_core import ValidationError
+from typing import Literal, Optional
+import pydantic
 import tum_esm_utils
-from packages.core import types, utils
+from packages.core import utils, types
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".state.lock")
-_RUNTIME_DATA_PATH = os.path.join(_PROJECT_DIR, "runtime-data")
+_STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "logs", ".state.lock")
+_STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
+
 logger = utils.Logger(origin="state-interface")
 
 
+class StateObject(pydantic.BaseModel):
+    last_updated: datetime.datetime
+    helios_indicates_good_conditions: Optional[Literal["yes", "no",
+                                                       "inconclusive"]] = None
+    measurements_should_be_running: Optional[bool] = None
+    plc_state: Optional[types.PLCState] = None
+    os_state: Optional[types.OperatingSystemState] = None
+    active_opus_macro_id: Optional[int] = None
+    current_exceptions: Optional[list[str]] = None
+
+
 class StateInterface:
-    """Use JSON files to communicate state between different parts
-    of Pyra Core, and between Core and CLI/UI.
-
-    The `runtime-data/state.json` file will be cleared with every
-    restart of PYRA Core. The `logs/persistent-state.json` will only
-    be created, when it does not exist yet.
-
-    `runtime-data/state.json`:
-
-    ```json
-    {
-        "helios_indicates_good_conditions": ...,
-        "measurements_should_be_running": ...,
-        "enclosure_plc_readings": {...},
-        "os_state": {...}
-    }
-    ```
-
-    `logs/persistent-state.json`:
-
-    ```json
-    {
-        "active_opus_macro_id": ...,
-        "current_exceptions": []
-    }
-    ```"""
-
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_STATE_LOCK_PATH, timeout=5
+    )
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def initialize() -> None:
-        """Clear `state.json`, create empty `prersistent-state.json` if
-        it does not exist yet."""
-
-        # clear runtime-data directory
-        if os.path.exists(_RUNTIME_DATA_PATH):
-            shutil.rmtree(_RUNTIME_DATA_PATH)
-        os.mkdir(_RUNTIME_DATA_PATH)
-
-        # create the state file
-        types.PyraCoreState().dump()
-
-        # possibly create the persistent state file
+    def load_state() -> StateObject:
+        """Load the state from the state file."""
         try:
-            types.PyraCoreStatePersistent.load()
-        except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
-            types.PyraCoreStatePersistent().dump()
+            with open(_STATE_FILE_PATH, "r") as f:
+                state = StateObject.model_validate_json(f.read())
+        except (
+            FileNotFoundError,
+            pydantic.ValidationError,
+        ):
+            state = StateObject(last_updated=datetime.datetime.now())
+            with open(_STATE_FILE_PATH, "w") as f:
+                f.write(state.model_dump_json(indent=4))
+        return state
 
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_STATE_LOCK_PATH, timeout=5
+    )
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def read() -> types.PyraCoreState:
-        """Read the state file and return its content"""
-        return StateInterface.read_without_filelock()
-
-    @staticmethod
-    def read_without_filelock() -> types.PyraCoreState:
-        """Read the state file and return its content"""
+    def update_state(
+        helios_indicates_good_conditions: Optional[Literal["yes", "no",
+                                                           "inconclusive"]
+                                                  ] = None,
+        measurements_should_be_running: Optional[bool] = None,
+        enclosure_plc_readings: Optional[dict] = None,
+        os_state: Optional[dict] = None,
+        active_opus_macro_id: Optional[int] = None,
+        current_exceptions: Optional[list[str]] = None,
+        enforce_none_values: bool = False,
+    ) -> StateObject:
         try:
-            return types.PyraCoreState.load()
-        except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
-            logger.warning("reinitializing the corrupted state file")
-            new_object = types.PyraCoreState()
-            new_object.dump()
-            return new_object
+            with open(_STATE_FILE_PATH, "r") as f:
+                state = StateObject.model_validate_json(f.read())
+        except FileNotFoundError:
+            state = StateObject(
+                last_updated=datetime.datetime.now(),
+                helios_indicates_good_conditions=None,
+                measurements_should_be_running=None,
+                enclosure_plc_readings=None,
+                os_state=None,
+                active_opus_macro_id=None,
+                current_exceptions=None
+            )
 
-    @staticmethod
-    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def read_persistent() -> types.PyraCoreStatePersistent:
-        """Read the persistent state file and return its content"""
-        return StateInterface.read_persistent_without_filelock()
+        state.last_updated = datetime.datetime.now()
+        if enforce_none_values or (
+            helios_indicates_good_conditions is not None
+        ):
+            state.helios_indicates_good_conditions = helios_indicates_good_conditions
+        if enforce_none_values or (measurements_should_be_running is not None):
+            state.measurements_should_be_running = measurements_should_be_running
+        if enforce_none_values or (enclosure_plc_readings is not None):
+            state.enclosure_plc_readings = enclosure_plc_readings
+        if enforce_none_values or (os_state is not None):
+            state.os_state = os_state
+        if enforce_none_values or (active_opus_macro_id is not None):
+            state.active_opus_macro_id = active_opus_macro_id
+        if enforce_none_values or (current_exceptions is not None):
+            state.current_exceptions = current_exceptions
 
-    @staticmethod
-    def read_persistent_without_filelock() -> types.PyraCoreStatePersistent:
-        """Read the persistent state file and return its content"""
-        try:
-            return types.PyraCoreStatePersistent.load()
-        except (FileNotFoundError, json.JSONDecodeError, AssertionError, ValidationError):
-            logger.warning("reinitializing the corrupted persistent state file")
-            new_object = types.PyraCoreStatePersistent()
-            new_object.dump()
-            return new_object
-
-    @staticmethod
-    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def update(apply_update: Callable[[types.PyraCoreState], types.PyraCoreState]) -> None:
-        """Update the (persistent) state file and return its content.
-        The update object should only include the properties to be
-        changed in contrast to containing the whole file."""
-
-        current_state = StateInterface.read_without_filelock()
-        apply_update(current_state).dump()
-
-    @staticmethod
-    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=10)
-    def update_persistent(
-        apply_update: Callable[[types.PyraCoreStatePersistent], types.PyraCoreStatePersistent]
-    ) -> None:
-        """Update the (persistent) state file and return its content.
-        The update object should only include the properties to be
-        changed in contrast to containing the whole file."""
-
-        current_state = StateInterface.read_persistent_without_filelock()
-        apply_update(current_state).dump()
+        with open(_STATE_FILE_PATH, "w") as f:
+            f.write(state.model_dump_json(indent=4))
