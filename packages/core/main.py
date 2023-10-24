@@ -141,6 +141,19 @@ def run() -> None:
     current_exceptions = interfaces.StateInterface.read_persistent(
     ).current_exceptions
 
+    # Before shutting down: save the current activity history and log
+    # that the core is shutting down
+    def _graceful_teardown(*args: Any) -> None:
+        logger.info("Received shutdown signal, starting graceful teardown")
+        ActivityHistoryInterface.dump_current_activity_history()
+        logger.info("Graceful teardown complete")
+        exit(0)
+
+    signal.signal(signal.SIGINT, _graceful_teardown)
+    signal.signal(signal.SIGTERM, _graceful_teardown)
+    signal.signal(signal.SIGHUP, _graceful_teardown)
+    logger.info("Established graceful teardown hook")
+
     while True:
         start_time = time.time()
         logger.info("Starting iteration")
@@ -165,18 +178,6 @@ def run() -> None:
         if config.general.test_mode:
             logger.info("pyra-core in test mode")
             logger.debug("Skipping HeliosThread and UploadThread in test mode")
-
-        # Before shutting down: save the current activity history and log
-        # that the core is shutting down
-        def _graceful_teardown(*args: Any) -> None:
-            logger.info("Received shutdown signal, starting graceful teardown")
-            ActivityHistoryInterface.dump_current_activity_history()
-            logger.info("Graceful teardown complete")
-            exit(0)
-
-        signal.signal(signal.SIGINT, _graceful_teardown)
-        signal.signal(signal.SIGTERM, _graceful_teardown)
-        logger.info("Established graceful teardown hook")
 
         # loop over every module, when one of the modules
         # encounters an exception, this inner loop stops
