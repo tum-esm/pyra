@@ -1,11 +1,12 @@
 import { range } from 'lodash';
 import moment from 'moment';
-import { functionalUtils } from '../../utils';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 import {
     ActivityHistory,
+    parseActivityHistory,
     useActivityHistoryStore,
 } from '../../utils/zustand-utils/activity-zustand';
+import { useMemo } from 'react';
 
 function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
     let fraction = time.hour() / 24.0 + time.minute() / (24.0 * 60) + time.second() / (24.0 * 3600);
@@ -52,10 +53,9 @@ function ActivityPlot() {
         }
     }
 
-    const sections = functionalUtils.generateActivityHistories(
-        activityHistory,
-        measurementsAreRunning,
-        errorIsPresent
+    const sections = useMemo(
+        () => parseActivityHistory(activityHistory, measurementsAreRunning, errorIsPresent),
+        [activityHistory, measurementsAreRunning, errorIsPresent]
     );
     const localUTCOffset = moment().utcOffset();
 
@@ -77,7 +77,7 @@ function ActivityPlot() {
                     {range(1, 24).map((h) => (
                         <div
                             key={h}
-                            className="absolute top-0 z-10 w-[1.5px] h-6 bg-gray-500 translate-x-[-1px]"
+                            className="absolute top-0 z-10 w-[1.5px] h-9 bg-gray-500 translate-x-[-1px]"
                             style={{ left: `${h / 0.24}%` }}
                         />
                     ))}

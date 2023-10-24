@@ -41,7 +41,6 @@ export default function Dashboard() {
                 const fileContent = await fetchUtils.getFileContent(
                     `logs/activity/activity-${filename}.json`
                 );
-                // @ts-ignore
                 setActivityHistory(JSON.parse(fileContent));
             } catch (e) {
                 console.debug(`Could not load activity file: ${e}`);
