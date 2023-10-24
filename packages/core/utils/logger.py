@@ -1,32 +1,22 @@
-from datetime import datetime, timedelta
-import json
+import datetime
 import os
 import traceback
-from typing import Literal
+from typing import Optional
 import filelock
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_INFO_LOG_FILE = os.path.join(_PROJECT_DIR, "logs", "info.log")
 _DEBUG_LOG_FILE = os.path.join(_PROJECT_DIR, "logs", "debug.log")
 _LOG_FILES_LOCK = os.path.join(_PROJECT_DIR, "logs", ".logs.lock")
 
 
-def _log_line_has_time(log_line: str) -> bool:
-    """Returns true when a give log line (string) starts
-    with a valid date. This is not true for exception
-    tracebacks. This log line time is used to determine
-    which file to archive logs lines into."""
+def _get_log_line_datetime(log_line: str) -> Optional[datetime.datetime]:
+    """Returns the date, if a log line is starting with a valid date."""
     try:
-        assert len(log_line) >= 10
-        datetime.strptime(log_line[: 10], "%Y-%m-%d")
-        return True
+        assert len(log_line) >= 19
+        return datetime.datetime.strptime(log_line[: 19], "%Y-%m-%d %H:%M:%S")
     except:
-        return False
-
-
-# TODO: use logger from `tum_esm_utils` and extend its class
-#       with the actual logging functionality
+        return None
 
 
 class Logger:
@@ -80,9 +70,11 @@ class Logger:
     def _write_log_line(self, level: str, message: str) -> None:
         """Format the log line string and write it to "logs/debug.log"
         and possibly "logs/info.log"""
-        now = datetime.now()
-        utc_offset = round((datetime.now() - datetime.utcnow()).total_seconds()
-                           / 3600, 1)
+        now = datetime.datetime.now()
+        utc_offset = round(
+            (datetime.datetime.now() -
+             datetime.datetime.utcnow()).total_seconds() / 3600, 1
+        )
         if round(utc_offset) == utc_offset:
             utc_offset = round(utc_offset)
 
@@ -96,24 +88,21 @@ class Logger:
             with filelock.FileLock(_LOG_FILES_LOCK, timeout=10):
                 with open(_DEBUG_LOG_FILE, "a") as f1:
                     f1.write(log_string)
-                if level != "DEBUG":
-                    with open(_INFO_LOG_FILE, "a") as f2:
-                        f2.write(log_string)
 
-        # Archive lines older than 60 minutes, every 10 minutes
-        if (now - Logger.last_archive_time).total_seconds() > 600:
-            Logger.archive(keep_last_hour=True)
+        # Archive lines older than 5 minutes, every 5 minutes
+        if (now - Logger.last_archive_time).total_seconds() > 300:
+            Logger.archive(keep_recent_logs=True)
             Logger.last_archive_time = now
 
     @staticmethod
-    def archive(keep_last_hour: bool = False) -> None:
+    def archive(keep_recent_logs: bool = False) -> None:
         """
         Move all log lines in "logs/info.log" and "logs/debug.log" into
         an archive file ("logs/archive/YYYYMMDD-debug.log", "...info.log").
 
         With keep_last_hour = True, log lines less than an hour old will
-        remain.
-        """
+        remain."""
+
         with filelock.FileLock(_LOG_FILES_LOCK, timeout=10):
             with open(_DEBUG_LOG_FILE, "r") as f:
                 log_lines_in_file = f.readlines()
@@ -122,45 +111,47 @@ class Logger:
 
             lines_to_be_archived = []
             lines_to_be_kept = []
-            latest_time = str(
-                datetime.now() - timedelta(hours=(1 if keep_last_hour else 0))
+            latest_time = (
+                datetime.datetime.now() -
+                datetime.timedelta(minutes=(5 if keep_recent_logs else 0))
             )
-            line_time = log_lines_in_file[0][: 26]
             for index, line in enumerate(log_lines_in_file):
-                if _log_line_has_time(line):
-                    line_time = line[: 26]
-                if line_time > latest_time:
-                    lines_to_be_archived = log_lines_in_file[: index]
-                    lines_to_be_kept = log_lines_in_file[index :]
-                    break
+                line_time = _get_log_line_datetime(line)
+                if line_time is not None:
+                    if line_time > latest_time:
+                        lines_to_be_archived = log_lines_in_file[: index]
+                        lines_to_be_kept = log_lines_in_file[index :]
+                        break
+
+            # not lines to archive
+            if len(lines_to_be_archived) + len(lines_to_be_kept) == 0:
+                return
 
             with open(_DEBUG_LOG_FILE, "w") as f:
                 f.writelines(lines_to_be_kept)
-            with open(_INFO_LOG_FILE, "w") as f:
-                f.writelines([
-                    l for l in lines_to_be_kept if " - DEBUG - " not in l
-                ])
 
             if len(lines_to_be_archived) == 0:
                 return
 
-            archive_log_date_groups: dict[str, dict[str, list[str]]] = {}
-            line_date = lines_to_be_archived[0][: 10].replace("-", "")
-            for line in lines_to_be_archived:
-                if _log_line_has_time(line):
-                    line_date = line[: 10].replace("-", "")
-                if line_date not in archive_log_date_groups.keys():
-                    archive_log_date_groups[line_date] = {
-                        "debug": [], "info": []
-                    }
-                archive_log_date_groups[line_date]["debug"].append(line)
-                if " - DEBUG - " not in line:
-                    archive_log_date_groups[line_date]["info"].append(line)
+            archive_log_date_groups: dict[datetime.date, list[str]] = {}
 
-            for date in archive_log_date_groups.keys():
-                for t in ["info", "debug"]:
-                    filename = os.path.join(
-                        _PROJECT_DIR, "logs", "archive", f"{date}-{t}.log"
-                    )
-                    with open(filename, "a") as f:
-                        f.writelines(archive_log_date_groups[date][t] + [""])
+            # this logic is necessary because not all log lines have timestamps
+            # i.e. exceptions only have a timestamp in the first line
+            line_datetime = _get_log_line_datetime(lines_to_be_archived[0])
+            assert line_datetime is not None
+            line_date = line_datetime.date()
+            for line in lines_to_be_archived:
+                new_line_date = _get_log_line_datetime(line)
+                if new_line_date is not None:
+                    line_date = new_line_date.date()
+                if line_date not in archive_log_date_groups.keys():
+                    archive_log_date_groups[line_date] = []
+                archive_log_date_groups[line_date].append(line)
+
+            for date, log_lines in archive_log_date_groups.items():
+                with open(
+                    os.path.join(
+                        _PROJECT_DIR, "logs", "archive", f"{date}-debug.log"
+                    ), "a"
+                ) as f:
+                    f.writelines(log_lines + [""])
