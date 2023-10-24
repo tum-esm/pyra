@@ -2,6 +2,7 @@ import os
 import time
 from typing import Callable, Literal, Optional
 from packages.core import types, utils, interfaces, modules, threads
+from packages.core.utils.activity_history import ActivityHistoryInterface
 
 logger = utils.Logger(origin="main")
 
@@ -33,14 +34,11 @@ def _update_exception_state(
                 utils.ExceptionEmailClient.handle_occured_exception(
                     config, new_exception
                 )
-                if len(current_exceptions) == 0:
-                    utils.Logger.log_activity_event("error-occured")
         else:
             if len(current_exceptions) > 0:
                 updated_current_exceptions = []
                 utils.ExceptionEmailClient.handle_resolved_exception(config)
                 logger.info(f"All exceptions have been resolved.")
-                utils.Logger.log_activity_event("errors-resolved")
 
         def apply_state_update(
             state: types.PyraCoreStatePersistent,
@@ -145,6 +143,10 @@ def run() -> None:
     while True:
         start_time = time.time()
         logger.info("Starting iteration")
+
+        ActivityHistoryInterface.add_datapoint(
+            errors=len(current_exceptions) > 0,
+        )
 
         # load config at the beginning of each mainloop iteration
         try:

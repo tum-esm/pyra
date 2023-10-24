@@ -1,3 +1,4 @@
+from .activity_history import ActivityHistoryInterface as ActivityHistoryInterface
 from .logger import Logger
 from .astronomy import Astronomy
 from .exception_email_client import ExceptionEmailClient

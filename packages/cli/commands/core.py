@@ -7,7 +7,7 @@ import os
 import filelock
 import psutil
 import tum_esm_utils
-from packages.core import utils, modules, types
+from packages.core import modules, types
 
 dir = os.path.dirname
 _PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -91,7 +91,6 @@ def _start_pyra_core() -> None:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    utils.Logger.log_activity_event("start-core")
     _print_green(f"Started background process with PID {p.pid}")
 
 
@@ -108,7 +107,6 @@ def _stop_pyra_core() -> None:
             f"Terminated {len(termination_pids)} pyra-core background " +
             f"processe(s) with PID(s) {termination_pids}"
         )
-        utils.Logger.log_activity_event("stop-core")
 
         config = types.Config.load()
         if config.general.test_mode:

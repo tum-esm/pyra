@@ -1,5 +1,6 @@
 import datetime
 from packages.core import types, utils, interfaces
+from packages.core.utils.activity_history import ActivityHistoryInterface
 
 logger = utils.Logger(origin="measurement-conditions")
 
@@ -61,17 +62,11 @@ class MeasurementConditions:
             measurements_should_be_running = self._get_automatic_decision()
         assert isinstance(measurements_should_be_running, bool)
 
-        if (
-            interfaces.StateInterface.read().measurements_should_be_running
-            != measurements_should_be_running
-        ):
-            utils.Logger.log_activity_event(
-                "start-measurements"
-                if measurements_should_be_running else "stop-measurements"
-            )
-
         logger.info(
             f"Measurements should be running is set to: {measurements_should_be_running}."
+        )
+        ActivityHistoryInterface.add_datapoint(
+            measuring=measurements_should_be_running
         )
 
         def apply_state_update(
