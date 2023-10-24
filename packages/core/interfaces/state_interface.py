@@ -15,34 +15,22 @@ _STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
 logger = utils.Logger(origin="state-interface")
 
 
-class StateObject(pydantic.BaseModel):
-    last_updated: datetime.datetime
-    helios_indicates_good_conditions: Optional[Literal["yes", "no",
-                                                       "inconclusive"]] = None
-    measurements_should_be_running: Optional[bool] = None
-    plc_state: types.PLCState = types.PLCState()
-    operating_system_state: types.OperatingSystemState = types.OperatingSystemState(
-    )
-    current_exceptions: Optional[list[str]] = None
-    upload_is_running: Optional[bool] = None
-
-
 class StateInterface:
     @tum_esm_utils.decorators.with_filelock(
         lockfile_path=_STATE_LOCK_PATH, timeout=5
     )
     @staticmethod
-    def load_state() -> StateObject:
+    def load_state() -> types.StateObject:
         """Load the state from the state file."""
 
         try:
             with open(_STATE_FILE_PATH, "r") as f:
-                state = StateObject.model_validate_json(f.read())
+                state = types.StateObject.model_validate_json(f.read())
         except (
             FileNotFoundError,
             pydantic.ValidationError,
         ):
-            state = StateObject(last_updated=datetime.datetime.now())
+            state = types.StateObject(last_updated=datetime.datetime.now())
             with open(_STATE_FILE_PATH, "w") as f:
                 f.write(state.model_dump_json(indent=4))
         return state
@@ -68,9 +56,9 @@ class StateInterface:
 
         try:
             with open(_STATE_FILE_PATH, "r") as f:
-                state = StateObject.model_validate_json(f.read())
+                state = types.StateObject.model_validate_json(f.read())
         except FileNotFoundError:
-            state = StateObject(last_updated=datetime.datetime.now())
+            state = types.StateObject(last_updated=datetime.datetime.now())
 
         state.last_updated = datetime.datetime.now()
         if enforce_none_values or (
@@ -97,7 +85,7 @@ class StateInterface:
     @tum_esm_utils.decorators.with_filelock(
         lockfile_path=_STATE_LOCK_PATH, timeout=5
     )
-    def update_state_in_context() -> Generator[StateObject, None, None]:
+    def update_state_in_context() -> Generator[types.StateObject, None, None]:
         """Update the state file in a context manager.
         
         Example:
@@ -113,9 +101,9 @@ class StateInterface:
 
         try:
             with open(_STATE_FILE_PATH, "r") as f:
-                state = StateObject.model_validate_json(f.read())
+                state = types.StateObject.model_validate_json(f.read())
         except FileNotFoundError:
-            state = StateObject(last_updated=datetime.datetime.now())
+            state = types.StateObject(last_updated=datetime.datetime.now())
 
         state.last_updated = datetime.datetime.now()
         yield state

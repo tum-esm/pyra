@@ -38,9 +38,8 @@ class MeasurementConditions:
         self.config = initial_config
 
     def run(self, new_config: types.Config) -> None:
-        """Called in every cycle of the main loop.
-        Updates StateInterface: measurements_should_be_running based on the selected mode, triggers
-        and present conditions."""
+        """Called in every cycle of the main loop. Updates the state
+        based on the selected mode, triggers and present conditions."""
 
         self.config = new_config
 
@@ -73,10 +72,11 @@ class MeasurementConditions:
         )
 
     def _get_automatic_decision(self) -> bool:
-        """Evaluates the activated automatic mode triggers (Sun Angle, Time, Helios).
-        Reads the config to consider activated measurement triggers. Evaluates active measurement
-        triggers and combines their states by logical conjunction.
-        """
+        """Evaluates the activated automatic mode triggers (Sun Angle,
+        Time, Helios). Reads the config to consider activated measurement
+        triggers. Evaluates active measurement triggers and combines their
+        states by logical conjunction."""
+
         triggers = self.config.measurement_triggers
         if self.config.helios is None:
             triggers.consider_helios = False

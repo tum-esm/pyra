@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Literal, Optional
 import pydantic
 
 
@@ -59,3 +59,14 @@ class PLCState(pydantic.BaseModel):
     state: PLCStateState = PLCStateState()
     power: PLCStatePower = PLCStatePower()
     connections: PLCStateConnections = PLCStateConnections()
+
+
+class StateObject(pydantic.BaseModel):
+    last_updated: datetime.datetime
+    helios_indicates_good_conditions: Optional[Literal["yes", "no",
+                                                       "inconclusive"]] = None
+    measurements_should_be_running: Optional[bool] = None
+    plc_state: PLCState = PLCState()
+    operating_system_state: OperatingSystemState = OperatingSystemState()
+    current_exceptions: Optional[list[str]] = None
+    upload_is_running: Optional[bool] = None

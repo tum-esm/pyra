@@ -8,6 +8,11 @@ import pydantic
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 
+# TODO: add uploading to activity history
+# TODO: add camtracker startups to activity history
+# TODO: add opus startups to activity history
+# TODO: add cli calls to activity history
+
 
 class ActivityDatapoint(pydantic.BaseModel):
     """A datapoint of the activity history."""

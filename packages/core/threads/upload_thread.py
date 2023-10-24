@@ -12,6 +12,8 @@ import re
 import pydantic
 from packages.core import types, utils, interfaces
 
+# TODO: add uploading to state
+
 logger = utils.Logger(origin="upload")
 
 _dir = os.path.dirname
@@ -29,10 +31,8 @@ class InvalidUploadState(Exception):
 
 
 class DirectoryUploadClient:
-    """
-    This is the client that is concerned with uploading one specific
-    directory. run() will perform the actual upload process.
-    """
+    """This is the client that is concerned with uploading one specific
+    directory. run() will perform the actual upload process."""
     def __init__(
         self,
         date_string: str,
