@@ -86,22 +86,27 @@ class Logger:
             print(log_string, end="")
         else:
             with filelock.FileLock(_LOG_FILES_LOCK, timeout=10):
+                # current logs that only contains from the last 5-10 minutes
                 with open(_DEBUG_LOG_FILE, "a") as f1:
                     f1.write(log_string)
 
+                # archive that contains all log lines
+                with open(
+                    os.path.join(
+                        _PROJECT_DIR, "logs", "archive",
+                        f"{now.strftime('%Y-%m-%d')}-debug.log"
+                    ), "a"
+                ) as f:
+                    f.write(log_string)
+
         # Archive lines older than 5 minutes, every 5 minutes
         if (now - Logger.last_archive_time).total_seconds() > 300:
-            Logger.archive(keep_recent_logs=True)
+            Logger.archive()
             Logger.last_archive_time = now
 
     @staticmethod
-    def archive(keep_recent_logs: bool = False) -> None:
-        """
-        Move all log lines in "logs/info.log" and "logs/debug.log" into
-        an archive file ("logs/archive/YYYYMMDD-debug.log", "...info.log").
-
-        With keep_last_hour = True, log lines less than an hour old will
-        remain."""
+    def archive() -> None:
+        """Only keep the lines from the last 5 minutes in "logs/debug.log"."""
 
         with filelock.FileLock(_LOG_FILES_LOCK, timeout=10):
             with open(_DEBUG_LOG_FILE, "r") as f:
@@ -109,49 +114,16 @@ class Logger:
             if len(log_lines_in_file) == 0:
                 return
 
-            lines_to_be_archived = []
-            lines_to_be_kept = []
-            latest_time = (
-                datetime.datetime.now() -
-                datetime.timedelta(minutes=(5 if keep_recent_logs else 0))
+            lines_to_be_kept: list[str] = []
+            latest_log_time_to_keep = (
+                datetime.datetime.now() - datetime.timedelta(minutes=5)
             )
             for index, line in enumerate(log_lines_in_file):
                 line_time = _get_log_line_datetime(line)
                 if line_time is not None:
-                    if line_time > latest_time:
-                        lines_to_be_archived = log_lines_in_file[: index]
+                    if line_time > latest_log_time_to_keep:
                         lines_to_be_kept = log_lines_in_file[index :]
                         break
 
-            # not lines to archive
-            if len(lines_to_be_archived) + len(lines_to_be_kept) == 0:
-                return
-
             with open(_DEBUG_LOG_FILE, "w") as f:
                 f.writelines(lines_to_be_kept)
-
-            if len(lines_to_be_archived) == 0:
-                return
-
-            archive_log_date_groups: dict[datetime.date, list[str]] = {}
-
-            # this logic is necessary because not all log lines have timestamps
-            # i.e. exceptions only have a timestamp in the first line
-            line_datetime = _get_log_line_datetime(lines_to_be_archived[0])
-            assert line_datetime is not None
-            line_date = line_datetime.date()
-            for line in lines_to_be_archived:
-                new_line_date = _get_log_line_datetime(line)
-                if new_line_date is not None:
-                    line_date = new_line_date.date()
-                if line_date not in archive_log_date_groups.keys():
-                    archive_log_date_groups[line_date] = []
-                archive_log_date_groups[line_date].append(line)
-
-            for date, log_lines in archive_log_date_groups.items():
-                with open(
-                    os.path.join(
-                        _PROJECT_DIR, "logs", "archive", f"{date}-debug.log"
-                    ), "a"
-                ) as f:
-                    f.writelines(log_lines + [""])
