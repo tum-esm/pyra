@@ -8,92 +8,88 @@ from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="plc-interface")
 
-_PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PlcSpecification] = {
+_PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PLCSpecification] = {
     1:
-        types.PlcSpecification(
-            **{
-                "actors": {
-                    "current_angle": [25, 6, 2],
-                    "fan_speed": [8, 18, 2],
-                    "move_cover": [25, 8, 2],
-                    "nominal_angle": [25, 8, 2],
-                },
-                "control": {
-                    "auto_temp_mode": [8, 24, 1, 2],
-                    "manual_control": [8, 24, 1, 5],
-                    "manual_temp_mode": [8, 24, 1, 3],
-                    "reset": [3, 4, 1, 5],
-                    "sync_to_tracker": [8, 16, 1, 0],
-                },
-                "sensors": {
-                    "humidity": [8, 22, 2],
-                    "temperature": [8, 20, 2],
-                },
-                "state": {
-                    "cover_closed": [25, 2, 1, 2],
-                    "motor_failed": [8, 12, 1, 3],
-                    "rain": [8, 6, 1, 0],
-                    "reset_needed": [3, 2, 1, 2],
-                    "ups_alert": [8, 0, 1, 1],
-                },
-                "power": {
-                    "camera": [8, 16, 1, 2],
-                    "computer": [8, 16, 1, 6],
-                    "heater": [8, 16, 1, 5],
-                    "router": [8, 16, 1, 3],
-                    "spectrometer": [8, 16, 1, 1],
-                },
-                "connections": {
-                    "camera": [8, 14, 1, 6],
-                    "computer": [8, 14, 1, 3],
-                    "heater": [8, 14, 1, 1],
-                    "router": [8, 14, 1, 2],
-                    "spectrometer": [8, 14, 1, 0],
-                },
-            }
+        types.PLCSpecification(
+            actors=types.PLCSpecificationActors(
+                current_angle=(25, 6, 2),
+                fan_speed=(8, 18, 2),
+                move_cover=(25, 8, 2),
+                nominal_angle=(25, 8, 2),
+            ),
+            control=types.PLCSpecificationControl(
+                auto_temp_mode=(8, 24, 1, 2),
+                manual_control=(8, 24, 1, 5),
+                manual_temp_mode=(8, 24, 1, 3),
+                reset=(3, 4, 1, 5),
+                sync_to_tracker=(8, 16, 1, 0),
+            ),
+            sensors=types.PLCSpecificationSensors(
+                humidity=(8, 22, 2),
+                temperature=(8, 20, 2),
+            ),
+            state=types.PLCSpecificationState(
+                cover_closed=(25, 2, 1, 2),
+                motor_failed=(8, 12, 1, 3),
+                rain=(8, 6, 1, 0),
+                reset_needed=(3, 2, 1, 2),
+                ups_alert=(8, 0, 1, 1),
+            ),
+            power=types.PLCSpecificationPower(
+                camera=(8, 16, 1, 2),
+                computer=(8, 16, 1, 6),
+                heater=(8, 16, 1, 5),
+                router=(8, 16, 1, 3),
+                spectrometer=(8, 16, 1, 1),
+            ),
+            connections=types.PLCSpecificationConnections(
+                camera=(8, 14, 1, 6),
+                computer=(8, 14, 1, 3),
+                heater=(8, 14, 1, 1),
+                router=(8, 14, 1, 2),
+                spectrometer=(8, 14, 1, 0),
+            ),
         ),
     2:
-        types.PlcSpecification(
-            **{
-                "actors": {
-                    "current_angle": [6, 6, 2],
-                    "fan_speed": [8, 4, 2],
-                    "move_cover": [6, 8, 2],
-                    "nominal_angle": [6, 8, 2],
-                },
-                "control": {
-                    "auto_temp_mode": [8, 24, 1, 5],
-                    "manual_control": [8, 12, 1, 7],
-                    "manual_temp_mode": [8, 24, 1, 4],
-                    "reset": [3, 4, 1, 5],
-                    "sync_to_tracker": [8, 8, 1, 1],
-                },
-                "sensors": {
-                    "humidity": [8, 22, 2],
-                    "temperature": [8, 16, 2],
-                },
-                "state": {
-                    "cover_closed": [6, 16, 1, 1],
-                    "motor_failed": None,
-                    "rain": [3, 0, 1, 0],
-                    "reset_needed": [3, 2, 1, 2],
-                    "ups_alert": [8, 13, 1, 6],
-                },
-                "power": {
-                    "camera": [8, 8, 1, 4],  # K5 Relay
-                    "computer": None,
-                    "heater": [8, 12, 1, 7],  # K3 Relay
-                    "router": None,  # not allowed
-                    "spectrometer": [8, 8, 1, 2],  # K4 Relay
-                },
-                "connections": {
-                    "camera": None,
-                    "computer": [8, 13, 1, 2],
-                    "heater": [8, 6, 1, 1],
-                    "router": [8, 12, 1, 4],
-                    "spectrometer": None,
-                },
-            }
+        types.PLCSpecification(
+            actors=types.PLCSpecificationActors(
+                current_angle=(6, 6, 2),
+                fan_speed=(8, 4, 2),
+                move_cover=(6, 8, 2),
+                nominal_angle=(6, 8, 2),
+            ),
+            control=types.PLCSpecificationControl(
+                auto_temp_mode=(8, 24, 1, 5),
+                manual_control=(8, 12, 1, 7),
+                manual_temp_mode=(8, 24, 1, 4),
+                reset=(3, 4, 1, 5),
+                sync_to_tracker=(8, 8, 1, 1),
+            ),
+            sensors=types.PLCSpecificationSensors(
+                humidity=(8, 22, 2),
+                temperature=(8, 16, 2),
+            ),
+            state=types.PLCSpecificationState(
+                cover_closed=(6, 16, 1, 1),
+                motor_failed=None,
+                rain=(3, 0, 1, 0),
+                reset_needed=(3, 2, 1, 2),
+                ups_alert=(8, 13, 1, 6),
+            ),
+            power=types.PLCSpecificationPower(
+                camera=(8, 8, 1, 4),  # K5 Relay
+                computer=None,
+                heater=(8, 12, 1, 7),  # K3 Relay
+                router=None,  # not allowed
+                spectrometer=(8, 8, 1, 2),  # K4 Relay
+            ),
+            connections=types.PLCSpecificationConnections(
+                camera=None,
+                computer=(8, 13, 1, 2),
+                heater=(8, 6, 1, 1),
+                router=(8, 12, 1, 4),
+                spectrometer=None,
+            ),
         ),
 }
 
@@ -130,12 +126,11 @@ class PLCInterface:
     def update_config(
         self, new_plc_version: Literal[1, 2], new_plc_ip: types.StrictIPAdress
     ) -> None:
-        """
-        Update the internally used config (executed at the)
+        """Update the internally used config (executed at the)
         beginning of enclosure-control's run-function.
 
-        Reconnecting to PLC, when IP has changed.
-        """
+        Reconnecting to PLC, when IP has changed."""
+
         if (self.plc_version
             != new_plc_version) or (self.plc_ip != new_plc_ip.root):
             logger.debug("PLC ip has changed, reconnecting now")
@@ -146,9 +141,8 @@ class PLCInterface:
             self.connect()
 
     def connect(self) -> None:
-        """
-        Connects to the PLC Snap7. Times out after 30 seconds.
-        """
+        """Connects to the PLC Snap7. Times out after 30 seconds."""
+
         self.plc = snap7.client.Client()
         start_time = time.time()
 
@@ -172,9 +166,8 @@ class PLCInterface:
                 self.plc = snap7.client.Client()
 
     def disconnect(self) -> None:
-        """
-        Disconnects from the PLC Snap7
-        """
+        """Disconnects from the PLC Snap7"""
+
         try:
             self.plc.disconnect()
             self.plc.destroy()
@@ -185,40 +178,34 @@ class PLCInterface:
 
     def is_responsive(self) -> bool:
         """Pings the PLC"""
+
         return os.system("ping -n 1 " + self.plc_ip) == 0
 
     # DIRECT READ FUNCTIONS
 
     def rain_is_detected(self) -> bool:
-        """
-        Reads the single value "state.rain"
-        """
+        """Reads the single value "state.rain" """
+
         return self.__read_bool(self.specification.state.rain)
 
     def cover_is_closed(self) -> bool:
-        """
-        Reads the single value "state.cover_closed"
-        """
+        """Reads the single value "state.cover_closed" """
+
         return self.__read_bool(self.specification.state.cover_closed)
 
     def reset_is_needed(self) -> bool:
-        """
-        Reads the single value "state.reset_needed"
-        """
+        """Reads the single value "state.reset_needed" """
+
         return self.__read_bool(self.specification.state.reset_needed)
 
     def get_cover_angle(self) -> int:
-        """
-        Reads the single value "actors.current_angle"
-        """
+        """Reads the single value "actors.current_angle" """
         return self.__read_int(self.specification.actors.current_angle)
 
     # BULK READ
 
     def read(self) -> types.PLCState:
-        """
-        Read the whole state of the PLC
-        """
+        """Read the whole state of the PLC"""
 
         plc_db_content: dict[int, bytearray] = {}
         plc_db_size = {1: {3: 6, 8: 26, 25: 10}, 2: {3: 5, 6: 17,
@@ -290,21 +277,19 @@ class PLCInterface:
     # LOW LEVEL READ FUNCTIONS
 
     def __sleep_while_cpu_is_busy(self) -> None:
-        """
-        Initially sleeps 0.5 seconds. The checks every 2 seconds
+        """Initially sleeps 0.5 seconds. The checks every 2 seconds
         whether the CPU of the PLC is still busy. End function
-        if the CPU is idle again.
-        """
+        if the CPU is idle again."""
+
         time.sleep(0.5)
         if str(self.plc.get_cpu_state()) == "S7CpuStatusRun":
             time.sleep(2)
 
     def __read_int(self, action: tuple[int, int, int]) -> int:
-        """
-        Reads an INT value in the PLC database.
+        """Reads an INT value in the PLC database.
 
-        action is tuple: db_number, start, size
-        """
+        action is tuple: db_number, start, size"""
+
         msg: bytearray = self.plc.db_read(*action)
         value: int = snap7.util.get_int(msg, 0)
 
@@ -314,6 +299,7 @@ class PLCInterface:
 
     def __write_int(self, action: tuple[int, int, int], value: int) -> None:
         """Changes an INT value in the PLC database."""
+
         db_number, start, size = action
 
         msg = bytearray(size)
@@ -324,6 +310,7 @@ class PLCInterface:
 
     def __read_bool(self, action: tuple[int, int, int, int]) -> bool:
         """Reads a BOOL value in the PLC database."""
+
         db_number, start, size, bool_index = action
 
         msg: bytearray = self.plc.db_read(db_number, start, size)
@@ -337,6 +324,7 @@ class PLCInterface:
         self, action: tuple[int, int, int, int], value: bool
     ) -> None:
         """Changes a BOOL value in the PLC database."""
+
         db_number, start, size, bool_index = action
 
         msg = self.plc.db_read(db_number, start, size)
@@ -350,11 +338,12 @@ class PLCInterface:
     def __update_bool(
         self, new_state: bool, spec: tuple[int, int, int, int]
     ) -> None:
-        """
+        """Update a boolean value on the PLC.
+
         1. low-level direct-write new_state to PLC according to spec
         2. low-level direct-read of plc's value according to spec
-        3. raise `PLCInterface.PLCError` if value is different
-        """
+        3. raise `PLCInterface.PLCError` if value is different"""
+
         self.__write_bool(spec, new_state)
         if self.__read_bool(spec) != new_state:
             raise PLCInterface.PLCError("PLC state did not change")

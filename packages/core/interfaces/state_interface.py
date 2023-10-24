@@ -70,7 +70,7 @@ class StateInterface:
         if enforce_none_values or (plc_state is not None):
             state.plc_state = plc_state or types.PLCState()
         if enforce_none_values or (operating_system_state is not None):
-            state.os_state = operating_system_state or types.OperatingSystemState(
+            state.operating_system_state = operating_system_state or types.OperatingSystemState(
             )
         if enforce_none_values or (current_exceptions is not None):
             state.current_exceptions = current_exceptions

@@ -2,14 +2,14 @@ from typing import Optional
 import pydantic
 
 
-class _PlcSpecificationActors(pydantic.BaseModel):
+class PLCSpecificationActors(pydantic.BaseModel):
     current_angle: tuple[int, int, int]
     fan_speed: tuple[int, int, int]
     move_cover: tuple[int, int, int]
     nominal_angle: tuple[int, int, int]
 
 
-class _PlcSpecificationControl(pydantic.BaseModel):
+class PLCSpecificationControl(pydantic.BaseModel):
     auto_temp_mode: tuple[int, int, int, int]
     manual_control: tuple[int, int, int, int]
     manual_temp_mode: tuple[int, int, int, int]
@@ -17,12 +17,12 @@ class _PlcSpecificationControl(pydantic.BaseModel):
     sync_to_tracker: tuple[int, int, int, int]
 
 
-class _PlcSpecificationSensors(pydantic.BaseModel):
+class PLCSpecificationSensors(pydantic.BaseModel):
     humidity: tuple[int, int, int]
     temperature: tuple[int, int, int]
 
 
-class _PlcSpecificationState(pydantic.BaseModel):
+class PLCSpecificationState(pydantic.BaseModel):
     cover_closed: tuple[int, int, int, int]
     motor_failed: Optional[tuple[int, int, int, int]]
     rain: tuple[int, int, int, int]
@@ -30,7 +30,7 @@ class _PlcSpecificationState(pydantic.BaseModel):
     ups_alert: tuple[int, int, int, int]
 
 
-class _PlcSpecificationPower(pydantic.BaseModel):
+class PLCSpecificationPower(pydantic.BaseModel):
     camera: tuple[int, int, int, int]
     computer: Optional[tuple[int, int, int, int]]
     heater: tuple[int, int, int, int]
@@ -38,7 +38,7 @@ class _PlcSpecificationPower(pydantic.BaseModel):
     spectrometer: tuple[int, int, int, int]
 
 
-class _PlcSpecificationConnections(pydantic.BaseModel):
+class PLCSpecificationConnections(pydantic.BaseModel):
     camera: Optional[tuple[int, int, int, int]]
     computer: tuple[int, int, int, int]
     heater: tuple[int, int, int, int]
@@ -46,10 +46,10 @@ class _PlcSpecificationConnections(pydantic.BaseModel):
     spectrometer: Optional[tuple[int, int, int, int]]
 
 
-class PlcSpecification(pydantic.BaseModel):
-    actors: _PlcSpecificationActors
-    control: _PlcSpecificationControl
-    sensors: _PlcSpecificationSensors
-    state: _PlcSpecificationState
-    power: _PlcSpecificationPower
-    connections: _PlcSpecificationConnections
+class PLCSpecification(pydantic.BaseModel):
+    actors: PLCSpecificationActors
+    control: PLCSpecificationControl
+    sensors: PLCSpecificationSensors
+    state: PLCSpecificationState
+    power: PLCSpecificationPower
+    connections: PLCSpecificationConnections

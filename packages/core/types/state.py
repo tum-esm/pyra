@@ -60,6 +60,8 @@ class PLCState(pydantic.BaseModel):
     power: PLCStatePower = PLCStatePower()
     connections: PLCStateConnections = PLCStateConnections()
 
+    model_config = pydantic.ConfigDict(extra="forbid")
+
 
 class StateObject(pydantic.BaseModel):
     last_updated: datetime.datetime
@@ -70,3 +72,5 @@ class StateObject(pydantic.BaseModel):
     operating_system_state: OperatingSystemState = OperatingSystemState()
     current_exceptions: Optional[list[str]] = None
     upload_is_running: Optional[bool] = None
+
+    model_config = pydantic.ConfigDict(extra="forbid")
