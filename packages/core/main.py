@@ -1,6 +1,7 @@
 import os
+import signal
 import time
-from typing import Callable, Literal, Optional
+from typing import Any, Callable, Literal, Optional
 from packages.core import types, utils, interfaces, modules, threads
 from packages.core.utils.activity_history import ActivityHistoryInterface
 
@@ -164,6 +165,18 @@ def run() -> None:
         if config.general.test_mode:
             logger.info("pyra-core in test mode")
             logger.debug("Skipping HeliosThread and UploadThread in test mode")
+
+        # Before shutting down: save the current activity history and log
+        # that the core is shutting down
+        def _graceful_teardown(*args: Any) -> None:
+            logger.info("Received shutdown signal, starting graceful teardown")
+            ActivityHistoryInterface.dump_current_activity_history()
+            logger.info("Graceful teardown complete")
+            exit(0)
+
+        signal.signal(signal.SIGINT, _graceful_teardown)
+        signal.signal(signal.SIGTERM, _graceful_teardown)
+        logger.info("Established graceful teardown hook")
 
         # loop over every module, when one of the modules
         # encounters an exception, this inner loop stops

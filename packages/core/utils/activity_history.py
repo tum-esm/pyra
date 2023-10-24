@@ -139,8 +139,6 @@ class ActivityHistoryInterface:
         ).total_seconds() >= 300)):
             ActivityHistoryInterface.dump_current_activity_history()
 
-    # TODO: dump activity history when shutting down
-
     @staticmethod
     def dump_current_activity_history() -> None:
         activity_history = ActivityHistoryInterface.current_activity_history
