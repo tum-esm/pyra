@@ -2,24 +2,31 @@ from typing import Optional
 import pydantic
 
 
-class _PlcStateActors(pydantic.BaseModel):
+class OperatingSystemState(pydantic.BaseModel):
+    cpu_usage: Optional[list[float]] = None
+    memory_usage: Optional[float] = None
+    last_boot_time: Optional[str] = None
+    filled_disk_space_fraction: Optional[float] = None
+
+
+class _PLCStateActors(pydantic.BaseModel):
     fan_speed: Optional[int] = None
     current_angle: Optional[int] = None
 
 
-class _PlcStateControl(pydantic.BaseModel):
+class _PLCStateControl(pydantic.BaseModel):
     auto_temp_mode: Optional[bool] = None
     manual_control: Optional[bool] = None
     manual_temp_mode: Optional[bool] = None
     sync_to_tracker: Optional[bool] = None
 
 
-class _PlcStateSensors(pydantic.BaseModel):
+class _PLCStateSensors(pydantic.BaseModel):
     humidity: Optional[int] = None
     temperature: Optional[int] = None
 
 
-class _PlcStateState(pydantic.BaseModel):
+class _PLCStateState(pydantic.BaseModel):
     cover_closed: Optional[bool] = None
     motor_failed: Optional[bool] = None
     rain: Optional[bool] = None
@@ -27,7 +34,7 @@ class _PlcStateState(pydantic.BaseModel):
     ups_alert: Optional[bool] = None
 
 
-class _PlcStatePower(pydantic.BaseModel):
+class _PLCStatePower(pydantic.BaseModel):
     camera: Optional[bool] = None
     computer: Optional[bool] = None
     heater: Optional[bool] = None
@@ -35,7 +42,7 @@ class _PlcStatePower(pydantic.BaseModel):
     spectrometer: Optional[bool] = None
 
 
-class _PlcStateConnections(pydantic.BaseModel):
+class _PLCStateConnections(pydantic.BaseModel):
     camera: Optional[bool] = None
     computer: Optional[bool] = None
     heater: Optional[bool] = None
@@ -43,11 +50,11 @@ class _PlcStateConnections(pydantic.BaseModel):
     spectrometer: Optional[bool] = None
 
 
-class PlcState(pydantic.BaseModel):
+class PLCState(pydantic.BaseModel):
     last_read_time: Optional[str] = None
-    actors: _PlcStateActors = _PlcStateActors()
-    control: _PlcStateControl = _PlcStateControl()
-    sensors: _PlcStateSensors = _PlcStateSensors()
-    state: _PlcStateState = _PlcStateState()
-    power: _PlcStatePower = _PlcStatePower()
-    connections: _PlcStateConnections = _PlcStateConnections()
+    actors: _PLCStateActors = _PLCStateActors()
+    control: _PLCStateControl = _PLCStateControl()
+    sensors: _PLCStateSensors = _PLCStateSensors()
+    state: _PLCStateState = _PLCStateState()
+    power: _PLCStatePower = _PLCStatePower()
+    connections: _PLCStateConnections = _PLCStateConnections()

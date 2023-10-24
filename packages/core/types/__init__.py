@@ -1,7 +1,7 @@
 from .config import Config, ConfigPartial, StrictIPAdress
 
 from .plc_specification import PlcSpecification
-from .plc_state import PlcState
+from .state import PLCState, OperatingSystemState
 
 from .pyra_core_state import PyraCoreState, PyraCoreStatePersistent
 
