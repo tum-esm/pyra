@@ -145,7 +145,7 @@ def run() -> None:
         logger.info("Starting iteration")
 
         ActivityHistoryInterface.add_datapoint(
-            errors=len(current_exceptions) > 0,
+            has_errors=len(current_exceptions) > 0,
         )
 
         # load config at the beginning of each mainloop iteration
@@ -197,7 +197,11 @@ def run() -> None:
         # wait rest of loop time
         logger.info("Ending iteration")
         elapsed_time = time.time() - start_time
-        time_to_wait = config.general.seconds_per_core_interval - elapsed_time
+        seconds_per_core_interval = config.general.seconds_per_core_interval
+        if config.general.test_mode:
+            seconds_per_core_interval = 10
+            ActivityHistoryInterface.dump_current_activity_history()
+        time_to_wait = seconds_per_core_interval - elapsed_time
         if time_to_wait > 0:
             logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
             time.sleep(time_to_wait)

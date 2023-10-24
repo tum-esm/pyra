@@ -13,9 +13,12 @@ class ActivityDatapoint(pydantic.BaseModel):
     """A datapoint of the activity history."""
 
     local_time: datetime.time
-    measuring: bool = False
-    errors: bool = False
-    uploading: bool = False
+    is_measuring: bool = False
+    has_errors: bool = False
+    is_uploading: bool = False
+    camtracker_startups: int = 0
+    opus_startups: int = 0
+    cli_calls: int = 0
 
 
 class ActivityDatapointList(pydantic.RootModel[list[ActivityDatapoint]]):
@@ -64,9 +67,12 @@ class ActivityHistoryInterface:
 
     @staticmethod
     def add_datapoint(
-        measuring: Optional[bool] = None,
-        errors: Optional[bool] = None,
-        uploading: Optional[bool] = None,
+        is_measuring: Optional[bool] = None,
+        has_errors: Optional[bool] = None,
+        is_uploading: Optional[bool] = None,
+        camtracker_startups: Optional[int] = None,
+        opus_startups: Optional[int] = None,
+        cli_calls: Optional[int] = None,
     ) -> None:
         """Add a new activity datapoint"""
 
@@ -110,12 +116,18 @@ class ActivityHistoryInterface:
 
         # do not downgrade a True to a False value
         # only upgrade a False to a True value
-        if measuring is not None:
-            current_activity_datapoint.measuring &= measuring
-        if errors is not None:
-            current_activity_datapoint.errors &= errors
-        if uploading is not None:
-            current_activity_datapoint.uploading &= uploading
+        if is_measuring is not None:
+            current_activity_datapoint.is_measuring &= is_measuring
+        if has_errors is not None:
+            current_activity_datapoint.has_errors &= has_errors
+        if is_uploading is not None:
+            current_activity_datapoint.is_uploading &= is_uploading
+        if camtracker_startups is not None:
+            current_activity_datapoint.camtracker_startups += camtracker_startups
+        if opus_startups is not None:
+            current_activity_datapoint.opus_startups += opus_startups
+        if cli_calls is not None:
+            current_activity_datapoint.cli_calls += cli_calls
 
         ActivityHistoryInterface.current_activity_history = new_history
 
@@ -128,8 +140,6 @@ class ActivityHistoryInterface:
             ActivityHistoryInterface.dump_current_activity_history()
 
     # TODO: dump activity history when shutting down
-    # TODO: add information about CLI commands to activity history
-    # TODO: add information about CamTracker restarts to activity history
 
     @staticmethod
     def dump_current_activity_history() -> None:

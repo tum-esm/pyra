@@ -66,7 +66,7 @@ class MeasurementConditions:
             f"Measurements should be running is set to: {measurements_should_be_running}."
         )
         ActivityHistoryInterface.add_datapoint(
-            measuring=measurements_should_be_running
+            is_measuring=measurements_should_be_running
         )
 
         def apply_state_update(
