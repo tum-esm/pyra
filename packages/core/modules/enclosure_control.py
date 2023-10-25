@@ -1,4 +1,6 @@
+import datetime
 import time
+from typing import Optional
 from snap7.exceptions import Snap7Exception
 from packages.core import types, utils, interfaces
 
@@ -34,6 +36,10 @@ class EnclosureControl:
         self.initialized = False
         self.last_plc_connection_time = time.time()
         self.motor_reset_needed_in_last_iteration = False
+
+        self.last_camera_power_down_time: Optional[datetime.datetime] = None
+        self.last_camera_power_up_time: Optional[datetime.datetime] = None
+
         if self.config.general.test_mode:
             return
 
@@ -72,6 +78,10 @@ class EnclosureControl:
             return
 
         logger.info("Running EnclosureControl")
+
+        # Perform a power cycle of the camera every day at midnight
+        logger.debug("Performing camera power cycle.")
+        self.perform_camera_power_cycle()
 
         # Check for current measurement status
         self.measurements_should_be_running = (
@@ -175,6 +185,42 @@ class EnclosureControl:
                 )
 
     # PLC.ACTORS SETTERS
+
+    def perform_camera_power_cycle(self) -> None:
+        """Performs a power cycle of the camera every day at midnight: Turn off
+        the camera power at midnight system time. Turn on the camera power two
+        minutes later.
+        
+        Exact logic: Whenever the time is between 00:00 and 00:15, and the last
+        power down was on a different day or never logged (core has been stopped
+        since last power cycle), power down the camera. Two minutes later, power
+        up the camera. This works because this function should be run at least
+        every 10 minutes (`config.general.seconds_per_core_interval` is <= 600).
+        
+        It leads to multiple power cycles if the core is restarted between 00:00
+        and 00:15, but this doesn't break any hardware. The only way to circumvent
+        this is adding it to the persistent state which is not worth it right now."""
+
+        current_time = datetime.datetime.now()
+
+        if (current_time.hour == 0) and (current_time.minute < 15):
+            if (self.last_camera_power_down_time is None) or (
+                self.last_camera_power_down_time.date() < current_time.date()
+            ):
+                self.last_camera_power_down_time = current_time
+                self.last_camera_power_up_time = None
+                self.plc_interface.set_power_camera(False)
+                logger.info("Powering down the camera.")
+
+        if (self.last_camera_power_down_time
+            is not None) and (self.last_camera_power_up_time is None):
+            if (current_time -
+                self.last_camera_power_down_time).total_seconds() > 120:
+                self.last_camera_power_up_time = current_time
+                self.plc_interface.set_power_camera(True)
+                logger.info("Powering up the camera.")
+
+        self.plc_interface.set_power_camera(False)
 
     def move_cover(self, value: int) -> None:
         """Moves the cover attached on top of the enclosure. The cover is moved by a electrical
