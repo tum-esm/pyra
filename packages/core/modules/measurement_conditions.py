@@ -43,6 +43,21 @@ class MeasurementConditions:
 
         self.config = new_config
 
+        # Fetch and log current sun elevation
+        camtracker_coordinates = utils.Astronomy.get_camtracker_coordinates(
+            self.config
+        )
+        logger.debug(
+            f"Coordinates used from CamTracker (lat, lon, alt): {camtracker_coordinates}."
+        )
+        sun_elevation = utils.Astronomy.get_current_sun_elevation(
+            self.config,
+            lat=camtracker_coordinates[0],
+            lon=camtracker_coordinates[1],
+            alt=camtracker_coordinates[2],
+        )
+        logger.debug(f"Theoretical sun elevation is: {sun_elevation}°.")
+
         # Skip rest of the function if test mode is active
         if self.config.general.test_mode:
             logger.debug("Skipping MeasurementConditions in test mode")
@@ -53,13 +68,13 @@ class MeasurementConditions:
         logger.debug(f"Decision mode for measurements is: {decision.mode}.")
 
         # Selection and evaluation of the current set measurement mode
+        measurements_should_be_running: bool
         if decision.mode == "manual":
             measurements_should_be_running = decision.manual_decision_result
-        if decision.mode == "cli":
+        elif decision.mode == "cli":
             measurements_should_be_running = decision.cli_decision_result
-        if decision.mode == "automatic":
+        else:
             measurements_should_be_running = self._get_automatic_decision()
-        assert isinstance(measurements_should_be_running, bool)
 
         logger.info(
             f"Measurements should be running is set to: {measurements_should_be_running}."

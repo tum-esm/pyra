@@ -50,17 +50,8 @@ class Astronomy:
         else:
             current_time = skyfield.api.load.timescale().now()
 
-        if any([c is None for c in [lat, lon, alt]]):
-            with open(config.camtracker.config_path.root, "r") as f:
-                _lines = f.readlines()
-            _marker_line_index: Optional[int] = None
-            for n, line in enumerate(_lines):
-                if line == "$1\n":
-                    _marker_line_index = n
-            assert _marker_line_index is not None, "Camtracker config file is not valid"
-            lat = float(_lines[_marker_line_index + 1].strip())
-            lon = float(_lines[_marker_line_index + 2].strip())
-            alt = float(_lines[_marker_line_index + 3].strip())
+        if (lat is None) or (lon is None) or (alt is None):
+            lat, lon, alt = Astronomy.get_camtracker_coordinates(config)
 
         current_position = earth + skyfield.api.wgs84.latlon(
             latitude_degrees=lat,
@@ -71,3 +62,24 @@ class Astronomy:
         sun_pos = current_position.at(current_time).observe(sun).apparent()
         altitude, _, _ = sun_pos.altaz()
         return float(altitude.degrees)
+
+    @staticmethod
+    def get_camtracker_coordinates(
+        config: types.Config
+    ) -> tuple[float, float, float]:
+        """Returns the coordinates from the CamTracker config file."""
+
+        if config.general.test_mode:
+            return (11.569, 48.151, 539)  # TUM_I location in munich
+
+        with open(config.camtracker.config_path.root, "r") as f:
+            _lines = f.readlines()
+        _marker_line_index: Optional[int] = None
+        for n, line in enumerate(_lines):
+            if line == "$1\n":
+                _marker_line_index = n
+        assert _marker_line_index is not None, "Camtracker config file is not valid"
+        lat = float(_lines[_marker_line_index + 1].strip())
+        lon = float(_lines[_marker_line_index + 2].strip())
+        alt = float(_lines[_marker_line_index + 3].strip())
+        return lat, lon, alt
