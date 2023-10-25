@@ -1,7 +1,6 @@
+from typing import Optional
 import os
 import time
-from typing import Optional
-import jdcal
 import datetime
 from packages.core import types, utils, interfaces
 

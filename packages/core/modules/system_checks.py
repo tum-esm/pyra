@@ -1,6 +1,5 @@
 import tum_esm_utils
 from packages.core import types, utils, interfaces
-from packages.core.types.state import OperatingSystemState
 
 logger = utils.Logger(origin="system-checks")
 
@@ -41,7 +40,7 @@ class SystemChecks:
         interfaces.OSInterface.validate_system_battery()
 
         interfaces.StateInterface.update_state(
-            operating_system_state=OperatingSystemState(
+            operating_system_state=types.OperatingSystemState(
                 cpu_usage=cpu_usage,
                 memory_usage=memory_usage,
                 last_boot_time=last_boot_time,

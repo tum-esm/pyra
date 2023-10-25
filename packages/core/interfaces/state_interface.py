@@ -1,8 +1,8 @@
 from __future__ import annotations
+from typing import Generator, Literal, Optional
 import contextlib
 import datetime
 import os
-from typing import Generator, Literal, Optional
 import pydantic
 import tum_esm_utils
 from packages.core import utils, types

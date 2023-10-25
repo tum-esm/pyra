@@ -1,8 +1,9 @@
 import json
 import os
-import smtplib, ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import smtplib
+import ssl
+import email.mime.text
+import email.mime.multipart
 import traceback
 from packages.core import types
 
@@ -64,14 +65,14 @@ class ExceptionEmailClient:
         sender_email = config.error_email.sender_address
         recipients = config.error_email.recipients.replace(" ", "").split(",")
 
-        message = MIMEMultipart("alternative")
+        message = email.mime.multipart.MIMEMultipart("alternative")
         message["Subject"] = subject
         message["From"] = f"PYRA Technical User <{sender_email}>"
         message["To"] = ", ".join(recipients)
 
         # The email client will try to render the last part first
-        message.attach(MIMEText(text, "plain"))
-        message.attach(MIMEText(html, "html"))
+        message.attach(email.mime.text.MIMEText(text, "plain"))
+        message.attach(email.mime.text.MIMEText(html, "html"))
 
         # Create secure connection with server and send email
         context = ssl.create_default_context()

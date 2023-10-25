@@ -1,11 +1,10 @@
+from typing import Any, Optional
 import os
 import threading
 import time
 import cv2 as cv
 import numpy as np
-from typing import Any, Optional
 import pydantic
-
 import tum_esm_utils
 from packages.core import types, utils, interfaces
 

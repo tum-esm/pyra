@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 import hashlib
 import json
 import os
@@ -225,10 +225,10 @@ class DirectoryUploadClient:
     @staticmethod
     def __is_valid_date(date_string: str) -> bool:
         try:
-            day_ending = datetime.strptime(
+            day_ending = datetime.datetime.strptime(
                 f"{date_string} 23:59:59", "%Y%m%d %H:%M:%S"
             )
-            seconds_since_day_ending = (datetime.now() -
+            seconds_since_day_ending = (datetime.datetime.now() -
                                         day_ending).total_seconds()
             assert seconds_since_day_ending >= 3600
             return True

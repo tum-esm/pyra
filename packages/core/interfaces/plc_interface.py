@@ -1,9 +1,9 @@
-from datetime import datetime
 from typing import Literal, Optional
+import datetime
 import snap7
 import time
 import os
-from snap7.exceptions import Snap7Exception
+import snap7.exceptions
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="plc-interface")
@@ -148,7 +148,9 @@ class PLCInterface:
 
         while True:
             if (time.time() - start_time) > 30:
-                raise Snap7Exception("Connect to PLC timed out.")
+                raise snap7.exceptions.Snap7Exception(
+                    "Connect to PLC timed out."
+                )
 
             try:
                 self.plc.connect(self.plc_ip, 0, 1)
@@ -161,7 +163,7 @@ class PLCInterface:
                 self.plc.destroy()
                 self.plc = snap7.client.Client()
 
-            except Snap7Exception:
+            except snap7.exceptions.Snap7Exception:
                 self.plc.destroy()
                 self.plc = snap7.client.Client()
 
@@ -172,7 +174,7 @@ class PLCInterface:
             self.plc.disconnect()
             self.plc.destroy()
             logger.debug("Gracefully disconnected from PLC.")
-        except Snap7Exception:
+        except snap7.exceptions.Snap7Exception:
             self.plc.destroy()
             logger.debug("Disconnected ungracefully from PLC.")
 
@@ -236,7 +238,7 @@ class PLCInterface:
         s = self.specification
 
         return types.PLCState(
-            last_full_fetch=datetime.now(),
+            last_full_fetch=datetime.datetime.now(),
             actors=types.state.PLCStateActors(
                 fan_speed=_get_int(s.actors.fan_speed),
                 current_angle=_get_int(s.actors.current_angle),

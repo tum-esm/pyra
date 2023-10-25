@@ -1,7 +1,7 @@
+from typing import Optional
 import datetime
 import time
-from typing import Optional
-from snap7.exceptions import Snap7Exception
+import snap7.exceptions
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="enclosure-control")
@@ -105,7 +105,7 @@ class EnclosureControl:
             # Reads and returns the latest PLC database states
             try:
                 self.plc_state = self.plc_interface.read()
-            except Snap7Exception:
+            except snap7.exceptions.Snap7Exception:
                 logger.warning("Could not read PLC state in this loop.")
 
             # Push the latest readout of the PLC state to the StateInterface
@@ -170,7 +170,7 @@ class EnclosureControl:
 
         # Allows for PLC connection downtime of 10 minutes before an error is raised.
         # Allows PLC connection to heal itself.
-        except (Snap7Exception, RuntimeError) as e:
+        except (snap7.exceptions.Snap7Exception, RuntimeError) as e:
             logger.exception(e)
             now = time.time()
             seconds_since_error_occured = now - self.last_plc_connection_time

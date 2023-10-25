@@ -1,7 +1,7 @@
+from typing import Any
 import os
 import sys
 import time
-from typing import Any
 from packages.core import types, utils, interfaces
 
 # these imports are provided by pywin32
