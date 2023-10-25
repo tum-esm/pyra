@@ -1,4 +1,4 @@
-import pendulum
+import datetime
 import os
 import random
 import sys
@@ -49,7 +49,7 @@ def test_astronomy(sample_config: types.Config) -> None:
     for year in range(2020, 2051):
         e = utils.Astronomy.get_current_sun_elevation(
             sample_config,
-            datetime_object=pendulum.datetime(
+            datetime_object=datetime.datetime(
                 year=year,
                 month=random.randint(1, 12),
                 day=random.randint(1, 28),
