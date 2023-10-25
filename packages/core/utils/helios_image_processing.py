@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 import datetime
 import math
 import os
@@ -21,7 +21,7 @@ class HeliosImageProcessing:
         radius: int,
         center_x: int,
         center_y: int,
-    ) -> cv.Mat:
+    ) -> np.ndarray[Any, Any]:
         """
         input: image width/height, circle radius/center_x/center_y
 
@@ -45,8 +45,10 @@ class HeliosImageProcessing:
         """
 
         y, x = np.indices(img_shape)
-        return (np.abs(np.hypot(center_x - x, center_y - y))
-                < radius).astype(np.uint8)
+        return np.ndarray(
+            (np.abs(np.hypot(center_x - x, center_y - y))
+             < radius).astype(np.uint8)
+        )
 
     @staticmethod
     def _moving_average(
@@ -58,7 +60,7 @@ class HeliosImageProcessing:
         return list(ret[n - 1 :] / n)
 
     @staticmethod
-    def _get_binary_mask(frame: cv.Mat) -> cv.Mat:
+    def _get_binary_mask(frame: np.ndarray[Any, Any]) -> np.ndarray[Any, Any]:
         """
         input: gray image matrix (2D matrix) with integer values for each pixel
         output: binary mask (same shape) that has 0s for dark pixels and 1s for bright pixels
@@ -89,7 +91,7 @@ class HeliosImageProcessing:
 
     @staticmethod
     def _get_circle_location(
-        grayscale_image: cv.Mat
+        grayscale_image: np.ndarray[Any, Any]
     ) -> Optional[tuple[int, int, int]]:
         """
         input: binary mask (2D array) like
@@ -131,12 +133,12 @@ class HeliosImageProcessing:
 
     @staticmethod
     def add_markings_to_image(
-        img: cv.Mat,
+        img: np.ndarray[Any, Any],
         edge_fraction: float,
         circle_cx: int,
         circle_cy: int,
         circle_r: int,
-    ) -> cv.Mat:
+    ) -> np.ndarray[Any, Any]:
         """Put text for edge fraction and mark circles in image."""
 
         img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
@@ -150,14 +152,14 @@ class HeliosImageProcessing:
 
     @staticmethod
     def add_text_to_image(
-        img: cv.Mat,
+        img: np.ndarray[Any, Any],
         text: str,
         color: tuple[int, int, int] = (200, 0, 0),
-    ) -> cv.Mat:
+    ) -> np.ndarray[Any, Any]:
         """Put some text on the bottom left of an image"""
 
         cv.putText(
-            img,
+            img,  # type: ignore
             text=text,
             org=(10, img.shape[0] - 15),
             fontFace=None,
@@ -168,7 +170,9 @@ class HeliosImageProcessing:
         return img
 
     @staticmethod
-    def get_edge_fraction(frame: cv.Mat, save_image: bool = False) -> float:
+    def get_edge_fraction(
+        frame: np.ndarray[Any, Any], save_image: bool = False
+    ) -> float:
         """
         For a given frame determine the number of "edge pixels" with
         respect to the inner 90% of the lense diameter and the "status".
@@ -200,10 +204,10 @@ class HeliosImageProcessing:
             circle_cx, circle_cy, circle_r = circle_location
 
         # only consider edges and make them bold
-        edges_only: cv.Mat = np.array(
+        edges_only = np.array(
             cv.Canny(grayscale_image, 40, 40), dtype=np.float32
         )
-        edges_only_dilated: cv.Mat = cv.dilate(
+        edges_only_dilated = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
         )
 
