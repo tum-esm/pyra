@@ -9,4 +9,3 @@ from .plc_specification import (
     PLCSpecificationConnections,
 )
 from .state import PLCState, OperatingSystemState, StateObject
-from .upload_meta import UploadMeta
