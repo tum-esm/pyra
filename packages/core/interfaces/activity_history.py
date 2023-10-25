@@ -1,9 +1,10 @@
 from __future__ import annotations
+from typing import Optional
 import datetime
 import json
 import os
-from typing import Optional
 import pydantic
+from packages.core import types
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -14,60 +15,33 @@ _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 # TODO: add cli calls to activity history
 
 
-class ActivityDatapoint(pydantic.BaseModel):
-    """A datapoint of the activity history."""
-
-    local_time: datetime.time
-    is_measuring: bool = False
-    has_errors: bool = False
-    is_uploading: bool = False
-    camtracker_startups: int = 0
-    opus_startups: int = 0
-    cli_calls: int = 0
-
-
-class ActivityDatapointList(pydantic.RootModel[list[ActivityDatapoint]]):
-    """A datapoint of the activity history."""
-
-    root: list[ActivityDatapoint]
-
-
-example = {
-    "localTime": "12:00", "measuring": True, "errors": False, "uploading": False
-}
-
-
-class ActivityHistory(pydantic.BaseModel):
-    """A datapoint of the activity history."""
-
-    datapoints: ActivityDatapointList = ActivityDatapointList(root=[])
-    date: datetime.date
-
-
 def _date_to_filepath(date: datetime.date) -> str:
     return os.path.join(
         _PROJECT_DIR, "logs", "activity", f"activity-{date}.json"
     )
 
 
-def _load_current_activity_history() -> ActivityHistory:
+def _load_current_activity_history() -> types.ActivityHistory:
     today = datetime.date.today()
 
     try:
         with open(_date_to_filepath(today), "r") as f:
-            return ActivityHistory(datapoints=json.load(f), date=today)
+            return types.ActivityHistory(datapoints=json.load(f), date=today)
     except (
         json.JSONDecodeError,
         FileNotFoundError,
         pydantic.ValidationError,
     ):
-        return ActivityHistory(date=today)
+        return types.ActivityHistory(date=today)
 
 
 class ActivityHistoryInterface:
-    """Logging the system activity every minute to `logs/activity/activity-YYYY-MM-DD.json` to plot it in the UI."""
+    """Logging the system activity every minute to 
+    `logs/activity/activity-YYYY-MM-DD.json` to plot
+    it in the UI."""
 
-    current_activity_history: ActivityHistory = _load_current_activity_history()
+    current_activity_history: types.ActivityHistory = _load_current_activity_history(
+    )
     last_write_time: datetime.datetime = datetime.datetime(1970, 1, 1)
 
     @staticmethod
@@ -79,7 +53,9 @@ class ActivityHistoryInterface:
         opus_startups: Optional[int] = None,
         cli_calls: Optional[int] = None,
     ) -> None:
-        """Add a new activity datapoint"""
+        """Add a new activity datapoint. When this function is called
+        multiple times in the same minute, the datapoints are aggregated
+        into one datapoint per minute."""
 
         current_local_datetime = datetime.datetime.now()
 
@@ -88,7 +64,7 @@ class ActivityHistoryInterface:
             != current_local_datetime.date()
         ):
             ActivityHistoryInterface.dump_current_activity_history()
-            ActivityHistoryInterface.current_activity_history = ActivityHistory(
+            ActivityHistoryInterface.current_activity_history = types.ActivityHistory(
                 date=current_local_datetime.date()
             )
 
@@ -97,7 +73,7 @@ class ActivityHistoryInterface:
 
         # determining if the last datapoint is from the same minute
         # if so, we update it, otherwise we create a new one
-        last_activity_datapoint: Optional[ActivityDatapoint] = None
+        last_activity_datapoint: Optional[types.ActivityDatapoint] = None
         if len(new_history.datapoints.root) > 0:
             last_activity_datapoint = new_history.datapoints.root[-1]
 
@@ -111,7 +87,7 @@ class ActivityHistoryInterface:
         # creating a new datapoint if none exist for the current minute
         current_activity_datapoint = last_activity_datapoint
         if current_activity_datapoint is None:
-            current_activity_datapoint = ActivityDatapoint(
+            current_activity_datapoint = types.ActivityDatapoint(
                 local_time=datetime.time(
                     hour=current_local_datetime.hour,
                     minute=current_local_datetime.minute,

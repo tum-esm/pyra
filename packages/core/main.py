@@ -3,7 +3,6 @@ import signal
 import time
 from typing import Any, Callable, Literal, Optional
 from packages.core import types, utils, interfaces, modules, threads
-from packages.core.utils.activity_history import ActivityHistoryInterface
 
 logger = utils.Logger(origin="main")
 
@@ -145,7 +144,7 @@ def run() -> None:
     # that the core is shutting down
     def _graceful_teardown(*args: Any) -> None:
         logger.info("Received shutdown signal, starting graceful teardown")
-        ActivityHistoryInterface.dump_current_activity_history()
+        interfaces.ActivityHistoryInterface.dump_current_activity_history()
         logger.info("Graceful teardown complete")
         exit(0)
 
@@ -158,7 +157,7 @@ def run() -> None:
         start_time = time.time()
         logger.info("Starting iteration")
 
-        ActivityHistoryInterface.add_datapoint(
+        interfaces.ActivityHistoryInterface.add_datapoint(
             has_errors=len(current_exceptions) > 0,
         )
 
@@ -214,7 +213,7 @@ def run() -> None:
         seconds_per_core_interval = config.general.seconds_per_core_interval
         if config.general.test_mode:
             seconds_per_core_interval = 10
-            ActivityHistoryInterface.dump_current_activity_history()
+            interfaces.ActivityHistoryInterface.dump_current_activity_history()
         time_to_wait = seconds_per_core_interval - elapsed_time
         if time_to_wait > 0:
             logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
