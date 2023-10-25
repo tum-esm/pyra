@@ -6,6 +6,7 @@ import cv2 as cv
 import numpy as np
 import pydantic
 import tum_esm_utils
+from .abstract_thread import AbstractThread
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="helios")
@@ -258,7 +259,7 @@ class _Helios:
         return edge_fraction
 
 
-class HeliosThread:
+class HeliosThread(AbstractThread):
     """Thread for determining the current sun conditions in a
     parallel mainloop.
 
@@ -275,51 +276,24 @@ class HeliosThread:
     it can find in the image.
 
     The result of this constant sunlight evaluation is written
-    to the StateInterface.
-    """
-    def __init__(self, config: types.Config) -> None:
-        self.__thread = threading.Thread(target=HeliosThread.main)
-        self.__logger: utils.Logger = utils.Logger(origin="helios")
-        self.config: types.Config = config
-        self.is_initialized = False
-
-    def update_thread_state(self, new_config: types.Config) -> None:
-        """
-        Make sure that the thread loop is (not) running,
-        based on config.upload
-        """
-        self.config = new_config
-        should_be_running = HeliosThread.should_be_running(self.config)
-
-        if should_be_running and (not self.is_initialized):
-            self.__logger.info("Starting the thread")
-            self.is_initialized = True
-            self.__thread.start()
-
-        # set up a new thread instance for the next time the thread should start
-        if self.is_initialized:
-            if self.__thread.is_alive():
-                self.__logger.debug("Thread is alive")
-            else:
-                self.__logger.debug("Thread is not alive, running teardown")
-                self.__thread.join()
-                self.__thread = threading.Thread(target=HeliosThread.main)
-                self.is_initialized = False
-
+    to the StateInterface."""
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
-        """Should the thread be running? (based on config.upload)"""
+        """Based on the config, should the thread be running or not?"""
         return ((not config.general.test_mode) and
                 (config.helios is not None) and
                 (config.measurement_triggers.consider_helios))
 
     @staticmethod
-    def main(headless: bool = False) -> None:
-        """
-        Main entrypoint of the thread.
+    def get_new_thread_object() -> threading.Thread:
+        """Return a new thread object that is to be started."""
+        return threading.Thread(target=HeliosThread.main, daemon=True)
 
-        headless mode = don't write to log files, print to console, save all images
-        """
+    @staticmethod
+    def main(headless: bool = False) -> None:
+        """Main entrypoint of the thread. In headless mode, 
+        don't write to log files but print to console."""
+
         global logger
         global _CONFIG
 
