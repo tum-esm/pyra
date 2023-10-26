@@ -1,64 +1,64 @@
 {
-    "name": "docs",
-    "version": "0.0.0",
-    "private": true,
-    "scripts": {
-        "docusaurus": "docusaurus",
-        "develop": "cd ../ui && yarn && cd ../docs && docusaurus start",
-        "build": "cd ../ui && yarn && cd ../docs && docusaurus build",
-        "swizzle": "docusaurus swizzle",
-        "deploy": "docusaurus deploy",
-        "clear": "docusaurus clear",
-        "serve": "docusaurus serve",
-        "write-translations": "docusaurus write-translations",
-        "write-heading-ids": "docusaurus write-heading-ids",
-        "typecheck": "tsc"
-    },
-    "dependencies": {
-        "@docusaurus/core": "^2.4.0",
-        "@docusaurus/preset-classic": "^2.4.0",
-        "@mdx-js/react": "^1.6.22",
-        "@reduxjs/toolkit": "^1.9.3",
-        "@tauri-apps/api": "^1.2.0",
-        "clsx": "^1.2.1",
-        "deep-diff": "^1.0.2",
-        "docusaurus-plugin-sass": "^0.2.3",
-        "lodash": "^4.17.21",
-        "mdx-mermaid": "^1.3.2",
-        "mermaid": "^9.1.6",
-        "moment": "^2.29.4",
-        "prism-react-renderer": "^1.3.5",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "react-hot-toast": "^2.4.0",
-        "react-redux": "^8.0.5",
-        "sass": "^1.59.3",
-        "socket.io-client": "^4.6.1",
-        "typedoc": "^0.23.28",
-        "typedoc-plugin-markdown": "^3.14.0"
-    },
-    "devDependencies": {
-        "@docusaurus/module-type-aliases": "^2.4.0",
-        "@tsconfig/docusaurus": "^1.0.5",
-        "autoprefixer": "^10.4.8",
-        "docusaurus-plugin-typedoc": "^0.18.0",
-        "postcss": "^8.4.16",
-        "tailwindcss": "^3.1.8",
-        "typescript": "^4.7.4"
-    },
-    "browserslist": {
-        "production": [
-            ">0.5%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "engines": {
-        "node": ">=16.14"
-    }
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "dev": "cd ../ui && yarn && cd ../docs && docusaurus start",
+    "build": "cd ../ui && yarn && cd ../docs && docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "clear": "docusaurus clear",
+    "serve": "docusaurus serve",
+    "write-translations": "docusaurus write-translations",
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^2.4.0",
+    "@docusaurus/preset-classic": "^2.4.0",
+    "@mdx-js/react": "^1.6.22",
+    "@reduxjs/toolkit": "^1.9.3",
+    "@tauri-apps/api": "^1.2.0",
+    "clsx": "^1.2.1",
+    "deep-diff": "^1.0.2",
+    "docusaurus-plugin-sass": "^0.2.3",
+    "lodash": "^4.17.21",
+    "mdx-mermaid": "^1.3.2",
+    "mermaid": "^9.1.6",
+    "moment": "^2.29.4",
+    "prism-react-renderer": "^1.3.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.0",
+    "react-redux": "^8.0.5",
+    "sass": "^1.59.3",
+    "socket.io-client": "^4.6.1",
+    "typedoc": "^0.23.28",
+    "typedoc-plugin-markdown": "^3.14.0"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "^2.4.0",
+    "@tsconfig/docusaurus": "^1.0.5",
+    "autoprefixer": "^10.4.8",
+    "docusaurus-plugin-typedoc": "^0.18.0",
+    "postcss": "^8.4.16",
+    "tailwindcss": "^3.1.8",
+    "typescript": "^4.7.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "engines": {
+    "node": ">=16.14"
+  }
 }

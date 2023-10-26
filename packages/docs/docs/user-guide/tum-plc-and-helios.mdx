@@ -9,7 +9,13 @@ The TUM weather protection enclosure and Helios setup hardware is unavailable to
 
 <img src='/img/docs/muccnet-image-roof.jpg' className='tw-mb-6 tw-rounded-lg' />
 
-The TUM hardware used by [MUCCnet](https://atmosphere.ei.tum.de/) has been described in [Dietrich et al. 2021 (https://doi.org/10.5194/amt-14-1111-2021)](https://doi.org/10.5194/amt-14-1111-2021).
+The TUM hardware used by [MUCCnet](https://atmosphere.ei.tum.de/) has been described in [Dietrich et al. 2021 (doi.org/10.5194/amt-14-1111-2021)](https://doi.org/10.5194/amt-14-1111-2021) and [Heinle et al. 2018 (doi.org/10.5194/amt-11-2173-2018)](https://doi.org/10.5194/amt-11-2173-2018).
+
+:::tip
+
+Pyra does not have power over the PLC concerning safety-related functions. When the PLC is in the "rain was detected" state, the cover will move to its parking position at 0°. Pyra (or any other process on the PC) cannot change that state or move the cover out of the parking position.
+
+:::
 
 ## What does Helios do?
 
