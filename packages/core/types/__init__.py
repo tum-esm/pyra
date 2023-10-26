@@ -1,5 +1,5 @@
 from .activity_history import ActivityDatapoint, ActivityDatapointList, ActivityHistory
-from .config import Config, ConfigPartial, StrictIPAdress
+from .config import Config, PartialConfig, StrictIPAdress
 from .plc_specification import (
     PLCSpecification,
     PLCSpecificationActors,

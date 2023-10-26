@@ -74,7 +74,7 @@ def _update_config(content: str) -> None:
         raise RuntimeError(f"Could not load the current config.json file: {e}")
 
     try:
-        new_partial_config = types.ConfigPartial.load(
+        new_partial_config = types.PartialConfig.load(
             content,
             ignore_path_existence=True,
         )

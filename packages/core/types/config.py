@@ -56,13 +56,13 @@ class TimeDict(pydantic.BaseModel):
         return datetime.time(self.hour, self.minute, self.second)
 
 
-class TimeDictPartial(pydantic.BaseModel):
+class PartialTimeDict(pydantic.BaseModel):
     hour: Optional[int] = pydantic.Field(None, ge=0, le=23)
     minute: Optional[int] = pydantic.Field(None, ge=0, le=59)
     second: Optional[int] = pydantic.Field(None, ge=0, le=59)
 
 
-class SubConfigGeneral(pydantic.BaseModel):
+class GeneralConfig(pydantic.BaseModel):
     version: Literal["4.1.0"]
     seconds_per_core_interval: float = pydantic.Field(..., ge=5, le=600)
     test_mode: bool
@@ -70,7 +70,7 @@ class SubConfigGeneral(pydantic.BaseModel):
     min_sun_elevation: float = pydantic.Field(..., ge=0, le=90)
 
 
-class SubConfigGeneralPartial(pydantic.BaseModel):
+class PartialGeneralConfig(pydantic.BaseModel):
     """Like `SubConfigGeneral`, but all fields are optional."""
 
     seconds_per_core_interval: Optional[float] = pydantic.Field(
@@ -81,7 +81,7 @@ class SubConfigGeneralPartial(pydantic.BaseModel):
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
 
 
-class SubConfigOpus(pydantic.BaseModel):
+class OpusConfig(pydantic.BaseModel):
     em27_ip: StrictIPAdress
     executable_path: StrictFilePath
     experiment_path: StrictFilePath
@@ -90,7 +90,7 @@ class SubConfigOpus(pydantic.BaseModel):
     password: str
 
 
-class SubConfigOpusPartial(pydantic.BaseModel):
+class PartialOpusConfig(pydantic.BaseModel):
     """Like `SubConfigOpus`, but all fields are optional."""
 
     em27_ip: Optional[StrictIPAdress] = None
@@ -101,7 +101,7 @@ class SubConfigOpusPartial(pydantic.BaseModel):
     password: Optional[str] = None
 
 
-class SubConfigCamtracker(pydantic.BaseModel):
+class CamtrackerConfig(pydantic.BaseModel):
     config_path: StrictFilePath
     executable_path: StrictFilePath
     learn_az_elev_path: StrictFilePath
@@ -110,7 +110,7 @@ class SubConfigCamtracker(pydantic.BaseModel):
     restart_if_logs_are_too_old: bool
 
 
-class SubConfigCamtrackerPartial(pydantic.BaseModel):
+class PartialCamtrackerConfig(pydantic.BaseModel):
     """Like `SubConfigCamtracker` but all fields are optional."""
 
     config_path: Optional[StrictFilePath] = None
@@ -121,7 +121,7 @@ class SubConfigCamtrackerPartial(pydantic.BaseModel):
     restart_if_logs_are_too_old: Optional[bool] = None
 
 
-class SubConfigErrorEmail(pydantic.BaseModel):
+class ErrorEmailConfig(pydantic.BaseModel):
     smtp_host: str
     smtp_port: Literal[465, 587]
     smtp_username: str
@@ -131,7 +131,7 @@ class SubConfigErrorEmail(pydantic.BaseModel):
     recipients: str
 
 
-class SubConfigErrorEmailPartial(pydantic.BaseModel):
+class PartialErrorEmailConfig(pydantic.BaseModel):
     """Like `SubConfigErrorEmail` but all fields are optional."""
 
     smtp_host: Optional[str] = None
@@ -143,13 +143,13 @@ class SubConfigErrorEmailPartial(pydantic.BaseModel):
     recipients: Optional[str] = None
 
 
-class SubConfigMeasurementDecision(pydantic.BaseModel):
+class MeasurementDecisionConfig(pydantic.BaseModel):
     mode: Literal["automatic", "manual", "cli"]
     manual_decision_result: bool
     cli_decision_result: bool
 
 
-class SubConfigMeasurementDecisionPartial(pydantic.BaseModel):
+class PartialMeasurementDecisionConfig(pydantic.BaseModel):
     """Like `SubConfigMeasurementDecision` but all fields are optional."""
 
     mode: Optional[Literal["automatic", "manual", "cli"]] = None
@@ -157,7 +157,7 @@ class SubConfigMeasurementDecisionPartial(pydantic.BaseModel):
     cli_decision_result: Optional[bool] = None
 
 
-class SubConfigMeasurementTriggers(pydantic.BaseModel):
+class MeasurementTriggersConfig(pydantic.BaseModel):
     consider_time: bool
     consider_sun_elevation: bool
     consider_helios: bool
@@ -166,24 +166,24 @@ class SubConfigMeasurementTriggers(pydantic.BaseModel):
     min_sun_elevation: float = pydantic.Field(..., ge=0, le=90)
 
 
-class SubConfigMeasurementTriggersPartial(pydantic.BaseModel):
+class PartialMeasurementTriggersConfig(pydantic.BaseModel):
     """Like `SubConfigMeasurementTriggers` but all fields are optional."""
 
     consider_time: Optional[bool] = None
     consider_sun_elevation: Optional[bool] = None
     consider_helios: Optional[bool] = None
-    start_time: Optional[TimeDictPartial] = None
-    stop_time: Optional[TimeDictPartial] = None
+    start_time: Optional[PartialTimeDict] = None
+    stop_time: Optional[PartialTimeDict] = None
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
 
 
-class SubConfigTumPlc(pydantic.BaseModel):
+class TumPlcConfig(pydantic.BaseModel):
     ip: StrictIPAdress
     version: Literal[1, 2]
     controlled_by_user: bool
 
 
-class SubConfigTumPlcPartial(pydantic.BaseModel):
+class PartialTumPlcConfig(pydantic.BaseModel):
     """Like `SubConfigTumPlc`, but all fields are optional."""
 
     ip: Optional[StrictIPAdress] = None
@@ -191,7 +191,7 @@ class SubConfigTumPlcPartial(pydantic.BaseModel):
     controlled_by_user: Optional[bool] = None
 
 
-class SubConfigHelios(pydantic.BaseModel):
+class HeliosConfig(pydantic.BaseModel):
     camera_id: int = pydantic.Field(..., ge=0, le=999999)
     evaluation_size: int = pydantic.Field(..., ge=1, le=100)
     seconds_per_interval: float = pydantic.Field(..., ge=5, le=600)
@@ -199,7 +199,7 @@ class SubConfigHelios(pydantic.BaseModel):
     save_images: bool
 
 
-class SubConfigHeliosPartial(pydantic.BaseModel):
+class PartialHeliosConfig(pydantic.BaseModel):
     """Like `SubConfigHelios`, but all fields are optional."""
 
     camera_id: Optional[int] = pydantic.Field(None, ge=0, le=999999)
@@ -209,7 +209,16 @@ class SubConfigHeliosPartial(pydantic.BaseModel):
     save_images: Optional[bool] = None
 
 
-class SubConfigUpload(pydantic.BaseModel):
+class UploadStreamConfig(pydantic.BaseModel):
+    is_active: bool
+    label: str
+    variant: Literal["directories", "files"]
+    src_directory: StrictDirectoryPath
+    dst_directory: str
+    remove_src_after_upload: bool
+
+
+class UploadConfig(pydantic.BaseModel):
     host: StrictIPAdress
     user: str
     password: str
@@ -222,7 +231,7 @@ class SubConfigUpload(pydantic.BaseModel):
     remove_src_helios_after_upload: bool
 
 
-class SubConfigUploadPartial(pydantic.BaseModel):
+class PartialUploadConfig(pydantic.BaseModel):
     """Like `SubConfigUpload`, but all fields are optional."""
 
     host: Optional[StrictIPAdress] = None
@@ -238,15 +247,15 @@ class SubConfigUploadPartial(pydantic.BaseModel):
 
 
 class Config(pydantic.BaseModel):
-    general: SubConfigGeneral
-    opus: SubConfigOpus
-    camtracker: SubConfigCamtracker
-    error_email: SubConfigErrorEmail
-    measurement_decision: SubConfigMeasurementDecision
-    measurement_triggers: SubConfigMeasurementTriggers
-    tum_plc: Optional[SubConfigTumPlc] = None
-    helios: Optional[SubConfigHelios] = None
-    upload: Optional[SubConfigUpload] = None
+    general: GeneralConfig
+    opus: OpusConfig
+    camtracker: CamtrackerConfig
+    error_email: ErrorEmailConfig
+    measurement_decision: MeasurementDecisionConfig
+    measurement_triggers: MeasurementTriggersConfig
+    tum_plc: Optional[TumPlcConfig] = None
+    helios: Optional[HeliosConfig] = None
+    upload: Optional[UploadConfig] = None
 
     @staticmethod
     def load(
@@ -333,24 +342,24 @@ class Config(pydantic.BaseModel):
                 f.write(self.model_dump_json())
 
 
-class ConfigPartial(pydantic.BaseModel):
+class PartialConfig(pydantic.BaseModel):
     """Like `ConfigDict`, but all fields are optional."""
 
-    general: Optional[SubConfigGeneralPartial] = None
-    opus: Optional[SubConfigOpusPartial] = None
-    camtracker: Optional[SubConfigCamtrackerPartial] = None
-    error_email: Optional[SubConfigErrorEmailPartial] = None
-    measurement_decision: Optional[SubConfigMeasurementDecisionPartial] = None
-    measurement_triggers: Optional[SubConfigMeasurementTriggersPartial] = None
-    tum_plc: Optional[SubConfigTumPlcPartial] = None
-    helios: Optional[SubConfigHeliosPartial] = None
-    upload: Optional[SubConfigUploadPartial] = None
+    general: Optional[PartialGeneralConfig] = None
+    opus: Optional[PartialOpusConfig] = None
+    camtracker: Optional[PartialCamtrackerConfig] = None
+    error_email: Optional[PartialErrorEmailConfig] = None
+    measurement_decision: Optional[PartialMeasurementDecisionConfig] = None
+    measurement_triggers: Optional[PartialMeasurementTriggersConfig] = None
+    tum_plc: Optional[PartialTumPlcConfig] = None
+    helios: Optional[PartialHeliosConfig] = None
+    upload: Optional[PartialUploadConfig] = None
 
     @staticmethod
     def load(
         config_object: str,
         ignore_path_existence: bool = False
-    ) -> ConfigPartial:
+    ) -> PartialConfig:
         """Load a partial config file.
         
         Args:
@@ -366,7 +375,7 @@ class ConfigPartial(pydantic.BaseModel):
         """
 
         try:
-            return ConfigPartial.model_validate_json(
+            return PartialConfig.model_validate_json(
                 config_object,
                 context={"ignore-path-existence": ignore_path_existence},
             )
