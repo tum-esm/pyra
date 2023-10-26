@@ -11,7 +11,7 @@ SAMPLE_CONFIG = types.Config(
     general=types.config.GeneralConfig(
         version="4.1.0",
         seconds_per_core_interval=30,
-        test_mode=True,
+        test_mode=False,
         station_id="...",
         min_sun_elevation=11,
     ),
@@ -94,7 +94,7 @@ def sample_config() -> Any:
     temporary_config_path = os.path.join(
         PROJECT_DIR, "config", "config.tmp.json"
     )
-    config_string = json.dumps(SAMPLE_CONFIG, indent=4)
+    config_string = SAMPLE_CONFIG.model_dump_json(indent=4)
     save_file(original_config_path, temporary_config_path, config_string)
 
     # run the respective test
