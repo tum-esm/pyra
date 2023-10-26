@@ -4,3 +4,4 @@ from .logs import logs_command_group
 from .plc import plc_command_group
 from .remove_filelocks import remove_filelocks
 from .state import state_command_group
+from .test import test_command_group
