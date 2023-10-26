@@ -222,13 +222,7 @@ class UploadConfig(pydantic.BaseModel):
     host: StrictIPAdress
     user: str
     password: str
-    upload_ifgs: bool
-    src_directory_ifgs: str
-    dst_directory_ifgs: str
-    remove_src_ifgs_after_upload: bool
-    upload_helios: bool
-    dst_directory_helios: str
-    remove_src_helios_after_upload: bool
+    streams: list[UploadStreamConfig]
 
 
 class PartialUploadConfig(pydantic.BaseModel):
@@ -237,13 +231,7 @@ class PartialUploadConfig(pydantic.BaseModel):
     host: Optional[StrictIPAdress] = None
     user: Optional[str] = None
     password: Optional[str] = None
-    upload_ifgs: Optional[bool] = None
-    src_directory_ifgs: Optional[str] = None
-    dst_directory_ifgs: Optional[str] = None
-    remove_src_ifgs_after_upload: Optional[bool] = None
-    upload_helios: Optional[bool] = None
-    dst_directory_helios: Optional[str] = None
-    remove_src_helios_after_upload: Optional[bool] = None
+    streams: Optional[list[UploadStreamConfig]] = None
 
 
 class Config(pydantic.BaseModel):
