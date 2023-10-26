@@ -7,6 +7,7 @@
       "is_active": false,
       "label": "interferograms",
       "variant": "directories",
+      "dated_regex": "^%Y%m%d$",
       "src_directory": "...",
       "dst_directory": "...",
       "remove_src_after_upload": false
@@ -15,6 +16,7 @@
       "is_active": false,
       "label": "datalogger",
       "variant": "files",
+      "dated_regex": "^datalogger-%Y-%m-%d*$",
       "src_directory": "...",
       "dst_directory": "...",
       "remove_src_after_upload": false

@@ -213,6 +213,7 @@ class UploadStreamConfig(pydantic.BaseModel):
     is_active: bool
     label: str
     variant: Literal["directories", "files"]
+    dated_regex: str
     src_directory: StrictDirectoryPath
     dst_directory: str
     remove_src_after_upload: bool
