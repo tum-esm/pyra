@@ -15,23 +15,18 @@ from packages.core import types
 def test_default_config() -> None:
 
     with open(os.path.join(CONFIG_DIR, "config.default.json"), "r") as f:
-        config = types.Config.load(f.read(), ignore_path_existence=True)
-
-    assert config.tum_plc is None
-    assert config.helios is None
-    assert config.upload is None
-    config_dict = config.model_dump()
+        types.Config.load(f.read(), ignore_path_existence=True)
 
     with open(
         os.path.join(CONFIG_DIR, "tum_plc.config.default.json"), "r"
     ) as f:
-        config_dict["tum_plc"] = json.load(f)
+        types.config.TumPlcConfig.model_validate_json(f.read())
 
     with open(os.path.join(CONFIG_DIR, "helios.config.default.json"), "r") as f:
-        config_dict["helios"] = json.load(f)
+        types.config.HeliosConfig.model_validate_json(f.read())
 
     with open(os.path.join(CONFIG_DIR, "upload.config.default.json"), "r") as f:
-        config_dict["upload"] = json.load(f)
-
-    # validate the full config with all optional subconfigs
-    config = types.Config.load(config_dict, ignore_path_existence=True)
+        types.config.UploadConfig.model_validate_json(
+            f.read(),
+            context={"ignore-path-existence": True},
+        )

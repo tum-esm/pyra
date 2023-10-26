@@ -47,15 +47,18 @@ class AbstractThread(abc.ABC):
                 self.thread = self.get_new_thread_object()
                 self.is_initialized = False
 
-    @abc.abstractstaticmethod
+    @staticmethod
+    @abc.abstractmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
 
-    @abc.abstractstaticmethod
+    @staticmethod
+    @abc.abstractmethod
     def get_new_thread_object() -> threading.Thread:
         """Return a new thread object that is to be started."""
 
-    @abc.abstractstaticmethod
+    @staticmethod
+    @abc.abstractmethod
     def main(headless: bool = False) -> None:
         """Main entrypoint of the thread. In headless mode, 
         don't write to log files but print to console."""
