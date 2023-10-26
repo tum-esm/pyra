@@ -16,6 +16,14 @@ def test_command_group() -> None:
     pass
 
 
+@test_command_group.command(name="email")
+def _test_emailing() -> None:
+    """Send a test email."""
+    config = types.Config.load()
+    utils.ExceptionEmailClient.send_test_email(config)
+    _print_green("Successfully sent test email.")
+
+
 @test_command_group.command(name="upload")
 def _test_uploading() -> None:
     """try to connect to upload server."""
