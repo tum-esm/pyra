@@ -1,0 +1,59 @@
+---
+hide_table_of_contents: true
+---
+
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/activity_history.py#L0" className="SourceCodeLinkBadge">source code</a>
+
+# <kbd>module</kbd> `core.interfaces.activity_history`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/activity_history.py#L38" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `ActivityHistoryInterface`
+Logging the system activity every minute to  `logs/activity/activity-YYYY-MM-DD.json` to plot it in the UI. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/activity_history.py#L47" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `add_datapoint`
+
+```python
+add_datapoint(
+    is_measuring: 'Optional[bool]' = None,
+    has_errors: 'Optional[bool]' = None,
+    is_uploading: 'Optional[bool]' = None,
+    camtracker_startups: 'Optional[int]' = None,
+    opus_startups: 'Optional[int]' = None,
+    cli_calls: 'Optional[int]' = None
+) → None
+```
+
+Add a new activity datapoint. When this function is called multiple times in the same minute, the datapoints are aggregated into one datapoint per minute. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/activity_history.py#L123" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `dump_current_activity_history`
+
+```python
+dump_current_activity_history() → None
+```
+
+
+
+
+
+

@@ -12,39 +12,178 @@ hide_table_of_contents: true
 
 
 
+
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L461" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L16" className="SourceCodeLinkBadge">source code</a>
 
-## <kbd>function</kbd> `validate_config_dict`
+## <kbd>class</kbd> `StrictFilePath`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L19" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>classmethod</kbd> `path_should_exist`
 
 ```python
-validate_config_dict(
-    o: Any,
-    partial: bool = False,
-    skip_filepaths: bool = False
-) → None
+path_should_exist(v: 'str', info: 'ValidationInfo') → str
 ```
 
-Check, whether a given object is a correct ConfigDict Raises a pydantic.ValidationError if the object is invalid. 
 
-This should always be used when loading the object from a JSON file! 
+
+
 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L6" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L30" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `StrictDirectoryPath`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L33" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>classmethod</kbd> `path_should_exist`
+
+```python
+path_should_exist(v: 'str', info: 'ValidationInfo') → str
+```
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L44" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `StrictIPAdress`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L50" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `TimeDict`
-TypedDict: 
-
-```ts
-{
-     hour: int;
-     minute: int;
-     second: int;
-}
-``` 
 
 
 
@@ -52,10 +191,49 @@ TypedDict:
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L23" className="SourceCodeLinkBadge">source code</a>
+#### <kbd>property</kbd> model_computed_fields
 
-## <kbd>class</kbd> `TimeDictPartial`
-TypedDict: like `TimeDict`, but all fields are optional. 
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L55" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `as_datettime_time`
+
+```python
+as_datettime_time() → time
+```
+
 
 
 
@@ -63,115 +241,9 @@ TypedDict: like `TimeDict`, but all fields are optional.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L31" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L59" className="SourceCodeLinkBadge">source code</a>
 
-## <kbd>class</kbd> `ConfigSubDicts`
-Class that contains TypedDicts for sections of the config file. 
-
-
-
-
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L328" className="SourceCodeLinkBadge">source code</a>
-
-## <kbd>class</kbd> `ConfigDict`
-TypedDict: 
-
-```ts
-{
-     general: {
-         version: "4.0.8";
-         seconds_per_core_interval: float;
-         test_mode: bool;
-         station_id: str;
-         min_sun_elevation: float;
-     },
-     opus: {
-         em27_ip: str;
-         executable_path: str;
-         experiment_path: str;
-         macro_path: str;
-         username: str;
-         password: str;
-     },
-     camtracker: {
-         config_path: str;
-         executable_path: str;
-         learn_az_elev_path: str;
-         sun_intensity_path: str;
-         motor_offset_threshold: float;
-     },
-     error_email: {
-         sender_address: str;
-         sender_password: str;
-         notify_recipients: bool;
-         recipients: str;
-     },
-     measurement_decision: {
-         mode: "automatic" | "manual" | "cli";
-         manual_decision_result: bool;
-         cli_decision_result: bool;
-     },
-     measurement_triggers: {
-         consider_time: bool;
-         consider_sun_elevation: bool;
-         consider_helios: bool;
-         start_time: {
-             hour: int;
-             minute: int;
-             second: int;
-         };
-         stop_time: {
-             hour: int;
-             minute: int;
-             second: int;
-         };
-         min_sun_elevation: float;
-     },
-     tum_plc: null | {
-         ip: str;
-         version: 1 | 2;
-         controlled_by_user: bool;
-     },
-     helios: null | {
-         camera_id: int;
-         evaluation_size: int;
-         seconds_per_interval: float;
-         edge_detection_threshold: float;
-         save_images: bool;
-     },
-     upload: null | {
-         host: str;
-         user: str;
-         password: str;
-         upload_ifgs: bool;
-         src_directory_ifgs: str;
-         dst_directory_ifgs: str;
-         remove_src_ifgs_after_upload: bool;
-         upload_helios: bool;
-         dst_directory_helios: str;
-         remove_src_helios_after_upload: bool;
-     },
-}
-``` 
-
-Or expressed using `ConfigSubDicts`: 
-
-```ts
-{
-     general: ConfigSubDicts.General;
-     opus: ConfigSubDicts.Opus;
-     camtracker: ConfigSubDicts.Camtracker;
-     error_email: ConfigSubDicts.ErrorEmail;
-     measurement_decision: ConfigSubDicts.MeasurementDecision;
-     measurement_triggers: ConfigSubDicts.MeasurementTriggers;
-     tum_plc: null | ConfigSubDicts.TumPlc;
-     helios: null | ConfigSubDicts.Helios;
-     upload: null | ConfigSubDicts.Upload;
-}
-``` 
+## <kbd>class</kbd> `PartialTimeDict`
 
 
 
@@ -179,10 +251,45 @@ Or expressed using `ConfigSubDicts`:
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L437" className="SourceCodeLinkBadge">source code</a>
+#### <kbd>property</kbd> model_computed_fields
 
-## <kbd>class</kbd> `ConfigDictPartial`
-TypedDict: like `ConfigDict`, but all fields are optional. 
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L65" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `GeneralConfig`
 
 
 
@@ -190,12 +297,1013 @@ TypedDict: like `ConfigDict`, but all fields are optional.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L451" className="SourceCodeLinkBadge">source code</a>
+#### <kbd>property</kbd> model_computed_fields
 
-## <kbd>class</kbd> `ValidationError`
-Will be raised in any custom checks on config dicts have failed: file-existence, ip-format, min/max-range 
-
+Get the computed fields of this model instance. 
 
 
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L73" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialGeneralConfig`
+Like `SubConfigGeneral`, but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L84" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `OpusConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L93" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialOpusConfig`
+Like `SubConfigOpus`, but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L104" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `CamtrackerConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L113" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialCamtrackerConfig`
+Like `SubConfigCamtracker` but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L124" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `ErrorEmailConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L134" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialErrorEmailConfig`
+Like `SubConfigErrorEmail` but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L146" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `MeasurementDecisionConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L152" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialMeasurementDecisionConfig`
+Like `SubConfigMeasurementDecision` but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L160" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `MeasurementTriggersConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L169" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialMeasurementTriggersConfig`
+Like `SubConfigMeasurementTriggers` but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L180" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `TumPlcConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L186" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialTumPlcConfig`
+Like `SubConfigTumPlc`, but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L194" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `HeliosConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L202" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialHeliosConfig`
+Like `SubConfigHelios`, but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L212" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `UploadStreamConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L222" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `UploadConfig`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L229" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialUploadConfig`
+Like `SubConfigUpload`, but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L238" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `Config`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L324" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `dump`
+
+```python
+dump(with_filelock: 'bool' = True) → None
+```
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L249" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `load`
+
+```python
+load(
+    config_object: 'Optional[str | dict[Any, Any]]' = None,
+    with_filelock: 'bool' = True,
+    ignore_path_existence: 'bool' = False
+) → Config
+```
+
+Load the config file. 
+
+
+
+**Args:**
+ 
+ - <b>`config_object`</b>:           If provided, the config file will be ignored and  the provided content will be used instead. Defaults  to None. 
+ - <b>`with_filelock`</b>:           If True, the config file will be locked  during loading. Defaults to True. 
+ - <b>`ignore_path_existence`</b>:   If True, the existence of the file and directory  paths used in the whole config file will not be  checked. Defaults to False. 
+
+Returns:  The loaded config object. 
+
+
+
+**Raises:**
+ 
+ - <b>`ValueError`</b>:   If the config file is invalid. 
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L334" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PartialConfig`
+Like `ConfigDict`, but all fields are optional. 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L347" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `load`
+
+```python
+load(
+    config_object: 'str',
+    ignore_path_existence: 'bool' = False
+) → PartialConfig
+```
+
+Load a partial config file. 
+
+
+
+**Args:**
+ 
+ - <b>`config_object`</b>:           JSON string containing a partial config. 
+ - <b>`ignore_path_existence`</b>:   If True, the existence of the file and directory  paths used in the whole config file will not be  checked. Defaults to False. 
+
+Returns:  The loaded partial config object. 
+
+
+
+**Raises:**
+ 
+ - <b>`ValueError`</b>:   If the config file is invalid. 
 
 

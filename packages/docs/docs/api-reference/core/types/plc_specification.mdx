@@ -15,56 +15,322 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_specification.py#L48" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_specification.py#L5" className="SourceCodeLinkBadge">source code</a>
 
-## <kbd>class</kbd> `PlcSpecificationDict`
-TypedDict: 
+## <kbd>class</kbd> `PLCSpecificationActors`
 
-```ts
-{
-     actors: {
-         current_angle: number[],
-         fan_speed: number[],
-         move_cover: number[],
-         nominal_angle: number[]
-     },
-     control: {
-         auto_control: number[],
-         auto_temp_mode: number[],
-         manual_control: number[],
-         manual_temp_mode: number[],
-         reset: number[],
-         sync_to_tracker: number[]
-     },
-     sensors: {
-         angle: number[],
-         humidity: number[],
-         temperature: number[]
-     },
-     state: {
-         cover_closed: number[],
-         motor_failed: number[],
-         rain: number[],
-         reset_needed: number[],
-         ups_alert: number[]
-     },
-     power: {
-         camera: number[],
-         computer: number[],
-         heater: number[],
-         router: number[],
-         spectrometer: number[]
-     },
-     connections: {
-         camera: number[],
-         computer: number[],
-         heater: number[],
-         router: number[],
-         spectrometer: number[]
-     }
-}
-``` 
 
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_specification.py#L12" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCSpecificationControl`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_specification.py#L20" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCSpecificationSensors`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_specification.py#L25" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCSpecificationState`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_specification.py#L33" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCSpecificationPower`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_specification.py#L41" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCSpecificationConnections`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/plc_specification.py#L49" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCSpecification`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
 
 
 

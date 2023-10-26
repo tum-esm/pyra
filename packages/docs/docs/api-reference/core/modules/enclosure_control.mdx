@@ -15,17 +15,17 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L8" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L10" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `EnclosureControl`
 EnclosureControl allows to interact with TUM made weather protected enclosures that allow a 24/7 deployment of the FTIR spectrometer EM27/Sun in the field. The class takes the latest decision from `measurement_conditions.py` (StateInterface: measurements_should_be_running) and communicates with the enclosure's built in Siemens S7 PLC to read and write parameters to its database (PLCInterface). Additionally, it powers down the spectrometer during dusk to extend the overall spectrometer lifetime. During dawn, it powers up the spectrometer to prepare and warm it up for the next measurement day. At initialization, the PLC is set to control the ambient enclosure temperature in automatic mode. During flank changes of measurements_should_be_running it either tells the enclosure to open up the cover to allow direct sunlight to hit the CamTracker mirrors or close the cover to protect the instrument. Instrument protection from bad weather conditions is always prioritised over a slight maximization of measurement uptime. 
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L33" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L34" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
 ```python
-__init__(initial_config: ConfigDict)
+__init__(initial_config: Config)
 ```
 
 
@@ -37,7 +37,7 @@ __init__(initial_config: ConfigDict)
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L233" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L284" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `auto_set_power_spectrometer`
 
@@ -49,7 +49,7 @@ Shuts down spectrometer if the sun angle is too low. Starts up the spectrometer 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L195" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L244" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `force_cover_close`
 
@@ -61,7 +61,7 @@ Emergency option to call to ensure that the cover is closed immediately. Account
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L178" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L225" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `move_cover`
 
@@ -73,19 +73,35 @@ Moves the cover attached on top of the enclosure. The cover is moved by a electr
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L59" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L189" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `perform_camera_power_cycle`
+
+```python
+perform_camera_power_cycle() → None
+```
+
+Performs a power cycle of the camera every day at midnight: Turn off the camera power at midnight system time. Turn on the camera power two minutes later. 
+
+Exact logic: Whenever the time is between 00:00 and 00:15, and the last power down was on a different day or never logged (core has been stopped since last power cycle), power down the camera. Two minutes later, power up the camera. This works because this function should be run at least every 10 minutes (`config.general.seconds_per_core_interval` is <= 600). 
+
+It leads to multiple power cycles if the core is restarted between 00:00 and 00:15, but this doesn't break any hardware. The only way to circumvent this is adding it to the persistent state which is not worth it right now. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L64" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `run`
 
 ```python
-run(new_config: ConfigDict) → None
+run(new_config: Config) → None
 ```
 
 Called in every cycle of the main loop. Updates enclosure state based on the current automation status. 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L252" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L305" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `sync_cover_to_measurement_status`
 
@@ -97,7 +113,7 @@ Checks for flank changes in parameter measurement_should_be_running. Positive fl
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L276" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L329" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `verify_cover_position`
 
@@ -111,7 +127,7 @@ This functions allows to detect desync caused by previous user controlled decisi
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L288" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L342" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `verify_cover_sync`
 
@@ -125,7 +141,7 @@ This functions allows to detect desync caused by previous user controlled decisi
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L213" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/enclosure_control.py#L262" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `wait_for_cover_closing`
 

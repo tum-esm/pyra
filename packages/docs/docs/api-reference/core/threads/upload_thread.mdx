@@ -15,132 +15,31 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L28" className="SourceCodeLinkBadge">source code</a>
-
-## <kbd>class</kbd> `InvalidUploadState`
-
-
-
-
-
-
-
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L32" className="SourceCodeLinkBadge">source code</a>
-
-## <kbd>class</kbd> `DirectoryUploadClient`
-This is the client that is concerned with uploading one specific directory. run() will perform the actual upload process. 
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L38" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `__init__`
-
-```python
-__init__(
-    date_string: str,
-    src_path: str,
-    dst_path: str,
-    remove_files_after_upload: bool,
-    connection: Connection,
-    transfer_process: Transfer
-) → None
-```
-
-
-
-
-
-
-
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L262" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `get_directories_to_be_uploaded`
-
-```python
-get_directories_to_be_uploaded(data_path: str) → list[str]
-```
-
-
-
-
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L172" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `run`
-
-```python
-run() → None
-```
-
-Perform the whole upload process for a given directory. 
-
-1. If the respective remote directory doesn't exist, create it 2. Download the current upload-meta.json file from the server 3. Determine which files have not been uploaded yet 4. Upload every file that is found locally but not in the remote  meta. Update the remote meta every 25 uploaded files (reduces  load and traffic). 5. Test whether the checksums of "ifgs on server" and "local ifgs"  are equal, raise an exception (and end the function) if the differ 6. Indicate that the upload process is complete in remote meta 7. Optionally remove local ifgs 
-
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L276" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L8" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `UploadThread`
-Thread for uploading all interferograms from a specific directory to a server via SSH. 
+Thread for uploading data to a server via SCP. 
 
-The local files will only be removed (optional) if the files on the server generate the same MD5 checksum as the local files. 
-
-The source directory where OPUS puts the interferograms can be configured with config.upload.src_directory_ifgs. OPUS's output directory should be configured inside the macro file. 
-
-The expected file structure looks like this: 
-
-```
-📁 srcdir/dstdir
-     📁 YYYYMMDD
-         📄 filename1
-         📄 filename2
-     📁 YYYYMMDD
-         📄 filename1
-         📄 filename2
-     📁 ...
-``` 
-
-Each YYYYMMDD folder will be uploaded independently. During its upload the process will store its progress inside a file "YYYYMMDD/upload-meta.json" (locally and remotely). 
-
-The upload-meta.json file looks like this: 
-
-```json
-{
-     "complete": bool,
-     "fileList": [filename1, filename2, ...],
-     "createdTime": float,
-     "lastModifiedTime": float
-}
-``` 
-
-This function only does one loop in headless mode. 
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L320" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `__init__`
-
-```python
-__init__(config: ConfigDict) → None
-```
-
-
-
-
+See https://github.com/dostuffthatmatters/circadian-scp-upload for a description of how this is implemented. 
 
 
 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L351" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L23" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `get_new_thread_object`
+
+```python
+get_new_thread_object() → Thread
+```
+
+Return a new thread object that is to be started. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L28" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `main`
 
@@ -148,32 +47,18 @@ __init__(config: ConfigDict) → None
 main(headless: bool = False) → None
 ```
 
-Main entrypoint of the thread 
-
-headless mode = don't write to log files, print to console 
+Main entrypoint of the thread. In headless mode,  don't write to log files but print to console. 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L326" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L13" className="SourceCodeLinkBadge">source code</a>
 
-### <kbd>method</kbd> `update_thread_state`
-
-```python
-update_thread_state(new_config: ConfigDict) → None
-```
-
-Make sure that the thread loop is (not) running, based on config.upload 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/upload_thread.py#L397" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `upload_all_files`
+### <kbd>method</kbd> `should_be_running`
 
 ```python
-upload_all_files(config: ConfigDict) → bool
+should_be_running(config: Config) → bool
 ```
 
-Returns True if all file uploads have been finished. Returns False if the config has change during upload -> restart with new parameters. 
+Based on the config, should the thread be running or not? 
 
 

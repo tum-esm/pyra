@@ -12,41 +12,58 @@ hide_table_of_contents: true
 
 
 
+
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L46" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L6" className="SourceCodeLinkBadge">source code</a>
 
-## <kbd>function</kbd> `validate_state_dict`
+## <kbd>class</kbd> `OperatingSystemState`
 
-```python
-validate_state_dict(o: Any, partial: bool = False) → None
-```
 
-Check, whether a given object is a correct StateDict Raises a pydantic.ValidationError if the object is invalid. 
 
-This should always be used when loading the object from a JSON file! 
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
 
 
 ---
 
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L13" className="SourceCodeLinkBadge">source code</a>
 
-## <kbd>class</kbd> `StateDict`
-TypedDict: 
-
-```ts
-{
-     helios_indicates_good_conditions: boolean | null,
-     measurements_should_be_running: boolean,
-     enclosure_plc_readings: PlcStateDict,
-     os_state: {
-         cpu_usage: number[] | null,
-         memory_usage: number | null,
-         last_boot_time: string | null,
-         filled_disk_space_fraction: number | null
-     }
-}
-``` 
+## <kbd>class</kbd> `PLCStateActors`
 
 
 
@@ -54,11 +71,358 @@ TypedDict:
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L37" className="SourceCodeLinkBadge">source code</a>
+#### <kbd>property</kbd> model_computed_fields
 
-## <kbd>class</kbd> `StateDictPartial`
-TypedDict: like `StateDict`, but all fields are optional. 
+Get the computed fields of this model instance. 
 
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L18" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCStateControl`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L25" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCStateSensors`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L30" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCStateState`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L38" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCStatePower`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L46" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCStateConnections`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L54" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `PLCState`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/state.py#L66" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `StateObject`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
 
 
 

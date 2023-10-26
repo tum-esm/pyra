@@ -15,7 +15,7 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/system_checks.py#L6" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/system_checks.py#L7" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `SystemChecks`
 SystemChecks interacts with the present Operating System through `OSInterface`. It checks and logs important parameters (CPU, memory, disk space) to give insight into the overall system stability. It raises custom errors when the disk runs out of storage or the energy supply is not ensured. SystemChecks writes the latest readout into StateInterface. 
@@ -25,7 +25,7 @@ SystemChecks interacts with the present Operating System through `OSInterface`. 
 ### <kbd>method</kbd> `__init__`
 
 ```python
-__init__(initial_config: ConfigDict)
+__init__(initial_config: Config)
 ```
 
 
@@ -42,7 +42,7 @@ __init__(initial_config: ConfigDict)
 ### <kbd>method</kbd> `run`
 
 ```python
-run(new_config: ConfigDict) → None
+run(new_config: Config) → None
 ```
 
 

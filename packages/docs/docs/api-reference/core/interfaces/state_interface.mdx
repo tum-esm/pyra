@@ -15,118 +15,70 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L75" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L18" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `StateInterface`
-Use JSON files to communicate state between different parts of Pyra Core, and between Core and CLI/UI. 
 
-The `runtime-data/state.json` file will be cleared with every restart of PYRA Core. The `logs/persistent-state.json` will only be created, when it does not exist yet. 
 
-`runtime-data/state.json`: 
 
-```json
-{
-     "helios_indicates_good_conditions": ...,
-     "measurements_should_be_running": ...,
-     "enclosure_plc_readings": {...},
-     "os_state": {...}
-}
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/.venv/lib/python3.10/site-packages/tum_esm_utils/decorators.py#L19" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `load_state`
+
+```python
+load_state() → StateObject
+```
+
+Load the state from the state file. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/.venv/lib/python3.10/site-packages/tum_esm_utils/decorators.py#L38" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `update_state`
+
+```python
+update_state(
+    helios_indicates_good_conditions: "Optional[Literal['yes', 'no', 'inconclusive']]" = None,
+    measurements_should_be_running: 'Optional[bool]' = None,
+    plc_state: 'Optional[PLCState]' = None,
+    operating_system_state: 'Optional[OperatingSystemState]' = None,
+    current_exceptions: 'Optional[list[str]]' = None,
+    upload_is_running: 'Optional[bool]' = None,
+    enforce_none_values: 'bool' = False
+) → None
+```
+
+Update the state file. Values that are not explicitly set will not be changed in the state file. Only if `enforce_none_values` is set to `True`, all values not explicitly set will be set to `None`. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/core/interfaces/state_interface/update_state_in_context#L83" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `update_state_in_context`
+
+```python
+update_state_in_context() → Generator[StateObject, None, None]
+```
+
+Update the state file in a context manager. 
+
+
+
+**Example:**
+ 
+
+```python
+with interfaces.StateInterface.update_state_in_context() as state:
+     state.helios_indicates_good_conditions = "yes"
 ``` 
 
-`logs/persistent-state.json`: 
-
-```json
-{
-     "active_opus_macro_id": ...,
-     "current_exceptions": []
-}
-``` 
-
-
-
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/.venv/lib/python3.10/site-packages/tum_esm_utils/decorators.py#L103" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `initialize`
-
-```python
-initialize() → None
-```
-
-Clear `state.json`, create empty `prersistent-state.json` if it does not exist yet. 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/.venv/lib/python3.10/site-packages/tum_esm_utils/decorators.py#L126" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `read`
-
-```python
-read() → StateDict
-```
-
-Read the state file and return its content 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/.venv/lib/python3.10/site-packages/tum_esm_utils/decorators.py#L149" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `read_persistent`
-
-```python
-read_persistent() → PersistentStateDict
-```
-
-Read the persistent state file and return its content 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L158" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `read_persistent_without_filelock`
-
-```python
-read_persistent_without_filelock() → PersistentStateDict
-```
-
-Read the persistent state file and return its content 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/state_interface.py#L135" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `read_without_filelock`
-
-```python
-read_without_filelock() → StateDict
-```
-
-Read the state file and return its content 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/.venv/lib/python3.10/site-packages/tum_esm_utils/decorators.py#L172" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `update`
-
-```python
-update(update: StateDictPartial) → None
-```
-
-Update the (persistent) state file and return its content. The update object should only include the properties to be changed in contrast to containing the whole file. 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/.venv/lib/python3.10/site-packages/tum_esm_utils/decorators.py#L187" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `update_persistent`
-
-```python
-update_persistent(update: PersistentStateDictPartial) → None
-```
-
-Update the (persistent) state file and return its content. The update object should only include the properties to be changed in contrast to containing the whole file. 
+The file will be locked correctly, so that no other process can interfere with the state file and the state 
 
 

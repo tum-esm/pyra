@@ -1,0 +1,84 @@
+---
+hide_table_of_contents: true
+---
+
+<!-- markdownlint-disable -->
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/abstract_thread.py#L0" className="SourceCodeLinkBadge">source code</a>
+
+# <kbd>module</kbd> `core.threads.abstract_thread`
+
+
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/abstract_thread.py#L9" className="SourceCodeLinkBadge">source code</a>
+
+## <kbd>class</kbd> `AbstractThread`
+Abstract base class for all threads 
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/abstract_thread.py#L11" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `__init__`
+
+```python
+__init__(config: Config) → None
+```
+
+Initialize the thread instance. This does not start the thread but only initializes the instance that triggers the thread to start and stop correctly. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/abstract_thread.py#L55" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `get_new_thread_object`
+
+```python
+get_new_thread_object() → Thread
+```
+
+Return a new thread object that is to be started. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/abstract_thread.py#L60" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `main`
+
+```python
+main(headless: bool = False) → None
+```
+
+Main entrypoint of the thread. In headless mode,  don't write to log files but print to console. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/abstract_thread.py#L50" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `should_be_running`
+
+```python
+should_be_running(config: Config) → bool
+```
+
+Based on the config, should the thread be running or not? 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/abstract_thread.py#L26" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `update_thread_state`
+
+```python
+update_thread_state(new_config: Config) → None
+```
+
+Use `self.should_be_running` to determine if the thread should be running or not. If it should be running and it is not running, start the thread. If it should not be running and it is running, stop the thread. 
+
+

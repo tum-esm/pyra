@@ -15,7 +15,7 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/exception_email_client.py#L45" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/exception_email_client.py#L52" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `ExceptionEmailClient`
 Provide functionality to send emails when an exception occurs/is resolved. 
@@ -25,26 +25,38 @@ Provide functionality to send emails when an exception occurs/is resolved.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/exception_email_client.py#L114" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/exception_email_client.py#L137" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `handle_occured_exception`
 
 ```python
-handle_occured_exception(config: ConfigDict, exception: Exception) → None
+handle_occured_exception(config: Config, exception: Exception) → None
 ```
 
 Send out an email that a new exception has occured. 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/exception_email_client.py#L77" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/exception_email_client.py#L104" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `handle_resolved_exception`
 
 ```python
-handle_resolved_exception(config: ConfigDict) → None
+handle_resolved_exception(config: Config) → None
 ```
 
 Send out an email that all exceptions have been resolved. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/exception_email_client.py#L174" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `send_test_email`
+
+```python
+send_test_email(config: Config) → None
+```
+
+Send out a test email. 
 
 

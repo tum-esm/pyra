@@ -27,46 +27,46 @@ See https://pyra.esm.ei.tum.de/docs/user-guide/tum-plc-and-helios#what-does-heli
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L126" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L134" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `add_markings_to_image`
 
 ```python
 add_markings_to_image(
-    img: Mat,
+    img: ndarray[Any, Any],
     edge_fraction: float,
     circle_cx: int,
     circle_cy: int,
     circle_r: int
-) → Mat
+) → ndarray[Any, Any]
 ```
 
 Put text for edge fraction and mark circles in image. 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L141" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L153" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `add_text_to_image`
 
 ```python
 add_text_to_image(
-    img: Mat,
+    img: ndarray[Any, Any],
     text: str,
     color: tuple[int, int, int] = (200, 0, 0)
-) → Mat
+) → ndarray[Any, Any]
 ```
 
 Put some text on the bottom left of an image 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L160" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L172" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_edge_fraction`
 
 ```python
-get_edge_fraction(frame: Mat, save_image: bool = False) → float
+get_edge_fraction(frame: ndarray[Any, Any], save_image: bool = False) → float
 ```
 
 For a given frame determine the number of "edge pixels" with respect to the inner 90% of the lense diameter and the "status". The status is 1 when the edge pixels are above the given threshold and 0 otherwise. 

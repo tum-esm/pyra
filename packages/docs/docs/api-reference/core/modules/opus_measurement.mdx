@@ -15,7 +15,7 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L19" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L17" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `OpusMeasurement`
 OPUS Measurements manages the FTIR spectrometer measurement software OPUS. It allows to remotely communicate with OPUS via a DDE connection and trigger different commands. 
@@ -26,12 +26,12 @@ During the day it makes sure that OPUS up and running and reloads the latest exp
 
 OPUSMeasurement will start and stop Macros according to the current value of StateInterface: measurements_should_be_running. 
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L37" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L34" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
 ```python
-__init__(initial_config: ConfigDict)
+__init__(initial_config: Config)
 ```
 
 
@@ -108,12 +108,12 @@ Checks if OPUS is already running by identifying the window.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L80" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L77" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `run`
 
 ```python
-run(new_config: ConfigDict) → None
+run(new_config: Config) → None
 ```
 
 Called in every cycle of the main loop. Starts and stops OPUS.exe based on the present sun angle. Reads StateInterface: measurements_should_be_running and starts and stops the OPUS macro. 
@@ -168,7 +168,7 @@ Checks defined sun angle in config. Closes OPUS at the end of the day to start u
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L367" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/opus_measurement.py#L364" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `test_setup`
 
