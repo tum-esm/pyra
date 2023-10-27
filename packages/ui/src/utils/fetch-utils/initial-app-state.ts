@@ -51,7 +51,7 @@ async function initialAppState(
     }
 
     const result3 = await backend.checkPyraCoreState();
-    if (!result3.stdout.includes('pyra-core is running with PID')) {
+    if (!result3.stdout.includes('pyra-core is running with process ID')) {
         setPyraCorePid(-1);
         setBackendIntegrity('pyra-core is not running');
         return;

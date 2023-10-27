@@ -1,116 +1,73 @@
 import { create } from 'zustand';
 import { z } from 'zod';
-import moment from 'moment';
+import { groupBy, sumBy } from 'lodash';
+
+export const ACTIVITY_BUCKETS_PER_HOUR = 4;
 
 export const activityHistorySchema = z.array(
-    z.object({
-        localTime: z.string(),
-        event: z.enum([
-            'start-core',
-            'stop-core',
-            'start-measurements',
-            'stop-measurements',
-            'error-occured',
-            'errors-resolved',
-        ]),
-    })
+    z
+        .object({
+            local_time: z.string(),
+            is_measuring: z.boolean(),
+            has_errors: z.boolean(),
+            is_uploading: z.boolean(),
+            camtracker_startups: z.number(),
+            opus_startups: z.number(),
+            cli_calls: z.number(),
+        })
+        .transform((data) => ({
+            localTime: data.local_time,
+            isMeasuring: data.is_measuring,
+            hasErrors: data.has_errors,
+            isUploading: data.is_uploading,
+            camtrackerStartups: data.camtracker_startups,
+            opusStartups: data.opus_startups,
+            cliCalls: data.cli_calls,
+        }))
 );
-
-const activityHistoryExample = {
-    localTime: '15:00:00',
-    running: true,
-    measuring: false,
-    error: false,
-};
 
 export type ActivityHistory = z.infer<typeof activityHistorySchema>;
 
 export type ActivitySection = {
-    from: string;
-    to: string;
+    from_hour: number;
+    to_hour: number;
+    isRunning: number;
+    isMeasuring: number;
+    hasErrors: number;
+    isUploading: number;
+    camtrackerStartups: number;
+    opusStartups: number;
+    cliCalls: number;
 };
 
-export function parseActivityHistory(
-    activityHistory: ActivityHistory,
-    measurementsAreRunning: boolean,
-    errorIsPresent: boolean
-): {
-    core: ActivitySection[];
-    measurements: ActivitySection[];
-    error: ActivitySection[];
-} {
-    /*
-    This function parses the activity logs in reverse. The current state
-    can be read from the current log lines (whether measurements should be
-    running and/or an error is present).
-
-    measurementsAreRunning and errorIsPresent is determined from the current
-    log lines.
-    */
-
-    const now = moment();
-
-    let coreEndTime: moment.Moment | undefined = now;
-    let measurementsEndTime: moment.Moment | undefined = measurementsAreRunning ? now : undefined;
-    let errorEndTime: moment.Moment | undefined = errorIsPresent ? now : undefined;
-
-    let coreHistory: ActivitySection[] = [];
-    let measurementsHistory: ActivitySection[] = [];
-    let errorHistory: ActivitySection[] = [];
-
-    const reversedActivityHistory: ActivityHistory = JSON.parse(
-        JSON.stringify(activityHistory)
-    ).reverse();
-
-    reversedActivityHistory.forEach((a) => {
-        if (a.event === 'start-core' && coreEndTime !== undefined) {
-            coreHistory.push({ from: a.localTime, to: coreEndTime.format('HH:mm:ss') });
-            coreEndTime = undefined;
-            measurementsEndTime = undefined;
-        }
-
-        if (a.event === 'start-measurements') {
-            // if I have already seen an unpaired "stop-measurements"
-            if (measurementsEndTime !== undefined) {
-                measurementsHistory.push({
-                    from: a.localTime,
-                    to: measurementsEndTime.format('HH:mm:ss'),
-                });
-            } else if (coreEndTime !== undefined) {
-                measurementsHistory.push({
-                    from: a.localTime,
-                    to: coreEndTime.format('HH:mm:ss'),
-                });
-            }
-            measurementsEndTime = undefined;
-        }
-
-        if (a.event === 'error-occured' && errorEndTime !== undefined) {
-            errorHistory.push({ from: a.localTime, to: errorEndTime.format('HH:mm:ss') });
-            errorEndTime = undefined;
-        }
-
-        if (a.event === 'stop-core') {
-            coreEndTime = moment(a.localTime, 'HH:mm:ss');
-        }
-        if (a.event === 'stop-measurements') {
-            measurementsEndTime = moment(a.localTime, 'HH:mm:ss');
-        }
-        if (a.event === 'errors-resolved') {
-            errorEndTime = moment(a.localTime, 'HH:mm:ss');
-        }
+export function parseActivityHistory(activityHistory: ActivityHistory): ActivitySection[] {
+    const groupedBySection = groupBy(activityHistory, (ah) => {
+        const hour = parseInt(ah.localTime.split(':')[0]);
+        const minute = parseInt(ah.localTime.split(':')[1]);
+        return (
+            hour + Math.floor((minute / 60) * ACTIVITY_BUCKETS_PER_HOUR) / ACTIVITY_BUCKETS_PER_HOUR
+        );
     });
-
-    return { core: coreHistory, measurements: measurementsHistory, error: errorHistory };
+    return Object.entries(groupedBySection).map(([key, value]) => ({
+        from_hour: parseFloat(key),
+        to_hour: parseFloat(key) + 1 / ACTIVITY_BUCKETS_PER_HOUR,
+        isRunning: value.length,
+        isMeasuring: sumBy(value, 'isMeasuring'),
+        hasErrors: sumBy(value, 'hasErrors'),
+        isUploading: sumBy(value, 'isUploading'),
+        camtrackerStartups: sumBy(value, 'camtrackerStartups'),
+        opusStartups: sumBy(value, 'opusStartups'),
+        cliCalls: sumBy(value, 'cliCalls'),
+    }));
 }
 
 interface ActivityHistoryState {
-    activityHistory: ActivityHistory | undefined;
+    activitySections: ActivitySection[] | undefined;
     setActivityHistory: (ah: any) => void;
 }
 
 export const useActivityHistoryStore = create<ActivityHistoryState>()((set) => ({
-    activityHistory: undefined,
+    activitySections: undefined,
     setActivityHistory: (ah: any) =>
-        set(() => ({ activityHistory: activityHistorySchema.parse(ah) })),
+        set(() => ({ activitySections: parseActivityHistory(activityHistorySchema.parse(ah)) })),
 }));
