@@ -5,21 +5,8 @@ export namespace customTypes {
         isDiffering: boolean | undefined;
         errorMessage: string | undefined;
     };
-    export type reduxStateLogs = {
-        infoLines: string[] | undefined;
-        debugLines: string[] | undefined;
-        fetchUpdates: boolean;
-        renderedLogScope: string;
-    };
-    export type reduxStateCoreState = { body: coreState | undefined };
-    export type reduxStateCoreProcess = {
-        pid: number | undefined;
-    };
     export type reduxState = {
         config: reduxStateConfig;
-        logs: reduxStateLogs;
-        coreState: reduxStateCoreState;
-        coreProcess: reduxStateCoreProcess;
     };
     export type intArray3 = [number, number, number];
     export type intArray4 = [number, number, number, number];
@@ -168,102 +155,5 @@ export namespace customTypes {
             dst_directory_helios?: string;
             remove_src_helios_after_upload?: boolean;
         };
-    };
-
-    export type enclosurePlcReadings = {
-        last_read_time: string | null;
-        actors: {
-            fan_speed: number | null;
-            current_angle: number | null;
-        };
-        control: {
-            auto_temp_mode: boolean | null;
-            manual_control: boolean | null;
-            manual_temp_mode: boolean | null;
-            sync_to_tracker: boolean | null;
-        };
-        sensors: {
-            humidity: number | null;
-            temperature: number | null;
-        };
-        state: {
-            cover_closed: boolean | null;
-            motor_failed: boolean | null;
-            rain: boolean | null;
-            reset_needed: boolean | null;
-            ups_alert: boolean | null;
-        };
-        power: {
-            camera: boolean | null;
-            computer: boolean | null;
-            heater: boolean | null;
-            router: boolean | null;
-            spectrometer: boolean | null;
-        };
-        connections: {
-            camera: boolean | null;
-            computer: boolean | null;
-            heater: boolean | null;
-            router: boolean | null;
-            spectrometer: boolean | null;
-        };
-    };
-
-    export type partialEnclosurePlcReadings = {
-        last_read_time?: string;
-        actors?: {
-            fan_speed?: number;
-            current_angle?: number;
-        };
-        control?: {
-            auto_temp_mode?: boolean;
-            manual_control?: boolean;
-            manual_temp_mode?: boolean;
-            sync_to_tracker?: boolean;
-        };
-        sensors?: {
-            humidity?: number;
-            temperature?: number;
-        };
-        state?: {
-            cover_closed?: boolean;
-            motor_failed?: boolean;
-            rain?: boolean;
-            reset_needed?: boolean;
-            ups_alert?: boolean;
-        };
-        power?: {
-            camera?: boolean;
-            computer?: boolean;
-            heater?: boolean;
-            router?: boolean;
-            spectrometer?: boolean;
-        };
-        connections?: {
-            camera?: boolean;
-            computer?: boolean;
-            heater?: boolean;
-            router?: boolean;
-            spectrometer?: boolean;
-        };
-    };
-
-    export type OSState = {
-        cpu_usage: number | null;
-        memory_usage: number | null;
-        last_boot_time: string | null;
-        filled_disk_space_fraction: number | null;
-    };
-
-    export type coreState = {
-        helios_indicates_good_conditions: boolean | null;
-        measurements_should_be_running: boolean;
-        enclosure_plc_readings: enclosurePlcReadings;
-        os_state: OSState;
-    };
-
-    export type partialCoreState = {
-        measurements_should_be_running?: boolean;
-        enclosure_plc_readings?: partialEnclosurePlcReadings;
     };
 }
