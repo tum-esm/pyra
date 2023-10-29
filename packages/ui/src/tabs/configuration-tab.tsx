@@ -15,6 +15,7 @@ import {
     IconSunFilled,
     TablerIconsProps,
 } from '@tabler/icons-react';
+import { Button } from '../components/ui/button';
 
 const sections: {
     key: customTypes.configSectionKey;
@@ -92,6 +93,17 @@ export default function ConfigurationTab() {
         }
     }
 
+    function copyConfigFile() {
+        if (configIsDiffering) {
+            toast.error('Please save your changes before copying the config file');
+        } else if (centralConfig !== undefined) {
+            navigator.clipboard.writeText(JSON.stringify(centralConfig, null, 4));
+            toast.success('Copied config.json to clipboard');
+        } else {
+            toast.error('Could not copy config.json to clipboard');
+        }
+    }
+
     const SectionButton = (props: {
         section: {
             key: customTypes.configSectionKey;
@@ -142,6 +154,11 @@ export default function ConfigurationTab() {
                 {hardwareSections.map((section) => (
                     <SectionButton key={section.key} section={section} />
                 ))}
+                <div className="flex-grow" />
+
+                <Button className="mx-2 my-1" onClick={copyConfigFile}>
+                    Copy config.json
+                </Button>
             </div>
             <div className={'z-0 flex-grow h-full p-6 overflow-y-auto relative pb-20'}>
                 {/*{activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
