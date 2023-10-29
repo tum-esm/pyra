@@ -7,6 +7,18 @@ import { IconPower } from '@tabler/icons-react';
 export default function PyraCoreStatus() {
     const { pyraCorePid, setPyraCorePid } = usePyraCoreStore();
 
+    async function startPyraCore(): Promise<void> {
+        setPyraCorePid(undefined);
+        toast.promise(fetchUtils.backend.stopPyraCore(), {
+            loading: 'starting Pyra Core',
+            success: (p) => {
+                setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
+                return 'Pyra Core has been started';
+            },
+            error: (e) => `Error while starting Pyra Core: ${e}`,
+        });
+    }
+
     async function stopPyraCore() {
         setPyraCorePid(undefined);
         toast.promise(fetchUtils.backend.stopPyraCore(), {
@@ -15,36 +27,50 @@ export default function PyraCoreStatus() {
                 setPyraCorePid(-1);
                 return 'Pyra Core has been stopped';
             },
-            error: 'Error while stopping Pyra Core',
+            error: (e) => `Error while stopping Pyra Core: ${e}`,
         });
     }
-
-    const pid = pyraCorePid === -1 ? undefined : pyraCorePid;
 
     return (
         <div
             className={
-                'w-full text-sm flex flex-row items-center justify-center gap-x-2 px-4 py-2 bg-green-300 text-green-800'
+                'w-full text-sm flex flex-row items-center justify-center gap-x-2 px-4 py-2 ' +
+                (pyraCorePid === undefined
+                    ? 'bg-slate-300 text-slate-950'
+                    : pyraCorePid === -1
+                    ? 'bg-red-300 text-red-950'
+                    : 'bg-green-300 text-green-950')
             }
         >
             <div>
-                <span className="ml-2.5 mr-1">
-                    <strong className="font-semibold text-green-950">Pyra Core</strong> is
-                </span>
-                {pid === undefined && (
-                    <span className="font-semibold text-green-950">not running</span>
+                {pyraCorePid === undefined && 'loading'}
+                {pyraCorePid === -1 && (
+                    <span>
+                        Pyra Core is
+                        <strong className="font-semibold">not running</strong>
+                    </span>
                 )}
-                {pid !== undefined && (
-                    <>
-                        running with process ID{' '}
-                        <span className="font-medium text-green-950">{pid}</span>
-                    </>
+                {pyraCorePid !== undefined && pyraCorePid !== -1 && (
+                    <span>
+                        Pyra Core is
+                        <strong className="font-semibold">running</strong> with process ID{' '}
+                        {pyraCorePid}
+                    </span>
                 )}
             </div>
             <div className="flex-grow" />
-            <Button onClick={stopPyraCore} className="bg-green-900 hover:bg-green-700">
-                <IconPower size={18} />
-            </Button>
+            {pyraCorePid !== undefined && (
+                <Button
+                    onClick={pyraCorePid === -1 ? startPyraCore : stopPyraCore}
+                    className={
+                        pyraCorePid === -1
+                            ? 'bg-red-900 hover:bg-red-700'
+                            : 'bg-green-900 hover:bg-green-700'
+                    }
+                >
+                    <IconPower size={18} />
+                </Button>
+            )}
         </div>
     );
 }
