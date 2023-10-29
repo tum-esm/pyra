@@ -1,13 +1,13 @@
 import toast from 'react-hot-toast';
 import { fetchUtils } from '../../utils';
-import { usePyraCoreStore } from '../../utils/zustand-utils/core-state-zustand';
+import { useCoreProcessStore } from '../../utils/zustand-utils/core-process-zustand';
 import { Button } from '../ui/button';
 import { IconPower } from '@tabler/icons-react';
 import { useEffect } from 'react';
 import { ChildProcess } from '@tauri-apps/api/shell';
 
 export default function PyraCoreStatus() {
-    const { pyraCorePid, setPyraCorePid } = usePyraCoreStore();
+    const { pyraCorePid, setPyraCorePid } = useCoreProcessStore();
 
     useEffect(() => {
         toast.promise(fetchUtils.backend.checkPyraCoreState(), {

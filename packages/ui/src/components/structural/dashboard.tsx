@@ -2,60 +2,52 @@ import { useEffect, useState } from 'react';
 import { fetchUtils, reduxUtils } from '../../utils';
 import { OverviewTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
 import { structuralComponents } from '../../components';
-import { customTypes } from '../../custom-types';
-import { diff } from 'deep-diff';
-import { dialog } from '@tauri-apps/api';
 import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zustand';
-import { usePyraCoreStore } from '../../utils/zustand-utils/core-state-zustand';
+import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
 const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState<TabType>('Overview');
-    const [initialFetchTriggered, setInitialFetchTriggered] = useState(false);
 
-    const dispatch = reduxUtils.useTypedDispatch();
     const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
     const enclosureControlsIsVisible =
         centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
 
     const { setLogs } = useLogsStore();
     const { setActivityHistory } = useActivityHistoryStore();
-    const { setPyraCoreStateObject } = usePyraCoreStore();
+    const { setCoreState } = useCoreStateStore();
+
+    async function fetchStateFile() {
+        const fileContent = await fetchUtils.getFileContent('logs/state.json');
+        setCoreState(JSON.parse(fileContent));
+    }
+
+    async function fetchLogFile() {
+        const fileContent = await fetchUtils.getFileContent('logs/debug.log');
+        setLogs(fileContent.split('\n'));
+    }
+
+    async function fetchActivityFile() {
+        const filename = moment().format('YYYY-MM-DD');
+        try {
+            const fileContent = await fetchUtils.getFileContent(
+                `logs/activity/activity-${filename}.json`
+            );
+            setActivityHistory(JSON.parse(fileContent));
+        } catch (e) {
+            console.debug(`Could not load activity file: ${e}`);
+            setActivityHistory([]);
+        }
+    }
 
     useEffect(() => {
-        async function fetchStateFile() {
-            const fileContent = await fetchUtils.getFileContent('logs/state.json');
-            setPyraCoreStateObject(JSON.parse(fileContent));
-        }
-
-        async function fetchLogFile() {
-            const fileContent = await fetchUtils.getFileContent('logs/debug.log');
-            setLogs(fileContent.split('\n'));
-        }
-
-        async function fetchActivityFile() {
-            const filename = moment().format('YYYY-MM-DD');
-            try {
-                const fileContent = await fetchUtils.getFileContent(
-                    `logs/activity/activity-${filename}.json`
-                );
-                setActivityHistory(JSON.parse(fileContent));
-            } catch (e) {
-                console.debug(`Could not load activity file: ${e}`);
-                setActivityHistory([]);
-            }
-        }
-
-        if (!initialFetchTriggered) {
-            fetchStateFile();
-            fetchLogFile();
-            fetchActivityFile();
-            setInitialFetchTriggered(true);
-        }
+        fetchStateFile();
+        fetchLogFile();
+        fetchActivityFile();
 
         const interval1 = setInterval(fetchStateFile, 5000);
         const interval2 = setInterval(fetchLogFile, 5000);
@@ -66,9 +58,10 @@ export default function Dashboard() {
             clearInterval(interval2);
             clearInterval(interval3);
         };
-    }, [dispatch, initialFetchTriggered]);
+    }, []);
 
-    useEffect(() => {
+    // TODO: add again only updating the cli decision result
+    /*useEffect(() => {
         async function fetchConfigFile() {
             const fileContent = await fetchUtils.getFileContent('config/config.json');
             const newCentralConfig: customTypes.config = JSON.parse(fileContent);
@@ -105,7 +98,7 @@ export default function Dashboard() {
         return () => {
             clearInterval(interval3);
         };
-    }, [dispatch, centralConfig]);
+    }, [dispatch, centralConfig]);*/
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">

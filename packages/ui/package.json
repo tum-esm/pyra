@@ -22,7 +22,7 @@
         "moment": "^2.29.4",
         "react": "18.2.0",
         "react-dom": "18.2.0",
-        "react-hot-toast": "^2.2.0",
+        "react-hot-toast": "^2.4.1",
         "react-redux": "^8.0.2",
         "socket.io-client": "^4.5.1",
         "tailwind-merge": "^1.14.0",

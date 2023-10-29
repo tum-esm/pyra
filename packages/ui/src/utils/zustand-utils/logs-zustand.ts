@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface LogsState {
+interface LogsStore {
     allLogs: string[] | undefined;
     mainLogs: string[] | undefined;
     uploadLogs: string[] | undefined;
@@ -8,7 +8,7 @@ interface LogsState {
     setLogs: (allLogs: string[]) => void;
 }
 
-export const useLogsStore = create<LogsState>()((set) => ({
+export const useLogsStore = create<LogsStore>()((set) => ({
     allLogs: undefined,
     mainLogs: undefined,
     uploadLogs: undefined,

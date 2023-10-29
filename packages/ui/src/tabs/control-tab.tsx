@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { customTypes } from '../custom-types';
 import { ICONS } from '../assets';
 import toast from 'react-hot-toast';
-import { PyraCoreStateObject, usePyraCoreStore } from '../utils/zustand-utils/core-state-zustand';
+import { useCoreStateStore } from '../utils/zustand-utils/core-state-zustand';
 
 function renderBoolValue(value: boolean | null) {
     if (value === null) {
@@ -88,7 +88,7 @@ function VariableBlock(props: {
     );
 }
 export default function ControlTab() {
-    const { pyraCoreStateObject } = usePyraCoreStore();
+    const { coreState } = useCoreStateStore();
 
     const plcIsControlledByUser = reduxUtils.useTypedSelector(
         (s) => s.config.central?.tum_plc?.controlled_by_user
@@ -189,8 +189,8 @@ export default function ControlTab() {
     }
 
     async function toggleSyncToTracker() {
-        if (pyraCoreStateObject !== undefined) {
-            const newValue = !pyraCoreStateObject.plc_state.control.sync_to_tracker;
+        if (coreState !== undefined) {
+            const newValue = !coreState.plc_state.control.sync_to_tracker;
             await runPlcWriteCommand(
                 ['set-sync-to-tracker', JSON.stringify(newValue)],
                 setIsLoadingSyncTotracker,
@@ -202,8 +202,8 @@ export default function ControlTab() {
     }
 
     async function toggleAutoTemperature() {
-        if (pyraCoreStateObject !== undefined) {
-            const newValue = !pyraCoreStateObject.plc_state.control.auto_temp_mode;
+        if (coreState !== undefined) {
+            const newValue = !coreState.plc_state.control.auto_temp_mode;
             await runPlcWriteCommand(
                 ['set-auto-temperature', JSON.stringify(newValue)],
                 setIsLoadingAutoTemperature,
@@ -215,8 +215,8 @@ export default function ControlTab() {
     }
 
     async function togglePowerHeater() {
-        if (pyraCoreStateObject !== undefined) {
-            const newValue = !pyraCoreStateObject.plc_state.power.heater;
+        if (coreState !== undefined) {
+            const newValue = !coreState.plc_state.power.heater;
             await runPlcWriteCommand(
                 ['set-heater-power', JSON.stringify(newValue)],
                 setIsLoadingPowerHeater,
@@ -228,8 +228,8 @@ export default function ControlTab() {
     }
 
     async function togglePowerCamera() {
-        if (pyraCoreStateObject !== undefined) {
-            const newValue = !pyraCoreStateObject.plc_state.power.camera;
+        if (coreState !== undefined) {
+            const newValue = !coreState.plc_state.power.camera;
             await runPlcWriteCommand(
                 ['set-camera-power', JSON.stringify(newValue)],
                 setIsLoadingPowerCamera,
@@ -241,8 +241,8 @@ export default function ControlTab() {
     }
 
     async function togglePowerRouter() {
-        if (pyraCoreStateObject !== undefined) {
-            const newValue = !pyraCoreStateObject.plc_state.power.router;
+        if (coreState !== undefined) {
+            const newValue = !coreState.plc_state.power.router;
             await runPlcWriteCommand(
                 ['set-router-power', JSON.stringify(newValue)],
                 setIsLoadingPowerRouter,
@@ -254,8 +254,8 @@ export default function ControlTab() {
     }
 
     async function togglePowerSpectrometer() {
-        if (pyraCoreStateObject !== undefined) {
-            const newValue = !pyraCoreStateObject.plc_state.power.spectrometer;
+        if (coreState !== undefined) {
+            const newValue = !coreState.plc_state.power.spectrometer;
             await runPlcWriteCommand(
                 ['set-spectrometer-power', JSON.stringify(newValue)],
                 setIsLoadingPowerSpectrometer,
@@ -267,8 +267,8 @@ export default function ControlTab() {
     }
 
     async function togglePowerComputer() {
-        if (pyraCoreStateObject !== undefined) {
-            const newValue = !pyraCoreStateObject.plc_state.power.computer;
+        if (coreState !== undefined) {
+            const newValue = !coreState.plc_state.power.computer;
             await runPlcWriteCommand(
                 ['set-computer-power', JSON.stringify(newValue)],
                 setIsLoadingPowerComputer,
@@ -303,11 +303,11 @@ export default function ControlTab() {
                 <div className="flex-grow" />
                 <div className="px-2 py-0.5 text-sm text-green-100 bg-green-900 rounded shadow-sm">
                     Last PLC-read:{' '}
-                    {pyraCoreStateObject === undefined ||
-                    pyraCoreStateObject.plc_state.last_full_fetch === null ||
-                    pyraCoreStateObject.plc_state.last_full_fetch === undefined
+                    {coreState === undefined ||
+                    coreState.plc_state.last_full_fetch === null ||
+                    coreState.plc_state.last_full_fetch === undefined
                         ? '...'
-                        : pyraCoreStateObject?.plc_state.last_full_fetch}
+                        : coreState?.plc_state.last_full_fetch}
                 </div>
             </div>
             <div className="w-full h-px my-0 bg-gray-300" />
@@ -317,13 +317,13 @@ export default function ControlTab() {
                         No PLC connection when pyra is in test mode
                     </div>
                 )}
-                {!pyraIsInTestMode && pyraCoreStateObject === undefined && (
+                {!pyraIsInTestMode && coreState === undefined && (
                     <div className="flex-row-center gap-x-1.5">
                         <essentialComponents.Spinner />
                         loading PLC state
                     </div>
                 )}
-                {!pyraIsInTestMode && pyraCoreStateObject !== undefined && (
+                {!pyraIsInTestMode && coreState !== undefined && (
                     <>
                         <VariableBlock
                             label="Errors"
@@ -333,7 +333,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Reset needed',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.state.reset_needed
+                                            coreState.plc_state.state.reset_needed
                                         ),
                                     },
                                     action: {
@@ -346,16 +346,14 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Motor failed',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.state.motor_failed
+                                            coreState.plc_state.state.motor_failed
                                         ),
                                     },
                                 },
                                 {
                                     variable: {
                                         key: 'UPS alert',
-                                        value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.state.ups_alert
-                                        ),
+                                        value: renderBoolValue(coreState.plc_state.state.ups_alert),
                                     },
                                 },
                             ]}
@@ -369,7 +367,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Cover is closed',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.state.cover_closed
+                                            coreState.plc_state.state.cover_closed
                                         ),
                                     },
                                     action: {
@@ -381,9 +379,7 @@ export default function ControlTab() {
                                 {
                                     variable: {
                                         key: 'Rain detected',
-                                        value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.state.rain
-                                        ),
+                                        value: renderBoolValue(coreState.plc_state.state.rain),
                                     },
                                 },
                             ]}
@@ -397,7 +393,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Current cover angle',
                                         value: renderStringValue(
-                                            pyraCoreStateObject.plc_state.actors.current_angle,
+                                            coreState.plc_state.actors.current_angle,
                                             '°'
                                         ),
                                     },
@@ -406,8 +402,7 @@ export default function ControlTab() {
                                         callback: moveCover,
                                         spinner: isLoadingMoveCover,
                                         variant: 'numeric',
-                                        initialValue:
-                                            pyraCoreStateObject.plc_state.actors.current_angle || 0,
+                                        initialValue: coreState.plc_state.actors.current_angle || 0,
                                         postfix: '°',
                                     },
                                 },
@@ -415,11 +410,11 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Sync to CamTracker',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.control.sync_to_tracker
+                                            coreState.plc_state.control.sync_to_tracker
                                         ),
                                     },
                                     action: {
-                                        label: pyraCoreStateObject.plc_state.control.sync_to_tracker
+                                        label: coreState.plc_state.control.sync_to_tracker
                                             ? 'do not sync'
                                             : 'sync',
                                         callback: toggleSyncToTracker,
@@ -437,7 +432,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Temperature',
                                         value: renderStringValue(
-                                            pyraCoreStateObject.plc_state.sensors.temperature,
+                                            coreState.plc_state.sensors.temperature,
                                             ' °C'
                                         ),
                                     },
@@ -446,7 +441,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Humidity',
                                         value: renderStringValue(
-                                            pyraCoreStateObject.plc_state.sensors.humidity,
+                                            coreState.plc_state.sensors.humidity,
                                             '%'
                                         ),
                                     },
@@ -455,7 +450,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Fan Speed',
                                         value: renderStringValue(
-                                            pyraCoreStateObject.plc_state.actors.fan_speed,
+                                            coreState.plc_state.actors.fan_speed,
                                             '%'
                                         ),
                                     },
@@ -464,11 +459,11 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Auto temperature',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.control.auto_temp_mode
+                                            coreState.plc_state.control.auto_temp_mode
                                         ),
                                     },
                                     action: {
-                                        label: pyraCoreStateObject.plc_state.control.auto_temp_mode
+                                        label: coreState.plc_state.control.auto_temp_mode
                                             ? 'disable'
                                             : 'enable',
                                         callback: toggleAutoTemperature,
@@ -485,12 +480,10 @@ export default function ControlTab() {
                                 {
                                     variable: {
                                         key: 'Camera Power',
-                                        value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.power.camera
-                                        ),
+                                        value: renderBoolValue(coreState.plc_state.power.camera),
                                     },
                                     action: {
-                                        label: pyraCoreStateObject.plc_state.power.camera
+                                        label: coreState.plc_state.power.camera
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerCamera,
@@ -500,12 +493,10 @@ export default function ControlTab() {
                                 {
                                     variable: {
                                         key: 'Router Power',
-                                        value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.power.router
-                                        ),
+                                        value: renderBoolValue(coreState.plc_state.power.router),
                                     },
                                     action: {
-                                        label: pyraCoreStateObject.plc_state.power.router
+                                        label: coreState.plc_state.power.router
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerRouter,
@@ -516,11 +507,11 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Spectrometer Power',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.power.spectrometer
+                                            coreState.plc_state.power.spectrometer
                                         ),
                                     },
                                     action: {
-                                        label: pyraCoreStateObject.plc_state.power.spectrometer
+                                        label: coreState.plc_state.power.spectrometer
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerSpectrometer,
@@ -530,12 +521,10 @@ export default function ControlTab() {
                                 {
                                     variable: {
                                         key: 'Computer Power',
-                                        value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.power.computer
-                                        ),
+                                        value: renderBoolValue(coreState.plc_state.power.computer),
                                     },
                                     action: {
-                                        label: pyraCoreStateObject.plc_state.power.computer
+                                        label: coreState.plc_state.power.computer
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerComputer,
@@ -545,12 +534,10 @@ export default function ControlTab() {
                                 {
                                     variable: {
                                         key: 'Heater power',
-                                        value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.power.heater
-                                        ),
+                                        value: renderBoolValue(coreState.plc_state.power.heater),
                                     },
                                     action: {
-                                        label: pyraCoreStateObject.plc_state.power.heater
+                                        label: coreState.plc_state.power.heater
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerHeater,
@@ -568,7 +555,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Camera',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.connections.camera
+                                            coreState.plc_state.connections.camera
                                         ),
                                     },
                                 },
@@ -576,7 +563,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Computer',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.connections.computer
+                                            coreState.plc_state.connections.computer
                                         ),
                                     },
                                 },
@@ -584,7 +571,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Heater',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.connections.heater
+                                            coreState.plc_state.connections.heater
                                         ),
                                     },
                                 },
@@ -592,7 +579,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Router',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.connections.router
+                                            coreState.plc_state.connections.router
                                         ),
                                     },
                                 },
@@ -600,7 +587,7 @@ export default function ControlTab() {
                                     variable: {
                                         key: 'Spectrometer',
                                         value: renderBoolValue(
-                                            pyraCoreStateObject.plc_state.connections.spectrometer
+                                            coreState.plc_state.connections.spectrometer
                                         ),
                                     },
                                 },

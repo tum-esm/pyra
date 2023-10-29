@@ -61,12 +61,12 @@ function parseActivityHistory(activityHistory: ActivityHistory): ActivitySection
     }));
 }
 
-interface ActivityHistoryState {
+interface ActivityHistoryStore {
     activitySections: ActivitySection[] | undefined;
     setActivityHistory: (ah: any) => void;
 }
 
-export const useActivityHistoryStore = create<ActivityHistoryState>()((set) => ({
+export const useActivityHistoryStore = create<ActivityHistoryStore>()((set) => ({
     activitySections: undefined,
     setActivityHistory: (ah: any) =>
         set(() => ({ activitySections: parseActivityHistory(activityHistorySchema.parse(ah)) })),

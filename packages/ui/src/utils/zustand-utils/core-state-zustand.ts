@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { z } from 'zod';
 
-const pyraCoreStateObjectSchema = z.object({
+const coreStateSchema = z.object({
     last_updated: z.string(),
     helios_indicates_good_conditions: z.boolean().nullable(),
     measurements_should_be_running: z.boolean().nullable(),
@@ -53,19 +53,14 @@ const pyraCoreStateObjectSchema = z.object({
     upload_is_running: z.boolean().nullable(),
 });
 
-export type PyraCoreStateObject = z.infer<typeof pyraCoreStateObjectSchema>;
+export type CoreState = z.infer<typeof coreStateSchema>;
 
-interface PyraCoreState {
-    pyraCorePid: number | undefined;
-    pyraCoreStateObject: PyraCoreStateObject | undefined;
-    setPyraCorePid: (pid: number | undefined) => void;
-    setPyraCoreStateObject: (stateObject: any) => void;
+interface CoreStateStore {
+    coreState: CoreState | undefined;
+    setCoreState: (s: any) => void;
 }
 
-export const usePyraCoreStore = create<PyraCoreState>()((set) => ({
-    pyraCorePid: undefined,
-    pyraCoreStateObject: undefined,
-    setPyraCorePid: (pid) => set(() => ({ pyraCorePid: pid })),
-    setPyraCoreStateObject: (stateObject: any) =>
-        set(() => ({ pyraCoreStateObject: pyraCoreStateObjectSchema.parse(stateObject) })),
+export const useCoreStateStore = create<CoreStateStore>()((set) => ({
+    coreState: undefined,
+    setCoreState: (s: any) => set(() => ({ coreState: coreStateSchema.parse(s) })),
 }));
