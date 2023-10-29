@@ -1,5 +1,6 @@
 """Start and stop the pyra-core background process."""
 
+import subprocess
 import sys
 import click
 import os
@@ -44,16 +45,20 @@ def _start_pyra_core() -> None:
         exit(1)
 
     try:
-        _run_pyra_core_lock.acquire()
+        _run_pyra_core_lock.acquire(timeout=0.25)
         _run_pyra_core_lock.release()
     except filelock.Timeout:
         _print_red("PyraCore process already exists with unknown process ID")
         return
 
-    new_pid = tum_esm_utils.processes.start_background_process(
-        sys.executable, _RUN_PYRA_CORE_SCRIPT_PATH
+    p = subprocess.Popen(
+        [sys.executable, _RUN_PYRA_CORE_SCRIPT_PATH],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
-    _print_green(f"Started background process with process ID {new_pid}")
+    _print_green(f"Started background process with process ID {p.pid}")
+
+    exit(0)
 
 
 @click.command(
