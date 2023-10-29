@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { mean } from 'lodash';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 import { usePyraCoreStore } from '../utils/zustand-utils/core-state-zustand';
+import { ChildProcess } from '@tauri-apps/api/shell';
 
 function SystemRow(props: { label: string; value: React.ReactNode }) {
     return (
@@ -19,49 +20,20 @@ function SystemRow(props: { label: string; value: React.ReactNode }) {
 
 export default function OverviewTab() {
     const { pyraCoreStateObject } = usePyraCoreStore();
-
     const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
-    const dispatch = reduxUtils.useTypedDispatch();
-    const setCoreStatePartial = (c: customTypes.partialCoreState) =>
-        dispatch(reduxUtils.coreStateActions.setPartial(c));
-
-    // reused function from control-tab
-    async function runPlcWriteCommand(
-        command: string[],
-        setLoading: (l: boolean) => void,
-        stateUpdateIfSuccessful: customTypes.partialEnclosurePlcReadings
-    ) {
-        setLoading(true);
-        const result = await fetchUtils.backend.writeToPLC(command);
-        if (result.stdout.replace(/[\n\s]*/g, '') !== 'Ok') {
-            if (result.code === 0) {
-                toast.error(`Could not write to PLC: ${result.stdout}`);
-            } else {
-                toast.error('Could not write to PLC - details in console');
-                console.error(`Could not write to PLC, processResults = ${JSON.stringify(result)}`);
-            }
-            setLoading(false);
-            throw '';
-        } else {
-            //setCoreStatePartial({ enclosure_plc_readings: stateUpdateIfSuccessful });
-            setLoading(false);
-        }
-    }
-
-    // reused function from control-tab
-    async function closeCover() {
-        await runPlcWriteCommand(['close-cover'], setIsLoadingCloseCover, {
-            state: { cover_closed: true },
-            actors: { current_angle: 0 },
-        });
-    }
 
     const { mainLogs } = useLogsStore();
     const currentInfoLogLines = mainLogs?.slice(-15);
 
-    const pyraIsInTestMode = reduxUtils.useTypedSelector(
-        (s) => s.config.central?.general.test_mode
-    );
+    async function closeCover() {
+        toast.promise(fetchUtils.backend.writeToPLC(['close-cover']), {
+            loading: 'Closing cover ...',
+            success: (result: ChildProcess) =>
+                `Successfully closed cover: ${JSON.stringify(result)}`,
+            error: (result: ChildProcess) =>
+                `Could not write to PLC - processResults = ${JSON.stringify(result)}`,
+        });
+    }
 
     function renderSystemBar(value: null | number | number[]) {
         if (value === null) {

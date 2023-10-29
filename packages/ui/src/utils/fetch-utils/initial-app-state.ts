@@ -37,15 +37,12 @@ async function initialAppState(
 
     console.debug('found pyra-cli');
 
-    let result2 = undefined;
     try {
-        result2 = await backend.getConfig();
+        let result2 = await backend.getConfig();
         const newConfig = JSON.parse(result2.stdout);
         dispatch(reduxUtils.configActions.setConfigs(newConfig));
-    } catch {
-        console.error(
-            `Could not fetch config file. configProcessResult = ${JSON.stringify(result2)}`
-        );
+    } catch (e) {
+        console.error(`Could not fetch config file. configProcessResult = ${JSON.stringify(e)}`);
         setBackendIntegrity('config is invalid');
         return;
     }

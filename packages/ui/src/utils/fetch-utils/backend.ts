@@ -3,7 +3,7 @@ import { customTypes } from '../../custom-types';
 import { join } from '@tauri-apps/api/path';
 import fetchUtils from '.';
 
-async function callCLI(args: string[]) {
+async function callCLI(args: string[]): Promise<ChildProcess> {
     let projectDirPath = await fetchUtils.getProjectDirPath();
 
     let pythonInterpreter =
@@ -13,9 +13,19 @@ async function callCLI(args: string[]) {
     const commandString = [pythonInterpreter, pyraCLIEntrypoint, ...args].join(' ');
     console.debug(`Running shell command: "${commandString}" in directory "${projectDirPath}"`);
 
-    return await new Command(pythonInterpreter, [pyraCLIEntrypoint, ...args], {
-        cwd: projectDirPath,
-    }).execute();
+    return new Promise(async (resolve, reject) => {
+        console.log('c');
+        const result = await new Command(pythonInterpreter, [pyraCLIEntrypoint, ...args], {
+            cwd: projectDirPath,
+        }).execute();
+        console.log('d');
+
+        if (result.code === 0) {
+            resolve(result);
+        } else {
+            reject(result);
+        }
+    });
 }
 
 const backend = {
