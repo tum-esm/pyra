@@ -3,7 +3,7 @@ import { ICONS } from './assets';
 import { fetchUtils, reduxUtils } from './utils';
 import { structuralComponents } from './components';
 import Dashboard from './components/structural/dashboard';
-import { usePyraCoreStore } from './utils/zustand-utils/pyra-core-zustand';
+import { usePyraCoreStore } from './utils/zustand-utils/core-state-zustand';
 import { Toaster } from 'react-hot-toast';
 
 export default function Main() {

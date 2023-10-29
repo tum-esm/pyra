@@ -4,7 +4,7 @@ import { groupBy, sumBy } from 'lodash';
 
 export const ACTIVITY_BUCKETS_PER_HOUR = 4;
 
-export const activityHistorySchema = z.array(
+const activityHistorySchema = z.array(
     z
         .object({
             local_time: z.string(),
@@ -40,7 +40,7 @@ export type ActivitySection = {
     cliCalls: number;
 };
 
-export function parseActivityHistory(activityHistory: ActivityHistory): ActivitySection[] {
+function parseActivityHistory(activityHistory: ActivityHistory): ActivitySection[] {
     const groupedBySection = groupBy(activityHistory, (ah) => {
         const hour = parseInt(ah.localTime.split(':')[0]);
         const minute = parseInt(ah.localTime.split(':')[1]);

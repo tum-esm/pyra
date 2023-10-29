@@ -1,6 +1,6 @@
 import toast from 'react-hot-toast';
 import { fetchUtils } from '../../utils';
-import { usePyraCoreStore } from '../../utils/zustand-utils/pyra-core-zustand';
+import { usePyraCoreStore } from '../../utils/zustand-utils/core-state-zustand';
 import { Button } from '../ui/button';
 
 export default function PyraCoreStatus() {
