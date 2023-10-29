@@ -38,6 +38,7 @@ export default function Header(props: {
             <div className="flex flex-wrap justify-center h-full gap-x-2 gap-y-2">
                 {tabs.map((t, i) => (
                     <div
+                        key={t}
                         className={
                             'h-full py-2 border-b-[3px] ' +
                             (t === activeTab ? 'border-slate-900 ' : 'border-transparent')

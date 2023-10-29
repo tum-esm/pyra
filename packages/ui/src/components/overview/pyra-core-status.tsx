@@ -2,6 +2,7 @@ import toast from 'react-hot-toast';
 import { fetchUtils } from '../../utils';
 import { usePyraCoreStore } from '../../utils/zustand-utils/core-state-zustand';
 import { Button } from '../ui/button';
+import { IconPower } from '@tabler/icons-react';
 
 export default function PyraCoreStatus() {
     const { pyraCorePid, setPyraCorePid } = usePyraCoreStore();
@@ -42,7 +43,7 @@ export default function PyraCoreStatus() {
             </div>
             <div className="flex-grow" />
             <Button onClick={stopPyraCore} className="bg-green-900 hover:bg-green-700">
-                stop
+                <IconPower size={18} />
             </Button>
         </div>
     );

@@ -6,6 +6,7 @@ import {
     ACTIVITY_BUCKETS_PER_HOUR,
 } from '../../utils/zustand-utils/activity-zustand';
 import { useState } from 'react';
+import React from 'react';
 
 const SHOW_ALL_BARS: boolean = false;
 
@@ -72,7 +73,7 @@ function ActivityPlot() {
                 <div className="relative grid w-full h-4 text-[0.6rem] font-medium text-gray-400">
                     {range(2, 23, 2).map((h) => (
                         <div
-                            key={h}
+                            key={`hour-label-${h}`}
                             className="absolute top-0 -translate-x-1/2"
                             style={{ left: `${h / 0.24}%` }}
                         >
@@ -92,23 +93,21 @@ function ActivityPlot() {
                     )}
                     {range(0.25, 24, 0.25).map((h) => (
                         <div
-                            key={h}
+                            key={`thin-hour-line-${h}`}
                             className="absolute top-0 z-10 w-[1.5px] h-14 bg-gray-600 translate-x-[-1px]"
                             style={{ left: `${h / 0.24}%` }}
                         />
                     ))}
                     {range(1, 24).map((h) => (
                         <div
-                            key={h}
+                            key={`bold-hour-line-${h}`}
                             className="absolute top-0 z-10 w-[1.5px] h-14 bg-gray-400 translate-x-[-1px]"
                             style={{ left: `${h / 0.24}%` }}
                         />
                     ))}
-
-                    {activitySections.map((s) => (
-                        <>
+                    {activitySections.map((s, i) => (
+                        <React.Fragment key={i}>
                             <div
-                                key={`core-${s.from_hour}-${s.to_hour}`}
                                 className="absolute top-0 z-20 h-2 cursor-pointer bg-slate-300 hover:bg-slate-200"
                                 style={sectionToStyle(s, s.isRunning)}
                                 onMouseOver={() =>
@@ -125,7 +124,6 @@ function ActivityPlot() {
                             />
                             {s.isMeasuring > 0 && (
                                 <div
-                                    key={`measuring-${s.from_hour}-${s.to_hour}`}
                                     className="absolute z-20 h-2 bg-green-400 cursor-pointer top-2 hover:bg-green-300"
                                     style={sectionToStyle(s, s.isMeasuring)}
                                     onMouseOver={() =>
@@ -143,7 +141,6 @@ function ActivityPlot() {
                             )}
                             {s.hasErrors > 0 && (
                                 <div
-                                    key={`error-${s.from_hour}-${s.to_hour}`}
                                     className="absolute z-20 h-2 bg-red-400 cursor-pointer top-4 hover:bg-red-300"
                                     style={sectionToStyle(s, s.hasErrors)}
                                     onMouseOver={() =>
@@ -161,7 +158,6 @@ function ActivityPlot() {
                             )}
                             {s.isUploading > 0 && (
                                 <div
-                                    key={`uploading-${s.from_hour}-${s.to_hour}`}
                                     className="absolute z-20 h-2 cursor-pointer bg-fuchsia-400 top-6 hover:bg-fuchsia-300"
                                     style={sectionToStyle(s, s.isUploading)}
                                     onMouseOver={() =>
@@ -179,7 +175,6 @@ function ActivityPlot() {
                             )}
                             {s.camtrackerStartups > 0 && (
                                 <div
-                                    key={`camtracker-${s.from_hour}-${s.to_hour}`}
                                     className="absolute z-20 h-2 cursor-pointer bg-violet-400 top-8 hover:bg-violet-300"
                                     style={sectionToStyle(s)}
                                     onMouseOver={() =>
@@ -197,7 +192,6 @@ function ActivityPlot() {
                             )}
                             {s.opusStartups > 0 && (
                                 <div
-                                    key={`opus-${s.from_hour}-${s.to_hour}`}
                                     className="absolute z-20 h-2 bg-purple-400 cursor-pointer top-10 hover:bg-purple-300"
                                     style={sectionToStyle(s)}
                                     onMouseOver={() =>
@@ -215,7 +209,6 @@ function ActivityPlot() {
                             )}
                             {s.cliCalls > 0 && (
                                 <div
-                                    key={`camtracker-${s.from_hour}-${s.to_hour}`}
                                     className="absolute z-20 h-2 bg-indigo-400 cursor-pointer top-12 hover:bg-indigo-300"
                                     style={sectionToStyle(s)}
                                     onMouseOver={() =>
@@ -231,11 +224,10 @@ function ActivityPlot() {
                                     onMouseLeave={() => setHoverLabel(undefined)}
                                 />
                             )}
-                        </>
+                        </React.Fragment>
                     ))}
                     {/* blue line of current time */}
                     {/* blue label "now" */}
-
                     {/*<div
                         className="absolute z-30 w-[2.5px] -mx-px bg-gray-900 -top-0.5 h-10 rounded-full"
                         style={{ left: timeToPercentage(now) }}
