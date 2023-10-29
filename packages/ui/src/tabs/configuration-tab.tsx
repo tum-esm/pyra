@@ -25,7 +25,11 @@ const sections: {
     { key: 'opus', label: 'OPUS', icon: IconMicroscope },
     { key: 'camtracker', label: 'CamTracker', icon: IconSunFilled },
     { key: 'error_email', label: 'Error Email', icon: IconMail },
-    { key: 'measurement_triggers', label: 'Triggers', icon: IconAdjustmentsFilled },
+    {
+        key: 'measurement_triggers',
+        label: 'Triggers',
+        icon: IconAdjustmentsFilled,
+    },
     { key: 'upload', label: 'Upload', icon: IconFileUpload },
 ];
 
@@ -34,7 +38,7 @@ const hardwareSections: {
     label: string;
     icon: (props: TablerIconsProps) => JSX.Element;
 }[] = [
-    { key: 'tum_plc', label: 'TUM PLC', icon: IconCpu },
+    { key: 'tum_plc', label: 'TUM Enclosure', icon: IconCpu },
     { key: 'helios', label: 'Helios', icon: IconCpu },
 ];
 
@@ -88,6 +92,38 @@ export default function ConfigurationTab() {
         }
     }
 
+    const SectionButton = (props: {
+        section: {
+            key: customTypes.configSectionKey;
+            label: string;
+            icon: (props: TablerIconsProps) => JSX.Element;
+        };
+    }) => (
+        <div
+            className={
+                'w-full border-r-[3px] px-2 py-1 ' +
+                (props.section.key === activeKey ? 'border-slate-950' : 'border-transparent')
+            }
+        >
+            <button
+                onClick={() => setActiveKey(props.section.key)}
+                className={
+                    'px-2.5 py-1.5 w-full text-sm font-medium text-left rounded ' +
+                    'flex flex-row items-center justify-start gap-x-2.5 h-8 leading-5 ' +
+                    (props.section.key === activeKey
+                        ? ' text-black '
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800 ')
+                }
+            >
+                <props.section.icon
+                    size={16}
+                    className={props.section.key === activeKey ? `` : 'opacity-30'}
+                />
+                <div>{props.section.label}</div>
+            </button>
+        </div>
+    );
+
     if ([localConfig, configIsDiffering].includes(undefined)) {
         return <></>;
     }
@@ -100,47 +136,15 @@ export default function ConfigurationTab() {
                 }
             >
                 {sections.map((section) => (
-                    <button
-                        key={section.key}
-                        onClick={() => setActiveKey(section.key)}
-                        className={
-                            'px-2.5 py-1.5 text-sm font-semibold text-left mx-2 my-1 rounded ' +
-                            'flex flex-row items-center justify-start gap-x-2.5 h-8 leading-5 ' +
-                            (section.key === activeKey
-                                ? 'bg-blue-200 text-blue-950 '
-                                : 'text-gray-500 hover:bg-gray-150 hover:text-gray-700 ')
-                        }
-                    >
-                        <section.icon
-                            size={14}
-                            className={section.key === activeKey ? 'opacity-100' : 'opacity-50'}
-                        />
-                        <div>{section.label}</div>
-                    </button>
+                    <SectionButton key={section.key} section={section} />
                 ))}
                 <div className="w-full h-px my-1 bg-slate-200 " />
                 {hardwareSections.map((section) => (
-                    <button
-                        key={section.key}
-                        onClick={() => setActiveKey(section.key)}
-                        className={
-                            'px-2.5 py-1.5 text-sm font-semibold text-left mx-2 my-1 rounded ' +
-                            'flex flex-row items-center justify-start gap-x-2.5 h-8 leading-5 ' +
-                            (section.key === activeKey
-                                ? 'bg-blue-200 text-blue-950 '
-                                : 'text-gray-500 hover:bg-gray-150 hover:text-gray-700 ')
-                        }
-                    >
-                        <section.icon
-                            size={14}
-                            className={section.key === activeKey ? 'opacity-100' : 'opacity-50'}
-                        />
-                        <div>{section.label}</div>
-                    </button>
+                    <SectionButton key={section.key} section={section} />
                 ))}
             </div>
             <div className={'z-0 flex-grow h-full p-6 overflow-y-auto relative pb-20'}>
-                {activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
+                {/*{activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
                 {activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
                 {activeKey === 'camtracker' && <configurationComponents.ConfigSectionCamtracker />}
                 {activeKey === 'error_email' && <configurationComponents.ConfigSectionErrorEmail />}
@@ -159,7 +163,7 @@ export default function ConfigurationTab() {
                             isSaving,
                         }}
                     />
-                )}
+                    )}*/}
             </div>
         </div>
     );

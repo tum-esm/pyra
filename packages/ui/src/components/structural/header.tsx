@@ -30,25 +30,32 @@ export default function Header(props: {
     }
 
     return (
-        <header className="z-50 flex flex-row items-center flex-shrink-0 w-full px-2 py-0 bg-gray-900 shadow h-14">
-            <h1 className="pl-3 text-2xl font-semibold text-center text-white whitespace-nowrap">
-                PYRA <span className="pl-0.5 text-lg font-normal opacity-50">{APP_VERSION}</span>
+        <header className="z-50 flex flex-row items-center flex-shrink-0 w-full px-2 py-0 bg-white border-b h-14 border-slate-300">
+            <h1 className="pl-3 text-2xl font-semibold text-center text-slate-800 whitespace-nowrap">
+                PYRA <span className="pl-0.5 text-lg font-normal opacity-60">{APP_VERSION}</span>
             </h1>
             <div className="flex-grow " />
-            <div className="flex flex-wrap justify-center px-4 py-2 gap-x-2 gap-y-2">
+            <div className="flex flex-wrap justify-center h-full gap-x-2 gap-y-2">
                 {tabs.map((t, i) => (
-                    <button
-                        key={i}
+                    <div
                         className={
-                            'px-4 py-1.5 rounded-md font-medium cursor-pointer text-base ' +
-                            (t === activeTab
-                                ? 'bg-gray-600 text-white '
-                                : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200')
+                            'h-full py-2 border-b-[3px] ' +
+                            (t === activeTab ? 'border-slate-900 ' : 'border-transparent')
                         }
-                        onClick={() => monitoredSetActiveTab(t)}
                     >
-                        {t}
-                    </button>
+                        <button
+                            key={i}
+                            className={
+                                'px-4 py-1.5 rounded-md font-medium cursor-pointer text-base h-full ' +
+                                (t === activeTab
+                                    ? 'text-slate-950 '
+                                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')
+                            }
+                            onClick={() => monitoredSetActiveTab(t)}
+                        >
+                            {t}
+                        </button>
+                    </div>
                 ))}
             </div>
         </header>

@@ -5,12 +5,6 @@ import {
     useActivityHistoryStore,
     ACTIVITY_BUCKETS_PER_HOUR,
 } from '../../utils/zustand-utils/activity-zustand';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '../../components/ui/tooltip';
 import { useState } from 'react';
 
 const SHOW_ALL_BARS: boolean = false;
@@ -49,10 +43,15 @@ function sectionToStyle(
     section: ActivitySection,
     accumulatedValue: number = 60 / ACTIVITY_BUCKETS_PER_HOUR
 ) {
+    const opacity =
+        accumulatedValue === 0
+            ? 0
+            : 0.25 + 0.75 * ((accumulatedValue * ACTIVITY_BUCKETS_PER_HOUR) / 60);
+
     return {
         left: `${(section.from_hour / 24.0) * 100}%`,
         right: `${(1 - section.to_hour / 24.0) * 100}%`,
-        opacity: SHOW_ALL_BARS ? 1 : (accumulatedValue * ACTIVITY_BUCKETS_PER_HOUR) / 60,
+        opacity: SHOW_ALL_BARS ? 1 : opacity,
     };
 }
 
