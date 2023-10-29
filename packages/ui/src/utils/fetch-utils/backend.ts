@@ -14,12 +14,9 @@ async function callCLI(args: string[]): Promise<ChildProcess> {
     console.debug(`Running shell command: "${commandString}" in directory "${projectDirPath}"`);
 
     return new Promise(async (resolve, reject) => {
-        console.log('c');
         const result = await new Command(pythonInterpreter, [pyraCLIEntrypoint, ...args], {
             cwd: projectDirPath,
         }).execute();
-        console.log('d');
-
         if (result.code === 0) {
             resolve(result);
         } else {
@@ -29,14 +26,14 @@ async function callCLI(args: string[]): Promise<ChildProcess> {
 }
 
 const backend = {
-    startPyraCore: async (): Promise<ChildProcess> => {
-        return await callCLI(['core', 'start']);
-    },
     pyraCliIsAvailable: async (): Promise<ChildProcess> => {
         return await callCLI([]);
     },
     checkPyraCoreState: async (): Promise<ChildProcess> => {
         return await callCLI(['core', 'is-running']);
+    },
+    startPyraCore: async (): Promise<ChildProcess> => {
+        return await callCLI(['core', 'start']);
     },
     stopPyraCore: async (): Promise<ChildProcess> => {
         return await callCLI(['core', 'stop']);
