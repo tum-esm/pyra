@@ -8,6 +8,7 @@ import { dialog } from '@tauri-apps/api';
 import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zustand';
+import { usePyraCoreStore } from '../../utils/zustand-utils/core-state-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
 const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
@@ -23,11 +24,12 @@ export default function Dashboard() {
 
     const { setLogs } = useLogsStore();
     const { setActivityHistory } = useActivityHistoryStore();
+    const { setPyraCoreStateObject } = usePyraCoreStore();
 
     useEffect(() => {
         async function fetchStateFile() {
-            const fileContent = await fetchUtils.getFileContent('runtime-data/state.json');
-            dispatch(reduxUtils.coreStateActions.set(JSON.parse(fileContent)));
+            const fileContent = await fetchUtils.getFileContent('logs/state.json');
+            setPyraCoreStateObject(JSON.parse(fileContent));
         }
 
         async function fetchLogFile() {
@@ -57,7 +59,7 @@ export default function Dashboard() {
 
         const interval1 = setInterval(fetchStateFile, 5000);
         const interval2 = setInterval(fetchLogFile, 5000);
-        const interval3 = setInterval(fetchActivityFile, 5000);
+        const interval3 = setInterval(fetchActivityFile, 60000);
 
         return () => {
             clearInterval(interval1);

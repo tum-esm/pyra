@@ -6,6 +6,7 @@ import { customTypes } from '../custom-types';
 import toast from 'react-hot-toast';
 import { mean } from 'lodash';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
+import { usePyraCoreStore } from '../utils/zustand-utils/core-state-zustand';
 
 function SystemRow(props: { label: string; value: React.ReactNode }) {
     return (
@@ -17,7 +18,7 @@ function SystemRow(props: { label: string; value: React.ReactNode }) {
 }
 
 export default function OverviewTab() {
-    const coreState = reduxUtils.useTypedSelector((s) => s.coreState.body);
+    const { pyraCoreStateObject } = usePyraCoreStore();
 
     const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
     const dispatch = reduxUtils.useTypedDispatch();
@@ -42,7 +43,7 @@ export default function OverviewTab() {
             setLoading(false);
             throw '';
         } else {
-            setCoreStatePartial({ enclosure_plc_readings: stateUpdateIfSuccessful });
+            //setCoreStatePartial({ enclosure_plc_readings: stateUpdateIfSuccessful });
             setLoading(false);
         }
     }
@@ -108,13 +109,13 @@ export default function OverviewTab() {
             <div className="w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
                 System Status
             </div>
-            {coreState === undefined && (
+            {pyraCoreStateObject === undefined && (
                 <div className="w-full p-4 text-sm flex-row-left gap-x-2">
                     State is loading <essentialComponents.Spinner />
                 </div>
             )}
-            {coreState?.enclosure_plc_readings.state.rain === true &&
-                coreState?.enclosure_plc_readings.state.cover_closed === false && (
+            {pyraCoreStateObject?.plc_state.state.rain === true &&
+                pyraCoreStateObject?.plc_state.state.cover_closed === false && (
                     <div
                         className={
                             'w-full py-1 pl-2 pr-3 flex-row-left gap-x-1 shadow-sm ' +
@@ -126,7 +127,7 @@ export default function OverviewTab() {
                         Rain was detected but cover is not closed!
                     </div>
                 )}
-            {coreState !== undefined && (
+            {pyraCoreStateObject !== undefined && (
                 <div className="grid w-full grid-cols-2">
                     <div
                         className={
@@ -136,32 +137,25 @@ export default function OverviewTab() {
                     >
                         <SystemRow
                             label="Temperature"
-                            value={renderString(
-                                coreState.enclosure_plc_readings.sensors.temperature,
-                                { appendix: '°C' }
-                            )}
+                            value={renderString(pyraCoreStateObject.plc_state.sensors.temperature, {
+                                appendix: '°C',
+                            })}
                         />
                         <SystemRow
                             label="Reset needed"
-                            value={renderBoolean(
-                                coreState.enclosure_plc_readings.state.reset_needed
-                            )}
+                            value={renderBoolean(pyraCoreStateObject.plc_state.state.reset_needed)}
                         />
                         <SystemRow
                             label="Motor failed"
-                            value={renderBoolean(
-                                coreState.enclosure_plc_readings.state.motor_failed
-                            )}
+                            value={renderBoolean(pyraCoreStateObject.plc_state.state.motor_failed)}
                         />
                         <SystemRow
                             label="Cover is closed"
-                            value={renderBoolean(
-                                coreState.enclosure_plc_readings.state.cover_closed
-                            )}
+                            value={renderBoolean(pyraCoreStateObject.plc_state.state.cover_closed)}
                         />
                         <SystemRow
                             label="Rain detected"
-                            value={renderBoolean(coreState.enclosure_plc_readings.state.rain)}
+                            value={renderBoolean(pyraCoreStateObject.plc_state.state.rain)}
                         />
                         <essentialComponents.Button
                             variant="red"
@@ -175,19 +169,28 @@ export default function OverviewTab() {
                     <div className="flex-col items-start justify-start pl-3 text-sm">
                         <SystemRow
                             label="Last boot time"
-                            value={renderString(coreState.os_state.last_boot_time)}
+                            value={renderString(
+                                pyraCoreStateObject.operating_system_state.last_boot_time
+                            )}
                         />
                         <SystemRow
                             label="Disk space usage"
-                            value={renderSystemBar(coreState.os_state.filled_disk_space_fraction)}
+                            value={renderSystemBar(
+                                pyraCoreStateObject.operating_system_state
+                                    .filled_disk_space_fraction
+                            )}
                         />
                         <SystemRow
                             label="CPU usage"
-                            value={renderSystemBar(coreState.os_state.cpu_usage)}
+                            value={renderSystemBar(
+                                pyraCoreStateObject.operating_system_state.cpu_usage
+                            )}
                         />
                         <SystemRow
                             label="Memory usage"
-                            value={renderSystemBar(coreState.os_state.memory_usage)}
+                            value={renderSystemBar(
+                                pyraCoreStateObject.operating_system_state.memory_usage
+                            )}
                         />
                     </div>
                 </div>
