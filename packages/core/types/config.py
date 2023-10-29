@@ -71,7 +71,7 @@ class GeneralConfig(pydantic.BaseModel):
 
 
 class PartialGeneralConfig(pydantic.BaseModel):
-    """Like `SubConfigGeneral`, but all fields are optional."""
+    """Like `GeneralConfig`, but all fields are optional."""
 
     seconds_per_core_interval: Optional[float] = pydantic.Field(
         None, ge=5, le=600
@@ -91,7 +91,7 @@ class OpusConfig(pydantic.BaseModel):
 
 
 class PartialOpusConfig(pydantic.BaseModel):
-    """Like `SubConfigOpus`, but all fields are optional."""
+    """Like `OpusConfig`, but all fields are optional."""
 
     em27_ip: Optional[StrictIPAdress] = None
     executable_path: Optional[StrictFilePath] = None
@@ -111,7 +111,7 @@ class CamtrackerConfig(pydantic.BaseModel):
 
 
 class PartialCamtrackerConfig(pydantic.BaseModel):
-    """Like `SubConfigCamtracker` but all fields are optional."""
+    """Like `CamtrackerConfig` but all fields are optional."""
 
     config_path: Optional[StrictFilePath] = None
     executable_path: Optional[StrictFilePath] = None
@@ -132,7 +132,7 @@ class ErrorEmailConfig(pydantic.BaseModel):
 
 
 class PartialErrorEmailConfig(pydantic.BaseModel):
-    """Like `SubConfigErrorEmail` but all fields are optional."""
+    """Like `ErrorEmailConfig` but all fields are optional."""
 
     smtp_host: Optional[str] = None
     smtp_port: Optional[Literal[465, 587]] = None
@@ -150,7 +150,7 @@ class MeasurementDecisionConfig(pydantic.BaseModel):
 
 
 class PartialMeasurementDecisionConfig(pydantic.BaseModel):
-    """Like `SubConfigMeasurementDecision` but all fields are optional."""
+    """Like `MeasurementDecisionConfig` but all fields are optional."""
 
     mode: Optional[Literal["automatic", "manual", "cli"]] = None
     manual_decision_result: Optional[bool] = None
@@ -167,7 +167,7 @@ class MeasurementTriggersConfig(pydantic.BaseModel):
 
 
 class PartialMeasurementTriggersConfig(pydantic.BaseModel):
-    """Like `SubConfigMeasurementTriggers` but all fields are optional."""
+    """Like `MeasurementTriggersConfig` but all fields are optional."""
 
     consider_time: Optional[bool] = None
     consider_sun_elevation: Optional[bool] = None
@@ -184,7 +184,7 @@ class TumPlcConfig(pydantic.BaseModel):
 
 
 class PartialTumPlcConfig(pydantic.BaseModel):
-    """Like `SubConfigTumPlc`, but all fields are optional."""
+    """Like `TumPlcConfig`, but all fields are optional."""
 
     ip: Optional[StrictIPAdress] = None
     version: Optional[Literal[1, 2]] = None
@@ -200,7 +200,7 @@ class HeliosConfig(pydantic.BaseModel):
 
 
 class PartialHeliosConfig(pydantic.BaseModel):
-    """Like `SubConfigHelios`, but all fields are optional."""
+    """Like `HeliosConfig`, but all fields are optional."""
 
     camera_id: Optional[int] = pydantic.Field(None, ge=0, le=999999)
     evaluation_size: Optional[int] = pydantic.Field(None, ge=1, le=100)
@@ -227,7 +227,7 @@ class UploadConfig(pydantic.BaseModel):
 
 
 class PartialUploadConfig(pydantic.BaseModel):
-    """Like `SubConfigUpload`, but all fields are optional."""
+    """Like `UploadConfig`, but all fields are optional."""
 
     host: Optional[StrictIPAdress] = None
     user: Optional[str] = None
@@ -271,7 +271,6 @@ class Config(pydantic.BaseModel):
         """
 
         try:
-
             if config_object is not None:
                 if isinstance(config_object, dict):
                     return Config.model_validate(
@@ -287,9 +286,9 @@ class Config(pydantic.BaseModel):
                             "ignore-path-existence": ignore_path_existence
                         },
                     )
+            else:
 
-            if with_filelock:
-                with filelock.FileLock(_CONFIG_LOCK_PATH, timeout=10):
+                def _read() -> Config:
                     with open(_CONFIG_FILE_PATH) as f:
                         return Config.model_validate_json(
                             f.read(),
@@ -297,15 +296,12 @@ class Config(pydantic.BaseModel):
                                 "ignore-path-existence": ignore_path_existence
                             },
                         )
-            else:
-                with open(_CONFIG_FILE_PATH) as f:
-                    return Config.model_validate_json(
-                        f.read(),
-                        context={
-                            "ignore-path-existence": ignore_path_existence
-                        },
-                    )
 
+                if with_filelock:
+                    with filelock.FileLock(_CONFIG_LOCK_PATH, timeout=10):
+                        return _read()
+                else:
+                    return _read()
         except pydantic.ValidationError as e:
             pretty_errors: list[str] = []
             for er in e.errors():
@@ -322,6 +318,7 @@ class Config(pydantic.BaseModel):
             ) from None
 
     def dump(self, with_filelock: bool = True) -> None:
+        print("DUDU")
         if with_filelock:
             with filelock.FileLock(_CONFIG_LOCK_PATH, timeout=10):
                 with open(_CONFIG_FILE_PATH, "w") as f:
@@ -332,7 +329,7 @@ class Config(pydantic.BaseModel):
 
 
 class PartialConfig(pydantic.BaseModel):
-    """Like `ConfigDict`, but all fields are optional."""
+    """Like `Config`, but all fields are optional."""
 
     general: Optional[PartialGeneralConfig] = None
     opus: Optional[PartialOpusConfig] = None

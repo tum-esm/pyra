@@ -23,6 +23,7 @@ config/**/*.json
 !config/**/*.default.json
 logs/**/*
 !logs/**/.gitkeep
+nohup.out
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/linux,macos,opencv,python,windows,node
