@@ -1,5 +1,5 @@
 import { ask } from '@tauri-apps/api/dialog';
-import { reduxUtils } from '../../utils';
+import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 
 export default function Header(props: {
     tabs: string[];
@@ -7,9 +7,8 @@ export default function Header(props: {
     setActiveTab(t: string): void;
 }) {
     const { tabs, activeTab, setActiveTab } = props;
-    const plcIsControlledByUser = reduxUtils.useTypedSelector(
-        (s) => s.config.central?.tum_plc?.controlled_by_user
-    );
+    const { centralConfig } = useConfigStore();
+    const plcIsControlledByUser = centralConfig?.tum_plc?.controlled_by_user;
 
     async function monitoredSetActiveTab(t: string) {
         if (
