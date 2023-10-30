@@ -95,3 +95,31 @@ export const configSchema = z.object({
 
 export type Config = z.infer<typeof configSchema>;
 
+interface ConfigStore {
+    centralConfig: Config | undefined;
+    localConfig: Config | undefined;
+    setConfig: (c: any) => void;
+    setLocalConfigItem: (path: string, value: any) => void;
+    configIsDiffering: () => boolean;
+}
+
+export const useConfigStore = create<ConfigStore>()((set, state) => ({
+    centralConfig: undefined,
+    localConfig: undefined,
+    setConfig: (c) =>
+        set(() => ({ centralConfig: configSchema.parse(c), localConfig: configSchema.parse(c) })),
+    setLocalConfigItem: (path, value) =>
+        set((state) => {
+            if (state.localConfig === undefined || state.centralConfig === undefined) {
+                return {};
+            } else {
+                return {
+                    localConfig: lodashSet(state.localConfig, path, value),
+                };
+            }
+        }),
+    configIsDiffering: () => {
+        const currentState = state();
+        return diff(currentState.centralConfig, currentState.localConfig) !== undefined;
+    },
+}));
