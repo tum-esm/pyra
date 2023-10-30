@@ -1,4 +1,3 @@
-import { functionalUtils } from '../../../utils';
 import { configurationComponents, essentialComponents } from '../..';
 
 export default function ConfigElementTime(props: {
@@ -10,14 +9,17 @@ export default function ConfigElementTime(props: {
 }) {
     const { title, value, oldValue, setValue, disabled } = props;
 
-    const hasChanged = !functionalUtils.deepEqual(value, oldValue);
-
-    function parseNumericValue(v: string): any {
-        return `${v}`.replace(/[^\d\.]/g, '');
+    function parseNumericValue(v: string): number {
+        return parseInt(`${v}`.replace(/[^\d]/g, ''));
     }
 
+    let hasBeenModified =
+        value.hour !== oldValue.hour ||
+        value.minute !== oldValue.minute ||
+        value.second !== oldValue.second;
+
     return (
-        <configurationComponents.LabeledRow title={title + ' (h:m:s)'} modified={hasChanged}>
+        <configurationComponents.LabeledRow title={title + ' (h:m:s)'} modified={hasBeenModified}>
             <div className="relative flex w-full gap-x-1">
                 <essentialComponents.TextInput
                     value={value.hour.toString()}
@@ -41,7 +43,7 @@ export default function ConfigElementTime(props: {
                 />
                 <essentialComponents.PreviousValue
                     previousValue={
-                        hasChanged
+                        hasBeenModified
                             ? `${oldValue.hour} : ${oldValue.minute} : ${oldValue.second}`
                             : undefined
                     }

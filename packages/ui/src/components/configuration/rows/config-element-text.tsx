@@ -1,5 +1,4 @@
 import { dialog } from '@tauri-apps/api';
-import { functionalUtils } from '../../../utils';
 import { configurationComponents, essentialComponents } from '../..';
 
 export default function ConfigElementText(props: {
@@ -21,19 +20,24 @@ export default function ConfigElementText(props: {
         }
     }
 
-    function parseNumericValue(v: string): any {
+    function parseNumericValue(v: string): string {
         return `${v}`.replace(/[^\d\.]/g, '');
     }
 
     const showfileSelector = title.endsWith('Path') || props.showFileSelector;
-    const hasBeenModified = !functionalUtils.deepEqual(oldValue, value);
+    let hasBeenModified: boolean;
+    if (numeric) {
+        hasBeenModified = oldValue !== (typeof value === 'string' ? parseFloat(value) : value);
+    } else {
+        hasBeenModified = oldValue !== value;
+    }
 
     return (
         <configurationComponents.LabeledRow title={title} modified={hasBeenModified}>
             <div className="relative w-full flex-row-center gap-x-1">
                 <essentialComponents.TextInput
                     value={value.toString()}
-                    setValue={(v) => (numeric ? setValue(parseNumericValue(v)) : setValue(v))}
+                    setValue={(v) => setValue(numeric ? parseNumericValue(v) : v)}
                     postfix={postfix}
                 />
                 {showfileSelector && !disabled && (
