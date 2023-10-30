@@ -1,4 +1,4 @@
-import { essentialComponents } from '..';
+import { Button } from '../ui/button';
 
 export default function SavingOverlay(props: {
     errorMessage: undefined | string;
@@ -13,21 +13,13 @@ export default function SavingOverlay(props: {
             {errorMessage !== undefined && (
                 <span className="flex-grow text-left text-yellow-800">{errorMessage}</span>
             )}
-            <essentialComponents.Button
-                onClick={resetLocalConfig}
-                variant="gray"
-                disabled={isSaving}
-            >
+            <Button onClick={resetLocalConfig} disabled={isSaving}>
                 revert
-            </essentialComponents.Button>
+            </Button>
             {errorMessage === undefined && (
-                <essentialComponents.Button
-                    onClick={saveLocalConfig}
-                    variant="gray"
-                    spinner={isSaving}
-                >
+                <Button onClick={saveLocalConfig} disabled={isSaving}>
                     save
-                </essentialComponents.Button>
+                </Button>
             )}
         </div>
     );

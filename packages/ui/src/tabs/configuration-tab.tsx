@@ -1,10 +1,7 @@
 import { useState } from 'react';
-import { fetchUtils, functionalUtils, reduxUtils } from '../utils';
 import { customTypes } from '../custom-types';
 import { configurationComponents } from '../components';
 import toast from 'react-hot-toast';
-import { diff } from 'deep-diff';
-import { set } from 'lodash';
 import {
     IconAdjustmentsFilled,
     IconCpu,
@@ -16,6 +13,10 @@ import {
     TablerIconsProps,
 } from '@tabler/icons-react';
 import { Button } from '../components/ui/button';
+import { configSchema, useConfigStore } from '../utils/zustand-utils/config-zustand';
+import fetchUtils from '../utils/fetch-utils';
+import { omit } from 'lodash';
+import { ChildProcess } from '@tauri-apps/api/shell';
 
 const sections: {
     key: customTypes.configSectionKey;
@@ -44,43 +45,42 @@ const hardwareSections: {
 ];
 
 export default function ConfigurationTab() {
-    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
-    const localConfig = reduxUtils.useTypedSelector((s) => s.config.local);
-    const errorMessage = reduxUtils.useTypedSelector((s) => s.config.errorMessage);
-    const configIsDiffering = reduxUtils.useTypedSelector((s) => s.config.isDiffering);
-    const dispatch = reduxUtils.useTypedDispatch();
-
-    const setConfigs = (c: customTypes.config | undefined) =>
-        dispatch(reduxUtils.configActions.setConfigs(c));
-    const resetLocalConfig = () => {
-        dispatch(reduxUtils.configActions.resetLocal());
-        setErrorMessage(undefined);
-    };
-    const setErrorMessage = (m: string | undefined) =>
-        dispatch(reduxUtils.configActions.setErrorMessage(m));
-
     const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
+    const { centralConfig, localConfig, setConfig, configIsDiffering } = useConfigStore();
+
+    const resetLocalConfig = () => setConfig(centralConfig);
     const [isSaving, setIsSaving] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
     async function saveLocalConfig() {
-        if (localConfig !== undefined) {
+        if (centralConfig !== undefined && localConfig !== undefined) {
             setIsSaving(true);
-            const parsedLocalConfig = functionalUtils.parseNumberTypes(localConfig);
-            const diffsToCentral = diff(centralConfig, parsedLocalConfig);
-            const minimalConfigUpdate = {};
-            diffsToCentral?.forEach((d) => {
-                if (d.kind === 'E') {
-                    set(
-                        minimalConfigUpdate,
-                        d.path ? d.path.map((x: any) => x.toString()) : [],
-                        d.rhs
-                    );
-                }
-            });
-            let result = await fetchUtils.backend.updateConfig(minimalConfigUpdate);
 
-            if (result.stdout.includes('Updated config file')) {
-                setConfigs(parsedLocalConfig);
+            const parsedLocalConfig = configSchema.parse(localConfig);
+            console.log(omit(parsedLocalConfig, 'measurement_decision.cli_decision_result'));
+
+            toast.promise(
+                fetchUtils.backend.updateConfig(
+                    omit(parsedLocalConfig, 'measurement_decision.cli_decision_result')
+                ),
+                {
+                    loading: 'Saving config',
+                    success: (p: ChildProcess) => {
+                        setConfig(parsedLocalConfig);
+                        setIsSaving(false);
+
+                        return 'Successfully saved config';
+                    },
+                    error: (p: ChildProcess) => {
+                        setIsSaving(false);
+                        setErrorMessage(p.stdout);
+                        return 'Could not save config';
+                    },
+                }
+            );
+
+            /*if (result.stdout.includes('Updated config file')) {
+                setConfig(parsedLocalConfig);
             } else if (result.stdout.length !== 0) {
                 setErrorMessage(result.stdout);
             } else {
@@ -88,13 +88,12 @@ export default function ConfigurationTab() {
                     `Could not update config file. processResult = ${JSON.stringify(result)}`
                 );
                 toast.error(`Could not update config file, please look in the console for details`);
-            }
-            setIsSaving(false);
+            }*/
         }
     }
 
     function copyConfigFile() {
-        if (configIsDiffering) {
+        if (configIsDiffering()) {
             toast.error('Please save your changes before copying the config file');
         } else if (centralConfig !== undefined) {
             navigator.clipboard.writeText(JSON.stringify(centralConfig, null, 4));
@@ -161,8 +160,8 @@ export default function ConfigurationTab() {
                 </Button>
             </div>
             <div className={'z-0 flex-grow h-full p-6 overflow-y-auto relative pb-20'}>
-                {/*{activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
-                {activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
+                {activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
+                {/*{activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
                 {activeKey === 'camtracker' && <configurationComponents.ConfigSectionCamtracker />}
                 {activeKey === 'error_email' && <configurationComponents.ConfigSectionErrorEmail />}
                 {activeKey === 'measurement_triggers' && (
@@ -170,8 +169,8 @@ export default function ConfigurationTab() {
                 )}
                 {activeKey === 'tum_plc' && <configurationComponents.ConfigSectionTumPlc />}
                 {activeKey === 'helios' && <configurationComponents.ConfigSectionHelios />}
-                {activeKey === 'upload' && <configurationComponents.ConfigSectionUpload />}
-                {configIsDiffering && (
+                {activeKey === 'upload' && <configurationComponents.ConfigSectionUpload />}*/}
+                {configIsDiffering() && (
                     <configurationComponents.SavingOverlay
                         {...{
                             errorMessage,
@@ -180,7 +179,7 @@ export default function ConfigurationTab() {
                             isSaving,
                         }}
                     />
-                    )}*/}
+                )}
             </div>
         </div>
     );

@@ -1,26 +1,38 @@
 import { useEffect, useState } from 'react';
-import { fetchUtils, reduxUtils } from '../../utils';
+import { fetchUtils } from '../../utils';
 import { OverviewTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
 import { structuralComponents } from '../../components';
 import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zustand';
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
+import { ChildProcess } from '@tauri-apps/api/shell';
+import toast from 'react-hot-toast';
+import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
 const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState<TabType>('Overview');
-
-    const centralConfig = reduxUtils.useTypedSelector((s) => s.config.central);
-    const enclosureControlsIsVisible =
-        centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
-
     const { setLogs } = useLogsStore();
     const { setActivityHistory } = useActivityHistoryStore();
     const { setCoreState } = useCoreStateStore();
+    const { centralConfig, setConfig } = useConfigStore();
 
+    const enclosureControlsIsVisible =
+        centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
+
+    async function fetchConfig() {
+        toast.promise(fetchUtils.backend.getConfig(), {
+            loading: 'Loading config file...',
+            success: (p: ChildProcess) => {
+                setConfig(JSON.parse(p.stdout));
+                return 'Successfully loaded config file';
+            },
+            error: (p: ChildProcess) => `Could not load config file ${p}`,
+        });
+    }
     async function fetchStateFile() {
         const fileContent = await fetchUtils.getFileContent('logs/state.json');
         setCoreState(JSON.parse(fileContent));
@@ -45,6 +57,7 @@ export default function Dashboard() {
     }
 
     useEffect(() => {
+        fetchConfig();
         fetchStateFile();
         fetchLogFile();
         fetchActivityFile();

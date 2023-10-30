@@ -1,15 +1,12 @@
-import { customTypes } from '../../../custom-types';
 import { configurationComponents } from '../..';
-import { reduxUtils } from '../../../utils';
 import { ICONS } from '../../../assets';
+import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 
 export default function ConfigSectionGeneral() {
-    const centralSectionConfig = reduxUtils.useTypedSelector((s) => s.config.central?.general);
-    const localSectionConfig = reduxUtils.useTypedSelector((s) => s.config.local?.general);
-    const dispatch = reduxUtils.useTypedDispatch();
+    const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
 
-    const update = (c: customTypes.partialConfig) =>
-        dispatch(reduxUtils.configActions.setLocalPartial(c));
+    const centralSectionConfig = centralConfig?.general;
+    const localSectionConfig = localConfig?.general;
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
         return <></>;
@@ -19,26 +16,26 @@ export default function ConfigSectionGeneral() {
             <configurationComponents.ConfigElementText
                 title="Seconds Per Core Interval"
                 value={localSectionConfig.seconds_per_core_interval}
-                setValue={(v: number) => update({ general: { seconds_per_core_interval: v } })}
+                setValue={(v: number) => setLocalConfigItem('general.seconds_per_core_interval', v)}
                 oldValue={centralSectionConfig.seconds_per_core_interval}
                 postfix="second(s)"
             />
             <configurationComponents.ConfigElementToggle
                 title="Test Mode"
                 value={localSectionConfig.test_mode}
-                setValue={(v: boolean) => update({ general: { test_mode: v } })}
+                setValue={(v: boolean) => setLocalConfigItem('general.test_mode', v)}
                 oldValue={centralSectionConfig.test_mode}
             />
             <configurationComponents.ConfigElementText
                 title="Station ID"
                 value={localSectionConfig.station_id}
-                setValue={(v: string) => update({ general: { station_id: v } })}
+                setValue={(v: string) => setLocalConfigItem('general.station_id', v)}
                 oldValue={centralSectionConfig.station_id}
             />
             <configurationComponents.ConfigElementText
                 title="Min. Sun Elevation"
                 value={localSectionConfig.min_sun_elevation}
-                setValue={(v: number) => update({ general: { min_sun_elevation: v } })}
+                setValue={(v: number) => setLocalConfigItem('general.min_sun_elevation', v)}
                 oldValue={centralSectionConfig.min_sun_elevation}
                 postfix="degree(s)"
             />

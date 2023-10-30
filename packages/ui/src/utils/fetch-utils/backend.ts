@@ -2,6 +2,7 @@ import { Command, ChildProcess } from '@tauri-apps/api/shell';
 import { customTypes } from '../../custom-types';
 import { join } from '@tauri-apps/api/path';
 import fetchUtils from '.';
+import { Config } from '../zustand-utils/config-zustand';
 
 async function callCLI(args: string[]): Promise<ChildProcess> {
     let projectDirPath = await fetchUtils.getProjectDirPath();
@@ -41,7 +42,7 @@ const backend = {
     getConfig: async (): Promise<ChildProcess> => {
         return await callCLI(['config', 'get', '--no-indent', '--no-color']);
     },
-    updateConfig: async (newConfig: customTypes.partialConfig): Promise<ChildProcess> => {
+    updateConfig: async (newConfig: Config): Promise<ChildProcess> => {
         return await callCLI(['config', 'update', JSON.stringify(newConfig)]);
     },
     writeToPLC: async (command: string[]): Promise<ChildProcess> => {
