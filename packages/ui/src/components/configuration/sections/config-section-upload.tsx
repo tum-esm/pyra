@@ -47,13 +47,10 @@ export default function ConfigSectionUpload() {
     if (localSectionConfig === null) {
         return (
             <div className="relative space-y-2 text-sm flex-col-left">
-                <div className="space-x-2 text-sm flex-row-left">
-                    <span className="whitespace-nowrap">Not configured yet</span>
-                    <Button onClick={addDefault}>set up now</Button>
-                    {centralSectionConfig !== null && (
-                        <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
-                    )}
-                </div>
+                <Button onClick={addDefault}>set up now</Button>
+                {centralSectionConfig !== null && (
+                    <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
+                )}
                 <essentialComponents.PreviousValue
                     previousValue={
                         centralSectionConfig !== null
@@ -69,8 +66,13 @@ export default function ConfigSectionUpload() {
 
     return (
         <>
-            <Button onClick={setNull}>remove configuration</Button>
-            <div className="w-full h-px my-6 bg-gray-300" />
+            <div>
+                <Button onClick={setNull}>remove configuration</Button>
+            </div>
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementNote>
+                The IP and credentials of the Linux server to upload data to.
+            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Host"
                 value={localSectionConfig.host}
@@ -89,7 +91,7 @@ export default function ConfigSectionUpload() {
                 setValue={(v: string) => setLocalConfigItem('upload.password', v)}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.password : 'null'}
             />
-            <div className="w-full h-px my-6 bg-gray-300" />
+            <configurationComponents.ConfigElementLine />
             TODO: add stream configs
         </>
     );

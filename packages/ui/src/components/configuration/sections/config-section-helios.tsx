@@ -29,13 +29,10 @@ export default function ConfigSectionHelios() {
     if (localSectionConfig === null) {
         return (
             <div className="relative space-y-2 text-sm flex-col-left">
-                <div className="space-x-2 text-sm flex-row-left">
-                    <span className="whitespace-nowrap">Not configured yet</span>
-                    <Button onClick={addDefault}>set up now</Button>
-                    {centralSectionConfig !== null && (
-                        <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
-                    )}
-                </div>
+                <Button onClick={addDefault}>set up now</Button>
+                {centralSectionConfig !== null && (
+                    <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
+                )}
                 <essentialComponents.PreviousValue
                     previousValue={
                         centralSectionConfig !== null
@@ -51,8 +48,10 @@ export default function ConfigSectionHelios() {
 
     return (
         <>
-            <Button onClick={setNull}>remove configuration</Button>
-            <div className="w-full h-px my-6 bg-gray-300" />
+            <div>
+                <Button onClick={setNull}>remove configuration</Button>
+            </div>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="Camera ID"
                 value={localSectionConfig.camera_id}
@@ -60,6 +59,11 @@ export default function ConfigSectionHelios() {
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.camera_id : 'null'}
                 numeric
             />
+            <configurationComponents.ConfigElementNote>
+                Normally is 0, sometimes 1 or 2. Helios will complain (see logs tab) if it cannot
+                find the camera.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="Seconds Per Interval"
                 value={localSectionConfig.seconds_per_interval}
@@ -93,6 +97,14 @@ export default function ConfigSectionHelios() {
                 }
                 numeric
             />
+            <configurationComponents.ConfigElementNote>
+                The lower this threshold, the more sensitive is Helios. More sensitive = more sun
+                conditions are considered as "sunny enough to measure". A starting value of `0.01`
+                is a good baseline. When the system should be measuring and is not, lower the
+                threshold. When CamTracker is drifting a lot and is restarted frequently, increase
+                the threshold.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementToggle
                 title="Save Images"
                 value={localSectionConfig.save_images}

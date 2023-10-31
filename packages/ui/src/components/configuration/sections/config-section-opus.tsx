@@ -18,6 +18,7 @@ export default function ConfigSectionOpus() {
                 setValue={(v: string) => setLocalConfigItem('opus.em27_ip', v)}
                 oldValue={centralSectionConfig.em27_ip}
             />
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="Executable Path"
                 value={localSectionConfig.executable_path}
@@ -36,6 +37,7 @@ export default function ConfigSectionOpus() {
                 setValue={(v: string) => setLocalConfigItem('opus.macro_path', v)}
                 oldValue={centralSectionConfig.macro_path}
             />
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="Username"
                 value={localSectionConfig.username}

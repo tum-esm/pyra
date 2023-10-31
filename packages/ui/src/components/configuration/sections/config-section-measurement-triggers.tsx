@@ -21,7 +21,6 @@ export default function ConfigSectionMeasurementTriggers() {
                 }
                 oldValue={centralSectionConfig.consider_time}
             />
-            <div className="h-0 -mt-4" />
             <configurationComponents.ConfigElementToggle
                 title="Consider Sun Elevation"
                 value={localSectionConfig.consider_sun_elevation}
@@ -30,7 +29,6 @@ export default function ConfigSectionMeasurementTriggers() {
                 }
                 oldValue={centralSectionConfig.consider_sun_elevation}
             />
-            <div className="h-0 -mt-4" />
             <configurationComponents.ConfigElementToggle
                 title="Consider Helios"
                 value={localSectionConfig.consider_helios}
@@ -39,31 +37,42 @@ export default function ConfigSectionMeasurementTriggers() {
                 }
                 oldValue={centralSectionConfig.consider_helios}
             />
-            <div className="w-full h-px mb-6 -mt-2 bg-gray-300" />
+            <configurationComponents.ConfigElementNote>
+                Pyra only does measurements when ALL of the activated triggers are true - e.g. when
+                time is between start and stop time AND sun elevation is higher than the minimum
+                elevation.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementTime
                 title="Start Time"
                 value={localSectionConfig.start_time}
                 setValue={(v) => setLocalConfigItem('measurement_triggers.start_time', v)}
                 oldValue={centralSectionConfig.start_time}
             />
-            <div className="h-0 -mt-4" />
             <configurationComponents.ConfigElementTime
                 title="Stop Time"
                 value={localSectionConfig.stop_time}
                 setValue={(v) => setLocalConfigItem('measurement_triggers.stop_time', v)}
                 oldValue={centralSectionConfig.stop_time}
             />
+            <configurationComponents.ConfigElementNote>
+                Pyra only does measurements between start and stop time (computer time is used).
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="Min. Sun Elevation"
                 value={localSectionConfig.min_sun_elevation}
-                setValue={(v: number) => setLocalConfigItem('general.min_sun_elevation', v)}
+                setValue={(v: number) =>
+                    setLocalConfigItem('measurement_triggers.min_sun_elevation', v)
+                }
                 oldValue={centralSectionConfig.min_sun_elevation}
                 postfix="degree(s)"
+                numeric
             />
-            <div className="w-full -mt-[1.125rem] pl-[12.5rem] text-xs text-blue-600 flex-row-left gap-x-1">
-                <div className="w-4 h-4 text-blue-400">{ICONS.info}</div>This angle will only have
-                an effect if it is higher than "general.min_sun_elevation".
-            </div>
+            <configurationComponents.ConfigElementNote>
+                Pyra only does measurements, when sun angle is higher than this value. This angle
+                will only have an effect if it is higher than "general.min_sun_elevation".
+            </configurationComponents.ConfigElementNote>
         </>
     );
 }

@@ -36,13 +36,34 @@ export default function ConfigSectionCamtracker() {
                 setValue={(v: string) => setLocalConfigItem('camtracker.learn_az_elev_path', v)}
                 oldValue={centralSectionConfig.learn_az_elev_path}
             />
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="Motor Offset Threshold"
                 value={localSectionConfig.motor_offset_threshold}
                 setValue={(v: number) => setLocalConfigItem('camtracker.motor_offset_threshold', v)}
                 oldValue={centralSectionConfig.motor_offset_threshold}
                 postfix="degree(s)"
+                numeric
             />
+            <configurationComponents.ConfigElementNote>
+                CamTracker will log its current motor position into the "learn_az_elev" file. When
+                CamTracker has already been running and its motor position is more than this
+                threshold away from the theoretical sun position, Pyra will restart CamTracker.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementToggle
+                title="Restart if no logs"
+                value={localSectionConfig.restart_if_logs_are_too_old}
+                setValue={(v: boolean) =>
+                    setLocalConfigItem('camtracker.restart_if_logs_are_too_old', v)
+                }
+                oldValue={centralSectionConfig.restart_if_logs_are_too_old}
+            />
+            <configurationComponents.ConfigElementNote>
+                If CamTracker does not log its motor position for more than 5 minutes and this
+                option is enabled, Pyra will restart CamTracker. This can indicate that CamTracker
+                is stuck at initialization - usually fixed by a restart.
+            </configurationComponents.ConfigElementNote>
         </>
     );
 }

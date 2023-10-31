@@ -151,7 +151,11 @@ export default function ConfigurationTab() {
                     Copy config.json
                 </Button>
             </div>
-            <div className={'z-0 flex-grow h-full p-6 overflow-y-auto relative pb-20'}>
+            <div
+                className={
+                    'z-0 flex-grow h-full p-6 overflow-y-auto relative pb-20 flex flex-col gap-y-2'
+                }
+            >
                 {activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
                 {activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
                 {activeKey === 'camtracker' && <configurationComponents.ConfigSectionCamtracker />}

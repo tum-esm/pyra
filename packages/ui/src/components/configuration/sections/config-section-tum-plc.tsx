@@ -27,10 +27,7 @@ export default function ConfigSectionTumPlc() {
     if (localSectionConfig === null) {
         return (
             <div className="relative space-y-2 text-sm flex-col-left">
-                <div className="space-x-2 text-sm flex-row-left">
-                    <span className="whitespace-nowrap">Not configured yet</span>
-                    <Button onClick={addDefault}>set up now</Button>
-                </div>
+                <Button onClick={addDefault}>set up now</Button>
                 <essentialComponents.PreviousValue
                     previousValue={
                         centralSectionConfig !== null
@@ -49,8 +46,10 @@ export default function ConfigSectionTumPlc() {
 
     return (
         <>
-            <Button onClick={setNull}>remove configuration</Button>
-            <div className="w-full h-px my-6 bg-gray-300" />
+            <div>
+                <Button onClick={setNull}>remove configuration</Button>
+            </div>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="IP"
                 value={localSectionConfig.ip}
@@ -62,6 +61,7 @@ export default function ConfigSectionTumPlc() {
                 value={localSectionConfig.version}
                 setValue={(v: any) => setLocalConfigItem('tum_plc.version', v)}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.version : 'null'}
+                numeric
             />
         </>
     );

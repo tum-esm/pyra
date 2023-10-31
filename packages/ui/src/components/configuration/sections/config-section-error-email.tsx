@@ -1,4 +1,3 @@
-import { ICONS } from '../../../assets';
 import { configurationComponents } from '../..';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 
@@ -19,6 +18,23 @@ export default function ConfigSectionErrorEmail() {
                 setValue={(v: boolean) => setLocalConfigItem('error_email.notify_recipients', v)}
                 oldValue={centralSectionConfig.notify_recipients}
             />
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementText
+                title="Sender Address"
+                value={localSectionConfig.sender_address}
+                setValue={(v: string) => setLocalConfigItem('error_email.sender_address', v)}
+                oldValue={centralSectionConfig.sender_address}
+            />
+            <configurationComponents.ConfigElementText
+                title="Recipients"
+                value={localSectionConfig.recipients}
+                setValue={(v: string) => setLocalConfigItem('error_email.recipients', v)}
+                oldValue={centralSectionConfig.recipients}
+            />
+            <configurationComponents.ConfigElementNote>
+                Add multiple recipient emails by splitting them with a comma.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="SMTP Host"
                 value={localSectionConfig.smtp_host}
@@ -32,6 +48,12 @@ export default function ConfigSectionErrorEmail() {
                 oldValue={centralSectionConfig.smtp_port}
                 numeric
             />
+            <configurationComponents.ConfigElementNote>
+                For Gmail: Use "smtp.gmail.com" and "587".
+                <br />
+                For TUM: Use "postout.lrz.de" and "587".
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="SMTP Username"
                 value={localSectionConfig.smtp_username}
@@ -44,22 +66,11 @@ export default function ConfigSectionErrorEmail() {
                 setValue={(v: string) => setLocalConfigItem('error_email.smtp_password', v)}
                 oldValue={centralSectionConfig.smtp_password}
             />
-            <configurationComponents.ConfigElementText
-                title="Sender Address"
-                value={localSectionConfig.sender_address}
-                setValue={(v: string) => setLocalConfigItem('error_email.sender_address', v)}
-                oldValue={centralSectionConfig.sender_address}
-            />
-            <configurationComponents.ConfigElementText
-                title="Recipients"
-                value={localSectionConfig.recipients}
-                setValue={(v: string) => setLocalConfigItem('error_email.recipients', v)}
-                oldValue={centralSectionConfig.recipients}
-            />
-            <div className="w-full -mt-[1.125rem] pl-[12.5rem] text-xs text-blue-600 flex-row-left gap-x-1">
-                <div className="w-4 h-4 text-blue-400">{ICONS.info}</div>Add multiple recipient
-                emails by splitting them with a comma.
-            </div>
+            <configurationComponents.ConfigElementNote>
+                For Gmail: Use the email address and the "App Password".
+                <br />
+                For TUM: Use the TUM ID and its password.
+            </configurationComponents.ConfigElementNote>
         </>
     );
 }
