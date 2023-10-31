@@ -3,13 +3,16 @@ import { z } from 'zod';
 import { diff } from 'deep-diff';
 import { set as lodashSet } from 'lodash';
 
+const floatSchema = z.union([z.number(), z.string().transform((x) => parseFloat(x) || 0.0)]);
+const intSchema = floatSchema; //z.union([z.number(), z.string().transform((x) => parseInt(x) || 0)]);
+
 export const configSchema = z.object({
     general: z.object({
         version: z.string(),
-        seconds_per_core_interval: z.union([z.number(), z.string().transform(parseFloat)]),
+        seconds_per_core_interval: floatSchema,
         test_mode: z.boolean(),
         station_id: z.string(),
-        min_sun_elevation: z.union([z.number(), z.string().transform(parseFloat)]),
+        min_sun_elevation: floatSchema,
     }),
     opus: z.object({
         em27_ip: z.string(),
@@ -24,12 +27,12 @@ export const configSchema = z.object({
         executable_path: z.string(),
         learn_az_elev_path: z.string(),
         sun_intensity_path: z.string(),
-        motor_offset_threshold: z.union([z.number(), z.string().transform(parseFloat)]),
+        motor_offset_threshold: floatSchema,
         restart_if_logs_are_too_old: z.boolean(),
     }),
     error_email: z.object({
         smtp_host: z.string(),
-        smtp_port: z.number(),
+        smtp_port: intSchema,
         smtp_username: z.string(),
         smtp_password: z.string(),
         sender_address: z.string(),
@@ -46,30 +49,30 @@ export const configSchema = z.object({
         consider_sun_elevation: z.boolean(),
         consider_helios: z.boolean(),
         start_time: z.object({
-            hour: z.number(),
-            minute: z.number(),
-            second: z.number(),
+            hour: intSchema,
+            minute: intSchema,
+            second: intSchema,
         }),
         stop_time: z.object({
-            hour: z.number(),
-            minute: z.number(),
-            second: z.number(),
+            hour: intSchema,
+            minute: intSchema,
+            second: intSchema,
         }),
-        min_sun_elevation: z.union([z.number(), z.string().transform(parseFloat)]),
+        min_sun_elevation: floatSchema,
     }),
     tum_plc: z
         .object({
             ip: z.string(),
-            version: z.number(),
+            version: intSchema,
             controlled_by_user: z.boolean(),
         })
         .nullable(),
     helios: z
         .object({
-            camera_id: z.number(),
-            evaluation_size: z.number(),
-            seconds_per_interval: z.union([z.number(), z.string().transform(parseFloat)]),
-            edge_detection_threshold: z.union([z.number(), z.string().transform(parseFloat)]),
+            camera_id: intSchema,
+            evaluation_size: intSchema,
+            seconds_per_interval: floatSchema,
+            edge_detection_threshold: floatSchema,
             save_images: z.boolean(),
         })
         .nullable(),
@@ -132,6 +135,14 @@ export const useConfigStore = create<ConfigStore>()((set, state) => ({
         }),
     configIsDiffering: () => {
         const currentState = state();
-        return diff(currentState.centralConfig, currentState.localConfig) !== undefined;
+        if (currentState.centralConfig === undefined || currentState.localConfig === undefined) {
+            return false;
+        }
+        console.log(currentState.centralConfig);
+        console.log(currentState.localConfig);
+        return (
+            diff(currentState.centralConfig, configSchema.parse(currentState.localConfig)) !==
+            undefined
+        );
     },
 }));

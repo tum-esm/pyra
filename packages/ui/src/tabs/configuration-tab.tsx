@@ -48,11 +48,15 @@ export default function ConfigurationTab() {
     const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
     const { centralConfig, localConfig, setConfig, configIsDiffering } = useConfigStore();
 
-    const resetLocalConfig = () => setConfig(centralConfig);
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
-    async function saveLocalConfig() {
+    function onRevert() {
+        setErrorMessage(undefined);
+        setConfig(centralConfig);
+    }
+
+    async function onSave() {
         if (centralConfig !== undefined && localConfig !== undefined) {
             setIsSaving(true);
 
@@ -68,27 +72,15 @@ export default function ConfigurationTab() {
                     success: (p: ChildProcess) => {
                         setConfig(parsedLocalConfig);
                         setIsSaving(false);
-
                         return 'Successfully saved config';
                     },
                     error: (p: ChildProcess) => {
                         setIsSaving(false);
                         setErrorMessage(p.stdout);
-                        return 'Could not save config';
+                        return `Could not save config`;
                     },
                 }
             );
-
-            /*if (result.stdout.includes('Updated config file')) {
-                setConfig(parsedLocalConfig);
-            } else if (result.stdout.length !== 0) {
-                setErrorMessage(result.stdout);
-            } else {
-                console.error(
-                    `Could not update config file. processResult = ${JSON.stringify(result)}`
-                );
-                toast.error(`Could not update config file, please look in the console for details`);
-            }*/
         }
     }
 
@@ -161,7 +153,7 @@ export default function ConfigurationTab() {
             </div>
             <div className={'z-0 flex-grow h-full p-6 overflow-y-auto relative pb-20'}>
                 {activeKey === 'general' && <configurationComponents.ConfigSectionGeneral />}
-                {/*{activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
+                {activeKey === 'opus' && <configurationComponents.ConfigSectionOpus />}
                 {activeKey === 'camtracker' && <configurationComponents.ConfigSectionCamtracker />}
                 {activeKey === 'error_email' && <configurationComponents.ConfigSectionErrorEmail />}
                 {activeKey === 'measurement_triggers' && (
@@ -169,13 +161,13 @@ export default function ConfigurationTab() {
                 )}
                 {activeKey === 'tum_plc' && <configurationComponents.ConfigSectionTumPlc />}
                 {activeKey === 'helios' && <configurationComponents.ConfigSectionHelios />}
-                {activeKey === 'upload' && <configurationComponents.ConfigSectionUpload />}*/}
+                {activeKey === 'upload' && <configurationComponents.ConfigSectionUpload />}
                 {configIsDiffering() && (
                     <configurationComponents.SavingOverlay
                         {...{
                             errorMessage,
-                            saveLocalConfig,
-                            resetLocalConfig,
+                            onSave,
+                            onRevert,
                             isSaving,
                         }}
                     />
