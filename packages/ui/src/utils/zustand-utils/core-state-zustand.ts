@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { z } from 'zod';
+import { set as lodashSet } from 'lodash';
 
 const coreStateSchema = z.object({
     last_updated: z.string(),
@@ -58,9 +59,19 @@ export type CoreState = z.infer<typeof coreStateSchema>;
 interface CoreStateStore {
     coreState: CoreState | undefined;
     setCoreState: (s: any) => void;
+    setCoreStateItem: (path: string, value: any) => void;
 }
 
 export const useCoreStateStore = create<CoreStateStore>()((set) => ({
     coreState: undefined,
     setCoreState: (s: any) => set(() => ({ coreState: coreStateSchema.parse(s) })),
+    setCoreStateItem: (path: string, value: any) =>
+        set((state) => {
+            if (state.coreState === undefined) {
+                return {};
+            }
+            return {
+                coreState: lodashSet(state.coreState, path, value),
+            };
+        }),
 }));

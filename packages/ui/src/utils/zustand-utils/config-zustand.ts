@@ -100,6 +100,7 @@ interface ConfigStore {
     localConfig: Config | undefined;
     setConfig: (c: any) => void;
     setLocalConfigItem: (path: string, value: any) => void;
+    setConfigItem: (path: string, value: any) => void;
     configIsDiffering: () => boolean;
 }
 
@@ -115,6 +116,17 @@ export const useConfigStore = create<ConfigStore>()((set, state) => ({
             } else {
                 return {
                     localConfig: lodashSet(state.localConfig, path, value),
+                };
+            }
+        }),
+    setConfigItem: (path, value) =>
+        set((state) => {
+            if (state.localConfig === undefined || state.centralConfig === undefined) {
+                return {};
+            } else {
+                return {
+                    localConfig: lodashSet(state.localConfig, path, value),
+                    centralConfig: lodashSet(state.centralConfig, path, value),
                 };
             }
         }),
