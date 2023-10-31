@@ -10,7 +10,7 @@ export default function ConfigElementTime(props: {
     const { title, value, oldValue, setValue, disabled } = props;
 
     function parseNumericValue(v: string): number {
-        return parseInt(`${v}`.replace(/[^\d]/g, ''));
+        return parseInt(`${v}`.replace(/[^\d]/g, '')) || 0;
     }
 
     let hasBeenModified =
@@ -20,35 +20,32 @@ export default function ConfigElementTime(props: {
 
     return (
         <configurationComponents.LabeledRow title={title + ' (h:m:s)'} modified={hasBeenModified}>
-            <div className="relative flex w-full gap-x-1">
+            <div className="relative flex flex-row items-baseline w-full gap-x-1">
                 <essentialComponents.TextInput
                     value={value.hour.toString()}
                     setValue={(v: string) => setValue({ ...value, hour: parseNumericValue(v) })}
-                    small
                     disabled={disabled}
                 />
                 :
                 <essentialComponents.TextInput
                     value={value.minute.toString()}
                     setValue={(v: any) => setValue({ ...value, minute: parseNumericValue(v) })}
-                    small
                     disabled={disabled}
                 />
                 :
                 <essentialComponents.TextInput
                     value={value.second.toString()}
                     setValue={(v: any) => setValue({ ...value, second: parseNumericValue(v) })}
-                    small
                     disabled={disabled}
                 />
-                <essentialComponents.PreviousValue
-                    previousValue={
-                        hasBeenModified
-                            ? `${oldValue.hour} : ${oldValue.minute} : ${oldValue.second}`
-                            : undefined
-                    }
-                />
             </div>
+            <essentialComponents.PreviousValue
+                previousValue={
+                    hasBeenModified
+                        ? `${oldValue.hour} : ${oldValue.minute} : ${oldValue.second}`
+                        : undefined
+                }
+            />
         </configurationComponents.LabeledRow>
     );
 }

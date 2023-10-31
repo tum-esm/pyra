@@ -21,7 +21,11 @@ export default function ConfigElementText(props: {
     }
 
     function parseNumericValue(v: string): string {
-        return `${v}`.replace(/[^\d\.]/g, '');
+        const parsedValue = `${v}`.replace(/[^\d\.]/g, '');
+        if (parsedValue === '') {
+            return '0';
+        }
+        return parsedValue;
     }
 
     const showfileSelector = title.endsWith('Path') || props.showFileSelector;
