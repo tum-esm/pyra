@@ -31,11 +31,14 @@ export default function Main() {
     }
 
     return (
-        <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
+        <div className="relative flex flex-col items-stretch w-screen h-screen overflow-hidden">
             {backendIntegrity === undefined && (
-                <main className="w-full h-full flex-row-center">
-                    <div className="w-8 h-8 text-slate-950 animate-spin">{ICONS.spinner}</div>
-                </main>
+                <>
+                    <structuralComponents.BlankHeader />
+                    <main className="w-full h-full flex-row-center">
+                        <div className="w-8 h-8 text-slate-950 animate-spin">{ICONS.spinner}</div>
+                    </main>
+                </>
             )}
             {backendIntegrity === 'cli is missing' && (
                 <structuralComponents.DisconnectedScreen retry={load} />
