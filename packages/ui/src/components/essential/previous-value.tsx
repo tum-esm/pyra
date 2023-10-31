@@ -2,7 +2,7 @@ export default function PreviousValue(props: { previousValue?: any }) {
     const { previousValue } = props;
     const sharedClasses1 = 'ml-1 text-xs font-normal flex-row-left opacity-80 gap-x-1';
     const sharedClasses2 =
-        'rounded bg-yellow-150 border border-yellow-400 px-1 py-0 text-yellow-800 text-xs shadow-sm break-all';
+        'rounded-md bg-blue-100 border border-blue-300 px-1.5 py-0.5 text-blue-950 text-xs break-all';
 
     if (typeof previousValue === 'string') {
         return (
@@ -11,10 +11,7 @@ export default function PreviousValue(props: { previousValue?: any }) {
                 <span className={sharedClasses2}>{previousValue}</span>
             </span>
         );
-    } else if (
-        typeof previousValue === 'object' &&
-        previousValue.length !== undefined
-    ) {
+    } else if (typeof previousValue === 'object' && previousValue.length !== undefined) {
         return (
             <span className={sharedClasses1}>
                 <span className="whitespace-nowrap">previous value: </span>

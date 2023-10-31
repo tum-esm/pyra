@@ -8,14 +8,16 @@ export default function LabeledRow(props: {
     const { title, modified, children } = props;
 
     return (
-        <div className="relative flex mb-6 gap-x-2">
-            <label className="text-sm text-left w-[12.5rem] text-gray-700 flex-shrink-0 h-9 leading-tight font-semibold flex items-center justify-start">
+        <div className="relative flex flex-shrink-0 gap-x-2">
+            <label
+                className={
+                    'text-sm text-left w-[12.5rem] flex-shrink-0 h-9 leading-tight font-semibold text-gray-700 flex flex-col items-start justify-start'
+                }
+            >
                 {title}
+                {modified && <div className="text-xs font-normal text-blue-400">modified</div>}
             </label>
             <div className="flex-grow space-y-1 flex-col-left">{children}</div>
-            {modified && (
-                <div className="absolute top-0 -left-1 w-1.5 h-full -translate-x-2.5 bg-yellow-400 rounded-sm" />
-            )}
         </div>
     );
 }
