@@ -11,6 +11,8 @@ import ConfigSectionOpus from './sections/config-section-opus';
 import ConfigSectionTumPlc from './sections/config-section-tum-plc';
 import ConfigSectionHelios from './sections/config-section-helios';
 import ConfigSectionUpload from './sections/config-section-upload';
+import ConfigElementLine from './rows/config-element-line';
+import ConfigElementNote from './rows/config-element-note';
 
 export default {
     LabeledRow,
@@ -18,6 +20,8 @@ export default {
     ConfigElementText,
     ConfigElementTime,
     ConfigElementToggle,
+    ConfigElementLine,
+    ConfigElementNote,
     ConfigSectionCamtracker,
     ConfigSectionErrorEmail,
     ConfigSectionGeneral,
