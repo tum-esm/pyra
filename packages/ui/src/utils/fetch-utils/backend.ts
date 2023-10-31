@@ -42,7 +42,7 @@ const backend = {
     getConfig: async (): Promise<ChildProcess> => {
         return await callCLI(['config', 'get', '--no-indent', '--no-color']);
     },
-    updateConfig: async (newConfig: Config): Promise<ChildProcess> => {
+    updateConfig: async (newConfig: any): Promise<ChildProcess> => {
         return await callCLI(['config', 'update', JSON.stringify(newConfig)]);
     },
     writeToPLC: async (command: string[]): Promise<ChildProcess> => {

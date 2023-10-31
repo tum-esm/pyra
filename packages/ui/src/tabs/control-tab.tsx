@@ -1,10 +1,11 @@
 import { fetchUtils } from '../utils';
 import { essentialComponents } from '../components';
 import { useState } from 'react';
-import { customTypes } from '../custom-types';
 import { ICONS } from '../assets';
 import toast from 'react-hot-toast';
 import { useCoreStateStore } from '../utils/zustand-utils/core-state-zustand';
+import { useConfigStore } from '../utils/zustand-utils/config-zustand';
+import { ChildProcess } from '@tauri-apps/api/shell';
 
 function renderBoolValue(value: boolean | null) {
     if (value === null) {
@@ -29,12 +30,11 @@ function VariableBlock(props: {
             | {
                   label: string;
                   callback: (value: number) => void;
-                  spinner: boolean;
                   variant: 'numeric';
                   initialValue: number;
                   postfix?: string;
               }
-            | { label: string; callback: () => void; spinner: boolean; variant?: undefined };
+            | { label: string; callback: () => void; variant?: undefined };
     }[];
 }) {
     return (
@@ -59,7 +59,6 @@ function VariableBlock(props: {
                                         variant="gray"
                                         onClick={r.action.callback}
                                         key={r.action.label}
-                                        spinner={r.action.spinner}
                                         className="w-52"
                                         disabled={props.disabled}
                                     >
@@ -71,7 +70,6 @@ function VariableBlock(props: {
                                         initialValue={r.action.initialValue}
                                         onClick={r.action.callback}
                                         key={r.action.label}
-                                        spinner={r.action.spinner}
                                         className="w-52"
                                         postfix={r.action.postfix}
                                         disabled={props.disabled}
@@ -89,100 +87,89 @@ function VariableBlock(props: {
 }
 export default function ControlTab() {
     const { coreState } = useCoreStateStore();
+    const { centralConfig, setConfigItem } = useConfigStore();
+    const { setCoreStateItem } = useCoreStateStore();
 
-    const plcIsControlledByUser = reduxUtils.useTypedSelector(
-        (s) => s.config.central?.tum_plc?.controlled_by_user
-    );
-    const pyraIsInTestMode = reduxUtils.useTypedSelector(
-        (s) => s.config.central?.general.test_mode
-    );
+    const plcIsControlledByUser = centralConfig?.tum_plc?.controlled_by_user;
+    const pyraIsInTestMode = centralConfig?.general.test_mode;
 
-    const dispatch = reduxUtils.useTypedDispatch();
-    const setConfigsPartial = (c: customTypes.partialConfig) =>
-        dispatch(reduxUtils.configActions.setConfigsPartial(c));
-
-    const [isLoadingManualToggle, setIsLoadingManualToggle] = useState(false);
-    const [isLoadingReset, setIsLoadingReset] = useState(false);
-    const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
-    const [isLoadingMoveCover, setIsLoadingMoveCover] = useState(false);
-    const [isLoadingSyncTotracker, setIsLoadingSyncTotracker] = useState(false);
-    const [isLoadingAutoTemperature, setIsLoadingAutoTemperature] = useState(false);
-
-    const [isLoadingPowerHeater, setIsLoadingPowerHeater] = useState(false);
-    const [isLoadingPowerCamera, setIsLoadingPowerCamera] = useState(false);
-    const [isLoadingPowerRouter, setIsLoadingPowerRouter] = useState(false);
-    const [isLoadingPowerSpectrometer, setIsLoadingPowerSpectrometer] = useState(false);
-    const [isLoadingPowerComputer, setIsLoadingPowerComputer] = useState(false);
-
-    const buttonsAreDisabled =
-        !plcIsControlledByUser ||
-        isLoadingManualToggle ||
-        isLoadingReset ||
-        isLoadingCloseCover ||
-        isLoadingMoveCover ||
-        isLoadingSyncTotracker ||
-        isLoadingAutoTemperature ||
-        isLoadingPowerHeater ||
-        isLoadingPowerCamera ||
-        isLoadingPowerRouter ||
-        isLoadingPowerSpectrometer ||
-        isLoadingPowerComputer;
+    const [commandIsRunning, setCommandIsRunning] = useState(false);
+    const buttonsAreDisabled = !plcIsControlledByUser || commandIsRunning;
 
     async function setPlcIsControlledByUser(v: boolean) {
-        setIsLoadingManualToggle(true);
-        const update = { tum_plc: { controlled_by_user: v } };
-        let result = await fetchUtils.backend.updateConfig(update);
-        if (!result.stdout.includes('Updated config file')) {
-            console.error(
-                `Could not update config file. processResult = ${JSON.stringify(result)}`
-            );
-            toast.error(`Could not update config file, please look in the console for details`);
-        } else {
-            setConfigsPartial(update);
+        if (commandIsRunning) {
+            toast.error('You cannot run multiple commands at once');
+            return;
         }
-        setIsLoadingManualToggle(false);
-    }
+        setCommandIsRunning(true);
 
-    async function runPlcWriteCommand(
-        command: string[],
-        setLoading: (l: boolean) => void,
-        update: any
-    ) {
-        setLoading(true);
-        const result = await fetchUtils.backend.writeToPLC(command);
-        if (result.stdout.replace(/[\n\s]*/g, '') !== 'Ok') {
-            if (result.code === 0) {
-                toast.error(`Could not write to PLC: ${result.stdout}`);
-            } else {
-                toast.error('Could not write to PLC - details in console');
-                console.error(`Could not write to PLC, processResults = ${JSON.stringify(result)}`);
-            }
-            setLoading(false);
-            throw '';
-        } else {
-            setLoading(false);
-        }
-    }
-
-    async function reset() {
-        await runPlcWriteCommand(['reset'], setIsLoadingReset, {
-            state: { reset_needed: false },
+        toast.promise(fetchUtils.backend.updateConfig({ tum_plc: { controlled_by_user: v } }), {
+            loading: 'Switching PLC control mode',
+            success: (p: ChildProcess) => {
+                setConfigItem('tum_plc.controlled_by_user', v);
+                setCommandIsRunning(false);
+                return 'Successfully switched PLC control mode';
+            },
+            error: (p: ChildProcess) => {
+                setCommandIsRunning(false);
+                console.log(p);
+                return 'Could not switch PLC control mode';
+            },
         });
     }
 
+    async function runPLCCommand(
+        command: string[],
+        label: string,
+        successLabel: string,
+        successUpdate: () => void
+    ) {
+        if (commandIsRunning) {
+            toast.error('You cannot run multiple commands at once');
+            return;
+        }
+        setCommandIsRunning(true);
+
+        toast.promise(fetchUtils.backend.writeToPLC(command), {
+            loading: label,
+            success: (p: ChildProcess) => {
+                successUpdate();
+                setCommandIsRunning(false);
+                return successLabel;
+            },
+            error: (p: ChildProcess) => {
+                setCommandIsRunning(false);
+                console.log(p);
+                // TODO: add button to open console
+                return 'Could not write to PLC, details in console';
+            },
+        });
+    }
+
+    async function reset() {
+        await runPLCCommand(['reset'], 'running PLC reset', 'successfully reset the PLC', () =>
+            setCoreStateItem('plc_state.reset_needed', false)
+        );
+    }
+
     async function closeCover() {
-        await runPlcWriteCommand(['close-cover'], setIsLoadingCloseCover, {
-            state: { cover_closed: true },
-            actors: { current_angle: 0 },
+        await runPLCCommand(['close-cover'], 'closing cover', 'successfully closed cover', () => {
+            setCoreStateItem('plc_state.state.cover_closed', true);
+            setCoreStateItem('plc_state.actors.current_angle', 0);
         });
     }
 
     async function moveCover(angle: number) {
         if (angle === 0 || (angle >= 110 && angle <= 250)) {
-            await runPlcWriteCommand(['set-cover-angle', angle.toString()], setIsLoadingMoveCover, {
-                state: { cover_closed: angle === 0 },
-                actors: { current_angle: angle },
-            });
+            await runPLCCommand(
+                ['set-cover-angle'],
+                'moving cover',
+                'successfully moved cover',
+                () => {
+                    setCoreStateItem('plc_state.state.cover_closed', angle === 0);
+                    setCoreStateItem('plc_state.actors.current_angle', angle);
+                }
+            );
         } else {
             toast.error(`Angle has to be either 0 or between 110° and 250°`);
         }
@@ -191,12 +178,11 @@ export default function ControlTab() {
     async function toggleSyncToTracker() {
         if (coreState !== undefined) {
             const newValue = !coreState.plc_state.control.sync_to_tracker;
-            await runPlcWriteCommand(
+            await runPLCCommand(
                 ['set-sync-to-tracker', JSON.stringify(newValue)],
-                setIsLoadingSyncTotracker,
-                {
-                    control: { sync_to_tracker: newValue },
-                }
+                'toggling sync-to-tracker',
+                'successfully toggled sync-to-tracker',
+                () => setCoreStateItem('plc_state.control.sync_to_tracker', newValue)
             );
         }
     }
@@ -204,12 +190,11 @@ export default function ControlTab() {
     async function toggleAutoTemperature() {
         if (coreState !== undefined) {
             const newValue = !coreState.plc_state.control.auto_temp_mode;
-            await runPlcWriteCommand(
+            await runPLCCommand(
                 ['set-auto-temperature', JSON.stringify(newValue)],
-                setIsLoadingAutoTemperature,
-                {
-                    control: { auto_temp_mode: newValue },
-                }
+                'toggling auto-temperature',
+                'successfully toggled auto-temperature',
+                () => setCoreStateItem('plc_state.control.auto_temp_mode', newValue)
             );
         }
     }
@@ -217,12 +202,11 @@ export default function ControlTab() {
     async function togglePowerHeater() {
         if (coreState !== undefined) {
             const newValue = !coreState.plc_state.power.heater;
-            await runPlcWriteCommand(
+            await runPLCCommand(
                 ['set-heater-power', JSON.stringify(newValue)],
-                setIsLoadingPowerHeater,
-                {
-                    power: { heater: newValue },
-                }
+                'toggling heater power',
+                'successfully toggled heater power',
+                () => setCoreStateItem('plc_state.power.heater', newValue)
             );
         }
     }
@@ -230,12 +214,11 @@ export default function ControlTab() {
     async function togglePowerCamera() {
         if (coreState !== undefined) {
             const newValue = !coreState.plc_state.power.camera;
-            await runPlcWriteCommand(
+            await runPLCCommand(
                 ['set-camera-power', JSON.stringify(newValue)],
-                setIsLoadingPowerCamera,
-                {
-                    power: { camera: newValue },
-                }
+                'toggling camera power',
+                'successfully toggled camera power',
+                () => setCoreStateItem('plc_state.power.camera', newValue)
             );
         }
     }
@@ -243,12 +226,11 @@ export default function ControlTab() {
     async function togglePowerRouter() {
         if (coreState !== undefined) {
             const newValue = !coreState.plc_state.power.router;
-            await runPlcWriteCommand(
+            await runPLCCommand(
                 ['set-router-power', JSON.stringify(newValue)],
-                setIsLoadingPowerRouter,
-                {
-                    power: { router: newValue },
-                }
+                'toggling router power',
+                'successfully toggled router power',
+                () => setCoreStateItem('plc_state.power.router', newValue)
             );
         }
     }
@@ -256,12 +238,11 @@ export default function ControlTab() {
     async function togglePowerSpectrometer() {
         if (coreState !== undefined) {
             const newValue = !coreState.plc_state.power.spectrometer;
-            await runPlcWriteCommand(
+            await runPLCCommand(
                 ['set-spectrometer-power', JSON.stringify(newValue)],
-                setIsLoadingPowerSpectrometer,
-                {
-                    power: { spectrometer: newValue },
-                }
+                'toggling spectrometer power',
+                'successfully toggled spectrometer power',
+                () => setCoreStateItem('plc_state.power.spectrometer', newValue)
             );
         }
     }
@@ -269,12 +250,11 @@ export default function ControlTab() {
     async function togglePowerComputer() {
         if (coreState !== undefined) {
             const newValue = !coreState.plc_state.power.computer;
-            await runPlcWriteCommand(
+            await runPLCCommand(
                 ['set-computer-power', JSON.stringify(newValue)],
-                setIsLoadingPowerComputer,
-                {
-                    power: { computer: newValue },
-                }
+                'toggling computer power',
+                'successfully toggled computer power',
+                () => setCoreStateItem('plc_state.power.computer', newValue)
             );
         }
     }
@@ -292,14 +272,11 @@ export default function ControlTab() {
                     values={['user', 'automation']}
                     setValue={(v) => setPlcIsControlledByUser(v === 'user')}
                 />
-                {isLoadingManualToggle && <essentialComponents.Spinner />}
-                {!isLoadingManualToggle && (
-                    <div className="text-sm text-gray-500 flex-row-center">
-                        <div className="w-4 h-4 mr-1">{ICONS.info}</div>
-                        {plcIsControlledByUser && 'The automation will skip all PLC related logic'}
-                        {!plcIsControlledByUser && 'You cannot send any commands to the PLC'}
-                    </div>
-                )}
+                <div className="text-sm text-gray-500 flex-row-center">
+                    <div className="w-4 h-4 mr-1">{ICONS.info}</div>
+                    {plcIsControlledByUser && 'The automation will skip all PLC related logic'}
+                    {!plcIsControlledByUser && 'You cannot send any commands to the PLC'}
+                </div>
                 <div className="flex-grow" />
                 <div className="px-2 py-0.5 text-sm text-green-100 bg-green-900 rounded shadow-sm">
                     Last PLC-read:{' '}
@@ -339,7 +316,6 @@ export default function ControlTab() {
                                     action: {
                                         label: 'reset now',
                                         callback: reset,
-                                        spinner: isLoadingReset,
                                     },
                                 },
                                 {
@@ -373,7 +349,6 @@ export default function ControlTab() {
                                     action: {
                                         label: 'force cover close',
                                         callback: closeCover,
-                                        spinner: isLoadingCloseCover,
                                     },
                                 },
                                 {
@@ -400,7 +375,6 @@ export default function ControlTab() {
                                     action: {
                                         label: 'move to angle',
                                         callback: moveCover,
-                                        spinner: isLoadingMoveCover,
                                         variant: 'numeric',
                                         initialValue: coreState.plc_state.actors.current_angle || 0,
                                         postfix: '°',
@@ -418,7 +392,6 @@ export default function ControlTab() {
                                             ? 'do not sync'
                                             : 'sync',
                                         callback: toggleSyncToTracker,
-                                        spinner: isLoadingSyncTotracker,
                                     },
                                 },
                             ]}
@@ -467,7 +440,6 @@ export default function ControlTab() {
                                             ? 'disable'
                                             : 'enable',
                                         callback: toggleAutoTemperature,
-                                        spinner: isLoadingAutoTemperature,
                                     },
                                 },
                             ]}
@@ -487,7 +459,6 @@ export default function ControlTab() {
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerCamera,
-                                        spinner: isLoadingPowerCamera,
                                     },
                                 },
                                 {
@@ -500,7 +471,6 @@ export default function ControlTab() {
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerRouter,
-                                        spinner: isLoadingPowerRouter,
                                     },
                                 },
                                 {
@@ -515,7 +485,6 @@ export default function ControlTab() {
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerSpectrometer,
-                                        spinner: isLoadingPowerSpectrometer,
                                     },
                                 },
                                 {
@@ -528,7 +497,6 @@ export default function ControlTab() {
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerComputer,
-                                        spinner: isLoadingPowerComputer,
                                     },
                                 },
                                 {
@@ -541,7 +509,6 @@ export default function ControlTab() {
                                             ? 'disable'
                                             : 'enable',
                                         callback: togglePowerHeater,
-                                        spinner: isLoadingPowerHeater,
                                     },
                                 },
                             ]}
