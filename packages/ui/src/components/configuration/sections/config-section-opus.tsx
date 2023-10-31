@@ -1,14 +1,11 @@
 import { configurationComponents } from '../..';
-import { customTypes } from '../../../custom-types';
-import { reduxUtils } from '../../../utils';
+import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 
 export default function ConfigSectionOpus() {
-    const centralSectionConfig = reduxUtils.useTypedSelector((s) => s.config.central?.opus);
-    const localSectionConfig = reduxUtils.useTypedSelector((s) => s.config.local?.opus);
-    const dispatch = reduxUtils.useTypedDispatch();
+    const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
 
-    const update = (c: customTypes.partialConfig) =>
-        dispatch(reduxUtils.configActions.setLocalPartial(c));
+    const centralSectionConfig = centralConfig?.opus;
+    const localSectionConfig = localConfig?.opus;
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
         return <></>;
@@ -18,37 +15,37 @@ export default function ConfigSectionOpus() {
             <configurationComponents.ConfigElementText
                 title="EM27 IP"
                 value={localSectionConfig.em27_ip}
-                setValue={(v: string) => update({ opus: { em27_ip: v } })}
+                setValue={(v: string) => setLocalConfigItem('opus.em27_ip', v)}
                 oldValue={centralSectionConfig.em27_ip}
             />
             <configurationComponents.ConfigElementText
                 title="Executable Path"
                 value={localSectionConfig.executable_path}
-                setValue={(v: string) => update({ opus: { executable_path: v } })}
+                setValue={(v: string) => setLocalConfigItem('opus.executable_path', v)}
                 oldValue={centralSectionConfig.executable_path}
             />
             <configurationComponents.ConfigElementText
                 title="Experiment Path"
                 value={localSectionConfig.experiment_path}
-                setValue={(v: string) => update({ opus: { experiment_path: v } })}
+                setValue={(v: string) => setLocalConfigItem('opus.experiment_path', v)}
                 oldValue={centralSectionConfig.experiment_path}
             />
             <configurationComponents.ConfigElementText
                 title="Macro Path"
                 value={localSectionConfig.macro_path}
-                setValue={(v: string) => update({ opus: { macro_path: v } })}
+                setValue={(v: string) => setLocalConfigItem('opus.macro_path', v)}
                 oldValue={centralSectionConfig.macro_path}
             />
             <configurationComponents.ConfigElementText
                 title="Username"
                 value={localSectionConfig.username}
-                setValue={(v: string) => update({ opus: { username: v } })}
+                setValue={(v: string) => setLocalConfigItem('opus.username', v)}
                 oldValue={centralSectionConfig.username}
             />
             <configurationComponents.ConfigElementText
                 title="Password"
                 value={localSectionConfig.password}
-                setValue={(v: string) => update({ opus: { password: v } })}
+                setValue={(v: string) => setLocalConfigItem('opus.password', v)}
                 oldValue={centralSectionConfig.password}
             />
         </>

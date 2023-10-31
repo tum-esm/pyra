@@ -1,19 +1,12 @@
-import { customTypes } from '../../../custom-types';
 import { configurationComponents } from '../..';
-import { reduxUtils } from '../../../utils';
 import { ICONS } from '../../../assets';
+import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 
 export default function ConfigSectionMeasurementTriggers() {
-    const centralSectionConfig = reduxUtils.useTypedSelector(
-        (s) => s.config.central?.measurement_triggers
-    );
-    const localSectionConfig = reduxUtils.useTypedSelector(
-        (s) => s.config.local?.measurement_triggers
-    );
-    const dispatch = reduxUtils.useTypedDispatch();
+    const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
 
-    const update = (c: customTypes.partialConfig) =>
-        dispatch(reduxUtils.configActions.setLocalPartial(c));
+    const centralSectionConfig = centralConfig?.measurement_triggers;
+    const localSectionConfig = localConfig?.measurement_triggers;
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
         return <></>;
@@ -23,7 +16,9 @@ export default function ConfigSectionMeasurementTriggers() {
             <configurationComponents.ConfigElementToggle
                 title="Consider Time"
                 value={localSectionConfig.consider_time}
-                setValue={(v: boolean) => update({ measurement_triggers: { consider_time: v } })}
+                setValue={(v: boolean) =>
+                    setLocalConfigItem('measurement_triggers.consider_time', v)
+                }
                 oldValue={centralSectionConfig.consider_time}
             />
             <div className="h-0 -mt-4" />
@@ -31,9 +26,7 @@ export default function ConfigSectionMeasurementTriggers() {
                 title="Consider Sun Elevation"
                 value={localSectionConfig.consider_sun_elevation}
                 setValue={(v: boolean) =>
-                    update({
-                        measurement_triggers: { consider_sun_elevation: v },
-                    })
+                    setLocalConfigItem('measurement_triggers.consider_sun_elevation', v)
                 }
                 oldValue={centralSectionConfig.consider_sun_elevation}
             />
@@ -41,27 +34,29 @@ export default function ConfigSectionMeasurementTriggers() {
             <configurationComponents.ConfigElementToggle
                 title="Consider Helios"
                 value={localSectionConfig.consider_helios}
-                setValue={(v: boolean) => update({ measurement_triggers: { consider_helios: v } })}
+                setValue={(v: boolean) =>
+                    setLocalConfigItem('measurement_triggers.consider_helios', v)
+                }
                 oldValue={centralSectionConfig.consider_helios}
             />
             <div className="w-full h-px mb-6 -mt-2 bg-gray-300" />
             <configurationComponents.ConfigElementTime
                 title="Start Time"
                 value={localSectionConfig.start_time}
-                setValue={(v) => update({ measurement_triggers: { start_time: v } })}
+                setValue={(v) => setLocalConfigItem('measurement_triggers.start_time', v)}
                 oldValue={centralSectionConfig.start_time}
             />
             <div className="h-0 -mt-4" />
             <configurationComponents.ConfigElementTime
                 title="Stop Time"
                 value={localSectionConfig.stop_time}
-                setValue={(v) => update({ measurement_triggers: { stop_time: v } })}
+                setValue={(v) => setLocalConfigItem('measurement_triggers.stop_time', v)}
                 oldValue={centralSectionConfig.stop_time}
             />
             <configurationComponents.ConfigElementText
                 title="Min. Sun Elevation"
                 value={localSectionConfig.min_sun_elevation}
-                setValue={(v: number) => update({ measurement_triggers: { min_sun_elevation: v } })}
+                setValue={(v: number) => setLocalConfigItem('general.min_sun_elevation', v)}
                 oldValue={centralSectionConfig.min_sun_elevation}
                 postfix="degree(s)"
             />
