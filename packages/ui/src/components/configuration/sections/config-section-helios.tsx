@@ -13,7 +13,8 @@ export default function ConfigSectionHelios() {
             camera_id: 0,
             evaluation_size: 15,
             seconds_per_interval: 6,
-            edge_detection_threshold: 0.01,
+            edge_pixel_threshold: 0.01,
+            edge_color_threshold: 40,
             save_images: false,
         });
     }
@@ -86,23 +87,42 @@ export default function ConfigSectionHelios() {
                 numeric
                 postfix="image(s)"
             />
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementNote>
+                In general: The lower these thresholds, the more sensitive is Helios. More sensitive
+                = more sun conditions are considered as "sunny enough to measure". hen the system
+                should be measuring and is not, lower these thresholds. When CamTracker is drifting
+                a lot and is restarted frequently, increase the thresholds.
+            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
-                title="Edge Detection Threshold"
-                value={localSectionConfig.edge_detection_threshold}
-                setValue={(v: any) => setLocalConfigItem('helios.edge_detection_threshold', v)}
+                title="Edge Pixel Threshold"
+                value={localSectionConfig.edge_pixel_threshold}
+                setValue={(v: any) => setLocalConfigItem('helios.edge_pixel_threshold', v)}
                 oldValue={
                     centralSectionConfig !== null
-                        ? centralSectionConfig.edge_detection_threshold
+                        ? centralSectionConfig.edge_pixel_threshold
                         : 'null'
                 }
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                The lower this threshold, the more sensitive is Helios. More sensitive = more sun
-                conditions are considered as "sunny enough to measure". A starting value of `0.01`
-                is a good baseline. When the system should be measuring and is not, lower the
-                threshold. When CamTracker is drifting a lot and is restarted frequently, increase
-                the threshold.
+                How many pixels of the lense should be considered as "edge". A starting value of
+                `0.01` is a good baseline, i.e. 1% of the lense is a hard edge.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementText
+                title="Edge Color Threshold"
+                value={localSectionConfig.edge_color_threshold}
+                setValue={(v: any) => setLocalConfigItem('helios.edge_color_threshold', v)}
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.edge_color_threshold
+                        : 'null'
+                }
+                numeric
+            />
+            <configurationComponents.ConfigElementNote>
+                How hard does a shadow have to be to be considered as "edge". A starting value of
+                `40` is a good baseline.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementToggle
