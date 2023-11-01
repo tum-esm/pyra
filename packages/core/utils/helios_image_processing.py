@@ -172,6 +172,7 @@ class HeliosImageProcessing:
     @staticmethod
     def get_edge_fraction(
         frame: np.ndarray[Any, Any],
+        station_id: str,
         edge_color_threshold: int,
         save_image: bool = False
     ) -> float:
@@ -238,18 +239,21 @@ class HeliosImageProcessing:
 
             edge_fraction_str = str(edge_fraction
                                    ) + ("0" * (8 - len(str(edge_fraction))))
-            raw_img_name = f"{img_timestamp}-{edge_fraction_str}-raw.jpg"
-
-            processed_img_name = f"{img_timestamp}-{edge_fraction_str}-processed.jpg"
             processed_frame = HeliosImageProcessing.add_markings_to_image(
                 edges_only_dilated, edge_fraction, circle_cx, circle_cy,
                 circle_r
             )
-
-            cv.imwrite(os.path.join(img_directory_path, raw_img_name), frame)
             cv.imwrite(
-                os.path.join(img_directory_path, processed_img_name),
-                processed_frame
+                os.path.join(
+                    img_directory_path,
+                    f"{station_id}-{img_timestamp}-{edge_fraction_str}-raw.jpg"
+                ), frame
+            )
+            cv.imwrite(
+                os.path.join(
+                    img_directory_path,
+                    f"{station_id}-{img_timestamp}-{edge_fraction_str}-processed.jpg"
+                ), processed_frame
             )
 
         return edge_fraction

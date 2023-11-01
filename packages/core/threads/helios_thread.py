@@ -211,7 +211,12 @@ class HeliosInterface:
             )
             self.current_exposure = new_exposure
 
-    def run(self, edge_color_threshold: int, save_image: bool) -> float:
+    def run(
+        self,
+        station_id: str,
+        edge_color_threshold: int,
+        save_image: bool,
+    ) -> float:
         """Take an image and evaluate the sun conditions. Run autoexposure
         function every 5 minutes. Returns the edge fraction."""
         now = time.time()
@@ -223,6 +228,7 @@ class HeliosInterface:
 
         edge_fraction = utils.HeliosImageProcessing.get_edge_fraction(
             frame=frame,
+            station_id=station_id,
             edge_color_threshold=edge_color_threshold,
             save_image=save_image,
         )
@@ -349,6 +355,7 @@ class HeliosThread(AbstractThread):
                 # an Exception will be raised (and Helios will be restarted)
                 try:
                     new_edge_fraction = helios_instance.run(
+                        station_id=config.general.station_id,
                         edge_color_threshold=config.helios.edge_color_threshold,
                         save_image=(config.helios.save_images or headless)
                     )
