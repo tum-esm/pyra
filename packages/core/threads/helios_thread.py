@@ -211,7 +211,7 @@ class HeliosInterface:
             )
             self.current_exposure = new_exposure
 
-    def run(self, save_image: bool) -> float:
+    def run(self, edge_color_threshold: int, save_image: bool) -> float:
         """Take an image and evaluate the sun conditions. Run autoexposure
         function every 5 minutes. Returns the edge fraction."""
         now = time.time()
@@ -222,7 +222,9 @@ class HeliosInterface:
         frame = self.take_image()
 
         edge_fraction = utils.HeliosImageProcessing.get_edge_fraction(
-            frame, save_image
+            frame=frame,
+            edge_color_threshold=edge_color_threshold,
+            save_image=save_image,
         )
         self.logger.debug(
             f"exposure = {self.current_exposure}, edge_fraction = {edge_fraction}"
@@ -347,6 +349,7 @@ class HeliosThread(AbstractThread):
                 # an Exception will be raised (and Helios will be restarted)
                 try:
                     new_edge_fraction = helios_instance.run(
+                        edge_color_threshold=config.helios.edge_color_threshold,
                         save_image=(config.helios.save_images or headless)
                     )
                     repeated_camera_error_count = 0
@@ -382,7 +385,7 @@ class HeliosThread(AbstractThread):
                     # eliminating quickly alternating decisions
                     # see https://github.com/tum-esm/pyra/issues/148
 
-                    upper_ef_threshold = config.helios.edge_detection_threshold
+                    upper_ef_threshold = config.helios.edge_pixel_threshold
                     lower_ef_threshold = upper_ef_threshold * 0.7
                     if current_state is None:
                         new_state = average_edge_fraction >= upper_ef_threshold

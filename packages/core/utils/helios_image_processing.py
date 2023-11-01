@@ -171,7 +171,9 @@ class HeliosImageProcessing:
 
     @staticmethod
     def get_edge_fraction(
-        frame: np.ndarray[Any, Any], save_image: bool = False
+        frame: np.ndarray[Any, Any],
+        edge_color_threshold: int,
+        save_image: bool = False
     ) -> float:
         """
         For a given frame determine the number of "edge pixels" with
@@ -205,7 +207,10 @@ class HeliosImageProcessing:
 
         # only consider edges and make them bold
         edges_only = np.array(
-            cv.Canny(grayscale_image, 40, 40), dtype=np.float32
+            cv.Canny(
+                grayscale_image, edge_color_threshold, edge_color_threshold
+            ),
+            dtype=np.float32
         )
         edges_only_dilated = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))

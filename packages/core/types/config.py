@@ -195,7 +195,8 @@ class HeliosConfig(pydantic.BaseModel):
     camera_id: int = pydantic.Field(..., ge=0, le=999999)
     evaluation_size: int = pydantic.Field(..., ge=1, le=100)
     seconds_per_interval: float = pydantic.Field(..., ge=5, le=600)
-    edge_detection_threshold: float = pydantic.Field(..., ge=0, le=1)
+    edge_pixel_threshold: float = pydantic.Field(..., ge=0, le=1)
+    edge_color_threshold: int = pydantic.Field(..., ge=5, le=250)
     save_images: bool
 
 
@@ -205,7 +206,8 @@ class PartialHeliosConfig(pydantic.BaseModel):
     camera_id: Optional[int] = pydantic.Field(None, ge=0, le=999999)
     evaluation_size: Optional[int] = pydantic.Field(None, ge=1, le=100)
     seconds_per_interval: Optional[float] = pydantic.Field(None, ge=5, le=600)
-    edge_detection_threshold: Optional[float] = pydantic.Field(None, ge=0, le=1)
+    edge_pixel_threshold: Optional[float] = pydantic.Field(None, ge=0, le=1)
+    edge_color_threshold: Optional[int] = pydantic.Field(None, ge=5, le=250)
     save_images: Optional[bool] = None
 
 
