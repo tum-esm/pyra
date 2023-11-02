@@ -1,75 +1,76 @@
-name: 'test-python-codebase-on-main'
+name: "test-python-codebase-on-main"
 on:
-    push:
-        branches:
-            - main
-        paths-ignore:
-            - 'packages/core/ui/**'
-            - 'packages/core/docs/**'
-            - '.gitignore'
-            - 'README.md'
-            - 'LICENSE.md'
-            - 'netlify.toml'
-            - '.github/workflows/*.yml'
-            - '!.github/workflows/test-python-codebase-on-main.yml'
-    pull_request:
-        branches:
-            - main
-        paths-ignore:
-            - 'packages/core/ui/**'
-            - 'packages/core/docs/**'
-            - '.gitignore'
-            - 'README.md'
-            - 'LICENSE.md'
-            - 'netlify.toml'
-            - '.github/workflows/*.yml'
-            - '!.github/workflows/test-python-codebase-on-main.yml'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "packages/core/ui/**"
+      - "packages/core/docs/**"
+      - ".gitignore"
+      - "README.md"
+      - "LICENSE.md"
+      - "netlify.toml"
+      - ".github/workflows/*.yml"
+      - "!.github/workflows/test-python-codebase-on-main.yml"
+  pull_request:
+    branches:
+      - main
+      - integration-*
+    paths-ignore:
+      - "packages/core/ui/**"
+      - "packages/core/docs/**"
+      - ".gitignore"
+      - "README.md"
+      - "LICENSE.md"
+      - "netlify.toml"
+      - ".github/workflows/*.yml"
+      - "!.github/workflows/test-python-codebase-on-main.yml"
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-            # check-out repo and set-up python
-            - name: Check out repository
-              uses: actions/checkout@v3
-            - name: Set up Python 3.10.6
-              uses: actions/setup-python@v4
-              with:
-                  python-version: 3.10.6
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # check-out repo and set-up python
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Set up Python 3.10.6
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10.6
 
-            # load caches (dependencies and poetry binaries)
-            - name: Load cached venv
-              id: cached-poetry-dependencies
-              uses: actions/cache@v3
-              with:
-                  path: .venv
-                  key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-            - name: Load cached .local
-              uses: actions/cache@v3
-              with:
-                  path: ~/.local
-                  key: dotlocal-${{ runner.os }}-${{ hashFiles('.github/workflows/test-python-codebase-on-main.yml') }}
+      # load caches (dependencies and poetry binaries)
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Load cached .local
+        uses: actions/cache@v3
+        with:
+          path: ~/.local
+          key: dotlocal-${{ runner.os }}-${{ hashFiles('.github/workflows/test-python-codebase-on-main.yml') }}
 
-            # install poetry (will be quick after it has been cached)
-            - name: Install Poetry
-              uses: snok/install-poetry@v1
-              with:
-                  version: 1.3.2
-                  virtualenvs-create: true
-                  virtualenvs-in-project: true
-                  installer-parallel: true
+      # install poetry (will be quick after it has been cached)
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.3.2
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
 
-            # install dependencies if cache does not exist
-            - name: Install dependencies
-              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-              run: poetry install
+      # install dependencies if cache does not exist
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install
 
-            # run test suite
-            - name: Run mypy static type analysis
-              run: |
-                  source .venv/bin/activate
-                  bash scripts/check_static_types.sh
-            - name: Run pytest tests
-              run: |
-                  source .venv/bin/activate
-                  pytest -m "ci" --cov=packages tests
-                  coverage report
+      # run test suite
+      - name: Run mypy static type analysis
+        run: |
+          source .venv/bin/activate
+          bash scripts/check_static_types.sh
+      - name: Run pytest tests
+        run: |
+          source .venv/bin/activate
+          pytest -m "ci" --cov=packages tests
+          coverage report

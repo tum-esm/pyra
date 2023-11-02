@@ -9,6 +9,7 @@ on:
   pull_request:
     branches:
       - main
+      - integration-*
     paths:
       - "packages/ui/**"
       - ".github/workflows/test-typescript-codebase-on-main.yml"
