@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 import os
 import time
 import datetime
@@ -74,25 +74,27 @@ class SunTracking:
 
         if (time.time() - self.last_start_time) < 300:
             logger.debug(
-                "Skipping motor validation when CamTracker " +
-                "has been started less than 5 minutes ago"
+                "Skipping CamTracker state validation when " +
+                "it has been started less than 5 minutes ago"
             )
             return
 
-        camtracker_state_is_valid = self.validate_camtracker_state()
-        if camtracker_state_is_valid is None:
-            logger.debug(
-                "CamTracker motor position is unknown (last log line too old)."
-            )
-        else:
-            if camtracker_state_is_valid:
-                logger.debug("CamTracker motor position is valid.")
-            else:
-                logger.info("CamTracker motor position is over threshold.")
-                logger.info(
-                    "Stopping CamTracker. Preparing for reinitialization."
-                )
-                self.stop_sun_tracking_automation()
+        motor_position_state = self.check_camtracker_motor_position()
+        restart_camtracker: bool = False
+
+        if motor_position_state == "logs too old":
+            logger.debug("CamTracker motor position is unknown (no log line).")
+            if self.config.camtracker.restart_if_logs_are_too_old:
+                restart_camtracker = True
+        if motor_position_state == "invalid":
+            logger.info("CamTracker motor position is over threshold.")
+            restart_camtracker = True
+        if motor_position_state == "valid":
+            logger.debug("CamTracker motor position is valid.")
+
+        if restart_camtracker:
+            logger.info("Stopping CamTracker. Preparing for reinitialization.")
+            self.stop_sun_tracking_automation()
 
     def ct_application_running(self) -> bool:
         """Checks if CamTracker is already running by identifying the active window.
@@ -219,37 +221,34 @@ class SunTracking:
 
         return (logline_datetime, *float_values[1 :])
 
-    def validate_camtracker_state(self) -> Optional[bool]:
+    def check_camtracker_motor_position(
+        self
+    ) -> Literal["logs too old", "valid", "invalid"]:
         """Checks whether CamTracker is running and is pointing
         in the right direction.
 
         Reads in the `LEARN_Az_Elev.dat` logfile, if the last line is older
-        than 5 minutes, the function returns `False`. because that means that
-        CamTracker is not running correctly.
-        
-        If `config.camtracker.restart_if_logs_are_too_old` is set to `False`
-        (the default), too old log lines will be ignored.
+        than 5 minutes, the function returns "logs too old".
 
         If the last logline is younger than 5 minutes, the function returns
-        `True` if the motor offsets are within the defined threshold.
-
-        Returns:  `True` if CamTracker is in a valid state and `False` otherwise.
-        """
+        "valid" if the motor offsets are within the defined threshold and
+        "invalid" if the motor offsets are outside the threshold."""
 
         # fails if file integrity is broken
         tracker_status = self._read_ct_log_learn_az_elev()
         if tracker_status is None:
-            if self.config.camtracker.restart_if_logs_are_too_old:
-                return False
-            else:
-                return None
+            return "logs too old"
 
         elev_offset: float = tracker_status[3]
         az_offeset: float = tracker_status[4]
         threshold: float = self.config.camtracker.motor_offset_threshold
 
-        return (abs(elev_offset)
-                <= threshold) and (abs(az_offeset) <= threshold)
+        elev_offset_within_bounds = abs(elev_offset) <= threshold
+        az_offeset_within_bounds = abs(az_offeset) <= threshold
+        if elev_offset_within_bounds and az_offeset_within_bounds:
+            return "valid"
+        else:
+            return "invalid"
 
     def test_setup(self) -> None:
         """
