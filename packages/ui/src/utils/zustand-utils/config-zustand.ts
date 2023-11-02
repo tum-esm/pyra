@@ -141,8 +141,6 @@ export const useConfigStore = create<ConfigStore>()((set, state) => ({
         if (currentState.centralConfig === undefined || currentState.localConfig === undefined) {
             return false;
         }
-        console.log(currentState.centralConfig);
-        console.log(currentState.localConfig);
         return (
             diff(currentState.centralConfig, configSchema.parse(currentState.localConfig)) !==
             undefined

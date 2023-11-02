@@ -5,7 +5,9 @@ interface LogsStore {
     mainLogs: string[] | undefined;
     uploadLogs: string[] | undefined;
     heliosLogs: string[] | undefined;
+    uiLogs: { timestamp: number; text: string; details: string }[];
     setLogs: (allLogs: string[]) => void;
+    addUiLogLine: (text: string, details: string) => void;
 }
 
 export const useLogsStore = create<LogsStore>()((set) => ({
@@ -13,6 +15,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
     mainLogs: undefined,
     uploadLogs: undefined,
     heliosLogs: undefined,
+    uiLogs: [],
     setLogs: (allLogs) =>
         set(() => {
             const newLogs: {
@@ -46,4 +49,15 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                 heliosLogs: newLogs.helios,
             };
         }),
+    addUiLogLine: (text, details) =>
+        set((state) => ({
+            uiLogs: [
+                ...state.uiLogs.filter((logLine) => logLine.timestamp > Date.now() - 600000), // 10 minutes
+                {
+                    timestamp: Date.now(),
+                    text,
+                    details,
+                },
+            ],
+        })),
 }));
