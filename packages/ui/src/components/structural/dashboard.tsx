@@ -7,7 +7,7 @@ import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zustand';
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 import { ChildProcess } from '@tauri-apps/api/shell';
-import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
+import { useConfigStore, configSchema } from '../../utils/zustand-utils/config-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
 const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
@@ -17,7 +17,7 @@ export default function Dashboard() {
     const { setLogs } = useLogsStore();
     const { setActivityHistory } = useActivityHistoryStore();
     const { setCoreState } = useCoreStateStore();
-    const { centralConfig, setConfig } = useConfigStore();
+    const { centralConfig, setConfig, setConfigItem } = useConfigStore();
     const { runPromisingCommand } = fetchUtils.useCommand();
 
     const enclosureControlsIsVisible =
@@ -73,45 +73,21 @@ export default function Dashboard() {
         };
     }, []);
 
-    // TODO: add again only updating the cli decision result
-    /*useEffect(() => {
-        async function fetchConfigFile() {
-            const fileContent = await fetchUtils.getFileContent('config/config.json');
-            const newCentralConfig: customTypes.config = JSON.parse(fileContent);
-            const diffsToCentral = diff(centralConfig, newCentralConfig) || [];
+    async function fetchCLIDecisionResult() {
+        const newConfig = configSchema.parse(
+            JSON.parse((await fetchUtils.backend.getConfig()).stdout)
+        );
+        const newCLIDecisionResult = newConfig.measurement_decision.cli_decision_result;
+        setConfigItem('measurement_decision.cli_decision_result', newCLIDecisionResult);
+    }
 
-            // measurement_decision.cli_decision_result is allowed to change
-            // changing any other property from somewhere else than the UI requires
-            // a reload of the window
-            const reloadIsRequired =
-                diffsToCentral.filter(
-                    (d) =>
-                        d.kind === 'E' &&
-                        d.path?.join('.') !== 'measurement_decision.cli_decision_result'
-                ).length > 0;
-
-            if (reloadIsRequired) {
-                dialog
-                    .message('The config.json file has been modified. Reload required', 'PyRa 4 UI')
-                    .then(() => window.location.reload());
-            } else {
-                dispatch(
-                    reduxUtils.configActions.setConfigsPartial({
-                        measurement_decision: {
-                            cli_decision_result:
-                                newCentralConfig.measurement_decision.cli_decision_result,
-                        },
-                    })
-                );
-            }
-        }
-
-        const interval3 = setInterval(fetchConfigFile, 5000);
+    useEffect(() => {
+        const interval = setInterval(fetchCLIDecisionResult, 5000);
 
         return () => {
-            clearInterval(interval3);
+            clearInterval(interval);
         };
-    }, [dispatch, centralConfig]);*/
+    }, []);
 
     return (
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
