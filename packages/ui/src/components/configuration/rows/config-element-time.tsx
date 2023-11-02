@@ -1,4 +1,5 @@
 import { configurationComponents, essentialComponents } from '../..';
+import { renderTimeObject } from '../../../utils/functions';
 
 export default function ConfigElementTime(props: {
     title: string;
@@ -40,11 +41,7 @@ export default function ConfigElementTime(props: {
                 />
             </div>
             <essentialComponents.PreviousValue
-                previousValue={
-                    hasBeenModified
-                        ? `${oldValue.hour} : ${oldValue.minute} : ${oldValue.second}`
-                        : undefined
-                }
+                previousValue={hasBeenModified ? renderTimeObject(oldValue) : undefined}
             />
         </configurationComponents.LabeledRow>
     );

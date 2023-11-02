@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 import { fetchUtils } from '../../utils';
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
+import { renderTimeObject } from '../../utils/functions';
 
 function ModePanel(props: {
     label: string;
@@ -71,17 +72,10 @@ export default function MeasurementDecision() {
         automaticFilterSettingsNotConsidered.push('sun elevation');
     }
     if (centralConfig.measurement_triggers.consider_time) {
-        const startTime = centralConfig.measurement_triggers.start_time;
-        const stopTime = centralConfig.measurement_triggers.stop_time;
         automaticFilterSettingsConsidered.push(
-            `time is between ` +
-                `${startTime.hour < 10 ? '0' : ''}${startTime.hour}:${
-                    startTime.minute < 10 ? '0' : ''
-                }${startTime.minute}` +
-                ` and ` +
-                `${stopTime.hour < 10 ? '0' : ''}${stopTime.hour}:${
-                    stopTime.minute < 10 ? '0' : ''
-                }${stopTime.minute}`
+            `time is between ${renderTimeObject(
+                centralConfig.measurement_triggers.start_time
+            )} and ${renderTimeObject(centralConfig.measurement_triggers.stop_time)}`
         );
     } else {
         automaticFilterSettingsNotConsidered.push('time');

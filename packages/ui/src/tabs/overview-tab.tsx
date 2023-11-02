@@ -1,21 +1,12 @@
 import { fetchUtils } from '../utils';
 import { essentialComponents, overviewComponents } from '../components';
-import ICONS from '../assets/icons';
 import { mean } from 'lodash';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 import { useCoreStateStore } from '../utils/zustand-utils/core-state-zustand';
 import { useConfigStore } from '../utils/zustand-utils/config-zustand';
 import { Button } from '../components/ui/button';
 import { IconCloudRain } from '@tabler/icons-react';
-
-function SystemRow(props: { label: string; value: React.ReactNode }) {
-    return (
-        <div className="w-full pl-2 flex-row-left">
-            <div className="w-32">{props.label}:</div>
-            <div className="min-w-[2rem]">{props.value}</div>
-        </div>
-    );
-}
+import { renderBoolean, renderString } from '../utils/functions';
 
 export default function OverviewTab() {
     const { coreState } = useCoreStateStore();
@@ -23,48 +14,12 @@ export default function OverviewTab() {
     const { runPromisingCommand } = fetchUtils.useCommand();
     const { centralConfig } = useConfigStore();
 
-    async function closeCover() {
+    function closeCover() {
         runPromisingCommand({
             command: () => fetchUtils.backend.writeToPLC(['close-cover']),
             label: 'closing cover',
             successLabel: 'successfully closed cover',
         });
-    }
-
-    function renderSystemBar(value: null | number | number[]) {
-        if (value === null) {
-            return '-';
-        }
-        if (typeof value === 'object') {
-            value = mean(value);
-        }
-        return (
-            <div className="flex-row-center">
-                <div className="relative w-32 h-2 overflow-hidden bg-white border rounded-full border-gray-250">
-                    <div
-                        className="h-full bg-slate-700"
-                        style={{ width: `${value.toFixed(3)}%` }}
-                    />
-                </div>
-                <div className="ml-1.5 font-mono w-[3.375rem] text-right">{value.toFixed(1)} %</div>
-            </div>
-        );
-    }
-
-    function renderString(value: null | string | number, options?: { appendix: string }) {
-        if (value === null) {
-            return '-';
-        } else {
-            return `${value}${options !== undefined ? options.appendix : ''}`;
-        }
-    }
-
-    function renderBoolean(value: null | boolean) {
-        if (value === null) {
-            return '-';
-        } else {
-            return value ? 'Yes' : 'No';
-        }
     }
 
     return (
@@ -156,20 +111,34 @@ export default function OverviewTab() {
                 </div>
                 <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                     <div className="text-xs font-semibold">Latitude</div>
-                    <div>{coreState?.position.latitude ? coreState.position.latitude : '-'}</div>
+                    <div>
+                        {renderString(coreState?.position.latitude, {
+                            appendix: ' °N',
+                        })}
+                    </div>
                 </div>
                 <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                     <div className="text-xs font-semibold">Longitude</div>
-                    <div>{coreState?.position.latitude ? coreState.position.longitude : '-'}</div>
+                    <div>
+                        {renderString(coreState?.position.longitude, {
+                            appendix: ' °E',
+                        })}
+                    </div>
                 </div>
                 <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                     <div className="text-xs font-semibold">Altitude</div>
-                    <div>{coreState?.position.altitude ? coreState.position.altitude : '-'}</div>
+                    <div>
+                        {renderString(coreState?.position.altitude, {
+                            appendix: ' m',
+                        })}
+                    </div>
                 </div>
                 <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                     <div className="text-xs font-semibold">Current Sun Elevation</div>
                     <div>
-                        {coreState?.position.sun_elevation ? coreState.position.sun_elevation : '-'}
+                        {renderString(coreState?.position.sun_elevation, {
+                            appendix: ' °',
+                        })}
                     </div>
                 </div>
             </div>
@@ -186,48 +155,30 @@ export default function OverviewTab() {
                         <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                             <div className="text-xs font-semibold">Cover Angle</div>
                             <div>
-                                {coreState?.plc_state.actors.current_angle === null
-                                    ? '-'
-                                    : `${coreState?.plc_state.actors.current_angle} °`}
+                                {renderString(coreState.plc_state.actors.current_angle, {
+                                    appendix: ' °',
+                                })}
                             </div>
                         </div>
                         <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                             <div className="text-xs font-semibold">Enclosure Temperature</div>
                             <div>
-                                {coreState.plc_state.sensors.temperature === null
-                                    ? '-'
-                                    : `${coreState?.plc_state.sensors.temperature} °C`}
+                                {renderString(coreState.plc_state.sensors.temperature, {
+                                    appendix: ' °C',
+                                })}
                             </div>
                         </div>
                         <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                             <div className="text-xs font-semibold">Reset Needed</div>
-                            <div>
-                                {coreState.plc_state.state.reset_needed === null
-                                    ? '-'
-                                    : coreState.plc_state.state.reset_needed
-                                    ? 'yes'
-                                    : 'no'}
-                            </div>
+                            <div>{renderBoolean(coreState.plc_state.state.reset_needed)}</div>
                         </div>
                         <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                             <div className="text-xs font-semibold">Motor Failed</div>
-                            <div>
-                                {coreState.plc_state.state.motor_failed === null
-                                    ? '-'
-                                    : coreState.plc_state.state.motor_failed
-                                    ? 'yes'
-                                    : 'no'}
-                            </div>
+                            <div>{renderBoolean(coreState.plc_state.state.motor_failed)}</div>
                         </div>
                         <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                             <div className="text-xs font-semibold">Rain Detected</div>
-                            <div>
-                                {coreState.plc_state.state.rain === null
-                                    ? '-'
-                                    : coreState.plc_state.state.rain
-                                    ? 'yes'
-                                    : 'no'}
-                            </div>
+                            <div>{renderBoolean(coreState.plc_state.state.rain)}</div>
                         </div>
                     </div>
                     {coreState?.plc_state.state.rain === true &&
