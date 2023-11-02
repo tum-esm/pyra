@@ -17,6 +17,52 @@ hide_table_of_contents: true
 
 <a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L16" className="SourceCodeLinkBadge">source code</a>
 
+## <kbd>class</kbd> `StricterBaseModel`
+
+
+
+
+
+---
+
+#### <kbd>property</kbd> model_computed_fields
+
+Get the computed fields of this model instance. 
+
+
+
+**Returns:**
+  A dictionary of computed field names and their corresponding `ComputedFieldInfo` objects. 
+
+---
+
+#### <kbd>property</kbd> model_extra
+
+Get extra fields set during validation. 
+
+
+
+**Returns:**
+  A dictionary of extra fields, or `None` if `config.extra` is not set to `"allow"`. 
+
+---
+
+#### <kbd>property</kbd> model_fields_set
+
+Returns the set of fields that have been set on this model instance. 
+
+
+
+**Returns:**
+  A set of strings representing the fields that have been set,  i.e. that were not filled from defaults. 
+
+
+
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L20" className="SourceCodeLinkBadge">source code</a>
+
 ## <kbd>class</kbd> `StrictFilePath`
 
 
@@ -60,7 +106,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L19" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L23" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>classmethod</kbd> `path_should_exist`
 
@@ -75,7 +121,7 @@ path_should_exist(v: 'str', info: 'ValidationInfo') → str
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L30" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L34" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `StrictDirectoryPath`
 
@@ -120,7 +166,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L33" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L37" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>classmethod</kbd> `path_should_exist`
 
@@ -135,7 +181,7 @@ path_should_exist(v: 'str', info: 'ValidationInfo') → str
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L44" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L48" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `StrictIPAdress`
 
@@ -181,7 +227,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L50" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L54" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `TimeDict`
 
@@ -226,7 +272,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L55" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L59" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `as_datettime_time`
 
@@ -241,7 +287,7 @@ as_datettime_time() → time
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L59" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L63" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialTimeDict`
 
@@ -287,7 +333,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L65" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L69" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `GeneralConfig`
 
@@ -333,10 +379,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L73" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L77" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialGeneralConfig`
-Like `SubConfigGeneral`, but all fields are optional. 
+Like `GeneralConfig`, but all fields are optional. 
 
 
 ---
@@ -377,7 +423,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L84" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L88" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `OpusConfig`
 
@@ -423,10 +469,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L93" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L97" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialOpusConfig`
-Like `SubConfigOpus`, but all fields are optional. 
+Like `OpusConfig`, but all fields are optional. 
 
 
 ---
@@ -467,7 +513,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L104" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L108" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `CamtrackerConfig`
 
@@ -513,10 +559,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L113" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L118" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialCamtrackerConfig`
-Like `SubConfigCamtracker` but all fields are optional. 
+Like `CamtrackerConfig` but all fields are optional. 
 
 
 ---
@@ -557,7 +603,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L124" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L130" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `ErrorEmailConfig`
 
@@ -603,10 +649,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L134" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L140" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialErrorEmailConfig`
-Like `SubConfigErrorEmail` but all fields are optional. 
+Like `ErrorEmailConfig` but all fields are optional. 
 
 
 ---
@@ -647,7 +693,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L146" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L152" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `MeasurementDecisionConfig`
 
@@ -693,10 +739,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L152" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L158" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialMeasurementDecisionConfig`
-Like `SubConfigMeasurementDecision` but all fields are optional. 
+Like `MeasurementDecisionConfig` but all fields are optional. 
 
 
 ---
@@ -737,7 +783,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L160" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L166" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `MeasurementTriggersConfig`
 
@@ -783,10 +829,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L169" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L175" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialMeasurementTriggersConfig`
-Like `SubConfigMeasurementTriggers` but all fields are optional. 
+Like `MeasurementTriggersConfig` but all fields are optional. 
 
 
 ---
@@ -827,7 +873,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L180" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L186" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `TumPlcConfig`
 
@@ -873,10 +919,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L186" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L192" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialTumPlcConfig`
-Like `SubConfigTumPlc`, but all fields are optional. 
+Like `TumPlcConfig`, but all fields are optional. 
 
 
 ---
@@ -917,7 +963,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L194" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L200" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `HeliosConfig`
 
@@ -963,10 +1009,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L202" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L210" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialHeliosConfig`
-Like `SubConfigHelios`, but all fields are optional. 
+Like `HeliosConfig`, but all fields are optional. 
 
 
 ---
@@ -1007,7 +1053,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L212" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L224" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `UploadStreamConfig`
 
@@ -1053,7 +1099,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L222" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L234" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `UploadConfig`
 
@@ -1099,10 +1145,10 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L229" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L241" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialUploadConfig`
-Like `SubConfigUpload`, but all fields are optional. 
+Like `UploadConfig`, but all fields are optional. 
 
 
 ---
@@ -1143,7 +1189,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L238" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L250" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `Config`
 
@@ -1188,7 +1234,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L324" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L332" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `dump`
 
@@ -1202,7 +1248,7 @@ dump(with_filelock: 'bool' = True) → None
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L249" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L261" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `load`
 
@@ -1235,10 +1281,10 @@ Returns:  The loaded config object.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L334" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L343" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `PartialConfig`
-Like `ConfigDict`, but all fields are optional. 
+Like `Config`, but all fields are optional. 
 
 
 ---
@@ -1278,7 +1324,7 @@ Returns the set of fields that have been set on this model instance.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L347" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/types/config.py#L356" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `load`
 

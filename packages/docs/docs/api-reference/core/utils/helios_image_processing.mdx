@@ -66,7 +66,12 @@ Put some text on the bottom left of an image
 ### <kbd>method</kbd> `get_edge_fraction`
 
 ```python
-get_edge_fraction(frame: ndarray[Any, Any], save_image: bool = False) → float
+get_edge_fraction(
+    frame: ndarray[Any, Any],
+    station_id: str,
+    edge_color_threshold: int,
+    save_image: bool = False
+) → float
 ```
 
 For a given frame determine the number of "edge pixels" with respect to the inner 90% of the lense diameter and the "status". The status is 1 when the edge pixels are above the given threshold and 0 otherwise. 

@@ -39,7 +39,35 @@ __init__(initial_config: Config)
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L97" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L241" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `check_camtracker_motor_position`
+
+```python
+check_camtracker_motor_position() → Literal['logs too old', 'valid', 'invalid']
+```
+
+Checks whether CamTracker is running and is pointing in the right direction. 
+
+Reads in the `LEARN_Az_Elev.dat` logfile, if the last line is older than 5 minutes, the function returns "logs too old". 
+
+If the last logline is younger than 5 minutes, the function returns "valid" if the motor offsets are within the defined threshold and "invalid" if the motor offsets are outside the threshold. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L270" className="SourceCodeLinkBadge">source code</a>
+
+### <kbd>method</kbd> `check_tum_plc_cover_position`
+
+```python
+check_tum_plc_cover_position() → Literal['angle not reported', 'valid', 'invalid']
+```
+
+Checks whether the TUM PLC cover is open or closed. Returns "angle not reported" if the cover position has not beenreported by the PLC yet. 
+
+---
+
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L116" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `ct_application_running`
 
@@ -53,7 +81,7 @@ False if Application is currently not running on OS True if Application is curre
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L156" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L175" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `remove_stop_file`
 
@@ -77,7 +105,7 @@ Called in every cycle of the main loop. Redas StateInterface: measurements_shoul
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L115" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L134" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `start_sun_tracking_automation`
 
@@ -91,7 +119,7 @@ Removes stop.txt file in CamTracker directory if present. This file is the curre
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L141" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L160" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `stop_sun_tracking_automation`
 
@@ -105,7 +133,7 @@ CamTracker has an internal check for a stop.txt file in its directory. After det
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L254" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L287" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `test_setup`
 
@@ -114,25 +142,5 @@ test_setup() → None
 ```
 
 Function to test the functonality of this module. Starts up CamTracker to initialize the tracking mirrors. Then moves mirrors back to parking position and shuts dosn CamTracker. 
-
----
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L222" className="SourceCodeLinkBadge">source code</a>
-
-### <kbd>method</kbd> `validate_camtracker_state`
-
-```python
-validate_camtracker_state() → Optional[bool]
-```
-
-Checks whether CamTracker is running and is pointing in the right direction. 
-
-Reads in the `LEARN_Az_Elev.dat` logfile, if the last line is older than 5 minutes, the function returns `False`. because that means that CamTracker is not running correctly. 
-
-If `config.camtracker.restart_if_logs_are_too_old` is set to `False` (the default), too old log lines will be ignored. 
-
-If the last logline is younger than 5 minutes, the function returns `True` if the motor offsets are within the defined threshold. 
-
-Returns:  `True` if CamTracker is in a valid state and `False` otherwise. 
 
 

@@ -45,6 +45,7 @@ Load the state from the state file.
 
 ```python
 update_state(
+    position: 'Optional[Position]' = None,
     helios_indicates_good_conditions: "Optional[Literal['yes', 'no', 'inconclusive']]" = None,
     measurements_should_be_running: 'Optional[bool]' = None,
     plc_state: 'Optional[PLCState]' = None,
@@ -59,7 +60,7 @@ Update the state file. Values that are not explicitly set will not be changed in
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/core/interfaces/state_interface/update_state_in_context#L83" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/core/interfaces/state_interface/update_state_in_context#L86" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `update_state_in_context`
 
