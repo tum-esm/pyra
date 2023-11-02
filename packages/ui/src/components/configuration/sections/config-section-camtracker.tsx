@@ -59,10 +59,19 @@ export default function ConfigSectionCamtracker() {
                 }
                 oldValue={centralSectionConfig.restart_if_logs_are_too_old}
             />
+            <configurationComponents.ConfigElementToggle
+                title="Restart if cover remains closed"
+                value={localSectionConfig.restart_if_cover_remains_closed}
+                setValue={(v: boolean) =>
+                    setLocalConfigItem('camtracker.restart_if_cover_remains_closed', v)
+                }
+                oldValue={centralSectionConfig.restart_if_cover_remains_closed}
+            />
             <configurationComponents.ConfigElementNote>
-                If CamTracker does not log its motor position for more than 5 minutes and this
-                option is enabled, Pyra will restart CamTracker. This can indicate that CamTracker
-                is stuck at initialization - usually fixed by a restart.
+                If CamTracker does not log its motor position or the enclosure cover remains closed
+                for more than 5 minutes after startup, and these options are enabled, Pyra will
+                restart CamTracker. These states indicate that CamTracker is stuck at initialization
+                - usually fixed by a restart.
             </configurationComponents.ConfigElementNote>
         </>
     );

@@ -29,6 +29,7 @@ export const configSchema = z.object({
         sun_intensity_path: z.string(),
         motor_offset_threshold: floatSchema,
         restart_if_logs_are_too_old: z.boolean(),
+        restart_if_cover_remains_closed: z.boolean(),
     }),
     error_email: z.object({
         smtp_host: z.string(),
