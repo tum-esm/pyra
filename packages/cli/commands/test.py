@@ -33,7 +33,7 @@ def _test_uploading() -> None:
     """try to connect to upload server."""
     interfaces.StateInterface.update_state(recent_cli_calls=1)
     logger.info('running command "test upload"')
-    config = types.Config.load()
+    config = types.Config.load(ignore_path_existence=True)
     if config.upload is None:
         _print_red("No upload server configured.")
         return

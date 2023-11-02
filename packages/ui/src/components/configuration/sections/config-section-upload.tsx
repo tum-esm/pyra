@@ -1,12 +1,22 @@
 import { configurationComponents, essentialComponents } from '../..';
+import fetchUtils from '../../../utils/fetch-utils';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 import { Button } from '../../ui/button';
 
 export default function ConfigSectionUpload() {
     const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
+    const { runPromisingCommand } = fetchUtils.useCommand();
 
     const centralSectionConfig = centralConfig?.upload;
     const localSectionConfig = localConfig?.upload;
+
+    function test() {
+        runPromisingCommand({
+            command: fetchUtils.backend.testUpload,
+            label: 'testing connection to upload server',
+            successLabel: 'successfully connected to upload server',
+        });
+    }
 
     function addDefault() {
         setLocalConfigItem('upload', {
@@ -66,8 +76,9 @@ export default function ConfigSectionUpload() {
 
     return (
         <>
-            <div>
+            <div className="flex flex-row gap-x-2">
                 <Button onClick={setNull}>remove configuration</Button>
+                <Button onClick={test}>Test Upload Connection</Button>
             </div>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementNote>

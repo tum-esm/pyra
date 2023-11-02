@@ -51,6 +51,9 @@ const backend = {
     testEmail: async (): Promise<ChildProcess> => {
         return await callCLI(['test', 'email']);
     },
+    testUpload: async (): Promise<ChildProcess> => {
+        return await callCLI(['test', 'upload']);
+    },
 };
 
 export default backend;
