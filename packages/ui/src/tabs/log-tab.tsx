@@ -6,14 +6,14 @@ import Toggle from '../components/essential/toggle';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 
 export default function LogTab() {
-    const [logType, setLogType] = useState<'main' | 'upload' | 'helios'>('main');
+    const [logType, setLogType] = useState<'main' | 'upload' | 'helios' | 'ui'>('main');
 
     const [liveUpdateIsActice, setLiveUpdateIsActive] = useState(true);
     const [renderedMainLogs, setRenderedMainLogs] = useState<string[] | undefined>(undefined);
     const [renderedUploadLogs, setRenderedUploadLogs] = useState<string[] | undefined>(undefined);
     const [renderedHeliosLogs, setRenderedHeliosLogs] = useState<string[] | undefined>(undefined);
 
-    const { mainLogs, uploadLogs, heliosLogs, setLogs } = useLogsStore();
+    const { mainLogs, uploadLogs, heliosLogs, uiLogs } = useLogsStore();
     useEffect(() => {
         if (liveUpdateIsActice) {
             setRenderedMainLogs(mainLogs);
@@ -67,7 +67,7 @@ export default function LogTab() {
                 <Toggle
                     value={logType}
                     setValue={(lt: any) => setLogType(lt)}
-                    values={['main', 'upload', 'helios']}
+                    values={['main', 'upload', 'helios', 'ui']}
                 />
                 <div className="flex-grow" />
                 <essentialComponents.Button onClick={openLogsFolder} variant="white">
@@ -80,7 +80,7 @@ export default function LogTab() {
                     'border-t border-gray-250 bg-whites flex-grow bg-white'
                 }
             >
-                {renderedLogs !== undefined && (
+                {logType !== 'ui' && renderedLogs !== undefined && (
                     <>
                         {renderedLogs.map((l, i) => (
                             <essentialComponents.CoreLogLine text={l} key={`${i} ${l}`} />
@@ -88,6 +88,14 @@ export default function LogTab() {
                         {renderedLogs.length == 0 && (
                             <div className="px-4 py-2">logs are empty</div>
                         )}
+                    </>
+                )}
+                {logType === 'ui' && (
+                    <>
+                        {uiLogs.map((l, i) => (
+                            <essentialComponents.UILogLine logLine={l} key={`${i} ${l.text}`} />
+                        ))}
+                        {uiLogs.length == 0 && <div className="px-4 py-2">logs are empty</div>}
                     </>
                 )}
             </div>
