@@ -56,7 +56,7 @@ class TimeDict(StricterBaseModel):
     minute: int = pydantic.Field(..., ge=0, le=59)
     second: int = pydantic.Field(..., ge=0, le=59)
 
-    def as_datettime_time(self) -> datetime.time:
+    def as_datetime_time(self) -> datetime.time:
         return datetime.time(self.hour, self.minute, self.second)
 
 
@@ -77,6 +77,7 @@ class GeneralConfig(StricterBaseModel):
 class PartialGeneralConfig(StricterBaseModel):
     """Like `GeneralConfig`, but all fields are optional."""
 
+    version: Literal["4.1.0"] = "4.1.0"
     seconds_per_core_interval: Optional[float] = pydantic.Field(
         None, ge=5, le=600
     )

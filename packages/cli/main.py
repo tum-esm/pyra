@@ -19,10 +19,14 @@ from packages.cli.commands import (
     state_command_group,
     test_command_group,
 )
+from packages.core import utils
+
+logger = utils.Logger(origin="cli")
 
 
 @click.command(help="Print Pyra version and code directory path.")
 def print_cli_information() -> None:
+    logger.info('running command "info"')
     click.echo(
         click.style(
             f'This CLI is running Pyra version 4.1.0 in directory "{_PROJECT_DIR}"',

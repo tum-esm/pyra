@@ -41,6 +41,7 @@ class StateInterface:
     @staticmethod
     def update_state(
         position: Optional[types.Position] = None,
+        recent_cli_calls: Optional[int] = None,
         helios_indicates_good_conditions: Optional[Literal["yes", "no",
                                                            "inconclusive"]
                                                   ] = None,
@@ -64,6 +65,12 @@ class StateInterface:
         state.last_updated = datetime.datetime.now()
         if enforce_none_values or (position is not None):
             state.position = position or types.Position()
+
+        if enforce_none_values and (recent_cli_calls is None):
+            state.recent_cli_calls = 0
+        elif recent_cli_calls is not None:
+            state.recent_cli_calls += recent_cli_calls
+
         if enforce_none_values or (
             helios_indicates_good_conditions is not None
         ):
@@ -76,7 +83,7 @@ class StateInterface:
             state.operating_system_state = operating_system_state or types.OperatingSystemState(
             )
         if enforce_none_values or (current_exceptions is not None):
-            state.current_exceptions = current_exceptions
+            state.current_exceptions = current_exceptions or []
         if enforce_none_values or (upload_is_running is not None):
             state.upload_is_running = upload_is_running
 

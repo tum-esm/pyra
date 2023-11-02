@@ -7,7 +7,7 @@ import os
 import filelock
 import psutil
 import tum_esm_utils
-from packages.core import modules, types
+from packages.core import interfaces, modules, types, utils
 
 dir = os.path.dirname
 _PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -21,6 +21,8 @@ _run_pyra_core_lock = filelock.FileLock(
     timeout=0.5,
 )
 
+logger = utils.Logger(origin="cli")
+
 
 def _print_green(text: str) -> None:
     click.echo(click.style(text, fg="green"))
@@ -30,11 +32,20 @@ def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
-@click.command(
+@click.group(name="core")
+def core_command_group() -> None:
+    pass
+
+
+@core_command_group.command(
+    name="start",
     help=
     "Start pyra-core as a background process. Return the process id. Prevents spawning multiple processes."
 )
 def _start_pyra_core() -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info('running command "core start"')
+
     existing_pids = tum_esm_utils.processes.get_process_pids(
         _RUN_PYRA_CORE_SCRIPT_PATH
     )
@@ -61,11 +72,15 @@ def _start_pyra_core() -> None:
     exit(0)
 
 
-@click.command(
+@core_command_group.command(
+    name="stop",
     help=
     "Stop the pyra-core background process. Return the process id of terminated processes. This command will force quit the OPUS process."
 )
 def _stop_pyra_core() -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info('running command "core stop"')
+
     termination_pids = tum_esm_utils.processes.terminate_process(
         _RUN_PYRA_CORE_SCRIPT_PATH
     )
@@ -116,10 +131,12 @@ def _stop_pyra_core() -> None:
         exit(1)
 
 
-@click.command(
+@core_command_group.command(
+    name="is-running",
     help="Checks whether the pyra-core background process is running."
 )
 def _pyra_core_is_running() -> None:
+    logger.info('running command "core is-running"')
     existing_pids = tum_esm_utils.processes.get_process_pids(
         _RUN_PYRA_CORE_SCRIPT_PATH
     )
@@ -127,13 +144,3 @@ def _pyra_core_is_running() -> None:
         _print_green(f"pyra-core is running with process ID(s) {existing_pids}")
     else:
         _print_red("pyra-core is not running")
-
-
-@click.group()
-def core_command_group() -> None:
-    pass
-
-
-core_command_group.add_command(_start_pyra_core, name="start")
-core_command_group.add_command(_stop_pyra_core, name="stop")
-core_command_group.add_command(_pyra_core_is_running, name="is-running")

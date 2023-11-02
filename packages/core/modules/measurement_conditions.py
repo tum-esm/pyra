@@ -4,15 +4,6 @@ from packages.core import types, utils, interfaces
 logger = utils.Logger(origin="measurement-conditions")
 
 
-def is_time_trigger_active(config: types.Config) -> bool:
-    """Returns true if time triggers in the config specify
-    that it should be measured right now"""
-    current_time = datetime.datetime.now().time()
-    start_time = config.measurement_triggers.start_time.as_datettime_time()
-    end_time = config.measurement_triggers.stop_time.as_datettime_time()
-    return (current_time > start_time) and (current_time < end_time)
-
-
 class MeasurementConditions:
     """MeasurementConditions allows operation in three different modes:
     Manual, Automatic, Manual, and CLI. Whenever a decision is made the
@@ -41,6 +32,7 @@ class MeasurementConditions:
         based on the selected mode, triggers and present conditions."""
 
         self.config = new_config
+        current_state = interfaces.StateInterface.load_state()
 
         # Fetch and log current sun elevation
         camtracker_coordinates = utils.Astronomy.get_camtracker_coordinates(
@@ -73,25 +65,25 @@ class MeasurementConditions:
         elif decision.mode == "cli":
             measurements_should_be_running = decision.cli_decision_result
         else:
-            measurements_should_be_running = self._get_automatic_decision()
+            measurements_should_be_running = self._get_automatic_decision(
+                current_state
+            )
 
         logger.info(
             f"Measurements should be running is set to: {measurements_should_be_running}."
         )
         interfaces.ActivityHistoryInterface.add_datapoint(
+            cli_calls=current_state.recent_cli_calls,
             is_measuring=measurements_should_be_running
         )
-        interfaces.StateInterface.update_state(
-            position=types.Position(
-                latitude=camtracker_coordinates[0],
-                longitude=camtracker_coordinates[1],
-                altitude=camtracker_coordinates[2],
-                sun_elevation=sun_elevation,
-            ),
-            measurements_should_be_running=measurements_should_be_running
-        )
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.position.latitude = camtracker_coordinates[0]
+            state.position.longitude = camtracker_coordinates[1]
+            state.position.altitude = camtracker_coordinates[2]
+            state.measurements_should_be_running = measurements_should_be_running
+            state.recent_cli_calls -= current_state.recent_cli_calls
 
-    def _get_automatic_decision(self) -> bool:
+    def _get_automatic_decision(self, current_state: types.StateObject) -> bool:
         """Evaluates the activated automatic mode triggers (Sun Angle,
         Time, Helios). Reads the config to consider activated measurement
         triggers. Evaluates active measurement triggers and combines their
@@ -128,7 +120,12 @@ class MeasurementConditions:
         # Evaluate time if trigger is active
         if triggers.consider_time:
             logger.info("Time as a trigger is considered.")
-            time_is_valid = is_time_trigger_active(self.config)
+            current_time = datetime.datetime.now().time()
+            time_is_valid = (
+                self.config.measurement_triggers.start_time.as_datetime_time() <
+                current_time <
+                self.config.measurement_triggers.stop_time.as_datetime_time()
+            )
             logger.debug(
                 f"Time conditions are {'' if time_is_valid else 'not '}fulfilled."
             )
@@ -139,8 +136,7 @@ class MeasurementConditions:
         # Helios runs in a thread and evaluates the sun conditions consistanly during day.
         if triggers.consider_helios:
             logger.info("Helios as a trigger is considered.")
-            helios_result = interfaces.StateInterface.load_state(
-            ).helios_indicates_good_conditions
+            helios_result = current_state.helios_indicates_good_conditions
 
             if helios_result == "inconclusive" or helios_result is None:
                 logger.debug(f"Helios does not nave enough images yet.")

@@ -72,13 +72,14 @@ class PLCState(pydantic.BaseModel):
 
 class StateObject(pydantic.BaseModel):
     last_updated: datetime.datetime
+    recent_cli_calls: int = 0
     helios_indicates_good_conditions: Optional[Literal["yes", "no",
                                                        "inconclusive"]] = None
     position: Position = Position()
     measurements_should_be_running: Optional[bool] = None
     plc_state: PLCState = PLCState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
-    current_exceptions: Optional[list[str]] = []
+    current_exceptions: list[str] = []
     upload_is_running: Optional[bool] = None
 
     model_config = pydantic.ConfigDict(extra="forbid")

@@ -1,12 +1,10 @@
 """Read or update the `config.json` file."""
 
-import json
 import shutil
 import click
 import os
-
 import tum_esm_utils
-from packages.core import types
+from packages.core import interfaces, types, utils
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -15,6 +13,13 @@ _DEFAULT_CONFIG_FILE_PATH = os.path.join(
 )
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
 _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
+
+logger = utils.Logger(origin="cli")
+
+
+@click.group()
+def config_command_group() -> None:
+    pass
 
 
 def _print_green(text: str) -> None:
@@ -25,17 +30,20 @@ def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
-@click.option("--no-indent", default=False, is_flag=True)
-@click.option("--check-path-existence", default=False, is_flag=True)
-@click.option("--no-color", default=False, is_flag=True)
-@click.command(
+@config_command_group.command(
+    name="get",
     short_help="Read the config.json file.",
     help=
     "Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence.",
 )
+@click.option("--no-indent", default=False, is_flag=True)
+@click.option("--check-path-existence", default=False, is_flag=True)
+@click.option("--no-color", default=False, is_flag=True)
 def _get_config(
     no_indent: bool, check_path_existence: bool, no_color: bool
 ) -> None:
+    logger.info('running command "config get"')
+
     if not os.path.isfile(_CONFIG_FILE_PATH):
         shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
     try:
@@ -54,7 +62,8 @@ def _get_config(
     )
 
 
-@click.command(
+@config_command_group.command(
+    name="update",
     short_help="Update the config.json file.",
     help=
     f"Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
@@ -65,6 +74,9 @@ def _get_config(
     timeout=5,
 )
 def _update_config(content: str) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "config update" with content: "{content}"')
+
     try:
         current_config = types.Config.load(
             with_filelock=False,
@@ -102,11 +114,14 @@ def _update_config(content: str) -> None:
     _print_green("Updated config file")
 
 
-@click.command(
+@config_command_group.command(
+    name="validate",
     help=
     f"Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
 )
 def _validate_current_config() -> None:
+    logger.info('running command "config validate"')
+
     try:
         types.Config.load()
     except Exception as e:
@@ -114,13 +129,3 @@ def _validate_current_config() -> None:
         exit(1)
 
     _print_green(f"Current config file is valid")
-
-
-@click.group()
-def config_command_group() -> None:
-    pass
-
-
-config_command_group.add_command(_get_config, name="get")
-config_command_group.add_command(_update_config, name="update")
-config_command_group.add_command(_validate_current_config, name="validate")

@@ -1,6 +1,8 @@
 import click
 import circadian_scp_upload
-from packages.core import types, utils
+from packages.core import interfaces, types, utils
+
+logger = utils.Logger(origin="cli")
 
 
 def _print_green(text: str) -> None:
@@ -19,6 +21,8 @@ def test_command_group() -> None:
 @test_command_group.command(name="email")
 def _test_emailing() -> None:
     """Send a test email."""
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info('running command "test email"')
     config = types.Config.load()
     utils.ExceptionEmailClient.send_test_email(config)
     _print_green("Successfully sent test email.")
@@ -27,6 +31,8 @@ def _test_emailing() -> None:
 @test_command_group.command(name="upload")
 def _test_uploading() -> None:
     """try to connect to upload server."""
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info('running command "test upload"')
     config = types.Config.load()
     if config.upload is None:
         _print_red("No upload server configured.")

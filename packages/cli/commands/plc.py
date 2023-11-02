@@ -2,16 +2,21 @@
 
 import json
 import time
-from typing import Callable, Optional
+from typing import Callable, Literal, Optional
 import click
 import os
-
 import tum_esm_utils
-from packages.core import types, interfaces, modules
+from packages.core import types, utils, interfaces, modules
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
+logger = utils.Logger(origin="cli")
+
+
+@click.group(name="plc")
+def plc_command_group() -> None:
+    pass
 
 
 def _print_green(text: str) -> None:
@@ -40,13 +45,18 @@ def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
     return plc_interface
 
 
-@click.command(help="Read current state from plc.")
+@plc_command_group.command(
+    name="read",
+    help="Read current state from plc.",
+)
 @click.option(
     "--no-indent",
     is_flag=True,
     help="Do not print the JSON in an indented manner"
 )
 def _read(no_indent: bool) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info('running command "plc read"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_readings = plc_interface.read()
@@ -56,8 +66,13 @@ def _read(no_indent: bool) -> None:
         plc_interface.disconnect()
 
 
-@click.command(help="Run plc function 'reset()'")
+@plc_command_group.command(
+    name="reset",
+    help="Run plc function 'reset()'",
+)
 def _reset() -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info('running command "plc reset"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_interface.reset()
@@ -103,9 +118,14 @@ def _wait_until_cover_is_at_angle(
             )
 
 
-@click.command(help="Run plc function 'move_cover()'")
+@plc_command_group.command(
+    name="set-cover-angle",
+    help="Run plc function 'move_cover()'",
+)
 @click.argument("angle")
 def _set_cover_angle(angle: str) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "plc set-cover-angle {angle}"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         new_cover_angle = int(
@@ -136,10 +156,14 @@ def _enable_user_control_in_config() -> None:
         config.dump(with_filelock=False)
 
 
-@click.command(help="Run plc function 'force_cover_close()'")
+@plc_command_group.command(
+    name="close-cover",
+    help="Run plc function 'force_cover_close()'",
+)
 def _close_cover() -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info('running command "plc close-cover"')
     _enable_user_control_in_config()
-
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_interface.set_sync_to_tracker(False)
@@ -153,7 +177,7 @@ def _close_cover() -> None:
 
 
 def _set_boolean_plc_state(
-    state: str,
+    state: Literal["true", "false"],
     get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool],
                                                                       None]],
 ) -> None:
@@ -167,65 +191,78 @@ def _set_boolean_plc_state(
         plc_interface.disconnect()
 
 
-@click.command(help="Run plc function 'set_sync_to_tracker()'")
+@plc_command_group.command(
+    name="set-sync-to-tracker",
+    help="Run plc function 'set_sync_to_tracker()'",
+)
 @click.argument("state")
-def _set_sync_to_tracker(state: str) -> None:
+def _set_sync_to_tracker(state: Literal["true", "false"]) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "plc set-sync-to-tracker {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
 
 
-@click.command(help="Run plc function 'set_auto_temperature()'")
+@plc_command_group.command(
+    name="set-auto-temperature",
+    help="Run plc function 'set_auto_temperature()'",
+)
 @click.argument("state")
-def _set_auto_temperature(state: str) -> None:
+def _set_auto_temperature(state: Literal["true", "false"]) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "plc set-auto-temperature {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_auto_temperature)
 
 
-@click.command(help="Run plc function 'set_power_heater()'")
+@plc_command_group.command(
+    name="set-heater-power",
+    help="Run plc function 'set_power_heater()'",
+)
 @click.argument("state")
-def _set_heater_power(state: str) -> None:
+def _set_heater_power(state: Literal["true", "false"]) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "plc set-heater-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_heater)
 
 
-@click.command(help="Run plc function 'set_power_heater()'")
+@plc_command_group.command(
+    name="set-camera-power",
+    help="Run plc function 'set_camera_heater()'",
+)
 @click.argument("state")
-def _set_camera_power(state: str) -> None:
+def _set_camera_power(state: Literal["true", "false"]) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "plc set-camera-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_camera)
 
 
-@click.command(help="Run plc function 'set_power_router()'")
+@plc_command_group.command(
+    name="set-router-power",
+    help="Run plc function 'set_power_router()'",
+)
 @click.argument("state")
-def _set_router_power(state: str) -> None:
+def _set_router_power(state: Literal["true", "false"]) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "plc set-router-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_router)
 
 
-@click.command(help="Run plc function 'set_power_spectrometer()'")
+@plc_command_group.command(
+    name="set-spectrometer-power",
+    help="Run plc function 'set_power_spectrometer()'",
+)
 @click.argument("state")
-def _set_spectrometer_power(state: str) -> None:
+def _set_spectrometer_power(state: Literal["true", "false"]) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "plc set-spectrometer-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_spectrometer)
 
 
-@click.command(help="Run plc function 'set_power_computer()'")
+@plc_command_group.command(
+    name="set-computer-power",
+    help="Run plc function 'set_power_computer()'",
+)
 @click.argument("state")
-def _set_computer_power(state: str) -> None:
+def _set_computer_power(state: Literal["true", "false"]) -> None:
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info(f'running command "plc set-computer-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_computer)
-
-
-@click.group()
-def plc_command_group() -> None:
-    pass
-
-
-plc_command_group.add_command(_read, name="read")
-plc_command_group.add_command(_reset, name="reset")
-plc_command_group.add_command(_set_cover_angle, name="set-cover-angle")
-plc_command_group.add_command(_close_cover, name="close-cover")
-plc_command_group.add_command(_set_sync_to_tracker, name="set-sync-to-tracker")
-plc_command_group.add_command(
-    _set_auto_temperature, name="set-auto-temperature"
-)
-plc_command_group.add_command(_set_heater_power, name="set-heater-power")
-plc_command_group.add_command(_set_camera_power, name="set-camera-power")
-plc_command_group.add_command(_set_router_power, name="set-router-power")
-plc_command_group.add_command(
-    _set_spectrometer_power, name="set-spectrometer-power"
-)
-plc_command_group.add_command(_set_computer_power, name="set-computer-power")
