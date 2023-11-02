@@ -80,7 +80,11 @@ def _update_config(content: str) -> None:
         )
     except ValueError as e:
         error_message = str(e)
-        _print_red(error_message)
+        _print_red(
+            error_message.replace(
+                "ConfigPartial is invalid", "Config update is invalid"
+            )
+        )
         exit(1)
 
     merged_config_dicts = tum_esm_utils.datastructures.merge_dicts(

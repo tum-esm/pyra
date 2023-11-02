@@ -13,6 +13,10 @@ _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
 _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
 
+class StricterBaseModel(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid", validate_assignment=True)
+
+
 class StrictFilePath(pydantic.RootModel[str]):
     root: str
 
@@ -47,7 +51,7 @@ class StrictIPAdress(pydantic.RootModel[str]):
     )
 
 
-class TimeDict(pydantic.BaseModel):
+class TimeDict(StricterBaseModel):
     hour: int = pydantic.Field(..., ge=0, le=23)
     minute: int = pydantic.Field(..., ge=0, le=59)
     second: int = pydantic.Field(..., ge=0, le=59)
@@ -56,13 +60,13 @@ class TimeDict(pydantic.BaseModel):
         return datetime.time(self.hour, self.minute, self.second)
 
 
-class PartialTimeDict(pydantic.BaseModel):
+class PartialTimeDict(StricterBaseModel):
     hour: Optional[int] = pydantic.Field(None, ge=0, le=23)
     minute: Optional[int] = pydantic.Field(None, ge=0, le=59)
     second: Optional[int] = pydantic.Field(None, ge=0, le=59)
 
 
-class GeneralConfig(pydantic.BaseModel):
+class GeneralConfig(StricterBaseModel):
     version: Literal["4.1.0"]
     seconds_per_core_interval: float = pydantic.Field(..., ge=5, le=600)
     test_mode: bool
@@ -70,7 +74,7 @@ class GeneralConfig(pydantic.BaseModel):
     min_sun_elevation: float = pydantic.Field(..., ge=0, le=90)
 
 
-class PartialGeneralConfig(pydantic.BaseModel):
+class PartialGeneralConfig(StricterBaseModel):
     """Like `GeneralConfig`, but all fields are optional."""
 
     seconds_per_core_interval: Optional[float] = pydantic.Field(
@@ -81,7 +85,7 @@ class PartialGeneralConfig(pydantic.BaseModel):
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
 
 
-class OpusConfig(pydantic.BaseModel):
+class OpusConfig(StricterBaseModel):
     em27_ip: StrictIPAdress
     executable_path: StrictFilePath
     experiment_path: StrictFilePath
@@ -90,7 +94,7 @@ class OpusConfig(pydantic.BaseModel):
     password: str
 
 
-class PartialOpusConfig(pydantic.BaseModel):
+class PartialOpusConfig(StricterBaseModel):
     """Like `OpusConfig`, but all fields are optional."""
 
     em27_ip: Optional[StrictIPAdress] = None
@@ -101,7 +105,7 @@ class PartialOpusConfig(pydantic.BaseModel):
     password: Optional[str] = None
 
 
-class CamtrackerConfig(pydantic.BaseModel):
+class CamtrackerConfig(StricterBaseModel):
     config_path: StrictFilePath
     executable_path: StrictFilePath
     learn_az_elev_path: StrictFilePath
@@ -111,7 +115,7 @@ class CamtrackerConfig(pydantic.BaseModel):
     restart_if_cover_remains_closed: bool
 
 
-class PartialCamtrackerConfig(pydantic.BaseModel):
+class PartialCamtrackerConfig(StricterBaseModel):
     """Like `CamtrackerConfig` but all fields are optional."""
 
     config_path: Optional[StrictFilePath] = None
@@ -123,7 +127,7 @@ class PartialCamtrackerConfig(pydantic.BaseModel):
     restart_if_cover_remains_closed: Optional[bool] = None
 
 
-class ErrorEmailConfig(pydantic.BaseModel):
+class ErrorEmailConfig(StricterBaseModel):
     smtp_host: str
     smtp_port: Literal[465, 587]
     smtp_username: str
@@ -133,7 +137,7 @@ class ErrorEmailConfig(pydantic.BaseModel):
     recipients: str
 
 
-class PartialErrorEmailConfig(pydantic.BaseModel):
+class PartialErrorEmailConfig(StricterBaseModel):
     """Like `ErrorEmailConfig` but all fields are optional."""
 
     smtp_host: Optional[str] = None
@@ -145,13 +149,13 @@ class PartialErrorEmailConfig(pydantic.BaseModel):
     recipients: Optional[str] = None
 
 
-class MeasurementDecisionConfig(pydantic.BaseModel):
+class MeasurementDecisionConfig(StricterBaseModel):
     mode: Literal["automatic", "manual", "cli"]
     manual_decision_result: bool
     cli_decision_result: bool
 
 
-class PartialMeasurementDecisionConfig(pydantic.BaseModel):
+class PartialMeasurementDecisionConfig(StricterBaseModel):
     """Like `MeasurementDecisionConfig` but all fields are optional."""
 
     mode: Optional[Literal["automatic", "manual", "cli"]] = None
@@ -159,7 +163,7 @@ class PartialMeasurementDecisionConfig(pydantic.BaseModel):
     cli_decision_result: Optional[bool] = None
 
 
-class MeasurementTriggersConfig(pydantic.BaseModel):
+class MeasurementTriggersConfig(StricterBaseModel):
     consider_time: bool
     consider_sun_elevation: bool
     consider_helios: bool
@@ -168,7 +172,7 @@ class MeasurementTriggersConfig(pydantic.BaseModel):
     min_sun_elevation: float = pydantic.Field(..., ge=0, le=90)
 
 
-class PartialMeasurementTriggersConfig(pydantic.BaseModel):
+class PartialMeasurementTriggersConfig(StricterBaseModel):
     """Like `MeasurementTriggersConfig` but all fields are optional."""
 
     consider_time: Optional[bool] = None
@@ -179,13 +183,13 @@ class PartialMeasurementTriggersConfig(pydantic.BaseModel):
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
 
 
-class TumPlcConfig(pydantic.BaseModel):
+class TumPlcConfig(StricterBaseModel):
     ip: StrictIPAdress
     version: Literal[1, 2]
     controlled_by_user: bool
 
 
-class PartialTumPlcConfig(pydantic.BaseModel):
+class PartialTumPlcConfig(StricterBaseModel):
     """Like `TumPlcConfig`, but all fields are optional."""
 
     ip: Optional[StrictIPAdress] = None
@@ -193,7 +197,7 @@ class PartialTumPlcConfig(pydantic.BaseModel):
     controlled_by_user: Optional[bool] = None
 
 
-class HeliosConfig(pydantic.BaseModel):
+class HeliosConfig(StricterBaseModel):
     camera_id: int = pydantic.Field(..., ge=0, le=999999)
     evaluation_size: int = pydantic.Field(..., ge=1, le=100)
     seconds_per_interval: float = pydantic.Field(..., ge=5, le=600)
@@ -203,7 +207,7 @@ class HeliosConfig(pydantic.BaseModel):
     save_images: bool
 
 
-class PartialHeliosConfig(pydantic.BaseModel):
+class PartialHeliosConfig(StricterBaseModel):
     """Like `HeliosConfig`, but all fields are optional."""
 
     camera_id: Optional[int] = pydantic.Field(None, ge=0, le=999999)
@@ -217,7 +221,7 @@ class PartialHeliosConfig(pydantic.BaseModel):
     save_images: Optional[bool] = None
 
 
-class UploadStreamConfig(pydantic.BaseModel):
+class UploadStreamConfig(StricterBaseModel):
     is_active: bool
     label: str
     variant: Literal["directories", "files"]
@@ -227,14 +231,14 @@ class UploadStreamConfig(pydantic.BaseModel):
     remove_src_after_upload: bool
 
 
-class UploadConfig(pydantic.BaseModel):
+class UploadConfig(StricterBaseModel):
     host: StrictIPAdress
     user: str
     password: str
     streams: list[UploadStreamConfig]
 
 
-class PartialUploadConfig(pydantic.BaseModel):
+class PartialUploadConfig(StricterBaseModel):
     """Like `UploadConfig`, but all fields are optional."""
 
     host: Optional[StrictIPAdress] = None
@@ -243,7 +247,7 @@ class PartialUploadConfig(pydantic.BaseModel):
     streams: Optional[list[UploadStreamConfig]] = None
 
 
-class Config(pydantic.BaseModel):
+class Config(StricterBaseModel):
     general: GeneralConfig
     opus: OpusConfig
     camtracker: CamtrackerConfig
@@ -336,7 +340,7 @@ class Config(pydantic.BaseModel):
                 f.write(self.model_dump_json())
 
 
-class PartialConfig(pydantic.BaseModel):
+class PartialConfig(StricterBaseModel):
     """Like `Config`, but all fields are optional."""
 
     general: Optional[PartialGeneralConfig] = None

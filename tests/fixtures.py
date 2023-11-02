@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any
+from typing import Any, Generator
 import pytest
 from packages.core import types
 
@@ -83,7 +83,7 @@ def restore_file(original_path: str, temporary_path: str) -> None:
 
 
 @pytest.fixture()
-def sample_config() -> Any:
+def sample_config() -> Generator[types.Config, None, None]:
     """
     Store the original config.json file under a different name.
     Restore it after the tests are done.
