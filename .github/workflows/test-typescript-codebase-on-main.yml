@@ -1,36 +1,36 @@
-name: 'test-typescript-codebase-on-main'
+name: "test-typescript-codebase-on-main"
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - 'packages/ui/**'
-            - '.github/workflows/test-typescript-codebase-on-main.yml'
-    pull_request:
-        branches:
-            - main
-        paths:
-            - 'packages/ui/**'
-            - '.github/workflows/test-typescript-codebase-on-main.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/ui/**"
+      - ".github/workflows/test-typescript-codebase-on-main.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "packages/ui/**"
+      - ".github/workflows/test-typescript-codebase-on-main.yml"
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Check out repository
-              uses: actions/checkout@v3
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
 
-            - name: Set up NodeJS with Yarn
-              uses: actions/setup-node@v3
-              with:
-                  node-version: '14'
-                  cache: 'yarn'
-                  cache-dependency-path: packages/ui/yarn.lock
+      - name: Set up NodeJS with Yarn
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: packages/ui/yarn.lock
 
-            - name: Install dependencies
-              run: yarn install --frozen-lockfile
-              working-directory: packages/ui
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: packages/ui
 
-            - name: Build frontend
-              run: yarn build
-              working-directory: packages/ui
+      - name: Build frontend
+        run: yarn build
+        working-directory: packages/ui
