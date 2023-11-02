@@ -5,11 +5,18 @@ import { Button } from '../ui/button';
 import { IconPower } from '@tabler/icons-react';
 import { useEffect } from 'react';
 import { ChildProcess } from '@tauri-apps/api/shell';
+import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 
 export default function PyraCoreStatus() {
     const { pyraCorePid, setPyraCorePid } = useCoreProcessStore();
+    const { addUiLogLine } = useLogsStore();
 
-    useEffect(() => {
+    function exitFromFailedProcess(p: ChildProcess, label: string): string {
+        addUiLogLine(`Error while ${label}.`, `stdout = ${p.stdout}, stderr = ${p.stderr}`);
+        return `Error while ${label}, full error in UI logs`;
+    }
+
+    function checkPyraCoreState() {
         toast.promise(fetchUtils.backend.checkPyraCoreState(), {
             loading: 'checking Pyra Core state',
             success: (p: ChildProcess) => {
@@ -21,11 +28,11 @@ export default function PyraCoreStatus() {
                     return 'Pyra Core is running';
                 }
             },
-            error: (p: ChildProcess) => {
-                return `Could not determine, whether Pyra Core is Running: ${p}`;
-            },
+            error: (p: ChildProcess) => exitFromFailedProcess(p, 'checking Pyra Core state'),
         });
-    }, []);
+    }
+
+    useEffect(checkPyraCoreState, []);
 
     async function startPyraCore(): Promise<void> {
         setPyraCorePid(undefined);
@@ -35,7 +42,7 @@ export default function PyraCoreStatus() {
                 setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
                 return 'Pyra Core has been started';
             },
-            error: (p: ChildProcess) => `Error while starting Pyra Core: ${p}`,
+            error: (p: ChildProcess) => exitFromFailedProcess(p, 'starting Pyra Core'),
         });
     }
 
@@ -47,7 +54,10 @@ export default function PyraCoreStatus() {
                 setPyraCorePid(-1);
                 return 'Pyra Core has been stopped';
             },
-            error: (p: ChildProcess) => `Error while stopping Pyra Core: ${p}`,
+            error: (p: ChildProcess) => {
+                checkPyraCoreState();
+                return exitFromFailedProcess(p, 'stopping Pyra Core');
+            },
         });
     }
 
