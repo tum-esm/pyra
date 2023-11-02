@@ -9,10 +9,10 @@ export default function SavingOverlay(props: {
     return (
         <div className="fixed bottom-0 left-0 z-50 w-full p-3 text-sm pl-[11.75rem] text-center border-t border-blue-300 bg-blue-200 flex-row-right gap-x-2">
             <div className="flex-grow text-left text-blue-950">
-                <div className="max-w-xl break-all">
+                <div className="max-w-xl break-all whitespace-pre-wrap">
                     {props.errorMessage === undefined && 'Save your changes now!'}
                     {props.errorMessage !== undefined &&
-                        props.errorMessage.replace('ConfigPartial is invalid: Error in ', '')}
+                        props.errorMessage.replaceAll('Error in ', '')}
                 </div>
             </div>
 

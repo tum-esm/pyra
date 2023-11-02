@@ -57,6 +57,8 @@ export default function ConfigSectionMeasurementTriggers() {
             />
             <configurationComponents.ConfigElementNote>
                 Pyra only does measurements between start and stop time (computer time is used).
+                <br />
+                The format is "hour : minute : second"
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText

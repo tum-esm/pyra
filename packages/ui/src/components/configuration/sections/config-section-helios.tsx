@@ -105,9 +105,9 @@ export default function ConfigSectionHelios() {
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementNote>
                 In general: The lower these thresholds, the more sensitive is Helios. More sensitive
-                = more sun conditions are considered as "sunny enough to measure". hen the system
-                should be measuring and is not, lower these thresholds. When CamTracker is drifting
-                a lot and is restarted frequently, increase the thresholds.
+                = more sun conditions are considered as "sunny enough to measure". Hence, when the
+                system should be measuring but is not, lower the thresholds. When CamTracker is
+                drifting a lot and is restarted frequently, increase the thresholds.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Edge Pixel Threshold"

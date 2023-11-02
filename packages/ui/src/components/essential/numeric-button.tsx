@@ -24,7 +24,6 @@ export default function NumericButton(props: {
                 value={value.toString()}
                 setValue={(v) => setValue(isNaN(parseInt(v)) ? 0 : parseInt(v))}
                 postfix={postfix}
-                small
                 disabled={props.disabled}
             />
             <Button

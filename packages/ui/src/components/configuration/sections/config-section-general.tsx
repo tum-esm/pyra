@@ -19,7 +19,7 @@ export default function ConfigSectionGeneral() {
                 oldValue={centralSectionConfig.station_id}
             />
             <configurationComponents.ConfigElementNote>
-                Used in logs and email.
+                Used in logs, emails and Helios images.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
