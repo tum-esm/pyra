@@ -1,5 +1,6 @@
 import { ask } from '@tauri-apps/api/dialog';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
+import { IconBugFilled, IconBook } from '@tabler/icons-react';
 
 export function Header(props: {
     tabs: string[];
@@ -58,6 +59,23 @@ export function Header(props: {
                     </div>
                 ))}
             </div>
+            <div className="w-px h-full mx-4 bg-slate-300" />
+            <a
+                className="w-10 h-10 p-2.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-950 mr-2"
+                title="Documentation"
+                href="https://pyra.esm.ei.tum.de/docs"
+                target="_blank"
+            >
+                <IconBook className="w-5 h-5" />
+            </a>
+            <a
+                className="w-10 h-10 p-2.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-950 mr-2"
+                title="Issue Tracker"
+                href="https://github.com/tum-esm/pyra/issues"
+                target="_blank"
+            >
+                <IconBugFilled className="w-5 h-5" />
+            </a>
         </header>
     );
 }
