@@ -41,7 +41,7 @@ export function ConfigElementBooleanToggle(props: {
             title={props.title}
             value={props.value ? 'yes' : 'no'}
             values={['yes', 'no']}
-            oldValue={props.oldValue !== null ? (props.oldValue ? 'yes' : 'no') : null}
+            oldValue={props.oldValue !== null ? (props.oldValue ? 'yes' : 'no') : 'null'}
             setValue={(v) => props.setValue(v === 'yes')}
         />
     );

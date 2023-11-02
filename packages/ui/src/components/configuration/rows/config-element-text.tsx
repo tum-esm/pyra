@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 export default function ConfigElementText(props: {
     title: string;
     value: string | number;
-    oldValue: string | number;
+    oldValue: string | number | undefined;
     setValue(v: string | number): void;
     disabled?: boolean;
     numeric?: boolean;
@@ -66,7 +66,9 @@ export default function ConfigElementText(props: {
                 )}
             </div>
             <essentialComponents.PreviousValue
-                previousValue={hasBeenModified ? `${oldValue}` : undefined}
+                previousValue={
+                    hasBeenModified ? (oldValue === undefined ? 'null' : `${oldValue}`) : undefined
+                }
             />
         </configurationComponents.LabeledRow>
     );

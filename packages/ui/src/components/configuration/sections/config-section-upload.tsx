@@ -1,7 +1,9 @@
+import { pullAt } from 'lodash';
 import { configurationComponents, essentialComponents } from '../..';
 import fetchUtils from '../../../utils/fetch-utils';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 import { Button } from '../../ui/button';
+import { Fragment } from 'react';
 
 export default function ConfigSectionUpload() {
     const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
@@ -23,26 +25,7 @@ export default function ConfigSectionUpload() {
             host: '1.2.3.4',
             user: '...',
             password: '...',
-            streams: [
-                {
-                    is_active: false,
-                    label: 'interferograms',
-                    variant: 'directories',
-                    dated_regex: '^%Y%m%d$',
-                    src_directory: '...',
-                    dst_directory: '...',
-                    remove_src_after_upload: false,
-                },
-                {
-                    is_active: false,
-                    label: 'datalogger',
-                    variant: 'files',
-                    dated_regex: '^datalogger-%Y-%m-%d*$',
-                    src_directory: '...',
-                    dst_directory: '...',
-                    remove_src_after_upload: false,
-                },
-            ],
+            streams: [],
         });
     }
 
@@ -74,16 +57,65 @@ export default function ConfigSectionUpload() {
         );
     }
 
+    // TODO: add stream configs
+
+    function addStream() {
+        if (localSectionConfig) {
+            setLocalConfigItem('upload.streams', [
+                ...localSectionConfig.streams,
+                {
+                    is_active: false,
+                    label: 'datalogger',
+                    variant: 'files',
+                    dated_regex: '^.*%Y-%m-%d.*$',
+                    src_directory: '...',
+                    dst_directory: '...',
+                    remove_src_after_upload: false,
+                },
+            ]);
+        }
+    }
+
+    function removeStream(index: number) {
+        if (localSectionConfig) {
+            setLocalConfigItem(
+                'upload.streams',
+                localSectionConfig.streams.length === 1
+                    ? []
+                    : pullAt(localSectionConfig.streams, index)
+            );
+        }
+    }
+
     return (
         <>
             <div className="flex flex-row gap-x-2">
                 <Button onClick={setNull}>remove configuration</Button>
                 <Button onClick={test}>Test Upload Connection</Button>
             </div>
+            <div className="flex-shrink-0 w-full mt-1 text-xs text-slate-500 flex-row-left gap-x-1">
+                <p>
+                    This upload feature uses the `circadian-scp-upload` Python library (
+                    <a
+                        href="https://github.com/dostuffthatmatters/circadian-scp-upload"
+                        target="_blank"
+                        className="inline text-blue-500 underline"
+                    >
+                        github.com/dostuffthatmatters/circadian-scp-upload
+                    </a>
+                    ). You can use it to upload your inteferograms, your datalogger files, and so
+                    on: All the data generated day by day that has to be uploaded to a server.
+                </p>
+            </div>
+            {centralSectionConfig &&
+                centralSectionConfig?.streams.length > localSectionConfig.streams.length && (
+                    <div className="text-xs font-normal text-blue-400 top-7">
+                        modified:{' '}
+                        {centralSectionConfig?.streams.length - localSectionConfig.streams.length}{' '}
+                        stream(s) have been deleted
+                    </div>
+                )}
             <configurationComponents.ConfigElementLine />
-            <configurationComponents.ConfigElementNote>
-                The IP and credentials of the Linux server to upload data to.
-            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Host"
                 value={localSectionConfig.host}
@@ -103,7 +135,192 @@ export default function ConfigSectionUpload() {
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.password : 'null'}
             />
             <configurationComponents.ConfigElementLine />
-            TODO: add stream configs
+            {localSectionConfig.streams.map((stream, index) => (
+                <Fragment key={`${index}`}>
+                    <div className="flex flex-col pl-8 border-l-2 border-dotted border-slate-300 gap-y-2">
+                        <div className="flex flex-row items-baseline text-xs font-semibold text-slate-950">
+                            <div>
+                                Stream {index + 1} ({stream.label})
+                            </div>
+                            <div className="flex-grow" />
+                            <div className="flex flex-row gap-x-2">
+                                <Button onClick={() => removeStream(index)}>
+                                    Remove Upload Stream
+                                </Button>
+                            </div>
+                        </div>
+                        <configurationComponents.ConfigElementBooleanToggle
+                            title="Is Active"
+                            value={stream.is_active}
+                            setValue={(v: boolean) =>
+                                setLocalConfigItem(`upload.streams.${index}.is_active`, v)
+                            }
+                            oldValue={
+                                centralSectionConfig?.streams[index]
+                                    ? centralSectionConfig.streams[index]?.is_active
+                                    : null
+                            }
+                        />
+                        <configurationComponents.ConfigElementText
+                            title="Label"
+                            value={stream.label}
+                            setValue={(v: string) =>
+                                setLocalConfigItem(`upload.streams.${index}.label`, v)
+                            }
+                            oldValue={
+                                centralSectionConfig !== null
+                                    ? centralSectionConfig.streams[index]?.label
+                                    : 'null'
+                            }
+                        />
+                        <configurationComponents.ConfigElementLine />
+                        <configurationComponents.LabeledRow
+                            title={'Variant'}
+                            modified={
+                                centralSectionConfig?.streams[index]?.variant !== stream.variant
+                            }
+                        >
+                            <div className="flex flex-row text-xs gap-x-2">
+                                <button
+                                    className={
+                                        'flex flex-col border divide-y rounded-lg shadow-sm divide-slate-200 border-slate-300 w-52 items-center bg-slate-100 ' +
+                                        (stream.variant === 'directories'
+                                            ? 'opacity-100'
+                                            : 'opacity-50')
+                                    }
+                                    onClick={() =>
+                                        setLocalConfigItem(
+                                            `upload.streams.${index}.variant`,
+                                            'directories'
+                                        )
+                                    }
+                                >
+                                    <div
+                                        className={
+                                            'w-full py-2 text-sm font-medium text-center rounded-t-lg ' +
+                                            (stream.variant === 'directories'
+                                                ? 'bg-slate-900 text-white'
+                                                : 'bg-slate-100 text-slate-950')
+                                        }
+                                    >
+                                        directories
+                                    </div>
+                                    <div className="relative flex-grow p-2 font-mono text-left whitespace-pre text-slate-800">
+                                        {'📁 data-directory\n' +
+                                            ' ├── 📁 20190101\n' +
+                                            ' │    ├── 📄 file1.txt\n' +
+                                            ' │    ├── 📄 file2.txt\n' +
+                                            ' │    └── 📄 file3.txt\n' +
+                                            ' └── 📁 20190102\n' +
+                                            '      ├── 📄 file1.txt\n' +
+                                            '      ├── 📄 file2.txt\n' +
+                                            '      └── 📄 file3.txt'}
+                                    </div>
+                                </button>
+                                <button
+                                    className={
+                                        'flex flex-col border divide-y rounded-lg shadow-sm divide-slate-200 border-slate-300 w-52 items-center bg-slate-100 ' +
+                                        (stream.variant === 'files' ? 'opacity-100' : 'opacity-50')
+                                    }
+                                    onClick={() =>
+                                        setLocalConfigItem(
+                                            `upload.streams.${index}.variant`,
+                                            'files'
+                                        )
+                                    }
+                                >
+                                    <div
+                                        className={
+                                            'w-full py-2 text-sm font-medium text-center rounded-t-lg ' +
+                                            (stream.variant === 'files'
+                                                ? 'bg-slate-900 text-white'
+                                                : 'bg-slate-100 text-slate-950')
+                                        }
+                                    >
+                                        files
+                                    </div>
+                                    <div className="flex-grow p-2 font-mono text-left whitespace-pre text-slate-800">
+                                        {'📁 data-directory\n' +
+                                            ' ├── 📄 20190101.txt\n' +
+                                            ' ├── 📄 20190102-a.txt\n' +
+                                            ' ├── 📄 20190102-b.txt\n' +
+                                            ' └── 📄 20190103.txt'}
+                                    </div>
+                                </button>
+                            </div>
+                            <essentialComponents.PreviousValue
+                                previousValue={
+                                    centralSectionConfig?.streams[index]?.variant === undefined
+                                        ? 'null'
+                                        : centralSectionConfig?.streams[index]?.variant ===
+                                          stream.variant
+                                        ? undefined
+                                        : centralSectionConfig?.streams[index]?.variant
+                                }
+                            />
+                        </configurationComponents.LabeledRow>
+                        <configurationComponents.ConfigElementText
+                            title="Dated Regex"
+                            value={stream.dated_regex}
+                            setValue={(v: string) =>
+                                setLocalConfigItem(`upload.streams.${index}.dated_regex`, v)
+                            }
+                            oldValue={
+                                centralSectionConfig !== null
+                                    ? centralSectionConfig.streams[index]?.dated_regex
+                                    : 'null'
+                            }
+                        />
+                        <configurationComponents.ConfigElementNote>
+                            `^.*%Y-%m-%d.*$` (as an example) will look for directories/files named
+                            for `...2019-01-01...` to determine when they have been created.
+                        </configurationComponents.ConfigElementNote>
+                        <configurationComponents.ConfigElementLine />
+                        <configurationComponents.ConfigElementText
+                            title="Source Directory"
+                            value={stream.src_directory}
+                            setValue={(v: string) =>
+                                setLocalConfigItem(`upload.streams.${index}.src_directory`, v)
+                            }
+                            oldValue={
+                                centralSectionConfig !== null
+                                    ? centralSectionConfig.streams[index]?.src_directory
+                                    : 'null'
+                            }
+                            showFileSelector
+                        />
+                        <configurationComponents.ConfigElementText
+                            title="Destination Directory"
+                            value={stream.dst_directory}
+                            setValue={(v: string) =>
+                                setLocalConfigItem(`upload.streams.${index}.dst_directory`, v)
+                            }
+                            oldValue={centralSectionConfig?.streams[index]?.dst_directory}
+                            showFileSelector
+                        />
+                        <configurationComponents.ConfigElementBooleanToggle
+                            title="Remove Source After Upload"
+                            value={stream.remove_src_after_upload}
+                            setValue={(v: boolean) =>
+                                setLocalConfigItem(
+                                    `upload.streams.${index}.remove_src_after_upload`,
+                                    v
+                                )
+                            }
+                            oldValue={
+                                centralSectionConfig?.streams[index]
+                                    ? centralSectionConfig.streams[index]?.remove_src_after_upload
+                                    : null
+                            }
+                        />
+                    </div>
+                    <configurationComponents.ConfigElementLine />
+                </Fragment>
+            ))}
+            <div className="flex flex-row gap-x-2">
+                <div className="flex-grow" />
+                <Button onClick={addStream}>Add Upload Stream</Button>
+            </div>
         </>
     );
 }

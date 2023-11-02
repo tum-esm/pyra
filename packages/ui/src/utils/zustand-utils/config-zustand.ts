@@ -88,7 +88,7 @@ export const configSchema = z.object({
                 z.object({
                     is_active: z.boolean(),
                     label: z.string(),
-                    variant: z.string(),
+                    variant: z.union([z.literal('directories'), z.literal('files')]),
                     dated_regex: z.string(),
                     src_directory: z.string(),
                     dst_directory: z.string(),
