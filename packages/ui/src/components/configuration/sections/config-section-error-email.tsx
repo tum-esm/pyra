@@ -25,10 +25,7 @@ export default function ConfigSectionErrorEmail() {
     return (
         <>
             <div>
-                <Button onClick={test}>Test Error Emails</Button>
-            </div>
-            <div className="flex-shrink-0 w-full mt-1 text-xs text-slate-500 flex-row-left">
-                This will send out a test email to the recipients below.
+                <Button onClick={test}>Send Test Email</Button>
             </div>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementToggle

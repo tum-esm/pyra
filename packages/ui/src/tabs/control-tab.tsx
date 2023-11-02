@@ -36,11 +36,11 @@ function VariableBlock(props: {
     }[];
 }) {
     return (
-        <div className="relative flex overflow-hidden divide-x divide-slate-200">
-            <div className="flex items-center flex-shrink-0 w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-slate-100">
+        <div className="relative flex overflow-hidden divide-x divide-slate-300">
+            <div className="flex items-center flex-shrink-0 w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-slate-200">
                 {props.label}
             </div>
-            <div className="flex-grow py-3 pl-4 pr-3 bg-white flex-col-left gap-y-1">
+            <div className="flex-grow py-3 pl-4 pr-3 bg-slate-50 flex-col-left gap-y-1">
                 {props.rows.map((r, i) => (
                     <div className="w-full flex-row-left h-7" key={i}>
                         <div className="flex-row-center whitespace-nowrap">
@@ -234,7 +234,7 @@ export default function ControlTab() {
 
     return (
         <div className={'w-full relative flex-col-left'}>
-            <div className="w-full px-6 py-4 border-b flex-row-left gap-x-2 border-slate-300">
+            <div className="w-full px-6 py-4 bg-white border-b flex-row-left gap-x-2 border-slate-300">
                 <div>PLC is controlled by:</div>
                 <essentialComponents.Toggle
                     value={plcIsControlledByUser ? 'user' : 'automation'}

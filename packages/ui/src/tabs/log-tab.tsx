@@ -57,8 +57,8 @@ export default function LogTab() {
             : renderedHeliosLogs;
 
     return (
-        <div className={'flex flex-col w-full h-[calc(100vh-3.5rem)] pt-4 overflow-hidden '}>
-            <div className="px-6 mb-4 flex-row-center gap-x-2">
+        <div className={'flex flex-col w-full h-[calc(100vh-3.5rem)] overflow-hidden '}>
+            <div className="px-6 py-4 bg-white flex-row-center gap-x-2 ">
                 <essentialComponents.LiveSwitch
                     isLive={liveUpdateIsActice}
                     toggle={setLiveUpdateIsActive}
@@ -77,7 +77,7 @@ export default function LogTab() {
             <div
                 className={
                     'w-full !py-2 !mb-0 font-mono text-xs overflow-y-scroll ' +
-                    'border-t border-gray-250 bg-whites flex-grow bg-white'
+                    'border-t border-gray-250 bg-whites flex-grow bg-slate-50'
                 }
             >
                 {logType !== 'ui' && renderedLogs !== undefined && (
