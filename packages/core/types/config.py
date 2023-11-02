@@ -326,7 +326,7 @@ class Config(StricterBaseModel):
 
             # the "from None" suppresses the pydantic exception
             raise ValueError(
-                f"Config is invalid: {','.join(pretty_errors)}"
+                "Config is invalid:\n" + ',\n'.join(pretty_errors)
             ) from None
 
     def dump(self, with_filelock: bool = True) -> None:

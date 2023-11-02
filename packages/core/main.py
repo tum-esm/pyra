@@ -89,6 +89,12 @@ def run() -> None:
         try:
             config = types.Config.load()
             break
+        except ValueError as e:
+            logger.error(
+                "Invalid config, waiting 10 seconds: " +
+                str(e).replace("Config is invalid:", "")
+            )
+            time.sleep(10)
         except Exception as e:
             logger.exception(e)
             logger.error("Could not load config, waiting 10 seconds")
@@ -166,7 +172,15 @@ def run() -> None:
         # load config at the beginning of each mainloop iteration
         try:
             config = types.Config.load()
+        except ValueError as e:
+            logger.error(
+                "Invalid config, waiting 10 seconds: " +
+                str(e).replace("Config is invalid:", "")
+            )
+            time.sleep(10)
+            continue
         except Exception as e:
+            logger.exception(e)
             logger.error("Invalid config, waiting 10 seconds")
             time.sleep(10)
             continue

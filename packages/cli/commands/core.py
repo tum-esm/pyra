@@ -78,7 +78,7 @@ def _stop_pyra_core() -> None:
         f"processe(s) with process ID(s) {termination_pids}"
     )
 
-    config = types.Config.load()
+    config = types.Config.load(ignore_path_existence=True)
     if config.general.test_mode:
         _print_green("Skip closing TUM_PLC, CamTracker, and OPUS in test mode")
         exit(0)
