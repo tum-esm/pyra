@@ -16,6 +16,11 @@ from packages.core import types, utils
 
 @pytest.mark.ci
 def test_astronomy(sample_config: types.Config) -> None:
+    # disable test mode because in test mode it uses
+    # munich coordinates instead of reading them from
+    # the CamTracker config file
+    sample_config.general.test_mode = False
+
     try:
         utils.Astronomy.get_current_sun_elevation(sample_config)
         raise Exception("Failed to warn about not loaded astronomy data.")
