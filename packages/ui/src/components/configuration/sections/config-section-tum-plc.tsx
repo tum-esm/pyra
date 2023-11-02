@@ -38,7 +38,7 @@ export default function ConfigSectionTumPlc() {
                     }
                 />
                 {centralSectionConfig !== null && (
-                    <div className="absolute -top-2.5 -left-1 w-1.5 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-yellow-400 rounded-sm" />
+                    <div className="absolute -top-2.5 -left-1 w-1 h-[calc(100%+0.625rem)] -translate-x-2.5 bg-blue-300" />
                 )}
             </div>
         );
