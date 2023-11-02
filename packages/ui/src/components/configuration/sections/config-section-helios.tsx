@@ -13,6 +13,7 @@ export default function ConfigSectionHelios() {
             camera_id: 0,
             evaluation_size: 15,
             seconds_per_interval: 6,
+            min_seconds_between_state_changes: 180,
             edge_pixel_threshold: 0.01,
             edge_color_threshold: 40,
             save_images: false,
@@ -86,6 +87,20 @@ export default function ConfigSectionHelios() {
                 }
                 numeric
                 postfix="image(s)"
+            />
+            <configurationComponents.ConfigElementText
+                title="Min. Seconds Between State Changes"
+                value={localSectionConfig.min_seconds_between_state_changes}
+                setValue={(v: any) =>
+                    setLocalConfigItem('helios.min_seconds_between_state_changes', v)
+                }
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.min_seconds_between_state_changes
+                        : 'null'
+                }
+                numeric
+                postfix="second(s)"
             />
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementNote>

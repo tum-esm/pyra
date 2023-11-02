@@ -72,6 +72,7 @@ export const configSchema = z.object({
             camera_id: intSchema,
             evaluation_size: intSchema,
             seconds_per_interval: floatSchema,
+            min_seconds_between_state_changes: intSchema,
             edge_pixel_threshold: floatSchema,
             edge_color_threshold: intSchema,
             save_images: z.boolean(),
