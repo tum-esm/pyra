@@ -4,6 +4,12 @@ import { set as lodashSet } from 'lodash';
 
 const coreStateSchema = z.object({
     last_updated: z.string(),
+    position: z.object({
+        latitude: z.number().nullable(),
+        longitude: z.number().nullable(),
+        altitude: z.number().nullable(),
+        sun_elevation: z.number().nullable(),
+    }),
     helios_indicates_good_conditions: z.boolean().nullable(),
     measurements_should_be_running: z.boolean().nullable(),
     plc_state: z.object({

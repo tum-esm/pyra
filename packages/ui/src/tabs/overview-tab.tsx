@@ -75,9 +75,9 @@ export default function OverviewTab() {
                 <overviewComponents.ActivityPlot />
             </div>
             <div className="w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
-                Computer Status
+                System State
             </div>
-            <div className="grid w-full grid-cols-4 px-4 pb-4 text-sm gap-x-1">
+            <div className="grid w-full grid-cols-4 px-4 pb-4 text-sm gap-x-1 gap-y-1">
                 <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
                     <div className="text-xs font-semibold">Last Boot Time</div>
                     <div>{coreState?.operating_system_state.last_boot_time}</div>
@@ -152,6 +152,24 @@ export default function OverviewTab() {
                         ) : (
                             '-'
                         )}
+                    </div>
+                </div>
+                <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                    <div className="text-xs font-semibold">Latitude</div>
+                    <div>{coreState?.position.latitude ? coreState.position.latitude : '-'}</div>
+                </div>
+                <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                    <div className="text-xs font-semibold">Longitude</div>
+                    <div>{coreState?.position.latitude ? coreState.position.longitude : '-'}</div>
+                </div>
+                <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                    <div className="text-xs font-semibold">Altitude</div>
+                    <div>{coreState?.position.altitude ? coreState.position.altitude : '-'}</div>
+                </div>
+                <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                    <div className="text-xs font-semibold">Current Sun Elevation</div>
+                    <div>
+                        {coreState?.position.sun_elevation ? coreState.position.sun_elevation : '-'}
                     </div>
                 </div>
             </div>
