@@ -1,65 +1,54 @@
-import toast from 'react-hot-toast';
 import { fetchUtils } from '../../utils';
 import { useCoreProcessStore } from '../../utils/zustand-utils/core-process-zustand';
 import { Button } from '../ui/button';
 import { IconPower } from '@tabler/icons-react';
 import { useEffect } from 'react';
 import { ChildProcess } from '@tauri-apps/api/shell';
-import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 
 export default function PyraCoreStatus() {
     const { pyraCorePid, setPyraCorePid } = useCoreProcessStore();
-    const { addUiLogLine } = useLogsStore();
-
-    function exitFromFailedProcess(p: ChildProcess, label: string): string {
-        addUiLogLine(`Error while ${label}.`, `stdout = ${p.stdout}, stderr = ${p.stderr}`);
-        return `Error while ${label}, full error in UI logs`;
-    }
+    const { runPromisingCommand } = fetchUtils.useCommand();
 
     function checkPyraCoreState() {
-        toast.promise(fetchUtils.backend.checkPyraCoreState(), {
-            loading: 'checking Pyra Core state',
-            success: (p: ChildProcess) => {
+        runPromisingCommand({
+            command: fetchUtils.backend.checkPyraCoreState,
+            label: 'checking Pyra Core state',
+            successLabel: 'successfully checked Pyra Core state',
+            onSuccess: (p: ChildProcess) => {
                 if (p.stdout.includes('not running')) {
                     setPyraCorePid(-1);
-                    return 'Pyra Core is not running';
                 } else {
                     setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
-                    return 'Pyra Core is running';
                 }
             },
-            error: (p: ChildProcess) => exitFromFailedProcess(p, 'checking Pyra Core state'),
+            onError: (p: ChildProcess) => checkPyraCoreState(),
+        });
+    }
+
+    function startPyraCore() {
+        setPyraCorePid(undefined);
+        runPromisingCommand({
+            command: fetchUtils.backend.startPyraCore,
+            label: 'starting Pyra Core',
+            successLabel: 'successfully started Pyra Core',
+            onSuccess: (p: ChildProcess) => {
+                setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
+            },
+        });
+    }
+
+    function stopPyraCore() {
+        setPyraCorePid(undefined);
+        runPromisingCommand({
+            command: fetchUtils.backend.stopPyraCore,
+            label: 'stopping Pyra Core',
+            successLabel: 'successfully stopped Pyra Core',
+            onSuccess: () => setPyraCorePid(-1),
+            onError: (p: ChildProcess) => checkPyraCoreState(),
         });
     }
 
     useEffect(checkPyraCoreState, []);
-
-    async function startPyraCore(): Promise<void> {
-        setPyraCorePid(undefined);
-        toast.promise(fetchUtils.backend.startPyraCore(), {
-            loading: 'starting Pyra Core',
-            success: (p: ChildProcess) => {
-                setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
-                return 'Pyra Core has been started';
-            },
-            error: (p: ChildProcess) => exitFromFailedProcess(p, 'starting Pyra Core'),
-        });
-    }
-
-    async function stopPyraCore() {
-        setPyraCorePid(undefined);
-        toast.promise(fetchUtils.backend.stopPyraCore(), {
-            loading: 'stopping Pyra Core',
-            success: (p: ChildProcess) => {
-                setPyraCorePid(-1);
-                return 'Pyra Core has been stopped';
-            },
-            error: (p: ChildProcess) => {
-                checkPyraCoreState();
-                return exitFromFailedProcess(p, 'stopping Pyra Core');
-            },
-        });
-    }
 
     return (
         <div
