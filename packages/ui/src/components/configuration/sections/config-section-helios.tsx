@@ -140,7 +140,7 @@ export default function ConfigSectionHelios() {
                 `40` is a good baseline.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
-            <configurationComponents.ConfigElementToggle
+            <configurationComponents.ConfigElementBooleanToggle
                 title="Save Images"
                 value={localSectionConfig.save_images}
                 setValue={(v: boolean) => setLocalConfigItem('helios.save_images', v)}

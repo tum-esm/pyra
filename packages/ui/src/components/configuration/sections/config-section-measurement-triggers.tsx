@@ -1,5 +1,4 @@
 import { configurationComponents } from '../..';
-import { ICONS } from '../../../assets';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 
 export default function ConfigSectionMeasurementTriggers() {
@@ -13,7 +12,7 @@ export default function ConfigSectionMeasurementTriggers() {
     }
     return (
         <>
-            <configurationComponents.ConfigElementToggle
+            <configurationComponents.ConfigElementBooleanToggle
                 title="Consider Time"
                 value={localSectionConfig.consider_time}
                 setValue={(v: boolean) =>
@@ -21,7 +20,7 @@ export default function ConfigSectionMeasurementTriggers() {
                 }
                 oldValue={centralSectionConfig.consider_time}
             />
-            <configurationComponents.ConfigElementToggle
+            <configurationComponents.ConfigElementBooleanToggle
                 title="Consider Sun Elevation"
                 value={localSectionConfig.consider_sun_elevation}
                 setValue={(v: boolean) =>
@@ -29,7 +28,7 @@ export default function ConfigSectionMeasurementTriggers() {
                 }
                 oldValue={centralSectionConfig.consider_sun_elevation}
             />
-            <configurationComponents.ConfigElementToggle
+            <configurationComponents.ConfigElementBooleanToggle
                 title="Consider Helios"
                 value={localSectionConfig.consider_helios}
                 setValue={(v: boolean) =>

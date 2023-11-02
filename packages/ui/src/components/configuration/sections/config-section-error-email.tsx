@@ -28,7 +28,7 @@ export default function ConfigSectionErrorEmail() {
                 <Button onClick={test}>Send Test Email</Button>
             </div>
             <configurationComponents.ConfigElementLine />
-            <configurationComponents.ConfigElementToggle
+            <configurationComponents.ConfigElementBooleanToggle
                 title="Send Error Emails"
                 value={localSectionConfig.notify_recipients}
                 setValue={(v: boolean) => setLocalConfigItem('error_email.notify_recipients', v)}

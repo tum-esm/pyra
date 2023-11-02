@@ -43,7 +43,7 @@ export default function ConfigSectionGeneral() {
                 angle.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
-            <configurationComponents.ConfigElementToggle
+            <configurationComponents.ConfigElementBooleanToggle
                 title="Test Mode"
                 value={localSectionConfig.test_mode}
                 setValue={(v: boolean) => setLocalConfigItem('general.test_mode', v)}

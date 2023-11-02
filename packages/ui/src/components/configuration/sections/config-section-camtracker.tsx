@@ -51,7 +51,7 @@ export default function ConfigSectionCamtracker() {
                 threshold away from the theoretical sun position, Pyra will restart CamTracker.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
-            <configurationComponents.ConfigElementToggle
+            <configurationComponents.ConfigElementBooleanToggle
                 title="Restart if no logs"
                 value={localSectionConfig.restart_if_logs_are_too_old}
                 setValue={(v: boolean) =>
@@ -59,7 +59,7 @@ export default function ConfigSectionCamtracker() {
                 }
                 oldValue={centralSectionConfig.restart_if_logs_are_too_old}
             />
-            <configurationComponents.ConfigElementToggle
+            <configurationComponents.ConfigElementBooleanToggle
                 title="Restart if cover remains closed"
                 value={localSectionConfig.restart_if_cover_remains_closed}
                 setValue={(v: boolean) =>
