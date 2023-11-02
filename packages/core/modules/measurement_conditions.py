@@ -82,6 +82,12 @@ class MeasurementConditions:
             is_measuring=measurements_should_be_running
         )
         interfaces.StateInterface.update_state(
+            position=types.Position(
+                latitude=camtracker_coordinates[0],
+                longitude=camtracker_coordinates[1],
+                altitude=camtracker_coordinates[2],
+                sun_elevation=sun_elevation,
+            ),
             measurements_should_be_running=measurements_should_be_running
         )
 

@@ -3,6 +3,13 @@ import datetime
 import pydantic
 
 
+class Position(pydantic.BaseModel):
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    altitude: Optional[float] = None
+    sun_elevation: Optional[float] = None
+
+
 class OperatingSystemState(pydantic.BaseModel):
     cpu_usage: Optional[list[float]] = None
     memory_usage: Optional[float] = None
@@ -67,10 +74,11 @@ class StateObject(pydantic.BaseModel):
     last_updated: datetime.datetime
     helios_indicates_good_conditions: Optional[Literal["yes", "no",
                                                        "inconclusive"]] = None
+    position: Position = Position()
     measurements_should_be_running: Optional[bool] = None
     plc_state: PLCState = PLCState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
-    current_exceptions: Optional[list[str]] = None
+    current_exceptions: Optional[list[str]] = []
     upload_is_running: Optional[bool] = None
 
     model_config = pydantic.ConfigDict(extra="forbid")

@@ -40,6 +40,7 @@ class StateInterface:
     )
     @staticmethod
     def update_state(
+        position: Optional[types.Position] = None,
         helios_indicates_good_conditions: Optional[Literal["yes", "no",
                                                            "inconclusive"]
                                                   ] = None,
@@ -61,6 +62,8 @@ class StateInterface:
             state = types.StateObject(last_updated=datetime.datetime.now())
 
         state.last_updated = datetime.datetime.now()
+        if enforce_none_values or (position is not None):
+            state.position = position or types.Position()
         if enforce_none_values or (
             helios_indicates_good_conditions is not None
         ):
