@@ -140,6 +140,8 @@ class SunTracking:
         gracefully shutting down CamTracker and move the mirrors back to parking position.
         """
 
+        interfaces.ActivityHistoryInterface.add_datapoint(camtracker_startups=1)
+
         # delete stop.txt file in camtracker folder if present
         self.remove_stop_file()
 

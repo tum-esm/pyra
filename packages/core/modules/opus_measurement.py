@@ -248,6 +248,7 @@ class OpusMeasurement:
         a user click on the executable."""
 
         assert sys.platform == "win32"
+        interfaces.ActivityHistoryInterface.add_datapoint(opus_startups=1)
 
         opus_path = self.config.opus.executable_path.root
         opus_username = self.config.opus.username

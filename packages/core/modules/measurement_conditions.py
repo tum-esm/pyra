@@ -51,6 +51,15 @@ class MeasurementConditions:
 
         # Skip rest of the function if test mode is active
         if self.config.general.test_mode:
+            interfaces.ActivityHistoryInterface.add_datapoint(
+                cli_calls=current_state.recent_cli_calls
+            )
+            with interfaces.StateInterface.update_state_in_context() as state:
+                state.position.latitude = camtracker_coordinates[0]
+                state.position.longitude = camtracker_coordinates[1]
+                state.position.altitude = camtracker_coordinates[2]
+                state.position.sun_elevation = sun_elevation
+                state.recent_cli_calls -= current_state.recent_cli_calls
             logger.debug("Skipping MeasurementConditions in test mode")
             return
 

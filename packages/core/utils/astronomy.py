@@ -61,16 +61,16 @@ class Astronomy:
 
         sun_pos = current_position.at(current_time).observe(sun).apparent()
         altitude, _, _ = sun_pos.altaz()
-        return float(altitude.degrees)
+        return round(float(altitude.degrees), 3)
 
     @staticmethod
     def get_camtracker_coordinates(
         config: types.Config
     ) -> tuple[float, float, float]:
-        """Returns the coordinates from the CamTracker config file."""
+        """Returns the coordinates from the CamTracker config file as (lat, lon, alt)."""
 
         if config.general.test_mode:
-            return (11.569, 48.151, 539)  # TUM_I location in munich
+            return (48.151, 11.569, 539)  # TUM_I location in munich
 
         with open(config.camtracker.config_path.root, "r") as f:
             _lines = f.readlines()
