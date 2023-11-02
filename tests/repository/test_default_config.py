@@ -1,10 +1,9 @@
-import json
 import os
 import sys
 import pytest
+import tum_esm_utils
 
-dir = os.path.dirname
-PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
+PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=3)
 CONFIG_DIR = os.path.join(PROJECT_DIR, "config")
 
 sys.path.append(PROJECT_DIR)

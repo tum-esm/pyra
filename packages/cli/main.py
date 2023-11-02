@@ -2,14 +2,14 @@
 to see all available commands.`"""
 
 import click
-import os
 import sys
+import tum_esm_utils
 
-_dir = os.path.dirname
-_PROJECT_DIR = _dir(_dir(_dir(os.path.abspath(__file__))))
+_PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(
+    __file__, current_depth=3
+)
 sys.path.append(_PROJECT_DIR)
 
-from packages.core import types
 from packages.cli.commands import (
     config_command_group,
     core_command_group,
@@ -23,11 +23,9 @@ from packages.cli.commands import (
 
 @click.command(help="Print Pyra version and code directory path.")
 def print_cli_information() -> None:
-    config = types.Config.load()
     click.echo(
         click.style(
-            f'This CLI is running Pyra version {config.general.version}' +
-            f' in directory "{_PROJECT_DIR}".',
+            f'This CLI is running Pyra version 4.1.0 in directory "{_PROJECT_DIR}"',
             fg="green",
         )
     )

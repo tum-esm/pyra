@@ -1,7 +1,7 @@
 {
     "name": "pyra-ui",
-    "private": true,
     "version": "4.1.0",
+    "private": true,
     "scripts": {
         "dev": "vite --port 3000",
         "build": "tsc && vite build",
