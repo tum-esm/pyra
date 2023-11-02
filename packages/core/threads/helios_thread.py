@@ -384,8 +384,9 @@ class HeliosThread(AbstractThread):
                 )
 
                 # evaluate sun state only if list is filled
-                new_state: Optional[bool] = current_state
                 if edge_fraction_history.is_full():
+                    new_state: Optional[bool] = current_state
+
                     average_edge_fraction = float(
                         edge_fraction_history.sum() /
                         edge_fraction_history.get_max_size()
@@ -396,7 +397,7 @@ class HeliosThread(AbstractThread):
 
                     upper_ef_threshold = config.helios.edge_pixel_threshold
                     lower_ef_threshold = upper_ef_threshold * 0.7
-                    if current_state is None:
+                    if new_state is None:
                         new_state = average_edge_fraction >= upper_ef_threshold
                     else:
                         # if already running and below lower threshold -> stop
@@ -410,36 +411,43 @@ class HeliosThread(AbstractThread):
                            ) and (average_edge_fraction >= upper_ef_threshold):
                             new_state = True
 
-                logger.debug(
-                    f"New state: {'GOOD' if (new_state == True) else 'BAD'}"
-                )
-                if current_state != new_state:
-                    # only do state change if last_state_change is long ago in the past
-                    seconds_since_last_state_change: float = config.helios.min_seconds_between_state_changes
-                    if last_state_change is not None:
-                        seconds_since_last_state_change = (
-                            datetime.datetime.now() - last_state_change
-                        ).total_seconds()
+                    logger.debug(
+                        f"New state: {'GOOD' if (new_state == True) else 'BAD'}"
+                    )
+                    if current_state != new_state:
+                        # only do state change if last_state_change is long ago in
+                        # the past see https://github.com/tum-esm/pyra/issues/195
+                        seconds_since_last_state_change: float = config.helios.min_seconds_between_state_changes
+                        if last_state_change is not None:
+                            seconds_since_last_state_change = (
+                                datetime.datetime.now() - last_state_change
+                            ).total_seconds()
 
-                    if seconds_since_last_state_change >= config.helios.min_seconds_between_state_changes:
-                        logger.info(
-                            f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
-                        )
-                        interfaces.StateInterface.update_state(
-                            helios_indicates_good_conditions=(
-                                "inconclusive" if (
-                                    new_state is None
-                                ) else "yes" if new_state else "no"
+                        if seconds_since_last_state_change >= config.helios.min_seconds_between_state_changes:
+                            logger.info(
+                                f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
                             )
-                        )
-                        current_state = new_state
-                        last_state_change = datetime.datetime.now()
-                    else:
-                        logger.debug(
-                            "Not changing state because last state change was" +
-                            f" too recent ({seconds_since_last_state_change} " +
-                            "second(s) ago)"
-                        )
+                            interfaces.StateInterface.update_state(
+                                helios_indicates_good_conditions=(
+                                    "inconclusive" if (
+                                        new_state is None
+                                    ) else "yes" if new_state else "no"
+                                )
+                            )
+                            current_state = new_state
+                            last_state_change = datetime.datetime.now()
+                        else:
+                            logger.debug(
+                                "Not changing state because last state change was"
+                                +
+                                f" too recent ({seconds_since_last_state_change} "
+                                + "second(s) ago)"
+                            )
+                else:
+                    logger.debug(
+                        "Not evaluating sun state because " +
+                        "Helios buffer is still filling up"
+                    )
 
                 # wait rest of loop time
                 elapsed_time = time.time() - start_time
