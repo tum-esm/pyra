@@ -15,8 +15,9 @@ import {
 import { Button } from '../components/ui/button';
 import { configSchema, useConfigStore } from '../utils/zustand-utils/config-zustand';
 import fetchUtils from '../utils/fetch-utils';
-import { omit } from 'lodash';
+import { join, omit, takeWhile, pick } from 'lodash';
 import { ChildProcess } from '@tauri-apps/api/shell';
+import { getDiff } from 'recursive-diff';
 
 const sections: {
     key: customTypes.configSectionKey;
@@ -59,28 +60,33 @@ export default function ConfigurationTab() {
     async function onSave() {
         if (centralConfig !== undefined && localConfig !== undefined) {
             setIsSaving(true);
-
             const parsedLocalConfig = configSchema.parse(localConfig);
-            console.log(omit(parsedLocalConfig, 'measurement_decision.cli_decision_result'));
-
-            toast.promise(
-                fetchUtils.backend.updateConfig(
-                    omit(parsedLocalConfig, 'measurement_decision.cli_decision_result')
-                ),
-                {
-                    loading: 'Saving config',
-                    success: (p: ChildProcess) => {
-                        setConfig(parsedLocalConfig);
-                        setIsSaving(false);
-                        return 'Successfully saved config';
-                    },
-                    error: (p: ChildProcess) => {
-                        setIsSaving(false);
-                        setErrorMessage(p.stdout);
-                        return `Could not save config`;
-                    },
-                }
-            );
+            const updatedPaths: string[] = [];
+            getDiff(
+                omit(parsedLocalConfig, 'measurement_decision.cli_decision_result'),
+                omit(centralConfig, 'measurement_decision.cli_decision_result')
+            ).forEach((d) => {
+                updatedPaths.push(
+                    join(
+                        takeWhile(d.path, (p) => typeof p === 'string'),
+                        '.'
+                    )
+                );
+            });
+            toast.promise(fetchUtils.backend.updateConfig(pick(parsedLocalConfig, updatedPaths)), {
+                loading: 'Saving config',
+                success: (p: ChildProcess) => {
+                    setErrorMessage(undefined);
+                    setConfig(parsedLocalConfig);
+                    setIsSaving(false);
+                    return 'Successfully saved config';
+                },
+                error: (p: ChildProcess) => {
+                    setIsSaving(false);
+                    setErrorMessage(p.stdout);
+                    return `Could not save config`;
+                },
+            });
         }
     }
 
