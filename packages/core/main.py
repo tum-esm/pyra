@@ -79,7 +79,9 @@ def run() -> None:
     according to the config.
     """
 
-    logger.info(f"Starting mainloop inside process with PID {os.getpid()}")
+    logger.info(
+        f"Starting mainloop inside process with process ID {os.getpid()}"
+    )
 
     # Loop until a valid config has been found. Without
     # an invalid config, the mainloop cannot initialize

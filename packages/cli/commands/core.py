@@ -40,7 +40,7 @@ def _start_pyra_core() -> None:
     )
     if len(existing_pids) > 0:
         _print_red(
-            f"Background process already exists with process IDs {existing_pids}"
+            f"Background process already exists with process ID(s) {existing_pids}"
         )
         exit(1)
 
@@ -75,7 +75,7 @@ def _stop_pyra_core() -> None:
 
     _print_green(
         f"Terminated {len(termination_pids)} pyra-core background " +
-        f"processe(s) with PID(s) {termination_pids}"
+        f"processe(s) with process ID(s) {termination_pids}"
     )
 
     config = types.Config.load()
@@ -124,7 +124,7 @@ def _pyra_core_is_running() -> None:
         _RUN_PYRA_CORE_SCRIPT_PATH
     )
     if len(existing_pids) > 0:
-        _print_green(f"pyra-core is running with process IDs {existing_pids}")
+        _print_green(f"pyra-core is running with process ID(s) {existing_pids}")
     else:
         _print_red("pyra-core is not running")
 

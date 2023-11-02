@@ -11,7 +11,7 @@ SAMPLE_CONFIG = types.Config(
     general=types.config.GeneralConfig(
         version="4.1.0",
         seconds_per_core_interval=30,
-        test_mode=False,
+        test_mode=True,
         station_id="...",
         min_sun_elevation=11,
     ),
