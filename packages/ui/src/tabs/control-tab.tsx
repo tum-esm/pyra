@@ -36,11 +36,11 @@ function VariableBlock(props: {
     }[];
 }) {
     return (
-        <div className="relative flex overflow-hidden elevated-panel">
-            <div className="block w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-gray-100 border-r border-gray-200 rounded-l flex-row-center">
+        <div className="relative flex overflow-hidden divide-x divide-slate-200">
+            <div className="flex items-center flex-shrink-0 w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-slate-100">
                 {props.label}
             </div>
-            <div className="flex-grow py-3 pl-4 pr-3 flex-col-left gap-y-1">
+            <div className="flex-grow py-3 pl-4 pr-3 bg-white flex-col-left gap-y-1">
                 {props.rows.map((r, i) => (
                     <div className="w-full flex-row-left h-7" key={i}>
                         <div className="flex-row-center whitespace-nowrap">
@@ -233,8 +233,8 @@ export default function ControlTab() {
     }
 
     return (
-        <div className={'w-full relative py-4 flex-col-left gap-y-4'}>
-            <div className="w-full px-6 flex-row-left gap-x-2">
+        <div className={'w-full relative flex-col-left'}>
+            <div className="w-full px-6 py-4 border-b flex-row-left gap-x-2 border-slate-300">
                 <div>PLC is controlled by:</div>
                 <essentialComponents.Toggle
                     value={plcIsControlledByUser ? 'user' : 'automation'}
@@ -247,17 +247,16 @@ export default function ControlTab() {
                     {!plcIsControlledByUser && 'You cannot send any commands to the PLC'}
                 </div>
                 <div className="flex-grow" />
-                <div className="px-2 py-0.5 text-sm text-green-100 bg-green-900 rounded shadow-sm">
+                <div className="text-sm text-slate-700">
                     Last PLC-read:{' '}
                     {coreState === undefined ||
                     coreState.plc_state.last_full_fetch === null ||
                     coreState.plc_state.last_full_fetch === undefined
-                        ? '...'
+                        ? '-'
                         : coreState?.plc_state.last_full_fetch}
                 </div>
             </div>
-            <div className="w-full h-px my-0 bg-gray-300" />
-            <div className="flex flex-col w-full px-6 text-sm gap-y-2">
+            <div className="flex flex-col w-full text-sm divide-y divide-slate-300">
                 <>
                     <VariableBlock
                         label="Errors"

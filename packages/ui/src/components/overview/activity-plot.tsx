@@ -36,7 +36,7 @@ function getSectionHoverLabel(
         `- ${hourFractionToTimeString(section.to_hour)} | ${label} ` +
         (variant === 'fraction'
             ? `${Math.round(fraction * 100)} % of the time`
-            : `${fraction} times`)
+            : `${accumulatedValue} times`)
     );
 }
 
