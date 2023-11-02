@@ -48,8 +48,7 @@ const hardwareSections: {
 export default function ConfigurationTab() {
     const [activeKey, setActiveKey] = useState<customTypes.configSectionKey>('general');
     const { centralConfig, localConfig, setConfig, configIsDiffering } = useConfigStore();
-
-    const [isSaving, setIsSaving] = useState(false);
+    const { commandIsRunning, runPromisingCommand } = fetchUtils.useCommand();
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
     function onRevert() {
@@ -59,7 +58,6 @@ export default function ConfigurationTab() {
 
     async function onSave() {
         if (centralConfig !== undefined && localConfig !== undefined) {
-            setIsSaving(true);
             const parsedLocalConfig = configSchema.parse(localConfig);
             const updatedPaths: string[] = [];
             getDiff(
@@ -73,18 +71,17 @@ export default function ConfigurationTab() {
                     )
                 );
             });
-            toast.promise(fetchUtils.backend.updateConfig(pick(parsedLocalConfig, updatedPaths)), {
-                loading: 'Saving config',
-                success: (p: ChildProcess) => {
+            runPromisingCommand({
+                command: () =>
+                    fetchUtils.backend.updateConfig(pick(parsedLocalConfig, updatedPaths)),
+                label: 'saving config',
+                successLabel: 'saved config',
+                onSuccess: () => {
                     setErrorMessage(undefined);
                     setConfig(parsedLocalConfig);
-                    setIsSaving(false);
-                    return 'Successfully saved config';
                 },
-                error: (p: ChildProcess) => {
-                    setIsSaving(false);
+                onError: (p: ChildProcess) => {
                     setErrorMessage(p.stdout);
-                    return `Could not save config`;
                 },
             });
         }
@@ -178,7 +175,7 @@ export default function ConfigurationTab() {
                             errorMessage,
                             onSave,
                             onRevert,
-                            isSaving,
+                            isSaving: commandIsRunning,
                         }}
                     />
                 )}

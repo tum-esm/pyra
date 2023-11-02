@@ -7,7 +7,6 @@ import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zustand';
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 import { ChildProcess } from '@tauri-apps/api/shell';
-import toast from 'react-hot-toast';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
@@ -19,18 +18,19 @@ export default function Dashboard() {
     const { setActivityHistory } = useActivityHistoryStore();
     const { setCoreState } = useCoreStateStore();
     const { centralConfig, setConfig } = useConfigStore();
+    const { runPromisingCommand } = fetchUtils.useCommand();
 
     const enclosureControlsIsVisible =
         centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
 
     async function fetchConfig() {
-        toast.promise(fetchUtils.backend.getConfig(), {
-            loading: 'Loading config file...',
-            success: (p: ChildProcess) => {
+        runPromisingCommand({
+            command: fetchUtils.backend.getConfig,
+            label: 'loading config file',
+            successLabel: 'successfully loaded config file',
+            onSuccess: (p: ChildProcess) => {
                 setConfig(JSON.parse(p.stdout));
-                return 'Successfully loaded config file';
             },
-            error: (p: ChildProcess) => `Could not load config file ${p}`,
         });
     }
     async function fetchStateFile() {

@@ -1,11 +1,9 @@
 import { fetchUtils } from '../utils';
 import { essentialComponents } from '../components';
-import { useState } from 'react';
 import { ICONS } from '../assets';
 import toast from 'react-hot-toast';
 import { useCoreStateStore } from '../utils/zustand-utils/core-state-zustand';
 import { useConfigStore } from '../utils/zustand-utils/config-zustand';
-import { ChildProcess } from '@tauri-apps/api/shell';
 
 function renderBoolValue(value: boolean | null) {
     if (value === null) {
@@ -89,32 +87,17 @@ export default function ControlTab() {
     const { coreState } = useCoreStateStore();
     const { centralConfig, setConfigItem } = useConfigStore();
     const { setCoreStateItem } = useCoreStateStore();
-
     const plcIsControlledByUser = centralConfig?.tum_plc?.controlled_by_user;
-    const pyraIsInTestMode = centralConfig?.general.test_mode;
 
-    const [commandIsRunning, setCommandIsRunning] = useState(false);
+    const { commandIsRunning, runPromisingCommand } = fetchUtils.useCommand();
     const buttonsAreDisabled = !plcIsControlledByUser || commandIsRunning;
 
     async function setPlcIsControlledByUser(v: boolean) {
-        if (commandIsRunning) {
-            toast.error('You cannot run multiple commands at once');
-            return;
-        }
-        setCommandIsRunning(true);
-
-        toast.promise(fetchUtils.backend.updateConfig({ tum_plc: { controlled_by_user: v } }), {
-            loading: 'Switching PLC control mode',
-            success: (p: ChildProcess) => {
-                setConfigItem('tum_plc.controlled_by_user', v);
-                setCommandIsRunning(false);
-                return 'Successfully switched PLC control mode';
-            },
-            error: (p: ChildProcess) => {
-                setCommandIsRunning(false);
-                console.log(p);
-                return 'Could not switch PLC control mode';
-            },
+        runPromisingCommand({
+            command: () => fetchUtils.backend.updateConfig({ tum_plc: { controlled_by_user: v } }),
+            label: 'toggling PLC control mode',
+            successLabel: 'successfully toggled PLC control mode',
+            onSuccess: () => setConfigItem('tum_plc.controlled_by_user', v),
         });
     }
 
@@ -122,27 +105,13 @@ export default function ControlTab() {
         command: string[],
         label: string,
         successLabel: string,
-        successUpdate: () => void
+        onSuccess: () => void
     ) {
-        if (commandIsRunning) {
-            toast.error('You cannot run multiple commands at once');
-            return;
-        }
-        setCommandIsRunning(true);
-
-        toast.promise(fetchUtils.backend.writeToPLC(command), {
-            loading: label,
-            success: (p: ChildProcess) => {
-                successUpdate();
-                setCommandIsRunning(false);
-                return successLabel;
-            },
-            error: (p: ChildProcess) => {
-                setCommandIsRunning(false);
-                console.log(p);
-                // TODO: add button to open console
-                return 'Could not write to PLC, details in console';
-            },
+        runPromisingCommand({
+            command: () => fetchUtils.backend.writeToPLC(command),
+            label: label,
+            successLabel: successLabel,
+            onSuccess: onSuccess,
         });
     }
 
@@ -259,7 +228,7 @@ export default function ControlTab() {
         }
     }
 
-    if (plcIsControlledByUser === undefined) {
+    if (coreState === undefined || centralConfig === undefined) {
         return <></>;
     }
 
@@ -289,279 +258,246 @@ export default function ControlTab() {
             </div>
             <div className="w-full h-px my-0 bg-gray-300" />
             <div className="flex flex-col w-full px-6 text-sm gap-y-2">
-                {pyraIsInTestMode && (
-                    <div className="flex-row-center">
-                        No PLC connection when pyra is in test mode
-                    </div>
-                )}
-                {!pyraIsInTestMode && coreState === undefined && (
-                    <div className="flex-row-center gap-x-1.5">
-                        <essentialComponents.Spinner />
-                        loading PLC state
-                    </div>
-                )}
-                {!pyraIsInTestMode && coreState !== undefined && (
-                    <>
-                        <VariableBlock
-                            label="Errors"
-                            disabled={buttonsAreDisabled}
-                            rows={[
-                                {
-                                    variable: {
-                                        key: 'Reset needed',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.state.reset_needed
-                                        ),
-                                    },
-                                    action: {
-                                        label: 'reset now',
-                                        callback: reset,
-                                    },
+                <>
+                    <VariableBlock
+                        label="Errors"
+                        disabled={buttonsAreDisabled}
+                        rows={[
+                            {
+                                variable: {
+                                    key: 'Reset needed',
+                                    value: renderBoolValue(coreState.plc_state.state.reset_needed),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Motor failed',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.state.motor_failed
-                                        ),
-                                    },
+                                action: {
+                                    label: 'reset now',
+                                    callback: reset,
                                 },
-                                {
-                                    variable: {
-                                        key: 'UPS alert',
-                                        value: renderBoolValue(coreState.plc_state.state.ups_alert),
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Motor failed',
+                                    value: renderBoolValue(coreState.plc_state.state.motor_failed),
                                 },
-                            ]}
-                        />
+                            },
+                            {
+                                variable: {
+                                    key: 'UPS alert',
+                                    value: renderBoolValue(coreState.plc_state.state.ups_alert),
+                                },
+                            },
+                        ]}
+                    />
 
-                        <VariableBlock
-                            label="Rain Detection"
-                            disabled={buttonsAreDisabled}
-                            rows={[
-                                {
-                                    variable: {
-                                        key: 'Cover is closed',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.state.cover_closed
-                                        ),
-                                    },
-                                    action: {
-                                        label: 'force cover close',
-                                        callback: closeCover,
-                                    },
+                    <VariableBlock
+                        label="Rain Detection"
+                        disabled={buttonsAreDisabled}
+                        rows={[
+                            {
+                                variable: {
+                                    key: 'Cover is closed',
+                                    value: renderBoolValue(coreState.plc_state.state.cover_closed),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Rain detected',
-                                        value: renderBoolValue(coreState.plc_state.state.rain),
-                                    },
+                                action: {
+                                    label: 'force cover close',
+                                    callback: closeCover,
                                 },
-                            ]}
-                        />
+                            },
+                            {
+                                variable: {
+                                    key: 'Rain detected',
+                                    value: renderBoolValue(coreState.plc_state.state.rain),
+                                },
+                            },
+                        ]}
+                    />
 
-                        <VariableBlock
-                            label="Cover Angle"
-                            disabled={buttonsAreDisabled}
-                            rows={[
-                                {
-                                    variable: {
-                                        key: 'Current cover angle',
-                                        value: renderStringValue(
-                                            coreState.plc_state.actors.current_angle,
-                                            '°'
-                                        ),
-                                    },
-                                    action: {
-                                        label: 'move to angle',
-                                        callback: moveCover,
-                                        variant: 'numeric',
-                                        initialValue: coreState.plc_state.actors.current_angle || 0,
-                                        postfix: '°',
-                                    },
+                    <VariableBlock
+                        label="Cover Angle"
+                        disabled={buttonsAreDisabled}
+                        rows={[
+                            {
+                                variable: {
+                                    key: 'Current cover angle',
+                                    value: renderStringValue(
+                                        coreState.plc_state.actors.current_angle,
+                                        '°'
+                                    ),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Sync to CamTracker',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.control.sync_to_tracker
-                                        ),
-                                    },
-                                    action: {
-                                        label: coreState.plc_state.control.sync_to_tracker
-                                            ? 'do not sync'
-                                            : 'sync',
-                                        callback: toggleSyncToTracker,
-                                    },
+                                action: {
+                                    label: 'move to angle',
+                                    callback: moveCover,
+                                    variant: 'numeric',
+                                    initialValue: coreState.plc_state.actors.current_angle || 0,
+                                    postfix: '°',
                                 },
-                            ]}
-                        />
+                            },
+                            {
+                                variable: {
+                                    key: 'Sync to CamTracker',
+                                    value: renderBoolValue(
+                                        coreState.plc_state.control.sync_to_tracker
+                                    ),
+                                },
+                                action: {
+                                    label: coreState.plc_state.control.sync_to_tracker
+                                        ? 'do not sync'
+                                        : 'sync',
+                                    callback: toggleSyncToTracker,
+                                },
+                            },
+                        ]}
+                    />
 
-                        <VariableBlock
-                            label="Climate"
-                            disabled={buttonsAreDisabled}
-                            rows={[
-                                {
-                                    variable: {
-                                        key: 'Temperature',
-                                        value: renderStringValue(
-                                            coreState.plc_state.sensors.temperature,
-                                            ' °C'
-                                        ),
-                                    },
+                    <VariableBlock
+                        label="Climate"
+                        disabled={buttonsAreDisabled}
+                        rows={[
+                            {
+                                variable: {
+                                    key: 'Temperature',
+                                    value: renderStringValue(
+                                        coreState.plc_state.sensors.temperature,
+                                        ' °C'
+                                    ),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Humidity',
-                                        value: renderStringValue(
-                                            coreState.plc_state.sensors.humidity,
-                                            '%'
-                                        ),
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Humidity',
+                                    value: renderStringValue(
+                                        coreState.plc_state.sensors.humidity,
+                                        '%'
+                                    ),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Fan Speed',
-                                        value: renderStringValue(
-                                            coreState.plc_state.actors.fan_speed,
-                                            '%'
-                                        ),
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Fan Speed',
+                                    value: renderStringValue(
+                                        coreState.plc_state.actors.fan_speed,
+                                        '%'
+                                    ),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Auto temperature',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.control.auto_temp_mode
-                                        ),
-                                    },
-                                    action: {
-                                        label: coreState.plc_state.control.auto_temp_mode
-                                            ? 'disable'
-                                            : 'enable',
-                                        callback: toggleAutoTemperature,
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Auto temperature',
+                                    value: renderBoolValue(
+                                        coreState.plc_state.control.auto_temp_mode
+                                    ),
                                 },
-                            ]}
-                        />
+                                action: {
+                                    label: coreState.plc_state.control.auto_temp_mode
+                                        ? 'disable'
+                                        : 'enable',
+                                    callback: toggleAutoTemperature,
+                                },
+                            },
+                        ]}
+                    />
 
-                        <VariableBlock
-                            label="Power"
-                            disabled={buttonsAreDisabled}
-                            rows={[
-                                {
-                                    variable: {
-                                        key: 'Camera Power',
-                                        value: renderBoolValue(coreState.plc_state.power.camera),
-                                    },
-                                    action: {
-                                        label: coreState.plc_state.power.camera
-                                            ? 'disable'
-                                            : 'enable',
-                                        callback: togglePowerCamera,
-                                    },
+                    <VariableBlock
+                        label="Power"
+                        disabled={buttonsAreDisabled}
+                        rows={[
+                            {
+                                variable: {
+                                    key: 'Camera Power',
+                                    value: renderBoolValue(coreState.plc_state.power.camera),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Router Power',
-                                        value: renderBoolValue(coreState.plc_state.power.router),
-                                    },
-                                    action: {
-                                        label: coreState.plc_state.power.router
-                                            ? 'disable'
-                                            : 'enable',
-                                        callback: togglePowerRouter,
-                                    },
+                                action: {
+                                    label: coreState.plc_state.power.camera ? 'disable' : 'enable',
+                                    callback: togglePowerCamera,
                                 },
-                                {
-                                    variable: {
-                                        key: 'Spectrometer Power',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.power.spectrometer
-                                        ),
-                                    },
-                                    action: {
-                                        label: coreState.plc_state.power.spectrometer
-                                            ? 'disable'
-                                            : 'enable',
-                                        callback: togglePowerSpectrometer,
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Router Power',
+                                    value: renderBoolValue(coreState.plc_state.power.router),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Computer Power',
-                                        value: renderBoolValue(coreState.plc_state.power.computer),
-                                    },
-                                    action: {
-                                        label: coreState.plc_state.power.computer
-                                            ? 'disable'
-                                            : 'enable',
-                                        callback: togglePowerComputer,
-                                    },
+                                action: {
+                                    label: coreState.plc_state.power.router ? 'disable' : 'enable',
+                                    callback: togglePowerRouter,
                                 },
-                                {
-                                    variable: {
-                                        key: 'Heater power',
-                                        value: renderBoolValue(coreState.plc_state.power.heater),
-                                    },
-                                    action: {
-                                        label: coreState.plc_state.power.heater
-                                            ? 'disable'
-                                            : 'enable',
-                                        callback: togglePowerHeater,
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Spectrometer Power',
+                                    value: renderBoolValue(coreState.plc_state.power.spectrometer),
                                 },
-                            ]}
-                        />
+                                action: {
+                                    label: coreState.plc_state.power.spectrometer
+                                        ? 'disable'
+                                        : 'enable',
+                                    callback: togglePowerSpectrometer,
+                                },
+                            },
+                            {
+                                variable: {
+                                    key: 'Computer Power',
+                                    value: renderBoolValue(coreState.plc_state.power.computer),
+                                },
+                                action: {
+                                    label: coreState.plc_state.power.computer
+                                        ? 'disable'
+                                        : 'enable',
+                                    callback: togglePowerComputer,
+                                },
+                            },
+                            {
+                                variable: {
+                                    key: 'Heater power',
+                                    value: renderBoolValue(coreState.plc_state.power.heater),
+                                },
+                                action: {
+                                    label: coreState.plc_state.power.heater ? 'disable' : 'enable',
+                                    callback: togglePowerHeater,
+                                },
+                            },
+                        ]}
+                    />
 
-                        <VariableBlock
-                            label="Connections"
-                            disabled={buttonsAreDisabled}
-                            rows={[
-                                {
-                                    variable: {
-                                        key: 'Camera',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.connections.camera
-                                        ),
-                                    },
+                    <VariableBlock
+                        label="Connections"
+                        disabled={buttonsAreDisabled}
+                        rows={[
+                            {
+                                variable: {
+                                    key: 'Camera',
+                                    value: renderBoolValue(coreState.plc_state.connections.camera),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Computer',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.connections.computer
-                                        ),
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Computer',
+                                    value: renderBoolValue(
+                                        coreState.plc_state.connections.computer
+                                    ),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Heater',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.connections.heater
-                                        ),
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Heater',
+                                    value: renderBoolValue(coreState.plc_state.connections.heater),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Router',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.connections.router
-                                        ),
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Router',
+                                    value: renderBoolValue(coreState.plc_state.connections.router),
                                 },
-                                {
-                                    variable: {
-                                        key: 'Spectrometer',
-                                        value: renderBoolValue(
-                                            coreState.plc_state.connections.spectrometer
-                                        ),
-                                    },
+                            },
+                            {
+                                variable: {
+                                    key: 'Spectrometer',
+                                    value: renderBoolValue(
+                                        coreState.plc_state.connections.spectrometer
+                                    ),
                                 },
-                            ]}
-                        />
-                    </>
-                )}
+                            },
+                        ]}
+                    />
+                </>
             </div>
         </div>
     );

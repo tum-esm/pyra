@@ -1,12 +1,9 @@
 import { fetchUtils } from '../utils';
 import { essentialComponents, overviewComponents } from '../components';
 import ICONS from '../assets/icons';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
 import { mean } from 'lodash';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 import { useCoreStateStore } from '../utils/zustand-utils/core-state-zustand';
-import { ChildProcess } from '@tauri-apps/api/shell';
 
 function SystemRow(props: { label: string; value: React.ReactNode }) {
     return (
@@ -19,18 +16,14 @@ function SystemRow(props: { label: string; value: React.ReactNode }) {
 
 export default function OverviewTab() {
     const { coreState } = useCoreStateStore();
-    const [isLoadingCloseCover, setIsLoadingCloseCover] = useState(false);
-
     const { mainLogs } = useLogsStore();
-    const currentInfoLogLines = mainLogs?.slice(-15);
+    const { runPromisingCommand } = fetchUtils.useCommand();
 
     async function closeCover() {
-        toast.promise(fetchUtils.backend.writeToPLC(['close-cover']), {
-            loading: 'Closing cover ...',
-            success: (result: ChildProcess) =>
-                `Successfully closed cover: ${JSON.stringify(result)}`,
-            error: (result: ChildProcess) =>
-                `Could not write to PLC - processResults = ${JSON.stringify(result)}`,
+        runPromisingCommand({
+            command: () => fetchUtils.backend.writeToPLC(['close-cover']),
+            label: 'closing cover',
+            successLabel: 'successfully closed cover',
         });
     }
 
@@ -132,7 +125,6 @@ export default function OverviewTab() {
                             variant="red"
                             onClick={closeCover}
                             className="w-full mt-1.5"
-                            spinner={isLoadingCloseCover}
                         >
                             force cover close
                         </essentialComponents.Button>
@@ -169,15 +161,17 @@ export default function OverviewTab() {
                 Recent Log Lines
             </div>
             <div className="w-[calc(100%-2rem)] mx-4 rounded-lg overflow-hidden font-mono text-xs bg-white border border-slate-200 py-1">
-                {(currentInfoLogLines === undefined || currentInfoLogLines.length === 0) && (
+                {(mainLogs === undefined || mainLogs.length === 0) && (
                     <div className="p-2">
                         <essentialComponents.Spinner />
                     </div>
                 )}
-                {currentInfoLogLines !== undefined &&
-                    currentInfoLogLines.map((l, i) => (
-                        <essentialComponents.CoreLogLine key={`${i} ${l}`} text={l} />
-                    ))}
+                {mainLogs !== undefined &&
+                    mainLogs
+                        .slice(-15)
+                        .map((l, i) => (
+                            <essentialComponents.CoreLogLine key={`${i} ${l}`} text={l} />
+                        ))}
             </div>
         </div>
     );
