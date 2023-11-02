@@ -1,6 +1,9 @@
 import { IconMicroscope } from '@tabler/icons-react';
 import { useState } from 'react';
 import { Button } from '../ui/button';
+import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
+import { fetchUtils } from '../../utils';
+import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 
 function ModePanel(props: {
     label: string;
@@ -30,21 +33,92 @@ function ModePanel(props: {
 
 export default function MeasurementDecision() {
     const [activeMode, setActiveMode] = useState('automatic');
-    const [measurementsAreRunning, setMeasurementsAreRunning] = useState(false);
+    const { runPromisingCommand } = fetchUtils.useCommand();
+    const { centralConfig, setConfigItem } = useConfigStore();
+    const { coreState } = useCoreStateStore();
+
+    function toggleManualMeasurementMode() {
+        if (centralConfig) {
+            const newDecisionResult = !centralConfig.measurement_decision.manual_decision_result;
+            runPromisingCommand({
+                command: () =>
+                    fetchUtils.backend.updateConfig({
+                        measurement_decision: {
+                            manual_decision_result: !newDecisionResult,
+                        },
+                    }),
+                label: 'toggling manual measurement mode',
+                successLabel:
+                    'successfully toggled manual measurement mode, system will react soon',
+                onSuccess: () => {
+                    setConfigItem('measurement_decision.manual_decision_result', newDecisionResult);
+                },
+            });
+        }
+    }
+    if (!centralConfig || !coreState) {
+        return <></>;
+    }
+
+    let automaticFilterSettingsConsidered: string[] = [];
+    let automaticFilterSettingsNotConsidered: string[] = [];
+
+    if (centralConfig.measurement_triggers.consider_sun_elevation) {
+        automaticFilterSettingsConsidered.push(
+            `sun elevation is above ${centralConfig.measurement_triggers.min_sun_elevation}°`
+        );
+    } else {
+        automaticFilterSettingsNotConsidered.push('sun elevation');
+    }
+    if (centralConfig.measurement_triggers.consider_time) {
+        const startTime = centralConfig.measurement_triggers.start_time;
+        const stopTime = centralConfig.measurement_triggers.stop_time;
+        automaticFilterSettingsConsidered.push(
+            `time is between ` +
+                `${startTime.hour < 10 ? '0' : ''}${startTime.hour}:${
+                    startTime.minute < 10 ? '0' : ''
+                }${startTime.minute}` +
+                ` and ` +
+                `${stopTime.hour < 10 ? '0' : ''}${stopTime.hour}:${
+                    stopTime.minute < 10 ? '0' : ''
+                }${stopTime.minute}`
+        );
+    } else {
+        automaticFilterSettingsNotConsidered.push('time');
+    }
+    if (centralConfig.measurement_triggers.consider_helios) {
+        automaticFilterSettingsConsidered.push(`Helios is detects good conditions`);
+    } else {
+        automaticFilterSettingsNotConsidered.push('Helios');
+    }
 
     return (
         <div className="flex flex-col w-full gap-y-2">
             <div
                 className={
                     'flex flex-row items-center w-full p-3 font-medium text-green-900 bg-green-300 rounded-lg gap-x-2 ' +
-                    (measurementsAreRunning
+                    (coreState.measurements_should_be_running === null
+                        ? 'text-slate-900 bg-slate-200'
+                        : coreState.measurements_should_be_running
                         ? 'text-green-900 bg-green-300'
                         : 'text-yellow-900 bg-yellow-300')
                 }
             >
                 <IconMicroscope size={20} />
                 <div>
-                    System is currently {!measurementsAreRunning && <strong>not</strong>} measuring
+                    {coreState.measurements_should_be_running === null ? (
+                        centralConfig.general.test_mode ? (
+                            'not running any measurements in test mode'
+                        ) : (
+                            'system is starting up'
+                        )
+                    ) : (
+                        <>
+                            System is currently{' '}
+                            {!coreState.measurements_should_be_running && <strong>not</strong>}{' '}
+                            measuring
+                        </>
+                    )}
                 </div>
             </div>
             <div className="grid grid-cols-3 gap-x-2">
@@ -56,8 +130,17 @@ export default function MeasurementDecision() {
                     <div>
                         <strong>Current filter settings:</strong>{' '}
                         <em>
-                            Measuring if time is between 07:00:00 and 21:00:00 <strong>and</strong>{' '}
-                            sun angle is above 10°. Not considering Helios.
+                            {automaticFilterSettingsConsidered.length === 0 ? (
+                                'Never measuring.'
+                            ) : (
+                                <>Measuring if {automaticFilterSettingsConsidered.join(' AND ')}.</>
+                            )}{' '}
+                            {automaticFilterSettingsNotConsidered.length > 0 && (
+                                <>
+                                    Not considering{' '}
+                                    {automaticFilterSettingsNotConsidered.join(', ')}.
+                                </>
+                            )}
                         </em>
                     </div>
 
@@ -82,17 +165,28 @@ export default function MeasurementDecision() {
                     isActive={activeMode === 'manual'}
                     onClick={() => setActiveMode('manual')}
                 >
-                    Manually start and stop measurements here.
+                    <div>Manually start and stop measurements here.</div>
+                    <div>
+                        Current state:{' '}
+                        <strong>
+                            {centralConfig.measurement_decision.manual_decision_result
+                                ? 'measuring'
+                                : 'not measuring'}
+                        </strong>
+                    </div>
                     {activeMode === 'manual' ? (
-                        <Button
-                            className="w-full"
-                            onClick={() => setMeasurementsAreRunning(!measurementsAreRunning)}
-                        >
-                            {measurementsAreRunning ? 'Stop' : 'Start'} Measurements
+                        <Button className="w-full" onClick={toggleManualMeasurementMode}>
+                            {centralConfig.measurement_decision.manual_decision_result
+                                ? 'Stop'
+                                : 'Start'}{' '}
+                            Measurements
                         </Button>
                     ) : (
                         <div className="flex items-center justify-center w-full font-medium rounded-md h-9 bg-slate-300 text-slate-100">
-                            {measurementsAreRunning ? 'Stop' : 'Start'} Measurements
+                            {centralConfig.measurement_decision.manual_decision_result
+                                ? 'Stop'
+                                : 'Start'}{' '}
+                            Measurements
                         </div>
                     )}
                 </ModePanel>
@@ -102,6 +196,14 @@ export default function MeasurementDecision() {
                     onClick={() => setActiveMode('cli')}
                 >
                     <div>Uses a trigger from an external source.</div>
+                    <div>
+                        Current state:{' '}
+                        <strong>
+                            {centralConfig.measurement_decision.cli_decision_result
+                                ? 'measuring'
+                                : 'not measuring'}
+                        </strong>
+                    </div>
                     <div>
                         Read more about this in the{' '}
                         {activeMode === 'cli' ? (
