@@ -79,8 +79,25 @@ class SunTracking:
             )
             return
 
-        motor_position_state = self.check_camtracker_motor_position()
+        # check the current positions of the CamTracker motors
+        # and the TUM PLC cover and restart CamTracker if they
+        # are not in the expected position
         restart_camtracker: bool = False
+
+        logger.debug("Checking CamTracker motor position")
+        motor_position_state = self.check_camtracker_motor_position()
+
+        if self.config.tum_plc is not None:
+            logger.debug("Checking TUM enclosure cover position")
+            cover_position_state = self.check_tum_plc_cover_position()
+            if cover_position_state == "angle not reported":
+                logger.debug("TUM enclosure cover position is unknown.")
+            if cover_position_state == "invalid":
+                logger.info("TUM enclosure cover is closed.")
+                if self.config.camtracker.restart_if_cover_remains_closed:
+                    restart_camtracker = True
+            if cover_position_state == "valid":
+                logger.debug("TUM enclosure cover is open.")
 
         if motor_position_state == "logs too old":
             logger.debug("CamTracker motor position is unknown (no log line).")
@@ -246,6 +263,23 @@ class SunTracking:
         elev_offset_within_bounds = abs(elev_offset) <= threshold
         az_offeset_within_bounds = abs(az_offeset) <= threshold
         if elev_offset_within_bounds and az_offeset_within_bounds:
+            return "valid"
+        else:
+            return "invalid"
+
+    def check_tum_plc_cover_position(
+        self
+    ) -> Literal["angle not reported", "valid", "invalid"]:
+        """Checks whether the TUM PLC cover is open or closed. Returns
+        "angle not reported" if the cover position has not beenreported
+        by the PLC yet."""
+
+        current_cover_angle = interfaces.StateInterface.load_state(
+        ).plc_state.actors.current_angle
+
+        if current_cover_angle is None:
+            return "angle not reported"
+        if 20 < (abs(current_cover_angle) % 360) < 340:
             return "valid"
         else:
             return "invalid"
