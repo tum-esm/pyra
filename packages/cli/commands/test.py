@@ -23,7 +23,7 @@ def _test_emailing() -> None:
     """Send a test email."""
     interfaces.StateInterface.update_state(recent_cli_calls=1)
     logger.info('running command "test email"')
-    config = types.Config.load()
+    config = types.Config.load(ignore_path_existence=True)
     utils.ExceptionEmailClient.send_test_email(config)
     _print_green("Successfully sent test email.")
 

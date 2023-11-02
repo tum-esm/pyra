@@ -1,17 +1,36 @@
 import { configurationComponents } from '../..';
+import { fetchUtils } from '../../../utils';
+import useCommand from '../../../utils/fetch-utils/use-command';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
+import { Button } from '../../ui/button';
 
 export default function ConfigSectionErrorEmail() {
     const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
+    const { runPromisingCommand } = useCommand();
 
     const centralSectionConfig = centralConfig?.error_email;
     const localSectionConfig = localConfig?.error_email;
+
+    function test() {
+        runPromisingCommand({
+            command: fetchUtils.backend.testEmail,
+            label: 'sending test email',
+            successLabel: 'successfully sent test email',
+        });
+    }
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
         return <></>;
     }
     return (
         <>
+            <div>
+                <Button onClick={test}>Test Error Emails</Button>
+            </div>
+            <div className="flex-shrink-0 w-full mt-1 text-xs text-slate-500 flex-row-left">
+                This will send out a test email to the recipients below.
+            </div>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementToggle
                 title="Send Error Emails"
                 value={localSectionConfig.notify_recipients}
