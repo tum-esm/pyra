@@ -108,6 +108,7 @@ class CamtrackerConfig(pydantic.BaseModel):
     sun_intensity_path: StrictFilePath
     motor_offset_threshold: float = pydantic.Field(..., ge=0, le=360)
     restart_if_logs_are_too_old: bool
+    restart_if_cover_remains_closed: bool
 
 
 class PartialCamtrackerConfig(pydantic.BaseModel):
@@ -119,6 +120,7 @@ class PartialCamtrackerConfig(pydantic.BaseModel):
     sun_intensity_path: Optional[StrictFilePath] = None
     motor_offset_threshold: Optional[float] = pydantic.Field(None, ge=0, le=360)
     restart_if_logs_are_too_old: Optional[bool] = None
+    restart_if_cover_remains_closed: Optional[bool] = None
 
 
 class ErrorEmailConfig(pydantic.BaseModel):

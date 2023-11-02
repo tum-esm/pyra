@@ -30,6 +30,7 @@ SAMPLE_CONFIG = types.Config(
         sun_intensity_path=EXISTING_TEST_FILE_PATH,
         motor_offset_threshold=10,
         restart_if_logs_are_too_old=True,
+        restart_if_cover_remains_closed=True,
     ),
     error_email=types.config.ErrorEmailConfig(
         smtp_host="smtp.gmail.com",

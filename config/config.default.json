@@ -20,7 +20,8 @@
     "learn_az_elev_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\LEARN_Az_Elev.dat",
     "sun_intensity_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\SunIntensity.dat",
     "motor_offset_threshold": 10,
-    "restart_if_logs_are_too_old": false
+    "restart_if_logs_are_too_old": false,
+    "restart_if_cover_remains_closed": false
   },
   "error_email": {
     "smtp_host": "smtp.gmail.com",
