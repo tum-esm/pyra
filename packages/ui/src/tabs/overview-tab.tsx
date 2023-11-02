@@ -4,6 +4,9 @@ import ICONS from '../assets/icons';
 import { mean } from 'lodash';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 import { useCoreStateStore } from '../utils/zustand-utils/core-state-zustand';
+import { useConfigStore } from '../utils/zustand-utils/config-zustand';
+import { Button } from '../components/ui/button';
+import { IconCloudRain } from '@tabler/icons-react';
 
 function SystemRow(props: { label: string; value: React.ReactNode }) {
     return (
@@ -18,6 +21,7 @@ export default function OverviewTab() {
     const { coreState } = useCoreStateStore();
     const { mainLogs } = useLogsStore();
     const { runPromisingCommand } = fetchUtils.useCommand();
+    const { centralConfig } = useConfigStore();
 
     async function closeCover() {
         runPromisingCommand({
@@ -151,86 +155,77 @@ export default function OverviewTab() {
                     </div>
                 </div>
             </div>
-            <div className="w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
-                System Status
-            </div>
-            {coreState === undefined && (
-                <div className="w-full p-4 text-sm flex-row-left gap-x-2">
-                    State is loading <essentialComponents.Spinner />
-                </div>
-            )}
-            {coreState?.plc_state.state.rain === true &&
-                coreState?.plc_state.state.cover_closed === false && (
-                    <div
-                        className={
-                            'w-full py-1 pl-2 pr-3 flex-row-left gap-x-1 shadow-sm ' +
-                            'bg-red-600 rounded-md text-red-50 text-sm font-semibold ' +
-                            'border border-red-900 -mb-2 '
-                        }
-                    >
-                        <div className="w-6 h-6 p-[0.075rem] text-white">{ICONS.alert}</div>
-                        Rain was detected but cover is not closed!
-                    </div>
-                )}
-            {coreState !== undefined && (
-                <div className="grid w-full grid-cols-2">
-                    <div
-                        className={
-                            'flex-col items-start justify-start pr-3 text-sm gap-y-1 ' +
-                            'border-r border-gray-300 min-w-[16rem]'
-                        }
-                    >
-                        <SystemRow
-                            label="Temperature"
-                            value={renderString(coreState.plc_state.sensors.temperature, {
-                                appendix: '°C',
-                            })}
-                        />
-                        <SystemRow
-                            label="Reset needed"
-                            value={renderBoolean(coreState.plc_state.state.reset_needed)}
-                        />
-                        <SystemRow
-                            label="Motor failed"
-                            value={renderBoolean(coreState.plc_state.state.motor_failed)}
-                        />
-                        <SystemRow
-                            label="Cover is closed"
-                            value={renderBoolean(coreState.plc_state.state.cover_closed)}
-                        />
-                        <SystemRow
-                            label="Rain detected"
-                            value={renderBoolean(coreState.plc_state.state.rain)}
-                        />
-                        <essentialComponents.Button
-                            variant="red"
-                            onClick={closeCover}
-                            className="w-full mt-1.5"
-                        >
+            {centralConfig?.tum_plc && coreState && (
+                <>
+                    <div className="flex flex-row items-center w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
+                        <div>TUM Enclosure Status</div>
+                        <div className="flex-grow" />
+                        <Button onClick={closeCover} className="mt-1.5">
                             force cover close
-                        </essentialComponents.Button>
+                        </Button>
                     </div>
-                    <div className="flex-col items-start justify-start pl-3 text-sm">
-                        <SystemRow
-                            label="Last boot time"
-                            value={renderString(coreState.operating_system_state.last_boot_time)}
-                        />
-                        <SystemRow
-                            label="Disk space usage"
-                            value={renderSystemBar(
-                                coreState.operating_system_state.filled_disk_space_fraction
-                            )}
-                        />
-                        <SystemRow
-                            label="CPU usage"
-                            value={renderSystemBar(coreState.operating_system_state.cpu_usage)}
-                        />
-                        <SystemRow
-                            label="Memory usage"
-                            value={renderSystemBar(coreState.operating_system_state.memory_usage)}
-                        />
+                    <div className="grid w-full grid-cols-5 px-4 pb-4 text-sm gap-x-1">
+                        <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                            <div className="text-xs font-semibold">Cover Angle</div>
+                            <div>
+                                {coreState?.plc_state.actors.current_angle === null
+                                    ? '-'
+                                    : `${coreState?.plc_state.actors.current_angle} °`}
+                            </div>
+                        </div>
+                        <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                            <div className="text-xs font-semibold">Enclosure Temperature</div>
+                            <div>
+                                {coreState.plc_state.sensors.temperature === null
+                                    ? '-'
+                                    : `${coreState?.plc_state.sensors.temperature} °C`}
+                            </div>
+                        </div>
+                        <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                            <div className="text-xs font-semibold">Reset Needed</div>
+                            <div>
+                                {coreState.plc_state.state.reset_needed === null
+                                    ? '-'
+                                    : coreState.plc_state.state.reset_needed
+                                    ? 'yes'
+                                    : 'no'}
+                            </div>
+                        </div>
+                        <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                            <div className="text-xs font-semibold">Motor Failed</div>
+                            <div>
+                                {coreState.plc_state.state.motor_failed === null
+                                    ? '-'
+                                    : coreState.plc_state.state.motor_failed
+                                    ? 'yes'
+                                    : 'no'}
+                            </div>
+                        </div>
+                        <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
+                            <div className="text-xs font-semibold">Rain Detected</div>
+                            <div>
+                                {coreState.plc_state.state.rain === null
+                                    ? '-'
+                                    : coreState.plc_state.state.rain
+                                    ? 'yes'
+                                    : 'no'}
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    {coreState?.plc_state.state.rain === true &&
+                        coreState?.plc_state.state.cover_closed === false && (
+                            <div className="w-full px-4 mb-4 -mt-2 text-sm">
+                                <div
+                                    className={
+                                        'flex w-full flex-row items-center flex-grow p-3 font-medium rounded-lg gap-x-2 text-red-50 bg-red-500'
+                                    }
+                                >
+                                    <IconCloudRain size={20} />
+                                    <div>Rain has been detected but cover is not closed</div>
+                                </div>
+                            </div>
+                        )}
+                </>
             )}
             <div className="w-full px-4 py-4 pb-0 text-base font-semibold border-t border-slate-200">
                 Measurement Decision
