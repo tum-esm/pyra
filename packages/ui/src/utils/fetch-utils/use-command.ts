@@ -1,9 +1,11 @@
 import { ChildProcess } from '@tauri-apps/api/shell';
 import { useLogsStore } from '../zustand-utils/logs-zustand';
 import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 export default function useCommand() {
     const { addUiLogLine } = useLogsStore();
+    const [commandIsRunning, setCommandIsRunning] = useState(false);
 
     function exitFromFailedProcess(p: ChildProcess, label: string): string {
         addUiLogLine(`Error while ${label}.`, `stdout = ${p.stdout}, stderr = ${p.stderr}`);
@@ -17,24 +19,32 @@ export default function useCommand() {
         onSuccess?: (p: ChildProcess) => void;
         onError?: (p: ChildProcess) => void;
     }): void {
-        toast.promise(args.command(), {
-            loading: args.label,
-            success: (p: ChildProcess) => {
-                if (args.onSuccess) {
-                    args.onSuccess(p);
-                }
-                return args.successLabel;
-            },
-            error: (p: ChildProcess) => {
-                if (args.onError) {
-                    args.onError(p);
-                }
-                return exitFromFailedProcess(p, args.label);
-            },
-        });
+        if (commandIsRunning) {
+            toast.error('Cannot run multiple commands at the same time');
+        } else {
+            setCommandIsRunning(true);
+            toast.promise(args.command(), {
+                loading: args.label,
+                success: (p: ChildProcess) => {
+                    if (args.onSuccess) {
+                        args.onSuccess(p);
+                    }
+                    setCommandIsRunning(false);
+                    return args.successLabel;
+                },
+                error: (p: ChildProcess) => {
+                    if (args.onError) {
+                        args.onError(p);
+                    }
+                    setCommandIsRunning(false);
+                    return exitFromFailedProcess(p, args.label);
+                },
+            });
+        }
     }
 
     return {
+        commandIsRunning,
         runPromisingCommand,
     };
 }
