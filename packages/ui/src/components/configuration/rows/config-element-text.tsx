@@ -1,5 +1,7 @@
-import { dialog } from '@tauri-apps/api';
+import { dialog, shell } from '@tauri-apps/api';
 import { configurationComponents, essentialComponents } from '../..';
+import { join } from '@tauri-apps/api/path';
+import toast from 'react-hot-toast';
 
 export default function ConfigElementText(props: {
     title: string;
@@ -28,6 +30,14 @@ export default function ConfigElementText(props: {
         return parsedValue;
     }
 
+    async function openDirectory() {
+        if (typeof value === 'string') {
+            await shell
+                .open(value.split('/').slice(0, -1).join('/'))
+                .catch(() => toast.error('Could not open directory'));
+        }
+    }
+
     const showfileSelector = title.endsWith('Path') || props.showFileSelector;
     let hasBeenModified: boolean;
     if (numeric) {
@@ -45,9 +55,14 @@ export default function ConfigElementText(props: {
                     postfix={postfix}
                 />
                 {showfileSelector && !disabled && (
-                    <essentialComponents.Button variant="white" onClick={triggerFileSelection}>
-                        select
-                    </essentialComponents.Button>
+                    <>
+                        <essentialComponents.Button variant="white" onClick={triggerFileSelection}>
+                            select
+                        </essentialComponents.Button>
+                        <essentialComponents.Button variant="white" onClick={openDirectory}>
+                            show in explorer
+                        </essentialComponents.Button>
+                    </>
                 )}
             </div>
             <essentialComponents.PreviousValue

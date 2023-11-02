@@ -29,7 +29,7 @@ export default function LogTab() {
             // on moritz personal machine
             case 'development-moritz':
                 baseDir = await documentDir();
-                filePath = await join('research', 'pyra-4', 'logs');
+                filePath = await join('work', 'esm', 'pyra', 'logs');
                 break;
 
             // on the R19 laptop the Documents folder is a network directory
