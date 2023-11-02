@@ -83,7 +83,7 @@ export default function LogTab() {
                 {renderedLogs !== undefined && (
                     <>
                         {renderedLogs.map((l, i) => (
-                            <essentialComponents.LogLine text={l} key={`${i} ${l}`} />
+                            <essentialComponents.CoreLogLine text={l} key={`${i} ${l}`} />
                         ))}
                         {renderedLogs.length == 0 && (
                             <div className="px-4 py-2">logs are empty</div>

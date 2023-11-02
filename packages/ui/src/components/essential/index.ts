@@ -1,6 +1,6 @@
 import Button from './button';
 import LiveSwitch from './live-switch';
-import LogLine from './log-line';
+import { CoreLogLine, UILogLine } from './log-line';
 import NumericButton from './numeric-button';
 import Ping from './ping';
 import PreviousValue from './previous-value';
@@ -11,7 +11,8 @@ import Spinner from './spinner';
 export default {
     Button,
     LiveSwitch,
-    LogLine,
+    CoreLogLine,
+    UILogLine,
     NumericButton,
     Ping,
     PreviousValue,

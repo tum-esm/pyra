@@ -176,7 +176,7 @@ export default function OverviewTab() {
                 )}
                 {currentInfoLogLines !== undefined &&
                     currentInfoLogLines.map((l, i) => (
-                        <essentialComponents.LogLine key={`${i} ${l}`} text={l} />
+                        <essentialComponents.CoreLogLine key={`${i} ${l}`} text={l} />
                     ))}
             </div>
         </div>
