@@ -1,3 +1,4 @@
+import datetime
 from typing import Any, Optional
 import os
 import threading
@@ -285,6 +286,7 @@ class HeliosThread(AbstractThread):
             max_size=config.helios.evaluation_size
         )
         current_state: Optional[bool] = None
+        last_state_change: Optional[datetime.datetime] = None
 
         # how many cycles (initialization + mainloop) have been run
         # without successfully fetching an image from the camera
@@ -409,22 +411,35 @@ class HeliosThread(AbstractThread):
                             new_state = True
 
                 logger.debug(
-                    f"State: {'GOOD' if (new_state == True) else 'BAD'}"
+                    f"New state: {'GOOD' if (new_state == True) else 'BAD'}"
                 )
-
                 if current_state != new_state:
-                    logger.info(
-                        f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
-                    )
+                    # only do state change if last_state_change is long ago in the past
+                    seconds_since_last_state_change: float = config.helios.min_seconds_between_state_changes
+                    if last_state_change is not None:
+                        seconds_since_last_state_change = (
+                            datetime.datetime.now() - last_state_change
+                        ).total_seconds()
 
-                    interfaces.StateInterface.update_state(
-                        helios_indicates_good_conditions=(
-                            "inconclusive" if (
-                                new_state is None
-                            ) else "yes" if new_state else "no"
+                    if seconds_since_last_state_change >= config.helios.min_seconds_between_state_changes:
+                        logger.info(
+                            f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
                         )
-                    )
-                    current_state = new_state
+                        interfaces.StateInterface.update_state(
+                            helios_indicates_good_conditions=(
+                                "inconclusive" if (
+                                    new_state is None
+                                ) else "yes" if new_state else "no"
+                            )
+                        )
+                        current_state = new_state
+                        last_state_change = datetime.datetime.now()
+                    else:
+                        logger.debug(
+                            "Not changing state because last state change was" +
+                            f" too recent ({seconds_since_last_state_change} " +
+                            "second(s) ago)"
+                        )
 
                 # wait rest of loop time
                 elapsed_time = time.time() - start_time
