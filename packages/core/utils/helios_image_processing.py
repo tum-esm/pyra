@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 import datetime
 import math
 import os
@@ -7,7 +7,8 @@ import numpy as np
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios")
+_LOGS_DIR = os.path.join(_PROJECT_DIR, "logs")
+_IMG_DIR = os.path.join(_LOGS_DIR, "helios")
 
 
 class HeliosImageProcessing:
@@ -146,7 +147,10 @@ class HeliosImageProcessing:
             img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2
         )
         img = HeliosImageProcessing.add_text_to_image(
-            img, f"{round(edge_fraction * 100, 2)}%"
+            img, f"{round(edge_fraction * 100, 2)}%", position="bottom-left"
+        )
+        img = HeliosImageProcessing.add_text_to_image(
+            img, f"{datetime.datetime.now()}", position="top-left"
         )
         return img
 
@@ -155,13 +159,18 @@ class HeliosImageProcessing:
         img: np.ndarray[Any, Any],
         text: str,
         color: tuple[int, int, int] = (200, 0, 0),
+        position: Literal["top-left", "bottom-left"] = "bottom-left",
     ) -> np.ndarray[Any, Any]:
         """Put some text on the bottom left of an image"""
 
+        if (position == "bottom-left"):
+            origin = (10, img.shape[0] - 15)
+        else:
+            origin = (10, 15)
         cv.putText(
             img,  # type: ignore
             text=text,
-            org=(10, img.shape[0] - 15),
+            org=origin,
             fontFace=None,
             fontScale=0.8,
             color=color,
@@ -174,7 +183,8 @@ class HeliosImageProcessing:
         frame: np.ndarray[Any, Any],
         station_id: str,
         edge_color_threshold: int,
-        save_image: bool = False
+        save_image_to_archive: bool = False,
+        save_current_image: bool = False,
     ) -> float:
         """
         For a given frame determine the number of "edge pixels" with
@@ -230,7 +240,7 @@ class HeliosImageProcessing:
             edge_fraction = round((np.sum(edges_only_dilated) / 255) /
                                   pixels_inside_circle, 6)
 
-        if save_image:
+        if save_image_to_archive or save_current_image:
             now = datetime.datetime.now()
             img_timestamp = now.strftime("%Y%m%d-%H%M%S")
             img_directory_path = os.path.join(_IMG_DIR, now.strftime("%Y%m%d"))
@@ -243,17 +253,28 @@ class HeliosImageProcessing:
                 edges_only_dilated, edge_fraction, circle_cx, circle_cy,
                 circle_r
             )
-            cv.imwrite(
-                os.path.join(
-                    img_directory_path,
-                    f"{station_id}-{img_timestamp}-{edge_fraction_str}-raw.jpg"
-                ), frame
-            )
-            cv.imwrite(
-                os.path.join(
-                    img_directory_path,
-                    f"{station_id}-{img_timestamp}-{edge_fraction_str}-processed.jpg"
-                ), processed_frame
-            )
+            if save_image_to_archive:
+                cv.imwrite(
+                    os.path.join(
+                        img_directory_path,
+                        f"{station_id}-{img_timestamp}-{edge_fraction_str}-raw.jpg"
+                    ), frame
+                )
+                cv.imwrite(
+                    os.path.join(
+                        img_directory_path,
+                        f"{station_id}-{img_timestamp}-{edge_fraction_str}-processed.jpg"
+                    ), processed_frame
+                )
+            if save_current_image:
+                cv.imwrite(
+                    os.path.join(_LOGS_DIR, f"current-helios-view-raw.jpg"),
+                    frame
+                )
+                cv.imwrite(
+                    os.path.join(
+                        _LOGS_DIR, f"current-helios-view-processed.jpg"
+                    ), processed_frame
+                )
 
         return edge_fraction

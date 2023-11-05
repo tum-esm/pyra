@@ -205,7 +205,8 @@ class HeliosConfig(StricterBaseModel):
     min_seconds_between_state_changes: int = pydantic.Field(..., ge=0, le=3600)
     edge_pixel_threshold: float = pydantic.Field(..., ge=0, le=1)
     edge_color_threshold: int = pydantic.Field(..., ge=5, le=250)
-    save_images: bool
+    save_image_to_archive: bool
+    save_current_image: bool
 
 
 class PartialHeliosConfig(StricterBaseModel):
@@ -219,7 +220,8 @@ class PartialHeliosConfig(StricterBaseModel):
     )
     edge_pixel_threshold: Optional[float] = pydantic.Field(None, ge=0, le=1)
     edge_color_threshold: Optional[int] = pydantic.Field(None, ge=5, le=250)
-    save_images: Optional[bool] = None
+    save_image_to_archive: Optional[bool] = None
+    save_current_image: Optional[bool] = None
 
 
 class UploadStreamConfig(StricterBaseModel):
