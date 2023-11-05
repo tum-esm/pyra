@@ -2,8 +2,10 @@ import { configurationComponents, essentialComponents } from '../..';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 import { Button } from '../../ui/button';
 import { fetchUtils } from '../../../utils';
+import { join } from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { useEffect, useState } from 'react';
+import moment from 'moment';
 
 export default function ConfigSectionHelios() {
     const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
@@ -165,6 +167,7 @@ export default function ConfigSectionHelios() {
 function HeliosImages() {
     const [heliosImagePathRaw, setHeliosImagePathRaw] = useState<string | null>(null);
     const [heliosImagePathProcessed, setHeliosImagePathProcessed] = useState<string | null>(null);
+    const [timestamp, setTimestamp] = useState<number>(moment().unix());
 
     async function updateHeliosImagePaths() {
         const projectDirPath = await fetchUtils.getProjectDirPath();
@@ -178,17 +181,23 @@ function HeliosImages() {
 
     useEffect(() => {
         updateHeliosImagePaths();
+
+        const interval = setInterval(() => {
+            setTimestamp(moment().unix());
+        }, 5000);
+
+        return () => clearInterval(interval);
     }, []);
 
     return (
         <div className="grid grid-cols-2 gap-2 mt-2">
             <img
-                src={heliosImagePathRaw || ''}
+                src={(heliosImagePathRaw || '') + `?${timestamp}`}
                 alt="Helios Image Raw"
                 className="w-full overflow-hidden border-0 bg-slate-100"
             />
             <img
-                src={heliosImagePathProcessed || ''}
+                src={(heliosImagePathProcessed || '') + `?${timestamp}`}
                 alt="Helios Image Processed"
                 className="w-full overflow-hidden border-0 bg-slate-100"
                 style={{ outline: 'none' }}
