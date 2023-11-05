@@ -85,7 +85,12 @@ Loop over every integer in [-20, ..., +20] and try to set the camera exposure to
 ### <kbd>method</kbd> `run`
 
 ```python
-run(station_id: str, edge_color_threshold: int, save_image: bool) → float
+run(
+    station_id: str,
+    edge_color_threshold: int,
+    save_images_to_archive: bool,
+    save_current_image: bool
+) → float
 ```
 
 Take an image and evaluate the sun conditions. Run autoexposure function every 5 minutes. Returns the edge fraction. 
@@ -130,7 +135,7 @@ Update the settings of the connected camera. Which settings are available depend
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L243" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L245" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `HeliosThread`
 Thread for determining the current sun conditions in a parallel mainloop. 
@@ -146,7 +151,7 @@ The result of this constant sunlight evaluation is written to the StateInterface
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L269" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L271" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_new_thread_object`
 
@@ -158,7 +163,7 @@ Return a new thread object that is to be started.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L274" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L276" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `main`
 
@@ -170,7 +175,7 @@ Main entrypoint of the thread. In headless mode,  don't write to log files but p
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L261" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L263" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `should_be_running`
 

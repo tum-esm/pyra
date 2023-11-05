@@ -67,7 +67,7 @@ Checks whether the TUM PLC cover is open or closed. Returns "angle not reported"
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L116" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L115" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `ct_application_running`
 
@@ -81,7 +81,7 @@ False if Application is currently not running on OS True if Application is curre
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L177" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L176" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `remove_stop_file`
 
@@ -101,11 +101,11 @@ This function removes the stop.txt file to allow CamTracker to restart.
 run(new_config: Config) → None
 ```
 
-Called in every cycle of the main loop. Redas StateInterface: measurements_should_be_running and starts and stops CamTracker tracking. 
+Called in every cycle of the main loop. Start and stops CamTracker based on `StateInterface.measurements_should_be_running`. 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L134" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L133" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `start_sun_tracking_automation`
 
@@ -119,7 +119,7 @@ Removes stop.txt file in CamTracker directory if present. This file is the curre
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L162" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/sun_tracking.py#L160" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `stop_sun_tracking_automation`
 

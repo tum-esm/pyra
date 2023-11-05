@@ -30,7 +30,7 @@ export function Header(props: {
     }
 
     return (
-        <header className="z-50 flex flex-row items-center flex-shrink-0 w-full px-2 py-0 bg-white border-b h-14 border-slate-300">
+        <header className="z-50 flex flex-row items-center flex-shrink-0 w-full px-2 py-0 bg-white border-y h-14 border-slate-300">
             <h1 className="pl-3 text-2xl font-semibold text-center text-slate-800 whitespace-nowrap">
                 PYRA <span className="pl-0.5 text-lg font-normal opacity-60">{APP_VERSION}</span>
             </h1>

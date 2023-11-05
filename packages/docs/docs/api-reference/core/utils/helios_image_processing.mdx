@@ -15,7 +15,7 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L13" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L14" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `HeliosImageProcessing`
 Class for processing images from the Helios camera. 
@@ -27,7 +27,7 @@ See https://pyra.esm.ei.tum.de/docs/user-guide/tum-plc-and-helios#what-does-heli
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L134" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L135" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `add_markings_to_image`
 
@@ -45,7 +45,7 @@ Put text for edge fraction and mark circles in image.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L153" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L157" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `add_text_to_image`
 
@@ -53,7 +53,8 @@ Put text for edge fraction and mark circles in image.
 add_text_to_image(
     img: ndarray[Any, Any],
     text: str,
-    color: tuple[int, int, int] = (200, 0, 0)
+    color: tuple[int, int, int] = (200, 0, 0),
+    position: Literal['top-left', 'bottom-left'] = 'bottom-left'
 ) → ndarray[Any, Any]
 ```
 
@@ -61,7 +62,7 @@ Put some text on the bottom left of an image
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L172" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/helios_image_processing.py#L181" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_edge_fraction`
 
@@ -70,7 +71,8 @@ get_edge_fraction(
     frame: ndarray[Any, Any],
     station_id: str,
     edge_color_threshold: int,
-    save_image: bool = False
+    save_images_to_archive: bool = False,
+    save_current_image: bool = False
 ) → float
 ```
 
