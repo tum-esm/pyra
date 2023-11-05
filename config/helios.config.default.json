@@ -5,6 +5,6 @@
   "min_seconds_between_state_changes": 180,
   "edge_pixel_threshold": 0.01,
   "edge_color_threshold": 40,
-  "save_image_to_archive": false,
-  "save_current_images": false
+  "save_images_to_archive": false,
+  "save_current_image": false
 }

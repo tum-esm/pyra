@@ -183,7 +183,7 @@ class HeliosImageProcessing:
         frame: np.ndarray[Any, Any],
         station_id: str,
         edge_color_threshold: int,
-        save_image_to_archive: bool = False,
+        save_images_to_archive: bool = False,
         save_current_image: bool = False,
     ) -> float:
         """
@@ -240,7 +240,7 @@ class HeliosImageProcessing:
             edge_fraction = round((np.sum(edges_only_dilated) / 255) /
                                   pixels_inside_circle, 6)
 
-        if save_image_to_archive or save_current_image:
+        if save_images_to_archive or save_current_image:
             now = datetime.datetime.now()
             img_timestamp = now.strftime("%Y%m%d-%H%M%S")
             img_directory_path = os.path.join(_IMG_DIR, now.strftime("%Y%m%d"))
@@ -253,7 +253,7 @@ class HeliosImageProcessing:
                 edges_only_dilated, edge_fraction, circle_cx, circle_cy,
                 circle_r
             )
-            if save_image_to_archive:
+            if save_images_to_archive:
                 cv.imwrite(
                     os.path.join(
                         img_directory_path,

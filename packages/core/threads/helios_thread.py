@@ -216,7 +216,7 @@ class HeliosInterface:
         self,
         station_id: str,
         edge_color_threshold: int,
-        save_image_to_archive: bool,
+        save_images_to_archive: bool,
         save_current_image: bool,
     ) -> float:
         """Take an image and evaluate the sun conditions. Run autoexposure
@@ -232,7 +232,7 @@ class HeliosInterface:
             frame=frame,
             station_id=station_id,
             edge_color_threshold=edge_color_threshold,
-            save_image_to_archive=save_image_to_archive,
+            save_images_to_archive=save_images_to_archive,
             save_current_image=save_current_image,
         )
         self.logger.debug(
@@ -361,10 +361,10 @@ class HeliosThread(AbstractThread):
                     new_edge_fraction = helios_instance.run(
                         station_id=config.general.station_id,
                         edge_color_threshold=config.helios.edge_color_threshold,
+                        save_images_to_archive=(
+                            config.helios.save_images_to_archive
+                        ),
                         save_current_image=(config.helios.save_current_image),
-                        save_image_to_archive=(
-                            config.helios.save_image_to_archive
-                        )
                     )
                     repeated_camera_error_count = 0
                 except CameraError as e:
