@@ -31,9 +31,8 @@ class SunTracking:
             return
 
     def run(self, new_config: types.Config) -> None:
-        """Called in every cycle of the main loop.
-        Redas StateInterface: measurements_should_be_running and starts and stops CamTracker
-        tracking."""
+        """Called in every cycle of the main loop. Start and stops CamTracker
+        based on `StateInterface.measurements_should_be_running`."""
 
         # update to latest config
         self.config = new_config
@@ -114,15 +113,15 @@ class SunTracking:
             self.stop_sun_tracking_automation()
 
     def ct_application_running(self) -> bool:
-        """Checks if CamTracker is already running by identifying the active window.
+        """Checks if CamTracker is already running by identifying the active
+        window.
 
         False if Application is currently not running on OS
-        True if Application is currently running on OS
-        """
+        True if Application is currently running on OS"""
 
-        ct_path = self.config.camtracker.executable_path.root
-        process_name = os.path.basename(ct_path)
-
+        process_name = os.path.basename(
+            self.config.camtracker.executable_path.root
+        )
         return interfaces.OSInterface.get_process_status(process_name) in [
             "running",
             "start_pending",
@@ -132,27 +131,26 @@ class SunTracking:
         ]
 
     def start_sun_tracking_automation(self) -> None:
-        """Uses os.startfile() to start up the CamTracker executable with additional parameter
-        "-automation". The paramter - automation will instruct CamTracker to automatically move the
-        mirrors to the expected sun position during startup.
+        """Uses os.startfile() to start up the CamTracker executable with
+        additional parameter "-automation". The paramter - automation will
+        instruct CamTracker to automatically move the mirrors to the expected
+        sun position during startup.
 
-        Removes stop.txt file in CamTracker directory if present. This file is the current way of
-        gracefully shutting down CamTracker and move the mirrors back to parking position.
-        """
+        Removes stop.txt file in CamTracker directory if present. This file
+        is the current way of gracefully shutting down CamTracker and move
+        the mirrors back to parking position."""
 
         interfaces.ActivityHistoryInterface.add_datapoint(camtracker_startups=1)
 
         # delete stop.txt file in camtracker folder if present
         self.remove_stop_file()
 
-        ct_path = self.config.camtracker.executable_path.root
-
         # works only > python3.10
         # without cwd CT will have trouble loading its internal database)
         try:
             os.startfile(  # type: ignore
-                os.path.basename(ct_path),
-                cwd=os.path.dirname(ct_path),
+                os.path.basename(self.config.camtracker.executable_path.root),
+                cwd=os.path.dirname(self.config.camtracker.executable_path.root),
                 arguments="-autostart",
                 show_cmd=2,
             )
@@ -164,24 +162,25 @@ class SunTracking:
         to parking position.
 
         CamTracker has an internal check for a stop.txt file in its directory.
-        After detection it will move it's mirrors to parking position and end itself.
-        """
+        After detection it will move it's mirrors to parking position and end
+        itself."""
 
         # create stop.txt file in camtracker folder
-        camtracker_directory = os.path.dirname(
-            self.config.camtracker.executable_path.root
+        stop_file_path = os.path.join(
+            os.path.dirname(self.config.camtracker.executable_path.root),
+            "stop.txt"
         )
-        with open(os.path.join(camtracker_directory, "stop.txt"), "w") as f:
+        with open(stop_file_path) as f:
             f.write("")
 
     def remove_stop_file(self) -> None:
-        """This function removes the stop.txt file to allow CamTracker to restart."""
+        """This function removes the stop.txt file to allow CamTracker to
+        restart."""
 
-        camtracker_directory = os.path.dirname(
-            self.config.camtracker.executable_path.root
+        stop_file_path = os.path.join(
+            os.path.dirname(self.config.camtracker.executable_path.root),
+            "stop.txt"
         )
-        stop_file_path = os.path.join(camtracker_directory, "stop.txt")
-
         if os.path.exists(stop_file_path):
             os.remove(stop_file_path)
 
@@ -234,7 +233,8 @@ class SunTracking:
         # assert that the log file is up-to-date
         if logline_age_in_seconds > 300:
             logger.warning(
-                f"Last line in CamTracker logfile is older than 5 minutes but from {logline_datetime}"
+                f"Last line in CamTracker logfile is older " +
+                f"than 5 minutes but from {logline_datetime}"
             )
             return None
 
@@ -287,10 +287,9 @@ class SunTracking:
             return "invalid"
 
     def test_setup(self) -> None:
-        """
-        Function to test the functonality of this module. Starts up CamTracker to initialize the
-        tracking mirrors. Then moves mirrors back to parking position and shuts dosn CamTracker.
-        """
+        """Function to test the functonality of this module. Starts up
+        CamTracker to initialize the tracking mirrors. Then moves mirrors
+        back to parking position and shuts dosn CamTracker."""
         if not self.ct_application_running():
             self.start_sun_tracking_automation()
             for _ in range(10):
