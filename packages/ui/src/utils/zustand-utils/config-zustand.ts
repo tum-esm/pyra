@@ -76,7 +76,8 @@ export const configSchema = z.object({
             min_seconds_between_state_changes: intSchema,
             edge_pixel_threshold: floatSchema,
             edge_color_threshold: intSchema,
-            save_images: z.boolean(),
+            save_images_to_archive: z.boolean(),
+            save_current_image: z.boolean(),
         })
         .nullable(),
     upload: z

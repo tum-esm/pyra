@@ -141,10 +141,17 @@ export default function ConfigSectionHelios() {
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
-                title="Save Images"
-                value={localSectionConfig.save_images}
-                setValue={(v: boolean) => setLocalConfigItem('helios.save_images', v)}
-                oldValue={centralSectionConfig?.save_images === true}
+                title="Save Images to Archive"
+                value={localSectionConfig.save_images_to_archive}
+                setValue={(v: boolean) => setLocalConfigItem('helios.save_images_to_archive', v)}
+                oldValue={centralSectionConfig?.save_images_to_archive === true}
+            />
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementBooleanToggle
+                title="Save Current Images"
+                value={localSectionConfig.save_current_image}
+                setValue={(v: boolean) => setLocalConfigItem('helios.save_current_image', v)}
+                oldValue={centralSectionConfig?.save_current_image === true}
             />
         </>
     );
