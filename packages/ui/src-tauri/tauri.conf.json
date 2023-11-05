@@ -45,6 +45,14 @@
                     "$DOCUMENT\\pyra\\pyra-4.*.*\\*",
                     "$DOCUMENT/work/esm/pyra/**"
                 ]
+            },
+            "protocol": {
+                "asset": true,
+                "assetScope": [
+                    "$DOWNLOAD\\pyra\\pyra-4.*.*\\*",
+                    "$DOCUMENT\\pyra\\pyra-4.*.*\\*",
+                    "$DOCUMENT/work/esm/pyra/**"
+                ]
             }
         },
         "bundle": {
