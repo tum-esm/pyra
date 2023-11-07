@@ -1,3 +1,4 @@
+import sys
 from typing import Literal, Optional
 import os
 import time
@@ -145,8 +146,11 @@ class SunTracking:
         # delete stop.txt file in camtracker folder if present
         self.remove_stop_file()
 
-        # works only > python3.10
+        # works only >= python3.10
         # without cwd CT will have trouble loading its internal database)
+        assert (sys.version_info.major == 3) and (
+            sys.version_info.minor >= 10
+        ), "This only works with Python 3.10 or higher"
         try:
             os.startfile(  # type: ignore
                 os.path.basename(self.config.camtracker.executable_path.root),
