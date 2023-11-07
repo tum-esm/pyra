@@ -113,10 +113,20 @@ class OpusMeasurement:
             logger.info("EM27 seems to be disconnected.")
 
         # check for automation state flank changes
-        measurements_should_be_running = (
-            interfaces.StateInterface.load_state().
-            measurements_should_be_running
-        ) or False
+        measurements_should_be_running: bool = False
+        state = interfaces.StateInterface.load_state()
+        if state.measurements_should_be_running == True:
+            if new_config.tum_plc is None:
+                measurements_should_be_running = True
+            else:
+                current_cover_angle = state.plc_state.actors.current_angle
+                if current_cover_angle is None:
+                    measurements_should_be_running = True
+                else:
+                    measurements_should_be_running = (
+                        abs(current_cover_angle) % 360
+                    ) > 30
+
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
                 # flank change 0 -> 1: start macro
