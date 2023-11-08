@@ -1,4 +1,10 @@
-import { IconMicroscope } from '@tabler/icons-react';
+import {
+    IconMicroscope,
+    IconRobot,
+    IconToggleRight,
+    IconUser,
+    IconWand,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
@@ -7,15 +13,19 @@ import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand'
 import { renderTimeObject } from '../../utils/functions';
 
 function ModePanel(props: {
+    icon: React.ReactNode;
     label: string;
     isActive: boolean;
     onClick: () => void;
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }) {
     if (props.isActive) {
         return (
             <div className="flex flex-col p-3 bg-white border rounded-lg text-slate-900 border-slate-200 gap-y-2">
-                <strong className="w-full font-semibold text-center">{props.label} Mode</strong>
+                <strong className="flex flex-row items-center justify-center w-full font-semibold text-center gap-x-2">
+                    {props.icon}
+                    <div>{props.label} Mode</div>
+                </strong>
                 {props.children}
             </div>
         );
@@ -25,8 +35,10 @@ function ModePanel(props: {
                 onClick={props.onClick}
                 className="flex flex-col items-start justify-start p-3 text-left border rounded-lg gap-y-2 bg-slate-100 text-slate-400 border-slate-200"
             >
-                <strong className="w-full font-semibold text-center">{props.label} Mode</strong>
-                {props.children}
+                <strong className="flex flex-row items-center justify-center w-full font-semibold text-center gap-x-2">
+                    {props.icon}
+                    <div>{props.label} Mode</div>
+                </strong>
             </button>
         );
     }
@@ -89,29 +101,13 @@ export default function MeasurementDecision() {
     return (
         <div className="grid w-full grid-cols-3 gap-x-2">
             <ModePanel
+                icon={<IconWand size={18} />}
                 label="Automatic"
                 isActive={activeMode === 'automatic'}
                 onClick={() => setActiveMode('automatic')}
-            >
-                {activeMode === 'automatic' && (
-                    <div>
-                        Read more about this in the{' '}
-                        {activeMode === 'automatic' ? (
-                            <a
-                                href="https://pyra.esm.ei.tum.de/docs/user-guide/measurements/#measurement-modes-and-triggers"
-                                target="_blank"
-                                className="text-blue-500 underline"
-                            >
-                                Pyra Docs
-                            </a>
-                        ) : (
-                            <span className="text-blue-300 underline">Pyra Docs</span>
-                        )}
-                        .
-                    </div>
-                )}
-            </ModePanel>
+            />
             <ModePanel
+                icon={<IconToggleRight size={18} />}
                 label="Manual"
                 isActive={activeMode === 'manual'}
                 onClick={() => setActiveMode('manual')}
@@ -136,6 +132,7 @@ export default function MeasurementDecision() {
                 )}
             </ModePanel>
             <ModePanel
+                icon={<IconRobot size={18} />}
                 label="CLI"
                 isActive={activeMode === 'cli'}
                 onClick={() => setActiveMode('cli')}
@@ -149,21 +146,6 @@ export default function MeasurementDecision() {
                                     ? 'measuring'
                                     : 'not measuring'}
                             </strong>
-                        </div>
-                        <div>
-                            Read more about this in the{' '}
-                            {activeMode === 'cli' ? (
-                                <a
-                                    href="https://pyra.esm.ei.tum.de/docs/user-guide/measurements#starting-and-stopping-measurements-via-cli"
-                                    target="_blank"
-                                    className="text-blue-500 underline"
-                                >
-                                    Pyra Docs
-                                </a>
-                            ) : (
-                                <span className="text-blue-300 underline">Pyra Docs</span>
-                            )}
-                            .
                         </div>
                     </>
                 )}

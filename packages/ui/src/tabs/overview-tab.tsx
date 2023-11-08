@@ -20,12 +20,18 @@ export default function OverviewTab() {
     return (
         <div className={'flex-col-center w-full pb-4 relative overflow-x-hidden bg-slate-50'}>
             <overviewComponents.PyraCoreStatus />
-            <div className="w-full px-4 py-4 pb-0 text-base font-semibold">Today's Activity</div>
+            <div className="w-full px-4 py-4 pb-0 text-base font-semibold">Activity</div>
             <div className="w-full p-4 pt-0">
                 <overviewComponents.ActivityPlot />
             </div>
+            <div className="w-full px-4 py-4 pb-0 text-base font-semibold border-t border-slate-200">
+                Mode
+            </div>
+            <div className="w-full p-4 pt-2 text-sm flex-row-left gap-x-1">
+                <overviewComponents.MeasurementDecision />
+            </div>
             <div className="flex flex-row items-center w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
-                <div>System State</div>
+                <div>State</div>
                 <div className="flex-grow" />
                 {centralConfig?.tum_plc && (
                     <Button onClick={closeCover} className="mt-1.5">
@@ -34,14 +40,8 @@ export default function OverviewTab() {
                 )}
             </div>
             <overviewComponents.SystemState />
-            <div className="w-full px-4 py-4 pb-0 text-base font-semibold border-t border-slate-200">
-                Measurement Decision
-            </div>
-            <div className="w-full p-4 pt-2 text-sm flex-row-left gap-x-1">
-                <overviewComponents.MeasurementDecision />
-            </div>
             <div className="w-full px-4 pt-3 pb-2 text-base font-semibold border-t border-slate-200">
-                Recent Log Lines
+                Recent Logs
             </div>
             <div className="w-[calc(100%-2rem)] mx-4 rounded-lg overflow-hidden font-mono text-xs bg-white border border-slate-200 py-1">
                 {(mainLogs === undefined || mainLogs.length === 0) && (
