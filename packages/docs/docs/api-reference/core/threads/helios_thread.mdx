@@ -52,7 +52,7 @@ __init__(logger: Logger, camera_id: int, initialization_tries: int = 5) → None
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L140" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L141" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `adjust_exposure`
 
@@ -60,7 +60,7 @@ __init__(logger: Logger, camera_id: int, initialization_tries: int = 5) → None
 adjust_exposure() → None
 ```
 
-This function will loop over all available exposures and take one image for each exposure. Then it sets exposure to the value where the overall mean pixel value color is closest to 50. 
+This function will loop over all available exposures and take one image for each exposure. Then it sets exposure to the value where the overall mean pixel value color is closest to `self.target_pixel_brightness`. 
 
 **For every exposure:** 
 
@@ -68,7 +68,7 @@ This function will loop over all available exposures and take one image for each
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L67" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L68" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_available_exposures`
 
@@ -80,7 +80,7 @@ Loop over every integer in [-20, ..., +20] and try to set the camera exposure to
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L215" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L216" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `run`
 
@@ -88,6 +88,7 @@ Loop over every integer in [-20, ..., +20] and try to set the camera exposure to
 run(
     station_id: str,
     edge_color_threshold: int,
+    target_pixel_brightness: int,
     save_images_to_archive: bool,
     save_current_image: bool
 ) → float
@@ -97,7 +98,7 @@ Take an image and evaluate the sun conditions. Run autoexposure function every 5
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L117" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L118" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `take_image`
 
@@ -114,7 +115,7 @@ Retries up to n times (camera can say "not possible") and throws away all mostly
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L80" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L81" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `update_camera_settings`
 
@@ -135,7 +136,7 @@ Update the settings of the connected camera. Which settings are available depend
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L245" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L259" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `HeliosThread`
 Thread for determining the current sun conditions in a parallel mainloop. 
@@ -151,7 +152,7 @@ The result of this constant sunlight evaluation is written to the StateInterface
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L271" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L285" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_new_thread_object`
 
@@ -163,7 +164,7 @@ Return a new thread object that is to be started.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L276" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L290" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `main`
 
@@ -175,7 +176,7 @@ Main entrypoint of the thread. In headless mode,  don't write to log files but p
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L263" className="SourceCodeLinkBadge">source code</a>
+<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L277" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `should_be_running`
 
