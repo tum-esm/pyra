@@ -83,20 +83,18 @@ class OpusMeasurement:
 
         # loads latest config
         self.config = new_config
-        if self.config.general.test_mode or (sys.platform != "win32"):
-            logger.debug(
-                "Skipping OpusMeasurement in test mode and on non-windows systems"
-            )
-            return
-
-        logger.info("Running OpusMeasurement")
-        logger.debug("Updating JSON Config Variables")
 
         # check for PYRA Test Mode status
         # everything afterwards will be skipped if PYRA Test Mode is active
         if self.config.general.test_mode:
-            logger.info("Test mode active.")
+            logger.info("Skipping OpusMeasurement in test mode.")
             return
+
+        if sys.platform != "win32":
+            logger.debug("Skipping OpusMeasurement on non-windows systems")
+            return
+
+        logger.info("Running OpusMeasurement")
 
         if not self.initialized:
             self.__initialize()
@@ -117,16 +115,13 @@ class OpusMeasurement:
         measurements_should_be_running: bool = False
         state = interfaces.StateInterface.load_state()
         if state.measurements_should_be_running == True:
-            if new_config.tum_plc is None:
+            current_cover_angle = state.plc_state.actors.current_angle
+            if (new_config.tum_plc is None) or (current_cover_angle is None):
                 measurements_should_be_running = True
             else:
-                current_cover_angle = state.plc_state.actors.current_angle
-                if current_cover_angle is None:
-                    measurements_should_be_running = True
-                else:
-                    measurements_should_be_running = (
-                        abs(current_cover_angle) % 360
-                    ) > 30
+                measurements_should_be_running = (
+                    abs(current_cover_angle) % 360
+                ) > 30
 
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
@@ -223,7 +218,6 @@ class OpusMeasurement:
         assert sys.platform == "win32"
 
         self.__connect_to_dde_opus()
-
         if not self.__test_dde_connection():
             return
         answer = self.conversation.Request("CLOSE_OPUS")
@@ -234,7 +228,6 @@ class OpusMeasurement:
         and Items) are not cleaned up by this call."""
 
         assert sys.platform == "win32"
-
         self.server.Shutdown()
 
     def __destroy_dde_server(self) -> None:
@@ -249,8 +242,6 @@ class OpusMeasurement:
         True -> Connected
         False -> Not Connected"""
 
-        assert sys.platform == "win32"
-
         response = os.system("ping -n 1 " + self.config.opus.em27_ip.root)
         return response == 0
 
@@ -258,15 +249,15 @@ class OpusMeasurement:
         """Starts the OPUS.exe with os.startfile(). This simulates
         a user click on the executable."""
 
-        assert sys.platform == "win32"
         interfaces.ActivityHistoryInterface.add_datapoint(opus_startups=1)
 
         opus_path = self.config.opus.executable_path.root
         opus_username = self.config.opus.username
         opus_password = self.config.opus.password
 
-        # works only > python3.10
+        # works only >= python3.10
         # without cwd CT will have trouble loading its internal database)
+        assert sys.platform == "win32"
         try:
             os.startfile(  # type: ignore
                 os.path.basename(opus_path),
@@ -293,8 +284,6 @@ class OpusMeasurement:
         """Checks defined sun angle in config. Closes OPUS at
         the end of the day to start up fresh the next day."""
 
-        assert sys.platform == "win32"
-
         return (
             utils.Astronomy.get_current_sun_elevation(self.config)
             < self.config.general.min_sun_elevation
@@ -304,8 +293,6 @@ class OpusMeasurement:
         """Start OPUS.exe if not running and sun angle conditions
         satisfied. Shuts down OPUS.exe if running and sun angle
         conditions not satisfied."""
-
-        assert sys.platform == "win32"
 
         if self.sun_angle_is_too_low():
             # Close OPUS if running
@@ -332,8 +319,6 @@ class OpusMeasurement:
         """Checks for OPUS to be running. Breaks out of the loop
         after a defined time."""
 
-        assert sys.platform == "win32"
-
         start_time = time.time()
         while True:
             # brakes when OPUS is up and running
@@ -349,8 +334,6 @@ class OpusMeasurement:
         """Compares the experiment in the config with the current
         active experiment. To reload an experiment during an active
         macro the macro needs to be stopped first."""
-
-        assert sys.platform == "win32"
 
         if self.config.opus.experiment_path.root != self.current_experiment:
             self.stop_macro()
