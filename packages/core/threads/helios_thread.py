@@ -46,6 +46,7 @@ class HeliosInterface:
 
                 self.current_exposure: int = min(self.available_exposures)
                 self.last_autoexposure_time: float = 0.0
+                self.target_pixel_brightness: int = 0
                 self.available_exposures: list[int] = available_exposures
 
                 self.update_camera_settings(exposure=self.current_exposure)
@@ -141,7 +142,7 @@ class HeliosInterface:
         """This function will loop over all available exposures and
         take one image for each exposure. Then it sets exposure to
         the value where the overall mean pixel value color is closest
-        to 50.
+        to `self.target_pixel_brightness`.
 
         **For every exposure:**
 
@@ -200,8 +201,8 @@ class HeliosInterface:
         new_exposure = int(
             min(
                 exposure_results,
-                key=lambda r:
-                abs(sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES - 50),
+                key=lambda r: abs((sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES) -
+                                  self.target_pixel_brightness),
             ).exposure
         )
         self.update_camera_settings(exposure=new_exposure)
@@ -216,15 +217,28 @@ class HeliosInterface:
         self,
         station_id: str,
         edge_color_threshold: int,
+        target_pixel_brightness: int,
         save_images_to_archive: bool,
         save_current_image: bool,
     ) -> float:
         """Take an image and evaluate the sun conditions. Run autoexposure
         function every 5 minutes. Returns the edge fraction."""
+        perform_autoexposure: bool = False
         now = time.time()
         if (now - self.last_autoexposure_time) > 300:
-            self.adjust_exposure()
+            self.logger.debug("performing autoexposure after 5 minutes")
+            perform_autoexposure = True
+        if self.target_pixel_brightness != target_pixel_brightness:
+            self.logger.debug(
+                "performing autoexposure because target_pixel_brightness changed"
+                +
+                f" ({self.target_pixel_brightness} -> {target_pixel_brightness})"
+            )
+            perform_autoexposure = True
+        if perform_autoexposure:
+            self.target_pixel_brightness = target_pixel_brightness
             self.last_autoexposure_time = now
+            self.adjust_exposure()
 
         frame = self.take_image()
 
@@ -361,6 +375,8 @@ class HeliosThread(AbstractThread):
                     new_edge_fraction = helios_instance.run(
                         station_id=config.general.station_id,
                         edge_color_threshold=config.helios.edge_color_threshold,
+                        target_pixel_brightness=config.helios.
+                        target_pixel_brightness,
                         save_images_to_archive=(
                             config.helios.save_images_to_archive
                         ),
