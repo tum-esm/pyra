@@ -57,8 +57,6 @@ export default function ConfigSectionUpload() {
         );
     }
 
-    // TODO: add stream configs
-
     function addStream() {
         if (localSectionConfig) {
             setLocalConfigItem('upload.streams', [
@@ -91,7 +89,7 @@ export default function ConfigSectionUpload() {
         <>
             <div className="flex flex-row gap-x-2">
                 <Button onClick={setNull}>remove configuration</Button>
-                <Button onClick={test}>Test Upload Connection</Button>
+                <Button onClick={test}>test upload connection</Button>
             </div>
             <div className="flex-shrink-0 w-full mt-1 text-xs text-slate-500 flex-row-left gap-x-1">
                 <p>
@@ -319,7 +317,7 @@ export default function ConfigSectionUpload() {
             ))}
             <div className="flex flex-row gap-x-2">
                 <div className="flex-grow" />
-                <Button onClick={addStream}>Add Upload Stream</Button>
+                <Button onClick={addStream}>add upload stream</Button>
             </div>
         </>
     );

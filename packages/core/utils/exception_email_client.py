@@ -55,9 +55,6 @@ def _get_current_log_lines() -> list[str]:
     return log_lines_in_email[::-1]
 
 
-# TODO: make SMTP server configurable
-
-
 class ExceptionEmailClient:
     """Provide functionality to send emails when an exception
     occurs/is resolved."""

@@ -9,11 +9,6 @@ from packages.core import types
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 
-# TODO: add uploading to activity history
-# TODO: add camtracker startups to activity history
-# TODO: add opus startups to activity history
-# TODO: add cli calls to activity history
-
 
 def _date_to_filepath(date: datetime.date) -> str:
     return os.path.join(

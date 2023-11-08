@@ -335,7 +335,6 @@ class Config(StricterBaseModel):
             ) from None
 
     def dump(self, with_filelock: bool = True) -> None:
-        print("DUDU")
         if with_filelock:
             with filelock.FileLock(_CONFIG_LOCK_PATH, timeout=10):
                 with open(_CONFIG_FILE_PATH, "w") as f:
