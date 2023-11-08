@@ -79,6 +79,7 @@ class Astronomy:
             for n, line in enumerate(_lines):
                 if line == "$1\n":
                     _marker_line_index = n
+            assert _marker_line_index is not None, "Could not find $1 marker"
             lat = float(_lines[_marker_line_index + 1].strip())
             lon = float(_lines[_marker_line_index + 2].strip())
             alt = float(_lines[_marker_line_index + 3].strip())
