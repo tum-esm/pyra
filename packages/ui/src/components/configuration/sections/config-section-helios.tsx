@@ -21,6 +21,7 @@ export default function ConfigSectionHelios() {
             min_seconds_between_state_changes: 180,
             edge_pixel_threshold: 0.01,
             edge_color_threshold: 40,
+            target_pixel_brightness: 50,
             save_image_to_archive: false,
             save_current_images: false,
         });
@@ -144,6 +145,21 @@ export default function ConfigSectionHelios() {
             <configurationComponents.ConfigElementNote>
                 How hard does a shadow have to be to be considered as "edge". A starting value of
                 `40` is a good baseline.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementText
+                title="Target Pixel Brightness"
+                value={localSectionConfig.target_pixel_brightness}
+                setValue={(v: any) => setLocalConfigItem('helios.target_pixel_brightness', v)}
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.target_pixel_brightness
+                        : 'null'
+                }
+                numeric
+            />
+            <configurationComponents.ConfigElementNote>
+                Every 5 minutes Helios takes an image with every availabe exposure time and picks
+                the exposure time where the mean pixel brightness is closest to this value.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
