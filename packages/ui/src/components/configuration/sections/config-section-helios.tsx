@@ -129,8 +129,8 @@ export default function ConfigSectionHelios() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                How many pixels of the lense should be considered as "edge". A starting value of
-                `0.01` is a good baseline, i.e. 1% of the lense is a hard edge.
+                How many pixels of the lens should be considered as "edge". A starting value of `1%`
+                is a good baseline, i.e. 1% of the lens is a hard edge.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Edge Color Threshold"
@@ -145,7 +145,10 @@ export default function ConfigSectionHelios() {
             />
             <configurationComponents.ConfigElementNote>
                 How hard does a shadow have to be to be considered as "edge". A starting value of
-                `40` is a good baseline.
+                `40` is a good baseline. This refers to the pixel color value, `0` is black, `255`
+                is white. A value of `40` means that two pixels are considered as "edge" if their
+                color difference is at least `40` - e.g. pixel 1 is at `100` and pixel 2 is at
+                `140`.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Target Pixel Brightness"
@@ -160,7 +163,9 @@ export default function ConfigSectionHelios() {
             />
             <configurationComponents.ConfigElementNote>
                 Every 5 minutes Helios takes an image with every availabe exposure time and picks
-                the exposure time where the mean pixel brightness is closest to this value.
+                the exposure time where the mean pixel brightness is closest to this value. This
+                mean pixel brightness is again a value between `0` and `255`. A starting value of
+                `50` is a good baseline.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
