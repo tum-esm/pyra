@@ -24,22 +24,16 @@ export default function OverviewTab() {
             <div className="w-full p-4 pt-0">
                 <overviewComponents.ActivityPlot />
             </div>
-            <div className="w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
-                System State
+            <div className="flex flex-row items-center w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
+                <div>System State</div>
+                <div className="flex-grow" />
+                {centralConfig?.tum_plc && (
+                    <Button onClick={closeCover} className="mt-1.5">
+                        force cover close
+                    </Button>
+                )}
             </div>
             <overviewComponents.SystemState />
-            {centralConfig?.tum_plc && (
-                <>
-                    <div className="flex flex-row items-center w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-200">
-                        <div>TUM Enclosure Status</div>
-                        <div className="flex-grow" />
-                        <Button onClick={closeCover} className="mt-1.5">
-                            force cover close
-                        </Button>
-                    </div>
-                    <overviewComponents.TumEnclosureState />
-                </>
-            )}
             <div className="w-full px-4 py-4 pb-0 text-base font-semibold border-t border-slate-200">
                 Measurement Decision
             </div>

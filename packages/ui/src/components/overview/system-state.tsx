@@ -2,6 +2,7 @@ import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand'
 import { mean } from 'lodash';
 import { renderBoolean, renderString } from '../../utils/functions';
 import { IconCloudRain } from '@tabler/icons-react';
+import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 
 function StatePanel(props: { title: string; children: React.ReactNode }) {
     return (
@@ -41,53 +42,92 @@ function StateBarPanel(props: { title: string; value: number | null }) {
 
 export function SystemState() {
     const { coreState } = useCoreStateStore();
+    const { centralConfig } = useConfigStore();
 
-    if (!coreState) {
+    if (!coreState || !centralConfig) {
         return <></>;
     }
 
     return (
-        <div className="grid w-full grid-cols-4 px-4 pb-4 text-sm gap-x-1 gap-y-1">
-            <StatePanel title="Last Boot Time">
-                {coreState.operating_system_state.last_boot_time}
-            </StatePanel>
-            <StateBarPanel
-                title="Disk Usage"
-                value={coreState.operating_system_state.filled_disk_space_fraction}
-            />
-            <StateBarPanel
-                title="CPU Usage"
-                value={
-                    coreState.operating_system_state.cpu_usage
-                        ? mean(coreState.operating_system_state.cpu_usage)
-                        : null
-                }
-            />
-            <StateBarPanel
-                title="Memory Usage"
-                value={coreState.operating_system_state.memory_usage}
-            />
-            <StatePanel title="Latitude">
-                {renderString(coreState.position.latitude, {
-                    appendix: ' °N',
-                })}
-            </StatePanel>
-            <StatePanel title="Longitude">
-                {renderString(coreState?.position.longitude, {
-                    appendix: ' °E',
-                })}
-            </StatePanel>
-            <StatePanel title="Altitude">
-                {renderString(coreState?.position.altitude, {
-                    appendix: ' m',
-                })}
-            </StatePanel>
-            <StatePanel title="Current Sun Elevation">
-                {renderString(coreState?.position.sun_elevation, {
-                    appendix: ' °',
-                })}
-            </StatePanel>
-        </div>
+        <>
+            {centralConfig.tum_plc !== null && (
+                <div className="grid w-full grid-cols-5 px-4 pb-1 text-sm gap-x-1">
+                    <StatePanel title="Cover Angle">
+                        {renderString(coreState.plc_state.actors.current_angle, {
+                            appendix: ' °',
+                        })}
+                    </StatePanel>
+                    <StatePanel title="Enclosure Temperature">
+                        {renderString(coreState.plc_state.sensors.temperature, {
+                            appendix: ' °C',
+                        })}
+                    </StatePanel>
+                    <StatePanel title="Reset Needed">
+                        {renderBoolean(coreState.plc_state.state.reset_needed)}
+                    </StatePanel>
+                    <StatePanel title="Motor Failed">
+                        {renderBoolean(coreState.plc_state.state.motor_failed)}
+                    </StatePanel>
+                    <StatePanel title="Rain Detected">
+                        {renderBoolean(coreState.plc_state.state.rain)}
+                    </StatePanel>
+                </div>
+            )}
+            {coreState?.plc_state.state.rain === true &&
+                coreState?.plc_state.state.cover_closed === false && (
+                    <div className="w-full px-4 mb-4 -mt-2 text-sm">
+                        <div
+                            className={
+                                'flex w-full flex-row items-center flex-grow p-3 font-medium rounded-lg gap-x-2 text-red-50 bg-red-500'
+                            }
+                        >
+                            <IconCloudRain size={20} />
+                            <div>Rain has been detected but cover is not closed</div>
+                        </div>
+                    </div>
+                )}
+            <div className="grid w-full grid-cols-4 px-4 pb-4 text-sm gap-x-1 gap-y-1">
+                <StatePanel title="Last Boot Time">
+                    {coreState.operating_system_state.last_boot_time}
+                </StatePanel>
+                <StateBarPanel
+                    title="Disk Usage"
+                    value={coreState.operating_system_state.filled_disk_space_fraction}
+                />
+                <StateBarPanel
+                    title="CPU Usage"
+                    value={
+                        coreState.operating_system_state.cpu_usage
+                            ? mean(coreState.operating_system_state.cpu_usage)
+                            : null
+                    }
+                />
+                <StateBarPanel
+                    title="Memory Usage"
+                    value={coreState.operating_system_state.memory_usage}
+                />
+                <StatePanel title="Latitude">
+                    {renderString(coreState.position.latitude, {
+                        appendix: ' °N',
+                    })}
+                </StatePanel>
+                <StatePanel title="Longitude">
+                    {renderString(coreState?.position.longitude, {
+                        appendix: ' °E',
+                    })}
+                </StatePanel>
+                <StatePanel title="Altitude">
+                    {renderString(coreState?.position.altitude, {
+                        appendix: ' m',
+                    })}
+                </StatePanel>
+                <StatePanel title="Current Sun Elevation">
+                    {renderString(coreState?.position.sun_elevation, {
+                        appendix: ' °',
+                    })}
+                </StatePanel>
+            </div>
+        </>
     );
 }
 
