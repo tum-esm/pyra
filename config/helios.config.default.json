@@ -3,7 +3,7 @@
   "evaluation_size": 15,
   "seconds_per_interval": 6,
   "min_seconds_between_state_changes": 180,
-  "edge_pixel_threshold": 0.01,
+  "edge_pixel_threshold": 1,
   "edge_color_threshold": 40,
   "target_pixel_brightness": 50,
   "save_images_to_archive": false,

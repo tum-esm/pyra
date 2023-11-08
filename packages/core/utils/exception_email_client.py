@@ -46,7 +46,7 @@ def _get_current_log_lines() -> list[str]:
             )
             log_lines_in_email.append(
                 l_sections[0] +
-                "running command \"config update\" with content: <redacted>"
+                "running command \"config update\" with content: { REDACTED }\n"
             )
         else:
             log_lines_in_email.append(l)
@@ -137,7 +137,7 @@ class ExceptionEmailClient:
         ])
 
         station_id = config.general.station_id
-        subject = f'✅ PYRA on "{station_id}": all exceptions resolved'
+        subject = f'✅ PYRA on system "{station_id}": all exceptions resolved'
         ExceptionEmailClient._send_email(config, text, html, subject)
 
     @staticmethod
@@ -174,7 +174,7 @@ class ExceptionEmailClient:
         ])
 
         station_id = config.general.station_id
-        subject = f'❗️ PYRA on "{station_id}": new exception "{type(exception).__name__}"'
+        subject = f'❗️ PYRA on system "{station_id}": new exception "{type(exception).__name__}"'
         ExceptionEmailClient._send_email(config, text, html, subject)
 
     @staticmethod
@@ -206,5 +206,5 @@ class ExceptionEmailClient:
         ])
 
         station_id = config.general.station_id
-        subject = f'⚙️ PYRA on "{station_id}": test email'
+        subject = f'⚙️ PYRA on system "{station_id}": test email'
         ExceptionEmailClient._send_email(config, text, html, subject)

@@ -31,7 +31,7 @@ export default function ConfigSectionCamtracker() {
                 oldValue={centralSectionConfig.sun_intensity_path}
             />
             <configurationComponents.ConfigElementText
-                title='"learn_az_elev" Path'
+                title="Learn Az Elev Path"
                 value={localSectionConfig.learn_az_elev_path}
                 setValue={(v: string) => setLocalConfigItem('camtracker.learn_az_elev_path', v)}
                 oldValue={centralSectionConfig.learn_az_elev_path}

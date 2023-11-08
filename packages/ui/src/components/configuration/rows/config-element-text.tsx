@@ -1,6 +1,5 @@
 import { dialog, shell } from '@tauri-apps/api';
 import { configurationComponents, essentialComponents } from '../..';
-import { join } from '@tauri-apps/api/path';
 import toast from 'react-hot-toast';
 
 export default function ConfigElementText(props: {
