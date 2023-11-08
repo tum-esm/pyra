@@ -21,7 +21,10 @@ pids
 runtime-data/
 config/**/*.json
 !config/**/*.default.json
-logs/**/*
+logs/**/*.json
+logs/**/*.log
+logs/**/*.png
+logs/**/*.jpg
 !logs/**/.gitkeep
 nohup.out
 
@@ -79,7 +82,6 @@ Temporary Items
 
 ### Node ###
 # Logs
-logs
 *.log
 npm-debug.log*
 yarn-debug.log*
