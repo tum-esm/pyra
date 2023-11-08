@@ -87,46 +87,74 @@ export default function MeasurementDecision() {
     }
 
     return (
-        <div className="flex flex-col w-full gap-y-2">
-            <div
-                className={
-                    'flex flex-row items-center w-full p-3 font-medium text-green-900 bg-green-300 rounded-lg gap-x-2 ' +
-                    (coreState.measurements_should_be_running === null
-                        ? 'text-slate-900 bg-slate-200'
-                        : coreState.measurements_should_be_running
-                        ? 'text-green-900 bg-green-300'
-                        : 'text-yellow-900 bg-yellow-300')
-                }
+        <div className="grid w-full grid-cols-3 gap-x-2">
+            <ModePanel
+                label="Automatic"
+                isActive={activeMode === 'automatic'}
+                onClick={() => setActiveMode('automatic')}
             >
-                <IconMicroscope size={20} />
-                <div>
-                    {coreState.measurements_should_be_running === null ? (
-                        centralConfig.general.test_mode ? (
-                            'not running any measurements in test mode'
+                {activeMode === 'automatic' && (
+                    <div>
+                        Read more about this in the{' '}
+                        {activeMode === 'automatic' ? (
+                            <a
+                                href="https://pyra.esm.ei.tum.de/docs/user-guide/measurements/#measurement-modes-and-triggers"
+                                target="_blank"
+                                className="text-blue-500 underline"
+                            >
+                                Pyra Docs
+                            </a>
                         ) : (
-                            'system is starting up'
-                        )
-                    ) : (
-                        <>
-                            System is currently{' '}
-                            {!coreState.measurements_should_be_running && <strong>not</strong>}{' '}
-                            measuring
-                        </>
-                    )}
-                </div>
-            </div>
-            <div className="grid grid-cols-3 gap-x-2">
-                <ModePanel
-                    label="Automatic"
-                    isActive={activeMode === 'automatic'}
-                    onClick={() => setActiveMode('automatic')}
-                >
-                    {activeMode === 'automatic' && (
+                            <span className="text-blue-300 underline">Pyra Docs</span>
+                        )}
+                        .
+                    </div>
+                )}
+            </ModePanel>
+            <ModePanel
+                label="Manual"
+                isActive={activeMode === 'manual'}
+                onClick={() => setActiveMode('manual')}
+            >
+                {activeMode === 'manual' && (
+                    <div>
+                        Current state:{' '}
+                        <strong>
+                            {centralConfig.measurement_decision.manual_decision_result
+                                ? 'measuring'
+                                : 'not measuring'}
+                        </strong>
+                    </div>
+                )}
+                {activeMode === 'manual' && (
+                    <Button className="w-full" onClick={toggleManualMeasurementMode}>
+                        {centralConfig.measurement_decision.manual_decision_result
+                            ? 'Stop'
+                            : 'Start'}{' '}
+                        Measurements
+                    </Button>
+                )}
+            </ModePanel>
+            <ModePanel
+                label="CLI"
+                isActive={activeMode === 'cli'}
+                onClick={() => setActiveMode('cli')}
+            >
+                {activeMode === 'cli' && (
+                    <>
+                        <div>
+                            Current state:{' '}
+                            <strong>
+                                {centralConfig.measurement_decision.cli_decision_result
+                                    ? 'measuring'
+                                    : 'not measuring'}
+                            </strong>
+                        </div>
                         <div>
                             Read more about this in the{' '}
-                            {activeMode === 'automatic' ? (
+                            {activeMode === 'cli' ? (
                                 <a
-                                    href="https://pyra.esm.ei.tum.de/docs/user-guide/measurements/#measurement-modes-and-triggers"
+                                    href="https://pyra.esm.ei.tum.de/docs/user-guide/measurements#starting-and-stopping-measurements-via-cli"
                                     target="_blank"
                                     className="text-blue-500 underline"
                                 >
@@ -137,66 +165,9 @@ export default function MeasurementDecision() {
                             )}
                             .
                         </div>
-                    )}
-                </ModePanel>
-                <ModePanel
-                    label="Manual"
-                    isActive={activeMode === 'manual'}
-                    onClick={() => setActiveMode('manual')}
-                >
-                    {activeMode === 'manual' && (
-                        <div>
-                            Current state:{' '}
-                            <strong>
-                                {centralConfig.measurement_decision.manual_decision_result
-                                    ? 'measuring'
-                                    : 'not measuring'}
-                            </strong>
-                        </div>
-                    )}
-                    {activeMode === 'manual' && (
-                        <Button className="w-full" onClick={toggleManualMeasurementMode}>
-                            {centralConfig.measurement_decision.manual_decision_result
-                                ? 'Stop'
-                                : 'Start'}{' '}
-                            Measurements
-                        </Button>
-                    )}
-                </ModePanel>
-                <ModePanel
-                    label="CLI"
-                    isActive={activeMode === 'cli'}
-                    onClick={() => setActiveMode('cli')}
-                >
-                    {activeMode === 'cli' && (
-                        <>
-                            <div>
-                                Current state:{' '}
-                                <strong>
-                                    {centralConfig.measurement_decision.cli_decision_result
-                                        ? 'measuring'
-                                        : 'not measuring'}
-                                </strong>
-                            </div>
-                            <div>
-                                Read more about this in the{' '}
-                                {activeMode === 'cli' ? (
-                                    <a
-                                        href="https://pyra.esm.ei.tum.de/docs/user-guide/measurements#starting-and-stopping-measurements-via-cli"
-                                        target="_blank"
-                                        className="text-blue-500 underline"
-                                    >
-                                        Pyra Docs
-                                    </a>
-                                ) : (
-                                    <span className="text-blue-300 underline">Pyra Docs</span>
-                                )}
-                                .
-                            </div>
-                        </>
-                    )}
-                </ModePanel>
-            </div>
+                    </>
+                )}
+            </ModePanel>
         </div>
     );
 }
