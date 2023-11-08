@@ -25,7 +25,7 @@ export default function ConfigSectionErrorEmail() {
     return (
         <>
             <div>
-                <Button onClick={test}>Send Test Email</Button>
+                <Button onClick={test}>send test email</Button>
             </div>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle

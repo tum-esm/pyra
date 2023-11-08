@@ -143,7 +143,7 @@ export default function ConfigSectionUpload() {
                             <div className="flex-grow" />
                             <div className="flex flex-row gap-x-2">
                                 <Button onClick={() => removeStream(index)}>
-                                    Remove Upload Stream
+                                    remove upload stream
                                 </Button>
                             </div>
                         </div>
