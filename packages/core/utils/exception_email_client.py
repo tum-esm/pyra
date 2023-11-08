@@ -36,11 +36,20 @@ def _get_current_log_lines() -> list[str]:
 
     log_lines_in_email: list[str] = []
     included_iterations = 0
-    for l in latest_log_lines[::-1]:
+    for l in latest_log_lines[::-1][: 50]:
         if ("main - INFO - Starting iteration"
             in l) or ("main - INFO - Starting mainloop" in l):
             included_iterations += 1
-        log_lines_in_email.append(l)
+        if 'running command "config update" with content:' in l:
+            l_sections = l.split(
+                "running command \"config update\" with content:"
+            )
+            log_lines_in_email.append(
+                l_sections[0] +
+                "running command \"config update\" with content: <redacted>"
+            )
+        else:
+            log_lines_in_email.append(l)
         if included_iterations == 2:
             break
     return log_lines_in_email[::-1]
