@@ -84,9 +84,9 @@ class EnclosureControl:
         self.perform_camera_power_cycle()
 
         # Check for current measurement status
+        current_state = interfaces.StateInterface.load_state()
         self.measurements_should_be_running = (
-            interfaces.StateInterface.load_state().
-            measurements_should_be_running
+            current_state.measurements_should_be_running
         ) or False
 
         # Updates the current loop to the latest config.
@@ -109,8 +109,10 @@ class EnclosureControl:
                 logger.warning("Could not read PLC state in this loop.")
 
             # Push the latest readout of the PLC state to the StateInterface
-            logger.info("New PLC readings.")
+            logger.info("New PLC readings. Writing them to the PLC logs.")
             interfaces.StateInterface.update_state(plc_state=self.plc_state)
+            current_state.plc_state = self.plc_state
+            utils.TUMPLCLogger.log(new_config, current_state)
 
             # Check for critial error: Motor Failed Flag in PLC. In case of present
             # motor failed flag the cover might not be closed in bad weather
