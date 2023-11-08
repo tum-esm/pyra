@@ -118,13 +118,13 @@ def _stop_pyra_core() -> None:
         exit(1)
 
     try:
-        processes = [p.name() for p in psutil.process_iter()]
-        for executable in ["opus.exe", "OpusCore.exe"]:
-            if executable in processes:
-                exit_code = os.system(f"taskkill /f /im {executable}")
+        for p in psutil.process_iter():
+            process_name = p.name()
+            if process_name in ["opus.exe", "OpusCore.exe"]:
+                exit_code = os.system(f"taskkill /f /im {process_name}")
                 assert (
                     exit_code == 0
-                ), f'taskkill  of "{executable}" ended with an exit_code of {exit_code}'
+                ), f'taskkill  of "{process_name}" ended with an exit_code of {exit_code}'
         _print_green("Successfully closed OPUS")
     except Exception as e:
         _print_red(f"Failed to close OPUS: {e}")
