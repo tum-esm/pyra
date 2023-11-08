@@ -2,6 +2,7 @@ from typing import Any
 import os
 import sys
 import time
+import psutil
 from packages.core import types, utils, interfaces
 
 # these imports are provided by pywin32
@@ -276,31 +277,17 @@ class OpusMeasurement:
         except AttributeError:
             pass
 
-    def opus_application_running(self) -> bool:
-        """Checks if OPUS is already running by identifying the window.
+    def opus_is_running(self) -> bool:
+        """Checks if OPUS is already running by searching for processes with
+        the executable `opus.exe` or `OpusCore.exe`
 
-        Returns:
-        False if Application is currently not running on OS
-        True if Application is currently running on OS
-        """
-        assert sys.platform == "win32"
+        Returns: `True` if Application is currently running and `False` if not."""
 
-        # FindWindow(className, windowName)
-        # className: String, The window class name to find, else None
-        # windowName: String, The window name (ie,title) to find, else None
-        opus_username = self.config.opus.username
-        opus_windows_name = (
-            f"OPUS - Operator: {opus_username}  (Administrator) - [Display - default.ows]"
-        )
-        try:
-            if _win32ui.FindWindow(
-                None,
-                opus_windows_name,
-            ):
+        for p in psutil.process_iter():
+            if p.name() in ["opus.exe", "OpusCore.exe"]:
                 return True
-            return False
-        except _win32ui.error:
-            return False
+
+        return False
 
     def sun_angle_is_too_low(self) -> bool:
         """Checks defined sun angle in config. Closes OPUS at
@@ -322,7 +309,7 @@ class OpusMeasurement:
 
         if self.sun_angle_is_too_low():
             # Close OPUS if running
-            if self.opus_application_running():
+            if self.opus_is_running():
                 logger.debug("Requesting OPUS night shutdown.")
                 # CLOSE_OPUS needs all macros closed to work. stop_macro() is
                 # called just in case
@@ -332,7 +319,7 @@ class OpusMeasurement:
 
         else:
             # start OPUS if not currently running
-            if not self.opus_application_running():
+            if not self.opus_is_running():
                 logger.info("Start OPUS.")
                 self.start_opus()
                 self.wait_for_opus_startup()
@@ -350,9 +337,9 @@ class OpusMeasurement:
         start_time = time.time()
         while True:
             # brakes when OPUS is up and running
-            if self.opus_application_running():
+            if self.opus_is_running():
                 break
-            time.sleep(0.5)
+            time.sleep(1)
 
             # breaks after 60s of waiting
             if time.time() - start_time > 60:
@@ -377,19 +364,17 @@ class OpusMeasurement:
         up OPUS, loads an experiment, starts a macro and stops it
         after 10s."""
 
-        assert sys.platform == "win32"
-
-        opus_is_running = self.opus_application_running()
+        opus_is_running = self.opus_is_running()
         if not opus_is_running:
             self.start_opus()
             try_count = 0
             while try_count < 10:
-                if self.opus_application_running():
+                if self.opus_is_running():
                     break
                 try_count += 1
                 time.sleep(6)
 
-        assert self.opus_application_running()
+        assert self.opus_is_running()
         assert self.__test_dde_connection()
 
         self.load_experiment()
