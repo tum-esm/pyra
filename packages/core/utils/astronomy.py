@@ -72,14 +72,20 @@ class Astronomy:
         if config.general.test_mode:
             return (48.151, 11.569, 539)  # TUM_I location in munich
 
-        with open(config.camtracker.config_path.root, "r") as f:
-            _lines = f.readlines()
-        _marker_line_index: Optional[int] = None
-        for n, line in enumerate(_lines):
-            if line == "$1\n":
-                _marker_line_index = n
-        assert _marker_line_index is not None, "Camtracker config file is not valid"
-        lat = float(_lines[_marker_line_index + 1].strip())
-        lon = float(_lines[_marker_line_index + 2].strip())
-        alt = float(_lines[_marker_line_index + 3].strip())
-        return lat, lon, alt
+        try:
+            with open(config.camtracker.config_path.root, "r") as f:
+                _lines = f.readlines()
+            _marker_line_index: Optional[int] = None
+            for n, line in enumerate(_lines):
+                if line == "$1\n":
+                    _marker_line_index = n
+            lat = float(_lines[_marker_line_index + 1].strip())
+            lon = float(_lines[_marker_line_index + 2].strip())
+            alt = float(_lines[_marker_line_index + 3].strip())
+            return lat, lon, alt
+        except Exception as e:
+            raise Exception(
+                "Could not read CamTracker config file. Please make sure that "
+                f"the config located at {config.camtracker.config_path.root} is "
+                "valid or change the path in the config."
+            ) from e
