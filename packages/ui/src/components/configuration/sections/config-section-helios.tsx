@@ -125,6 +125,7 @@ export default function ConfigSectionHelios() {
                         ? centralSectionConfig.edge_pixel_threshold
                         : 'null'
                 }
+                postfix="%"
                 numeric
             />
             <configurationComponents.ConfigElementNote>

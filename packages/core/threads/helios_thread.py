@@ -416,7 +416,7 @@ class HeliosThread(AbstractThread):
                     # eliminating quickly alternating decisions
                     # see https://github.com/tum-esm/pyra/issues/148
 
-                    upper_ef_threshold = config.helios.edge_pixel_threshold
+                    upper_ef_threshold = config.helios.edge_pixel_threshold / 100.0
                     lower_ef_threshold = upper_ef_threshold * 0.7
                     if new_state is None:
                         new_state = average_edge_fraction >= upper_ef_threshold
