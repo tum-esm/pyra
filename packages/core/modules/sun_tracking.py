@@ -28,6 +28,7 @@ class SunTracking:
     def __init__(self, initial_config: types.Config):
         self.config = initial_config
         self.last_start_time = time.time()
+        self.waiting_for_shutdown: bool = False
 
     def run(self, new_config: types.Config) -> None:
         """Called in every cycle of the main loop. Start and stops CamTracker
@@ -49,6 +50,17 @@ class SunTracking:
             interfaces.StateInterface.load_state().
             measurements_should_be_running
         ) or False
+
+        # if CamTracker is supposed to shut down but is
+        # still running wait until it has shut down
+        if self.waiting_for_shutdown:
+            if camtracker_is_running:
+                logger.debug("Waiting for CamTracker to shut down")
+                self.stop_sun_tracking_automation()
+                return
+            else:
+                logger.info("CamTracker has shut down")
+                self.waiting_for_shutdown = False
 
         # main logic for active automation
         # start sun tracking if supposed to be running and not active
@@ -177,6 +189,7 @@ class SunTracking:
         After detection it will move it's mirrors to parking position and end
         itself."""
 
+        self.waiting_for_shutdown = True
         with open(self.stop_file_path) as f:
             f.write("")
 
