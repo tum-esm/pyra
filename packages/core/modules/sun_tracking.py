@@ -28,8 +28,6 @@ class SunTracking:
     def __init__(self, initial_config: types.Config):
         self.config = initial_config
         self.last_start_time = time.time()
-        if self.config.general.test_mode:
-            return
 
     def run(self, new_config: types.Config) -> None:
         """Called in every cycle of the main loop. Start and stops CamTracker
@@ -40,12 +38,13 @@ class SunTracking:
 
         # Skip rest of the function if test mode is active
         if self.config.general.test_mode:
-            logger.debug("Skipping SunTracking in test mode")
+            logger.info("Skipping SunTracking in test mode")
             return
-
-        logger.info("Running SunTracking")
+        else:
+            logger.info("Running SunTracking")
 
         # check for automation state flank changes
+        camtracker_is_running = self.ct_application_running()
         measurements_should_be_running = (
             interfaces.StateInterface.load_state().
             measurements_should_be_running
@@ -53,15 +52,15 @@ class SunTracking:
 
         # main logic for active automation
         # start sun tracking if supposed to be running and not active
-        if measurements_should_be_running and not self.ct_application_running():
-            logger.info("Start CamTracker")
+        if measurements_should_be_running and (not camtracker_is_running):
+            logger.info("Starting CamTracker")
             self.start_sun_tracking_automation()
             self.last_start_time = time.time()
             return
 
         # stops sun tracking if supposed to be not running and active
-        if not measurements_should_be_running and self.ct_application_running():
-            logger.info("Stop CamTracker")
+        if not measurements_should_be_running and camtracker_is_running:
+            logger.info("Stopping CamTracker")
             self.stop_sun_tracking_automation()
             return
 
@@ -110,7 +109,7 @@ class SunTracking:
             logger.debug("CamTracker motor position is valid.")
 
         if restart_camtracker:
-            logger.info("Stopping CamTracker. Preparing for reinitialization.")
+            logger.info("Stopping CamTracker because it is in an invalid state")
             self.stop_sun_tracking_automation()
 
     def ct_application_running(self) -> bool:
@@ -161,6 +160,15 @@ class SunTracking:
         except AttributeError:
             pass
 
+    @property
+    def stop_file_path(self) -> str:
+        """Returns the path to the stop.txt file in CamTracker directory."""
+
+        return os.path.join(
+            os.path.dirname(self.config.camtracker.executable_path.root),
+            "stop.txt"
+        )
+
     def stop_sun_tracking_automation(self) -> None:
         """Tells the CamTracker application to end program and move mirrors
         to parking position.
@@ -169,24 +177,14 @@ class SunTracking:
         After detection it will move it's mirrors to parking position and end
         itself."""
 
-        # create stop.txt file in camtracker folder
-        stop_file_path = os.path.join(
-            os.path.dirname(self.config.camtracker.executable_path.root),
-            "stop.txt"
-        )
-        with open(stop_file_path) as f:
+        with open(self.stop_file_path) as f:
             f.write("")
 
     def remove_stop_file(self) -> None:
-        """This function removes the stop.txt file to allow CamTracker to
-        restart."""
+        """This function removes the stop.txt file to allow CamTracker to restart."""
 
-        stop_file_path = os.path.join(
-            os.path.dirname(self.config.camtracker.executable_path.root),
-            "stop.txt"
-        )
-        if os.path.exists(stop_file_path):
-            os.remove(stop_file_path)
+        if os.path.exists(self.stop_file_path):
+            os.remove(self.stop_file_path)
 
     def _read_ct_log_learn_az_elev(
         self,
