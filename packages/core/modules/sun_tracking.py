@@ -1,8 +1,9 @@
-import sys
 from typing import Literal, Optional
+import sys
 import os
 import time
 import datetime
+import psutil
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="sun-tracking")
@@ -45,7 +46,7 @@ class SunTracking:
             logger.info("Running SunTracking")
 
         # check for automation state flank changes
-        camtracker_is_running = self.ct_application_running()
+        camtracker_is_running = self.camtracker_is_running()
         measurements_should_be_running = (
             interfaces.StateInterface.load_state().
             measurements_should_be_running
@@ -79,7 +80,7 @@ class SunTracking:
         # check motor offset, if over params.threshold prepare to
         # shutdown CamTracker. Will be restarted in next run() cycle.
         # is only considered if tracking is already up for at least 5 minutes.
-        if not self.ct_application_running():
+        if not camtracker_is_running:
             logger.debug("CamTracker is not running")
             return
 
@@ -124,23 +125,18 @@ class SunTracking:
             logger.info("Stopping CamTracker because it is in an invalid state")
             self.stop_sun_tracking_automation()
 
-    def ct_application_running(self) -> bool:
-        """Checks if CamTracker is already running by identifying the active
-        window.
+    def camtracker_is_running(self) -> bool:
+        """Checks if CamTracker is already running by searching for processes with
+        the executable `opus.exe` or `OpusCore.exe`
 
-        False if Application is currently not running on OS
-        True if Application is currently running on OS"""
+        Returns: `True` if Application is currently running and `False` if not."""
 
-        process_name = os.path.basename(
-            self.config.camtracker.executable_path.root
-        )
-        return interfaces.OSInterface.get_process_status(process_name) in [
-            "running",
-            "start_pending",
-            "continue_pending",
-            "pause_pending",
-            "paused",
-        ]
+        for p in psutil.process_iter():
+            name = p.name().lower()
+            if name.startswith("camtracker") and name.endswith(".exe"):
+                return True
+
+        return False
 
     def start_sun_tracking_automation(self) -> None:
         """Uses os.startfile() to start up the CamTracker executable with
@@ -305,14 +301,14 @@ class SunTracking:
         """Function to test the functonality of this module. Starts up
         CamTracker to initialize the tracking mirrors. Then moves mirrors
         back to parking position and shuts dosn CamTracker."""
-        if not self.ct_application_running():
+        if not self.camtracker_is_running():
             self.start_sun_tracking_automation()
             for _ in range(10):
-                if self.ct_application_running():
+                if self.camtracker_is_running():
                     break
                 time.sleep(6)
 
-        assert self.ct_application_running()
+        assert self.camtracker_is_running()
         self.stop_sun_tracking_automation()
         time.sleep(10)
-        assert not self.ct_application_running()
+        assert not self.camtracker_is_running()

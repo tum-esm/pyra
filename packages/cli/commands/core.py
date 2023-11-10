@@ -110,7 +110,7 @@ def _stop_pyra_core() -> None:
 
     try:
         tracking = modules.sun_tracking.SunTracking(config)
-        if tracking.ct_application_running():
+        if tracking.camtracker_is_running():
             tracking.stop_sun_tracking_automation()
         _print_green("Successfully closed CamTracker")
     except Exception as e:
