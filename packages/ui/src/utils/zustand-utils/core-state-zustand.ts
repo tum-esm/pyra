@@ -10,7 +10,9 @@ const coreStateSchema = z.object({
         altitude: z.number().nullable(),
         sun_elevation: z.number().nullable(),
     }),
-    helios_indicates_good_conditions: z.boolean().nullable(),
+    helios_indicates_good_conditions: z
+        .union([z.literal('yes'), z.literal('no'), z.literal('inconclusive')])
+        .nullable(),
     measurements_should_be_running: z.boolean().nullable(),
     plc_state: z.object({
         last_full_fetch: z.string().nullable(),

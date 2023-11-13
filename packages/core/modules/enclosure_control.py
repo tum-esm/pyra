@@ -79,10 +79,6 @@ class EnclosureControl:
 
         logger.info("Running EnclosureControl")
 
-        # Perform a power cycle of the camera every day at midnight
-        logger.debug("Performing camera power cycle.")
-        self.perform_camera_power_cycle()
-
         # Check for current measurement status
         current_state = interfaces.StateInterface.load_state()
         self.measurements_should_be_running = (
@@ -113,6 +109,10 @@ class EnclosureControl:
             interfaces.StateInterface.update_state(plc_state=self.plc_state)
             current_state.plc_state = self.plc_state
             utils.TUMPLCLogger.log(new_config, current_state)
+
+            # Perform a power cycle of the camera every day at midnight
+            logger.debug("Performing camera power cycle.")
+            self.perform_camera_power_cycle()
 
             # Check for critial error: Motor Failed Flag in PLC. In case of present
             # motor failed flag the cover might not be closed in bad weather
