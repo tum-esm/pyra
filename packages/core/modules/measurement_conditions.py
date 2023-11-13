@@ -47,7 +47,7 @@ class MeasurementConditions:
             lon=camtracker_coordinates[1],
             alt=camtracker_coordinates[2],
         )
-        logger.debug(f"Theoretical sun elevation is: {sun_elevation}°.")
+        logger.debug(f"Theoretical sun elevation is: {sun_elevation} degrees.")
 
         # Skip rest of the function if test mode is active
         if self.config.general.test_mode:
@@ -89,6 +89,7 @@ class MeasurementConditions:
             state.position.latitude = camtracker_coordinates[0]
             state.position.longitude = camtracker_coordinates[1]
             state.position.altitude = camtracker_coordinates[2]
+            state.position.sun_elevation = sun_elevation
             state.measurements_should_be_running = measurements_should_be_running
             state.recent_cli_calls -= current_state.recent_cli_calls
 
