@@ -1,10 +1,8 @@
 export function CoreLogLine(props: { text: string }) {
-    let { text } = props;
+    const text = props.text.replace('\\r', '');
 
     if (
-        !text.match(
-            /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC(\+|-)\d(\.\d)? - .* - .* - .*$/
-        )
+        !text.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC(\+|-)\d(\.\d)? - .* - .* - .*/)
     ) {
         const textStyle =
             text === 'More log lines inside logs folder ...'
@@ -38,7 +36,7 @@ export function CoreLogLine(props: { text: string }) {
         <>
             {(logMessage.includes('Starting mainloop') ||
                 logMessage.includes('Starting iteration')) && (
-                <hr className="w-full my-1.5 border-0 bg-gray-100 first:hidden h-px" />
+                <hr className="w-full my-1.5 border-0 bg-gray-200 first:hidden h-px" />
             )}
             <div
                 className={
