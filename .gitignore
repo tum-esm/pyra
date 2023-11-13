@@ -23,6 +23,7 @@ config/**/*.json
 !config/**/*.default.json
 logs/**/*.json
 logs/**/*.log
+logs/**/*.csv
 logs/**/*.png
 logs/**/*.jpg
 !logs/**/.gitkeep
