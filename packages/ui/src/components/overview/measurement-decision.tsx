@@ -1,11 +1,4 @@
-import {
-    IconMicroscope,
-    IconRobot,
-    IconToggleRight,
-    IconUser,
-    IconWand,
-} from '@tabler/icons-react';
-import { useState } from 'react';
+import { IconRobot, IconToggleRight, IconWand } from '@tabler/icons-react';
 import { Button } from '../ui/button';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 import { fetchUtils } from '../../utils';
@@ -45,12 +38,29 @@ function ModePanel(props: {
 }
 
 export default function MeasurementDecision() {
-    const [activeMode, setActiveMode] = useState('automatic');
     const { runPromisingCommand } = fetchUtils.useCommand();
     const { centralConfig, setConfigItem } = useConfigStore();
     const { coreState } = useCoreStateStore();
+    const activeMode = centralConfig?.measurement_decision.mode;
 
-    function toggleManualMeasurementMode() {
+    function setActiveMode(mode: 'automatic' | 'manual' | 'cli') {
+        if (centralConfig) {
+            runPromisingCommand({
+                command: () =>
+                    fetchUtils.backend.updateConfig({
+                        measurement_decision: {
+                            mode: mode,
+                        },
+                    }),
+                label: 'setting measurement mode',
+                successLabel: 'successfully set measurement mode, system will react soon',
+                onSuccess: () => {
+                    setConfigItem('measurement_decision.mode', mode);
+                },
+            });
+        }
+    }
+    function toggleManualMeasurementDecision() {
         if (centralConfig) {
             const newDecisionResult = !centralConfig.measurement_decision.manual_decision_result;
             runPromisingCommand({
@@ -123,7 +133,7 @@ export default function MeasurementDecision() {
                     </div>
                 )}
                 {activeMode === 'manual' && (
-                    <Button className="w-full" onClick={toggleManualMeasurementMode}>
+                    <Button className="w-full" onClick={toggleManualMeasurementDecision}>
                         {centralConfig.measurement_decision.manual_decision_result
                             ? 'Stop'
                             : 'Start'}{' '}

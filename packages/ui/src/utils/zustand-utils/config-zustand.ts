@@ -41,7 +41,7 @@ export const configSchema = z.object({
         recipients: z.string(),
     }),
     measurement_decision: z.object({
-        mode: z.string(),
+        mode: z.union([z.literal('automatic'), z.literal('manual'), z.literal('cli')]),
         manual_decision_result: z.boolean(),
         cli_decision_result: z.boolean(),
     }),
