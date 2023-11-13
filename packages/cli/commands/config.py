@@ -42,8 +42,6 @@ def _print_red(text: str) -> None:
 def _get_config(
     no_indent: bool, check_path_existence: bool, no_color: bool
 ) -> None:
-    logger.info('running command "config get"')
-
     if not os.path.isfile(_CONFIG_FILE_PATH):
         shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
     try:
@@ -120,8 +118,6 @@ def _update_config(content: str) -> None:
     f"Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
 )
 def _validate_current_config() -> None:
-    logger.info('running command "config validate"')
-
     try:
         types.Config.load()
     except Exception as e:
