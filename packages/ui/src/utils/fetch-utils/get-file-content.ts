@@ -1,7 +1,7 @@
-import { readTextFile } from '@tauri-apps/api/fs';
+import { readBinaryFile } from '@tauri-apps/api/fs';
 import { BaseDirectory, join } from '@tauri-apps/api/path';
 
-async function getFileContent(filePath: string) {
+async function getFileContent(filePath: string): Promise<string> {
     let baseDir: 7 | 8;
     let absoluteFilePath: string;
     switch (import.meta.env.VITE_ENVIRONMENT) {
@@ -29,7 +29,9 @@ async function getFileContent(filePath: string) {
             baseDir === BaseDirectory.Document ? 'Documents' : 'Downloads'
         }/${absoluteFilePath}"`
     );
-    return await readTextFile(absoluteFilePath, { dir: baseDir });
+    const binaryContent = await readBinaryFile(absoluteFilePath, { dir: baseDir });
+
+    return new TextDecoder('utf-8').decode(binaryContent);
 }
 
 export default getFileContent;
