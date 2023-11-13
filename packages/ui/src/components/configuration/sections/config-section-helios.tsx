@@ -19,7 +19,7 @@ export default function ConfigSectionHelios() {
             evaluation_size: 15,
             seconds_per_interval: 6,
             min_seconds_between_state_changes: 180,
-            edge_pixel_threshold: 0.01,
+            edge_pixel_threshold: 1,
             edge_color_threshold: 40,
             target_pixel_brightness: 50,
             save_images_to_archive: false,
@@ -190,6 +190,12 @@ function HeliosImages() {
     const [heliosImagePathRaw, setHeliosImagePathRaw] = useState<string | null>(null);
     const [heliosImagePathProcessed, setHeliosImagePathProcessed] = useState<string | null>(null);
     const [timestamp, setTimestamp] = useState<number>(moment().unix());
+    const [leftImageState, setLeftImageState] = useState<'loading' | 'success' | 'broken'>(
+        'loading'
+    );
+    const [rightImageState, setRightImageState] = useState<'loading' | 'success' | 'broken'>(
+        'loading'
+    );
 
     async function updateHeliosImagePaths() {
         const projectDirPath = await fetchUtils.getProjectDirPath();
@@ -206,24 +212,57 @@ function HeliosImages() {
 
         const interval = setInterval(() => {
             setTimestamp(moment().unix());
-        }, 5000);
+        }, 10000);
 
         return () => clearInterval(interval);
     }, []);
 
     return (
         <div className="grid grid-cols-2 gap-2 mt-2">
-            <img
-                src={(heliosImagePathRaw || '') + `?${timestamp}`}
-                alt="Helios Image Raw"
-                className="w-full overflow-hidden border-0 bg-slate-100"
-            />
-            <img
-                src={(heliosImagePathProcessed || '') + `?${timestamp}`}
-                alt="Helios Image Processed"
-                className="w-full overflow-hidden border-0 bg-slate-100"
-                style={{ outline: 'none' }}
-            />
+            <div>
+                {leftImageState === 'loading' && (
+                    <div className="flex items-center justify-center w-full h-32 p-2 rounded-md bg-slate-300">
+                        loading ...
+                    </div>
+                )}
+                {leftImageState === 'broken' && (
+                    <div className="flex items-center justify-center w-full h-32 p-2 rounded-md bg-slate-300">
+                        no image yet
+                    </div>
+                )}
+                <img
+                    src={(heliosImagePathRaw || '') + `?${timestamp}`}
+                    alt="Helios Image Raw"
+                    onError={() => setLeftImageState('broken')}
+                    onLoad={() => setLeftImageState('success')}
+                    className={
+                        'w-full overflow-hidden border-0 bg-slate-100 ' +
+                        (leftImageState === 'success' ? 'opacity-100' : 'opacity-0')
+                    }
+                />
+            </div>
+            <div>
+                {rightImageState === 'loading' && (
+                    <div className="flex items-center justify-center w-full h-32 p-2 rounded-md bg-slate-300">
+                        loading ...
+                    </div>
+                )}
+                {rightImageState === 'broken' && (
+                    <div className="flex items-center justify-center w-full h-32 p-2 rounded-md bg-slate-300">
+                        no image yet
+                    </div>
+                )}
+                <img
+                    src={(heliosImagePathProcessed || '') + `?${timestamp}`}
+                    alt="Helios Image Processed"
+                    onError={() => setRightImageState('broken')}
+                    onLoad={() => setRightImageState('success')}
+                    className={
+                        'w-full overflow-hidden border-0 bg-slate-100 ' +
+                        (rightImageState === 'success' ? 'opacity-100' : 'opacity-0')
+                    }
+                />
+            </div>
         </div>
     );
 }
