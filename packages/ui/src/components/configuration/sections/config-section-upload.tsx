@@ -102,7 +102,7 @@ export default function ConfigSectionUpload() {
                         github.com/dostuffthatmatters/circadian-scp-upload
                     </a>
                     ). You can use it to upload your inteferograms, your datalogger files, and so
-                    on: All the data generated day by day that has to be uploaded to a server.
+                    on: Any data generated day by day that has to be uploaded to a server.
                 </p>
             </div>
             {centralSectionConfig &&

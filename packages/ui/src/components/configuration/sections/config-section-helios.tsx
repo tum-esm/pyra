@@ -69,8 +69,8 @@ export default function ConfigSectionHelios() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                Normally is 0, sometimes 1 or 2. Helios will complain (see logs tab) if it cannot
-                find the camera.
+                Normally, this is 0, sometimes it is1 or 2. Helios will complain (see logs tab) if
+                it cannot find the camera.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
@@ -130,7 +130,7 @@ export default function ConfigSectionHelios() {
             />
             <configurationComponents.ConfigElementNote>
                 How many pixels of the lens should be considered as "edge". A starting value of `1%`
-                is a good baseline, i.e. 1% of the lens is a hard edge.
+                is a good baseline, i.e. 1% of the lens is an edge.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Edge Color Threshold"
@@ -144,11 +144,11 @@ export default function ConfigSectionHelios() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                How hard does a shadow have to be to be considered as "edge". A starting value of
+                How hard does a shadow have to be to be considered an "edge". A starting value of
                 `40` is a good baseline. This refers to the pixel color value, `0` is black, `255`
                 is white. A value of `40` means that two pixels are considered as "edge" if their
-                color difference is at least `40` - e.g. pixel 1 is at `100` and pixel 2 is at
-                `140`.
+                color difference is at least `40` - e.g. pixel 1 is at `100` and pixel 2 is at `140`
+                or brighter.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Target Pixel Brightness"
@@ -162,7 +162,7 @@ export default function ConfigSectionHelios() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                Every 5 minutes Helios takes an image with every availabe exposure time and picks
+                Every 5 minutes, Helios takes an image with every availabe exposure time and picks
                 the exposure time where the mean pixel brightness is closest to this value. This
                 mean pixel brightness is again a value between `0` and `255`. A starting value of
                 `50` is a good baseline.

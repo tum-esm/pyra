@@ -55,7 +55,7 @@ export default function ConfigSectionMeasurementTriggers() {
                 oldValue={centralSectionConfig.stop_time}
             />
             <configurationComponents.ConfigElementNote>
-                Pyra only does measurements between start and stop time (computer time is used).
+                Pyra may only do measurements between start and stop time (computer time is used).
                 <br />
                 The format is "hour : minute : second"
             </configurationComponents.ConfigElementNote>
@@ -71,7 +71,7 @@ export default function ConfigSectionMeasurementTriggers() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                Pyra only does measurements, when sun angle is higher than this value. This angle
+                Pyra may only do measurements, when sun angle is higher than this value. This angle
                 will only have an effect if it is higher than "general.min_sun_elevation".
             </configurationComponents.ConfigElementNote>
         </>
