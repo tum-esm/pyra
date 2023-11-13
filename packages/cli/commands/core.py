@@ -82,7 +82,8 @@ def _stop_pyra_core() -> None:
     logger.info('running command "core stop"')
 
     termination_pids = tum_esm_utils.processes.terminate_process(
-        _RUN_PYRA_CORE_SCRIPT_PATH
+        _RUN_PYRA_CORE_SCRIPT_PATH,
+        termination_timeout=8,
     )
     if len(termination_pids) == 0:
         _print_red("No active process to be terminated")
