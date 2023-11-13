@@ -23,7 +23,7 @@ deepdiff = "6.3.0"
 skyfield = "1.46"
 opencv-python = "4.8.1.78"
 pydantic = "^2.4.2"                                                # trustworthy to do upgrades
-tum-esm-utils = "^1.6.2"                                           # we control this
+tum-esm-utils = "^1.6.3"                                           # we control this
 circadian-scp-upload = "^0.4.0"                                    # we control this
 
 [tool.poetry.group.dev.dependencies]
