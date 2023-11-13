@@ -22,8 +22,8 @@ export default function ConfigSectionHelios() {
             edge_pixel_threshold: 0.01,
             edge_color_threshold: 40,
             target_pixel_brightness: 50,
-            save_image_to_archive: false,
-            save_current_images: false,
+            save_images_to_archive: false,
+            save_current_image: false,
         });
     }
 

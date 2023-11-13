@@ -41,16 +41,16 @@
             "fs": {
                 "readFile": true,
                 "scope": [
-                    "$DOWNLOAD\\pyra\\pyra-4.*.*\\*",
-                    "$DOCUMENT\\pyra\\pyra-4.*.*\\*",
+                    "$DOWNLOAD\\pyra\\**",
+                    "$DOCUMENT\\pyra\\**",
                     "$DOCUMENT/work/esm/pyra/**"
                 ]
             },
             "protocol": {
                 "asset": true,
                 "assetScope": [
-                    "$DOWNLOAD\\pyra\\pyra-4.*.*\\*",
-                    "$DOCUMENT\\pyra\\pyra-4.*.*\\*",
+                    "$DOWNLOAD\\pyra\\**",
+                    "$DOCUMENT\\pyra\\**",
                     "$DOCUMENT/work/esm/pyra/**"
                 ]
             }
