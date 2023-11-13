@@ -827,6 +827,42 @@ xlsx2csv = ["xlsx2csv (>=0.8.0)"]
 xlsxwriter = ["xlsxwriter"]
 
 [[package]]
+name = "polars-lts-cpu"
+version = "0.19.13"
+description = "Blazingly fast DataFrame library"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "polars_lts_cpu-0.19.13-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:c5c74b01641f6d1c5837d6b324d61df173646588fefe8cc9f58306a283f9a11e"},
+    {file = "polars_lts_cpu-0.19.13-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:23745965cfc425821718f31f8c70193fd1b1488456a391a93865c3eec3f01bca"},
+    {file = "polars_lts_cpu-0.19.13-cp38-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:b94fd93b0fe37ff2514bf0e3aeba84fc4d51d11acedbc2752eb3fda0445e20fb"},
+    {file = "polars_lts_cpu-0.19.13-cp38-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:ce9357d6762ecd2569d4d88596d347216ce551b673ed394f8d4e5a1e701ee2f3"},
+    {file = "polars_lts_cpu-0.19.13-cp38-abi3-win_amd64.whl", hash = "sha256:62b5bd79eb7c2feab94dd2125c04a00ac9e6c8fa652d7a70d4f923beb87c89d4"},
+    {file = "polars_lts_cpu-0.19.13.tar.gz", hash = "sha256:b539035ed378934c73353df4fe6fd9b908a4ceb0836a0287584e2023e01e04fb"},
+]
+
+[package.extras]
+adbc = ["adbc_driver_sqlite"]
+all = ["polars[adbc,cloudpickle,connectorx,deltalake,fsspec,gevent,matplotlib,numpy,pandas,pyarrow,pydantic,pyiceberg,sqlalchemy,timezone,xlsx2csv,xlsxwriter]"]
+cloudpickle = ["cloudpickle"]
+connectorx = ["connectorx (>=0.3.2)"]
+deltalake = ["deltalake (>=0.13.0)"]
+fsspec = ["fsspec"]
+gevent = ["gevent"]
+matplotlib = ["matplotlib"]
+numpy = ["numpy (>=1.16.0)"]
+openpyxl = ["openpyxl (>=3.0.0)"]
+pandas = ["pandas", "pyarrow (>=7.0.0)"]
+pyarrow = ["pyarrow (>=7.0.0)"]
+pydantic = ["pydantic"]
+pyiceberg = ["pyiceberg (>=0.5.0)"]
+pyxlsb = ["pyxlsb (>=1.0)"]
+sqlalchemy = ["pandas", "sqlalchemy"]
+timezone = ["backports.zoneinfo", "tzdata"]
+xlsx2csv = ["xlsx2csv (>=0.8.0)"]
+xlsxwriter = ["xlsxwriter"]
+
+[[package]]
 name = "psutil"
 version = "5.9.4"
 description = "Cross-platform lib for process and system monitoring in Python."
@@ -1473,4 +1509,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.*"
-content-hash = "b6611a6b7ce31c55a293e278dd4812828148aed61dc3261c3e4e82f91be0bede"
+content-hash = "bef8d82692297024b38ed055879aa692a2c8c8e6434ba7a370c7399d5c5ed450"
