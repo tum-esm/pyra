@@ -158,7 +158,6 @@ def run() -> None:
 
     signal.signal(signal.SIGINT, _graceful_teardown)
     signal.signal(signal.SIGTERM, _graceful_teardown)
-    signal.signal(signal.SIGHUP, _graceful_teardown)
     logger.info("Established graceful teardown hook")
 
     while True:
