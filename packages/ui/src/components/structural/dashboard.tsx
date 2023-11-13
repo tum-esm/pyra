@@ -14,7 +14,7 @@ const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState<TabType>('Overview');
-    const { setLogs } = useLogsStore();
+    const { setLogs, addUiLogLine } = useLogsStore();
     const { setActivityHistory } = useActivityHistoryStore();
     const { setCoreState } = useCoreStateStore();
     const { centralConfig, setConfig, setConfigItem } = useConfigStore();
@@ -34,13 +34,21 @@ export default function Dashboard() {
         });
     }
     async function fetchStateFile() {
-        const fileContent = await fetchUtils.getFileContent('logs/state.json');
-        setCoreState(JSON.parse(fileContent));
+        try {
+            const fileContent = await fetchUtils.getFileContent('logs/state.json');
+            setCoreState(JSON.parse(fileContent));
+        } catch (e) {
+            addUiLogLine('Could not load logs/state.json', `${e}`);
+        }
     }
 
     async function fetchLogFile() {
-        const fileContent = await fetchUtils.getFileContent('logs/debug.log');
-        setLogs(fileContent.split('\n'));
+        try {
+            const fileContent = await fetchUtils.getFileContent('logs/debug.log');
+            setLogs(fileContent.split('\n'));
+        } catch (e) {
+            addUiLogLine('Could not load logs/debug.log', `${e}`);
+        }
     }
 
     async function fetchActivityFile() {
@@ -51,7 +59,7 @@ export default function Dashboard() {
             );
             setActivityHistory(JSON.parse(fileContent));
         } catch (e) {
-            console.debug(`Could not load activity file: ${e}`);
+            addUiLogLine(`Could not load logs/activity/activity-${filename}.json`, `${e}`);
             setActivityHistory([]);
         }
     }
