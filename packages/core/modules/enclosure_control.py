@@ -222,8 +222,6 @@ class EnclosureControl:
                 self.plc_interface.set_power_camera(True)
                 logger.info("Powering up the camera.")
 
-        self.plc_interface.set_power_camera(False)
-
     def move_cover(self, value: int) -> None:
         """Moves the cover attached on top of the enclosure. The cover is moved by a electrical
         motor controlled by the PLC. The cover functions as weather protection for the measurement

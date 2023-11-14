@@ -44,7 +44,7 @@ class HeliosInterface:
                 if len(available_exposures) == 0:
                     raise CameraError("did not find any available exposures")
 
-                self.current_exposure: int = min(self.available_exposures)
+                self.current_exposure: int = min(available_exposures)
                 self.last_autoexposure_time: float = 0.0
                 self.target_pixel_brightness: int = 0
                 self.available_exposures: list[int] = available_exposures
