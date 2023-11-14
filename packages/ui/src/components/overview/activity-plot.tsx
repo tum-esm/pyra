@@ -74,7 +74,7 @@ function ActivityPlot() {
                     {range(2, 23, 2).map((h) => (
                         <div
                             key={`hour-label-${h}`}
-                            className="absolute top-0 -translate-x-1/2"
+                            className="absolute top-0 p-px -translate-x-1/2"
                             style={{ left: `${h / 0.24}%` }}
                         >
                             {h}
@@ -83,7 +83,7 @@ function ActivityPlot() {
                 </div>
                 <div
                     className={
-                        'relative flex-grow w-full h-[calc(3.5rem+2px)] border border-slate-300 rounded-lg'
+                        'relative flex-grow w-full h-[calc(3.5rem+2px)] border border-slate-200 rounded-lg overflow-hidden'
                     }
                 >
                     {hoverLabel !== undefined && (
@@ -247,34 +247,30 @@ function ActivityPlot() {
                     </div>*/}
                     {/* gray blocks of past and future time */}
                     <div
-                        className="absolute top-0 z-0 h-full bg-gray-700 rounded-l-md"
+                        className="absolute top-0 z-0 h-full bg-gray-700 rounded-l-lg"
                         style={{ left: 0, right: timeToPercentage(now, true) }}
                     />
                     <div
-                        className="absolute top-0 z-40 h-full bg-gray-200 rounded-r-md"
+                        className="absolute top-0 z-40 h-full bg-gray-100 rounded-r-lg"
                         style={{ left: timeToPercentage(now), right: 0 }}
                     />
                 </div>
-                <div className="relative flex flex-row items-center justify-start w-full mt-2 text-xs font-medium text-gray-700 gap-x-1">
-                    <span className="px-2 py-0.5 text-slate-800 bg-slate-200 rounded-lg">
-                        running
-                    </span>
-                    <span className="px-2 py-0.5 text-green-800 bg-green-200 rounded-lg">
-                        measuring
-                    </span>
-                    <span className="px-2 py-0.5 text-red-800 bg-red-200 rounded-lg">error</span>
-                    <span className="px-2 py-0.5 text-fuchsia-800 bg-fuchsia-200 rounded-lg">
-                        uploading
-                    </span>
-                    <span className="px-2 py-0.5 text-purple-800 bg-purple-200 rounded-lg">
-                        camtracker startups
-                    </span>
-                    <span className="px-2 py-0.5 text-violet-800 bg-violet-200 rounded-lg">
-                        opus startups
-                    </span>
-                    <span className="px-2 py-0.5 text-indigo-800 bg-indigo-200 rounded-lg">
-                        CLI calls
-                    </span>
+                <div className="relative flex flex-row items-center justify-start w-full mt-0 overflow-hidden text-xs font-medium text-gray-700">
+                    <div className="relative flex flex-row items-center justify-start h-6 mt-2 overflow-hidden text-xs font-medium leading-6 text-gray-700 border divide-x rounded-lg gap-x-0 divide-slate-300 border-slate-300">
+                        <span className="px-2 py-0.5 text-slate-700 bg-slate-100">running</span>
+                        <span className="px-2 py-0.5 text-green-700 bg-green-100">measuring</span>
+                        <span className="px-2 py-0.5 text-red-700 bg-red-100">error</span>
+                        <span className="px-2 py-0.5 text-fuchsia-700 bg-fuchsia-100">
+                            uploading
+                        </span>
+                        <span className="px-2 py-0.5 text-purple-700 bg-purple-100">
+                            camtracker startups
+                        </span>
+                        <span className="px-2 py-0.5 text-violet-700 bg-violet-100">
+                            opus startups
+                        </span>
+                        <span className="px-2 py-0.5 text-indigo-700 bg-indigo-100">CLI calls</span>
+                    </div>
                     <div className="flex-grow" />
                     <div className=" text-slate-400">
                         times in UTC{localUTCOffset < 0 ? '' : '+'}

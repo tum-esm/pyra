@@ -51,15 +51,20 @@ export function SystemState() {
     return (
         <>
             {centralConfig.tum_plc !== null && (
-                <div className="grid w-full grid-cols-5 px-4 pb-1 text-sm gap-x-1">
+                <div className="grid w-full grid-cols-6 px-4 pb-1 text-sm gap-x-1">
                     <StatePanel title="Cover Angle">
                         {renderString(coreState.plc_state.actors.current_angle, {
                             appendix: ' °',
                         })}
                     </StatePanel>
-                    <StatePanel title="Enclosure Temperature">
+                    <StatePanel title="Temperature">
                         {renderString(coreState.plc_state.sensors.temperature, {
                             appendix: ' °C',
+                        })}
+                    </StatePanel>
+                    <StatePanel title="Humidity">
+                        {renderString(coreState.plc_state.sensors.humidity, {
+                            appendix: ' rH',
                         })}
                     </StatePanel>
                     <StatePanel title="Reset Needed">
@@ -121,7 +126,7 @@ export function SystemState() {
                         appendix: ' m',
                     })}
                 </StatePanel>
-                <StatePanel title="Current Sun Elevation">
+                <StatePanel title="Sun Elevation">
                     {renderString(coreState?.position.sun_elevation, {
                         appendix: ' °',
                     })}

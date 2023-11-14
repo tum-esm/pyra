@@ -64,12 +64,12 @@ export default function PyraCoreStatus() {
         <>
             <div
                 className={
-                    'w-full text-sm flex flex-row items-center justify-center gap-x-2 px-4 py-2 h-14 flex-shrink-0 ' +
+                    'w-full text-sm flex flex-row items-center justify-center gap-x-2 pl-4 py-2 h-10 flex-shrink-0 rounded-lg ' +
                     (pyraCorePid === undefined
-                        ? 'bg-slate-300 text-slate-950'
+                        ? 'bg-slate-100 text-slate-400 border border-slate-200 '
                         : pyraCorePid === -1
-                        ? 'bg-yellow-300 text-yellow-950 '
-                        : 'bg-green-300 text-green-950')
+                        ? 'bg-slate-100 text-slate-950 border border-slate-200 '
+                        : 'bg-green-300 text-green-950 border border-green-400')
                 }
             >
                 {pyraCorePid === undefined && '...'}
@@ -92,20 +92,28 @@ export default function PyraCoreStatus() {
                 )}
                 <div className="flex-grow" />
                 {pyraCorePid !== undefined && (
-                    <Button onClick={pyraCorePid === -1 ? startPyraCore : stopPyraCore}>
+                    <button
+                        onClick={pyraCorePid === -1 ? startPyraCore : stopPyraCore}
+                        className={
+                            'flex items-center justify-center w-12 h-10 rounded-r-lg ' +
+                            (pyraCorePid === -1
+                                ? 'bg-slate-200 hover:bg-slate-300 text-slate-700 hover:text-slate-950'
+                                : 'bg-green-400 hover:bg-green-500')
+                        }
+                    >
                         <IconPower size={18} />
-                    </Button>
+                    </button>
                 )}
             </div>
-            {coreState && centralConfig && (
+            {coreState && centralConfig && pyraCorePid !== undefined && pyraCorePid != -1 && (
                 <div
                     className={
-                        'flex flex-row items-center w-full p-3 text-sm text-green-900 border-y gap-x-2 px-4 h-14 ' +
+                        'flex flex-row items-center w-full rounded-lg p-3 text-sm gap-x-2 px-4 h-10 ' +
                         (coreState.measurements_should_be_running === null
-                            ? 'text-slate-950 bg-slate-300 border-slate-400'
+                            ? 'text-slate-400 bg-slate-100 border border-slate-200 '
                             : coreState.measurements_should_be_running
-                            ? 'text-green-950 bg-green-300 border-green-400'
-                            : 'text-yellow-950 bg-yellow-300 border-yellow-400')
+                            ? 'bg-green-300 text-green-950 border border-green-400'
+                            : 'text-slate-950 bg-slate-100 border border-slate-200 ')
                     }
                 >
                     {coreState.measurements_should_be_running ? (

@@ -40,17 +40,13 @@
             },
             "fs": {
                 "readFile": true,
-                "scope": [
-                    "$DOWNLOAD\\pyra\\**",
-                    "$DOCUMENT\\pyra\\**",
-                    "$DOCUMENT/work/esm/pyra/**"
-                ]
+                "scope": ["$DOWNLOAD/pyra/**", "$DOCUMENT/pyra/**", "$DOCUMENT/work/esm/pyra/**"]
             },
             "protocol": {
                 "asset": true,
                 "assetScope": [
-                    "$DOWNLOAD\\pyra\\**",
-                    "$DOCUMENT\\pyra\\**",
+                    "$DOWNLOAD/pyra/**",
+                    "$DOCUMENT/pyra/**",
                     "$DOCUMENT/work/esm/pyra/**"
                 ]
             }
