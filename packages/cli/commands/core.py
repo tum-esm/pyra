@@ -100,14 +100,20 @@ def _stop_pyra_core() -> None:
         exit(0)
 
     if config.tum_plc is not None:
-        try:
-            enclosure = modules.enclosure_control.EnclosureControl(config)
-            enclosure.force_cover_close()
-            enclosure.plc_interface.disconnect()
-            _print_green("Successfully closed cover")
-        except Exception as e:
-            _print_red(f"Failed to close cover: {e}")
-            exit(1)
+        current_cover_angle = interfaces.StateInterface.load_state(
+        ).plc_state.actors.current_angle
+        if current_cover_angle == 0:
+            _print_green("Cover is already closed")
+        else:
+            try:
+                click.echo("Closing cover")
+                enclosure = modules.enclosure_control.EnclosureControl(config)
+                enclosure.force_cover_close()
+                enclosure.plc_interface.disconnect()
+                _print_green("Successfully closed cover")
+            except Exception as e:
+                _print_red(f"Failed to close cover: {e}")
+                exit(1)
 
     try:
         tracking = modules.sun_tracking.SunTracking(config)
@@ -120,12 +126,16 @@ def _stop_pyra_core() -> None:
 
     try:
         for p in psutil.process_iter():
-            process_name = p.name()
-            if process_name in ["opus.exe", "OpusCore.exe"]:
-                exit_code = os.system(f"taskkill /f /im {process_name}")
-                assert (
-                    exit_code == 0
-                ), f'taskkill  of "{process_name}" ended with an exit_code of {exit_code}'
+            try:
+                if p.name() in ["opus.exe", "OpusCore.exe"]:
+                    p.kill()
+            except (
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+                psutil.NoSuchProcess,
+                IndexError,
+            ):
+                pass
         _print_green("Successfully closed OPUS")
     except Exception as e:
         _print_red(f"Failed to close OPUS: {e}")
