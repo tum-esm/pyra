@@ -60,6 +60,10 @@ export default function MeasurementDecision() {
             });
         }
     }
+    if (!centralConfig || !coreState) {
+        return <></>;
+    }
+
     function toggleManualMeasurementDecision() {
         if (centralConfig) {
             const newDecisionResult = !centralConfig.measurement_decision.manual_decision_result;
@@ -67,7 +71,7 @@ export default function MeasurementDecision() {
                 command: () =>
                     fetchUtils.backend.updateConfig({
                         measurement_decision: {
-                            manual_decision_result: !newDecisionResult,
+                            manual_decision_result: newDecisionResult,
                         },
                     }),
                 label: 'toggling manual measurement mode',
@@ -78,9 +82,6 @@ export default function MeasurementDecision() {
                 },
             });
         }
-    }
-    if (!centralConfig || !coreState) {
-        return <></>;
     }
 
     let automaticFilterSettingsConsidered: string[] = [];

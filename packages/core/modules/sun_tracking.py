@@ -186,7 +186,7 @@ class SunTracking:
         itself."""
 
         self.waiting_for_shutdown = True
-        with open(self.stop_file_path) as f:
+        with open(self.stop_file_path, "w") as f:
             f.write("")
 
     def remove_stop_file(self) -> None:

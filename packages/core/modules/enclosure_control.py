@@ -213,6 +213,7 @@ class EnclosureControl:
                 self.last_camera_power_up_time = None
                 self.plc_interface.set_power_camera(False)
                 logger.info("Powering down the camera.")
+                return
 
         if (self.last_camera_power_down_time
             is not None) and (self.last_camera_power_up_time is None):
@@ -221,6 +222,9 @@ class EnclosureControl:
                 self.last_camera_power_up_time = current_time
                 self.plc_interface.set_power_camera(True)
                 logger.info("Powering up the camera.")
+                return
+
+        logger.debug("No camera power cycle is due.")
 
     def move_cover(self, value: int) -> None:
         """Moves the cover attached on top of the enclosure. The cover is moved by a electrical

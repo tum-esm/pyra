@@ -100,6 +100,10 @@ class OpusMeasurement:
                 measurements_should_be_running = (
                     abs(current_cover_angle) % 360
                 ) > 30
+                if not measurements_should_be_running:
+                    logger.info(
+                        "Waiting with measurements until cover is open."
+                    )
 
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
@@ -110,6 +114,8 @@ class OpusMeasurement:
                 # flank change 1 -> 0: stop macro
                 logger.info("Stopping OPUS Macro.")
                 self.stop_macro()
+        else:
+            logger.debug("Nothing to do for OPUSMeasurement.")
 
         # save the automation status for the next run
         self.last_cycle_automation_status = measurements_should_be_running
