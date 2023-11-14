@@ -1,4 +1,10 @@
-import { IconRobot, IconToggleRight, IconWand } from '@tabler/icons-react';
+import {
+    IconPlayerPauseFilled,
+    IconPlayerPlayFilled,
+    IconRobot,
+    IconToggleRight,
+    IconWand,
+} from '@tabler/icons-react';
 import { Button } from '../ui/button';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 import { fetchUtils } from '../../utils';
@@ -124,22 +130,27 @@ export default function MeasurementDecision() {
                 onClick={() => setActiveMode('manual')}
             >
                 {activeMode === 'manual' && (
-                    <div>
-                        Current state:{' '}
-                        <strong>
-                            {centralConfig.measurement_decision.manual_decision_result
-                                ? 'measuring'
-                                : 'not measuring'}
-                        </strong>
+                    <div className="flex flex-row items-center w-full h-8">
+                        <div>
+                            Current state:{' '}
+                            <strong>
+                                {centralConfig.measurement_decision.manual_decision_result
+                                    ? 'measuring'
+                                    : 'not measuring'}
+                            </strong>
+                        </div>
+                        <div className="flex-grow" />
+                        <button
+                            className="flex items-center justify-center w-8 h-8 rounded-lg shadow text-slate-50 bg-slate-900 hover:bg-slate-800 hover:text-white"
+                            onClick={toggleManualMeasurementDecision}
+                        >
+                            {centralConfig.measurement_decision.manual_decision_result ? (
+                                <IconPlayerPauseFilled size={18} />
+                            ) : (
+                                <IconPlayerPlayFilled size={18} />
+                            )}
+                        </button>
                     </div>
-                )}
-                {activeMode === 'manual' && (
-                    <Button className="w-full" onClick={toggleManualMeasurementDecision}>
-                        {centralConfig.measurement_decision.manual_decision_result
-                            ? 'Stop'
-                            : 'Start'}{' '}
-                        Measurements
-                    </Button>
                 )}
             </ModePanel>
             <ModePanel
@@ -149,7 +160,7 @@ export default function MeasurementDecision() {
                 onClick={() => setActiveMode('cli')}
             >
                 {activeMode === 'cli' && (
-                    <>
+                    <div className="flex flex-row items-center w-full h-8">
                         <div>
                             Current state:{' '}
                             <strong>
@@ -158,7 +169,7 @@ export default function MeasurementDecision() {
                                     : 'not measuring'}
                             </strong>
                         </div>
-                    </>
+                    </div>
                 )}
             </ModePanel>
         </div>
