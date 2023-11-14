@@ -87,7 +87,11 @@ function ActivityPlot() {
                             {hoverLabel}
                         </div>
                     )}
-                    <div className={'w-full h-full border border-slate-200 rounded-lg'}>
+                    <div
+                        className={
+                            'w-full relative h-full border border-slate-200 rounded-lg overflow-hidden'
+                        }
+                    >
                         {range(0.25, 24, 0.25).map((h) => (
                             <div
                                 key={`thin-hour-line-${h}`}
