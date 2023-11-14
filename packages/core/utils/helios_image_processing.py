@@ -46,10 +46,8 @@ class HeliosImageProcessing:
         """
 
         y, x = np.indices(img_shape)
-        return np.ndarray(
-            (np.abs(np.hypot(center_x - x, center_y - y))
-             < radius).astype(np.uint8)
-        )
+        return np.array((np.abs(np.hypot(center_x - x, center_y - y))
+                         < radius).astype(np.uint8))
 
     @staticmethod
     def _moving_average(

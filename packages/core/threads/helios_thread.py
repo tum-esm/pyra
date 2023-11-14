@@ -135,7 +135,7 @@ class HeliosInterface:
                 if trow_away_white_images and np.mean(frame) > 240:
                     # image is mostly white
                     continue
-                return np.ndarray(frame)
+                return np.array(frame)
         raise CameraError("could not take image")
 
     def adjust_exposure(self) -> None:

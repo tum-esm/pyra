@@ -30,10 +30,10 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                 if (logLine.replace(' ', '').length > 0) {
                     // example log line:
                     // 2023-10-09 17:45:56.060208 UTC+2 - system-checks -
-                    if (logLine.match(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.*$/)) {
-                        if (logLine.split(' - ')[1].includes('upload')) {
+                    if (logLine.match(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.* - .* - .*/)) {
+                        if (logLine.split(' - ')[1].trim() === 'upload') {
                             currentCategory = 'upload';
-                        } else if (logLine.split(' - ')[1].includes('helios')) {
+                        } else if (logLine.split(' - ')[1].trim() === 'helios') {
                             currentCategory = 'helios';
                         } else {
                             currentCategory = 'main';
