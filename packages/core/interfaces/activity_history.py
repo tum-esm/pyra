@@ -93,11 +93,11 @@ class ActivityHistoryInterface:
         # do not downgrade a True to a False value
         # only upgrade a False to a True value
         if is_measuring is not None:
-            current_activity_datapoint.is_measuring &= is_measuring
+            current_activity_datapoint.is_measuring |= is_measuring
         if has_errors is not None:
-            current_activity_datapoint.has_errors &= has_errors
+            current_activity_datapoint.has_errors |= has_errors
         if is_uploading is not None:
-            current_activity_datapoint.is_uploading &= is_uploading
+            current_activity_datapoint.is_uploading |= is_uploading
         if camtracker_startups is not None:
             current_activity_datapoint.camtracker_startups += camtracker_startups
         if opus_startups is not None:
