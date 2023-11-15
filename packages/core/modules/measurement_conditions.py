@@ -69,14 +69,18 @@ class MeasurementConditions:
 
         # Selection and evaluation of the current set measurement mode
         measurements_should_be_running: bool
-        if decision.mode == "manual":
-            measurements_should_be_running = decision.manual_decision_result
-        elif decision.mode == "cli":
-            measurements_should_be_running = decision.cli_decision_result
+        if current_state.plc_state.state.rain == True:
+            logger.debug("not trying to measuring when PLC detected rain")
+            measurements_should_be_running = False
         else:
-            measurements_should_be_running = self._get_automatic_decision(
-                current_state
-            )
+            if decision.mode == "manual":
+                measurements_should_be_running = decision.manual_decision_result
+            elif decision.mode == "cli":
+                measurements_should_be_running = decision.cli_decision_result
+            else:
+                measurements_should_be_running = self._get_automatic_decision(
+                    current_state
+                )
 
         logger.info(
             f"Measurements should be running is set to: {measurements_should_be_running}."
