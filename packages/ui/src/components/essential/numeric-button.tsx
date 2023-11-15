@@ -25,10 +25,11 @@ export default function NumericButton(props: {
                 setValue={(v) => setValue(isNaN(parseInt(v)) ? 0 : parseInt(v))}
                 postfix={postfix}
                 disabled={props.disabled}
+                className="!h-8"
             />
             <Button
                 onClick={() => onClick(value)}
-                variant="gray"
+                variant="white"
                 className="flex-grow"
                 disabled={props.disabled}
                 spinner={props.spinner}

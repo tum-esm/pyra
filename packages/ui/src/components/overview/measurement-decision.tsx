@@ -116,7 +116,7 @@ export default function MeasurementDecision() {
     }
 
     return (
-        <div className="grid w-full grid-cols-3 gap-x-2">
+        <div className="grid w-full grid-cols-3 gap-x-1">
             <ModePanel
                 icon={<IconWand size={18} />}
                 label="Automatic"

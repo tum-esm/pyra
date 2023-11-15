@@ -3,6 +3,7 @@ export default function TextInput(props: {
     setValue(v: string): void;
     disabled?: boolean;
     postfix?: string | undefined;
+    className?: string;
 }) {
     return (
         <div
@@ -18,7 +19,8 @@ export default function TextInput(props: {
                     'shadow-sm rounded-lg border-slate-300 text-sm w-full ' +
                     'focus:ring-blue-100 focus:border-blue-300 focus:ring ' +
                     'flex-grow h-9 ' +
-                    (props.disabled ? 'cursor-not-allowed bg-gray-100 ' : ' ')
+                    (props.disabled ? 'cursor-not-allowed bg-gray-100 ' : ' ') +
+                    (props.className ? props.className : '')
                 }
                 disabled={props.disabled}
             />

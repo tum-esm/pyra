@@ -42,7 +42,7 @@ function VariableBlock(props: {
             </div>
             <div className="flex-grow py-3 pl-4 pr-3 bg-slate-50 flex-col-left gap-y-1">
                 {props.rows.map((r, i) => (
-                    <div className="w-full flex-row-left h-7" key={i}>
+                    <div className="w-full h-8 flex-row-left" key={i}>
                         <div className="flex-row-center whitespace-nowrap">
                             <div className="w-40">{r.variable.key}:</div>{' '}
                             <span className="w-12 font-semibold text-right">
@@ -54,7 +54,7 @@ function VariableBlock(props: {
                                 <div className="flex-grow" />
                                 {r.action.variant === undefined && (
                                     <essentialComponents.Button
-                                        variant="gray"
+                                        variant="white"
                                         onClick={r.action.callback}
                                         key={r.action.label}
                                         className="w-52"
@@ -234,7 +234,7 @@ export default function ControlTab() {
 
     return (
         <div className={'w-full relative flex-col-left'}>
-            <div className="w-full px-6 py-4 bg-white border-b flex-row-left gap-x-2 border-slate-300">
+            <div className="w-full px-4 py-4 bg-white border-b flex-row-left gap-x-2 border-slate-300">
                 <essentialComponents.Toggle
                     value={plcIsControlledByUser ? 'user controlled' : 'automatic'}
                     values={['user controlled', 'automatic']}

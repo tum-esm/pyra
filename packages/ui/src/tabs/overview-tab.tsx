@@ -19,7 +19,7 @@ export default function OverviewTab() {
 
     return (
         <div className={'flex-col-center w-full pb-4 relative overflow-x-hidden bg-slate-50'}>
-            <div className="flex flex-col w-full p-4 text-sm gap-y-2">
+            <div className="flex flex-col w-full p-4 text-sm gap-y-1">
                 <overviewComponents.PyraCoreStatus />
                 <overviewComponents.MeasurementDecision />
             </div>
