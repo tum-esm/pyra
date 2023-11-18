@@ -4,6 +4,7 @@ import os
 import time
 import datetime
 import psutil
+import tum_esm_utils
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="sun-tracking")
@@ -46,7 +47,7 @@ class SunTracking:
             logger.info("Running SunTracking")
 
         # check for automation state flank changes
-        camtracker_is_running = self.camtracker_is_running()
+        camtracker_is_running = SunTracking.camtracker_is_running()
         measurements_should_be_running = (
             interfaces.StateInterface.load_state().
             measurements_should_be_running
@@ -125,7 +126,8 @@ class SunTracking:
             logger.info("Stopping CamTracker because it is in an invalid state")
             self.stop_sun_tracking_automation()
 
-    def camtracker_is_running(self) -> bool:
+    @staticmethod
+    def camtracker_is_running() -> bool:
         """Checks if CamTracker is already running by searching for processes with
         the executable `opus.exe` or `OpusCore.exe`
 
@@ -303,15 +305,23 @@ class SunTracking:
         back to parking position and shuts dosn CamTracker."""
 
         assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        assert not SunTracking.camtracker_is_running(
+        ), "this test cannot be run if CamTracker is already running"
 
-        if not self.camtracker_is_running():
-            self.start_sun_tracking_automation()
-            for _ in range(10):
-                if self.camtracker_is_running():
-                    break
-                time.sleep(6)
+        self.start_sun_tracking_automation()
 
-        assert self.camtracker_is_running()
+        tum_esm_utils.testing.wait_for_condition(
+            is_successful=SunTracking.camtracker_is_running,
+            timeout_message="CamTracker did not start up within 20 seconds",
+            timeout_seconds=20,
+            check_interval_seconds=3,
+        )
+
         self.stop_sun_tracking_automation()
-        time.sleep(10)
-        assert not self.camtracker_is_running()
+
+        tum_esm_utils.testing.wait_for_condition(
+            is_successful=lambda: not SunTracking.camtracker_is_running(),
+            timeout_message="CamTracker did not close up within 10 seconds",
+            timeout_seconds=10,
+            check_interval_seconds=2,
+        )
