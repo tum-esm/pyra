@@ -36,6 +36,8 @@ export default function ConfigSectionOpus() {
                 <p>
                     This test will start up OPUS, run a macro, stop the macro and close OPUS again
                     using the values specified below.
+                    <br />
+                    <strong className="text-slate-600">This can take up to 80 seconds</strong>.
                 </p>
             </div>
             <configurationComponents.ConfigElementLine />

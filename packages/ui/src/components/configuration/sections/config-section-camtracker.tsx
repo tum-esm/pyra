@@ -36,6 +36,8 @@ export default function ConfigSectionCamtracker() {
                 <p>
                     This test will start up CamTracker, check if it is running and close it again
                     using the values specified below.
+                    <br />
+                    <strong className="text-slate-600">This can take up to 90 seconds</strong>.
                 </p>
             </div>
             <configurationComponents.ConfigElementLine />
