@@ -161,9 +161,7 @@ class OpusMeasurement:
         if not self.__test_dde_connection():
             return
         answer = self.conversation.Request("LOAD_EXPERIMENT " + experiment_path)
-        logger.info(
-            f"Loaded new OPUS experiment: {experiment_path}, DDE answer: {answer}"
-        )
+        logger.info(f"Loaded new OPUS experiment: {experiment_path}")
         self.current_experiment = experiment_path
 
     def start_macro(self) -> None:
@@ -179,7 +177,7 @@ class OpusMeasurement:
         # load macro
         macro_path = self.config.opus.macro_path
         answer = self.conversation.Request(f"RUN_MACRO {macro_path}")
-        logger.info(f"Started OPUS macro: {macro_path}, DDE answer: {answer}")
+        logger.info(f"Started OPUS macro: {macro_path}")
 
     def stop_macro(self) -> None:
         """Stops the currently running macro in OPUS over DDE
@@ -195,7 +193,7 @@ class OpusMeasurement:
         # stop macro
         macro_path = os.path.basename(self.config.opus.macro_path.root)
         answer = self.conversation.Request("KILL_MACRO " + macro_path)
-        logger.info(f"Stopped OPUS macro: {macro_path}, DDE answer: {answer}")
+        logger.info(f"Stopped OPUS macro: {macro_path}")
 
     def close_opus(self) -> None:
         """Closes OPUS via DDE call."""
@@ -208,7 +206,7 @@ class OpusMeasurement:
             return
 
         answer = self.conversation.Request("CLOSE_OPUS")
-        logger.info(f"Stopped OPUS.exe, DDE answer: {answer}")
+        logger.info(f"Stopped OPUS.exe")
 
     def __shutdown_dde_server(self) -> None:
         """Note the underlying DDE object (ie, Server, Topics
