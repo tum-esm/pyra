@@ -155,9 +155,9 @@ class SunTracking:
 
         # works only >= python3.10
         # without cwd CT will have trouble loading its internal database)
-        assert (sys.version_info.major == 3) and (
-            sys.version_info.minor >= 10
-        ), "This only works with Python 3.10 or higher"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        assert sys.version_info.major >= 3 and sys.version_info.minor >= 10, "this function requires python >= 3.10"
+
         try:
             os.startfile(  # type: ignore
                 os.path.basename(self.config.camtracker.executable_path.root),
@@ -301,6 +301,9 @@ class SunTracking:
         """Function to test the functonality of this module. Starts up
         CamTracker to initialize the tracking mirrors. Then moves mirrors
         back to parking position and shuts dosn CamTracker."""
+
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+
         if not self.camtracker_is_running():
             self.start_sun_tracking_automation()
             for _ in range(10):
