@@ -31,6 +31,16 @@ def _test_opus() -> None:
     _print_green("Successfully tested opus connection.")
 
 
+@test_command_group.command(name="camtracker")
+def _test_camtracker() -> None:
+    """Start CamTracker, check if it is running, stop CamTracker."""
+    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    logger.info('running command "test camtracker"')
+    config = types.Config.load()
+    modules.sun_tracking.SunTracking(config).test_setup()
+    _print_green("Successfully tested CamTracker connection.")
+
+
 @test_command_group.command(name="email")
 def _test_emailing() -> None:
     """Send a test email."""
