@@ -41,9 +41,9 @@ class OpusMeasurement:
         import dde  # type: ignore
 
         # note: dde servers talk to dde servers
-        self.server = dde.CreateServer()
+        self.server = dde.CreateServer()  # type: ignore
         self.server.Create("Client")
-        self.conversation = dde.CreateConversation(self.server)
+        self.conversation = dde.CreateConversation(self.server)  # type: ignore
         self.last_cycle_automation_status = 0
         self.initialized = True
 
@@ -139,9 +139,11 @@ class OpusMeasurement:
             # destroy socket
             self.__destroy_dde_server()
             # reconnect socket
-            self.server = dde.CreateServer()
+            self.server = dde.CreateServer()  # type: ignore
             self.server.Create("Client")
-            self.conversation = dde.CreateConversation(self.server)
+            self.conversation = dde.CreateConversation(
+                self.server
+            )  # type: ignore
             self.__connect_to_dde_opus()
 
             # retest DDE connection
