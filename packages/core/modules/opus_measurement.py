@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import psutil
+import tum_esm_utils
 from packages.core import types, utils, interfaces
 
 # these imports are provided by pywin32
@@ -331,18 +332,23 @@ class OpusMeasurement:
         up OPUS, loads an experiment, starts a macro and stops it
         after 10s."""
 
-        opus_is_running = self.opus_is_running()
-        if not opus_is_running:
+        if not self.opus_is_running():
             self.start_opus()
-            try_count = 0
-            while try_count < 10:
-                if self.opus_is_running():
-                    break
-                try_count += 1
-                time.sleep(6)
 
-        assert self.opus_is_running()
-        assert self.__test_dde_connection()
+        tum_esm_utils.testing.wait_for_condition(
+            is_successful=lambda: self.opus_is_running(),
+            timeout_message="OPUS.exe did not start within 30 seconds.",
+            timeout_seconds=30,
+            check_interval_seconds=4,
+        )
+
+        tum_esm_utils.testing.wait_for_condition(
+            is_successful=lambda: self.__test_dde_connection(),
+            timeout_message=
+            "DDE connection could not be established within 30 seconds.",
+            timeout_seconds=30,
+            check_interval_seconds=4,
+        )
 
         self.load_experiment()
         time.sleep(2)
