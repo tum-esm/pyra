@@ -254,7 +254,8 @@ class OpusMeasurement:
         except AttributeError:
             pass
 
-    def opus_is_running(self) -> bool:
+    @staticmethod
+    def opus_is_running() -> bool:
         """Checks if OPUS is already running by searching for processes with
         the executable `opus.exe` or `OpusCore.exe`
 
@@ -265,6 +266,23 @@ class OpusMeasurement:
                 return True
 
         return False
+
+    @staticmethod
+    def force_kill_opus() -> None:
+        """Terminate any "opus.exe" or "OpusCore.exe" processes using
+        psutil."""
+
+        for p in psutil.process_iter():
+            try:
+                if p.name() in ["opus.exe", "OpusCore.exe"]:
+                    p.kill()
+            except (
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+                psutil.NoSuchProcess,
+                IndexError,
+            ):
+                pass
 
     def sun_angle_is_too_low(self) -> bool:
         """Checks defined sun angle in config. Closes OPUS at
@@ -282,7 +300,7 @@ class OpusMeasurement:
 
         if self.sun_angle_is_too_low():
             # Close OPUS if running
-            if self.opus_is_running():
+            if OpusMeasurement.opus_is_running():
                 logger.debug("Requesting OPUS night shutdown.")
                 # CLOSE_OPUS needs all macros closed to work. stop_macro() is
                 # called just in case
@@ -292,7 +310,7 @@ class OpusMeasurement:
 
         else:
             # start OPUS if not currently running
-            if not self.opus_is_running():
+            if not OpusMeasurement.opus_is_running():
                 logger.info("Start OPUS.")
                 self.start_opus()
                 self.wait_for_opus_startup()
@@ -306,7 +324,7 @@ class OpusMeasurement:
         after a defined time."""
 
         tum_esm_utils.testing.wait_for_condition(
-            is_successful=lambda: self.opus_is_running(),
+            is_successful=OpusMeasurement.opus_is_running,
             timeout_message="OPUS.exe did not start within 30 seconds.",
             timeout_seconds=30,
             check_interval_seconds=4,
@@ -338,10 +356,10 @@ class OpusMeasurement:
         after 10s."""
 
         assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        assert not OpusMeasurement.opus_is_running(
+        ), "this test cannot be run if OPUS is already running"
 
-        if not self.opus_is_running():
-            self.start_opus()
-
+        self.start_opus()
         self.wait_for_opus_startup()
 
         self.load_experiment()
@@ -350,7 +368,11 @@ class OpusMeasurement:
         self.start_macro()
         time.sleep(10)
 
-        # TODO: we could use "MACRO_RESULTS <MacroID>" to test
-        #       whether the macro is actually running
+        # TODO: we could use "MACRO_RESULTS <MacroID>" to test whether
+        #       the macro is actually running once we figure out
+        #       https://github.com/tum-esm/pyra/issues/124
 
         self.stop_macro()
+        time.sleep(2)
+
+        self.close_opus()
