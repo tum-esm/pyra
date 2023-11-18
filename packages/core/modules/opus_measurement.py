@@ -116,7 +116,7 @@ class OpusMeasurement:
 
     def __connect_to_dde_opus(self) -> None:
         """Connects to the OPUS server over DDE."""
-        assert sys.platform == "win32"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
         try:
             self.conversation.ConnectTo("OPUS", "OPUS/System")
             logger.info("Connected to OPUS DDE Server.")
@@ -127,7 +127,7 @@ class OpusMeasurement:
         """Tests the DDE connection. Tries to reinitialize
         the DDE socket if connection test fails."""
 
-        assert sys.platform == "win32"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
         import dde  # type: ignore
 
         # conversation.Connected() returns 1 <class 'int'> if connected
@@ -150,20 +150,22 @@ class OpusMeasurement:
     def load_experiment(self) -> None:
         """Loads a new experiment in OPUS over DDE connection."""
 
-        assert sys.platform == "win32"
-
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
         self.__connect_to_dde_opus()
         experiment_path = self.config.opus.experiment_path.root
 
         if not self.__test_dde_connection():
             return
         answer = self.conversation.Request("LOAD_EXPERIMENT " + experiment_path)
-        logger.info(f"Loaded new OPUS experiment: {experiment_path}")
+        logger.info(
+            f"Loaded new OPUS experiment: {experiment_path}, DDE answer: {answer}"
+        )
         self.current_experiment = experiment_path
 
     def start_macro(self) -> None:
         """Starts a new macro in OPUS over DDE connection."""
-        assert sys.platform == "win32"
+
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
 
         # perform connect
         self.__connect_to_dde_opus()
@@ -173,13 +175,13 @@ class OpusMeasurement:
         # load macro
         macro_path = self.config.opus.macro_path
         answer = self.conversation.Request(f"RUN_MACRO {macro_path}")
-        logger.info(f"Started OPUS macro: {macro_path}")
+        logger.info(f"Started OPUS macro: {macro_path}, DDE answer: {answer}")
 
     def stop_macro(self) -> None:
         """Stops the currently running macro in OPUS over DDE
         connection."""
 
-        assert sys.platform == "win32"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
 
         # perform connect
         self.__connect_to_dde_opus()
@@ -189,30 +191,32 @@ class OpusMeasurement:
         # stop macro
         macro_path = os.path.basename(self.config.opus.macro_path.root)
         answer = self.conversation.Request("KILL_MACRO " + macro_path)
-        logger.info(f"Stopped OPUS macro: {macro_path}")
+        logger.info(f"Stopped OPUS macro: {macro_path}, DDE answer: {answer}")
 
     def close_opus(self) -> None:
         """Closes OPUS via DDE call."""
 
-        assert sys.platform == "win32"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
 
+        # perform connect
         self.__connect_to_dde_opus()
         if not self.__test_dde_connection():
             return
+
         answer = self.conversation.Request("CLOSE_OPUS")
-        logger.info("Stopped OPUS.exe")
+        logger.info(f"Stopped OPUS.exe, DDE answer: {answer}")
 
     def __shutdown_dde_server(self) -> None:
         """Note the underlying DDE object (ie, Server, Topics
         and Items) are not cleaned up by this call."""
 
-        assert sys.platform == "win32"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
         self.server.Shutdown()
 
     def __destroy_dde_server(self) -> None:
         """Destroys the underlying C++ object."""
 
-        assert sys.platform == "win32"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
         self.server.Destroy()
 
     def __is_em27_responsive(self) -> bool:
@@ -229,14 +233,15 @@ class OpusMeasurement:
         a user click on the executable."""
 
         interfaces.ActivityHistoryInterface.add_datapoint(opus_startups=1)
-
         opus_path = self.config.opus.executable_path.root
         opus_username = self.config.opus.username
         opus_password = self.config.opus.password
 
         # works only >= python3.10
         # without cwd CT will have trouble loading its internal database)
-        assert sys.platform == "win32"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        assert sys.version_info.major >= 3 and sys.version_info.minor >= 10, "this function requires python >= 3.10"
+
         try:
             os.startfile(  # type: ignore
                 os.path.basename(opus_path),
@@ -325,6 +330,8 @@ class OpusMeasurement:
         """Function to test the functonality of this module. Starts
         up OPUS, loads an experiment, starts a macro and stops it
         after 10s."""
+
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
 
         if not self.opus_is_running():
             self.start_opus()
