@@ -17,7 +17,7 @@ export default function ConfigSectionCamtracker() {
             toast.error('Please save your configuration before testing CamTracker connection.');
         } else {
             runPromisingCommand({
-                command: fetchUtils.backend.testOpus,
+                command: fetchUtils.backend.testCamTracker,
                 label: 'testing CamTracker connection',
                 successLabel: 'successfully connected to CamTracker',
             });
