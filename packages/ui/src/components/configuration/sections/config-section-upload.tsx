@@ -4,20 +4,25 @@ import fetchUtils from '../../../utils/fetch-utils';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 import { Button } from '../../ui/button';
 import { Fragment } from 'react';
+import toast from 'react-hot-toast';
 
 export default function ConfigSectionUpload() {
-    const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
+    const { centralConfig, localConfig, setLocalConfigItem, configIsDiffering } = useConfigStore();
     const { runPromisingCommand } = fetchUtils.useCommand();
 
     const centralSectionConfig = centralConfig?.upload;
     const localSectionConfig = localConfig?.upload;
 
     function test() {
-        runPromisingCommand({
-            command: fetchUtils.backend.testUpload,
-            label: 'testing connection to upload server',
-            successLabel: 'successfully connected to upload server',
-        });
+        if (configIsDiffering()) {
+            toast.error('Please save your configuration before testing the upload.');
+        } else {
+            runPromisingCommand({
+                command: fetchUtils.backend.testUpload,
+                label: 'testing connection to upload server',
+                successLabel: 'successfully connected to upload server',
+            });
+        }
     }
 
     function addDefault() {

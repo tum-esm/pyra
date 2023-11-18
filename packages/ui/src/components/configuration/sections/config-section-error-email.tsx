@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { configurationComponents } from '../..';
 import { fetchUtils } from '../../../utils';
 import useCommand from '../../../utils/fetch-utils/use-command';
@@ -5,18 +6,22 @@ import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 import { Button } from '../../ui/button';
 
 export default function ConfigSectionErrorEmail() {
-    const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
+    const { centralConfig, localConfig, setLocalConfigItem, configIsDiffering } = useConfigStore();
     const { runPromisingCommand } = useCommand();
 
     const centralSectionConfig = centralConfig?.error_email;
     const localSectionConfig = localConfig?.error_email;
 
     function test() {
-        runPromisingCommand({
-            command: fetchUtils.backend.testEmail,
-            label: 'sending test email',
-            successLabel: 'successfully sent test email',
-        });
+        if (configIsDiffering()) {
+            toast.error('Please save your configuration before sending the test email.');
+        } else {
+            runPromisingCommand({
+                command: fetchUtils.backend.testEmail,
+                label: 'sending test email',
+                successLabel: 'successfully sent test email',
+            });
+        }
     }
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
