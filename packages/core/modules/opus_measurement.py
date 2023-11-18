@@ -262,8 +262,16 @@ class OpusMeasurement:
         Returns: `True` if Application is currently running and `False` if not."""
 
         for p in psutil.process_iter():
-            if p.name() in ["opus.exe", "OpusCore.exe"]:
-                return True
+            try:
+                if p.name() in ["opus.exe", "OpusCore.exe"]:
+                    return True
+            except (
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+                psutil.NoSuchProcess,
+                IndexError,
+            ):
+                pass
 
         return False
 

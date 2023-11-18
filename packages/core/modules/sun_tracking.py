@@ -134,9 +134,17 @@ class SunTracking:
         Returns: `True` if Application is currently running and `False` if not."""
 
         for p in psutil.process_iter():
-            name = p.name().lower()
-            if name.startswith("camtracker") and name.endswith(".exe"):
-                return True
+            try:
+                name = p.name().lower()
+                if name.startswith("camtracker") and name.endswith(".exe"):
+                    return True
+            except (
+                psutil.AccessDenied,
+                psutil.ZombieProcess,
+                psutil.NoSuchProcess,
+                IndexError,
+            ):
+                pass
 
         return False
 
@@ -321,7 +329,7 @@ class SunTracking:
 
         tum_esm_utils.testing.wait_for_condition(
             is_successful=lambda: not SunTracking.camtracker_is_running(),
-            timeout_message="CamTracker did not close within 30 seconds",
+            timeout_message="CamTracker did not close within 60 seconds",
             timeout_seconds=60,
             check_interval_seconds=3,
         )
