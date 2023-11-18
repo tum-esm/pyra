@@ -1,17 +1,44 @@
+import toast from 'react-hot-toast';
 import { configurationComponents } from '../..';
+import { fetchUtils } from '../../../utils';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
+import useCommand from '../../../utils/fetch-utils/use-command';
+import { Button } from '../../ui/button';
 
 export default function ConfigSectionCamtracker() {
-    const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
+    const { centralConfig, localConfig, setLocalConfigItem, configIsDiffering } = useConfigStore();
+    const { runPromisingCommand } = useCommand();
 
     const centralSectionConfig = centralConfig?.camtracker;
     const localSectionConfig = localConfig?.camtracker;
+
+    function test() {
+        if (configIsDiffering()) {
+            toast.error('Please save your configuration before testing CamTracker connection.');
+        } else {
+            runPromisingCommand({
+                command: fetchUtils.backend.testOpus,
+                label: 'testing CamTracker connection',
+                successLabel: 'successfully connected to CamTracker',
+            });
+        }
+    }
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
         return <></>;
     }
     return (
         <>
+            <div>
+                <Button onClick={test}>test CamTracker connection</Button>
+            </div>
+            <div className="flex-shrink-0 w-full mt-1 text-xs text-slate-500 flex-row-left gap-x-1">
+                <p>
+                    This test will start up CamTracker, check if it is running and close it again
+                    using the values specified below.
+                </p>
+            </div>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="Config Path"
                 value={localSectionConfig.config_path}

@@ -51,6 +51,9 @@ const backend = {
     testOpus: async (): Promise<ChildProcess> => {
         return await callCLI(['test', 'opus']);
     },
+    testCamTracker: async (): Promise<ChildProcess> => {
+        return await callCLI(['test', 'camtracker']);
+    },
     testEmail: async (): Promise<ChildProcess> => {
         return await callCLI(['test', 'email']);
     },
