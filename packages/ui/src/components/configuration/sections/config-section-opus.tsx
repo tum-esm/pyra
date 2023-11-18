@@ -1,17 +1,44 @@
+import { toast } from 'react-hot-toast';
 import { configurationComponents } from '../..';
+import { fetchUtils } from '../../../utils';
+import useCommand from '../../../utils/fetch-utils/use-command';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
+import { Button } from '../../ui/button';
 
 export default function ConfigSectionOpus() {
-    const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
+    const { centralConfig, localConfig, setLocalConfigItem, configIsDiffering } = useConfigStore();
+    const { runPromisingCommand } = useCommand();
 
     const centralSectionConfig = centralConfig?.opus;
     const localSectionConfig = localConfig?.opus;
+
+    function test() {
+        if (configIsDiffering()) {
+            toast.error('Please save your configuration before testing OPUS connection.');
+        } else {
+            runPromisingCommand({
+                command: fetchUtils.backend.testOpus,
+                label: 'testing OPUS connection',
+                successLabel: 'successfully connected to OPUS',
+            });
+        }
+    }
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
         return <></>;
     }
     return (
         <>
+            <div>
+                <Button onClick={test}>test OPUS connection</Button>
+            </div>
+            <div className="flex-shrink-0 w-full mt-1 text-xs text-slate-500 flex-row-left gap-x-1">
+                <p>
+                    This test will start up OPUS, run a macro, stop the macro and close OPUS again
+                    using the values specified below.
+                </p>
+            </div>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
                 title="EM27 IP"
                 value={localSectionConfig.em27_ip}

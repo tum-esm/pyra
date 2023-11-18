@@ -48,6 +48,9 @@ const backend = {
     writeToPLC: async (command: string[]): Promise<ChildProcess> => {
         return await callCLI(['plc', ...command]);
     },
+    testOpus: async (): Promise<ChildProcess> => {
+        return await callCLI(['test', 'opus']);
+    },
     testEmail: async (): Promise<ChildProcess> => {
         return await callCLI(['test', 'email']);
     },
