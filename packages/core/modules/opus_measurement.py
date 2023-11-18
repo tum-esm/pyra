@@ -1,17 +1,9 @@
-from typing import Any
 import os
 import sys
 import time
 import psutil
 import tum_esm_utils
 from packages.core import types, utils, interfaces
-
-# these imports are provided by pywin32
-_win32ui: Any = None
-_dde: Any = None
-if sys.platform == "win32":
-    import win32ui as _win32ui  # type: ignore
-    import dde as _dde  # type: ignore
 
 logger = utils.Logger(origin="opus-measurement")
 
@@ -45,12 +37,13 @@ class OpusMeasurement:
     def __initialize(self) -> None:
         """Initialize the DDE connection and sets up the conversaton."""
 
-        assert sys.platform == "win32"
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        import dde  # type: ignore
 
         # note: dde servers talk to dde servers
-        self.server = _dde.CreateServer()
+        self.server = dde.CreateServer()
         self.server.Create("Client")
-        self.conversation = _dde.CreateConversation(self.server)
+        self.conversation = dde.CreateConversation(self.server)
         self.last_cycle_automation_status = 0
         self.initialized = True
 
@@ -135,6 +128,7 @@ class OpusMeasurement:
         the DDE socket if connection test fails."""
 
         assert sys.platform == "win32"
+        import dde  # type: ignore
 
         # conversation.Connected() returns 1 <class 'int'> if connected
         if self.conversation.Connected() == 1:
@@ -145,9 +139,9 @@ class OpusMeasurement:
             # destroy socket
             self.__destroy_dde_server()
             # reconnect socket
-            self.server = _dde.CreateServer()
+            self.server = dde.CreateServer()
             self.server.Create("Client")
-            self.conversation = _dde.CreateConversation(self.server)
+            self.conversation = dde.CreateConversation(self.server)
             self.__connect_to_dde_opus()
 
             # retest DDE connection
