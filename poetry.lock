@@ -1367,6 +1367,17 @@ files = [
 ]
 
 [[package]]
+name = "types-pywin32"
+version = "306.0.0.6"
+description = "Typing stubs for pywin32"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "types-pywin32-306.0.0.6.tar.gz", hash = "sha256:064fe653ccb0dfa55e8ba2ccb2912209de594343e2d5264f1db494c885ebbaf3"},
+    {file = "types_pywin32-306.0.0.6-py3-none-any.whl", hash = "sha256:9b8a974973d7a8fd40ed77e39c559a03b67e71473de17caa07ed9e2f7867c969"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.8.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -1506,4 +1517,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.*"
-content-hash = "ae84dcf288fb9ceeb75ed2287db1fba8f6754c3224fa54fdfe3f6e9d0e9eb297"
+content-hash = "e33daa4c3716238c58634ad37a0ae37a4173b509c49c5dbce4b6ffce4ac9716f"
