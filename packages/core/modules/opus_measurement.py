@@ -303,16 +303,20 @@ class OpusMeasurement:
         """Checks for OPUS to be running. Breaks out of the loop
         after a defined time."""
 
-        start_time = time.time()
-        while True:
-            # brakes when OPUS is up and running
-            if self.opus_is_running():
-                break
-            time.sleep(1)
+        tum_esm_utils.testing.wait_for_condition(
+            is_successful=lambda: self.opus_is_running(),
+            timeout_message="OPUS.exe did not start within 30 seconds.",
+            timeout_seconds=30,
+            check_interval_seconds=4,
+        )
 
-            # breaks after 60s of waiting
-            if time.time() - start_time > 60:
-                break
+        tum_esm_utils.testing.wait_for_condition(
+            is_successful=lambda: self.__test_dde_connection(),
+            timeout_message=
+            "DDE connection could not be established within 30 seconds.",
+            timeout_seconds=30,
+            check_interval_seconds=4,
+        )
 
     def check_for_experiment_change(self) -> None:
         """Compares the experiment in the config with the current
@@ -336,20 +340,7 @@ class OpusMeasurement:
         if not self.opus_is_running():
             self.start_opus()
 
-        tum_esm_utils.testing.wait_for_condition(
-            is_successful=lambda: self.opus_is_running(),
-            timeout_message="OPUS.exe did not start within 30 seconds.",
-            timeout_seconds=30,
-            check_interval_seconds=4,
-        )
-
-        tum_esm_utils.testing.wait_for_condition(
-            is_successful=lambda: self.__test_dde_connection(),
-            timeout_message=
-            "DDE connection could not be established within 30 seconds.",
-            timeout_seconds=30,
-            check_interval_seconds=4,
-        )
+        self.wait_for_opus_startup()
 
         self.load_experiment()
         time.sleep(2)
