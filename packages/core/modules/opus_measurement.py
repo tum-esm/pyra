@@ -38,6 +38,7 @@ class OpusMeasurement:
         """Initialize the DDE connection and sets up the conversaton."""
 
         assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        import win32ui  # type: ignore
         import dde  # type: ignore
 
         # note: dde servers talk to dde servers
@@ -128,6 +129,7 @@ class OpusMeasurement:
         the DDE socket if connection test fails."""
 
         assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        import win32ui  # type: ignore
         import dde  # type: ignore
 
         # conversation.Connected() returns 1 <class 'int'> if connected
@@ -349,5 +351,8 @@ class OpusMeasurement:
 
         self.start_macro()
         time.sleep(10)
+
+        # TODO: we could use "MACRO_RESULTS <MacroID>" to test
+        #       whether the macro is actually running
 
         self.stop_macro()
