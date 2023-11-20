@@ -252,13 +252,13 @@ files = [
 
 [[package]]
 name = "circadian-scp-upload"
-version = "0.4.1"
+version = "0.4.2"
 description = "Resumable, interruptible, SCP upload client for any files or directories generated day by day"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "circadian_scp_upload-0.4.1-py3-none-any.whl", hash = "sha256:ec1f6e517a1a41621d5a43998f9adbd9b1e3435ade6104e105e356b68045c7c1"},
-    {file = "circadian_scp_upload-0.4.1.tar.gz", hash = "sha256:2aaf9abe513c92f40fde15eae99bee38cd31d3c268f08a544b214fbffef69ead"},
+    {file = "circadian_scp_upload-0.4.2-py3-none-any.whl", hash = "sha256:fde23bbbd1212cc2149912ab388a34e40dfaedb88fce3a6ae3cbdd1072c3bb1a"},
+    {file = "circadian_scp_upload-0.4.2.tar.gz", hash = "sha256:57b5e374b1ac862364bde18794ce3e58f91aa174f0f425ec64e00127a2273caa"},
 ]
 
 [package.dependencies]
@@ -1125,6 +1125,7 @@ files = [
     {file = "python_snap7-1.3-py3-none-macosx_10_9_universal2.whl", hash = "sha256:c33ab26d7617ed527eaebdaf098f6947e70bb9338ada532db28397837a631831"},
     {file = "python_snap7-1.3-py3-none-manylinux1_x86_64.whl", hash = "sha256:441d162f9dc08ab6790f1bd4e1940ca2fe8c0d9bdd7dda0ba4a4e7738dab82c8"},
     {file = "python_snap7-1.3-py3-none-manylinux2014_aarch64.whl", hash = "sha256:f8bb72cf387b1af8e1e1b4bbbabf086ca7694c6024129c7a52054e3913f40ad6"},
+    {file = "python_snap7-1.3-py3-none-manylinux_2_24_armv7l.whl", hash = "sha256:5a7aaff9caceee34cfc3d0867d734990693430c353d56de08f7baaa05e7d0265"},
     {file = "python_snap7-1.3-py3-none-win_amd64.whl", hash = "sha256:6eba58676033204e36e3ff957e3823c3076a20544f501a731b2ba62d96139cc6"},
 ]
 
@@ -1517,4 +1518,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.*"
-content-hash = "3a7a504945d49ac9e2991887f9a69a9d9132cb23b7919f0a528ce11d1f1afe1d"
+content-hash = "9b4747ab584fe281dac574d560ad5fe4afaebbb767210f4c1eabe465ac28b0b8"
