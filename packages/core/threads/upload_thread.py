@@ -103,6 +103,9 @@ class UploadThread(AbstractThread):
 
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
+                logger.info(
+                    f"sleeping 10 minutes until looking for new files/directories"
+                )
                 for _ in range(15 * 4):
                     if upload_should_abort():
                         logger.info("stopping upload thread")

@@ -252,13 +252,13 @@ files = [
 
 [[package]]
 name = "circadian-scp-upload"
-version = "0.4.0"
+version = "0.4.1"
 description = "Resumable, interruptible, SCP upload client for any files or directories generated day by day"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "circadian_scp_upload-0.4.0-py3-none-any.whl", hash = "sha256:de713e55b372b2cc06f54c4cdc970b820b991900ab7c31b1bc853d56f4425890"},
-    {file = "circadian_scp_upload-0.4.0.tar.gz", hash = "sha256:65fd1e67fe11ba42cd1ce993eb01965d83e0bac515278d43792ca33df1bb2b34"},
+    {file = "circadian_scp_upload-0.4.1-py3-none-any.whl", hash = "sha256:ec1f6e517a1a41621d5a43998f9adbd9b1e3435ade6104e105e356b68045c7c1"},
+    {file = "circadian_scp_upload-0.4.1.tar.gz", hash = "sha256:2aaf9abe513c92f40fde15eae99bee38cd31d3c268f08a544b214fbffef69ead"},
 ]
 
 [package.dependencies]
@@ -1517,4 +1517,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.*"
-content-hash = "4f8d567aa9aa7803bf4f3b729d0f56cddaab85909ca632dd5d9b2dca5cb541d6"
+content-hash = "3a7a504945d49ac9e2991887f9a69a9d9132cb23b7919f0a528ce11d1f1afe1d"
