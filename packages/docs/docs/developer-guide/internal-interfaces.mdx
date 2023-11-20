@@ -8,44 +8,11 @@ hide_table_of_contents: true
 
 ## `config.json`
 
-The config file under `config/config.json` contains all parameters to tweak Pyra's operation. Schema: [/docs/api-reference/core/types/config#class-configdict](/docs/api-reference/core/types/config#class-configdict).
+The config file under `config/config.json` contains all parameters to tweak Pyra's operation. Schema: [/packages/core/types/config.py](https://github.com/tum-esm/pyra/blob/main/packages/core/types/config.py).
 
-In addition to this schema, there are value rules that are validated when parsing the config object:
+## `state.json`
 
-```python
-assertions: list[Callable[[], None]] = [
-    lambda: assert_min_max("general.seconds_per_core_interval", 5, 600),
-    lambda: assert_min_max("general.min_sun_elevation", 0, 90),
-    lambda: assert_ip_address("opus.em27_ip"),
-    lambda: assert_file_path("opus.executable_path"),
-    lambda: assert_file_path("opus.experiment_path"),
-    lambda: assert_file_path("opus.macro_path"),
-    lambda: assert_file_path("camtracker.config_path"),
-    lambda: assert_file_path("camtracker.executable_path"),
-    lambda: assert_file_path("camtracker.learn_az_elev_path"),
-    lambda: assert_file_path("camtracker.sun_intensity_path"),
-    lambda: assert_min_max("camtracker.motor_offset_threshold", -360, 360),
-    lambda: assert_min_max("measurement_triggers.min_sun_elevation", 0, 90),
-    lambda: assert_min_max("measurement_triggers.start_time.hour", 0, 23),
-    lambda: assert_min_max("measurement_triggers.stop_time.hour", 0, 23),
-    lambda: assert_min_max("measurement_triggers.start_time.minute", 0, 59),
-    lambda: assert_min_max("measurement_triggers.stop_time.minute", 0, 59),
-    lambda: assert_min_max("measurement_triggers.start_time.second", 0, 59),
-    lambda: assert_min_max("measurement_triggers.stop_time.second", 0, 59),
-    lambda: assert_ip_address("tum_plc.ip"),
-    lambda: assert_min_max("helios.camera_id", 0, 999999),
-    lambda: assert_min_max("helios.evaluation_size", 1, 100),
-    lambda: assert_min_max("helios.seconds_per_interval", 5, 600),
-    lambda: assert_min_max("helios.edge_detection_threshold", 0, 1),
-    lambda: assert_ip_address("upload.host"),
-]
-```
-
-## `state.json` and `persistent-state.json`
-
-The state file is generated under `runtime-data/state.json`. Pyra Core writes its internal values to this file. The state file is used to communicate between modules as well as with the "outside" world (UI, CLI). Schema: [/docs/api-reference/core/types/state#class-statedict](/docs/api-reference/core/types/state#class-statedict).
-
-The persistent-state file is generated under `logs/persistent-state.json`. It is currently only used by the Core and will not be reset with a restart of the Core. Schema: [/docs/api-reference/core/types/persistent_state#class-persistentstatedict](/docs/api-reference/core/types/persistent_state#class-persistentstatedict).
+The state file is generated under `logs/state.json`. Pyra Core writes its internal values to this file. The state file is used to communicate between modules as well as with the "outside" world (UI, CLI). Schema: [/packages/core/types/state.py](https://github.com/tum-esm/pyra/blob/main/packages/core/types/state.py).
 
 ## Validation strategy
 
@@ -88,20 +55,7 @@ Messages from all log levels can be found in `logs/debug.log`, and messages from
 
 ## Activity Log
 
-_Pyra Core_ will write important events to "activity logs" stored in `logs/activity/activity-YYYY-MM-DD.json`. This is the same information as in the regular log files but significantly easier to parse.
-
-```typescript
-export type activityHistory = {
-    localTime: string;
-    event:
-        | 'start-core'
-        | 'stop-core'
-        | 'start-measurements'
-        | 'stop-measurements'
-        | 'error-occured'
-        | 'errors-resolved';
-}[];
-```
+_Pyra Core_ stores its activity (is it measuring, are there errors, etc.) in `logs/activity/activity-YYYY-MM-DD.json`. This is the same information as in the regular log files but significantly easier to parse. Schema: [/packages/core/types/activity_history.py](https://github.com/tum-esm/pyra/blob/main/packages/core/types/activity_history.py).
 
 ## Pyra CLI commands from UI
 

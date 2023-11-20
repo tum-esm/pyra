@@ -64,7 +64,7 @@ function ActivityPlot() {
     const [hoverLabel, setHoverLabel] = useState<string | undefined>(undefined);
 
     if (activitySections === undefined) {
-        return 'Loading...';
+        return <div>loading ...</div>;
     }
 
     return (
