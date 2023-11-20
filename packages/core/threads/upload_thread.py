@@ -51,7 +51,7 @@ class UploadThread(AbstractThread):
         while True:
             try:
                 if upload_should_abort():
-                    logger.info("stopping UploadThread")
+                    logger.info("stopping upload thread")
                     return
 
                 interfaces.StateInterface.update_state(upload_is_running=True)
@@ -64,6 +64,9 @@ class UploadThread(AbstractThread):
                 ) as remote_connection:
 
                     for stream in config.upload.streams:
+                        if not stream.is_active:
+                            logger.info(f"skipping upload of '{stream.label}'")
+                            continue
                         logger.info(f"starting to upload '{stream.label}'")
                         logger.debug(
                             f"stream config: {stream.model_dump_json()}"
@@ -89,8 +92,8 @@ class UploadThread(AbstractThread):
                             ),
                         ).run()
 
-                        if upload_should_abort(silent=True):
-                            logger.info("stopping UploadThread")
+                        if upload_should_abort():
+                            logger.info("stopping upload thread")
                             return
 
                         logger.info(f"finished uploading '{stream.label}'")
@@ -101,8 +104,8 @@ class UploadThread(AbstractThread):
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
                 for _ in range(15 * 4):
-                    if upload_should_abort(silent=True):
-                        logger.info("stopping UploadThread")
+                    if upload_should_abort():
+                        logger.info("stopping upload thread")
                         return
 
                     time.sleep(15)
