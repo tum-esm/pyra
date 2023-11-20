@@ -35,9 +35,13 @@ export default function ConfigElementText(props: {
 
     async function openDirectory() {
         if (typeof value === 'string') {
-            await shell
-                .open(value.split('/').slice(0, -1).join('/'))
-                .catch(() => toast.error('Could not open directory'));
+            let path: string;
+            if (value.includes('\\')) {
+                path = value.split('\\').slice(0, -1).join('\\');
+            } else {
+                path = value.split('/').slice(0, -1).join('/');
+            }
+            await shell.open(path).catch(() => toast.error('Could not open directory'));
         }
     }
 
