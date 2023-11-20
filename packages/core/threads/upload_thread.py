@@ -110,7 +110,13 @@ class UploadThread(AbstractThread):
             except Exception as e:
                 logger.error(f"error in UploadThread: {repr(e)}")
                 logger.exception(e)
-                logger.info(f"sleeping 5 minutes, then stopping UploadThread")
-                time.sleep(300)
-                logger.info("stopping UploadThread")
+                logger.info(
+                    f"sleeping 5 minutes, then restarting upload thread"
+                )
+                for _ in range(5 * 4):
+                    if upload_should_abort():
+                        break
+                    time.sleep(15)
+
+                logger.info("stopping upload thread")
                 return
