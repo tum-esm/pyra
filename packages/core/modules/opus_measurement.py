@@ -175,7 +175,7 @@ class OpusMeasurement:
             return
 
         # load macro
-        macro_path = self.config.opus.macro_path
+        macro_path = self.config.opus.macro_path.root
         answer = self.conversation.Request(f"RUN_MACRO {macro_path}")
         logger.info(f"Started OPUS macro: {macro_path}")
 
