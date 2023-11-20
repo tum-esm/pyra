@@ -15,7 +15,7 @@ export function CoreLogLine(props: { text: string }) {
     const logSections = text.split(' - ');
     const logSource = logSections[1];
     const logType = logSections[2];
-    const logMessage = logSections[3];
+    const logMessage = logSections.slice(3).join(' - ');
 
     let textStyle: string;
     switch (logType) {
