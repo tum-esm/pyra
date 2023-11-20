@@ -46,24 +46,28 @@ export default function ConfigSectionCamtracker() {
                 value={localSectionConfig.config_path}
                 setValue={(v: string) => setLocalConfigItem('camtracker.config_path', v)}
                 oldValue={centralSectionConfig.config_path}
+                showSelector="file"
             />
             <configurationComponents.ConfigElementText
                 title="Executable Path"
                 value={localSectionConfig.executable_path}
                 setValue={(v: string) => setLocalConfigItem('camtracker.executable_path', v)}
                 oldValue={centralSectionConfig.executable_path}
+                showSelector="file"
             />
             <configurationComponents.ConfigElementText
                 title="Sun Intensity Path"
                 value={localSectionConfig.sun_intensity_path}
                 setValue={(v: string) => setLocalConfigItem('camtracker.sun_intensity_path', v)}
                 oldValue={centralSectionConfig.sun_intensity_path}
+                showSelector="file"
             />
             <configurationComponents.ConfigElementText
                 title="Learn Az Elev Path"
                 value={localSectionConfig.learn_az_elev_path}
                 setValue={(v: string) => setLocalConfigItem('camtracker.learn_az_elev_path', v)}
                 oldValue={centralSectionConfig.learn_az_elev_path}
+                showSelector="file"
             />
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText

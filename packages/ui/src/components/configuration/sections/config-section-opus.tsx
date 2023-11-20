@@ -53,18 +53,21 @@ export default function ConfigSectionOpus() {
                 value={localSectionConfig.executable_path}
                 setValue={(v: string) => setLocalConfigItem('opus.executable_path', v)}
                 oldValue={centralSectionConfig.executable_path}
+                showSelector="file"
             />
             <configurationComponents.ConfigElementText
                 title="Experiment Path"
                 value={localSectionConfig.experiment_path}
                 setValue={(v: string) => setLocalConfigItem('opus.experiment_path', v)}
                 oldValue={centralSectionConfig.experiment_path}
+                showSelector="file"
             />
             <configurationComponents.ConfigElementText
                 title="Macro Path"
                 value={localSectionConfig.macro_path}
                 setValue={(v: string) => setLocalConfigItem('opus.macro_path', v)}
                 oldValue={centralSectionConfig.macro_path}
+                showSelector="file"
             />
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText

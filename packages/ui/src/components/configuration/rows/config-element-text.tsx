@@ -10,12 +10,16 @@ export default function ConfigElementText(props: {
     disabled?: boolean;
     numeric?: boolean;
     postfix?: string;
-    showFileSelector?: boolean;
+    showSelector?: 'file' | 'directory';
 }) {
-    const { title, value, oldValue, setValue, disabled, numeric, postfix } = props;
+    const { title, value, oldValue, setValue, disabled, numeric, postfix, showSelector } = props;
 
-    async function triggerFileSelection() {
-        const result: any = await dialog.open({ title: 'PyRa 4 UI', multiple: false });
+    async function triggerSelection() {
+        const result: any = await dialog.open({
+            title: 'PyRa 4 UI',
+            multiple: false,
+            directory: showSelector === 'directory',
+        });
         if (result !== null) {
             setValue(result);
         }
@@ -37,7 +41,6 @@ export default function ConfigElementText(props: {
         }
     }
 
-    const showfileSelector = title.endsWith('Path') || props.showFileSelector;
     let hasBeenModified: boolean;
     if (numeric) {
         hasBeenModified = oldValue !== (typeof value === 'string' ? parseFloat(value) : value);
@@ -53,9 +56,9 @@ export default function ConfigElementText(props: {
                     setValue={(v) => setValue(numeric ? parseNumericValue(v) : v)}
                     postfix={postfix}
                 />
-                {showfileSelector && !disabled && (
+                {showSelector && !disabled && (
                     <>
-                        <essentialComponents.Button variant="white" onClick={triggerFileSelection}>
+                        <essentialComponents.Button variant="white" onClick={triggerSelection}>
                             select
                         </essentialComponents.Button>
                         <essentialComponents.Button variant="white" onClick={openDirectory}>

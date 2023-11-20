@@ -290,7 +290,7 @@ export default function ConfigSectionUpload() {
                                     ? centralSectionConfig.streams[index]?.src_directory
                                     : 'null'
                             }
-                            showFileSelector
+                            showSelector="directory"
                         />
                         <configurationComponents.ConfigElementText
                             title="Destination Directory"
@@ -299,7 +299,6 @@ export default function ConfigSectionUpload() {
                                 setLocalConfigItem(`upload.streams.${index}.dst_directory`, v)
                             }
                             oldValue={centralSectionConfig?.streams[index]?.dst_directory}
-                            showFileSelector
                         />
                         <configurationComponents.ConfigElementBooleanToggle
                             title="Remove Source After Upload"
