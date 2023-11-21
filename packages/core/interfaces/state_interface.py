@@ -23,13 +23,21 @@ class StateInterface:
     def load_state() -> types.StateObject:
         """Load the state from the state file."""
 
+        return StateInterface._load_state_without_filelock()
+
+    @staticmethod
+    def _load_state_without_filelock() -> types.StateObject:
+        """Load the state from the state file."""
+
         try:
             with open(_STATE_FILE_PATH, "r") as f:
                 state = types.StateObject.model_validate_json(f.read())
         except (
             FileNotFoundError,
             pydantic.ValidationError,
-        ):
+            UnicodeDecodeError,
+        ) as e:
+            logger.warning(f"Could not load state file - Creating new one: {e}")
             state = types.StateObject(last_updated=datetime.datetime.now())
             with open(_STATE_FILE_PATH, "w") as f:
                 f.write(state.model_dump_json(indent=4))
@@ -56,11 +64,7 @@ class StateInterface:
         be changed in the state file. Only if `enforce_none_values` is set to
         `True`, all values not explicitly set will be set to `None`."""
 
-        try:
-            with open(_STATE_FILE_PATH, "r") as f:
-                state = types.StateObject.model_validate_json(f.read())
-        except FileNotFoundError:
-            state = types.StateObject(last_updated=datetime.datetime.now())
+        state = StateInterface._load_state_without_filelock()
 
         state.last_updated = datetime.datetime.now()
         if enforce_none_values or (position is not None):
@@ -109,11 +113,7 @@ class StateInterface:
         interfere with the state file and the state
         """
 
-        try:
-            with open(_STATE_FILE_PATH, "r") as f:
-                state = types.StateObject.model_validate_json(f.read())
-        except FileNotFoundError:
-            state = types.StateObject(last_updated=datetime.datetime.now())
+        state = StateInterface._load_state_without_filelock()
 
         state.last_updated = datetime.datetime.now()
         yield state
