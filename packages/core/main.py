@@ -153,6 +153,11 @@ def run() -> None:
     def _graceful_teardown(*args: Any) -> None:
         logger.info("Received shutdown signal, starting graceful teardown")
         interfaces.ActivityHistoryInterface.dump_current_activity_history()
+        current_exceptions = interfaces.StateInterface.load_state(
+        ).current_exceptions or []
+        interfaces.StateInterface.update_state(
+            current_exceptions=current_exceptions, enforce_none_values=True
+        )
         logger.info("Graceful teardown complete")
         exit(0)
 
