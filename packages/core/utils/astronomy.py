@@ -82,7 +82,7 @@ class Astronomy:
             assert _marker_line_index is not None, "Could not find $1 marker"
             lat = float(_lines[_marker_line_index + 1].strip())
             lon = float(_lines[_marker_line_index + 2].strip())
-            alt = float(_lines[_marker_line_index + 3].strip())
+            alt = float(_lines[_marker_line_index + 3].strip()) * 1000
             return lat, lon, alt
         except Exception as e:
             raise Exception(
