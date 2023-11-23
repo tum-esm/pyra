@@ -25,7 +25,7 @@ opencv-python = "4.8.1.78"
 pydantic = "^2.4.2"                                                            # trustworthy to do upgrades
 tum-esm-utils = "^1.6.4"                                                       # we control this
 polars-lts-cpu = { version = "^0.19.13", markers = "sys_platform == 'win32'" }
-circadian-scp-upload = "^0.4.2"
+circadian-scp-upload = "^0.4.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.2.2"
