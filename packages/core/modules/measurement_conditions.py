@@ -87,7 +87,8 @@ class MeasurementConditions:
         )
         interfaces.ActivityHistoryInterface.add_datapoint(
             cli_calls=current_state.recent_cli_calls,
-            is_measuring=measurements_should_be_running
+            is_measuring=measurements_should_be_running,
+            is_uploading=current_state.upload_is_running,
         )
         with interfaces.StateInterface.update_state_in_context() as state:
             state.position.latitude = camtracker_coordinates[0]
