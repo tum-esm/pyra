@@ -1,6 +1,7 @@
 """Read or update the `config.json` file."""
 
 import shutil
+import time
 import click
 import os
 import tum_esm_utils
@@ -40,10 +41,18 @@ def _print_red(text: str) -> None:
 @click.option("--check-path-existence", default=False, is_flag=True)
 @click.option("--no-color", default=False, is_flag=True)
 def _get_config(
-    no_indent: bool, check_path_existence: bool, no_color: bool
+    no_indent: bool,
+    check_path_existence: bool,
+    no_color: bool,
 ) -> None:
     if not os.path.isfile(_CONFIG_FILE_PATH):
-        shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
+        time.sleep(2)
+        if not os.path.isfile(_CONFIG_FILE_PATH):
+            logger.info(
+                f'Config file not found at "{_CONFIG_FILE_PATH}". ' +
+                "Copying over default config file."
+            )
+            shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
     try:
         config = types.Config.load(
             ignore_path_existence=(not check_path_existence)
