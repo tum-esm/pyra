@@ -104,21 +104,43 @@ class UploadThread(AbstractThread):
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
                 logger.info(
-                    f"sleeping 60 minutes until looking for new files/directories"
+                    f"waiting 60 minutes until looking for new files/directories"
                 )
-                for _ in range(60 * 6):
-                    if upload_should_abort():
-                        logger.info("stopping upload thread")
-                        return
+                for i in range(30):
+                    for i in range(12):
+                        if upload_should_abort():
+                            logger.info("stopping upload thread")
+                            return
 
-                    time.sleep(10)
+                        time.sleep(10)
+
+                    minutes_left = 60 - ((i + 1) * 2)
+                    if minutes_left > 0:
+                        logger.info(
+                            f"waiting {minutes_left} more minutes until looking for new files/directories"
+                        )
 
             except Exception as e:
                 logger.error(f"error in UploadThread: {repr(e)}")
                 logger.exception(e)
                 logger.info(
-                    f"sleeping 5 minutes, then restarting upload thread"
+                    f"waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
                 )
+                for i in range(10):
+                    for i in range(12):
+                        if upload_should_abort():
+                            logger.info("stopping upload thread")
+                            return
+
+                        time.sleep(10)
+
+                    minutes_left = 20 - ((i + 1) * 2)
+                    if minutes_left > 0:
+                        logger.info(
+                            f"waiting {minutes_left} more minutes until looking "
+                            + "for new files/directories"
+                        )
+
                 for _ in range(5 * 6):
                     if upload_should_abort():
                         break
