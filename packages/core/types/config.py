@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Any, Literal, Optional
+import contextlib
+from typing import Any, Generator, Literal, Optional
 import datetime
 import os
 import filelock
@@ -342,6 +343,35 @@ class Config(StricterBaseModel):
         else:
             with open(_CONFIG_FILE_PATH, "w") as f:
                 f.write(self.model_dump_json())
+
+    @staticmethod
+    @contextlib.contextmanager
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_CONFIG_LOCK_PATH, timeout=5
+    )
+    def update_in_context() -> Generator[Config, None, None]:
+        """Update the confug file in a context manager.
+        
+        Example:
+        
+        ```python
+        with Config.update_in_context() as state:
+            config.somesetting = somevalue
+        ```
+
+        The file will be locked correctly, so that no other process can
+        interfere with the config file and the state."""
+
+        with open(_CONFIG_FILE_PATH) as f:
+            config = Config.model_validate_json(
+                f.read(),
+                context={"ignore-path-existence": True},
+            )
+
+        yield config
+
+        with open(_CONFIG_FILE_PATH, "w") as f:
+            f.write(config.model_dump_json(indent=4))
 
 
 class PartialConfig(StricterBaseModel):
