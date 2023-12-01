@@ -4,13 +4,8 @@ import json
 import time
 from typing import Callable, Literal, Optional
 import click
-import os
-import tum_esm_utils
 from packages.core import types, utils, interfaces, modules
 
-_dir = os.path.dirname
-_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
 logger = utils.Logger(origin="cli")
 
 
@@ -145,17 +140,6 @@ def _set_cover_angle(angle: str) -> None:
         plc_interface.disconnect()
 
 
-@tum_esm_utils.decorators.with_filelock(
-    lockfile_path=_CONFIG_FILE_PATH,
-    timeout=5,
-)
-def _enable_user_control_in_config() -> None:
-    config = types.Config.load(with_filelock=False)
-    if config.tum_plc is not None:
-        config.tum_plc.controlled_by_user = True
-        config.dump(with_filelock=False)
-
-
 @plc_command_group.command(
     name="close-cover",
     help="Run plc function 'force_cover_close()'",
@@ -163,7 +147,9 @@ def _enable_user_control_in_config() -> None:
 def _close_cover() -> None:
     interfaces.StateInterface.update_state(recent_cli_calls=1)
     logger.info('running command "plc close-cover"')
-    _enable_user_control_in_config()
+    with types.Config.update_in_context() as config:
+        assert config.tum_plc is not None, "PLC not configured"
+        config.tum_plc.controlled_by_user = True
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_interface.set_sync_to_tracker(False)
