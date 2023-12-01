@@ -101,10 +101,8 @@ def _wait_until_cover_is_at_angle(
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
             with interfaces.StateInterface.update_state_in_context() as state:
-                if state.plc_state is not None:
-                    state.plc_state.cover_angle = new_cover_angle
-                    state.plc_state.cover_closed = new_cover_angle == 0
-
+                state.plc_state.actors.current_angle = current_cover_angle
+                state.plc_state.state.cover_closed = (current_cover_angle == 0)
             break
 
         if running_time > timeout:
