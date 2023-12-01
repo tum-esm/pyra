@@ -104,14 +104,14 @@ class UploadThread(AbstractThread):
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
                 logger.info(
-                    f"sleeping 10 minutes until looking for new files/directories"
+                    f"sleeping 60 minutes until looking for new files/directories"
                 )
-                for _ in range(15 * 4):
+                for _ in range(60 * 6):
                     if upload_should_abort():
                         logger.info("stopping upload thread")
                         return
 
-                    time.sleep(15)
+                    time.sleep(10)
 
             except Exception as e:
                 logger.error(f"error in UploadThread: {repr(e)}")
@@ -119,10 +119,10 @@ class UploadThread(AbstractThread):
                 logger.info(
                     f"sleeping 5 minutes, then restarting upload thread"
                 )
-                for _ in range(5 * 4):
+                for _ in range(5 * 6):
                     if upload_should_abort():
                         break
-                    time.sleep(15)
+                    time.sleep(10)
 
                 logger.info("stopping upload thread")
                 return
