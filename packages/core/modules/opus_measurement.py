@@ -334,7 +334,7 @@ class OpusMeasurement:
         tum_esm_utils.testing.wait_for_condition(
             is_successful=OpusMeasurement.opus_is_running,
             timeout_message="OPUS.exe did not start within 30 seconds.",
-            timeout_seconds=30,
+            timeout_seconds=60,
             check_interval_seconds=4,
         )
 
@@ -342,7 +342,7 @@ class OpusMeasurement:
             is_successful=lambda: self.__test_dde_connection(),
             timeout_message=
             "DDE connection could not be established within 30 seconds.",
-            timeout_seconds=30,
+            timeout_seconds=60,
             check_interval_seconds=4,
         )
 

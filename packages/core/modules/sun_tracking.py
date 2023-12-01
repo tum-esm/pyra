@@ -321,7 +321,7 @@ class SunTracking:
         tum_esm_utils.testing.wait_for_condition(
             is_successful=SunTracking.camtracker_is_running,
             timeout_message="CamTracker did not start up within 20 seconds",
-            timeout_seconds=20,
+            timeout_seconds=30,
             check_interval_seconds=3,
         )
 
