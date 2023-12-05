@@ -1,3 +1,4 @@
+import datetime
 import threading
 import time
 import circadian_scp_upload
@@ -106,6 +107,7 @@ class UploadThread(AbstractThread):
                 logger.info(
                     f"waiting 60 minutes until looking for new files/directories"
                 )
+                waiting_start_time = datetime.datetime.now()
                 for i in range(30):
                     for j in range(12):
                         if upload_should_abort():
@@ -113,6 +115,13 @@ class UploadThread(AbstractThread):
                             return
 
                         time.sleep(10)
+
+                    # trying again at 1am because then new directories could be uploaded
+                    if waiting_start_time.hour == 0 and datetime.datetime.now(
+                    ).hour == 1:
+                        logger.info(
+                            f"Abort waiting because there might be new data to upload at 1am"
+                        )
 
                     minutes_left = 60 - ((i + 1) * 2)
                     if minutes_left > 0:
