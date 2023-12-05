@@ -107,7 +107,7 @@ class UploadThread(AbstractThread):
                     f"waiting 60 minutes until looking for new files/directories"
                 )
                 for i in range(30):
-                    for i in range(12):
+                    for j in range(12):
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
@@ -127,7 +127,7 @@ class UploadThread(AbstractThread):
                     f"waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
                 )
                 for i in range(10):
-                    for i in range(12):
+                    for j in range(12):
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
@@ -141,7 +141,7 @@ class UploadThread(AbstractThread):
                             + "for new files/directories"
                         )
 
-                for _ in range(5 * 6):
+                for i in range(5 * 6):
                     if upload_should_abort():
                         break
                     time.sleep(10)
