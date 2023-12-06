@@ -4,10 +4,15 @@
 **Documentation:** https://pyra.esm.ei.tum.de/docs<br/>
 **Contributor Guide:** https://pyra.esm.ei.tum.de/docs/contributor-guide/becoming-a-contributor
 
-[![status](https://joss.theoj.org/papers/d47b5197eb098bccfbd27b6a6c441cb4/status.svg)](https://joss.theoj.org/papers/d47b5197eb098bccfbd27b6a6c441cb4)
-![](https://badgen.net/github/license/tum-esm/pyra?color=e11d48)
-![](https://badgen.net/github/release/tum-esm/pyra/stable?label=latest%20release&color=e11d48)
-[![](https://badgen.net/github/checks/tum-esm/pyra/main?icon=github&label=ci%20tests)](https://github.com/tum-esm/pyra/actions)
+[![](https://joss.theoj.org/papers/d47b5197eb098bccfbd27b6a6c441cb4/status.svg)](https://joss.theoj.org/papers/d47b5197eb098bccfbd27b6a6c441cb4)
+[![](https://img.shields.io/github/v/tag/tum-esm/pyra?label=Latest%20Release&color=%23e11d48&cacheSeconds=60)
+](https://github.com/tum-esm/pyra/releases)
+[![GitHub License](https://img.shields.io/github/license/tum-esm/pyra?label=License&color=%23e11d48&cacheSeconds=3600)
+](https://github.com/tum-esm/pyra/blob/main/LICENSE.md)<br/>
+[![](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-python-codebase-on-main.yml?label=Python%20CI%20Tests&cacheSeconds=60)
+](https://github.com/tum-esm/pyra/actions)
+[![](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-typescript-codebase-on-main.yml?label=TypeScript%20CI%20Tests&cacheSeconds=60)
+](https://github.com/tum-esm/pyra/actions)
 
 <br/>
 
