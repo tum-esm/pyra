@@ -26,8 +26,4 @@ def test_api_reference_state(setup: None) -> None:
         "python scripts/update_api_reference.py",
         working_directory=PROJECT_DIR,
     )
-    stdout = tum_esm_utils.shell.run_shell_command(
-        f"diff --recursive {src} {dst}",
-        working_directory=PROJECT_DIR,
-    )
-    assert len(stdout) == 0
+    assert os.system(f"diff --recursive {src} {dst}", ) == 0
