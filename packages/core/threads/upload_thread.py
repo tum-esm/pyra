@@ -1,6 +1,7 @@
 import datetime
 import threading
 import time
+from typing import Optional
 import circadian_scp_upload
 from .abstract_thread import AbstractThread
 from packages.core import interfaces, types, utils
@@ -11,15 +12,38 @@ class UploadThread(AbstractThread):
     
     See https://github.com/dostuffthatmatters/circadian-scp-upload for
     a description of how this is implemented."""
+
+    last_measurement_time: Optional[datetime.datetime] = None
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
         upload_is_configured = config.upload is not None
         not_in_test_mode = not config.general.test_mode
-        not_measuring = not interfaces.StateInterface.load_state(
+
+        system_is_measuring = interfaces.StateInterface.load_state(
         ).measurements_should_be_running
 
-        return all([upload_is_configured, not_in_test_mode, not_measuring])
+        # not uploading while system is starting up
+        if system_is_measuring is None:
+            return False
+
+        # update last time of known measurements
+        if system_is_measuring:
+            UploadThread.last_measurement_time = datetime.datetime.now()
+
+        # only upload if system has not been measuring for 10 minutes
+        no_measurements_in_last_10_minutes = (
+            (UploadThread.last_measurement_time is None) or
+            ((datetime.datetime.now() -
+              UploadThread.last_measurement_time).total_seconds() >= 600)
+        )
+
+        return all([
+            upload_is_configured,
+            not_in_test_mode,
+            no_measurements_in_last_10_minutes,
+        ])
 
     @staticmethod
     def get_new_thread_object() -> threading.Thread:
