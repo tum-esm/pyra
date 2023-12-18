@@ -442,7 +442,7 @@ class HeliosThread(AbstractThread):
                                 False: "no",
                             }[current_state]
                         )
-                    if current_state != new_state:
+                    else:
                         logger.debug("State changed")
 
                         # only do state change if last_state_change is long ago in

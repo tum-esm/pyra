@@ -55,7 +55,6 @@ class UploadThread(AbstractThread):
                     logger.info("stopping upload thread")
                     return
 
-                interfaces.StateInterface.update_state(upload_is_running=True)
                 logger.info("starting upload")
 
                 with circadian_scp_upload.RemoteConnection(
@@ -71,6 +70,9 @@ class UploadThread(AbstractThread):
                         logger.info(f"starting to upload '{stream.label}'")
                         logger.debug(
                             f"stream config: {stream.model_dump_json()}"
+                        )
+                        interfaces.StateInterface.update_state(
+                            upload_is_running=True
                         )
                         circadian_scp_upload.DailyTransferClient(
                             remote_connection=remote_connection,
@@ -92,7 +94,9 @@ class UploadThread(AbstractThread):
                                 should_abort_upload=upload_should_abort,
                             ),
                         ).run()
-
+                        interfaces.StateInterface.update_state(
+                            upload_is_running=False
+                        )
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
@@ -100,7 +104,6 @@ class UploadThread(AbstractThread):
                         logger.info(f"finished uploading '{stream.label}'")
 
                 logger.info("finished upload")
-                interfaces.StateInterface.update_state(upload_is_running=False)
 
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
@@ -120,7 +123,7 @@ class UploadThread(AbstractThread):
                     if waiting_start_time.hour == 0 and datetime.datetime.now(
                     ).hour == 1:
                         logger.info(
-                            f"Abort waiting because there might be new data to upload at 1am"
+                            f"abort waiting because there might be new data to upload at 1am"
                         )
 
                     minutes_left = 60 - ((i + 1) * 2)
@@ -132,6 +135,7 @@ class UploadThread(AbstractThread):
             except Exception as e:
                 logger.error(f"error in UploadThread: {repr(e)}")
                 logger.exception(e)
+                interfaces.StateInterface.update_state(upload_is_running=False)
                 logger.info(
                     f"waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
                 )
