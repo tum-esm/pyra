@@ -432,37 +432,43 @@ class HeliosThread(AbstractThread):
                            ) and (average_edge_fraction >= upper_ef_threshold):
                             new_state = True
 
-                    logger.debug(
-                        f"New state: {'GOOD' if (new_state == True) else 'BAD'}"
-                    )
+                    logger.debug(f"New state: {'GOOD' if new_state else 'BAD'}")
+                    if current_state == new_state:
+                        logger.debug("State did not change")
+                        interfaces.StateInterface.update_state(
+                            helios_indicates_good_conditions={ # type: ignore
+                                None: "inconclusive",
+                                True: "yes",
+                                False: "no",
+                            }[current_state]
+                        )
                     if current_state != new_state:
+                        logger.debug("State changed")
+
                         # only do state change if last_state_change is long ago in
                         # the past see https://github.com/tum-esm/pyra/issues/195
-                        seconds_since_last_state_change: float = config.helios.min_seconds_between_state_changes
-                        if last_state_change is not None:
-                            seconds_since_last_state_change = (
-                                datetime.datetime.now() - last_state_change
-                            ).total_seconds()
 
-                        if seconds_since_last_state_change >= config.helios.min_seconds_between_state_changes:
+                        update_state_file = last_state_change is None or (
+                            (datetime.datetime.now() -
+                             last_state_change).total_seconds()
+                            >= config.helios.min_seconds_between_state_changes
+                        )
+                        if update_state_file:
                             logger.info(
-                                f"State change: {'BAD -> GOOD' if (new_state == True) else 'GOOD -> BAD'}"
+                                f"State change: {'BAD -> GOOD' if new_state else 'GOOD -> BAD'}"
                             )
                             interfaces.StateInterface.update_state(
-                                helios_indicates_good_conditions=(
-                                    "inconclusive" if (
-                                        new_state is None
-                                    ) else "yes" if new_state else "no"
-                                )
+                                helios_indicates_good_conditions={ # type: ignore
+                                    None: "inconclusive",
+                                    True: "yes",
+                                    False: "no",
+                                }[new_state]
                             )
                             current_state = new_state
                             last_state_change = datetime.datetime.now()
                         else:
                             logger.debug(
-                                "Not changing state because last state change was"
-                                +
-                                f" too recent ({seconds_since_last_state_change} "
-                                + "second(s) ago)"
+                                "Not updating state file because last change was too recent"
                             )
                 else:
                     logger.debug(
