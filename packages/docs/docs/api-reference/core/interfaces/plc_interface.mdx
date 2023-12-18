@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 <!-- markdownlint-disable -->
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L0" className="SourceCodeLinkBadge">source code</a>
-
 # <kbd>module</kbd> `core.interfaces.plc_interface`
 
 
@@ -15,14 +13,10 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L97" className="SourceCodeLinkBadge">source code</a>
-
 ## <kbd>class</kbd> `PLCInterface`
 Uses the snap7 library to connect to the Siemens PLC operating the enclosure hardware. 
 
 Manual: https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf 
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L115" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -39,8 +33,6 @@ __init__(plc_version: Literal[1, 2], plc_ip: StrictIPAdress) → None
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L143" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `connect`
 
 ```python
@@ -50,8 +42,6 @@ connect() → None
 Connects to the PLC Snap7. Times out after 30 seconds. 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L193" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `cover_is_closed`
 
@@ -63,8 +53,6 @@ Reads the single value "state.cover_closed"
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L170" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `disconnect`
 
 ```python
@@ -74,8 +62,6 @@ disconnect() → None
 Disconnects from the PLC Snap7 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L203" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `get_cover_angle`
 
@@ -87,8 +73,6 @@ Reads the single value "actors.current_angle"
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L181" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `is_responsive`
 
 ```python
@@ -98,8 +82,6 @@ is_responsive() → bool
 Pings the PLC 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L188" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `rain_is_detected`
 
@@ -111,8 +93,6 @@ Reads the single value "state.rain"
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L209" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `read`
 
 ```python
@@ -122,8 +102,6 @@ read() → PLCState
 Read the whole state of the PLC 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L416" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `reset`
 
@@ -135,8 +113,6 @@ Does not check, whether the value has been changed
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L198" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `reset_is_needed`
 
 ```python
@@ -146,8 +122,6 @@ reset_is_needed() → bool
 Reads the single value "state.reset_needed"  
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L401" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `set_auto_temperature`
 
@@ -159,8 +133,6 @@ Raises PLCInterface.PLCError, if value hasn't been changed
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L425" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `set_cover_angle`
 
 ```python
@@ -170,8 +142,6 @@ set_cover_angle(value: int) → None
 Does not check, whether the value has been changed 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L395" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `set_manual_control`
 
@@ -183,8 +153,6 @@ Raises PLCInterface.PLCError, if value hasn't been changed
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L407" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `set_manual_temperature`
 
 ```python
@@ -194,8 +162,6 @@ set_manual_temperature(new_state: bool) → None
 Raises PLCInterface.PLCError, if value hasn't been changed 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L353" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `set_power_camera`
 
@@ -207,8 +173,6 @@ Raises `PLCInterface.PLCError`, if value hasn't been changed
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L359" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `set_power_computer`
 
 ```python
@@ -218,8 +182,6 @@ set_power_computer(new_state: bool) → None
 Raises `PLCInterface.PLCError`, if value hasn't been changed 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L366" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `set_power_heater`
 
@@ -231,8 +193,6 @@ Raises `PLCInterface.PLCError`, if value hasn't been changed
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L372" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `set_power_router`
 
 ```python
@@ -242,8 +202,6 @@ set_power_router(new_state: bool) → None
 Raises PLCInterface.PLCError, if value hasn't been changed 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L379" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `set_power_spectrometer`
 
@@ -255,8 +213,6 @@ Raises PLCInterface.PLCError, if value hasn't been changed
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L387" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `set_sync_to_tracker`
 
 ```python
@@ -266,8 +222,6 @@ set_sync_to_tracker(new_state: bool) → None
 Raises PLCInterface.PLCError, if value hasn't been changed 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/interfaces/plc_interface.py#L126" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `update_config`
 

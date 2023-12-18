@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 <!-- markdownlint-disable -->
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L0" className="SourceCodeLinkBadge">source code</a>
-
 # <kbd>module</kbd> `core.threads.helios_thread`
 
 
@@ -14,8 +12,6 @@ hide_table_of_contents: true
 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L21" className="SourceCodeLinkBadge">source code</a>
 
 ## <kbd>class</kbd> `CameraError`
 
@@ -28,14 +24,10 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L25" className="SourceCodeLinkBadge">source code</a>
-
 ## <kbd>class</kbd> `HeliosInterface`
 
 
 
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L26" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -52,8 +44,6 @@ __init__(logger: Logger, camera_id: int, initialization_tries: int = 5) → None
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L141" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `adjust_exposure`
 
 ```python
@@ -68,8 +58,6 @@ This function will loop over all available exposures and take one image for each
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L68" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `get_available_exposures`
 
 ```python
@@ -79,8 +67,6 @@ get_available_exposures() → list[int]
 Loop over every integer in [-20, ..., +20] and try to set the camera exposure to each value. Return a list of integers that the camera accepted as an exposure setting. 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L216" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `run`
 
@@ -98,8 +84,6 @@ Take an image and evaluate the sun conditions. Run autoexposure function every 5
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L118" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `take_image`
 
 ```python
@@ -114,8 +98,6 @@ Take an image using the initialized camera. Raises an AssertionError if camera h
 Retries up to n times (camera can say "not possible") and throws away all mostly white images (overexposed) except when specified not to (used in autoexposure). 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L81" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `update_camera_settings`
 
@@ -136,8 +118,6 @@ Update the settings of the connected camera. Which settings are available depend
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L259" className="SourceCodeLinkBadge">source code</a>
-
 ## <kbd>class</kbd> `HeliosThread`
 Thread for determining the current sun conditions in a parallel mainloop. 
 
@@ -152,8 +132,6 @@ The result of this constant sunlight evaluation is written to the StateInterface
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L285" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `get_new_thread_object`
 
 ```python
@@ -164,8 +142,6 @@ Return a new thread object that is to be started.
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L290" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `main`
 
 ```python
@@ -175,8 +151,6 @@ main(headless: bool = False) → None
 Main entrypoint of the thread. In headless mode,  don't write to log files but print to console. 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/threads/helios_thread.py#L277" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `should_be_running`
 

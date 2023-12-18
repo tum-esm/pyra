@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import shutil
 import tum_esm_utils
 
@@ -40,18 +41,16 @@ for src_path in sorted(os.listdir(root_src_path), key=len):
         if abs_dst_path.endswith("main.mdx"):
             f.write("sidebar_position: 1\n")
         f.write("---\n\n")
-        f.write(
-            original_content.replace(
-                '><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square" />',
-                ' className="SourceCodeLinkBadge">source code',
-            ).replace(
-                '><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square">',
-                ' className="SourceCodeLinkBadge">source code',
-            )
-        )
+        for match in re.findall(
+            r'\n<a href="' + repo_url + r'/tree[^>]*>.*</a>\n',
+            original_content,
+            flags=re.MULTILINE,
+        ):
+            assert isinstance(match, str)
+            original_content = original_content.replace(match, "")
+        f.write(original_content)
 
 shutil.rmtree(root_src_path)
-
 
 with open(f"{root_dst_path}/_category_.json", "w") as f:
     json.dump({"label": "API Reference", "position": 6}, f)

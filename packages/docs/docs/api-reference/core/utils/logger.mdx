@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 <!-- markdownlint-disable -->
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L0" className="SourceCodeLinkBadge">source code</a>
-
 # <kbd>module</kbd> `core.utils.logger`
 
 
@@ -15,16 +13,12 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L22" className="SourceCodeLinkBadge">source code</a>
-
 ## <kbd>class</kbd> `Logger`
 A reimplementation of the logging module. 
 
 _Why?_ The `logging` module from the Python standard library is kind of hard to configure with some setups we have on the server-side. That is why we have decided to use a custom logging class in some of our bigger projects instead. 
 
 This class is simply formatting log lines, appending them to the log files and providing a simple API. 
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L36" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -41,8 +35,6 @@ With `just_print = True`, the log lines will be formatted like in the log files 
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L107" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `archive`
 
 ```python
@@ -52,8 +44,6 @@ archive() → None
 Only keep the lines from the last 5 minutes in "logs/debug.log". 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L49" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `debug`
 
@@ -65,8 +55,6 @@ Write a debug log (to debug only). Used for verbose output
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L61" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `error`
 
 ```python
@@ -76,8 +64,6 @@ error(message: str) → None
 Write an error log (to debug and info) 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L65" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `exception`
 
@@ -89,8 +75,6 @@ Log the traceback of an exception
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L53" className="SourceCodeLinkBadge">source code</a>
-
 ### <kbd>method</kbd> `info`
 
 ```python
@@ -100,8 +84,6 @@ info(message: str) → None
 Write an info log (to debug and info) 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/utils/logger.py#L57" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `warning`
 

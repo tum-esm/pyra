@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 <!-- markdownlint-disable -->
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/measurement_conditions.py#L0" className="SourceCodeLinkBadge">source code</a>
-
 # <kbd>module</kbd> `core.modules.measurement_conditions`
 
 
@@ -15,8 +13,6 @@ hide_table_of_contents: true
 
 ---
 
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/measurement_conditions.py#L7" className="SourceCodeLinkBadge">source code</a>
-
 ## <kbd>class</kbd> `MeasurementConditions`
 MeasurementConditions allows operation in three different modes: Manual, Automatic, Manual, and CLI. Whenever a decision is made the parameter measurements_should_be_running in StateInterface is updated. 
 
@@ -25,8 +21,6 @@ In Manual mode, the user has full control over whether measurements should be ac
 In Automatic mode, three different triggers are considered: Sun Elevation, Time, and Helios State. These triggers may also be active in any combination at the same time. Measurements are only set to be running if all triggers agree, while measurements will be set to be not active if at least one of the active triggers decides to stop measurements. 
 
 In CLI mode, triggers from external sources can be considered. This option is available for custom-built systems or sensors not part of Pyra 4. It is also possible in this mode to move the measurement control to remote systems i.e. by SSH. 
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/measurement_conditions.py#L27" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -42,8 +36,6 @@ __init__(initial_config: Config) → None
 
 
 ---
-
-<a href="https://github.com/tum-esm/pyra/tree/main/packages/core/modules/measurement_conditions.py#L30" className="SourceCodeLinkBadge">source code</a>
 
 ### <kbd>method</kbd> `run`
 
