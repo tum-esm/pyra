@@ -16,10 +16,10 @@ logger = utils.Logger(origin="state-interface")
 
 
 class StateInterface:
+    @staticmethod
     @tum_esm_utils.decorators.with_filelock(
         lockfile_path=_STATE_LOCK_PATH, timeout=5
     )
-    @staticmethod
     def load_state() -> types.StateObject:
         """Load the state from the state file."""
 
@@ -43,10 +43,10 @@ class StateInterface:
                 f.write(state.model_dump_json(indent=4))
         return state
 
+    @staticmethod
     @tum_esm_utils.decorators.with_filelock(
         lockfile_path=_STATE_LOCK_PATH, timeout=5
     )
-    @staticmethod
     def update_state(
         position: Optional[types.Position] = None,
         recent_cli_calls: Optional[int] = None,

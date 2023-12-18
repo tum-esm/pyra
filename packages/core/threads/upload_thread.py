@@ -1,7 +1,7 @@
+from typing import Optional
 import datetime
 import threading
 import time
-from typing import Optional
 import circadian_scp_upload
 from .abstract_thread import AbstractThread
 from packages.core import interfaces, types, utils
