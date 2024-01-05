@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyra"
-version = "4.1.0"
+version = "4.1.1"
 description = "operate an EM27 station autonomously"
 authors = [
     "Patrick Aigner <patrick.aigner@tum.de>",
