@@ -241,6 +241,7 @@ class UploadConfig(StricterBaseModel):
     host: StrictIPAdress
     user: str
     password: str
+    only_upload_at_night: bool
     streams: list[UploadStreamConfig]
 
 
