@@ -30,8 +30,14 @@ class UploadThread(AbstractThread):
         current_state = interfaces.StateInterface.load_state()
 
         # don't upload while system is starting up
-        if current_state.measurements_should_be_running is None:
+        if ((current_state.measurements_should_be_running is None) or
+            (current_state.position.sun_elevation is None)):
             return False
+
+        # (optional) don't upload during the day
+        if config.upload.only_upload_at_night:
+            if current_state.position.sun_elevation > 0:
+                return False
 
         # update last time of known measurements
         if current_state.measurements_should_be_running:
