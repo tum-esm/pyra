@@ -2009,7 +2009,7 @@ dependencies = [
 
 [[package]]
 name = "pyra-ui"
-version = "4.1.0"
+version = "4.1.1"
 dependencies = [
  "serde",
  "serde_json",

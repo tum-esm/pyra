@@ -131,7 +131,7 @@ export default function ControlTab() {
     async function moveCover(angle: number) {
         if (angle === 0 || (angle >= 110 && angle <= 250)) {
             await runPLCCommand(
-                ['set-cover-angle'],
+                ['set-cover-angle', `${angle}`],
                 'moving cover',
                 'successfully moved cover',
                 () => {
