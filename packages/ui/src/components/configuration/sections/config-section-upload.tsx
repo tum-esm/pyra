@@ -30,6 +30,7 @@ export default function ConfigSectionUpload() {
             host: '1.2.3.4',
             user: '...',
             password: '...',
+            only_upload_at_night: true,
             streams: [],
         });
     }
