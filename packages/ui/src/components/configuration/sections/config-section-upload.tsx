@@ -137,6 +137,17 @@ export default function ConfigSectionUpload() {
                 setValue={(v: string) => setLocalConfigItem('upload.password', v)}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.password : 'null'}
             />
+            <configurationComponents.ConfigElementBooleanToggle
+                title="Only Upload At Night"
+                value={localSectionConfig.only_upload_at_night}
+                setValue={(v: boolean) => setLocalConfigItem(`upload.only_upload_at_nighte`, v)}
+                oldValue={
+                    centralSectionConfig !== null ? centralSectionConfig.only_upload_at_night : null
+                }
+            />
+            <configurationComponents.ConfigElementNote>
+                At night = below 0° sun elevation
+            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             {localSectionConfig.streams.map((stream, index) => (
                 <Fragment key={`${index}`}>
