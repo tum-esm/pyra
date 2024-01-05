@@ -49,14 +49,25 @@ export default function MeasurementDecision() {
     const { coreState } = useCoreStateStore();
     const activeMode = centralConfig?.measurement_decision.mode;
 
+    if (!centralConfig || !coreState) {
+        return <></>;
+    }
+
     function setActiveMode(mode: 'automatic' | 'manual' | 'cli') {
         if (centralConfig) {
             runPromisingCommand({
                 command: () =>
                     fetchUtils.backend.updateConfig({
-                        measurement_decision: {
-                            mode: mode,
-                        },
+                        measurement_decision:
+                            mode === 'manual'
+                                ? {
+                                      mode: mode,
+                                      manual_decision_result:
+                                          coreState?.measurements_should_be_running || false,
+                                  }
+                                : {
+                                      mode: mode,
+                                  },
                     }),
                 label: 'setting measurement mode',
                 successLabel: 'successfully set measurement mode, system will react soon',
@@ -65,9 +76,6 @@ export default function MeasurementDecision() {
                 },
             });
         }
-    }
-    if (!centralConfig || !coreState) {
-        return <></>;
     }
 
     function toggleManualMeasurementDecision() {
