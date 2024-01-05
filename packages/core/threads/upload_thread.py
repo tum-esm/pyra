@@ -18,32 +18,32 @@ class UploadThread(AbstractThread):
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
-        upload_is_configured = config.upload is not None
-        not_in_test_mode = not config.general.test_mode
 
-        system_is_measuring = interfaces.StateInterface.load_state(
-        ).measurements_should_be_running
+        # only upload when upload is configured
+        if config.upload is None:
+            return False
 
-        # not uploading while system is starting up
-        if system_is_measuring is None:
+        # don't upload in test mode
+        if config.general.test_mode:
+            return False
+
+        current_state = interfaces.StateInterface.load_state()
+
+        # don't upload while system is starting up
+        if current_state.measurements_should_be_running is None:
             return False
 
         # update last time of known measurements
-        if system_is_measuring:
+        if current_state.measurements_should_be_running:
             UploadThread.last_measurement_time = datetime.datetime.now()
 
-        # only upload if system has not been measuring for 10 minutes
-        no_measurements_in_last_10_minutes = (
-            (UploadThread.last_measurement_time is None) or
-            ((datetime.datetime.now() -
-              UploadThread.last_measurement_time).total_seconds() >= 600)
-        )
+        # don't upload if system has been measuring in the last 10 minutes
+        if UploadThread.last_measurement_time is not None:
+            if ((datetime.datetime.now() -
+                 UploadThread.last_measurement_time).total_seconds() < 600):
+                return False
 
-        return all([
-            upload_is_configured,
-            not_in_test_mode,
-            no_measurements_in_last_10_minutes,
-        ])
+        return True
 
     @staticmethod
     def get_new_thread_object() -> threading.Thread:
