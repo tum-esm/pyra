@@ -141,7 +141,7 @@ export default function ConfigSectionUpload() {
             <configurationComponents.ConfigElementBooleanToggle
                 title="Only Upload At Night"
                 value={localSectionConfig.only_upload_at_night}
-                setValue={(v: boolean) => setLocalConfigItem(`upload.only_upload_at_nighte`, v)}
+                setValue={(v: boolean) => setLocalConfigItem(`upload.only_upload_at_night`, v)}
                 oldValue={
                     centralSectionConfig !== null ? centralSectionConfig.only_upload_at_night : null
                 }
