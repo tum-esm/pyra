@@ -24,6 +24,7 @@ dependencies = [
     "tum-esm-utils==1.8.0",
     "polars-lts-cpu==0.20.3; sys_platform == \"win32\"",
     "pywin32==306; sys_platform == \"win32\"",
+    "setuptools==68.*",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"
@@ -80,3 +81,4 @@ markers = [
 [tool.pdm.options]
 add = ["--no-self"]
 install = ["--no-self"]
+remove = ["--no-self"]
