@@ -1,46 +1,46 @@
-[tool.poetry]
+[project]
 name = "pyra"
 version = "4.1.2"
 description = "operate an EM27 station autonomously"
 authors = [
-    "Patrick Aigner <patrick.aigner@tum.de>",
-    "Moritz Makowski <moritz.makowski@tum.de>",
+    { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
+    { name = "Patrick Aigner", email = "patrick.aigner@tum.de" },
+    { name = "Andreas Luther", email = "andreas.luther@tum.de" },
 ]
+dependencies = [
+    "numpy==1.26.3",
+    "filelock==3.13.1",
+    "click==8.1.7",
+    "python-snap7==1.3",
+    "jdcal==1.4.1",
+    "psutil==5.9.7",
+    "tqdm==4.66.1",
+    "colorama==0.4.6",
+    "deepdiff==6.7.1",
+    "skyfield==1.46",
+    "opencv-python==4.9.0.80",
+    "pydantic==2.5.3",
+    "circadian-scp-upload==0.4.3",
+    "tum-esm-utils==1.8.0",
+    "polars-lts-cpu==0.20.3; sys_platform == \"win32\"",
+    "pywin32==306; sys_platform == \"win32\"",
+]
+requires-python = "==3.10.*"
+readme = "README.md"
+license = { text = "GPL-3" }
 
-[tool.poetry.dependencies]
-python = "3.10.*"
-Cerberus = "1.3.4"
-numpy = "1.24.2"
-filelock = "3.12.4"
-pywin32 = { version = "303", markers = "sys_platform == 'win32'" }
-click = "8.1.3"
-python-snap7 = "1.3"
-jdcal = "1.4.1"
-psutil = "5.9.6"
-tqdm = "4.65.0"
-colorama = "0.4.6"
-deepdiff = "6.3.0"
-skyfield = "1.46"
-opencv-python = "4.8.1.78"
-pydantic = "^2.4.2"                                                            # trustworthy to do upgrades
-polars-lts-cpu = { version = "^0.19.13", markers = "sys_platform == 'win32'" }
-circadian-scp-upload = "^0.4.3"
-tum-esm-utils = "^1.8.0"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "7.2.2"
-types-paramiko = "2.12.0.3"
-types-invoke = "1.7.3.17"
-pytest-cov = "3.0.0"
-types-psutil = "5.9.5.11"
-lazydocs = "0.4.8"
-yapf = "^0.40.2"
-mypy = "^1.6.1"
-types-pywin32 = "^306.0.0.6"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+    "lazydocs>=0.4.8",
+    "yapf>=0.40.2",
+    "mypy>=1.8.0",
+    "types-pywin32>=306.0.0.20240106",
+    "types-psutil>=5.9.5.20240106",
+    "types-paramiko>=3.4.0.20240106",
+    "types-invoke>=2.0.0.10",
+]
 
 [tool.yapf]
 based_on_style = "facebook"
@@ -52,7 +52,6 @@ spaces_around_subscript_colon = true
 [tool.mypy]
 strict = true
 implicit_reexport = true
-no_warn_unused_ignores = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]

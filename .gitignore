@@ -14,8 +14,8 @@ pids
 *.pid
 *.seed
 *.lock
+!pdm.lock
 !yarn.lock
-!poetry.lock
 *.dat
 *.txt
 runtime-data/
