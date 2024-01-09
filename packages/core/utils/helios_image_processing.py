@@ -71,7 +71,7 @@ class HeliosImageProcessing:
         _, kmeans_labels, kmeans_centers = cv.kmeans(
             data=np.array(blurred_image.flatten(), dtype=np.float32),
             K=2,
-            bestLabels=None,
+            bestLabels=None,  # type: ignore
             criteria=(
                 cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0
             ),
@@ -123,7 +123,7 @@ class HeliosImageProcessing:
 
         # get the circle that is closest to the image center
         x, y, r = min(
-            np.round(circles[0, :]).astype("int"),
+            np.round(circles[0, :]).astype("int"),  # type: ignore
             key=lambda c: math.pow(c[0] -
                                    (image_width * 0.5), 2)  # type: ignore
             + pow(c[1] - (image_height * 0.5), 2),
@@ -226,17 +226,22 @@ class HeliosImageProcessing:
         )
 
         # blacken the outer 10% of the circle radius
-        edges_only_dilated *= HeliosImageProcessing._get_circle_mask(
-            edges_only_dilated.shape, round(circle_r * 0.9), circle_cx,
-            circle_cy
+        edges_only_dilated *= HeliosImageProcessing._get_circle_mask( # type: ignore
+            edges_only_dilated.shape,  # type: ignore
+            round(circle_r * 0.9),
+            circle_cx,
+            circle_cy,
         )
 
         # determine how many pixels inside the circle are made up of "edge pixels"
         pixels_inside_circle: int = np.sum(3.141592 * pow(circle_r * 0.9, 2))
         edge_fraction: float = 0
         if pixels_inside_circle != 0:
-            edge_fraction = round((np.sum(edges_only_dilated) / 255) /
-                                  pixels_inside_circle, 6)
+            edge_fraction = round(
+                (np.sum(edges_only_dilated) / 255) /  # type: ignore
+                pixels_inside_circle,
+                6
+            )
 
         if save_images_to_archive or save_current_image:
             now = datetime.datetime.now()

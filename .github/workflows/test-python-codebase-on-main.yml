@@ -43,5 +43,5 @@ jobs:
       - name: Run Pytests
         run: |
           source .venv/bin/activate
-          pdm run -v pytest -m "ci" --cov=packages tests
+          pytest -m "ci" --cov=packages tests
           coverage report

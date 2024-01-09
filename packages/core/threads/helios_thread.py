@@ -132,7 +132,9 @@ class HeliosInterface:
         for _ in range(retries + 1):
             ret, frame = self.camera.read()
             if ret:
-                if trow_away_white_images and np.mean(frame) > 240:
+                if trow_away_white_images and np.mean(
+                    frame  # type: ignore
+                ) > 240:
                     # image is mostly white
                     continue
                 return np.array(frame)

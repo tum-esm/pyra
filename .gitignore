@@ -6,6 +6,7 @@ test-tmp/
 hidden/
 packages/docs/docs/api-reference/ui
 cli.sh
+.pdm-python
 
 # runtime data
 pids
