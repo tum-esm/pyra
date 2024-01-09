@@ -67,8 +67,8 @@ export function SystemState() {
                             appendix: ' rH',
                         })}
                     </StatePanel>
-                    <StatePanel title="Reset Needed">
-                        {renderBoolean(coreState.plc_state.state.reset_needed)}
+                    <StatePanel title="Heater Power">
+                        {renderBoolean(coreState.plc_state.power.heater)}
                     </StatePanel>
                     <StatePanel title="Motor Failed">
                         {renderBoolean(coreState.plc_state.state.motor_failed)}
