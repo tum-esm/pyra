@@ -86,7 +86,10 @@ export function SystemState() {
                         {renderBoolean(coreState.plc_state.state.rain)}
                     </StatePanel>
                     <StatePanel title="Helios Edge Pixels">
-                        {renderNumber(lastEdgeFractionValue, { appendix: ' %' })}
+                        {renderNumber(
+                            lastEdgeFractionValue === null ? null : lastEdgeFractionValue * 100,
+                            { appendix: ' %' }
+                        )}
                     </StatePanel>
                 </div>
             )}
