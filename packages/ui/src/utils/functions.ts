@@ -17,11 +17,14 @@ export function renderBoolean(value: undefined | null | boolean) {
     }
 }
 
-export function renderNumber(value: undefined | null | string | number) {
+export function renderNumber(
+    value: undefined | null | string | number,
+    options?: { appendix: string }
+) {
     if (value === undefined || value === null) {
         return '-';
     } else {
-        return `${value}`;
+        return `${Number(value).toFixed(2)}${options !== undefined ? options.appendix : ''}`;
     }
 }
 

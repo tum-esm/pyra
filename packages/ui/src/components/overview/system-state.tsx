@@ -54,7 +54,7 @@ export function SystemState() {
     // look for the last occurence of this string using regex
     const lastEdgeFraction = heliosLogs
         .join('\n')
-        .match(/edge_fraction = \d+(\.\d+)?\n/g)
+        .match(/edge_fraction = \d+(\.\d+)?\s*\n/g)
         ?.slice(-1)[0];
     const lastEdgeFractionValue = lastEdgeFraction
         ? parseFloat(lastEdgeFraction.split(' ')[2])
@@ -85,10 +85,8 @@ export function SystemState() {
                     <StatePanel title="Rain Detected">
                         {renderBoolean(coreState.plc_state.state.rain)}
                     </StatePanel>
-                    <StatePanel title="Helios Edges (meas. | requ.)">
-                        {renderNumber(lastEdgeFractionValue)}
-                        {' | '}
-                        {renderNumber(centralConfig.helios?.edge_pixel_threshold)}
+                    <StatePanel title="Helios Edge Pixels">
+                        {renderNumber(lastEdgeFractionValue, { appendix: ' %' })}
                     </StatePanel>
                 </div>
             )}
