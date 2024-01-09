@@ -1,8 +1,9 @@
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 import { mean } from 'lodash';
-import { renderBoolean, renderString } from '../../utils/functions';
+import { renderBoolean, renderString, renderNumber } from '../../utils/functions';
 import { IconCloudRain } from '@tabler/icons-react';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
+import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 
 function StatePanel(props: { title: string; children: React.ReactNode }) {
     return (
@@ -43,10 +44,21 @@ function StateBarPanel(props: { title: string; value: number | null }) {
 export function SystemState() {
     const { coreState } = useCoreStateStore();
     const { centralConfig } = useConfigStore();
+    const { heliosLogs } = useLogsStore();
 
-    if (!coreState || !centralConfig) {
+    if (!coreState || !centralConfig || !heliosLogs) {
         return <></>;
     }
+
+    // heliosLogs contain the string "edge_fraction = 0.0"
+    // look for the last occurence of this string using regex
+    const lastEdgeFraction = heliosLogs
+        .join('\n')
+        .match(/edge_fraction = \d+(\.\d+)?\n/g)
+        ?.slice(-1)[0];
+    const lastEdgeFractionValue = lastEdgeFraction
+        ? parseFloat(lastEdgeFraction.split(' ')[2])
+        : null;
 
     return (
         <>
@@ -70,11 +82,13 @@ export function SystemState() {
                     <StatePanel title="Heater Power">
                         {renderBoolean(coreState.plc_state.power.heater)}
                     </StatePanel>
-                    <StatePanel title="Motor Failed">
-                        {renderBoolean(coreState.plc_state.state.motor_failed)}
-                    </StatePanel>
                     <StatePanel title="Rain Detected">
                         {renderBoolean(coreState.plc_state.state.rain)}
+                    </StatePanel>
+                    <StatePanel title="Helios Edges (meas. | requ.)">
+                        {renderNumber(lastEdgeFractionValue)}
+                        {' | '}
+                        {renderNumber(centralConfig.helios?.edge_pixel_threshold)}
                     </StatePanel>
                 </div>
             )}

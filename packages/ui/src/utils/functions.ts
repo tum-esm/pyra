@@ -17,6 +17,14 @@ export function renderBoolean(value: undefined | null | boolean) {
     }
 }
 
+export function renderNumber(value: undefined | null | string | number) {
+    if (value === undefined || value === null) {
+        return '-';
+    } else {
+        return `${value}`;
+    }
+}
+
 export function renderTimeObject(value: { hour: number; minute: number; second: number }) {
     const hourString = `${value.hour}`.padStart(2, '0');
     const minuteString = `${value.minute}`.padStart(2, '0');
