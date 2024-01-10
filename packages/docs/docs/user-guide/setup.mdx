@@ -80,17 +80,13 @@ The [**Pyra Setup Tool**](https://github.com/tum-esm/pyra-setup-tool) can be use
 
 **The setup tool requires you to use a unix-like shell environment (bash/sh/zsh/..., _not_ powershell).**
 
-On the first time, clone the setup tool repo:
+On the first time, clone the setup tool repo and install its dependencies:
 
 ```bash
 cd %userprofile%/Documents
 git clone https://github.com/tum-esm/pyra-setup-tool
-```
-
-The setup tool uses the `colorama` library:
-
-```bash
-python -m pip install colorama
+cd pyra-setup-tool
+pip install .
 ```
 
 **Run the tool with (from this point on it will auto-update itself):**
