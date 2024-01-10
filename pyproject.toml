@@ -83,3 +83,6 @@ markers = [
 add = ["--no-self"]
 install = ["--no-self"]
 remove = ["--no-self"]
+
+[tool.setuptools]
+packages = []
