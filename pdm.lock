@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:8dba8ba69cb704163ce863df6121180650f4d6f78f0a85f51bb621639dde4d4c"
+content_hash = "sha256:a18d5714669a9d0b92efce643f59f70074624e17827977d06d810e4cae5ab29b"
 
 [[package]]
 name = "annotated-types"
@@ -117,7 +117,7 @@ files = [
 
 [[package]]
 name = "circadian-scp-upload"
-version = "0.4.3"
+version = "0.4.6"
 requires_python = ">=3.8,<4.0"
 summary = "Resumable, interruptible, SCP upload client for any files or directories generated day by day"
 groups = ["default"]
@@ -128,8 +128,8 @@ dependencies = [
     "python-dotenv<2.0.0,>=1.0.0",
 ]
 files = [
-    {file = "circadian_scp_upload-0.4.3-py3-none-any.whl", hash = "sha256:f7f9d6f82fe0214dc434fa6ac808855f84eda3c879640ea884f56151bb34a4ef"},
-    {file = "circadian_scp_upload-0.4.3.tar.gz", hash = "sha256:c26224177af481273b3e10f2c41d7bc8425b358fa98720d3e34b93fce75f26b4"},
+    {file = "circadian_scp_upload-0.4.6-py3-none-any.whl", hash = "sha256:c911c596090bc462afc310e63945ea89b22c0f61a0a7de4e221944f9dd37b279"},
+    {file = "circadian_scp_upload-0.4.6.tar.gz", hash = "sha256:d4abbc98d12924f1775994d2083714e82e90bef23f22d4e71f26c3791e7d41fd"},
 ]
 
 [[package]]

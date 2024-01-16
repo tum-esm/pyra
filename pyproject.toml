@@ -20,7 +20,7 @@ dependencies = [
     "skyfield==1.46",
     "opencv-python==4.9.0.80",
     "pydantic==2.5.3",
-    "circadian-scp-upload==0.4.3",
+    "circadian-scp-upload==0.4.6",
     "tum-esm-utils==1.8.0",
     "polars-lts-cpu==0.20.3; sys_platform == \"win32\"",
     "pywin32==306; sys_platform == \"win32\"",
