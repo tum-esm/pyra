@@ -251,6 +251,7 @@ class PartialUploadConfig(StricterBaseModel):
     host: Optional[StrictIPAdress] = None
     user: Optional[str] = None
     password: Optional[str] = None
+    only_upload_at_night: Optional[bool] = None
     streams: Optional[list[UploadStreamConfig]] = None
 
 
