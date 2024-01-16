@@ -1,6 +1,7 @@
 from datetime import datetime
 import subprocess
 import os
+import sys
 import time
 from packages.core import types
 from typing import Any
@@ -9,7 +10,7 @@ from ..fixtures import sample_config, empty_logs
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
-INTERPRETER_PATH = os.path.join(PROJECT_DIR, ".venv", "bin", "python")
+INTERPRETER_PATH = sys.executable
 PYRA_CLI_PATH = os.path.join(PROJECT_DIR, "packages", "cli", "main.py")
 DEBUG_LOG_PATH = os.path.join(PROJECT_DIR, "logs", "debug.log")
 

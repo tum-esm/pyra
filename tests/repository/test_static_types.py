@@ -28,6 +28,4 @@ def test_static_types() -> None:
         "packages/cli/main.py",
         "tests/",
     ]:
-        assert os.system(
-            f"cd {PROJECT_DIR} && .venv/bin/python -m mypy {path}"
-        ) == 0
+        assert os.system(f"cd {PROJECT_DIR} && python -m mypy {path}") == 0

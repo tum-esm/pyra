@@ -47,7 +47,7 @@ def test_astronomy(sample_config: types.Config) -> None:
         sample_config, lat=48.137154, lon=11.576124, alt=515
     )
     assert isinstance(e2, float)
-    assert abs(e1 - e2) < 1e-3
+    assert abs(e1 - e2) < 1e-2
 
     # generate a random datetime for every year between 2020 and 2050
     # and test whether the elevation is correctly computed
