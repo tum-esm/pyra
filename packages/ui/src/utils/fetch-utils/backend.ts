@@ -1,8 +1,6 @@
 import { Command, ChildProcess } from '@tauri-apps/api/shell';
-import { customTypes } from '../../custom-types';
 import { join } from '@tauri-apps/api/path';
 import fetchUtils from '.';
-import { Config } from '../zustand-utils/config-zustand';
 
 async function callCLI(args: string[]): Promise<ChildProcess> {
     let projectDirPath = await fetchUtils.getProjectDirPath();
@@ -15,14 +13,14 @@ async function callCLI(args: string[]): Promise<ChildProcess> {
     console.debug(`Running shell command: "${commandString}" in directory "${projectDirPath}"`);
 
     return new Promise(async (resolve, reject) => {
-        const result = await new Command(pythonInterpreter, [pyraCLIEntrypoint, ...args], {
+        new Command(pythonInterpreter, [pyraCLIEntrypoint, ...args], {
             cwd: projectDirPath,
-        }).execute();
-        if (result.code === 0) {
+        }).execute().then((result) => {
             resolve(result);
-        } else {
-            reject(result);
-        }
+        }).catch((error) => {
+            console.error("Error when calling CLI: ", error);
+            reject(error);
+        });
     });
 }
 
