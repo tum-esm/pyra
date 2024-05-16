@@ -141,8 +141,8 @@ class UploadThread(AbstractThread):
                     f"waiting 60 minutes until looking for new files/directories"
                 )
                 waiting_start_time = datetime.datetime.now()
-                for i in range(30):
-                    for j in range(12):
+                for i in range(60):
+                    for _ in range(6):
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
@@ -156,7 +156,7 @@ class UploadThread(AbstractThread):
                             f"abort waiting because there might be new data to upload at 1am"
                         )
 
-                    minutes_left = 60 - ((i + 1) * 2)
+                    minutes_left = 59 - i
                     if minutes_left > 0:
                         logger.info(
                             f"waiting {minutes_left} more minutes until looking for new files/directories"
@@ -169,25 +169,20 @@ class UploadThread(AbstractThread):
                 logger.info(
                     f"waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
                 )
-                for i in range(10):
-                    for j in range(12):
+                for i in range(20):
+                    for _ in range(6):
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
 
                         time.sleep(10)
 
-                    minutes_left = 20 - ((i + 1) * 2)
+                    minutes_left = 19 - i
                     if minutes_left > 0:
                         logger.info(
                             f"waiting {minutes_left} more minutes until looking "
                             + "for new files/directories"
                         )
-
-                for i in range(5 * 6):
-                    if upload_should_abort():
-                        break
-                    time.sleep(10)
 
                 logger.info("stopping upload thread")
                 return
