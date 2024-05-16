@@ -73,10 +73,10 @@ def _test_uploading() -> None:
             _print_red("Could not connect to upload server")
             exit(1)
 
+        result: fabric.runners.Result
+
         try:
-            result: fabric.runners.Result = remote_connection.connection.run(
-                "ls ~ > /dev/null 2>&1"
-            )
+            result = remote_connection.connection.run("ls ~ > /dev/null 2>&1")
             if result.return_code == 0:
                 _print_green("Found home directory of upload user account")
             else:
@@ -90,7 +90,7 @@ def _test_uploading() -> None:
             exit(1)
 
         try:
-            result: fabric.runners.Result = remote_connection.connection.run(
+            result = remote_connection.connection.run(
                 "python3.10 --version > /dev/null 2>&1"
             )
             if result.return_code == 0:

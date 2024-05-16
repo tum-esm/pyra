@@ -65,6 +65,7 @@ module = [
     "deepdiff",
     "psutil",
     "skyfield.*",
+    "fabric.*",
 ]
 ignore_missing_imports = true
 
