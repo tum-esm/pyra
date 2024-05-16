@@ -44,10 +44,11 @@ class UploadThread(AbstractThread):
             UploadThread.last_measurement_time = datetime.datetime.now()
 
         # don't upload if system has been measuring in the last 10 minutes
-        if UploadThread.last_measurement_time is not None:
-            if ((datetime.datetime.now() -
-                 UploadThread.last_measurement_time).total_seconds() < 600):
-                return False
+        if config.upload.only_upload_when_not_measuring:
+            if UploadThread.last_measurement_time is not None:
+                if ((datetime.datetime.now() -
+                    UploadThread.last_measurement_time).total_seconds() < 600):
+                    return False
 
         return True
 

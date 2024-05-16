@@ -87,6 +87,7 @@ export const configSchema = z.object({
             user: z.string(),
             password: z.string(),
             only_upload_at_night: z.boolean(),
+            only_upload_when_not_measuring: z.boolean(),
             streams: z.array(
                 z.object({
                     is_active: z.boolean(),

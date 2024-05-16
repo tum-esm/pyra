@@ -31,6 +31,7 @@ export default function ConfigSectionUpload() {
             user: '...',
             password: '...',
             only_upload_at_night: true,
+            only_upload_when_not_measuring: true,
             streams: [],
         });
     }
@@ -138,6 +139,12 @@ export default function ConfigSectionUpload() {
                 setValue={(v: string) => setLocalConfigItem('upload.password', v)}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.password : 'null'}
             />
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementNote>
+                The upload only uploads data after the day of recording, so it works during active
+                measurements. However, you can use the following two options to reduce the load on
+                the PC during measurements.
+            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementBooleanToggle
                 title="Only Upload At Night"
                 value={localSectionConfig.only_upload_at_night}
@@ -148,6 +155,17 @@ export default function ConfigSectionUpload() {
             />
             <configurationComponents.ConfigElementNote>
                 At night = below 0° sun elevation
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementBooleanToggle
+                title="Only Upload When Not Measuring"
+                value={localSectionConfig.only_upload_when_not_measuring}
+                setValue={(v: boolean) => setLocalConfigItem(`upload.only_upload_when_not_measuring`, v)}
+                oldValue={
+                    centralSectionConfig !== null ? centralSectionConfig.only_upload_when_not_measuring : null
+                }
+            />
+            <configurationComponents.ConfigElementNote>
+                Stops upload immediately 
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             {localSectionConfig.streams.map((stream, index) => (

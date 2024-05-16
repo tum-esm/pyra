@@ -242,6 +242,7 @@ class UploadConfig(StricterBaseModel):
     user: str
     password: str
     only_upload_at_night: bool
+    only_upload_when_not_measuring: bool
     streams: list[UploadStreamConfig]
 
 
@@ -252,6 +253,7 @@ class PartialUploadConfig(StricterBaseModel):
     user: Optional[str] = None
     password: Optional[str] = None
     only_upload_at_night: Optional[bool] = None
+    only_upload_when_not_measuring: Optional[bool] = None
     streams: Optional[list[UploadStreamConfig]] = None
 
 
