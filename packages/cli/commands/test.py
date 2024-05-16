@@ -1,6 +1,7 @@
 import click
 import circadian_scp_upload
 from packages.core import interfaces, types, utils, modules
+import fabric.runners
 
 logger = utils.Logger(origin="cli")
 
@@ -67,8 +68,39 @@ def _test_uploading() -> None:
         config.upload.password,
     ) as remote_connection:
         if remote_connection.connection.is_connected:
-            _print_green("Successfully connected to upload server.")
-            return
+            _print_green("Successfully connected to upload server")
+        else:
+            _print_red("Could not connect to upload server")
+            exit(1)
 
-    _print_red("Could not connect to upload server.")
-    exit(1)
+        try:
+            result: fabric.runners.Result = remote_connection.connection.run(
+                "ls ~ > /dev/null 2>&1"
+            )
+            if result.return_code == 0:
+                _print_green("Found home directory of upload user account")
+            else:
+                raise
+        except Exception as e:
+            logger.debug(f"Exception: {e}")
+            _print_red(
+                "Upload user account does not have a home directory, " +
+                "command \"ls ~\" failed"
+            )
+            exit(1)
+
+        try:
+            result: fabric.runners.Result = remote_connection.connection.run(
+                "python3.10 --version > /dev/null 2>&1"
+            )
+            if result.return_code == 0:
+                _print_green("Found Python3.10 installation on upload server")
+            else:
+                raise
+        except Exception as e:
+            logger.debug(f"Exception: {e}")
+            _print_red(
+                "Python3.10 is not installed on upload server, " +
+                "command \"python3.10 --version\" failed"
+            )
+            exit(1)
