@@ -4,9 +4,8 @@ import fetchUtils from '.';
 
 async function callCLI(args: string[]): Promise<ChildProcess> {
     let projectDirPath = await fetchUtils.getProjectDirPath();
-
     let pythonInterpreter =
-        import.meta.env.VITE_ENVIRONMENT === 'development-moritz' ? 'venv-python' : 'system-python';
+        import.meta.env.VITE_PYTHON_INTERPRETER === 'venv' ? 'venv-python' : 'system-python';
     let pyraCLIEntrypoint = await join('packages', 'cli', 'main.py');
 
     const commandString = [pythonInterpreter, pyraCLIEntrypoint, ...args].join(' ');

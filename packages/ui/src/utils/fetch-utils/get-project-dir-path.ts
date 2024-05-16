@@ -1,25 +1,12 @@
-import { documentDir, join, downloadDir } from '@tauri-apps/api/path';
+import { documentDir, join } from '@tauri-apps/api/path';
+import {split, tail} from 'lodash';
 
 async function getProjectDirPath() {
-    let projectDirPath: string;
-    switch (import.meta.env.VITE_ENVIRONMENT) {
-        // on moritz personal machine
-        case 'development-moritz':
-            projectDirPath = await join(await documentDir(), 'work', 'esm', 'pyra');
-            break;
-
-        // on the R19 laptop the Documents folder is a network directory
-        // hence, we cannot use that one since some script do not run there
-        case 'development-R19':
-            projectDirPath = await join(await downloadDir(), 'pyra', `pyra-${APP_VERSION}`);
-            break;
-
-        // on all other systems (no development of PYRA)
-        default:
-            projectDirPath = await join(await documentDir(), 'pyra', `pyra-${APP_VERSION}`);
-            break;
+    if (import.meta.env.VITE_PYRA_DIRECTORY !== null) {
+        return await join(await documentDir(), await join(...tail(split(import.meta.env.VITE_PYRA_DIRECTORY, '/Documents/'))));
+    } else {
+        return await join(await documentDir(), 'pyra', `pyra-${APP_VERSION}`);
     }
-    return projectDirPath;
 }
 
 export default getProjectDirPath;
