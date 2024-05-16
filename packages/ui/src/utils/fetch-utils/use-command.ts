@@ -8,7 +8,10 @@ export default function useCommand() {
     const [commandIsRunning, setCommandIsRunning] = useState(false);
 
     function exitFromFailedProcess(p: ChildProcess, label: string): string {
-        addUiLogLine(`Error while ${label}.`, `stdout = ${p.stdout}, stderr = ${p.stderr}`);
+        addUiLogLine(
+            `Error while ${label}.`,
+            `stdout: "${p.stdout.trim()}"\nstderr: "${p.stderr.trim()}"`
+        );
         return `Error while ${label}, full error in UI logs`;
     }
 

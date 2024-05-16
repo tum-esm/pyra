@@ -14,12 +14,21 @@ async function callCLI(args: string[]): Promise<ChildProcess> {
     return new Promise(async (resolve, reject) => {
         new Command(pythonInterpreter, [pyraCLIEntrypoint, ...args], {
             cwd: projectDirPath,
-        }).execute().then((result) => {
-            resolve(result);
-        }).catch((error) => {
-            console.error("Error when calling CLI: ", error);
-            reject(error);
-        });
+        })
+            .execute()
+            .then((result) => {
+                if (result.code === 0) {
+                    console.debug('CLI command executed successfully');
+                    resolve(result);
+                } else {
+                    console.error('Error when calling CLI: ', result);
+                    reject(result);
+                }
+            })
+            .catch((error) => {
+                console.error('Error when calling CLI: ', error);
+                reject(error);
+            });
     });
 }
 
