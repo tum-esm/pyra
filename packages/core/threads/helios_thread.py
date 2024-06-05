@@ -315,10 +315,10 @@ class HeliosThread(AbstractThread):
             config = types.Config.load()
 
             try:
-
                 # Check for termination
                 if not HeliosThread.should_be_running(config):
                     if helios_instance is not None:
+                        logger.info("Helios thread has been terminated")
                         del helios_instance
                         helios_instance = None
                     return

@@ -32,18 +32,20 @@ class AbstractThread(abc.ABC):
         self.config = new_config
         should_be_running = self.__class__.should_be_running(self.config)
 
-        if should_be_running and (not self.is_initialized):
-            self.logger.info("Starting the thread")
-            self.is_initialized = True
-            self.thread.start()
-
-        # set up a new thread instance for the next time the thread should start
-        if self.is_initialized:
+        if not self.is_initialized:
+            if should_be_running:
+                self.logger.info("Starting the thread")
+                self.is_initialized = True
+                self.thread.start()
+            else:
+                self.logger.debug("Thread is not started")
+        else:
             if self.thread.is_alive():
                 self.logger.debug("Thread is alive")
             else:
                 self.logger.debug("Thread is not alive, running teardown")
                 self.thread.join()
+                # set up a new thread instance for the next time the thread should start
                 self.thread = self.get_new_thread_object()
                 self.is_initialized = False
 
