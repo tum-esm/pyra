@@ -73,6 +73,12 @@ export default function MeasurementDecision() {
                 successLabel: 'successfully set measurement mode, system will react soon',
                 onSuccess: () => {
                     setConfigItem('measurement_decision.mode', mode);
+                    if (mode === 'manual') {
+                        setConfigItem(
+                            'measurement_decision.manual_decision_result',
+                            coreState?.measurements_should_be_running || false
+                        );
+                    }
                 },
             });
         }
