@@ -334,6 +334,7 @@ class HeliosThread(AbstractThread):
                         helios_instance = None
                         time.sleep(1)
                 config = new_config
+                assert config.helios is not None, "This is a bug in Pyra"
 
                 # sleep while sun angle is too low
                 current_sun_elevation = utils.Astronomy.get_current_sun_elevation(
