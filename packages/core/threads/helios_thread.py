@@ -457,7 +457,14 @@ class HeliosThread(AbstractThread):
                         )
                         if update_state_file:
                             logger.info(
-                                f"State change: {'BAD -> GOOD' if new_state else 'GOOD -> BAD'}"
+                                f"State change: " + {
+                                    True: "GOOD",
+                                    False: "BAD",
+                                    None: "None",
+                                }[current_state] + " -> " + {
+                                    True: "GOOD",
+                                    False: "BAD",
+                                }[new_state]
                             )
                             interfaces.StateInterface.update_state(
                                 helios_indicates_good_conditions={ # type: ignore
