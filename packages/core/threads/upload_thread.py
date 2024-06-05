@@ -35,9 +35,11 @@ class UploadThread(AbstractThread):
             return False
 
         # (optional) don't upload during the day
-        if config.upload.only_upload_at_night:
-            if current_state.position.sun_elevation > 0:
-                return False
+        if (
+            config.upload.only_upload_at_night and
+            (current_state.position.sun_elevation > 0)
+        ):
+            return False
 
         # update last time of known measurements
         if current_state.measurements_should_be_running:
@@ -46,8 +48,9 @@ class UploadThread(AbstractThread):
         # don't upload if system has been measuring in the last 10 minutes
         if config.upload.only_upload_when_not_measuring:
             if UploadThread.last_measurement_time is not None:
-                if ((datetime.datetime.now() -
-                    UploadThread.last_measurement_time).total_seconds() < 600):
+                if ((
+                    datetime.datetime.now() - UploadThread.last_measurement_time
+                ).total_seconds() < 600):
                     return False
 
         return True
