@@ -312,17 +312,28 @@ class HeliosThread(AbstractThread):
 
         while True:
             start_time = time.time()
-            config = types.Config.load()
+            new_config = types.Config.load()
 
             try:
+
                 # Check for termination
-                if not HeliosThread.should_be_running(config):
+                if not HeliosThread.should_be_running(new_config):
                     if helios_instance is not None:
                         logger.info("Helios thread has been terminated")
                         del helios_instance
                         helios_instance = None
                     return
-                assert config.helios is not None, "This is a bug in Pyra"
+                assert new_config.helios is not None, "This is a bug in Pyra"
+
+                if new_config.helios.camera_id != config.helios.camera_id:
+                    if helios_instance is not None:
+                        logger.info(
+                            "Camera ID changed, reinitializing HeliosInterface"
+                        )
+                        del helios_instance
+                        helios_instance = None
+                        time.sleep(1)
+                config = new_config
 
                 # sleep while sun angle is too low
                 current_sun_elevation = utils.Astronomy.get_current_sun_elevation(
