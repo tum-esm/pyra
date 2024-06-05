@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:a18d5714669a9d0b92efce643f59f70074624e17827977d06d810e4cae5ab29b"
+content_hash = "sha256:33021687dce1fc4ae89d0be2b50c168de663c82f9da1258d69a7f33db4d10cf8"
 
 [[package]]
 name = "annotated-types"
@@ -721,6 +721,20 @@ dependencies = [
 files = [
     {file = "pytest-cov-4.1.0.tar.gz", hash = "sha256:3904b13dfbfec47f003b8e77fd5b589cd11904a21ddf1ab38a64f204d6a10ef6"},
     {file = "pytest_cov-4.1.0-py3-none-any.whl", hash = "sha256:6ba70b9e97e69fcc3fb45bfeab2d0a138fb65c4d0d6a41ef33983ad114be8c3a"},
+]
+
+[[package]]
+name = "pytest-order"
+version = "1.2.1"
+requires_python = ">=3.6"
+summary = "pytest plugin to run your tests in a specific order"
+groups = ["dev"]
+dependencies = [
+    "pytest>=6.2.4; python_version >= \"3.10\"",
+]
+files = [
+    {file = "pytest-order-1.2.1.tar.gz", hash = "sha256:4451bd8821ba4fa2109455a2fcc882af60ef8e53e09d244d67674be08f56eac3"},
+    {file = "pytest_order-1.2.1-py3-none-any.whl", hash = "sha256:c3082fc73f9ddcf13e4a22dda9bbcc2f39865bf537438a1d50fa241e028dd743"},
 ]
 
 [[package]]

@@ -2,7 +2,6 @@ import os
 from typing import Generator
 import shutil
 import pytest
-import subprocess
 import tum_esm_utils
 
 PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=3)
@@ -20,6 +19,7 @@ def setup() -> Generator[None, None, None]:
     shutil.rmtree(dst)
 
 
+@pytest.mark.order(2)
 @pytest.mark.ci
 def test_api_reference_state(setup: None) -> None:
     tum_esm_utils.shell.run_shell_command(

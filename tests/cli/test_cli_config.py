@@ -2,10 +2,8 @@ import json
 import subprocess
 import sys
 from packages.core import types
-from typing import Any
 import pytest
 import os
-from deepdiff import DeepDiff
 from ..fixtures import sample_config
 
 dir = os.path.dirname
@@ -46,6 +44,7 @@ def run_cli_command(
     return stdout
 
 
+@pytest.mark.order(3)
 @pytest.mark.ci
 def test_get_config(sample_config: types.Config) -> None:
     # get config from cli
@@ -60,12 +59,14 @@ def test_get_config(sample_config: types.Config) -> None:
     )
 
 
+@pytest.mark.order(3)
 @pytest.mark.ci
 def test_validate_current_config(sample_config: types.Config) -> None:
     stdout = run_cli_command(["config", "validate"], should_succeed=True)
     assert stdout.startswith("Current config file is valid")
 
 
+@pytest.mark.order(3)
 @pytest.mark.ci
 def test_update_config(sample_config: types.Config) -> None:
 
@@ -131,6 +132,7 @@ def test_update_config(sample_config: types.Config) -> None:
         )
 
 
+@pytest.mark.order(3)
 @pytest.mark.ci
 def test_add_default_config(sample_config: types.Config) -> None:
 

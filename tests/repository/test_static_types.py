@@ -17,6 +17,7 @@ def _rm(path: str) -> None:
     os.system(f"rm -rf {path}")
 
 
+@pytest.mark.order(1)
 @pytest.mark.ci
 def test_static_types() -> None:
     _rmdir(".mypy_cache/3.10/packages")

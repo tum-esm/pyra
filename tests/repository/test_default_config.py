@@ -10,6 +10,7 @@ sys.path.append(PROJECT_DIR)
 from packages.core import types
 
 
+@pytest.mark.order(2)
 @pytest.mark.ci
 def test_default_config() -> None:
 

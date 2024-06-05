@@ -7,8 +7,9 @@ import tum_esm_utils
 PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=3)
 
 
+@pytest.mark.order(2)
 @pytest.mark.ci
-def test_default_config() -> None:
+def test_version_numbers() -> None:
 
     with open(os.path.join(PROJECT_DIR, "pyproject.toml"), "r") as f:
         third_line = f.read().split("\n")[2]

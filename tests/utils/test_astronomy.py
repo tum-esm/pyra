@@ -14,6 +14,7 @@ sys.path.append(PROJECT_DIR)
 from packages.core import types, utils
 
 
+@pytest.mark.order(3)
 @pytest.mark.ci
 def test_astronomy(sample_config: types.Config) -> None:
     # disable test mode because in test mode it uses

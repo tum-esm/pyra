@@ -29,6 +29,7 @@ def run_cli_command(command: list[str]) -> str:
     return stdout
 
 
+@pytest.mark.order(3)
 @pytest.mark.ci
 def test_start_stop_procedure(
     sample_config: types.Config, empty_logs: Any
