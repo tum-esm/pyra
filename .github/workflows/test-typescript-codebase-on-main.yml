@@ -14,24 +14,24 @@ on:
       - "packages/ui/**"
       - ".github/workflows/test-typescript-codebase-on-main.yml"
 
+defaults:
+  run:
+    working-directory: packages/ui
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
+     - uses: actions/checkout@v4
 
-      - name: Set up NodeJS with Yarn
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          cache: "yarn"
-          cache-dependency-path: packages/ui/yarn.lock
+    - name: Set up NodeJS
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
-        working-directory: packages/ui
+        run: bun install
 
       - name: Build frontend
-        run: yarn build
-        working-directory: packages/ui
+        run: bun run build
