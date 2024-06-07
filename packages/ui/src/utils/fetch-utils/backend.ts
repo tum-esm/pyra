@@ -6,7 +6,7 @@ async function callCLI(args: string[]): Promise<ChildProcess> {
     let projectDirPath = await fetchUtils.getProjectDirPath();
     let pythonInterpreter =
         import.meta.env.VITE_PYTHON_INTERPRETER === 'venv' ? 'venv-python' : 'system-python';
-    let pyraCLIEntrypoint = await join('packages', 'cli', 'main.py');
+    let pyraCLIEntrypoint = await join('pyra', `pyra-${APP_VERSION}`, 'packages', 'cli', 'main.py');
 
     const commandString = [pythonInterpreter, pyraCLIEntrypoint, ...args].join(' ');
     console.debug(`Running shell command: "${commandString}" in directory "${projectDirPath}"`);
