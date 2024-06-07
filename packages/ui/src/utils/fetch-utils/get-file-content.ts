@@ -5,7 +5,7 @@ import { split, tail } from 'lodash';
 async function getFileContent(filePath: string): Promise<string> {
     let absoluteFilePath: string;
 
-    if (import.meta.env.VITE_PYRA_DIRECTORY !== null) {
+    if (import.meta.env.VITE_PYRA_DIRECTORY !== undefined) {
         absoluteFilePath = await join(
             ...tail(split(import.meta.env.VITE_PYRA_DIRECTORY, '/Documents/')),
             ...filePath.split('/')
@@ -14,7 +14,7 @@ async function getFileContent(filePath: string): Promise<string> {
         absoluteFilePath = await join('pyra', `pyra-${APP_VERSION}`, ...filePath.split('/'));
     }
 
-    console.debug(`Reading file: "~/Documents/${absoluteFilePath}"`);
+    console.debug(`Reading file: "${absoluteFilePath}" in ~/Documents`);
     return new TextDecoder('utf-8').decode(
         await readBinaryFile(absoluteFilePath, { dir: BaseDirectory.Document })
     );
