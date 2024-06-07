@@ -43,7 +43,7 @@ class SystemChecks:
             operating_system_state=types.OperatingSystemState(
                 cpu_usage=cpu_usage,
                 memory_usage=memory_usage,
-                last_boot_time=last_boot_time,
+                last_boot_time=str(last_boot_time),
                 filled_disk_space_fraction=disk_space,
             )
         )
