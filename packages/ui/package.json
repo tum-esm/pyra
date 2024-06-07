@@ -1,55 +1,55 @@
 {
-    "name": "pyra-ui",
-    "version": "4.1.3",
-    "private": true,
-    "scripts": {
-        "dev": "vite --port 3000",
-        "build": "tsc && vite build",
-        "preview": "vite preview",
-        "tauri": "tauri"
-    },
-    "dependencies": {
-        "@radix-ui/react-icons": "^1.3.0",
-        "@radix-ui/react-slot": "^1.0.2",
-        "@reduxjs/toolkit": "^1.8.2",
-        "@tabler/icons-react": "^2.40.0",
-        "@tauri-apps/api": "^1.5.1",
-        "@tauri-apps/cli": "^1.5.6",
-        "class-variance-authority": "^0.7.0",
-        "clsx": "^2.0.0",
-        "deep-diff": "^1.0.2",
-        "lodash": "4.17.21",
-        "moment": "^2.29.4",
-        "react": "18.2.0",
-        "react-dom": "18.2.0",
-        "react-hot-toast": "^2.4.1",
-        "recursive-diff": "^1.0.9",
-        "tailwind-merge": "^1.14.0",
-        "tailwindcss-animate": "^1.0.7",
-        "zod": "^3.22.4",
-        "zustand": "^4.4.3"
-    },
-    "devDependencies": {
-        "@tailwindcss/forms": "0.5.6",
-        "@types/deep-diff": "^1.0.4",
-        "@types/lodash": "4.14.199",
-        "@types/node": "^20.8.2",
-        "@types/react": "18.2.24",
-        "@types/react-dom": "18.2.8",
-        "@vitejs/plugin-react": "4.1.0",
-        "autoprefixer": "10.4.16",
-        "postcss": "8.4.31",
-        "tailwindcss": "3.3.3",
-        "tilg": "0.1.1",
-        "typedoc": "^0.25.1",
-        "typescript": "5.2.2",
-        "vite": "4.4.10"
-    },
-    "prettier": {
-        "trailingComma": "es5",
-        "tabWidth": 4,
-        "semi": true,
-        "singleQuote": true,
-        "printWidth": 100
-    }
+  "name": "pyra-ui",
+  "version": "4.1.3",
+  "private": true,
+  "scripts": {
+    "dev": "vite --port 3000",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@reduxjs/toolkit": "^1.9.7",
+    "@tabler/icons-react": "^2.47.0",
+    "@tauri-apps/api": "^1.5.6",
+    "@tauri-apps/cli": "^1.5.14",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "deep-diff": "^1.0.2",
+    "lodash": "4.17.21",
+    "moment": "^2.30.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-hot-toast": "^2.4.1",
+    "recursive-diff": "^1.0.9",
+    "tailwind-merge": "^1.14.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "0.5.6",
+    "@types/deep-diff": "^1.0.5",
+    "@types/lodash": "4.14.199",
+    "@types/node": "^20.14.2",
+    "@types/react": "18.2.24",
+    "@types/react-dom": "18.2.8",
+    "@vitejs/plugin-react": "4.1.0",
+    "autoprefixer": "10.4.16",
+    "postcss": "8.4.31",
+    "tailwindcss": "3.3.3",
+    "tilg": "0.1.1",
+    "typedoc": "^0.25.13",
+    "typescript": "5.2.2",
+    "vite": "^5.2.13"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 4,
+    "semi": true,
+    "singleQuote": true,
+    "printWidth": 100
+  }
 }

@@ -87,7 +87,7 @@ install = ["--no-self"]
 remove = ["--no-self"]
 
 [tool.pdm]
-package-type = "application"
+distribution = false
 
 [tool.setuptools]
 packages = []
