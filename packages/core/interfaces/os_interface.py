@@ -25,10 +25,11 @@ class OSInterface:
         """Raises LowEnergyError if system battery runs lower than 20%."""
 
         battery_level = tum_esm_utils.system.get_system_battery()
-        if battery_level < 20:
-            raise OSInterface.LowEnergyError(
-                "The battery of the system is below 20%. Please check the power supply."
-            )
+        if battery_level is not None:
+            if battery_level < 20:
+                raise OSInterface.LowEnergyError(
+                    "The battery of the system is below 20%. Please check the power supply."
+                )
 
     @staticmethod
     def get_process_status(process_name: str, ) -> str:

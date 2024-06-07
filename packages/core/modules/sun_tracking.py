@@ -318,7 +318,7 @@ class SunTracking:
 
         self.start_sun_tracking_automation()
 
-        tum_esm_utils.testing.wait_for_condition(
+        tum_esm_utils.timing.wait_for_condition(
             is_successful=SunTracking.camtracker_is_running,
             timeout_message="CamTracker did not start up within 20 seconds",
             timeout_seconds=30,
@@ -327,7 +327,7 @@ class SunTracking:
 
         self.stop_sun_tracking_automation()
 
-        tum_esm_utils.testing.wait_for_condition(
+        tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: not SunTracking.camtracker_is_running(),
             timeout_message="CamTracker did not close within 60 seconds",
             timeout_seconds=60,
