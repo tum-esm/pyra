@@ -29,15 +29,15 @@ https://www.python.org/
 Your system's python3.10 interpreter should be available as shell environment variable `python`. Therefore, you need to add system environment variables to point the `python` command (and `pip`) to the Python3.10 interpreter by checking the box marked in the image below.
 
 <img
-    src='/img/docs/python-310-path-automatic.png'
-    className='tw-rounded-lg tw-mb-4'
-    style={{ width: 600 }}
+  src="/img/docs/python-310-path-automatic.png"
+  className="tw-rounded-lg tw-mb-4"
+  style={{ width: 600 }}
 />
 
-<div className='tw-mb-2'>
-    <span className='tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5'>
-        Incomplete installation:
-    </span>
+<div className="tw-mb-2">
+  <span className="tw-bg-red-200 tw-text-red-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">
+    Incomplete installation:
+  </span>
 </div>
 
 ```
@@ -47,10 +47,10 @@ from the Microsoft Store, or disable this shortcut from
 Settings > Manage App Execution Aliases.
 ```
 
-<div className='tw-mb-2'>
-    <span className='tw-bg-green-200 tw-text-green-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5'>
-        Complete installation:
-    </span>
+<div className="tw-mb-2">
+  <span className="tw-bg-green-200 tw-text-green-900 tw-rounded tw-px-1 tw-font-semibold tw-py-0.5 -tw-my-0.5">
+    Complete installation:
+  </span>
 </div>
 
 ```
@@ -114,7 +114,7 @@ The UI installer can take a while to finish. Please be patient.
 
 You need to actively tell Windows about the `pyra-cli` command. When using the installer, it will tell you which path to [add to the environment variables](#add-environment-paths) on every install process.
 
-<img src='/img/docs/pyra-cli-path-request.png' className='tw-rounded tw-mb-4' />
+<img src="/img/docs/pyra-cli-path-request.png" className="tw-rounded tw-mb-4" />
 
 :::note
 
@@ -127,25 +127,25 @@ The edit of the path variable is only required once per Pyra computer - when set
 1. Look for the "Edit the system environment variables" utility
 
 <img
-    src='/img/docs/environment-path-manual-1.png'
-    className='tw-rounded-lg tw-mb-4'
-    style={{ width: 600 }}
+  src="/img/docs/environment-path-manual-1.png"
+  className="tw-rounded-lg tw-mb-4"
+  style={{ width: 600 }}
 />
 
 2. Click on "Environment Variables"
 
 <img
-    src='/img/docs/environment-path-manual-2.png'
-    className='tw-rounded-lg tw-mb-4'
-    style={{ width: 600 }}
+  src="/img/docs/environment-path-manual-2.png"
+  className="tw-rounded-lg tw-mb-4"
+  style={{ width: 600 }}
 />
 
 3. Select "PATH" in the system section and click on "Edit"
 
 <img
-    src='/img/docs/environment-path-manual-3.png'
-    className='tw-rounded-lg tw-mb-4'
-    style={{ width: 600 }}
+  src="/img/docs/environment-path-manual-3.png"
+  className="tw-rounded-lg tw-mb-4"
+  style={{ width: 600 }}
 />
 
 4. Add the required paths to the list
@@ -158,23 +158,15 @@ All Pyra releases can be found here: <span className="tw-break-all">https://gith
 
 For Pyra to send you error emails (see [Usage section](/docs/user-guide/usage-overview#error-emails)), you need an email account that allows this kind of connection.
 
-We are using Gmail for this. You have to use an "App Password" for Pyra, which requires 2FA for your Google Account. Please refer to this article on how to set up an "App Password": <span className="tw-break-all">https://support.google.com/accounts/answer/185833</span>. Inside the config tab, you have to add this "App Password" to receive emails:
+<img src="/img/docs/email-config.png" className="tw-rounded-lg tw-mb-4" />
 
-<img src='/img/docs/email-config.png' className='tw-rounded-lg tw-mb-4' />
-
-:::note
-
-There is a test script to test whether email sending works. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).
-
-We plan to add a button "test emailing" to the config tab: https://github.com/tum-esm/pyra/issues/109
-
-:::
+We recommend using a functional account from your university.
 
 :::caution
 
-The "Gmail password" and the "app password" are not the same.
+If you use Gmail, you have to use an "App Password" for Pyra, which requires 2FA for your Google Account. Please refer to this article on how to set up an "App Password": <span className="tw-break-all">https://support.google.com/accounts/answer/185833</span>.
 
-Whenever changing/resetting the "Gmail password", all "app passwords" will be invalidated.
+The "Gmail password" and the "app password" are not the same. Whenever changing/resetting the "Gmail password", all "app passwords" will be invalidated.
 
 :::
 
