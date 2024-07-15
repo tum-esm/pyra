@@ -122,7 +122,4 @@ class ThingsBoardThread(AbstractThread):
                     logger.info("Failed to publish last telemetry data.")
 
             if config.thingsboard is not None:
-                if config.thingsboard.seconds_per_publish_interval is None:
-                    time.sleep(60)
-                else:
-                    time.sleep(config.thingsboard.seconds_per_publish_interval)
+                time.sleep(config.thingsboard.seconds_per_publish_interval)
