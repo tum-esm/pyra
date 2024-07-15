@@ -3,6 +3,7 @@ from packages.core import types, utils, interfaces
 from tb_device_mqtt import TBDeviceMqttClient  # type: ignore
 import threading
 import time
+from typing import Dict, Union, Optional
 
 
 class ThingsBoardThread(AbstractThread):
@@ -64,11 +65,32 @@ class ThingsBoardThread(AbstractThread):
             else:
                 # read latest state file
                 current_state = interfaces.StateInterface.load_state()
+                state: Dict[str, Optional[Union[str, bool, int, float]]] = {
+                    "last_updated": str(current_state.last_updated),
+                    "helios_indicates_good_conditions": current_state.helios_indicates_good_conditions,
+                    "measurements_should_be_running": current_state.measurements_should_be_running,
+                    "memory_usage": current_state.operating_system_state.memory_usage,
+                    "filled_disk_space_fraction": current_state.operating_system_state.filled_disk_space_fraction,
+                    "fan_speed": current_state.plc_state.actors.fan_speed,
+                    "current_angle": current_state.plc_state.actors.current_angle,
+                    "auto_temp_mode": current_state.plc_state.control.auto_temp_mode,
+                    "manual_control": current_state.plc_state.control.manual_control,
+                    "manual_temp_mode": current_state.plc_state.control.manual_temp_mode,
+                    "sync_to_tracker": current_state.plc_state.control.sync_to_tracker,
+                    "humidity": current_state.plc_state.sensors.humidity,
+                    "temperature": current_state.plc_state.sensors.temperature,
+                    "cover_closed": current_state.plc_state.state.cover_closed,
+                    "motor_failed": current_state.plc_state.state.motor_failed,
+                    "rain": current_state.plc_state.state.rain,
+                    "reset_needed": current_state.plc_state.state.reset_needed,
+                    "ups_alert": current_state.plc_state.state.ups_alert,
+                    "heater": current_state.plc_state.power.heater,
+                    "spectrometer": current_state.plc_state.power.spectrometer,
+                }
 
-                # TODO: inset state file parameters into telemetry payload
                 telemetry_with_ts = {
                     "ts": int(round(time.time() * 1000)),
-                    "values": {"temperature": 42.1, "humidity": 70},
+                    "values": state,
                 }
 
                 try:
