@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
-lock_version = "4.4.1"
-content_hash = "sha256:61ea7749c08bbf221be9d1573d83aa82d4aae1cb447cfb1c71f27264a7a92947"
+lock_version = "4.4.2"
+content_hash = "sha256:effa843c8783c7471f4decb29b0ca9601407ed2f8876335d83fdde5960faae85"
 
 [[package]]
 name = "annotated-types"
@@ -855,6 +855,30 @@ files = [
 ]
 
 [[package]]
+name = "simplejson"
+version = "3.19.2"
+requires_python = ">=2.5, !=3.0.*, !=3.1.*, !=3.2.*"
+summary = "Simple, fast, extensible JSON encoder/decoder for Python"
+groups = ["default"]
+files = [
+    {file = "simplejson-3.19.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:2f98d918f7f3aaf4b91f2b08c0c92b1774aea113334f7cde4fe40e777114dbe6"},
+    {file = "simplejson-3.19.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:7d74beca677623481810c7052926365d5f07393c72cbf62d6cce29991b676402"},
+    {file = "simplejson-3.19.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:7f2398361508c560d0bf1773af19e9fe644e218f2a814a02210ac2c97ad70db0"},
+    {file = "simplejson-3.19.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6ad331349b0b9ca6da86064a3599c425c7a21cd41616e175ddba0866da32df48"},
+    {file = "simplejson-3.19.2-cp310-cp310-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:332c848f02d71a649272b3f1feccacb7e4f7e6de4a2e6dc70a32645326f3d428"},
+    {file = "simplejson-3.19.2-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:25785d038281cd106c0d91a68b9930049b6464288cea59ba95b35ee37c2d23a5"},
+    {file = "simplejson-3.19.2-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:18955c1da6fc39d957adfa346f75226246b6569e096ac9e40f67d102278c3bcb"},
+    {file = "simplejson-3.19.2-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:11cc3afd8160d44582543838b7e4f9aa5e97865322844b75d51bf4e0e413bb3e"},
+    {file = "simplejson-3.19.2-cp310-cp310-musllinux_1_1_i686.whl", hash = "sha256:b01fda3e95d07a6148702a641e5e293b6da7863f8bc9b967f62db9461330562c"},
+    {file = "simplejson-3.19.2-cp310-cp310-musllinux_1_1_ppc64le.whl", hash = "sha256:778331444917108fa8441f59af45886270d33ce8a23bfc4f9b192c0b2ecef1b3"},
+    {file = "simplejson-3.19.2-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:9eb117db8d7ed733a7317c4215c35993b815bf6aeab67523f1f11e108c040672"},
+    {file = "simplejson-3.19.2-cp310-cp310-win32.whl", hash = "sha256:39b6d79f5cbfa3eb63a869639cfacf7c41d753c64f7801efc72692c1b2637ac7"},
+    {file = "simplejson-3.19.2-cp310-cp310-win_amd64.whl", hash = "sha256:5675e9d8eeef0aa06093c1ff898413ade042d73dc920a03e8cea2fb68f62445a"},
+    {file = "simplejson-3.19.2-py3-none-any.whl", hash = "sha256:bcedf4cae0d47839fee7de344f96b5694ca53c786f28b5f773d4f0b265a159eb"},
+    {file = "simplejson-3.19.2.tar.gz", hash = "sha256:9eb442a2442ce417801c912df68e1f6ccfcd41577ae7274953ab3ad24ef7d82c"},
+]
+
+[[package]]
 name = "skyfield"
 version = "1.46"
 summary = "Elegant astronomy for Python"
@@ -868,6 +892,31 @@ dependencies = [
 files = [
     {file = "skyfield-1.46-py3-none-any.whl", hash = "sha256:a2ddbef6f1cc3e649ad04b2317b57e8269593f2f90cc845eaccc1e4f50441112"},
     {file = "skyfield-1.46.tar.gz", hash = "sha256:27a54edbc46232a11019bcd88a9b74d36770aff26ff8ee631b90a81ba0be93e4"},
+]
+
+[[package]]
+name = "tb-mqtt-client"
+version = "1.9.9"
+requires_python = ">=3.7"
+summary = "ThingsBoard python client SDK"
+groups = ["default"]
+dependencies = [
+    "requests>=2.31.0",
+    "simplejson",
+    "tb-paho-mqtt-client>=1.6.3",
+]
+files = [
+    {file = "tb-mqtt-client-1.9.9.tar.gz", hash = "sha256:cb5c6bed4575d3be9d0e3d2e8452c36e89d2204fe0d5b5ddb1b65aeb25eca3aa"},
+]
+
+[[package]]
+name = "tb-paho-mqtt-client"
+version = "1.6.3"
+summary = "MQTT version 5.0/3.1.1 client class"
+groups = ["default"]
+files = [
+    {file = "tb-paho-mqtt-client-1.6.3.tar.gz", hash = "sha256:7c032e6e2c7ee4739ab564f102f14e83e06ccb5b3ad3b55c28bfa7e1a2979894"},
+    {file = "tb_paho_mqtt_client-1.6.3-py3-none-any.whl", hash = "sha256:4dbb4f47d1c8239b26ca9acc9be05db09a29c60587ba2456b1ee0db9b8caec7a"},
 ]
 
 [[package]]

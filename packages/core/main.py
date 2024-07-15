@@ -79,9 +79,7 @@ def run() -> None:
     according to the config.
     """
 
-    logger.info(
-        f"Starting mainloop inside process with process ID {os.getpid()}"
-    )
+    logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
 
     # Loop until a valid config has been found. Without
     # an invalid config, the mainloop cannot initialize
@@ -91,8 +89,8 @@ def run() -> None:
             break
         except ValueError as e:
             logger.error(
-                "Invalid config, waiting 10 seconds: " +
-                str(e).replace("Config is invalid:", "")
+                "Invalid config, waiting 10 seconds: "
+                + str(e).replace("Config is invalid:", "")
             )
             time.sleep(10)
         except Exception as e:
@@ -106,29 +104,25 @@ def run() -> None:
     # these modules will be executed one by one in each
     # mainloop iteration
     logger.info("Initializing mainloop modules")
-    mainloop_modules: list[tuple[
-        Literal[
-            "measurement-conditions",
-            "enclosure-control",
-            "sun-tracking",
-            "opus-measurement",
-            "system-checks",
-        ],
-        Callable[[types.Config], None],
-    ]] = [
+    mainloop_modules: list[
+        tuple[
+            Literal[
+                "measurement-conditions",
+                "enclosure-control",
+                "sun-tracking",
+                "opus-measurement",
+                "system-checks",
+            ],
+            Callable[[types.Config], None],
+        ]
+    ] = [
         (
             "measurement-conditions",
             modules.measurement_conditions.MeasurementConditions(config).run,
         ),
-        (
-            "enclosure-control",
-            modules.enclosure_control.EnclosureControl(config).run
-        ),
+        ("enclosure-control", modules.enclosure_control.EnclosureControl(config).run),
         ("sun-tracking", modules.sun_tracking.SunTracking(config).run),
-        (
-            "opus-measurement",
-            modules.opus_measurement.OpusMeasurement(config).run
-        ),
+        ("opus-measurement", modules.opus_measurement.OpusMeasurement(config).run),
         ("system-checks", modules.system_checks.SystemChecks(config).run),
     ]
 
@@ -139,9 +133,9 @@ def run() -> None:
     logger.info("Initializing threads")
     helios_thread_instance = threads.HeliosThread(config)
     upload_thread_instance = threads.UploadThread(config)
+    thingsboard_instance = threads.ThingsBoardThread(config)
 
-    current_exceptions = interfaces.StateInterface.load_state(
-    ).current_exceptions or []
+    current_exceptions = interfaces.StateInterface.load_state().current_exceptions or []
 
     logger.info("Removing temporary state from previous runs")
     interfaces.StateInterface.update_state(
@@ -153,8 +147,9 @@ def run() -> None:
     def _graceful_teardown(*args: Any) -> None:
         logger.info("Received shutdown signal, starting graceful teardown")
         interfaces.ActivityHistoryInterface.dump_current_activity_history()
-        current_exceptions = interfaces.StateInterface.load_state(
-        ).current_exceptions or []
+        current_exceptions = (
+            interfaces.StateInterface.load_state().current_exceptions or []
+        )
         interfaces.StateInterface.update_state(
             current_exceptions=current_exceptions, enforce_none_values=True
         )
@@ -178,8 +173,8 @@ def run() -> None:
             config = types.Config.load()
         except ValueError as e:
             logger.error(
-                "Invalid config, waiting 10 seconds: " +
-                str(e).replace("Config is invalid:", "")
+                "Invalid config, waiting 10 seconds: "
+                + str(e).replace("Config is invalid:", "")
             )
             time.sleep(10)
             continue
@@ -193,6 +188,7 @@ def run() -> None:
         # possibly (re)start each thread
         helios_thread_instance.update_thread_state(config)
         upload_thread_instance.update_thread_state(config)
+        thingsboard_instance.update_thread_state(config)
 
         if config.general.test_mode:
             logger.info("pyra-core in test mode")
