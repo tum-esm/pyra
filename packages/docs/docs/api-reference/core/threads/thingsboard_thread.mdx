@@ -1,0 +1,54 @@
+---
+hide_table_of_contents: true
+---
+
+<!-- markdownlint-disable -->
+
+# <kbd>module</kbd> `core.threads.thingsboard_thread`
+
+
+
+
+
+
+---
+
+## <kbd>class</kbd> `ThingsBoardThread`
+
+
+
+
+
+
+
+---
+
+### <kbd>method</kbd> `get_new_thread_object`
+
+```python
+get_new_thread_object() → Thread
+```
+
+Return a new thread object that is to be started. 
+
+---
+
+### <kbd>method</kbd> `main`
+
+```python
+main(headless: bool = False) → None
+```
+
+Main entrypoint of the thread. In headless mode, don't write to log files but print to console. 
+
+---
+
+### <kbd>method</kbd> `should_be_running`
+
+```python
+should_be_running(config: Config) → bool
+```
+
+Based on the config, should the thread be running or not? 
+
+
