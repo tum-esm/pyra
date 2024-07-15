@@ -259,16 +259,16 @@ class PartialUploadConfig(StricterBaseModel):
 
 class ThingsBoardConfig(StricterBaseModel):
     host: str
-    port: int
-    user: str
-    password: str
+    access_token: int
+    ca_cert: Optional[str]
+    cert_file: Optional[str]
 
 
 class PartialThingsBoardConfig(StricterBaseModel):
     host: Optional[str] = None
-    port: Optional[int] = None
-    user: Optional[str] = None
-    password: Optional[str] = None
+    access_token: Optional[int] = None
+    ca_cert: Optional[str] = None
+    cert_file: Optional[str] = None
 
 
 class Config(StricterBaseModel):

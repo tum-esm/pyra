@@ -1,5 +1,6 @@
 from .abstract_thread import AbstractThread
 from packages.core import types, utils, interfaces
+from tb_device_mqtt import TBDeviceMqttClient  # type: ignore
 import threading
 import time
 
@@ -10,11 +11,11 @@ class ThingsBoardThread(AbstractThread):
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
 
-        # only upload when upload is configured
+        # only publish data when Thingsboard is configured
         if config.thingsboard is None:
             return False
 
-        # don't upload in test mode
+        # don't publish in test mode
         if config.general.test_mode:
             return False
 
@@ -30,10 +31,55 @@ class ThingsBoardThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="upload", just_print=headless)
+        logger = utils.Logger(origin="thingsboard", just_print=headless)
         config = types.Config.load()
         assert config.thingsboard is not None
 
+        # initialize MQTT client
+        client = TBDeviceMqttClient(
+            config.thingsboard.host, username=config.thingsboard.access_token
+        )
+
+        # connect to MQTT broker
+        if config.thingsboard.ca_cert and config.thingsboard.cert_file:
+            client.connect(
+                tls=True,
+                ca_certs=config.thingsboard.ca_cert,
+                cert_file=config.thingsboard.cert_file,
+            )
+        else:
+            client.connect()
+
+        logger.info("Succesfully connected to Thingsboard Broker.")
+
         while True:
-            print(1)
-            time.sleep(60)
+            # Read latest config
+            config = types.Config.load()
+            if not ThingsBoardThread.should_be_running(config):
+                logger.info("ThingsboardThread shall not be running anymore.")
+                client.disconnect()
+                return
+
+            # publish if client is connected
+            if not client.is_connected():
+                logger.warning(
+                    "Client is currently not connected. Waiting for reconnect."
+                )
+            else:
+                # read latest state file
+                current_state = interfaces.StateInterface.load_state()
+
+                # TODO: inset state file parameters into telemetry payload
+                telemetry_with_ts = {
+                    "ts": int(round(time.time() * 1000)),
+                    "values": {"temperature": 42.1, "humidity": 70},
+                }
+
+                try:
+                    # Sending telemetry without checking the delivery status (QoS0)
+                    client.send_telemetry(telemetry_with_ts)
+                except Exception as e:
+                    logger.exception(e)
+                    logger.info("Failed to publish last telemetry data.")
+
+            time.sleep(config.general.seconds_per_core_interval)

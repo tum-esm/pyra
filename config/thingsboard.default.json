@@ -1,6 +1,6 @@
 {
-    "host": "10.0.0.4",
-    "port": 8883,
-    "user": "...",
-    "password": "..."
+    "host": "0.0.0.0",
+    "access_token": "...",
+    "ca_cert": null,
+    "cert_file": null
   }
