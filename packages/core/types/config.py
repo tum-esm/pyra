@@ -7,7 +7,9 @@ import filelock
 import pydantic
 import tum_esm_utils
 
-_PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
+_PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(
+    __file__, current_depth=4
+)
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
 _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
@@ -22,11 +24,9 @@ class StrictFilePath(pydantic.RootModel[str]):
     @pydantic.field_validator("root")
     @classmethod
     def path_should_exist(cls, v: str, info: pydantic.ValidationInfo) -> str:
-        ignore_path_existence = (
-            (info.context.get("ignore-path-existence") == True)
-            if isinstance(info.context, dict)
-            else False
-        )
+        ignore_path_existence = ((
+            info.context.get("ignore-path-existence") == True
+        ) if isinstance(info.context, dict) else False)
         if (not ignore_path_existence) and (not os.path.isfile(v)):
             raise ValueError("File does not exist")
         return v
@@ -38,11 +38,9 @@ class StrictDirectoryPath(pydantic.RootModel[str]):
     @pydantic.field_validator("root")
     @classmethod
     def path_should_exist(cls, v: str, info: pydantic.ValidationInfo) -> str:
-        ignore_path_existence = (
-            (info.context.get("ignore-path-existence") == True)
-            if isinstance(info.context, dict)
-            else False
-        )
+        ignore_path_existence = ((
+            info.context.get("ignore-path-existence") == True
+        ) if isinstance(info.context, dict) else False)
         if (not ignore_path_existence) and (not os.path.isdir(v)):
             raise ValueError("Directory does not exist")
         return v
@@ -81,7 +79,9 @@ class PartialGeneralConfig(StricterBaseModel):
     """Like `GeneralConfig`, but all fields are optional."""
 
     version: Literal["4.1.3"] = "4.1.3"
-    seconds_per_core_interval: Optional[float] = pydantic.Field(None, ge=5, le=600)
+    seconds_per_core_interval: Optional[float] = pydantic.Field(
+        None, ge=5, le=600
+    )
     test_mode: Optional[bool] = None
     station_id: Optional[str] = None
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
@@ -260,12 +260,16 @@ class PartialUploadConfig(StricterBaseModel):
 class ThingsBoardConfig(StricterBaseModel):
     host: str
     access_token: int
+    seconds_per_publish_interval: int = pydantic.Field(..., ge=30, le=999999)
     ca_cert: Optional[str]
 
 
 class PartialThingsBoardConfig(StricterBaseModel):
     host: Optional[str] = None
     access_token: Optional[int] = None
+    seconds_per_publish_interval: Optional[int] = pydantic.Field(
+        None, ge=30, le=999999
+    )
     ca_cert: Optional[str] = None
 
 
@@ -310,12 +314,16 @@ class Config(StricterBaseModel):
                 if isinstance(config_object, dict):
                     return Config.model_validate(
                         config_object,
-                        context={"ignore-path-existence": ignore_path_existence},
+                        context={
+                            "ignore-path-existence": ignore_path_existence
+                        },
                     )
                 else:
                     return Config.model_validate_json(
                         config_object,
-                        context={"ignore-path-existence": ignore_path_existence},
+                        context={
+                            "ignore-path-existence": ignore_path_existence
+                        },
                     )
             else:
 
@@ -323,7 +331,9 @@ class Config(StricterBaseModel):
                     with open(_CONFIG_FILE_PATH) as f:
                         return Config.model_validate_json(
                             f.read(),
-                            context={"ignore-path-existence": ignore_path_existence},
+                            context={
+                                "ignore-path-existence": ignore_path_existence
+                            },
                         )
 
                 if with_filelock:
@@ -337,7 +347,9 @@ class Config(StricterBaseModel):
                 location = ".".join([str(err) for err in er["loc"]])
                 message = er["msg"]
                 value = er["input"]
-                pretty_errors.append(f"Error in {location}: {message} (value: {value})")
+                pretty_errors.append(
+                    f"Error in {location}: {message} (value: {value})"
+                )
 
             # the "from None" suppresses the pydantic exception
             raise ValueError(
@@ -355,7 +367,9 @@ class Config(StricterBaseModel):
 
     @staticmethod
     @contextlib.contextmanager
-    @tum_esm_utils.decorators.with_filelock(lockfile_path=_CONFIG_LOCK_PATH, timeout=5)
+    @tum_esm_utils.decorators.with_filelock(
+        lockfile_path=_CONFIG_LOCK_PATH, timeout=5
+    )
     def update_in_context() -> Generator[Config, None, None]:
         """Update the confug file in a context manager.
 
@@ -396,7 +410,10 @@ class PartialConfig(StricterBaseModel):
     thingsboard: Optional[PartialThingsBoardConfig] = None
 
     @staticmethod
-    def load(config_object: str, ignore_path_existence: bool = False) -> PartialConfig:
+    def load(
+        config_object: str,
+        ignore_path_existence: bool = False
+    ) -> PartialConfig:
         """Load a partial config file.
 
         Args:
@@ -422,7 +439,9 @@ class PartialConfig(StricterBaseModel):
                 location = ".".join([str(err) for err in er["loc"]])
                 message = er["msg"]
                 value = er["input"]
-                pretty_errors.append(f"Error in {location}: {message} (value: {value})")
+                pretty_errors.append(
+                    f"Error in {location}: {message} (value: {value})"
+                )
 
             # the "from None" suppresses the pydantic exception
             raise ValueError(
