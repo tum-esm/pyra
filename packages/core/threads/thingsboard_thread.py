@@ -94,8 +94,9 @@ class ThingsBoardThread(AbstractThread):
                 }
 
                 try:
-                    # Sending telemetry without checking the delivery status (QoS0)
-                    client.send_telemetry(telemetry_with_ts)
+                    # Sending telemetry without checking the delivery status (QoS1)
+                    result = client.send_telemetry(telemetry_with_ts)
+                    logger.info(f"Published with result: {result}")
                 except Exception as e:
                     logger.exception(e)
                     logger.info("Failed to publish last telemetry data.")
