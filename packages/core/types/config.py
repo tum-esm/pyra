@@ -259,14 +259,14 @@ class PartialUploadConfig(StricterBaseModel):
 
 class ThingsBoardConfig(StricterBaseModel):
     host: str
-    access_token: int
+    access_token: str
     seconds_per_publish_interval: int = pydantic.Field(..., ge=30, le=999999)
     ca_cert: Optional[str]
 
 
 class PartialThingsBoardConfig(StricterBaseModel):
     host: Optional[str] = None
-    access_token: Optional[int] = None
+    access_token: Optional[str] = None
     seconds_per_publish_interval: Optional[int] = pydantic.Field(
         None, ge=30, le=999999
     )
