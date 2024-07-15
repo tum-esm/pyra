@@ -34,4 +34,7 @@ def test_default_config() -> None:
     with open(
         os.path.join(CONFIG_DIR, "thingsboard.config.default.json"), "r"
     ) as f:
-        types.config.ThingsBoardConfig.model_validate_json(f.read())
+        types.config.ThingsBoardConfig.model_validate_json(
+            f.read(),
+            context={"ignore-path-existence": True},
+        )
