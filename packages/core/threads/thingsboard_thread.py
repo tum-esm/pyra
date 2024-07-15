@@ -41,12 +41,8 @@ class ThingsBoardThread(AbstractThread):
         )
 
         # connect to MQTT broker
-        if config.thingsboard.ca_cert and config.thingsboard.cert_file:
-            client.connect(
-                tls=True,
-                ca_certs=config.thingsboard.ca_cert,
-                cert_file=config.thingsboard.cert_file,
-            )
+        if config.thingsboard.ca_cert:
+            client.connect(tls=True, ca_certs=config.thingsboard.ca_cert)
         else:
             client.connect()
 

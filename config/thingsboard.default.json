@@ -1,6 +1,5 @@
 {
     "host": "0.0.0.0",
     "access_token": "...",
-    "ca_cert": null,
-    "cert_file": null
+    "ca_cert": null
   }
