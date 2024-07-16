@@ -21,28 +21,28 @@ class StricterBaseModel(pydantic.BaseModel):
 class StrictFilePath(pydantic.RootModel[str]):
     root: str
 
-    @pydantic.field_validator('root')
+    @pydantic.field_validator("root")
     @classmethod
     def path_should_exist(cls, v: str, info: pydantic.ValidationInfo) -> str:
-        ignore_path_existence = (
-            info.context.get('ignore-path-existence') == True
-        ) if isinstance(info.context, dict) else False
+        ignore_path_existence = ((
+            info.context.get("ignore-path-existence") == True
+        ) if isinstance(info.context, dict) else False)
         if (not ignore_path_existence) and (not os.path.isfile(v)):
-            raise ValueError('File does not exist')
+            raise ValueError("File does not exist")
         return v
 
 
 class StrictDirectoryPath(pydantic.RootModel[str]):
     root: str
 
-    @pydantic.field_validator('root')
+    @pydantic.field_validator("root")
     @classmethod
     def path_should_exist(cls, v: str, info: pydantic.ValidationInfo) -> str:
-        ignore_path_existence = (
-            info.context.get('ignore-path-existence') == True
-        ) if isinstance(info.context, dict) else False
+        ignore_path_existence = ((
+            info.context.get("ignore-path-existence") == True
+        ) if isinstance(info.context, dict) else False)
         if (not ignore_path_existence) and (not os.path.isdir(v)):
-            raise ValueError('Directory does not exist')
+            raise ValueError("Directory does not exist")
         return v
 
 
@@ -257,6 +257,22 @@ class PartialUploadConfig(StricterBaseModel):
     streams: Optional[list[UploadStreamConfig]] = None
 
 
+class ThingsBoardConfig(StricterBaseModel):
+    host: str
+    access_token: str
+    seconds_per_publish_interval: int = pydantic.Field(..., ge=30, le=999999)
+    ca_cert: Optional[str]
+
+
+class PartialThingsBoardConfig(StricterBaseModel):
+    host: Optional[str] = None
+    access_token: Optional[str] = None
+    seconds_per_publish_interval: Optional[int] = pydantic.Field(
+        None, ge=30, le=999999
+    )
+    ca_cert: Optional[str] = None
+
+
 class Config(StricterBaseModel):
     general: GeneralConfig
     opus: OpusConfig
@@ -267,15 +283,16 @@ class Config(StricterBaseModel):
     tum_plc: Optional[TumPlcConfig] = None
     helios: Optional[HeliosConfig] = None
     upload: Optional[UploadConfig] = None
+    thingsboard: Optional[ThingsBoardConfig] = None
 
     @staticmethod
     def load(
         config_object: Optional[str | dict[Any, Any]] = None,
         with_filelock: bool = True,
-        ignore_path_existence: bool = False
+        ignore_path_existence: bool = False,
     ) -> Config:
         """Load the config file.
-        
+
         Args:
             config_object:          If provided, the config file will be ignored and
                                     the provided content will be used instead. Defaults
@@ -285,9 +302,9 @@ class Config(StricterBaseModel):
             ignore_path_existence:  If True, the existence of the file and directory
                                     paths used in the whole config file will not be
                                     checked. Defaults to False.
-        
+
         Returns:  The loaded config object.
-        
+
         Raises:
             ValueError:  If the config file is invalid.
         """
@@ -336,7 +353,7 @@ class Config(StricterBaseModel):
 
             # the "from None" suppresses the pydantic exception
             raise ValueError(
-                "Config is invalid:\n" + ',\n'.join(pretty_errors)
+                "Config is invalid:\n" + ",\n".join(pretty_errors)
             ) from None
 
     def dump(self, with_filelock: bool = True) -> None:
@@ -355,9 +372,9 @@ class Config(StricterBaseModel):
     )
     def update_in_context() -> Generator[Config, None, None]:
         """Update the confug file in a context manager.
-        
+
         Example:
-        
+
         ```python
         with Config.update_in_context() as state:
             config.somesetting = somevalue
@@ -390,6 +407,7 @@ class PartialConfig(StricterBaseModel):
     tum_plc: Optional[PartialTumPlcConfig] = None
     helios: Optional[PartialHeliosConfig] = None
     upload: Optional[PartialUploadConfig] = None
+    thingsboard: Optional[PartialThingsBoardConfig] = None
 
     @staticmethod
     def load(
@@ -397,15 +415,15 @@ class PartialConfig(StricterBaseModel):
         ignore_path_existence: bool = False
     ) -> PartialConfig:
         """Load a partial config file.
-        
+
         Args:
             config_object:          JSON string containing a partial config.
             ignore_path_existence:  If True, the existence of the file and directory
                                     paths used in the whole config file will not be
                                     checked. Defaults to False.
-        
+
         Returns:  The loaded partial config object.
-        
+
         Raises:
             ValueError:  If the config file is invalid.
         """

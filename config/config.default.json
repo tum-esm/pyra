@@ -55,5 +55,6 @@
   },
   "tum_plc": null,
   "helios": null,
-  "upload": null
+  "upload": null,
+  "thingsboard": null
 }

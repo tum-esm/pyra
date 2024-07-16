@@ -139,6 +139,7 @@ def run() -> None:
     logger.info("Initializing threads")
     helios_thread_instance = threads.HeliosThread(config)
     upload_thread_instance = threads.UploadThread(config)
+    thingsboard_thread_instance = threads.ThingsBoardThread(config)
 
     current_exceptions = interfaces.StateInterface.load_state(
     ).current_exceptions or []
@@ -153,8 +154,9 @@ def run() -> None:
     def _graceful_teardown(*args: Any) -> None:
         logger.info("Received shutdown signal, starting graceful teardown")
         interfaces.ActivityHistoryInterface.dump_current_activity_history()
-        current_exceptions = interfaces.StateInterface.load_state(
-        ).current_exceptions or []
+        current_exceptions = (
+            interfaces.StateInterface.load_state().current_exceptions or []
+        )
         interfaces.StateInterface.update_state(
             current_exceptions=current_exceptions, enforce_none_values=True
         )
@@ -193,6 +195,7 @@ def run() -> None:
         # possibly (re)start each thread
         helios_thread_instance.update_thread_state(config)
         upload_thread_instance.update_thread_state(config)
+        thingsboard_thread_instance.update_thread_state(config)
 
         if config.general.test_mode:
             logger.info("pyra-core in test mode")
