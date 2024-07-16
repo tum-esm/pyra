@@ -1,6 +1,5 @@
 from .abstract_thread import AbstractThread
 from packages.core import types, utils, interfaces
-from tb_device_mqtt import TBDeviceMqttClient  # type: ignore
 import threading
 import time
 from typing import Dict, Union, Optional
@@ -34,6 +33,8 @@ class ThingsBoardThread(AbstractThread):
         logger = utils.Logger(origin="thingsboard", just_print=headless)
         config = types.Config.load()
         assert config.thingsboard is not None
+
+        from tb_device_mqtt import TBDeviceMqttClient  # type: ignore
 
         # initialize MQTT client
         client = TBDeviceMqttClient(
