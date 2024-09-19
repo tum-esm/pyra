@@ -1,6 +1,6 @@
 [project]
 name = "pyra"
-version = "4.1.3"
+version = "4.1.4"
 description = "operate an EM27 station autonomously"
 authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
