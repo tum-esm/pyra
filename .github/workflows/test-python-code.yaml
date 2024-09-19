@@ -1,4 +1,4 @@
-name: "test-python-codebase-on-main"
+name: "test-python-code"
 on:
   push:
     branches:
@@ -10,8 +10,8 @@ on:
       - "README.md"
       - "LICENSE.md"
       - "netlify.toml"
-      - ".github/workflows/*.yml"
-      - "!.github/workflows/test-python-codebase-on-main.yml"
+      - ".github/workflows/*.yaml"
+      - "!.github/workflows/test-python-code.yaml"
   pull_request:
     branches:
       - main
@@ -23,13 +23,12 @@ on:
       - "README.md"
       - "LICENSE.md"
       - "netlify.toml"
-      - ".github/workflows/*.yml"
-      - "!.github/workflows/test-python-codebase-on-main.yml"
+      - ".github/workflows/*.yaml"
+      - "!.github/workflows/test-python-code.yaml"
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      # check-out repo and set-up python
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Set up Python 3.10.11

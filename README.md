@@ -9,9 +9,9 @@
 ](https://github.com/tum-esm/pyra/releases)
 [![GitHub License](https://img.shields.io/github/license/tum-esm/pyra?label=License&color=%23e11d48&cacheSeconds=3600)
 ](https://github.com/tum-esm/pyra/blob/main/LICENSE.md)<br/>
-[![](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-python-codebase-on-main.yml?label=Python%20CI%20Tests&cacheSeconds=60)
+[![](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-python-code.yaml?label=Python%20CI%20Tests&cacheSeconds=60)
 ](https://github.com/tum-esm/pyra/actions)
-[![](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-typescript-codebase-on-main.yml?label=TypeScript%20CI%20Tests&cacheSeconds=60)
+[![](https://img.shields.io/github/actions/workflow/status/tum-esm/pyra/test-typescript-code.yaml?label=TypeScript%20CI%20Tests&cacheSeconds=60)
 ](https://github.com/tum-esm/pyra/actions)
 
 <br/>
