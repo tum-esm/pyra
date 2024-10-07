@@ -203,3 +203,41 @@ class OpusControlThread:
                 current_experiment_path = config.opus.experiment_path.root
                 logger.info(f"Experiment file {current_experiment_path} was loaded")
 
+            # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
+
+            state = interfaces.StateInterface.load_state()
+            measurements_should_be_running = state.measurements_should_be_running == True
+            if measurements_should_be_running:
+                if state.plc_state.actors.current_angle is not None:
+                    cover_is_open = 20 < state.plc_state.actors.current_angle < 340
+                    if not cover_is_open:
+                        measurements_should_be_running = False
+
+            # STARTING MACRO
+
+            if measurements_should_be_running:
+                if current_macro_path is None:
+                    logger.info("Starting macro")
+                    dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
+                    time.sleep(5)
+                    current_macro_path = config.opus.macro_path.root
+                    logger.info(f"Macro file {current_macro_path} was started")
+                else:
+                    if config.opus.macro_path.root != current_macro_path:
+                        logger.info("Macro file has changed, stopping macro")
+                        dde_connection.request(f"KILL_MACRO {os.path.basename(current_macro_path)}")
+                        time.sleep(5)
+                        logger.info("Starting new macro")
+                        dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
+                        time.sleep(5)
+                        current_macro_path = config.opus.macro_path.root
+                        logger.info(f"Macro file {current_macro_path} was loaded")
+
+            # STOPPING MACRO
+
+            if (not measurements_should_be_running) and (current_macro_path is not None):
+                logger.info("Stopping macro")
+                dde_connection.request(f"KILL_MACRO {os.path.basename(current_macro_path)}")
+                time.sleep(5)
+                current_macro_path = None
+                logger.info(f"Stopped Macro {current_macro_path}")
