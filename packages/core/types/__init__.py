@@ -9,4 +9,4 @@ from .plc_specification import (
     PLCSpecificationPower,
     PLCSpecificationConnections,
 )
-from .state import Position, PLCState, OperatingSystemState, StateObject
+from .state import Position, PLCState, OperatingSystemState, StateObject, ExceptionStateItem

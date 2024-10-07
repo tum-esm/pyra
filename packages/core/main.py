@@ -1,53 +1,30 @@
 import os
 import signal
 import time
-from typing import Any, Callable, Literal, Optional
+import traceback
+from typing import Any, Callable, Literal
 from packages.core import types, utils, interfaces, modules, threads
 
 logger = utils.Logger(origin="main")
 
 
-def _update_exception_state(
-    config: types.Config,
-    current_exceptions: list[str],
-    new_exception: Optional[Exception],
-) -> list[str]:
-    """
-    Take a list of current_exceptions (all exceptions that are
-    present from the last mainloop iteration, possibly empty) and
-    a new_exception (the one that happened in this loop, possibly
-    None).
+def _send_exception_emails(config: types.Config) -> None:
+    """Send emails on occured/resolved exceptions."""
 
-    If the new_exception is None, all exceptions have been resolved
-    resolved: send a "resolved" email in case the current_exceptions
-    was not empty yet.
+    with interfaces.StateInterface.update_state_in_context() as state:
+        current_exceptions = state.current_exceptions
+        notified_exceptions = state.notified_exceptions
 
-    If the new_exception is not None, if it is not already in the
-    list of current_exceptions: append it to that list and send a
-    "new error occured" email.
-    """
-    try:
-        updated_current_exceptions = [*current_exceptions]
-        if new_exception is not None:
-            if type(new_exception).__name__ not in current_exceptions:
-                updated_current_exceptions.append(type(new_exception).__name__)
-                utils.ExceptionEmailClient.handle_occured_exception(
-                    config, new_exception
-                )
-        else:
-            if len(current_exceptions) > 0:
-                updated_current_exceptions = []
-                utils.ExceptionEmailClient.handle_resolved_exception(config)
-                logger.info(f"All exceptions have been resolved.")
+        new_exception_emails = [
+            e for e in current_exceptions if ((e not in notified_exceptions) and e.send_emails)
+        ]
+        if len(new_exception_emails) > 0:
+            utils.ExceptionEmailClient.handle_occured_exceptions(config, new_exception_emails)
 
-        interfaces.StateInterface.update_state(
-            current_exceptions=updated_current_exceptions
-        )
-        return updated_current_exceptions
+        if not any([e.send_emails for e in current_exceptions]):
+            utils.ExceptionEmailClient.handle_resolved_exception(config)
 
-    except Exception as e:
-        logger.exception(e)
-        return current_exceptions
+        state.notified_exceptions = current_exceptions
 
 
 def run() -> None:
@@ -77,9 +54,7 @@ def run() -> None:
     according to the config.
     """
 
-    logger.info(
-        f"Starting mainloop inside process with process ID {os.getpid()}"
-    )
+    logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
 
     # Loop until a valid config has been found. Without
     # an invalid config, the mainloop cannot initialize
@@ -89,8 +64,7 @@ def run() -> None:
             break
         except ValueError as e:
             logger.error(
-                "Invalid config, waiting 10 seconds: " +
-                str(e).replace("Config is invalid:", "")
+                "Invalid config, waiting 10 seconds: " + str(e).replace("Config is invalid:", "")
             )
             time.sleep(10)
         except Exception as e:
@@ -117,15 +91,9 @@ def run() -> None:
             "measurement-conditions",
             modules.measurement_conditions.MeasurementConditions(config).run,
         ),
-        (
-            "enclosure-control",
-            modules.enclosure_control.EnclosureControl(config).run
-        ),
+        ("enclosure-control", modules.enclosure_control.EnclosureControl(config).run),
         ("sun-tracking", modules.sun_tracking.SunTracking(config).run),
-        (
-            "opus-measurement",
-            modules.opus_measurement.OpusMeasurement(config).run
-        ),
+        ("opus-measurement", modules.opus_measurement.OpusMeasurement(config).run),
     ]
 
     # these thread classes always exist and start their
@@ -139,24 +107,17 @@ def run() -> None:
         threads.UploadThread(),
     ]
 
-    current_exceptions = interfaces.StateInterface.load_state(
-    ).current_exceptions or []
-
     logger.info("Removing temporary state from previous runs")
-    interfaces.StateInterface.update_state(
-        current_exceptions=current_exceptions, enforce_none_values=True
-    )
+    with interfaces.StateInterface.update_state_in_context() as state:
+        state.reset()
 
     # Before shutting down: save the current activity history and log
     # that the core is shutting down
     def _graceful_teardown(*args: Any) -> None:
         logger.info("Received shutdown signal, starting graceful teardown")
         interfaces.ActivityHistoryInterface.dump_current_activity_history()
-        current_exceptions = interfaces.StateInterface.load_state(
-        ).current_exceptions or []
-        interfaces.StateInterface.update_state(
-            current_exceptions=current_exceptions, enforce_none_values=True
-        )
+        with interfaces.StateInterface.update_state_in_context() as state:
+            state.reset()
         logger.info("Graceful teardown complete")
         exit(0)
 
@@ -169,7 +130,7 @@ def run() -> None:
         logger.info("Starting iteration")
 
         interfaces.ActivityHistoryInterface.add_datapoint(
-            has_errors=len(current_exceptions) > 0,
+            has_errors=len(state.current_exceptions) > 0,
         )
 
         # load config at the beginning of each mainloop iteration
@@ -177,8 +138,7 @@ def run() -> None:
             config = types.Config.load()
         except ValueError as e:
             logger.error(
-                "Invalid config, waiting 10 seconds: " +
-                str(e).replace("Config is invalid:", "")
+                "Invalid config, waiting 10 seconds: " + str(e).replace("Config is invalid:", "")
             )
             time.sleep(10)
             continue
@@ -203,27 +163,31 @@ def run() -> None:
         for module_name, module_function in mainloop_modules:
             try:
                 module_function(config)
+                with interfaces.StateInterface.update_state_in_context() as state:
+                    state.current_exceptions = [
+                        e for e in state.current_exceptions if e.origin != module_name
+                    ]
             except Exception as e:
                 new_exception = e
                 logger.exception(new_exception)
 
-                # update the list of currently present exceptions
-                # send error emails on new exceptions, send resolved
-                # emails when no errors are present anymore
-                current_exceptions = _update_exception_state(
-                    config, current_exceptions, new_exception
-                )
+                with interfaces.StateInterface.update_state_in_context() as state:
+                    new_exception_state_item = types.ExceptionStateItem(
+                        origin=module_name,
+                        subject=type(e).__name__,
+                        details="\n".join(traceback.format_exception(e)),
+                    )
+                    if new_exception_state_item not in state.current_exceptions:
+                        state.current_exceptions.append(new_exception_state_item)
+
                 if module_name == "measurement-conditions":
                     logger.debug(
                         "Skipping remaining modules due to exception in measurement-conditions"
                     )
                     break
 
-        # send resolved email if no exceptions are present anymore
-        if new_exception is None:
-            current_exceptions = _update_exception_state(
-                config, current_exceptions, None
-            )
+        # send emails on occured/resolved exceptions
+        _send_exception_emails(config)
 
         # wait rest of loop time
         logger.info("Ending iteration")
