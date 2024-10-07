@@ -57,7 +57,7 @@ def run() -> None:
 
     1. Read the config
 
-    2. Check whether `HeliosThread` and `UploadThread` are running
+    2. Check whether `HeliosThread`, `SystemChecksThread`, and `UploadThread` are running
 
     3. Possibly start/stop the threads according to the config
 
@@ -68,8 +68,6 @@ def run() -> None:
     6. Run `SunTracking` module
 
     7. Run `OpusMeasurement` module
-
-    8. Run `SystemChecks` module
 
     The mainloop logs all exceptions and sends out emails when new exceptions
     occur and when all exceptions have been resolved.
@@ -112,7 +110,6 @@ def run() -> None:
             "enclosure-control",
             "sun-tracking",
             "opus-measurement",
-            "system-checks",
         ],
         Callable[[types.Config], None],
     ]] = [
@@ -129,7 +126,6 @@ def run() -> None:
             "opus-measurement",
             modules.opus_measurement.OpusMeasurement(config).run
         ),
-        ("system-checks", modules.system_checks.SystemChecks(config).run),
     ]
 
     # these thread classes always exist and start their
@@ -137,8 +133,11 @@ def run() -> None:
     # respective service is configured. The threads itself
     # load the config periodically and stop themselves
     logger.info("Initializing threads")
-    helios_thread_instance = threads.HeliosThread(config)
-    upload_thread_instance = threads.UploadThread(config)
+    thread_instances: list[threads.abstract_thread.AbstractThread] = [
+        threads.HeliosThread(),
+        threads.SystemChecksThread(),
+        threads.UploadThread(),
+    ]
 
     current_exceptions = interfaces.StateInterface.load_state(
     ).current_exceptions or []
@@ -189,10 +188,9 @@ def run() -> None:
             time.sleep(10)
             continue
 
-        # check whether the two threads are (not) running
-        # possibly (re)start each thread
-        helios_thread_instance.update_thread_state(config)
-        upload_thread_instance.update_thread_state(config)
+        # check whether the threads are running and possibly (re)start them
+        for thread_instance in thread_instances:
+            thread_instance.update_thread_state(config)
 
         if config.general.test_mode:
             logger.info("pyra-core in test mode")
