@@ -3,16 +3,12 @@ import { z } from 'zod';
 import { set as lodashSet } from 'lodash';
 
 const coreStateSchema = z.object({
-    last_updated: z.string(),
     position: z.object({
         latitude: z.number().nullable(),
         longitude: z.number().nullable(),
         altitude: z.number().nullable(),
         sun_elevation: z.number().nullable(),
     }),
-    helios_indicates_good_conditions: z
-        .union([z.literal('yes'), z.literal('no'), z.literal('inconclusive')])
-        .nullable(),
     measurements_should_be_running: z.boolean().nullable(),
     plc_state: z.object({
         last_full_fetch: z.string().nullable(),
@@ -58,8 +54,6 @@ const coreStateSchema = z.object({
         last_boot_time: z.string().nullable(),
         filled_disk_space_fraction: z.number().nullable(),
     }),
-    current_exceptions: z.array(z.string()),
-    upload_is_running: z.boolean().nullable(),
 });
 
 export type CoreState = z.infer<typeof coreStateSchema>;
