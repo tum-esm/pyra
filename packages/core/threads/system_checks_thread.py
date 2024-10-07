@@ -33,6 +33,9 @@ class SystemChecksThread(AbstractThread):
         logger = utils.Logger(origin="system-checks", just_print=headless)
         logger.info("Running SystemChecks")
 
+        # TODO: add exception raising
+        # TODO: add exception resolving
+
         while True:
             cpu_usage = tum_esm_utils.system.get_cpu_usage()
             logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
@@ -75,6 +78,8 @@ class SystemChecksThread(AbstractThread):
                         if new_exception not in state.current_exceptions:
                             state.current_exceptions.append(new_exception)
                     logger.error(f"{new_exception.subject}: {new_exception.details}")
+
+            # TODO: add EM27 ping
 
             with interfaces.StateInterface.update_state() as state:
                 state.operating_system_state = types.OperatingSystemState(
