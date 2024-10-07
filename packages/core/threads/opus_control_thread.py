@@ -190,3 +190,16 @@ class OpusControlThread:
                 logger.info("Sleeping 3 minutes")
                 time.sleep(180)
                 continue
+
+            # LOAD EXPERIMENT
+
+            if config.opus.experiment_path.root != current_experiment_path:
+                if current_experiment_path is None:
+                    logger.info("Loading experiment")
+                else:
+                    logger.info("Experiment file has changed, loading new experiment")
+                dde_connection.request(f"LOAD_EXPERIMENT {config.opus.experiment_path.root}")
+                time.sleep(5)
+                current_experiment_path = config.opus.experiment_path.root
+                logger.info(f"Experiment file {current_experiment_path} was loaded")
+
