@@ -80,8 +80,7 @@ class PLCState(pydantic.BaseModel):
 class StateObject(pydantic.BaseModel):
     last_updated: datetime.datetime
     recent_cli_calls: int = 0
-    helios_indicates_good_conditions: Optional[Literal["yes", "no",
-                                                       "inconclusive"]] = None
+    helios_indicates_good_conditions: Optional[Literal["yes", "no", "inconclusive"]] = None
     position: Position = Position()
     measurements_should_be_running: Optional[bool] = None
     plc_state: PLCState = PLCState()
@@ -91,3 +90,13 @@ class StateObject(pydantic.BaseModel):
     upload_is_running: Optional[bool] = None
 
     model_config = pydantic.ConfigDict(extra="forbid")
+
+    def reset(self) -> None:
+        """Reset the state object to its initial values but keep the exceptions."""
+        self.recent_cli_calls = 0
+        self.helios_indicates_good_conditions = None
+        self.position = Position()
+        self.measurements_should_be_running = None
+        self.plc_state = PLCState()
+        self.operating_system_state = OperatingSystemState()
+        self.upload_is_running = None

@@ -101,9 +101,11 @@ class StateInterface:
         """
 
         state = StateInterface._load_state_without_filelock()
+        state_before = state.model_copy(deep=True)
 
-        state.last_updated = datetime.datetime.now()
         yield state
 
-        with open(_STATE_FILE_PATH, "w") as f:
-            f.write(state.model_dump_json(indent=4))
+        if state != state_before:
+            state.last_updated = datetime.datetime.now()
+            with open(_STATE_FILE_PATH, "w") as f:
+                f.write(state.model_dump_json(indent=4))
