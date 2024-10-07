@@ -17,9 +17,7 @@ logger = utils.Logger(origin="state-interface")
 
 class StateInterface:
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(
-        lockfile_path=_STATE_LOCK_PATH, timeout=5
-    )
+    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=5)
     def load_state() -> types.StateObject:
         """Load the state from the state file."""
 
@@ -44,15 +42,11 @@ class StateInterface:
         return state
 
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(
-        lockfile_path=_STATE_LOCK_PATH, timeout=5
-    )
+    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=5)
     def update_state(
         position: Optional[types.Position] = None,
         recent_cli_calls: Optional[int] = None,
-        helios_indicates_good_conditions: Optional[Literal["yes", "no",
-                                                           "inconclusive"]
-                                                  ] = None,
+        helios_indicates_good_conditions: Optional[Literal["yes", "no", "inconclusive"]] = None,
         measurements_should_be_running: Optional[bool] = None,
         plc_state: Optional[types.PLCState] = None,
         operating_system_state: Optional[types.OperatingSystemState] = None,
@@ -75,19 +69,14 @@ class StateInterface:
         elif recent_cli_calls is not None:
             state.recent_cli_calls += recent_cli_calls
 
-        if enforce_none_values or (
-            helios_indicates_good_conditions is not None
-        ):
+        if enforce_none_values or (helios_indicates_good_conditions is not None):
             state.helios_indicates_good_conditions = helios_indicates_good_conditions
         if enforce_none_values or (measurements_should_be_running is not None):
             state.measurements_should_be_running = measurements_should_be_running
         if enforce_none_values or (plc_state is not None):
             state.plc_state = plc_state or types.PLCState()
         if enforce_none_values or (operating_system_state is not None):
-            state.operating_system_state = operating_system_state or types.OperatingSystemState(
-            )
-        if enforce_none_values or (current_exceptions is not None):
-            state.current_exceptions = current_exceptions or []
+            state.operating_system_state = operating_system_state or types.OperatingSystemState()
         if enforce_none_values or (upload_is_running is not None):
             state.upload_is_running = upload_is_running
 
@@ -96,9 +85,7 @@ class StateInterface:
 
     @staticmethod
     @contextlib.contextmanager
-    @tum_esm_utils.decorators.with_filelock(
-        lockfile_path=_STATE_LOCK_PATH, timeout=5
-    )
+    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=5)
     def update_state_in_context() -> Generator[types.StateObject, None, None]:
         """Update the state file in a context manager.
         

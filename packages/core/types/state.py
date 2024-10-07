@@ -3,6 +3,13 @@ import datetime
 import pydantic
 
 
+class ExceptionStateItem(pydantic.BaseModel):
+    origin: str
+    subject: str
+    details: Optional[str] = None
+    send_emails: Optional[bool] = True
+
+
 class Position(pydantic.BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -79,7 +86,8 @@ class StateObject(pydantic.BaseModel):
     measurements_should_be_running: Optional[bool] = None
     plc_state: PLCState = PLCState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
-    current_exceptions: list[str] = []
+    current_exceptions: list[ExceptionStateItem] = []
+    notified_exceptions: list[ExceptionStateItem] = []
     upload_is_running: Optional[bool] = None
 
     model_config = pydantic.ConfigDict(extra="forbid")
