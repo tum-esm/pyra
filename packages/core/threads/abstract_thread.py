@@ -8,7 +8,7 @@ logger = utils.Logger(origin="helios")
 
 class AbstractThread(abc.ABC):
     """Abstract base class for all threads"""
-    def __init__(self, config: types.Config) -> None:
+    def __init__(self) -> None:
         """Initialize the thread instance. This does not start the
         thread but only initializes the instance that triggers the
         thread to start and stop correctly."""
@@ -18,36 +18,40 @@ class AbstractThread(abc.ABC):
             origin=re.sub(r'(?<!^)(?=[A-Z])', '-', self.__class__.__name__
                          ).lower()
         )
-
         self.thread = self.get_new_thread_object()
-        self.config: types.Config = config
         self.is_initialized = False
 
-    def update_thread_state(self, new_config: types.Config) -> None:
+    def update_thread_state(self, config: types.Config) -> None:
         """Use `self.should_be_running` to determine if the thread
         should be running or not. If it should be running and it is
         not running, start the thread. If it should not be running
         and it is running, stop the thread."""
 
-        self.config = new_config
-        should_be_running = self.__class__.should_be_running(self.config)
+        should_be_running: bool = self.__class__.should_be_running(config)
 
-        if not self.is_initialized:
-            if should_be_running:
-                self.logger.info("Starting the thread")
-                self.is_initialized = True
+        if should_be_running:
+            if self.is_initialized:
+                if self.thread.is_alive():
+                    self.logger.debug("Thread is running correctly")
+                else:
+                    self.logger.debug("Thread has crashed, running teardown")
+                    self.thread.join()
+                    # set up a new thread instance for the next time the thread should start
+                    self.thread = self.get_new_thread_object()
+                    self.is_initialized = False
+            else:
+                self.logger.debug("Starting the thread")
                 self.thread.start()
-            else:
-                self.logger.debug("Thread is not started")
+                self.is_initialized = True
+
         else:
-            if self.thread.is_alive():
-                self.logger.debug("Thread is alive")
-            else:
-                self.logger.debug("Thread is not alive, running teardown")
+            if self.is_initialized:
+                self.logger.debug("Joining the thread")
                 self.thread.join()
-                # set up a new thread instance for the next time the thread should start
                 self.thread = self.get_new_thread_object()
                 self.is_initialized = False
+            else:
+                self.logger.debug("Thread is pausing")
 
     @staticmethod
     @abc.abstractmethod
