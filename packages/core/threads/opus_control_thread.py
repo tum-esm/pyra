@@ -152,3 +152,41 @@ class OpusProgram:
                 pass
 
 
+class OpusControlThread:
+    """TODO: docstring"""
+    def run() -> None:
+        current_experiment_path: Optional[str] = None
+        current_macro_path: Optional[str] = None
+        dde_connection = DDEConnection()
+
+        # TODO: add exception raising
+        # TODO: add exception resolving
+
+        while True:
+            logger.info("Loading configuration file")
+            config = types.Config.load()
+
+            # START AND OPUS
+
+            opus_should_be_running = (
+                utils.Astronomy.get_current_sun_elevation(config)
+                >= config.general.min_sun_elevation
+            )
+            if opus_should_be_running and (not OpusProgram.is_running()):
+                logger.info("OPUS should be running, starting OPUS")
+                OpusProgram.start()
+                dde_connection.teardown()
+                dde_connection.setup()
+                continue
+            if (not opus_should_be_running) and OpusProgram.is_running():
+                logger.info("OPUS should not be running, stopping OPUS")
+                OpusProgram.stop(dde_connection)
+                dde_connection.teardown()
+                continue
+
+            # IDLE AT NIGHT
+
+            if not opus_should_be_running:
+                logger.info("Sleeping 3 minutes")
+                time.sleep(180)
+                continue
