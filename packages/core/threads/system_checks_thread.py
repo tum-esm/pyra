@@ -34,14 +34,11 @@ class SystemChecksThread(AbstractThread):
         logger.info("Running SystemChecks")
 
         while True:
-
             cpu_usage = tum_esm_utils.system.get_cpu_usage()
             logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
 
             memory_usage = tum_esm_utils.system.get_memory_usage()
-            logger.debug(
-                f"Current v_memory usage for the system is {memory_usage}."
-            )
+            logger.debug(f"Current v_memory usage for the system is {memory_usage}.")
 
             last_boot_time = tum_esm_utils.system.get_last_boot_time()
             logger.debug(f"The system is running since {last_boot_time}.")
@@ -51,27 +48,40 @@ class SystemChecksThread(AbstractThread):
             disk_space = tum_esm_utils.system.get_disk_space()
             logger.debug(f"The disk is currently filled with {disk_space}%.")
             if disk_space > 90:
-                raise SystemChecksThread.StorageError(
-                    "Disk space is less than 10%. This is bad for the OS stability."
-                )
+                with interfaces.StateInterface.update_state_in_context() as state:
+                    new_exception = types.ExceptionStateItem(
+                        origin="system-checks",
+                        subject="StorageError",
+                        details="Disk space is less than 10%. This is bad for the OS stability."
+                    )
+                    if new_exception not in state.current_exceptions:
+                        state.current_exceptions.append(new_exception)
+                logger.error(f"{new_exception.subject}: {new_exception.details}")
 
             # BATTERY LEVEL
 
             battery_level = tum_esm_utils.system.get_system_battery()
             logger.debug(f"The battery level is {battery_level}%.")
             if battery_level is not None:
-                if battery_level < 20:
-                    raise SystemChecksThread.LowEnergyError(
-                        "The battery of the system is below 20%. Please check the power supply."
-                    )
+                if battery_level < 30:
+                    # TODO: write this as function
+                    with interfaces.StateInterface.update_state_in_context() as state:
+                        new_exception = types.ExceptionStateItem(
+                            origin="system-checks",
+                            subject="LowEnergyError",
+                            details=
+                            "The battery of the system is below 30%. Please check the power supply."
+                        )
+                        if new_exception not in state.current_exceptions:
+                            state.current_exceptions.append(new_exception)
+                    logger.error(f"{new_exception.subject}: {new_exception.details}")
 
-            interfaces.StateInterface.update_state(
-                operating_system_state=types.OperatingSystemState(
+            with interfaces.StateInterface.update_state_in_context() as state:
+                state.operating_system_state = types.OperatingSystemState(
                     cpu_usage=cpu_usage,
                     memory_usage=memory_usage,
                     last_boot_time=str(last_boot_time),
                     filled_disk_space_fraction=disk_space,
                 )
-            )
 
             logger.info("Waiting 3 minutes before next system check")
