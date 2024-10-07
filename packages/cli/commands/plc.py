@@ -44,7 +44,8 @@ def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
 )
 @click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
 def _read(no_indent: bool) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info('running command "plc read"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
@@ -58,7 +59,8 @@ def _read(no_indent: bool) -> None:
     help="Run plc function 'reset()'",
 )
 def _reset() -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info('running command "plc reset"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
@@ -70,7 +72,7 @@ def _reset() -> None:
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
-                with interfaces.StateInterface.update_state_in_context() as state:
+                with interfaces.StateInterface.update_state() as state:
                     if state.plc_state is not None:
                         state.plc_state.state.reset_needed = False
                 break
@@ -89,7 +91,7 @@ def _wait_until_cover_is_at_angle(
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
-            with interfaces.StateInterface.update_state_in_context() as state:
+            with interfaces.StateInterface.update_state() as state:
                 state.plc_state.actors.current_angle = current_cover_angle
                 state.plc_state.state.cover_closed = (current_cover_angle == 0)
             break
@@ -106,7 +108,8 @@ def _wait_until_cover_is_at_angle(
 )
 @click.argument("angle")
 def _set_cover_angle(angle: str) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info(f'running command "plc set-cover-angle {angle}"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
@@ -130,7 +133,8 @@ def _set_cover_angle(angle: str) -> None:
     help="Run plc function 'force_cover_close()'",
 )
 def _close_cover() -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info('running command "plc close-cover"')
     with types.Config.update_in_context() as config:
         assert config.tum_plc is not None, "PLC not configured"
@@ -165,7 +169,8 @@ def _set_boolean_plc_state(
 )
 @click.argument("state")
 def _set_sync_to_tracker(state: Literal["true", "false"]) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info(f'running command "plc set-sync-to-tracker {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
 
@@ -176,7 +181,8 @@ def _set_sync_to_tracker(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_auto_temperature(state: Literal["true", "false"]) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info(f'running command "plc set-auto-temperature {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_auto_temperature)
 
@@ -187,7 +193,8 @@ def _set_auto_temperature(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_heater_power(state: Literal["true", "false"]) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info(f'running command "plc set-heater-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_heater)
 
@@ -198,7 +205,8 @@ def _set_heater_power(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_camera_power(state: Literal["true", "false"]) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info(f'running command "plc set-camera-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_camera)
 
@@ -209,7 +217,8 @@ def _set_camera_power(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_router_power(state: Literal["true", "false"]) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info(f'running command "plc set-router-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_router)
 
@@ -220,7 +229,8 @@ def _set_router_power(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_spectrometer_power(state: Literal["true", "false"]) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info(f'running command "plc set-spectrometer-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_spectrometer)
 
@@ -231,6 +241,7 @@ def _set_spectrometer_power(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_computer_power(state: Literal["true", "false"]) -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info(f'running command "plc set-computer-power {state}"')
     _set_boolean_plc_state(state, lambda p: p.set_power_computer)

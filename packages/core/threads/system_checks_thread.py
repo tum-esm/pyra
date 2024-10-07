@@ -48,7 +48,7 @@ class SystemChecksThread(AbstractThread):
             disk_space = tum_esm_utils.system.get_disk_space()
             logger.debug(f"The disk is currently filled with {disk_space}%.")
             if disk_space > 90:
-                with interfaces.StateInterface.update_state_in_context() as state:
+                with interfaces.StateInterface.update_state() as state:
                     new_exception = types.ExceptionStateItem(
                         origin="system-checks",
                         subject="StorageError",
@@ -65,7 +65,7 @@ class SystemChecksThread(AbstractThread):
             if battery_level is not None:
                 if battery_level < 30:
                     # TODO: write this as function
-                    with interfaces.StateInterface.update_state_in_context() as state:
+                    with interfaces.StateInterface.update_state() as state:
                         new_exception = types.ExceptionStateItem(
                             origin="system-checks",
                             subject="LowEnergyError",
@@ -76,7 +76,7 @@ class SystemChecksThread(AbstractThread):
                             state.current_exceptions.append(new_exception)
                     logger.error(f"{new_exception.subject}: {new_exception.details}")
 
-            with interfaces.StateInterface.update_state_in_context() as state:
+            with interfaces.StateInterface.update_state() as state:
                 state.operating_system_state = types.OperatingSystemState(
                     cpu_usage=cpu_usage,
                     memory_usage=memory_usage,

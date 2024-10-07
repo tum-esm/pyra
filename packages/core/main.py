@@ -11,7 +11,7 @@ logger = utils.Logger(origin="main")
 def _send_exception_emails(config: types.Config) -> None:
     """Send emails on occured/resolved exceptions."""
 
-    with interfaces.StateInterface.update_state_in_context() as state:
+    with interfaces.StateInterface.update_state() as state:
         current_exceptions = state.current_exceptions
         notified_exceptions = state.notified_exceptions
 
@@ -108,7 +108,7 @@ def run() -> None:
     ]
 
     logger.info("Removing temporary state from previous runs")
-    with interfaces.StateInterface.update_state_in_context() as state:
+    with interfaces.StateInterface.update_state() as state:
         state.reset()
 
     # Before shutting down: save the current activity history and log
@@ -116,7 +116,7 @@ def run() -> None:
     def _graceful_teardown(*args: Any) -> None:
         logger.info("Received shutdown signal, starting graceful teardown")
         interfaces.ActivityHistoryInterface.dump_current_activity_history()
-        with interfaces.StateInterface.update_state_in_context() as state:
+        with interfaces.StateInterface.update_state() as state:
             state.reset()
         logger.info("Graceful teardown complete")
         exit(0)
@@ -163,7 +163,7 @@ def run() -> None:
         for module_name, module_function in mainloop_modules:
             try:
                 module_function(config)
-                with interfaces.StateInterface.update_state_in_context() as state:
+                with interfaces.StateInterface.update_state() as state:
                     state.current_exceptions = [
                         e for e in state.current_exceptions if e.origin != module_name
                     ]
@@ -171,7 +171,7 @@ def run() -> None:
                 new_exception = e
                 logger.exception(new_exception)
 
-                with interfaces.StateInterface.update_state_in_context() as state:
+                with interfaces.StateInterface.update_state() as state:
                     new_exception_state_item = types.ExceptionStateItem(
                         origin=module_name,
                         subject=type(e).__name__,

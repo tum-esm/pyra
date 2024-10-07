@@ -320,7 +320,8 @@ class HeliosThread(AbstractThread):
                 min_sun_elevation = config.general.min_sun_elevation
                 if current_sun_elevation < min_sun_elevation:
                     logger.debug("Current sun elevation below minimum, sleeping 5 minutes")
-                    interfaces.StateInterface.update_state(helios_indicates_good_conditions="no")
+                    with interfaces.StateInterface.update_state() as s:
+                        s.helios_indicates_good_conditions = "no"
                     if helios_instance is not None:
                         del helios_instance
                         helios_instance = None
@@ -408,15 +409,14 @@ class HeliosThread(AbstractThread):
 
                     logger.debug(f"New state: {'GOOD' if new_state else 'BAD'}")
                     if current_state == new_state:
+                        # TODO: simplify this logic
                         logger.debug("State did not change")
-                        interfaces.StateInterface.update_state(
-                            helios_indicates_good_conditions=
-                            {  # type: ignore
+                        with interfaces.StateInterface.update_state() as s:
+                            s.helios_indicates_good_conditions = {  # type: ignore
                                 None: "inconclusive",
                                 True: "yes",
                                 False: "no",
                             }[current_state]
-                        )
                     else:
                         logger.debug("State changed")
 
@@ -437,14 +437,13 @@ class HeliosThread(AbstractThread):
                                     False: "BAD",
                                 }[new_state]
                             )
-                            interfaces.StateInterface.update_state(
-                                helios_indicates_good_conditions=
-                                {  # type: ignore
-                                    None: "inconclusive",
-                                    True: "yes",
-                                    False: "no",
-                                }[new_state]
-                            )
+                            with interfaces.StateInterface.update_state() as s:
+                                s.helios_indicates_good_conditions= {  # type: ignore
+                                        None: "inconclusive",
+                                        True: "yes",
+                                        False: "no",
+                                    }[new_state]
+
                             current_state = new_state
                             last_state_change = datetime.datetime.now()
                         else:

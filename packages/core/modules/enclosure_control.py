@@ -106,7 +106,8 @@ class EnclosureControl:
 
             # Push the latest readout of the PLC state to the StateInterface
             logger.info("New PLC readings. Writing them to the PLC logs.")
-            interfaces.StateInterface.update_state(plc_state=self.plc_state)
+            with interfaces.StateInterface.update_state() as s:
+                s.plc_state = self.plc_state
             current_state.plc_state = self.plc_state
             utils.TUMPLCLogger.log(new_config, current_state)
 

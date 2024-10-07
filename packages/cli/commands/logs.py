@@ -53,7 +53,8 @@ def _read_logs(level: str) -> None:
     "Archive the current log files. This command will write all log lines from the current info.log and debug.log files into the logs/archive directory."
 )
 def _archive_logs() -> None:
-    interfaces.StateInterface.update_state(recent_cli_calls=1)
+    with interfaces.StateInterface.update_state() as s:
+        s.recent_cli_calls += 1
     logger.info('running command "logs archive"')
 
     utils.Logger.archive()
