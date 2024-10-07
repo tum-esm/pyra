@@ -92,13 +92,9 @@ class OpusMeasurement:
             if (new_config.tum_plc is None) or (current_cover_angle is None):
                 measurements_should_be_running = True
             else:
-                measurements_should_be_running = (
-                    abs(current_cover_angle) % 360
-                ) > 30
+                measurements_should_be_running = (abs(current_cover_angle) % 360) > 30
                 if not measurements_should_be_running:
-                    logger.info(
-                        "Waiting with measurements until cover is open."
-                    )
+                    logger.info("Waiting with measurements until cover is open.")
 
         if self.last_cycle_automation_status != measurements_should_be_running:
             if measurements_should_be_running:
@@ -143,9 +139,7 @@ class OpusMeasurement:
             # reconnect socket
             self.server = dde.CreateServer()  # type: ignore
             self.server.Create("Client")
-            self.conversation = dde.CreateConversation(
-                self.server
-            )  # type: ignore
+            self.conversation = dde.CreateConversation(self.server)  # type: ignore
             self.__connect_to_dde_opus()
 
             # retest DDE connection
@@ -340,8 +334,7 @@ class OpusMeasurement:
 
         tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: self.__test_dde_connection(),
-            timeout_message=
-            "DDE connection could not be established within 30 seconds.",
+            timeout_message="DDE connection could not be established within 30 seconds.",
             timeout_seconds=60,
             check_interval_seconds=4,
         )

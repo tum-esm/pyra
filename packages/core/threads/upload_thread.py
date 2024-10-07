@@ -35,10 +35,7 @@ class UploadThread(AbstractThread):
             return False
 
         # (optional) don't upload during the day
-        if (
-            config.upload.only_upload_at_night and
-            (current_state.position.sun_elevation > 0)
-        ):
+        if (config.upload.only_upload_at_night and (current_state.position.sun_elevation > 0)):
             return False
 
         # update last time of known measurements
@@ -48,9 +45,8 @@ class UploadThread(AbstractThread):
         # don't upload if system has been measuring in the last 10 minutes
         if config.upload.only_upload_when_not_measuring:
             if UploadThread.last_measurement_time is not None:
-                if ((
-                    datetime.datetime.now() - UploadThread.last_measurement_time
-                ).total_seconds() < 600):
+                if ((datetime.datetime.now() - UploadThread.last_measurement_time).total_seconds()
+                    < 600):
                     return False
 
         return True
@@ -73,9 +69,7 @@ class UploadThread(AbstractThread):
             """Update the config from the main thread."""
             new_config = types.Config.load()
             upload_config_has_changed = new_config.upload != config.upload
-            thread_should_not_be_running = not UploadThread.should_be_running(
-                new_config
-            )
+            thread_should_not_be_running = not UploadThread.should_be_running(new_config)
             if not silent:
                 if upload_config_has_changed:
                     logger.info("upload config has changed")
@@ -102,21 +96,15 @@ class UploadThread(AbstractThread):
                             logger.info(f"skipping upload of '{stream.label}'")
                             continue
                         logger.info(f"starting to upload '{stream.label}'")
-                        logger.debug(
-                            f"stream config: {stream.model_dump_json()}"
-                        )
-                        interfaces.StateInterface.update_state(
-                            upload_is_running=True
-                        )
+                        logger.debug(f"stream config: {stream.model_dump_json()}")
+                        interfaces.StateInterface.update_state(upload_is_running=True)
                         circadian_scp_upload.DailyTransferClient(
                             remote_connection=remote_connection,
                             src_path=stream.src_directory.root,
                             dst_path=stream.dst_directory,
-                            remove_files_after_upload=stream.
-                            remove_src_after_upload,
+                            remove_files_after_upload=stream.remove_src_after_upload,
                             variant=stream.variant,
-                            callbacks=circadian_scp_upload.
-                            UploadClientCallbacks(
+                            callbacks=circadian_scp_upload.UploadClientCallbacks(
                                 dated_regex=stream.dated_regex,
                                 log_info=lambda message: logger.
                                 debug(f"{stream.label} - {message}"),
@@ -128,9 +116,7 @@ class UploadThread(AbstractThread):
                                 should_abort_upload=upload_should_abort,
                             ),
                         ).run()
-                        interfaces.StateInterface.update_state(
-                            upload_is_running=False
-                        )
+                        interfaces.StateInterface.update_state(upload_is_running=False)
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
@@ -141,9 +127,7 @@ class UploadThread(AbstractThread):
 
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
-                logger.info(
-                    f"waiting 60 minutes until looking for new files/directories"
-                )
+                logger.info(f"waiting 60 minutes until looking for new files/directories")
                 waiting_start_time = datetime.datetime.now()
                 for i in range(60):
                     for _ in range(6):
@@ -154,8 +138,7 @@ class UploadThread(AbstractThread):
                         time.sleep(10)
 
                     # trying again at 1am because then new directories could be uploaded
-                    if waiting_start_time.hour == 0 and datetime.datetime.now(
-                    ).hour == 1:
+                    if waiting_start_time.hour == 0 and datetime.datetime.now().hour == 1:
                         logger.info(
                             f"abort waiting because there might be new data to upload at 1am"
                         )
@@ -184,8 +167,8 @@ class UploadThread(AbstractThread):
                     minutes_left = 19 - i
                     if minutes_left > 0:
                         logger.info(
-                            f"waiting {minutes_left} more minutes until looking "
-                            + "for new files/directories"
+                            f"waiting {minutes_left} more minutes until looking " +
+                            "for new files/directories"
                         )
 
                 logger.info("stopping upload thread")

@@ -3,9 +3,7 @@ import os
 import tum_esm_utils
 from packages.core import types
 
-_PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(
-    __file__, current_depth=4
-)
+_PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 
 
 class TUMPLCLogger:
@@ -28,10 +26,7 @@ class TUMPLCLogger:
             state.plc_state.sensors.temperature,
             state.plc_state.sensors.humidity,
         ]
-        stringed_log_line = [
-            str(item).lower() if item is not None else "null"
-            for item in log_line
-        ]
+        stringed_log_line = [str(item).lower() if item is not None else "null" for item in log_line]
         current_log_file = os.path.join(
             _PROJECT_DIR, "logs", "tum-plc",
             f"{config.general.station_id}-plc-logs-{now.strftime('%Y-%m-%d')}.csv"

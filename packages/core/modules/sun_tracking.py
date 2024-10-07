@@ -49,8 +49,7 @@ class SunTracking:
         # check for automation state flank changes
         camtracker_is_running = SunTracking.camtracker_is_running()
         measurements_should_be_running = (
-            interfaces.StateInterface.load_state().
-            measurements_should_be_running
+            interfaces.StateInterface.load_state().measurements_should_be_running
         ) or False
 
         # if CamTracker is supposed to shut down but is
@@ -183,8 +182,7 @@ class SunTracking:
         """Returns the path to the stop.txt file in CamTracker directory."""
 
         return os.path.join(
-            os.path.dirname(self.config.camtracker.executable_path.root),
-            "stop.txt"
+            os.path.dirname(self.config.camtracker.executable_path.root), "stop.txt"
         )
 
     def stop_sun_tracking_automation(self) -> None:
@@ -244,12 +242,10 @@ class SunTracking:
 
         # convert julian day datetime
         logline_datetime = (
-            datetime.datetime(1858, 11, 17) +
-            datetime.timedelta(float_values[0] - 2400000.500)
+            datetime.datetime(1858, 11, 17) + datetime.timedelta(float_values[0] - 2400000.500)
         )
 
-        logline_age_in_seconds = (datetime.datetime.now() -
-                                  logline_datetime).total_seconds()
+        logline_age_in_seconds = (datetime.datetime.now() - logline_datetime).total_seconds()
 
         # assert that the log file is up-to-date
         if logline_age_in_seconds > 300:
@@ -261,9 +257,7 @@ class SunTracking:
 
         return (logline_datetime, *float_values[1 :])
 
-    def check_camtracker_motor_position(
-        self
-    ) -> Literal["logs too old", "valid", "invalid"]:
+    def check_camtracker_motor_position(self) -> Literal["logs too old", "valid", "invalid"]:
         """Checks whether CamTracker is running and is pointing
         in the right direction.
 
@@ -290,15 +284,12 @@ class SunTracking:
         else:
             return "invalid"
 
-    def check_tum_plc_cover_position(
-        self
-    ) -> Literal["angle not reported", "valid", "invalid"]:
+    def check_tum_plc_cover_position(self) -> Literal["angle not reported", "valid", "invalid"]:
         """Checks whether the TUM PLC cover is open or closed. Returns
         "angle not reported" if the cover position has not beenreported
         by the PLC yet."""
 
-        current_cover_angle = interfaces.StateInterface.load_state(
-        ).plc_state.actors.current_angle
+        current_cover_angle = interfaces.StateInterface.load_state().plc_state.actors.current_angle
 
         if current_cover_angle is None:
             return "angle not reported"

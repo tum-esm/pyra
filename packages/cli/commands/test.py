@@ -84,15 +84,12 @@ def _test_uploading() -> None:
         except Exception as e:
             logger.debug(f"Exception: {e}")
             _print_red(
-                "Upload user account does not have a home directory, " +
-                "command \"ls ~\" failed"
+                "Upload user account does not have a home directory, " + "command \"ls ~\" failed"
             )
             exit(1)
 
         try:
-            result = remote_connection.connection.run(
-                "python3.10 --version > /dev/null 2>&1"
-            )
+            result = remote_connection.connection.run("python3.10 --version > /dev/null 2>&1")
             if result.return_code == 0:
                 _print_green("Found Python3.10 installation on upload server")
             else:

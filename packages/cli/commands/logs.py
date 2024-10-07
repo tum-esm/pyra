@@ -38,9 +38,7 @@ def _read_logs(level: str) -> None:
     logger.info('running command "logs read"')
 
     if level == "INFO":
-        _print_red(
-            "Pyra ^4.1 does not have info log files anymore, only debug log files."
-        )
+        _print_red("Pyra ^4.1 does not have info log files anymore, only debug log files.")
     if level not in ["INFO", "DEBUG"]:
         _print_red("Level has to be either INFO or DEBUG.")
         exit(1)

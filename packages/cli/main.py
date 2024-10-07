@@ -5,9 +5,7 @@ import click
 import sys
 import tum_esm_utils
 
-_PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(
-    __file__, current_depth=3
-)
+_PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=3)
 sys.path.append(_PROJECT_DIR)
 
 from packages.cli.commands import (

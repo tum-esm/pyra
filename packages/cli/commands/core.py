@@ -46,13 +46,9 @@ def _start_pyra_core() -> None:
     interfaces.StateInterface.update_state(recent_cli_calls=1)
     logger.info('running command "core start"')
 
-    existing_pids = tum_esm_utils.processes.get_process_pids(
-        _RUN_PYRA_CORE_SCRIPT_PATH
-    )
+    existing_pids = tum_esm_utils.processes.get_process_pids(_RUN_PYRA_CORE_SCRIPT_PATH)
     if len(existing_pids) > 0:
-        _print_red(
-            f"Background process already exists with process ID(s) {existing_pids}"
-        )
+        _print_red(f"Background process already exists with process ID(s) {existing_pids}")
         exit(1)
 
     try:
@@ -100,8 +96,7 @@ def _stop_pyra_core() -> None:
         exit(0)
 
     if config.tum_plc is not None:
-        current_cover_angle = interfaces.StateInterface.load_state(
-        ).plc_state.actors.current_angle
+        current_cover_angle = interfaces.StateInterface.load_state().plc_state.actors.current_angle
         if current_cover_angle == 0:
             _print_green("Cover is already closed")
         else:
@@ -143,14 +138,11 @@ def _stop_pyra_core() -> None:
 
 
 @core_command_group.command(
-    name="is-running",
-    help="Checks whether the pyra-core background process is running."
+    name="is-running", help="Checks whether the pyra-core background process is running."
 )
 def _pyra_core_is_running() -> None:
     logger.info('running command "core is-running"')
-    existing_pids = tum_esm_utils.processes.get_process_pids(
-        _RUN_PYRA_CORE_SCRIPT_PATH
-    )
+    existing_pids = tum_esm_utils.processes.get_process_pids(_RUN_PYRA_CORE_SCRIPT_PATH)
     if len(existing_pids) > 0:
         _print_green(f"pyra-core is running with process ID(s) {existing_pids}")
     else:

@@ -35,12 +35,8 @@ class MeasurementConditions:
         current_state = interfaces.StateInterface.load_state()
 
         # Fetch and log current sun elevation
-        camtracker_coordinates = utils.Astronomy.get_camtracker_coordinates(
-            self.config
-        )
-        logger.debug(
-            f"Coordinates used from CamTracker (lat, lon, alt): {camtracker_coordinates}."
-        )
+        camtracker_coordinates = utils.Astronomy.get_camtracker_coordinates(self.config)
+        logger.debug(f"Coordinates used from CamTracker (lat, lon, alt): {camtracker_coordinates}.")
         sun_elevation = utils.Astronomy.get_current_sun_elevation(
             self.config,
             lat=camtracker_coordinates[0],
@@ -78,13 +74,9 @@ class MeasurementConditions:
             elif decision.mode == "cli":
                 measurements_should_be_running = decision.cli_decision_result
             else:
-                measurements_should_be_running = self._get_automatic_decision(
-                    current_state
-                )
+                measurements_should_be_running = self._get_automatic_decision(current_state)
 
-        logger.info(
-            f"Measurements should be running is set to: {measurements_should_be_running}."
-        )
+        logger.info(f"Measurements should be running is set to: {measurements_should_be_running}.")
         interfaces.ActivityHistoryInterface.add_datapoint(
             cli_calls=current_state.recent_cli_calls,
             is_measuring=measurements_should_be_running,
@@ -119,12 +111,9 @@ class MeasurementConditions:
         # Evaluate sun elevation if trigger is active
         if triggers.consider_sun_elevation:
             logger.info("Sun elevation as a trigger is considered.")
-            current_sun_elevation = utils.Astronomy.get_current_sun_elevation(
-                self.config
-            )
+            current_sun_elevation = utils.Astronomy.get_current_sun_elevation(self.config)
             min_sun_elevation = max(
-                self.config.general.min_sun_elevation,
-                triggers.min_sun_elevation
+                self.config.general.min_sun_elevation, triggers.min_sun_elevation
             )
             if current_sun_elevation > min_sun_elevation:
                 logger.debug("Sun angle is above threshold.")
@@ -137,13 +126,10 @@ class MeasurementConditions:
             logger.info("Time as a trigger is considered.")
             current_time = datetime.datetime.now().time()
             time_is_valid = (
-                self.config.measurement_triggers.start_time.as_datetime_time() <
-                current_time <
+                self.config.measurement_triggers.start_time.as_datetime_time() < current_time <
                 self.config.measurement_triggers.stop_time.as_datetime_time()
             )
-            logger.debug(
-                f"Time conditions are {'' if time_is_valid else 'not '}fulfilled."
-            )
+            logger.debug(f"Time conditions are {'' if time_is_valid else 'not '}fulfilled.")
             if not time_is_valid:
                 return False
 

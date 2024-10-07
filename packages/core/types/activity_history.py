@@ -21,9 +21,7 @@ class ActivityDatapointList(pydantic.RootModel[list[ActivityDatapoint]]):
     root: list[ActivityDatapoint]
 
 
-example = {
-    "localTime": "12:00", "measuring": True, "errors": False, "uploading": False
-}
+example = {"localTime": "12:00", "measuring": True, "errors": False, "uploading": False}
 
 
 class ActivityHistory(pydantic.BaseModel):

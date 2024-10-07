@@ -12,9 +12,7 @@ from packages.core import types, utils, interfaces
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_AUTOEXPOSURE_IMG_DIR = os.path.join(
-    _PROJECT_DIR, "logs", "helios-autoexposure"
-)
+_AUTOEXPOSURE_IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios-autoexposure")
 _NUMBER_OF_EXPOSURE_IMAGES = 3
 
 
@@ -38,9 +36,7 @@ class HeliosInterface:
             self.camera = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
             if self.camera.isOpened():
                 available_exposures = self.get_available_exposures()
-                logger.debug(
-                    f"determined available exposures: {available_exposures}"
-                )
+                logger.debug(f"determined available exposures: {available_exposures}")
                 if len(available_exposures) == 0:
                     raise CameraError("did not find any available exposures")
 
@@ -55,9 +51,7 @@ class HeliosInterface:
                 logger.debug(f"could not open camera, retrying in 2 seconds")
                 time.sleep(2)
 
-        raise CameraError(
-            f"could not initialize camera in {initialization_tries} tries"
-        )
+        raise CameraError(f"could not initialize camera in {initialization_tries} tries")
 
     def __del__(self) -> None:
         """Release the camera"""
@@ -132,9 +126,8 @@ class HeliosInterface:
         for _ in range(retries + 1):
             ret, frame = self.camera.read()
             if ret:
-                if trow_away_white_images and np.mean(
-                    frame  # type: ignore
-                ) > 240:
+                if trow_away_white_images and np.mean(frame  # type: ignore
+                                                     ) > 240:
                     # image is mostly white
                     continue
                 return np.array(frame)
@@ -182,20 +175,14 @@ class HeliosInterface:
                     img, f"mean={mean_colors[-1]}", color=(0, 0, 255)
                 )
                 cv.imwrite(
-                    os.path.join(
-                        _AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i+1}.jpg"
-                    ), img
+                    os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i+1}.jpg"), img
                 )
 
             # calculate mean color of all 3 images
-            exposure_results.append(
-                ExposureResult(exposure=exposure, means=mean_colors)
-            )
+            exposure_results.append(ExposureResult(exposure=exposure, means=mean_colors))
 
         self.logger.debug(f"exposure results: {exposure_results}")
-        means: list[float] = [
-            sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results
-        ]
+        means: list[float] = [sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results]
         for m1, m2 in zip(means[:-1], means[1 :]):
             assert m1 < m2 + 5, "mean colors should increase with increasing exposure"
 
@@ -203,16 +190,15 @@ class HeliosInterface:
         new_exposure = int(
             min(
                 exposure_results,
-                key=lambda r: abs((sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES) -
-                                  self.target_pixel_brightness),
+                key=lambda r: abs(
+                    (sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES) - self.target_pixel_brightness
+                ),
             ).exposure
         )
         self.update_camera_settings(exposure=new_exposure)
 
         if new_exposure != self.current_exposure:
-            self.logger.info(
-                f"changing exposure: {self.current_exposure} -> {new_exposure}"
-            )
+            self.logger.info(f"changing exposure: {self.current_exposure} -> {new_exposure}")
             self.current_exposure = new_exposure
 
     def run(
@@ -232,8 +218,7 @@ class HeliosInterface:
             perform_autoexposure = True
         if self.target_pixel_brightness != target_pixel_brightness:
             self.logger.debug(
-                "performing autoexposure because target_pixel_brightness changed"
-                +
+                "performing autoexposure because target_pixel_brightness changed" +
                 f" ({self.target_pixel_brightness} -> {target_pixel_brightness})"
             )
             perform_autoexposure = True
@@ -251,9 +236,7 @@ class HeliosInterface:
             save_images_to_archive=save_images_to_archive,
             save_current_image=save_current_image,
         )
-        self.logger.debug(
-            f"exposure = {self.current_exposure}, edge_fraction = {edge_fraction}"
-        )
+        self.logger.debug(f"exposure = {self.current_exposure}, edge_fraction = {edge_fraction}")
 
         return edge_fraction
 
@@ -280,8 +263,7 @@ class HeliosThread(AbstractThread):
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
 
-        return ((config.helios is not None) and
-                (not config.general.test_mode) and
+        return ((config.helios is not None) and (not config.general.test_mode) and
                 (config.measurement_triggers.consider_helios))
 
     @staticmethod
@@ -315,7 +297,6 @@ class HeliosThread(AbstractThread):
             new_config = types.Config.load()
 
             try:
-
                 # Check for termination
                 if not HeliosThread.should_be_running(new_config):
                     if helios_instance is not None:
@@ -327,9 +308,7 @@ class HeliosThread(AbstractThread):
 
                 if new_config.helios.camera_id != config.helios.camera_id:
                     if helios_instance is not None:
-                        logger.info(
-                            "Camera ID changed, reinitializing HeliosInterface"
-                        )
+                        logger.info("Camera ID changed, reinitializing HeliosInterface")
                         del helios_instance
                         helios_instance = None
                         time.sleep(1)
@@ -337,17 +316,11 @@ class HeliosThread(AbstractThread):
                 assert config.helios is not None, "This is a bug in Pyra"
 
                 # sleep while sun angle is too low
-                current_sun_elevation = utils.Astronomy.get_current_sun_elevation(
-                    config
-                )
+                current_sun_elevation = utils.Astronomy.get_current_sun_elevation(config)
                 min_sun_elevation = config.general.min_sun_elevation
                 if current_sun_elevation < min_sun_elevation:
-                    logger.debug(
-                        "Current sun elevation below minimum, sleeping 5 minutes"
-                    )
-                    interfaces.StateInterface.update_state(
-                        helios_indicates_good_conditions="no"
-                    )
+                    logger.debug("Current sun elevation below minimum, sleeping 5 minutes")
+                    interfaces.StateInterface.update_state(helios_indicates_good_conditions="no")
                     if helios_instance is not None:
                         del helios_instance
                         helios_instance = None
@@ -357,17 +330,11 @@ class HeliosThread(AbstractThread):
                 # initialize HeliosInterface if necessary
                 if helios_instance is None:
                     try:
-                        helios_instance = HeliosInterface(
-                            logger, config.helios.camera_id
-                        )
+                        helios_instance = HeliosInterface(logger, config.helios.camera_id)
                     except CameraError as e:
-                        logger.error(
-                            f"could not initialize HeliosInterface: {repr(e)}"
-                        )
+                        logger.error(f"could not initialize HeliosInterface: {repr(e)}")
                         logger.exception(e)
-                        logger.info(
-                            f"sleeping 30 seconds, reinitializing HeliosInterface"
-                        )
+                        logger.info(f"sleeping 30 seconds, reinitializing HeliosInterface")
                         time.sleep(30)
                         continue
 
@@ -389,11 +356,8 @@ class HeliosThread(AbstractThread):
                     new_edge_fraction = helios_instance.run(
                         station_id=config.general.station_id,
                         edge_color_threshold=config.helios.edge_color_threshold,
-                        target_pixel_brightness=config.helios.
-                        target_pixel_brightness,
-                        save_images_to_archive=(
-                            config.helios.save_images_to_archive
-                        ),
+                        target_pixel_brightness=config.helios.target_pixel_brightness,
+                        save_images_to_archive=(config.helios.save_images_to_archive),
                         save_current_image=(config.helios.save_current_image),
                     )
                     repeated_camera_error_count = 0
@@ -403,8 +367,8 @@ class HeliosThread(AbstractThread):
                         raise e
                     else:
                         logger.debug(
-                            f"camera occured ({repeated_camera_error_count} time(s) in a row). "
-                            + "sleeping 30 seconds, reinitializing Helios"
+                            f"camera occured ({repeated_camera_error_count} time(s) in a row). " +
+                            "sleeping 30 seconds, reinitializing Helios"
                         )
                         del helios_instance
                         helios_instance = None
@@ -423,8 +387,7 @@ class HeliosThread(AbstractThread):
                     new_state: Optional[bool] = current_state
 
                     average_edge_fraction = float(
-                        edge_fraction_history.sum() /
-                        edge_fraction_history.get_max_size()
+                        edge_fraction_history.sum() / edge_fraction_history.get_max_size()
                     )
 
                     # eliminating quickly alternating decisions
@@ -436,21 +399,19 @@ class HeliosThread(AbstractThread):
                         new_state = average_edge_fraction >= upper_ef_threshold
                     else:
                         # if already running and below lower threshold -> stop
-                        if current_state and (
-                            average_edge_fraction <= lower_ef_threshold
-                        ):
+                        if current_state and (average_edge_fraction <= lower_ef_threshold):
                             new_state = False
 
                         # if not running and above upper threshold -> start
-                        if (not current_state
-                           ) and (average_edge_fraction >= upper_ef_threshold):
+                        if (not current_state) and (average_edge_fraction >= upper_ef_threshold):
                             new_state = True
 
                     logger.debug(f"New state: {'GOOD' if new_state else 'BAD'}")
                     if current_state == new_state:
                         logger.debug("State did not change")
                         interfaces.StateInterface.update_state(
-                            helios_indicates_good_conditions={ # type: ignore
+                            helios_indicates_good_conditions=
+                            {  # type: ignore
                                 None: "inconclusive",
                                 True: "yes",
                                 False: "no",
@@ -462,11 +423,9 @@ class HeliosThread(AbstractThread):
                         # only do state change if last_state_change is long ago in
                         # the past see https://github.com/tum-esm/pyra/issues/195
 
-                        update_state_file = last_state_change is None or (
-                            (datetime.datetime.now() -
-                             last_state_change).total_seconds()
-                            >= config.helios.min_seconds_between_state_changes
-                        )
+                        update_state_file = last_state_change is None or ((
+                            datetime.datetime.now() - last_state_change
+                        ).total_seconds() >= config.helios.min_seconds_between_state_changes)
                         if update_state_file:
                             logger.info(
                                 f"State change: " + {
@@ -479,7 +438,8 @@ class HeliosThread(AbstractThread):
                                 }[new_state]
                             )
                             interfaces.StateInterface.update_state(
-                                helios_indicates_good_conditions={ # type: ignore
+                                helios_indicates_good_conditions=
+                                {  # type: ignore
                                     None: "inconclusive",
                                     True: "yes",
                                     False: "no",
@@ -493,17 +453,14 @@ class HeliosThread(AbstractThread):
                             )
                 else:
                     logger.debug(
-                        "Not evaluating sun state because " +
-                        "Helios buffer is still filling up"
+                        "Not evaluating sun state because " + "Helios buffer is still filling up"
                     )
 
                 # wait rest of loop time
                 elapsed_time = time.time() - start_time
                 time_to_wait = config.helios.seconds_per_interval - elapsed_time
                 if time_to_wait > 0:
-                    logger.debug(
-                        f"Finished iteration, waiting {round(time_to_wait, 2)} second(s)."
-                    )
+                    logger.debug(f"Finished iteration, waiting {round(time_to_wait, 2)} second(s).")
                     time.sleep(time_to_wait)
 
             except Exception as e:

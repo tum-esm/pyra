@@ -48,6 +48,7 @@ coalesce_brackets = true
 split_before_dict_set_generator = true
 each_dict_entry_on_separate_line = false
 spaces_around_subscript_colon = true
+column_limit = 100
 
 [tool.mypy]
 strict = true

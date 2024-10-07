@@ -138,9 +138,7 @@ class EnclosureControl:
 
             # Skip writing to the PLC as the user took over control from the automation
             if self.config.tum_plc.controlled_by_user:
-                logger.debug(
-                    "Skipping EnclosureControl because enclosure is controlled by user"
-                )
+                logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
                 self.last_plc_connection_time = time.time()
                 return
 
@@ -206,9 +204,8 @@ class EnclosureControl:
         current_time = datetime.datetime.now()
 
         if (current_time.hour == 0) and (current_time.minute < 15):
-            if (self.last_camera_power_down_time is None) or (
-                self.last_camera_power_down_time.date() < current_time.date()
-            ):
+            if (self.last_camera_power_down_time
+                is None) or (self.last_camera_power_down_time.date() < current_time.date()):
                 self.last_camera_power_down_time = current_time
                 self.last_camera_power_up_time = None
                 self.plc_interface.set_power_camera(False)
@@ -217,8 +214,7 @@ class EnclosureControl:
 
         if (self.last_camera_power_down_time
             is not None) and (self.last_camera_power_up_time is None):
-            if (current_time -
-                self.last_camera_power_down_time).total_seconds() > 120:
+            if (current_time - self.last_camera_power_down_time).total_seconds() > 120:
                 self.last_camera_power_up_time = current_time
                 self.plc_interface.set_power_camera(True)
                 logger.info("Powering up the camera.")
@@ -233,9 +229,7 @@ class EnclosureControl:
         A movement of the cover during bad weather conditions shall not be allowed as instrument
         saefty is priotized higher than maximization of overall measurement uptime.
         """
-        logger.debug(
-            f"Received request to move cover to position {value} degrees."
-        )
+        logger.debug(f"Received request to move cover to position {value} degrees.")
 
         # rain check before moving cover. PLC will deny cover requests during rain anyway
         if self.plc_state.state.rain:
@@ -280,9 +274,7 @@ class EnclosureControl:
             elapsed_time = time.time() - start_time
             if elapsed_time > 60:
                 if throw_error:
-                    raise EnclosureControl.CoverError(
-                        "Enclosure cover might be stuck."
-                    )
+                    raise EnclosureControl.CoverError("Enclosure cover might be stuck.")
                 break
 
     def auto_set_power_spectrometer(self) -> None:
@@ -291,9 +283,7 @@ class EnclosureControl:
         spectrometer in the morning when minimum angle is satisfied.
         """
 
-        current_sun_elevation = utils.Astronomy.get_current_sun_elevation(
-            self.config
-        )
+        current_sun_elevation = utils.Astronomy.get_current_sun_elevation(self.config)
         min_power_elevation = self.config.general.min_sun_elevation - 1
         sun_is_above_minimum = current_sun_elevation >= min_power_elevation
         spectrometer_is_powered = self.plc_state.power.spectrometer
@@ -336,8 +326,7 @@ class EnclosureControl:
 
         This functions allows to detect desync caused by previous user controlled decisions. It
         also functions as a failsafe to ensure weather protection of the instrument."""
-        if (not self.measurements_should_be_running
-           ) & (not self.plc_state.state.rain):
+        if (not self.measurements_should_be_running) & (not self.plc_state.state.rain):
             if not self.plc_state.state.cover_closed:
                 logger.info("Cover is still open. Trying to close again.")
                 self.force_cover_close()
@@ -347,17 +336,9 @@ class EnclosureControl:
         """Syncs the current cover_sync flag in the PLC with the present measurement status.
 
         This functions allows to detect desync caused by previous user controlled decisions."""
-        if self.measurements_should_be_running and (
-            not self.plc_state.control.sync_to_tracker
-        ):
-            logger.debug(
-                "Set sync to tracker to True to match measurement status."
-            )
+        if self.measurements_should_be_running and (not self.plc_state.control.sync_to_tracker):
+            logger.debug("Set sync to tracker to True to match measurement status.")
             self.plc_interface.set_sync_to_tracker(True)
-        if (
-            not self.measurements_should_be_running
-        ) and self.plc_state.control.sync_to_tracker:
-            logger.debug(
-                "Set sync to tracker to False to match measurement status."
-            )
+        if (not self.measurements_should_be_running) and self.plc_state.control.sync_to_tracker:
+            logger.debug("Set sync to tracker to False to match measurement status.")
             self.plc_interface.set_sync_to_tracker(False)

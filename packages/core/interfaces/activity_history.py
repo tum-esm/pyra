@@ -11,9 +11,7 @@ _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 
 
 def _date_to_filepath(date: datetime.date) -> str:
-    return os.path.join(
-        _PROJECT_DIR, "logs", "activity", f"activity-{date}.json"
-    )
+    return os.path.join(_PROJECT_DIR, "logs", "activity", f"activity-{date}.json")
 
 
 def _load_current_activity_history() -> types.ActivityHistory:
@@ -35,8 +33,7 @@ class ActivityHistoryInterface:
     `logs/activity/activity-YYYY-MM-DD.json` to plot
     it in the UI."""
 
-    current_activity_history: types.ActivityHistory = _load_current_activity_history(
-    )
+    current_activity_history: types.ActivityHistory = _load_current_activity_history()
     last_write_time: datetime.datetime = datetime.datetime(1970, 1, 1)
 
     @staticmethod
@@ -55,8 +52,7 @@ class ActivityHistoryInterface:
         current_local_datetime = datetime.datetime.now()
 
         if (
-            ActivityHistoryInterface.current_activity_history.date
-            != current_local_datetime.date()
+            ActivityHistoryInterface.current_activity_history.date != current_local_datetime.date()
         ):
             ActivityHistoryInterface.dump_current_activity_history()
             ActivityHistoryInterface.current_activity_history = types.ActivityHistory(
@@ -110,9 +106,9 @@ class ActivityHistoryInterface:
         # writing the activity history to the file if
         #   * first datapoint of the instance running
         #   * last write was at least 5 minutes ago
-        if ((last_activity_datapoint is None) or ((
-            ActivityHistoryInterface.last_write_time - current_local_datetime
-        ).total_seconds() >= 300)):
+        if ((last_activity_datapoint is None) or
+            ((ActivityHistoryInterface.last_write_time - current_local_datetime).total_seconds()
+             >= 300)):
             ActivityHistoryInterface.dump_current_activity_history()
 
     @staticmethod

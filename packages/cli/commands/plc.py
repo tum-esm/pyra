@@ -29,9 +29,7 @@ def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
     try:
         assert config.tum_plc is not None, "PLC not configured"
         assert config.tum_plc.controlled_by_user, "PLC is controlled by automation"
-        plc_interface = interfaces.PLCInterface(
-            config.tum_plc.version, config.tum_plc.ip
-        )
+        plc_interface = interfaces.PLCInterface(config.tum_plc.version, config.tum_plc.ip)
         plc_interface.connect()
     except Exception as e:
         _print_red(str(e))
@@ -44,20 +42,14 @@ def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
     name="read",
     help="Read current state from plc.",
 )
-@click.option(
-    "--no-indent",
-    is_flag=True,
-    help="Do not print the JSON in an indented manner"
-)
+@click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
 def _read(no_indent: bool) -> None:
     interfaces.StateInterface.update_state(recent_cli_calls=1)
     logger.info('running command "plc read"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_readings = plc_interface.read()
-        _print_green(
-            json.dumps(plc_readings, indent=(None if no_indent else 2))
-        )
+        _print_green(json.dumps(plc_readings, indent=(None if no_indent else 2)))
         plc_interface.disconnect()
 
 
@@ -78,8 +70,7 @@ def _reset() -> None:
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
-                with interfaces.StateInterface.update_state_in_context(
-                ) as state:
+                with interfaces.StateInterface.update_state_in_context() as state:
                     if state.plc_state is not None:
                         state.plc_state.state.reset_needed = False
                 break
@@ -89,9 +80,7 @@ def _reset() -> None:
 
 
 def _wait_until_cover_is_at_angle(
-    plc_interface: interfaces.PLCInterface,
-    new_cover_angle: int,
-    timeout: float = 15
+    plc_interface: interfaces.PLCInterface, new_cover_angle: int, timeout: float = 15
 ) -> None:
     # waiting until cover is at this angle
     running_time = 0
@@ -121,9 +110,7 @@ def _set_cover_angle(angle: str) -> None:
     logger.info(f'running command "plc set-cover-angle {angle}"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
-        new_cover_angle = int(
-            "".join([c for c in str(angle) if c.isnumeric() or c == "."])
-        )
+        new_cover_angle = int("".join([c for c in str(angle) if c.isnumeric() or c == "."]))
         assert (new_cover_angle == 0) or (
             new_cover_angle >= 110 and new_cover_angle <= 250
         ), "angle has to be 0° or between 110° and 250°"
@@ -162,14 +149,11 @@ def _close_cover() -> None:
 
 def _set_boolean_plc_state(
     state: Literal["true", "false"],
-    get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool],
-                                                                      None]],
+    get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool], None]],
 ) -> None:
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
-        assert state in [
-            "true", "false"
-        ], 'state has to be either "true" or "false"'
+        assert state in ["true", "false"], 'state has to be either "true" or "false"'
         get_setter_function(plc_interface)(state == "true")
         _print_green("Ok")
         plc_interface.disconnect()

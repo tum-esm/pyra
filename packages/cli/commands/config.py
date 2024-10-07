@@ -9,9 +9,7 @@ from packages.core import interfaces, types, utils
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_DEFAULT_CONFIG_FILE_PATH = os.path.join(
-    _PROJECT_DIR, "config", "config.default.json"
-)
+_DEFAULT_CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.default.json")
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
 _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
@@ -54,9 +52,7 @@ def _get_config(
             )
             shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
     try:
-        config = types.Config.load(
-            ignore_path_existence=(not check_path_existence)
-        )
+        config = types.Config.load(ignore_path_existence=(not check_path_existence))
     except ValueError as e:
         click.echo(click.style(e, fg=None if no_color else "red"))
         exit(1)
@@ -99,11 +95,7 @@ def _update_config(content: str) -> None:
         )
     except ValueError as e:
         error_message = str(e)
-        _print_red(
-            error_message.replace(
-                "ConfigPartial is invalid", "Config update is invalid"
-            )
-        )
+        _print_red(error_message.replace("ConfigPartial is invalid", "Config update is invalid"))
         exit(1)
 
     merged_config_dicts = tum_esm_utils.datastructures.merge_dicts(

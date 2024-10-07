@@ -71,10 +71,8 @@ class Logger:
         """Format the log line string and write it to "logs/debug.log"
         and possibly "logs/info.log"""
         now = datetime.datetime.now()
-        utc_offset = round(
-            (datetime.datetime.now() -
-             datetime.datetime.utcnow()).total_seconds() / 3600, 1
-        )
+        utc_offset = round((datetime.datetime.now() - datetime.datetime.utcnow()).total_seconds() /
+                           3600, 1)
         if round(utc_offset) == utc_offset:
             utc_offset = round(utc_offset)
 
@@ -93,8 +91,7 @@ class Logger:
                 # archive that contains all log lines
                 with open(
                     os.path.join(
-                        _PROJECT_DIR, "logs", "archive",
-                        f"{now.strftime('%Y-%m-%d')}-debug.log"
+                        _PROJECT_DIR, "logs", "archive", f"{now.strftime('%Y-%m-%d')}-debug.log"
                     ), "a"
                 ) as f:
                     f.write(log_string)
@@ -115,9 +112,7 @@ class Logger:
                 return
 
             lines_to_be_kept: list[str] = []
-            latest_log_time_to_keep = (
-                datetime.datetime.now() - datetime.timedelta(minutes=5)
-            )
+            latest_log_time_to_keep = (datetime.datetime.now() - datetime.timedelta(minutes=5))
             for index, line in enumerate(log_lines_in_file):
                 line_time = _get_log_line_datetime(line)
                 if line_time is not None:

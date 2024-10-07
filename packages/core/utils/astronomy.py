@@ -16,9 +16,7 @@ class Astronomy:
         """Loads the astronomical dataset DE421 from the NASA JPL website,
         see https://ssd.jpl.nasa.gov/planets/eph_export.html."""
 
-        filepath = os.path.join(
-            PROJECT_DIR, "config", "astronomy_dataset_de421.bsp"
-        )
+        filepath = os.path.join(PROJECT_DIR, "config", "astronomy_dataset_de421.bsp")
         assert os.path.isfile(filepath), "Astronomical dataset not found"
 
         if Astronomy._PLANETS is None:
@@ -43,9 +41,7 @@ class Astronomy:
             current_timestamp = datetime_object.timestamp()  # type: ignore
             assert isinstance(current_timestamp, float)
             current_time = skyfield.api.load.timescale().from_datetime(
-                datetime.datetime.fromtimestamp(
-                    current_timestamp, tz=skyfield.api.utc
-                )
+                datetime.datetime.fromtimestamp(current_timestamp, tz=skyfield.api.utc)
             )
         else:
             current_time = skyfield.api.load.timescale().now()
@@ -64,9 +60,7 @@ class Astronomy:
         return round(float(altitude.degrees), 3)
 
     @staticmethod
-    def get_camtracker_coordinates(
-        config: types.Config
-    ) -> tuple[float, float, float]:
+    def get_camtracker_coordinates(config: types.Config) -> tuple[float, float, float]:
         """Returns the coordinates from the CamTracker config file as (lat, lon, alt)."""
 
         if config.general.test_mode:

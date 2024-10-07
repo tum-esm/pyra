@@ -11,12 +11,8 @@ def state_command_group() -> None:
     pass
 
 
-@state_command_group.command(
-    name="get", help="Read the current state.json file."
-)
-@click.option(
-    "--indent", is_flag=True, help="Print the JSON in an indented manner"
-)
+@state_command_group.command(name="get", help="Read the current state.json file.")
+@click.option("--indent", is_flag=True, help="Print the JSON in an indented manner")
 def _get_state(indent: bool) -> None:
     logger.info('running command "state get"')
     state = interfaces.StateInterface.load_state()

@@ -46,8 +46,7 @@ class HeliosImageProcessing:
         """
 
         y, x = np.indices(img_shape)
-        return np.array((np.abs(np.hypot(center_x - x, center_y - y))
-                         < radius).astype(np.uint8))
+        return np.array((np.abs(np.hypot(center_x - x, center_y - y)) < radius).astype(np.uint8))
 
     @staticmethod
     def _moving_average(
@@ -72,9 +71,7 @@ class HeliosImageProcessing:
             data=np.array(blurred_image.flatten(), dtype=np.float32),
             K=2,
             bestLabels=None,  # type: ignore
-            criteria=(
-                cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0
-            ),
+            criteria=(cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
             attempts=5,
             flags=cv.KMEANS_PP_CENTERS,
         )
@@ -106,8 +103,7 @@ class HeliosImageProcessing:
 
         output: center_x, center_y, r
         """
-        image_height, image_width = grayscale_image.shape[
-            0], grayscale_image.shape[1]
+        image_height, image_width = grayscale_image.shape[0], grayscale_image.shape[1]
 
         circles = cv.HoughCircles(
             grayscale_image,
@@ -124,8 +120,7 @@ class HeliosImageProcessing:
         # get the circle that is closest to the image center
         x, y, r = min(
             np.round(circles[0, :]).astype("int"),  # type: ignore
-            key=lambda c: math.pow(c[0] -
-                                   (image_width * 0.5), 2)  # type: ignore
+            key=lambda c: math.pow(c[0] - (image_width * 0.5), 2)  # type: ignore
             + pow(c[1] - (image_height * 0.5), 2),
         )
         return round(x), round(y), round(r)
@@ -141,9 +136,7 @@ class HeliosImageProcessing:
         """Put text for edge fraction and mark circles in image."""
 
         img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
-        img = cv.circle(
-            img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2
-        )
+        img = cv.circle(img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2)
         img = HeliosImageProcessing.add_text_to_image(
             img, f"{round(edge_fraction * 100, 2)}%", position="bottom-left"
         )
@@ -206,9 +199,7 @@ class HeliosImageProcessing:
         grayscale_image = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)
 
         # determine lense position and size from binary mask
-        circle_location = HeliosImageProcessing._get_circle_location(
-            grayscale_image
-        )
+        circle_location = HeliosImageProcessing._get_circle_location(grayscale_image)
         if circle_location is None:
             return 0
         else:
@@ -216,10 +207,7 @@ class HeliosImageProcessing:
 
         # only consider edges and make them bold
         edges_only = np.array(
-            cv.Canny(
-                grayscale_image, edge_color_threshold, edge_color_threshold
-            ),
-            dtype=np.float32
+            cv.Canny(grayscale_image, edge_color_threshold, edge_color_threshold), dtype=np.float32
         )
         edges_only_dilated = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
@@ -250,11 +238,9 @@ class HeliosImageProcessing:
             if not os.path.exists(img_directory_path):
                 os.mkdir(img_directory_path)
 
-            edge_fraction_str = str(edge_fraction
-                                   ) + ("0" * (8 - len(str(edge_fraction))))
+            edge_fraction_str = str(edge_fraction) + ("0" * (8 - len(str(edge_fraction))))
             processed_frame = HeliosImageProcessing.add_markings_to_image(
-                edges_only_dilated, edge_fraction, circle_cx, circle_cy,
-                circle_r
+                edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
             )
             if save_images_to_archive:
                 cv.imwrite(
@@ -270,14 +256,9 @@ class HeliosImageProcessing:
                     ), processed_frame
                 )
             if save_current_image:
+                cv.imwrite(os.path.join(_LOGS_DIR, f"current-helios-view-raw.jpg"), frame)
                 cv.imwrite(
-                    os.path.join(_LOGS_DIR, f"current-helios-view-raw.jpg"),
-                    frame
-                )
-                cv.imwrite(
-                    os.path.join(
-                        _LOGS_DIR, f"current-helios-view-processed.jpg"
-                    ), processed_frame
+                    os.path.join(_LOGS_DIR, f"current-helios-view-processed.jpg"), processed_frame
                 )
 
         return edge_fraction

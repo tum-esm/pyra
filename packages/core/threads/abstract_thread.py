@@ -15,8 +15,7 @@ class AbstractThread(abc.ABC):
 
         # credits to https://stackoverflow.com/a/1176023/8255842
         self.logger: utils.Logger = utils.Logger(
-            origin=re.sub(r'(?<!^)(?=[A-Z])', '-', self.__class__.__name__
-                         ).lower()
+            origin=re.sub(r'(?<!^)(?=[A-Z])', '-', self.__class__.__name__).lower()
         )
         self.thread = self.get_new_thread_object()
         self.is_initialized = False
