@@ -114,6 +114,12 @@ class DDEConnection:
         # if there is any thread that is not the main thread, then a macro is running
         return len(active_thread_ids) > 0
 
+    def get_loaded_experiment(self) -> str:
+        self.request('OPUS_PARAMETERS', expect_ok=True)
+        xpp_answer = self.request('READ_PARAMETER XPP', expect_ok=True)
+        exp_answer = self.request('READ_PARAMETER EXP', expect_ok=True)
+        return os.path.join(xpp_answer[1], exp_answer[1])
+
     def load_experiment(self, experiment_path: str) -> None:
         """Load an experiment file into OPUS."""
         self.request(f"LOAD_EXPERIMENT {experiment_path}", expect_ok=True)
@@ -124,9 +130,15 @@ class DDEConnection:
         answer = self.request(f"RUN_MACRO {macro_path}", expect_ok=True)
         return int(answer[1])
 
-    def stop_macro(self, macro_path: str) -> None:
+    def stop_macro(self, macro_path: str, macro_id: int) -> None:
         """Stop a macro in OPUS."""
         self.request(f"KILL_MACRO {os.path.basename(macro_path)}", expect_ok=True)
+        tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: not self.macro_is_running(macro_id),
+            timeout_message="Macro did not stop within 90 seconds.",
+            timeout_seconds=90,
+            check_interval_seconds=9,
+        )
 
 
 class OpusProgram:
@@ -234,7 +246,6 @@ class OpusControlThread(AbstractThread):
         current_macro_id: Optional[int] = None
         dde_connection = DDEConnection()
 
-        # TODO: start macro if it is not running
         # TODO: raise exception if the macro has crashed 2 times in the last 10 minutes
 
         logger.info("Loading state file")
@@ -253,14 +264,22 @@ class OpusControlThread(AbstractThread):
                 else:
                     if dde_connection.macro_is_running(state.opus_state.macro_id):
                         logger.info("The Macro started by Pyra is still running, nothing to do")
-                        current_macro_id = state.opus_state.macro_id
-                        current_experiment_filepath = state.opus_state.experiment_filepath
+                        current_experiment_filepath = dde_connection.get_loaded_experiment()
                         current_macro_filepath = state.opus_state.macro_filepath
+                        current_macro_id = state.opus_state.macro_id
+
                     else:
                         logger.info(
                             "The Macro running in OPUS is not the one started by Pyra, stopping OPUS entirely"
                         )
                         OpusProgram.stop(dde_connection)
+            else:
+                current_experiment_filepath = dde_connection.get_loaded_experiment()
+
+        with interfaces.StateInterface.update_state() as state:
+            state.opus_state.experiment_filepath = current_experiment_filepath
+            state.opus_state.macro_filepath = current_macro_filepath
+            state.opus_state.macro_id = current_macro_id
 
         while True:
             try:
@@ -281,6 +300,15 @@ class OpusControlThread(AbstractThread):
                     continue
                 if (not opus_should_be_running) and OpusProgram.is_running():
                     logger.info("OPUS should not be running, stopping OPUS")
+                    if current_macro_id is not None:
+                        if dde_connection.macro_is_running(current_macro_id):
+                            logger.info("Stopping macro")
+                            dde_connection.stop_macro(current_macro_filepath, current_macro_id)
+                            current_macro_filepath = None
+                            current_macro_id = None
+                            with interfaces.StateInterface.update_state() as state:
+                                state.opus_state.macro_filepath = None
+                                state.opus_state.macro_id = None
                     OpusProgram.stop(dde_connection)
                     dde_connection.teardown()
                     continue
@@ -303,7 +331,7 @@ class OpusControlThread(AbstractThread):
                     current_experiment_path = config.opus.experiment_path.root
                     logger.info(f"Experiment file {current_experiment_path} was loaded")
                     with interfaces.StateInterface.update_state() as state:
-                        state.opus_state.experiment_file_path = config.opus.experiment_path.root
+                        state.opus_state.experiment_filepath = current_experiment_path
 
                 # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
 
@@ -318,31 +346,33 @@ class OpusControlThread(AbstractThread):
                 # STARTING MACRO
 
                 if measurements_should_be_running:
-                    if current_macro_path is None:
+                    if current_macro_filepath is None:
                         logger.info("Starting macro")
-                        dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
-                        time.sleep(5)
-                        current_macro_path = config.opus.macro_path.root
-                        logger.info(f"Macro file {current_macro_path} was started")
+                        current_macro_filepath = config.opus.macro_path.root
+                        current_macro_id = dde_connection.start_macro(current_macro_filepath)
+                        logger.info(f"Successfully started Macro {current_macro_filepath}")
                     else:
-                        if config.opus.macro_path.root != current_macro_path:
+                        if config.opus.macro_path.root != current_macro_filepath:
                             logger.info("Macro file has changed, stopping macro")
-                            dde_connection.stop_macro(current_macro_path)
-                            time.sleep(5)
-                            logger.info("Starting new macro")
-                            dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
-                            time.sleep(5)
-                            current_macro_path = config.opus.macro_path.root
-                            logger.info(f"Macro file {current_macro_path} was loaded")
+                            dde_connection.stop_macro(current_macro_filepath, current_macro_id)
+                            current_macro_filepath = None
+                            current_macro_id = None
+                            logger.info("Successfully stopped Macro")
 
                 # STOPPING MACRO
 
-                if (not measurements_should_be_running) and (current_macro_path is not None):
+                if (not measurements_should_be_running) and (current_macro_filepath is not None):
                     logger.info("Stopping macro")
-                    dde_connection.stop_macro(current_macro_path)
-                    time.sleep(5)
-                    current_macro_path = None
-                    logger.info(f"Stopped Macro {current_macro_path}")
+                    dde_connection.stop_macro(current_macro_filepath, current_macro_id)
+                    current_macro_filepath = None
+                    current_macro_id = None
+                    logger.info(f"Successfully stopped Macro")
+
+                # UPDATING STATE
+
+                with interfaces.StateInterface.update_state() as state:
+                    state.opus_state.macro_filepath = current_macro_filepath
+                    state.opus_state.macro_id = current_macro_id
 
                 # SLEEP
 
