@@ -229,13 +229,38 @@ class OpusControlThread(AbstractThread):
 
     @staticmethod
     def main(headless: bool = False) -> None:
-        current_experiment_path: Optional[str] = None
-        current_macro_path: Optional[str] = None
+        current_experiment_filepath: Optional[str] = None
+        current_macro_filepath: Optional[str] = None
+        current_macro_id: Optional[int] = None
         dde_connection = DDEConnection()
 
-        # TODO: stop OPUS if a macro is running with an unknown ID
         # TODO: start macro if it is not running
         # TODO: raise exception if the macro has crashed 2 times in the last 10 minutes
+
+        logger.info("Loading state file")
+        state = interfaces.StateInterface.load_state()
+
+        if OpusProgram.is_running():
+            logger.info("OPUS is already running")
+
+            dde_connection.setup()
+            if dde_connection.some_macro_is_running():
+                logger.info("Some macro is already running")
+
+                if state.opus_state.macro_id is None:
+                    logger.info("Macro ID is unknown, stopping OPUS entirely")
+                    OpusProgram.stop(dde_connection)
+                else:
+                    if dde_connection.macro_is_running(state.opus_state.macro_id):
+                        logger.info("The Macro started by Pyra is still running, nothing to do")
+                        current_macro_id = state.opus_state.macro_id
+                        current_experiment_filepath = state.opus_state.experiment_filepath
+                        current_macro_filepath = state.opus_state.macro_filepath
+                    else:
+                        logger.info(
+                            "The Macro running in OPUS is not the one started by Pyra, stopping OPUS entirely"
+                        )
+                        OpusProgram.stop(dde_connection)
 
         while True:
             try:
@@ -274,12 +299,11 @@ class OpusControlThread(AbstractThread):
                         logger.info("Loading experiment")
                     else:
                         logger.info("Experiment file has changed, loading new experiment")
-                    answer = dde_connection.request(
-                        f"LOAD_EXPERIMENT {config.opus.experiment_path.root}"
-                    )
-                    time.sleep(5)
+                    dde_connection.load_experiment(config.opus.experiment_path.root)
                     current_experiment_path = config.opus.experiment_path.root
                     logger.info(f"Experiment file {current_experiment_path} was loaded")
+                    with interfaces.StateInterface.update_state() as state:
+                        state.opus_state.experiment_file_path = config.opus.experiment_path.root
 
                 # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
 

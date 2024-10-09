@@ -77,6 +77,12 @@ class PLCState(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid")
 
 
+class OpusState(pydantic.BaseModel):
+    experiment_filepath: Optional[str] = None
+    macro_filepath: Optional[str] = None
+    macro_id: Optional[int] = None
+
+
 class StateObject(pydantic.BaseModel):
     last_updated: datetime.datetime
     recent_cli_calls: int = 0
@@ -88,6 +94,7 @@ class StateObject(pydantic.BaseModel):
     current_exceptions: list[ExceptionStateItem] = []
     notified_exceptions: list[ExceptionStateItem] = []
     upload_is_running: Optional[bool] = None
+    opus_state: OpusState = OpusState()
 
     model_config = pydantic.ConfigDict(extra="forbid")
 
