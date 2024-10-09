@@ -5,7 +5,6 @@ import sys
 import click
 import os
 import filelock
-import psutil
 import tum_esm_utils
 from packages.core import interfaces, modules, types, utils, threads
 
@@ -93,6 +92,8 @@ def _stop_pyra_core() -> None:
     )
 
     config = types.Config.load(ignore_path_existence=True)
+    state = interfaces.StateInterface.load_state()
+
     if config.general.test_mode:
         _print_green("Skip closing TUM_PLC, CamTracker, and OPUS in test mode")
         exit(0)
@@ -122,8 +123,17 @@ def _stop_pyra_core() -> None:
         exit(1)
 
     try:
-        threads.opus_control_thread.OpusProgram.stop()
-        _print_green("Successfully closed OPUS")
+        if threads.opus_control_thread.OpusProgram.is_running():
+            dde_connection = threads.opus_control_thread.DDEConnection()
+            if ((state.opus_state.macro_filepath is not None) and
+                (state.opus_state.macro_id is not None)):
+                dde_connection.stop_macro(
+                    state.opus_state.macro_filepath, state.opus_state.macro_id
+                )
+            threads.opus_control_thread.OpusProgram.stop(dde_connection)
+            _print_green("Successfully closed OPUS")
+        else:
+            _print_green("OPUS is already closed")
     except Exception as e:
         _print_red(f"Failed to close OPUS: {e}")
         exit(1)
