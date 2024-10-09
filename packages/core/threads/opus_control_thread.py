@@ -7,68 +7,62 @@ import psutil
 import tum_esm_utils
 from .abstract_thread import AbstractThread
 from packages.core import types, utils, interfaces
+import brukeropus.control.dde
 
 logger = utils.Logger(origin="opus")
 
 
 class DDEConnection:
-    """TODO: docstring"""
+    """Class for handling DDE connections to OPUS."""
     def __init__(self) -> None:
-        self.server: Optional[Any] = None
-        self.conversation: Optional[Any] = None
+        self.client: Optional[brukeropus.control.dde.DDEClient] = None
 
     def setup(self) -> None:
-        """TODO: docstring"""
-        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
-        import dde  # type: ignore
+        """Set up a new DDE connection to OPUS. Tear down the 
+        old connection if it exists."""
 
-        logger.info("Establishing new DDE connection")
-        self.server = dde.CreateServer()  # type: ignore
-        time.sleep(0.5)
-        self.server.Create("Client")
-        time.sleep(0.5)
-        self.conversation = dde.CreateConversation(self.server)  # type: ignore
-        logger.info("DDE connection established")
-        time.sleep(0.5)
+        if self.client is not None:
+            self.teardown()
 
-        for i in range(10):
-            try:
-                logger.info("Trying to connect to OPUS")
-                self.conversation.ConnectTo("OPUS", "OPUS/System")
-                assert self.conversation.Connected() == 1
-                logger.info("Connected to OPUS DDE Server.")
-            except:
-                logger.info(
-                    "Could not connect to OPUS DDE Server." +
-                    (" Retrying in 10 seconds." if i < 9 else "")
-                )
-                if i == 9:
-                    raise TimeoutError("Could not connect to OPUS DDE Server after 10 tries.")
-                else:
-                    time.sleep(10)
+        self.client = brukeropus.control.dde.DDEClient("Opus", "System")
+        time.sleep(0.5)
+        if not self.is_working():
+            raise RuntimeError("DDE connection to OPUS is not working")
 
     def is_working(self) -> bool:
-        """TODO: docstring"""
-        if self.conversation is None:
+        """Check if the DDE connection is working."""
+        if self.client is None:
             return False
-        return self.conversation.Connected() == 1  # type: ignore
+        answer = self.request("COMMAND_SAY hello")
+        return (answer[0] == "OK") and (answer[1] == "hello")
 
     def teardown(self) -> None:
-        """TODO: docstring"""
-        if self.server is not None:
+        """Tear down the current DDE connection."""
+        if self.client is not None:
             logger.info("Destroying DDE connection")
-            self.server.Shutdown()
-            self.server.Destroy()
-            self.server = None
-            self.conversation = None
-            logger.info("Destroyed DDE connection")
+            del self.client
+            self.client = None
+        else:
+            logger.info("No DDE connection to tear down")
 
-    def request(self, command: str) -> str:
-        """TODO: docstring"""
-        if self.conversation is None:
+    def request(
+        self,
+        command: str,
+        expected_answer: Optional[list[str]] = None,
+        timeout: float = 5
+    ) -> list[str]:
+        """Send a request to the OPUS DDE server. Run `setup()` if the 
+        connection is not yet established."""
+
+        if self.client is None:
             self.setup()
-        assert self.conversation is not None
-        return self.conversation.Request(command)  # type: ignore
+        raw_answer: bytes = self.client.request(command, timeout=int(timeout * 1000))
+        answer = raw_answer.decode("utf-8").strip("\n").split("\n\n")
+        if expected_answer is not None:
+            if answer != expected_answer:
+                raise RuntimeError(
+                    f"Unexpected answer from OPUS: {answer}, expected {expected_answer}"
+                )
 
 
 class OpusProgram:
