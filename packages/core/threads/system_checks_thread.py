@@ -37,6 +37,15 @@ class SystemChecksThread(AbstractThread):
         # TODO: add exception resolving
 
         while True:
+
+            # WINDOWS32 AND PYTHON VERSION >= 3.10
+
+            # TODO
+            # assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+            # assert sys.version_info.major >= 3 and sys.version_info.minor >= 10, "this function requires python >= 3.10"
+
+            # CPU/MEMORY USAGE AND BOOT TIME
+
             cpu_usage = tum_esm_utils.system.get_cpu_usage()
             logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
 

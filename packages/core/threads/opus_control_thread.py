@@ -66,16 +66,12 @@ class DDEConnection:
 
 
 class OpusProgram:
-    """TODO: docstring"""
+    """Class for starting and stopping OPUS."""
     @staticmethod
     def start(config: types.Config) -> None:
         """Starts the OPUS.exe with os.startfile()."""
 
         interfaces.ActivityHistoryInterface.add_datapoint(opus_startups=1)
-
-        # works only >= python3.10 because it requires the "cwd" argument
-        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
-        assert sys.version_info.major >= 3 and sys.version_info.minor >= 10, "this function requires python >= 3.10"
 
         os.startfile(  # type: ignore
             os.path.basename(config.opus.executable_path.root),
@@ -116,25 +112,29 @@ class OpusProgram:
         """Closes OPUS via DDE/force kills it via psutil. If no DDEConnection
         is provided, the function will force kill OPUS right away."""
 
-        if (dde_connection is not None) and dde_connection.is_working():
-            assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        try:
+            if (dde_connection is not None) and dde_connection.is_working():
+                logger.info(f"Requesting to stop OPUS via DDE")
+                dde_connection.request("UnloadAll()")
+                dde_connection.request("CLOSE_OPUS")
 
-            logger.info(f"Requesting to stop OPUS via DDE")
-            dde_connection.request("CLOSE_OPUS")
+                logger.info(f"Waiting for OPUS to close gracefully")
+                try:
+                    tum_esm_utils.timing.wait_for_condition(
+                        is_successful=lambda: not OpusProgram.is_running(),
+                        timeout_message="OPUS.exe did not stop within 60 seconds.",
+                        timeout_seconds=60,
+                        check_interval_seconds=4,
+                    )
+                    logger.info("OPUS.exe stopped successfully.")
+                    return
+                except TimeoutError:
+                    logger.warning("OPUS.exe did not stop gracefully within 60 seconds.")
+        except Exception as e:
+            logger.exception(e)
+            logger.error("Could not stop OPUS via DDE")
 
-            logger.info(f"Waiting for OPUS to close gracefully")
-            try:
-                tum_esm_utils.timing.wait_for_condition(
-                    is_successful=lambda: not OpusProgram.is_running(),
-                    timeout_message="OPUS.exe did not stop within 60 seconds.",
-                    timeout_seconds=60,
-                    check_interval_seconds=4,
-                )
-                logger.info("OPUS.exe stopped successfully.")
-                return
-            except TimeoutError:
-                logger.warning("OPUS.exe did not stop gracefully within 60 seconds.")
-
+        logger.info("Force killing OPUS")
         for p in psutil.process_iter():
             try:
                 if p.name() in ["opus.exe", "OpusCore.exe"]:
@@ -147,9 +147,16 @@ class OpusProgram:
             ):
                 pass
 
+    @staticmethod
+    def macro_is_running(dde_connection: DDEConnection, macro_id: int) -> bool:
+        pass
+
 
 class OpusControlThread(AbstractThread):
-    """TODO: docstring"""
+    """Thread for controlling OPUS. This thread starts/stops the OPUS executable
+    whenever it is not running.
+    
+    TODO"""
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -181,7 +188,6 @@ class OpusControlThread(AbstractThread):
                 if opus_should_be_running and (not OpusProgram.is_running()):
                     logger.info("OPUS should be running, starting OPUS")
                     OpusProgram.start(config)
-                    dde_connection.teardown()
                     dde_connection.setup()
                     continue
                 if (not opus_should_be_running) and OpusProgram.is_running():
@@ -204,7 +210,9 @@ class OpusControlThread(AbstractThread):
                         logger.info("Loading experiment")
                     else:
                         logger.info("Experiment file has changed, loading new experiment")
-                    dde_connection.request(f"LOAD_EXPERIMENT {config.opus.experiment_path.root}")
+                    answer = dde_connection.request(
+                        f"LOAD_EXPERIMENT {config.opus.experiment_path.root}"
+                    )
                     time.sleep(5)
                     current_experiment_path = config.opus.experiment_path.root
                     logger.info(f"Experiment file {current_experiment_path} was loaded")
@@ -260,7 +268,8 @@ class OpusControlThread(AbstractThread):
 
             except Exception as e:
                 logger.exception(e)
-                logger.info("Sleeping 2 minutes")
+                OpusProgram.stop(dde_connection)
+                logger.info("Sleeping 2 minute")
                 time.sleep(120)
                 logger.info("Stopping thread")
                 break
