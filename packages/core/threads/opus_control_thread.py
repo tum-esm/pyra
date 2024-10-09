@@ -22,12 +22,17 @@ class DDEConnection:
         old connection if it exists."""
 
         if self.client is not None:
+            logger.info("Destroying old DDE connection")
             self.teardown()
+            time.sleep(0.5)
 
+        logger.info("Setting up new DDE connection")
         self.client = brukeropus.control.dde.DDEClient("Opus", "System")
         time.sleep(0.5)
         if not self.is_working():
             raise RuntimeError("DDE connection to OPUS is not working")
+        answer = self.request("GET_VERSION_EXTENDED")
+        logger.info(f"Connected to OPUS version {answer[0]}")
 
     def is_working(self) -> bool:
         """Check if the DDE connection is working."""
@@ -49,6 +54,7 @@ class DDEConnection:
         self,
         command: str,
         expected_answer: Optional[list[str]] = None,
+        expect_ok: Optional[bool] = None,
         timeout: float = 5
     ) -> list[str]:
         """Send a request to the OPUS DDE server. Run `setup()` if the 
@@ -63,6 +69,44 @@ class DDEConnection:
                 raise RuntimeError(
                     f"Unexpected answer from OPUS: {answer}, expected {expected_answer}"
                 )
+        if expect_ok is not None:
+            assert answer[0] == "OK"
+
+    def get_main_thread_id(self) -> int:
+        """Get the main thread ID of OPUS."""
+        answer = self.request("FIND_FUNCTION 0", expect_ok=True)
+        return int(answer[1])
+
+    def macro_is_running(self, macro_id: int) -> bool:
+        answer = self.request(f'MACRO_RESULTS {macro_id}', expect_ok=True)
+        return int(answer[1]) == 0
+
+    def some_macro_is_running(self) -> bool:
+        answer = self.request('MACRO_RESULTS', expect_ok=True)
+        main_thread_id = self.get_main_thread_id()
+        active_thread_ids: set[int] = set()
+        for function in [
+            "MeasureReference", "MeasureSample", "MeasureRepeated", "MeasureRapidTRS",
+            "MeasureStepScanTrans"
+        ]:
+            answer = self.request(f'FIND_FUNCTION {function}')
+            if len(answer) == 2:
+                active_thread_ids.add(int(answer[1]))
+
+        if main_thread_id in active_thread_ids:
+            active_thread_ids.remove(main_thread_id)
+
+        return len(active_thread_ids) > 0
+
+    def load_experiment(self, experiment_path: str) -> None:
+        """Load an experiment file into OPUS."""
+        self.request(f"LOAD_EXPERIMENT {experiment_path}", expect_ok=True)
+
+    def start_macro(self, macro_path: str) -> int:
+        """Start a macro in OPUS. Returns the macro ID."""
+
+        answer = self.request(f"RUN_MACRO {macro_path}", expect_ok=True)
+        return int(answer[1])
 
 
 class OpusProgram:
@@ -115,8 +159,8 @@ class OpusProgram:
         try:
             if (dde_connection is not None) and dde_connection.is_working():
                 logger.info(f"Requesting to stop OPUS via DDE")
-                dde_connection.request("UnloadAll()")
-                dde_connection.request("CLOSE_OPUS")
+                dde_connection.request("UnloadAll()", expect_ok=True)
+                dde_connection.request("CLOSE_OPUS", expect_ok=True)
 
                 logger.info(f"Waiting for OPUS to close gracefully")
                 try:
@@ -146,10 +190,6 @@ class OpusProgram:
                 IndexError,
             ):
                 pass
-
-    @staticmethod
-    def macro_is_running(dde_connection: DDEConnection, macro_id: int) -> bool:
-        pass
 
 
 class OpusControlThread(AbstractThread):
