@@ -1,8 +1,7 @@
+from typing import Optional
 import os
-import sys
 import threading
 import time
-from typing import Any, Optional
 import psutil
 import tum_esm_utils
 from .abstract_thread import AbstractThread
@@ -82,7 +81,12 @@ class DDEConnection:
         return int(answer[1]) == 0
 
     def some_macro_is_running(self) -> bool:
-        answer = self.request('MACRO_RESULTS', expect_ok=True)
+        """Check if any macro is currently running in OPUS.
+        
+        In theory, we could also check whether the correct macro is running using
+        `READ_PARAMETER MPT` and `READ_PARAMETER MFN`. However, these variables do
+        not seem to be updated right away, so we cannot rely on them."""
+
         main_thread_id = self.get_main_thread_id()
         active_thread_ids: set[int] = set()
         for function in [
@@ -107,6 +111,10 @@ class DDEConnection:
 
         answer = self.request(f"RUN_MACRO {macro_path}", expect_ok=True)
         return int(answer[1])
+
+    def stop_macro(self, macro_path: str) -> None:
+        """Stop a macro in OPUS."""
+        self.request(f"KILL_MACRO {os.path.basename(macro_path)}", expect_ok=True)
 
 
 class OpusProgram:
@@ -213,6 +221,10 @@ class OpusControlThread(AbstractThread):
         current_macro_path: Optional[str] = None
         dde_connection = DDEConnection()
 
+        # TODO: stop OPUS if a macro is running with an unknown ID
+        # TODO: start macro if it is not running
+        # TODO: raise exception if the macro has crashed 2 times in the last 10 minutes
+
         while True:
             try:
                 logger.info("Loading configuration file")
@@ -279,9 +291,7 @@ class OpusControlThread(AbstractThread):
                     else:
                         if config.opus.macro_path.root != current_macro_path:
                             logger.info("Macro file has changed, stopping macro")
-                            dde_connection.request(
-                                f"KILL_MACRO {os.path.basename(current_macro_path)}"
-                            )
+                            dde_connection.stop_macro(current_macro_path)
                             time.sleep(5)
                             logger.info("Starting new macro")
                             dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
@@ -293,7 +303,7 @@ class OpusControlThread(AbstractThread):
 
                 if (not measurements_should_be_running) and (current_macro_path is not None):
                     logger.info("Stopping macro")
-                    dde_connection.request(f"KILL_MACRO {os.path.basename(current_macro_path)}")
+                    dde_connection.stop_macro(current_macro_path)
                     time.sleep(5)
                     current_macro_path = None
                     logger.info(f"Stopped Macro {current_macro_path}")
@@ -316,25 +326,19 @@ class OpusControlThread(AbstractThread):
 
     @staticmethod
     def test_setup(config: types.Config) -> None:
-        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
-        assert not OpusProgram.is_running(), "this test cannot be run if OPUS is already running"
-
         OpusProgram.start(config)
 
         dde_connection = DDEConnection()
         dde_connection.setup()
 
-        dde_connection.request(f"LOAD_EXPERIMENT {config.opus.experiment_path.root}")
+        dde_connection.load_experiment(config.opus.experiment_path.root)
         time.sleep(5)
 
-        dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
-        time.sleep(10)
+        macro_id = dde_connection.start_macro(config.opus.macro_path.root)
+        time.sleep(5)
+        assert dde_connection.macro_is_running(macro_id), "Macro is not running"
 
-        # TODO: we could use "MACRO_RESULTS <MacroID>" to test whether
-        #       the macro is actually running once we figure out
-        #       https://github.com/tum-esm/pyra/issues/124
-
-        dde_connection.request(f"KILL_MACRO {os.path.basename(config.opus.macro_path.root)}")
-        time.sleep(10)
+        dde_connection.stop_macro(config.opus.macro_path.root)
+        time.sleep(2)
 
         OpusProgram.stop(dde_connection)
