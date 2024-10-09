@@ -1,3 +1,4 @@
+import traceback
 from typing import Optional
 import os
 import threading
@@ -173,12 +174,7 @@ class OpusProgram:
             try:
                 if p.name() in ["opus.exe", "OpusCore.exe"]:
                     return True
-            except (
-                psutil.AccessDenied,
-                psutil.ZombieProcess,
-                psutil.NoSuchProcess,
-                IndexError,
-            ):
+            except (psutil.AccessDenied, psutil.ZombieProcess, psutil.NoSuchProcess, IndexError):
                 pass
 
         return False
@@ -245,8 +241,6 @@ class OpusControlThread(AbstractThread):
         current_macro_filepath: Optional[str] = None
         current_macro_id: Optional[int] = None
         dde_connection = DDEConnection()
-
-        # TODO: raise exception if the macro has crashed 2 times in the last 10 minutes
 
         logger.info("Loading state file")
         state = interfaces.StateInterface.load_state()
@@ -343,6 +337,13 @@ class OpusControlThread(AbstractThread):
                         if not cover_is_open:
                             measurements_should_be_running = False
 
+                # CHECK IF MACRO HAS CRASHED
+
+                if current_macro_filepath is not None:
+                    assert current_macro_id is not None, "this should not happen"
+                    if not dde_connection.macro_is_running(current_macro_id):
+                        raise RuntimeError("Macro has stopped/crashed")
+
                 # STARTING MACRO
 
                 if measurements_should_be_running:
@@ -357,6 +358,7 @@ class OpusControlThread(AbstractThread):
                             dde_connection.stop_macro(current_macro_filepath, current_macro_id)
                             current_macro_filepath = None
                             current_macro_id = None
+                            observed_macro_crashes = []
                             logger.info("Successfully stopped Macro")
 
                 # STOPPING MACRO
@@ -366,6 +368,7 @@ class OpusControlThread(AbstractThread):
                     dde_connection.stop_macro(current_macro_filepath, current_macro_id)
                     current_macro_filepath = None
                     current_macro_id = None
+                    observed_macro_crashes = []
                     logger.info(f"Successfully stopped Macro")
 
                 # UPDATING STATE
@@ -374,18 +377,33 @@ class OpusControlThread(AbstractThread):
                     state.opus_state.macro_filepath = current_macro_filepath
                     state.opus_state.macro_id = current_macro_id
 
+                    # TODO: turn this into a function
+                    state.current_exceptions = [
+                        e for e in state.current_exceptions if (e.origin != "opus")
+                    ]
+
                 # SLEEP
 
                 t2 = time.time()
-                sleep_time = 30 - (t2 - t1)
-                if sleep_time > 0:
-                    logger.info(f"Sleeping {sleep_time} seconds")
-                    time.sleep(sleep_time)
+                sleep_time = max(5, 30 - (t2 - t1))
+                logger.info(f"Sleeping {sleep_time} seconds")
+                time.sleep(sleep_time)
 
             except Exception as e:
                 logger.exception(e)
                 OpusProgram.stop(dde_connection)
-                logger.info("Sleeping 2 minute")
+                with interfaces.StateInterface.update_state() as state:
+                    state.opus_state.macro_filepath = None
+                    state.opus_state.macro_id = None
+                    # TODO: turn this into a function
+                    state.current_exceptions.append(
+                        types.ExceptionStateItem(
+                            origin="opus",
+                            subject=type(e).__name__,
+                            details="\n".join(traceback.format_exception(e)),
+                        )
+                    )
+                logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")
                 break
