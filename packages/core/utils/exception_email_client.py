@@ -169,9 +169,6 @@ class ExceptionEmailClient:
     def send_test_email(config: types.Config) -> None:
         """Send out a test email."""
 
-        if not config.error_email.notify_recipients:
-            return
-
         pyra_version = _get_pyra_version()
         current_log_lines = _get_current_log_lines()
 
