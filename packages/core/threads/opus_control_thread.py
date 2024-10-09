@@ -172,88 +172,104 @@ class OpusControlThread(AbstractThread):
         current_macro_path: Optional[str] = None
         dde_connection = DDEConnection()
 
-        # TODO: add exception raising
-        # TODO: add exception resolving
-
         while True:
-            logger.info("Loading configuration file")
-            config = types.Config.load()
+            try:
+                logger.info("Loading configuration file")
+                config = types.Config.load()
+                t1 = time.time()
 
-            # START AND OPUS
+                # START AND OPUS
 
-            opus_should_be_running = (
-                utils.Astronomy.get_current_sun_elevation(config)
-                >= config.general.min_sun_elevation
-            )
-            if opus_should_be_running and (not OpusProgram.is_running()):
-                logger.info("OPUS should be running, starting OPUS")
-                OpusProgram.start(config)
-                dde_connection.teardown()
-                dde_connection.setup()
-                continue
-            if (not opus_should_be_running) and OpusProgram.is_running():
-                logger.info("OPUS should not be running, stopping OPUS")
-                OpusProgram.stop(dde_connection)
-                dde_connection.teardown()
-                continue
+                opus_should_be_running = (
+                    utils.Astronomy.get_current_sun_elevation(config)
+                    >= config.general.min_sun_elevation
+                )
+                if opus_should_be_running and (not OpusProgram.is_running()):
+                    logger.info("OPUS should be running, starting OPUS")
+                    OpusProgram.start(config)
+                    dde_connection.teardown()
+                    dde_connection.setup()
+                    continue
+                if (not opus_should_be_running) and OpusProgram.is_running():
+                    logger.info("OPUS should not be running, stopping OPUS")
+                    OpusProgram.stop(dde_connection)
+                    dde_connection.teardown()
+                    continue
 
-            # IDLE AT NIGHT
+                # IDLE AT NIGHT
 
-            if not opus_should_be_running:
-                logger.info("Sleeping 3 minutes")
-                time.sleep(180)
-                continue
+                if not opus_should_be_running:
+                    logger.info("Sleeping 3 minutes")
+                    time.sleep(180)
+                    continue
 
-            # LOAD EXPERIMENT
+                # LOAD EXPERIMENT
 
-            if config.opus.experiment_path.root != current_experiment_path:
-                if current_experiment_path is None:
-                    logger.info("Loading experiment")
-                else:
-                    logger.info("Experiment file has changed, loading new experiment")
-                dde_connection.request(f"LOAD_EXPERIMENT {config.opus.experiment_path.root}")
-                time.sleep(5)
-                current_experiment_path = config.opus.experiment_path.root
-                logger.info(f"Experiment file {current_experiment_path} was loaded")
-
-            # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
-
-            state = interfaces.StateInterface.load_state()
-            measurements_should_be_running = state.measurements_should_be_running == True
-            if measurements_should_be_running:
-                if state.plc_state.actors.current_angle is not None:
-                    cover_is_open = 20 < state.plc_state.actors.current_angle < 340
-                    if not cover_is_open:
-                        measurements_should_be_running = False
-
-            # STARTING MACRO
-
-            if measurements_should_be_running:
-                if current_macro_path is None:
-                    logger.info("Starting macro")
-                    dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
+                if config.opus.experiment_path.root != current_experiment_path:
+                    if current_experiment_path is None:
+                        logger.info("Loading experiment")
+                    else:
+                        logger.info("Experiment file has changed, loading new experiment")
+                    dde_connection.request(f"LOAD_EXPERIMENT {config.opus.experiment_path.root}")
                     time.sleep(5)
-                    current_macro_path = config.opus.macro_path.root
-                    logger.info(f"Macro file {current_macro_path} was started")
-                else:
-                    if config.opus.macro_path.root != current_macro_path:
-                        logger.info("Macro file has changed, stopping macro")
-                        dde_connection.request(f"KILL_MACRO {os.path.basename(current_macro_path)}")
-                        time.sleep(5)
-                        logger.info("Starting new macro")
+                    current_experiment_path = config.opus.experiment_path.root
+                    logger.info(f"Experiment file {current_experiment_path} was loaded")
+
+                # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
+
+                state = interfaces.StateInterface.load_state()
+                measurements_should_be_running = state.measurements_should_be_running == True
+                if measurements_should_be_running:
+                    if state.plc_state.actors.current_angle is not None:
+                        cover_is_open = 20 < state.plc_state.actors.current_angle < 340
+                        if not cover_is_open:
+                            measurements_should_be_running = False
+
+                # STARTING MACRO
+
+                if measurements_should_be_running:
+                    if current_macro_path is None:
+                        logger.info("Starting macro")
                         dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
                         time.sleep(5)
                         current_macro_path = config.opus.macro_path.root
-                        logger.info(f"Macro file {current_macro_path} was loaded")
+                        logger.info(f"Macro file {current_macro_path} was started")
+                    else:
+                        if config.opus.macro_path.root != current_macro_path:
+                            logger.info("Macro file has changed, stopping macro")
+                            dde_connection.request(
+                                f"KILL_MACRO {os.path.basename(current_macro_path)}"
+                            )
+                            time.sleep(5)
+                            logger.info("Starting new macro")
+                            dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
+                            time.sleep(5)
+                            current_macro_path = config.opus.macro_path.root
+                            logger.info(f"Macro file {current_macro_path} was loaded")
 
-            # STOPPING MACRO
+                # STOPPING MACRO
 
-            if (not measurements_should_be_running) and (current_macro_path is not None):
-                logger.info("Stopping macro")
-                dde_connection.request(f"KILL_MACRO {os.path.basename(current_macro_path)}")
-                time.sleep(5)
-                current_macro_path = None
-                logger.info(f"Stopped Macro {current_macro_path}")
+                if (not measurements_should_be_running) and (current_macro_path is not None):
+                    logger.info("Stopping macro")
+                    dde_connection.request(f"KILL_MACRO {os.path.basename(current_macro_path)}")
+                    time.sleep(5)
+                    current_macro_path = None
+                    logger.info(f"Stopped Macro {current_macro_path}")
+
+                # SLEEP
+
+                t2 = time.time()
+                sleep_time = 30 - (t2 - t1)
+                if sleep_time > 0:
+                    logger.info(f"Sleeping {sleep_time} seconds")
+                    time.sleep(sleep_time)
+
+            except Exception as e:
+                logger.exception(e)
+                logger.info("Sleeping 2 minutes")
+                time.sleep(120)
+                logger.info("Stopping thread")
+                break
 
     @staticmethod
     def test_setup(config: types.Config) -> None:
