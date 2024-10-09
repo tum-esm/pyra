@@ -13,7 +13,7 @@ logger = utils.Logger(origin="opus")
 
 class DDEConnection:
     """TODO: docstring"""
-    def __init__(self):
+    def __init__(self) -> None:
         self.server: Optional[Any] = None
         self.conversation: Optional[Any] = None
 
@@ -28,12 +28,12 @@ class DDEConnection:
         self.server.Create("Client")
         time.sleep(0.5)
         self.conversation = dde.CreateConversation(self.server)  # type: ignore
-        self.logger.info("DDE connection established")
+        logger.info("DDE connection established")
         time.sleep(0.5)
 
         for i in range(10):
             try:
-                self.logger.info("Trying to connect to OPUS")
+                logger.info("Trying to connect to OPUS")
                 self.conversation.ConnectTo("OPUS", "OPUS/System")
                 assert self.conversation.Connected() == 1
                 logger.info("Connected to OPUS DDE Server.")
@@ -51,9 +51,9 @@ class DDEConnection:
         """TODO: docstring"""
         if self.conversation is None:
             return False
-        return self.conversation.Connected() == 1
+        return self.conversation.Connected() == 1  # type: ignore
 
-    def teardown(self, logger: utils.Logger) -> None:
+    def teardown(self) -> None:
         """TODO: docstring"""
         if self.server is not None:
             logger.info("Destroying DDE connection")
@@ -68,7 +68,7 @@ class DDEConnection:
         if self.conversation is None:
             self.setup()
         assert self.conversation is not None
-        return self.conversation.Request(command)
+        return self.conversation.Request(command)  # type: ignore
 
 
 class OpusProgram:
@@ -86,7 +86,7 @@ class OpusProgram:
         os.startfile(  # type: ignore
             os.path.basename(config.opus.executable_path.root),
             cwd=os.path.dirname(config.opus.executable_path.root),
-            arguments=f"/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD={self.config.opus.username}@{self.config.opus.password}",
+            arguments=f"/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD={config.opus.username}@{config.opus.password}",
             show_cmd=2,
         )
         tum_esm_utils.timing.wait_for_condition(
@@ -131,7 +131,7 @@ class OpusProgram:
             logger.info(f"Waiting for OPUS to close gracefully")
             try:
                 tum_esm_utils.timing.wait_for_condition(
-                    is_successful=lambda: not OpusMeasurement.opus_is_running(),
+                    is_successful=lambda: not OpusProgram.is_running(),
                     timeout_message="OPUS.exe did not stop within 60 seconds.",
                     timeout_seconds=60,
                     check_interval_seconds=4,
@@ -187,7 +187,7 @@ class OpusControlThread(AbstractThread):
             )
             if opus_should_be_running and (not OpusProgram.is_running()):
                 logger.info("OPUS should be running, starting OPUS")
-                OpusProgram.start()
+                OpusProgram.start(config)
                 dde_connection.teardown()
                 dde_connection.setup()
                 continue

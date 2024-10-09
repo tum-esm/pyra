@@ -7,7 +7,7 @@ import os
 import filelock
 import psutil
 import tum_esm_utils
-from packages.core import interfaces, modules, types, utils
+from packages.core import interfaces, modules, types, utils, threads
 
 dir = os.path.dirname
 _PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))
@@ -122,17 +122,7 @@ def _stop_pyra_core() -> None:
         exit(1)
 
     try:
-        for p in psutil.process_iter():
-            try:
-                if p.name() in ["opus.exe", "OpusCore.exe"]:
-                    p.kill()
-            except (
-                psutil.AccessDenied,
-                psutil.ZombieProcess,
-                psutil.NoSuchProcess,
-                IndexError,
-            ):
-                pass
+        threads.opus_control_thread.OpusProgram.stop()
         _print_green("Successfully closed OPUS")
     except Exception as e:
         _print_red(f"Failed to close OPUS: {e}")

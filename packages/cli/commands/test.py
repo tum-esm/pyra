@@ -1,6 +1,6 @@
 import click
 import circadian_scp_upload
-from packages.core import interfaces, types, utils, modules
+from packages.core import interfaces, types, utils, modules, threads
 import fabric.runners
 
 logger = utils.Logger(origin="cli")
@@ -27,9 +27,9 @@ def _test_opus() -> None:
     logger.info('running command "test opus"')
     config = types.Config.load()
     try:
-        modules.opus_measurement.OpusMeasurement(config).test_setup()
+        threads.OpusControlThread.test_setup(config)
     finally:
-        modules.opus_measurement.OpusMeasurement.force_kill_opus()
+        threads.opus_control_thread.OpusProgram.stop()
     _print_green("Successfully tested opus connection.")
 
 
