@@ -89,17 +89,29 @@ class DDEConnection:
 
         main_thread_id = self.get_main_thread_id()
         active_thread_ids: set[int] = set()
-        for function in [
+
+        # some common functions executed inside Macro routines that take some time
+        common_functions = [
             "MeasureReference", "MeasureSample", "MeasureRepeated", "MeasureRapidTRS",
-            "MeasureStepScanTrans"
-        ]:
+            "MeasureStepScanTrans", "UserDialog", "Baseline", "PeakPick", "Timer", "SendCommand"
+        ]
+
+        # check twice for any thread that is executing a common function
+        for function in common_functions:
+            answer = self.request(f'FIND_FUNCTION {function}')
+            if len(answer) == 2:
+                active_thread_ids.add(int(answer[1]))
+        time.sleep(3)
+        for function in common_functions:
             answer = self.request(f'FIND_FUNCTION {function}')
             if len(answer) == 2:
                 active_thread_ids.add(int(answer[1]))
 
+        # the main thread always runs some common functions for some reason
         if main_thread_id in active_thread_ids:
             active_thread_ids.remove(main_thread_id)
 
+        # if there is any thread that is not the main thread, then a macro is running
         return len(active_thread_ids) > 0
 
     def load_experiment(self, experiment_path: str) -> None:
