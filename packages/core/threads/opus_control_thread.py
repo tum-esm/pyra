@@ -254,3 +254,28 @@ class OpusControlThread(AbstractThread):
                 time.sleep(5)
                 current_macro_path = None
                 logger.info(f"Stopped Macro {current_macro_path}")
+
+    @staticmethod
+    def test_setup(config: types.Config) -> None:
+        assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
+        assert not OpusProgram.is_running(), "this test cannot be run if OPUS is already running"
+
+        OpusProgram.start(config)
+
+        dde_connection = DDEConnection()
+        dde_connection.setup()
+
+        dde_connection.request(f"LOAD_EXPERIMENT {config.opus.experiment_path.root}")
+        time.sleep(5)
+
+        dde_connection.request(f"RUN_MACRO {config.opus.macro_path.root}")
+        time.sleep(10)
+
+        # TODO: we could use "MACRO_RESULTS <MacroID>" to test whether
+        #       the macro is actually running once we figure out
+        #       https://github.com/tum-esm/pyra/issues/124
+
+        dde_connection.request(f"KILL_MACRO {os.path.basename(config.opus.macro_path.root)}")
+        time.sleep(10)
+
+        OpusProgram.stop(dde_connection)
