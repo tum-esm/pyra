@@ -83,7 +83,6 @@ def run() -> None:
             "measurement-conditions",
             "enclosure-control",
             "sun-tracking",
-            "opus-measurement",
         ],
         Callable[[types.Config], None],
     ]] = [
@@ -93,7 +92,6 @@ def run() -> None:
         ),
         ("enclosure-control", modules.enclosure_control.EnclosureControl(config).run),
         ("sun-tracking", modules.sun_tracking.SunTracking(config).run),
-        ("opus-measurement", modules.opus_measurement.OpusMeasurement(config).run),
     ]
 
     # these thread classes always exist and start their
@@ -105,6 +103,7 @@ def run() -> None:
         threads.HeliosThread(),
         threads.SystemChecksThread(),
         threads.UploadThread(),
+        threads.OpusControlThread(),
     ]
 
     logger.info("Removing temporary state from previous runs")

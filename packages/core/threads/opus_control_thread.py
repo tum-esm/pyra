@@ -1,9 +1,11 @@
 import os
 import sys
+import threading
 import time
 from typing import Any, Optional
 import psutil
 import tum_esm_utils
+from .abstract_thread import AbstractThread
 from packages.core import types, utils, interfaces
 
 logger = utils.Logger(origin="opus")
@@ -152,9 +154,20 @@ class OpusProgram:
                 pass
 
 
-class OpusControlThread:
+class OpusControlThread(AbstractThread):
     """TODO: docstring"""
-    def run() -> None:
+    @staticmethod
+    def should_be_running(config: types.Config) -> bool:
+        """Based on the config, should the thread be running or not?"""
+        return True
+
+    @staticmethod
+    def get_new_thread_object() -> threading.Thread:
+        """Return a new thread object that is to be started."""
+        return threading.Thread(target=OpusControlThread.main, daemon=True)
+
+    @staticmethod
+    def main(headless: bool = False) -> None:
         current_experiment_path: Optional[str] = None
         current_macro_path: Optional[str] = None
         dde_connection = DDEConnection()
