@@ -1,13 +1,28 @@
+from typing import Literal
+import datetime
 import os
 import threading
 import time
-from typing import Literal
 import psutil
+import pydantic
 import tum_esm_utils
 from .abstract_thread import AbstractThread
 from packages.core import interfaces, types, utils
 
 logger = utils.Logger(origin="camtracker")
+
+
+class TrackerPosition(pydantic.BaseModel):
+    dt: datetime.datetime = pydantic.Field(..., description="Datetime of the tracker position")
+    elevation: float = pydantic.Field(..., description="Tracker elevation")
+    azimuth: float = pydantic.Field(..., description="Tracker azimuth")
+    elevation_offset: float = pydantic.Field(
+        ..., description="Deviation from theoretical sun elevation to tracker elevation"
+    )
+    azimuth_offset: float = pydantic.Field(
+        ..., description="Deviation from theoretical sun azimuth to tracker azimuth"
+    )
+    ellipse_distance: float = pydantic.Field(..., description="Ellipse distance/px")
 
 
 class CamTrackerProgram:
@@ -97,6 +112,53 @@ class CamTrackerProgram:
             ):
                 pass
         logger.info("Successfully force killed CamTracker")
+
+    @staticmethod
+    def read_tracker_position(config: types.Config) -> TrackerPosition:
+        """Reads the CamTracker Logfile: LEARN_Az_Elev.dat.
+
+        Returns:  Last logged tracker position
+
+        Raises:
+            AssertionError: if last log line is in an invalid format
+        """
+
+        # read azimuth and elevation motor offsets from camtracker logfiles
+        ct_logfile_path = config.camtracker.learn_az_elev_path.root
+        assert os.path.isfile(ct_logfile_path), "CamTracker logfile not found"
+
+        try:
+            last_line = utils.read_last_file_line(ct_logfile_path)
+        except OSError as e:
+            raise AssertionError(f"CamTracker logfile is empty: {e}")
+
+        # last_line: [Julian Date, Tracker Elevation, Tracker Azimuth,
+        # Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px]
+        str_values = last_line.replace(" ", "").replace("\n", "").split(",")
+
+        try:
+            assert len(str_values) == 6
+            float_values = (
+                float(str_values[0]),
+                float(str_values[1]),
+                float(str_values[2]),
+                float(str_values[3]),
+                float(str_values[4]),
+                float(str_values[5]),
+            )
+        except (AssertionError, ValueError):
+            raise AssertionError(f'Invalid last logfile line "{last_line}"')
+
+        return TrackerPosition(
+            dt=(
+                datetime.datetime(1858, 11, 17) + datetime.timedelta(float_values[0] - 2400000.500)
+            ),
+            elevation=float_values[1],
+            azimuth=float_values[2],
+            elev_offset=float_values[3],
+            az_offset=float_values[4],
+            ellipse_distance=float_values[5],
+        )
 
 
 class CamTrackerThread(AbstractThread):
