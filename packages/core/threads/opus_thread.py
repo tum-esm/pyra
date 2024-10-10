@@ -221,7 +221,7 @@ class OpusProgram:
         logger.info("Successfully force killed OPUS")
 
 
-class OpusControlThread(AbstractThread):
+class OpusThread(AbstractThread):
     """Thread for controlling OPUS.
     
     * starts/stops the OPUS executable whenever it is not running and `config.general.min_sun_elevation` is reached
@@ -239,7 +239,7 @@ class OpusControlThread(AbstractThread):
     @staticmethod
     def get_new_thread_object() -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=OpusControlThread.main, daemon=True)
+        return threading.Thread(target=OpusThread.main, daemon=True)
 
     @staticmethod
     def main(headless: bool = False) -> None:

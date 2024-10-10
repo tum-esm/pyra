@@ -27,9 +27,9 @@ def _test_opus() -> None:
     logger.info('running command "test opus"')
     config = types.Config.load()
     try:
-        threads.OpusControlThread.test_setup(config)
+        threads.OpusThread.test_setup(config)
     finally:
-        threads.opus_control_thread.OpusProgram.stop()
+        threads.opus_thread.OpusProgram.stop()
     _print_green("Successfully tested opus connection.")
 
 

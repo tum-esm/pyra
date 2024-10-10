@@ -95,7 +95,7 @@ def run() -> None:
         threads.CamTrackerThread(),
         threads.HeliosThread(),
         threads.CASThread(),
-        threads.OpusControlThread(),
+        threads.OpusThread(),
         threads.SystemChecksThread(),
         threads.UploadThread(),
     ]

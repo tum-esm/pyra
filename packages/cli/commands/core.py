@@ -123,14 +123,14 @@ def _stop_pyra_core() -> None:
         exit(1)
 
     try:
-        if threads.opus_control_thread.OpusProgram.is_running():
-            dde_connection = threads.opus_control_thread.DDEConnection()
+        if threads.opus_thread.OpusProgram.is_running():
+            dde_connection = threads.opus_thread.DDEConnection()
             if ((state.opus_state.macro_filepath is not None) and
                 (state.opus_state.macro_id is not None)):
                 dde_connection.stop_macro(
                     state.opus_state.macro_filepath, state.opus_state.macro_id
                 )
-            threads.opus_control_thread.OpusProgram.stop(dde_connection)
+            threads.opus_thread.OpusProgram.stop(dde_connection)
             _print_green("Successfully closed OPUS")
         else:
             _print_green("OPUS is already closed")
