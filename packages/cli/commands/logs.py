@@ -1,10 +1,10 @@
-"""Read current `debug.log` log file."""
+"""Interact with log files"""
 
-# FIXME: remove this entirely with the next breaking release
-
+from typing import Optional
 import click
 import os
-
+import re
+import glob
 import tum_esm_utils
 from packages.core import interfaces, utils
 
@@ -25,6 +25,7 @@ def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
+# FIXME: remove this with the next breaking release
 @logs_command_group.command(
     name="read",
     help="Read the current info.log or debug.log file.",
@@ -47,6 +48,7 @@ def _read_logs(level: str) -> None:
         click.echo("".join(f.readlines()))
 
 
+# FIXME: remove this with the next breaking release
 @logs_command_group.command(
     name="archive",
     help=
@@ -59,3 +61,58 @@ def _archive_logs() -> None:
 
     utils.Logger.archive()
     _print_red("this command is deprecated without a replacement")
+
+
+@logs_command_group.command(name="split-log-files-by-origin")
+@click.argument(
+    "path",
+    type=str,
+    default="./*.log",
+    help="Path to the log files. You can use UNIX-style wildcards."
+)
+def split_log_files_by_origin(path: str) -> None:
+    """Split log files by origin."""
+
+    logger.info(f'running command "logs split-log-files-by-origin {path}"')
+    line_with_origin_pattern = re.compile(
+        r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+ [^\s]+ \- ([\w\d\-_]+) \- '
+    )
+    # 2024-10-09 01:40:16.089891 UTC+0 - enclosure-control -
+
+    filepaths = glob.glob(path)
+
+    for f in filepaths:
+        if not os.path.isfile(f):
+            print(f"Not a file: {f}")
+            continue
+        if not f.endswith(".log"):
+            print(f"Not a log file: {f} (has to end with `.log`)")
+            continue
+
+        print(f"Splitting {f}")
+        with open(f, 'r') as file:
+            lines = file.read().strip(" \t\n").split("\n")
+
+        data: dict[str, list[str]] = {}
+        origin: Optional[str] = None
+        for line in lines:
+            if line_with_origin_pattern.match(line):
+                origin = line_with_origin_pattern.match(line).group(1)
+                if origin not in data:
+                    data[origin] = []
+
+            if origin is not None:
+                data[origin].append(line)
+
+        if len(data) == 0:
+            print(f"No origin found in {f}")
+            continue
+        if len(data) == 1:
+            print(f"Only one origin found in {f} (not splitting)")
+            continue
+
+        for origin, lines in data.items():
+            new_path = f"{f[:-4]}-{origin}.log"
+            print(f"Writing logs subset to {new_path}")
+            with open(new_path, 'w') as file:
+                file.write("\n".join(lines))
