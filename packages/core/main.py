@@ -81,7 +81,6 @@ def run() -> None:
         Literal[
             "measurement-conditions",
             "enclosure-control",
-            "sun-tracking",
         ],
         Callable[[types.Config], None],
     ]] = [
@@ -90,7 +89,6 @@ def run() -> None:
             modules.measurement_conditions.MeasurementConditions(config).run,
         ),
         ("enclosure-control", modules.enclosure_control.EnclosureControl(config).run),
-        ("sun-tracking", modules.sun_tracking.SunTracking(config).run),
     ]
 
     # these thread classes always exist and start their
@@ -99,10 +97,11 @@ def run() -> None:
     # load the config periodically and stop themselves
     logger.info("Initializing threads")
     thread_instances: list[threads.abstract_thread.AbstractThread] = [
+        threads.CamTrackerThread(),
         threads.HeliosThread(),
+        threads.OpusControlThread(),
         threads.SystemChecksThread(),
         threads.UploadThread(),
-        threads.OpusControlThread(),
     ]
 
     logger.info("Removing temporary state from previous runs")
