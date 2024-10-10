@@ -113,24 +113,25 @@ def _stop_pyra_core() -> None:
                 _print_red(f"Failed to close cover: {e}")
                 exit(1)
 
+    camtracker_logger = utils.Logger(origin="camtracker")
     try:
-        tracking = modules.sun_tracking.SunTracking(config)
-        if tracking.camtracker_is_running():
-            tracking.stop_sun_tracking_automation()
+        if threads.camtracker_thread.CamTrackerProgram.is_running(camtracker_logger):
+            threads.camtracker_thread.CamTrackerProgram.stop(config, camtracker_logger)
         _print_green("Successfully closed CamTracker")
     except Exception as e:
         _print_red(f"Failed to close CamTracker: {e}")
         exit(1)
 
+    opus_logger = utils.Logger(origin="opus")
     try:
-        if threads.opus_thread.OpusProgram.is_running():
-            dde_connection = threads.opus_thread.DDEConnection()
+        if threads.opus_thread.OpusProgram.is_running(opus_logger):
+            dde_connection = threads.opus_thread.DDEConnection(opus_logger)
             if ((state.opus_state.macro_filepath is not None) and
                 (state.opus_state.macro_id is not None)):
                 dde_connection.stop_macro(
                     state.opus_state.macro_filepath, state.opus_state.macro_id
                 )
-            threads.opus_thread.OpusProgram.stop(dde_connection)
+            threads.opus_thread.OpusProgram.stop(opus_logger, dde_connection)
             _print_green("Successfully closed OPUS")
         else:
             _print_green("OPUS is already closed")
