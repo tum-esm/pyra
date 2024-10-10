@@ -79,15 +79,10 @@ def run() -> None:
     logger.info("Initializing mainloop modules")
     mainloop_modules: list[tuple[
         Literal[
-            "measurement-conditions",
             "enclosure-control",
         ],
         Callable[[types.Config], None],
     ]] = [
-        (
-            "measurement-conditions",
-            modules.measurement_conditions.MeasurementConditions(config).run,
-        ),
         ("enclosure-control", modules.enclosure_control.EnclosureControl(config).run),
     ]
 
@@ -99,6 +94,7 @@ def run() -> None:
     thread_instances: list[threads.abstract_thread.AbstractThread] = [
         threads.CamTrackerThread(),
         threads.HeliosThread(),
+        threads.MeasurementDecisionThread(),
         threads.OpusControlThread(),
         threads.SystemChecksThread(),
         threads.UploadThread(),
@@ -168,12 +164,6 @@ def run() -> None:
 
                 with interfaces.StateInterface.update_state() as state:
                     state.exceptions_state.add_exception(origin=module_name, exception=e)
-
-                if module_name == "measurement-conditions":
-                    logger.debug(
-                        "Skipping remaining modules due to exception in measurement-conditions"
-                    )
-                    break
 
         # send emails on occured/resolved exceptions
         _send_exception_emails(config)
