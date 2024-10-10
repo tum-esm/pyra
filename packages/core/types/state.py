@@ -1,3 +1,4 @@
+import traceback
 from typing import Literal, Optional
 import datetime
 import pydantic
@@ -83,6 +84,38 @@ class OpusState(pydantic.BaseModel):
     macro_id: Optional[int] = None
 
 
+class ExceptionsState(pydantic.BaseModel):
+    current: list[ExceptionStateItem] = pydantic.Field(
+        [], description="List of exceptions that are currently active."
+    )
+    notified: list[ExceptionStateItem] = pydantic.Field(
+        [], description="List of exceptions for which an email was sent out."
+    )
+
+    def add_exception_state_item(self, item: ExceptionStateItem) -> None:
+        """Add a new exception state item to the state."""
+
+        if item not in self.current:
+            self.current.append(item)
+
+    def add_exception(self, origin: str, exception: Exception, send_emails: bool = True) -> None:
+        """Add a new exception to the state."""
+
+        self.add_exception_state_item(
+            ExceptionStateItem(
+                origin=origin,
+                subject=type(exception).__name__,
+                details="\n".join(traceback.format_exception(exception)),
+                send_emails=send_emails
+            )
+        )
+
+    def clear_exception_origin(self, origin: str) -> None:
+        """Clear all exceptions with the given origin."""
+
+        self.current = [e for e in self.current if e.origin != origin]
+
+
 class StateObject(pydantic.BaseModel):
     last_updated: datetime.datetime
     recent_cli_calls: int = 0
@@ -91,8 +124,7 @@ class StateObject(pydantic.BaseModel):
     measurements_should_be_running: Optional[bool] = None
     plc_state: PLCState = PLCState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
-    current_exceptions: list[ExceptionStateItem] = []
-    notified_exceptions: list[ExceptionStateItem] = []
+    exceptions_state: ExceptionsState = ExceptionsState()
     upload_is_running: Optional[bool] = None
     opus_state: OpusState = OpusState()
 

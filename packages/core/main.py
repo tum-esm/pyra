@@ -1,7 +1,6 @@
 import os
 import signal
 import time
-import traceback
 from typing import Any, Callable, Literal
 from packages.core import types, utils, interfaces, modules, threads
 
@@ -12,8 +11,8 @@ def _send_exception_emails(config: types.Config) -> None:
     """Send emails on occured/resolved exceptions."""
 
     with interfaces.StateInterface.update_state() as state:
-        current_exceptions = state.current_exceptions
-        notified_exceptions = state.notified_exceptions
+        current_exceptions = state.exceptions_state.current
+        notified_exceptions = state.exceptions_state.notified
 
         new_exception_emails = [
             e for e in current_exceptions if ((e not in notified_exceptions) and e.send_emails)
@@ -24,7 +23,7 @@ def _send_exception_emails(config: types.Config) -> None:
         if not any([e.send_emails for e in current_exceptions]):
             utils.ExceptionEmailClient.handle_resolved_exception(config)
 
-        state.notified_exceptions = current_exceptions
+        state.exceptions_state.notified = state.exceptions_state.current
 
 
 def run() -> None:
@@ -163,21 +162,13 @@ def run() -> None:
             try:
                 module_function(config)
                 with interfaces.StateInterface.update_state() as state:
-                    state.current_exceptions = [
-                        e for e in state.current_exceptions if e.origin != module_name
-                    ]
+                    state.exceptions_state.clear_exception_origin(module_name)
             except Exception as e:
                 new_exception = e
                 logger.exception(new_exception)
 
                 with interfaces.StateInterface.update_state() as state:
-                    new_exception_state_item = types.ExceptionStateItem(
-                        origin=module_name,
-                        subject=type(e).__name__,
-                        details="\n".join(traceback.format_exception(e)),
-                    )
-                    if new_exception_state_item not in state.current_exceptions:
-                        state.current_exceptions.append(new_exception_state_item)
+                    state.exceptions_state.add_exception(origin=module_name, exception=e)
 
                 if module_name == "measurement-conditions":
                     logger.debug(

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Generator, Literal, Optional
+from typing import Generator
 import contextlib
 import datetime
 import os
@@ -12,7 +12,7 @@ _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "logs", ".state.lock")
 _STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
 
-logger = utils.Logger(origin="state-interface")
+logger = utils.Logger(origin="state")
 
 
 class StateInterface:

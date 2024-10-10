@@ -60,15 +60,15 @@ class SystemChecksThread(AbstractThread):
             disk_space = tum_esm_utils.system.get_disk_space()
             logger.debug(f"The disk is currently filled with {disk_space}%.")
             if disk_space > 90:
+                subject = "StorageError"
+                details = "Disk space is more than 90%. This is bad for the OS stability."
                 with interfaces.StateInterface.update_state() as state:
-                    new_exception = types.ExceptionStateItem(
-                        origin="system-checks",
-                        subject="StorageError",
-                        details="Disk space is less than 10%. This is bad for the OS stability."
+                    state.exceptions_state.add_exception_state_item(
+                        types.ExceptionStateItem(
+                            origin="system-checks", subject=subject, details=details
+                        )
                     )
-                    if new_exception not in state.current_exceptions:
-                        state.current_exceptions.append(new_exception)
-                logger.error(f"{new_exception.subject}: {new_exception.details}")
+                logger.error(f"{subject}: {details}")
 
             # BATTERY LEVEL
 
@@ -76,17 +76,15 @@ class SystemChecksThread(AbstractThread):
             logger.debug(f"The battery level is {battery_level}%.")
             if battery_level is not None:
                 if battery_level < 30:
-                    # TODO: write this as function
+                    subject = "LowEnergyError"
+                    details = "The battery of the system is below 30%. Please check the power supply."
                     with interfaces.StateInterface.update_state() as state:
-                        new_exception = types.ExceptionStateItem(
-                            origin="system-checks",
-                            subject="LowEnergyError",
-                            details=
-                            "The battery of the system is below 30%. Please check the power supply."
+                        state.exceptions_state.add_exception_state_item(
+                            types.ExceptionStateItem(
+                                origin="system-checks", subject=subject, details=details
+                            )
                         )
-                        if new_exception not in state.current_exceptions:
-                            state.current_exceptions.append(new_exception)
-                    logger.error(f"{new_exception.subject}: {new_exception.details}")
+                    logger.error(f"{subject}: {details}")
 
             # TODO: add EM27 ping
 

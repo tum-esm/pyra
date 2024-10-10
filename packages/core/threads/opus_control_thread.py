@@ -1,4 +1,3 @@
-import traceback
 from typing import Optional
 import os
 import threading
@@ -386,12 +385,8 @@ class OpusControlThread(AbstractThread):
                 with interfaces.StateInterface.update_state() as state:
                     state.opus_state.macro_filepath = current_macro_filepath
                     state.opus_state.macro_id = current_macro_id
-
-                    # TODO: turn this into a function
                     if clear_issues:
-                        state.current_exceptions = [
-                            e for e in state.current_exceptions if (e.origin != "opus")
-                        ]
+                        state.exceptions_state.clear_exception_origin("opus")
 
                 # SLEEP
 
@@ -406,14 +401,7 @@ class OpusControlThread(AbstractThread):
                 with interfaces.StateInterface.update_state() as state:
                     state.opus_state.macro_filepath = None
                     state.opus_state.macro_id = None
-                    # TODO: turn this into a function
-                    state.current_exceptions.append(
-                        types.ExceptionStateItem(
-                            origin="opus",
-                            subject=type(e).__name__,
-                            details="\n".join(traceback.format_exception(e)),
-                        )
-                    )
+                    state.exceptions_state.add_exception(origin="opus", exception=e)
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")
