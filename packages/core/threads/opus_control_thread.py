@@ -149,6 +149,7 @@ class OpusProgram:
 
         interfaces.ActivityHistoryInterface.add_datapoint(opus_startups=1)
 
+        logger.info("Starting OPUS")
         os.startfile(  # type: ignore
             os.path.basename(config.opus.executable_path.root),
             cwd=os.path.dirname(config.opus.executable_path.root),
@@ -161,14 +162,14 @@ class OpusProgram:
             timeout_seconds=90,
             check_interval_seconds=8,
         )
+        logger.info("Successfully started OPUS")
 
     @staticmethod
     def is_running() -> bool:
         """Checks if OPUS is already running by searching for processes with
-        the executable `opus.exe` or `OpusCore.exe`
+        the executable `opus.exe` or `OpusCore.exe`."""
 
-        Returns: `True` if Application is currently running and `False` if not."""
-
+        logger.debug("Checking if OPUS is running")
         for p in psutil.process_iter():
             try:
                 if p.name() in ["opus.exe", "OpusCore.exe"]:
@@ -197,7 +198,7 @@ class OpusProgram:
                         timeout_seconds=60,
                         check_interval_seconds=4,
                     )
-                    logger.info("OPUS.exe stopped successfully.")
+                    logger.info("Successfully stopped OPUS")
                     return
                 except TimeoutError:
                     logger.warning("OPUS.exe did not stop gracefully within 60 seconds.")
@@ -217,6 +218,7 @@ class OpusProgram:
                 IndexError,
             ):
                 pass
+        logger.info("Successfully force killed OPUS")
 
 
 class OpusControlThread(AbstractThread):
@@ -296,12 +298,12 @@ class OpusControlThread(AbstractThread):
                     >= config.general.min_sun_elevation
                 )
                 if opus_should_be_running and (not OpusProgram.is_running()):
-                    logger.info("OPUS should be running, starting OPUS")
+                    logger.info("OPUS should be running")
                     OpusProgram.start(config)
                     dde_connection.setup()
                     continue
                 if (not opus_should_be_running) and OpusProgram.is_running():
-                    logger.info("OPUS should not be running, stopping OPUS")
+                    logger.info("OPUS should not be running")
                     if current_macro_id is not None:
                         if dde_connection.macro_is_running(current_macro_id):
                             logger.info("Stopping macro")
@@ -311,6 +313,8 @@ class OpusControlThread(AbstractThread):
                             with interfaces.StateInterface.update_state() as state:
                                 state.opus_state.macro_filepath = None
                                 state.opus_state.macro_id = None
+                    else:
+                        logger.info("No macro to stop")
                     OpusProgram.stop(dde_connection)
                     dde_connection.teardown()
                     continue

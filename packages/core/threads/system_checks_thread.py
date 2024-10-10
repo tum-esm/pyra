@@ -8,14 +8,6 @@ from packages.core import interfaces, types, utils
 class SystemChecksThread(AbstractThread):
     """Thread for checking the system's state (CPU usage, disk utilization, etc.)"""
     @staticmethod
-    class StorageError(Exception):
-        """Raised when storage is more than 90% full"""
-
-    @staticmethod
-    class LowEnergyError(Exception):
-        """Raised when battery is less than 20% full"""
-
-    @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
 
