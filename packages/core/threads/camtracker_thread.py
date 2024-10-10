@@ -1,5 +1,7 @@
 import os
 import threading
+import time
+from typing import Literal
 import psutil
 import tum_esm_utils
 from .abstract_thread import AbstractThread
@@ -115,3 +117,38 @@ class CamTrackerThread(AbstractThread):
         don't write to log files but print to console."""
 
         pass
+
+    @staticmethod
+    def get_enclosure_cover_state(
+        config: types.Config
+    ) -> Literal["not configured", "angle not reported", "open", "closed"]:
+        """Checks whether the TUM PLC cover is open or closed. Returns
+        "angle not reported" if the cover position has not beenreported
+        by the PLC yet."""
+
+        if config.tum_plc is None:
+            return "not configured"
+
+        current_cover_angle = interfaces.StateInterface.load_state().plc_state.actors.current_angle
+
+        if current_cover_angle is None:
+            return "angle not reported"
+        if 20 < ((current_cover_angle + 360) % 360) < 340:
+            return "open"
+        else:
+            return "closed"
+
+    @staticmethod
+    def test_setup(self) -> None:
+        """Function to test the functonality of this module. Starts up
+        CamTracker to initialize the tracking mirrors. Then moves mirrors
+        back to parking position and shuts dosn CamTracker."""
+
+        assert (
+            not CamTrackerProgram.is_running(),
+            "This test cannot be run if CamTracker is already running"
+        )
+        config = types.Config.load()
+        CamTrackerProgram.start(config)
+        time.sleep(2)
+        CamTrackerProgram.stop(config)
