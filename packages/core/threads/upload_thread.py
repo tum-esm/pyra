@@ -90,7 +90,6 @@ class UploadThread(AbstractThread):
                     config.upload.user,
                     config.upload.password,
                 ) as remote_connection:
-
                     for stream in config.upload.streams:
                         if not stream.is_active:
                             logger.info(f"skipping upload of '{stream.label}'")
@@ -127,6 +126,10 @@ class UploadThread(AbstractThread):
 
                 logger.info("finished upload")
 
+                with interfaces.StateInterface.update_state() as s:
+                    s.upload_is_running = False
+                    s.exceptions_state.clear_exception_origin("upload")
+
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
                 logger.info(f"waiting 60 minutes until looking for new files/directories")
@@ -156,6 +159,7 @@ class UploadThread(AbstractThread):
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as s:
                     s.upload_is_running = False
+                    s.exceptions_state.add_exception(origin="upload", exception=e)
                 logger.info(
                     f"waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
                 )
