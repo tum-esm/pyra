@@ -1,3 +1,4 @@
+import sys
 import threading
 import tum_esm_utils
 from .abstract_thread import AbstractThread
@@ -33,51 +34,50 @@ class SystemChecksThread(AbstractThread):
         logger = utils.Logger(origin="system-checks", just_print=headless)
         logger.info("Running SystemChecks")
 
-        # TODO: add exception raising
-        # TODO: add exception resolving
-
         while True:
+            try:
+                # WINDOWS32 AND PYTHON VERSION >= 3.10
 
-            # WINDOWS32 AND PYTHON VERSION >= 3.10
-
-            # TODO
-            # assert sys.platform == "win32", f"this function cannot be run on platform {sys.platform}"
-            # assert sys.version_info.major >= 3 and sys.version_info.minor >= 10, "this function requires python >= 3.10"
-
-            # CPU/MEMORY USAGE AND BOOT TIME
-
-            cpu_usage = tum_esm_utils.system.get_cpu_usage()
-            logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
-
-            memory_usage = tum_esm_utils.system.get_memory_usage()
-            logger.debug(f"Current v_memory usage for the system is {memory_usage}.")
-
-            last_boot_time = tum_esm_utils.system.get_last_boot_time()
-            logger.debug(f"The system is running since {last_boot_time}.")
-
-            # DISK SPACE
-
-            disk_space = tum_esm_utils.system.get_disk_space()
-            logger.debug(f"The disk is currently filled with {disk_space}%.")
-            if disk_space > 90:
-                subject = "StorageError"
-                details = "Disk space is more than 90%. This is bad for the OS stability."
-                with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception_state_item(
-                        types.ExceptionStateItem(
-                            origin="system-checks", subject=subject, details=details
+                if sys.platform != "win32":
+                    subject = "UnsupportedPlatformError"
+                    details = f"This function cannot be run on this platform ({sys.platform}). It requires 32-bit Windows."
+                    logger.error(f"{subject}: {details}")
+                    with interfaces.StateInterface.update_state() as state:
+                        state.exceptions_state.add_exception_state_item(
+                            types.ExceptionStateItem(
+                                origin="system-checks", subject=subject, details=details
+                            )
                         )
-                    )
-                logger.error(f"{subject}: {details}")
 
-            # BATTERY LEVEL
+                if (sys.version_info.major != 3) or (sys.version_info.minor < 10):
+                    subject = "UnsupportedPythonVersionError"
+                    details = f"This function requires Python >= 3.10. Current version is {sys.version_info.major}.{sys.version_info.minor}."
+                    logger.error(f"{subject}: {details}")
+                    with interfaces.StateInterface.update_state() as state:
+                        state.exceptions_state.add_exception_state_item(
+                            types.ExceptionStateItem(
+                                origin="system-checks", subject=subject, details=details
+                            )
+                        )
 
-            battery_level = tum_esm_utils.system.get_system_battery()
-            logger.debug(f"The battery level is {battery_level}%.")
-            if battery_level is not None:
-                if battery_level < 30:
-                    subject = "LowEnergyError"
-                    details = "The battery of the system is below 30%. Please check the power supply."
+                # CPU/MEMORY USAGE AND BOOT TIME
+
+                cpu_usage = tum_esm_utils.system.get_cpu_usage()
+                logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
+
+                memory_usage = tum_esm_utils.system.get_memory_usage()
+                logger.debug(f"Current v_memory usage for the system is {memory_usage}.")
+
+                last_boot_time = tum_esm_utils.system.get_last_boot_time()
+                logger.debug(f"The system is running since {last_boot_time}.")
+
+                # DISK SPACE
+
+                disk_space = tum_esm_utils.system.get_disk_space()
+                logger.debug(f"The disk is currently filled with {disk_space}%.")
+                if disk_space > 90:
+                    subject = "StorageError"
+                    details = "Disk space is more than 90%. This is bad for the OS stability."
                     with interfaces.StateInterface.update_state() as state:
                         state.exceptions_state.add_exception_state_item(
                             types.ExceptionStateItem(
@@ -86,14 +86,34 @@ class SystemChecksThread(AbstractThread):
                         )
                     logger.error(f"{subject}: {details}")
 
-            # TODO: add EM27 ping
+                # BATTERY LEVEL
 
-            with interfaces.StateInterface.update_state() as state:
-                state.operating_system_state = types.OperatingSystemState(
-                    cpu_usage=cpu_usage,
-                    memory_usage=memory_usage,
-                    last_boot_time=str(last_boot_time),
-                    filled_disk_space_fraction=disk_space,
-                )
+                battery_level = tum_esm_utils.system.get_system_battery()
+                logger.debug(f"The battery level is {battery_level}%.")
+                if battery_level is not None:
+                    if battery_level < 30:
+                        subject = "LowEnergyError"
+                        details = "The battery of the system is below 30%. Please check the power supply."
+                        with interfaces.StateInterface.update_state() as state:
+                            state.exceptions_state.add_exception_state_item(
+                                types.ExceptionStateItem(
+                                    origin="system-checks", subject=subject, details=details
+                                )
+                            )
+                        logger.error(f"{subject}: {details}")
 
-            logger.info("Waiting 3 minutes before next system check")
+                with interfaces.StateInterface.update_state() as state:
+                    state.operating_system_state = types.OperatingSystemState(
+                        cpu_usage=cpu_usage,
+                        memory_usage=memory_usage,
+                        last_boot_time=str(last_boot_time),
+                        filled_disk_space_fraction=disk_space,
+                    )
+                    state.exceptions_state.clear_exception_origin("system-checks")
+
+                logger.info("Waiting 3 minutes before next system check")
+
+            except Exception as e:
+                logger.exception(e)
+                with interfaces.StateInterface.update_state() as state:
+                    state.exceptions_state.add_exception(origin="system-checks", exception=e)
