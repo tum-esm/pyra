@@ -452,8 +452,13 @@ class HeliosThread(AbstractThread):
                             )
                 else:
                     logger.debug(
-                        "Not evaluating sun state because " + "Helios buffer is still filling up"
+                        "Not evaluating sun state because Helios buffer is still filling up"
                     )
+
+                # clear exceptions
+
+                with interfaces.StateInterface.update_state() as state:
+                    state.exceptions_state.clear_exception_origin("helios")
 
                 # wait rest of loop time
                 elapsed_time = time.time() - start_time
@@ -469,5 +474,8 @@ class HeliosThread(AbstractThread):
 
                 logger.error(f"error in HeliosThread: {repr(e)}")
                 logger.exception(e)
+                with interfaces.StateInterface.update_state() as s:
+                    s.exceptions_state.add_exception(origin="helios", exception=e)
+
                 logger.info(f"sleeping 30 seconds, reinitializing HeliosThread")
                 time.sleep(30)
