@@ -181,6 +181,31 @@ class CamTrackerThread(AbstractThread):
         pass
 
     @staticmethod
+    def check_tracker_motor_positions(
+        config: types.Config
+    ) -> Literal["no logs", "logs too old", "valid", "invalid"]:
+        """Checks whether CamTracker is running and is pointing in the right direction.
+
+        If the last logline is younger than 5 minutes, the function returns
+        "valid" if the motor offsets are within the defined threshold and
+        "invalid" if the motor offsets are outside the threshold."""
+
+        try:
+            tracker_position = CamTrackerProgram.read_tracker_position(config)
+        except AssertionError as e:
+            logger.error(f"Could not read tracker position: {e}")
+            return "no logs"
+
+        if tracker_position.dt < datetime.datetime.now() - datetime.timedelta(minutes=5):
+            return "logs too old"
+
+        if ((abs(tracker_position.azimuth_offset) <= config.camtracker.motor_offset_threshold) and
+            (abs(tracker_position.elevation_offset) <= config.camtracker.motor_offset_threshold)):
+            return "valid"
+        else:
+            return "invalid"
+
+    @staticmethod
     def get_enclosure_cover_state(
         config: types.Config
     ) -> Literal["not configured", "angle not reported", "open", "closed"]:
