@@ -6,6 +6,8 @@ import circadian_scp_upload
 from .abstract_thread import AbstractThread
 from packages.core import interfaces, types, utils
 
+ORIGIN = "upload"
+
 
 class UploadThread(AbstractThread):
     """Thread for uploading data to a server via SCP.
@@ -61,7 +63,7 @@ class UploadThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode, 
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="upload", just_print=headless)
+        logger = utils.Logger(origin=ORIGIN, just_print=headless)
         config = types.Config.load()
         assert config.upload is not None
 
@@ -128,7 +130,7 @@ class UploadThread(AbstractThread):
 
                 with interfaces.StateInterface.update_state() as s:
                     s.upload_is_running = False
-                    s.exceptions_state.clear_exception_origin("upload")
+                    s.exceptions_state.clear_exception_origin(ORIGIN)
 
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
@@ -159,7 +161,7 @@ class UploadThread(AbstractThread):
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as s:
                     s.upload_is_running = False
-                    s.exceptions_state.add_exception(origin="upload", exception=e)
+                    s.exceptions_state.add_exception(origin=ORIGIN, exception=e)
                 logger.info(
                     f"waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
                 )
