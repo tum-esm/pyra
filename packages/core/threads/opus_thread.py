@@ -8,30 +8,31 @@ from .abstract_thread import AbstractThread
 from packages.core import types, utils, interfaces
 import brukeropus.control.dde
 
-logger = utils.Logger(origin="opus")
+ORIGIN = "opus"
 
 
 class DDEConnection:
     """Class for handling DDE connections to OPUS."""
-    def __init__(self) -> None:
+    def __init__(self, logger: utils.Logger) -> None:
         self.client: Optional[brukeropus.control.dde.DDEClient] = None
+        self.logger = logger
 
     def setup(self) -> None:
         """Set up a new DDE connection to OPUS. Tear down the 
         old connection if it exists."""
 
         if self.client is not None:
-            logger.info("Destroying old DDE connection")
+            self.logger.info("Destroying old DDE connection")
             self.teardown()
             time.sleep(0.5)
 
-        logger.info("Setting up new DDE connection")
+        self.logger.info("Setting up new DDE connection")
         self.client = brukeropus.control.dde.DDEClient("Opus", "System")
         time.sleep(0.5)
         if not self.is_working():
             raise RuntimeError("DDE connection to OPUS is not working")
         answer = self.request("GET_VERSION_EXTENDED")
-        logger.info(f"Connected to OPUS version {answer[0]}")
+        self.logger.info(f"Connected to OPUS version {answer[0]}")
 
     def is_working(self) -> bool:
         """Check if the DDE connection is working."""
@@ -43,11 +44,11 @@ class DDEConnection:
     def teardown(self) -> None:
         """Tear down the current DDE connection."""
         if self.client is not None:
-            logger.info("Destroying DDE connection")
+            self.logger.info("Destroying DDE connection")
             del self.client
             self.client = None
         else:
-            logger.info("No DDE connection to tear down")
+            self.logger.info("No DDE connection to tear down")
 
     def request(
         self,
@@ -144,7 +145,7 @@ class DDEConnection:
 class OpusProgram:
     """Class for starting and stopping OPUS."""
     @staticmethod
-    def start(config: types.Config) -> None:
+    def start(config: types.Config, logger: utils.Logger) -> None:
         """Starts the OPUS.exe with os.startfile()."""
 
         interfaces.ActivityHistoryInterface.add_datapoint(opus_startups=1)
@@ -165,7 +166,7 @@ class OpusProgram:
         logger.info("Successfully started OPUS")
 
     @staticmethod
-    def is_running() -> bool:
+    def is_running(logger: utils.Logger) -> bool:
         """Checks if OPUS is already running by searching for processes with
         the executable `opus.exe` or `OpusCore.exe`."""
 
@@ -180,7 +181,7 @@ class OpusProgram:
         return False
 
     @staticmethod
-    def stop(dde_connection: Optional[DDEConnection] = None) -> None:
+    def stop(logger: utils.Logger, dde_connection: Optional[DDEConnection] = None) -> None:
         """Closes OPUS via DDE/force kills it via psutil. If no DDEConnection
         is provided, the function will force kill OPUS right away."""
 
@@ -243,10 +244,12 @@ class OpusThread(AbstractThread):
 
     @staticmethod
     def main(headless: bool = False) -> None:
+        logger = utils.Logger(origin=ORIGIN)
+
         current_experiment_filepath: Optional[str] = None
         current_macro_filepath: Optional[str] = None
         current_macro_id: Optional[int] = None
-        dde_connection = DDEConnection()
+        dde_connection = DDEConnection(logger)
 
         logger.info("Loading state file")
         state = interfaces.StateInterface.load_state()
@@ -255,7 +258,7 @@ class OpusThread(AbstractThread):
         measurement_start_time = time.time()
         last_successful_ping_time = time.time()
 
-        if OpusProgram.is_running():
+        if OpusProgram.is_running(logger):
             logger.info("OPUS is already running")
 
             dde_connection.setup()
@@ -264,7 +267,7 @@ class OpusThread(AbstractThread):
 
                 if state.opus_state.macro_id is None:
                     logger.info("Macro ID is unknown, stopping OPUS entirely")
-                    OpusProgram.stop(dde_connection)
+                    OpusProgram.stop(logger, dde_connection)
                 else:
                     if dde_connection.macro_is_running(state.opus_state.macro_id):
                         logger.info("The Macro started by Pyra is still running, nothing to do")
@@ -276,7 +279,7 @@ class OpusThread(AbstractThread):
                         logger.info(
                             "The Macro running in OPUS is not the one started by Pyra, stopping OPUS entirely"
                         )
-                        OpusProgram.stop(dde_connection)
+                        OpusProgram.stop(logger, dde_connection)
             else:
                 current_experiment_filepath = dde_connection.get_loaded_experiment()
 
@@ -297,12 +300,12 @@ class OpusThread(AbstractThread):
                     utils.Astronomy.get_current_sun_elevation(config)
                     >= config.general.min_sun_elevation
                 )
-                if opus_should_be_running and (not OpusProgram.is_running()):
+                if opus_should_be_running and (not OpusProgram.is_running(logger)):
                     logger.info("OPUS should be running")
-                    OpusProgram.start(config)
+                    OpusProgram.start(config, logger)
                     dde_connection.setup()
                     continue
-                if (not opus_should_be_running) and OpusProgram.is_running():
+                if (not opus_should_be_running) and OpusProgram.is_running(logger):
                     logger.info("OPUS should not be running")
                     if current_macro_id is not None:
                         if dde_connection.macro_is_running(current_macro_id):
@@ -315,7 +318,7 @@ class OpusThread(AbstractThread):
                                 state.opus_state.macro_id = None
                     else:
                         logger.info("No macro to stop")
-                    OpusProgram.stop(dde_connection)
+                    OpusProgram.stop(logger, dde_connection)
                     dde_connection.teardown()
                     continue
 
@@ -408,7 +411,7 @@ class OpusThread(AbstractThread):
                     state.opus_state.macro_filepath = current_macro_filepath
                     state.opus_state.macro_id = current_macro_id
                     if clear_issues:
-                        state.exceptions_state.clear_exception_origin("opus")
+                        state.exceptions_state.clear_exception_origin(ORIGIN)
 
                 # SLEEP
 
@@ -419,19 +422,19 @@ class OpusThread(AbstractThread):
 
             except Exception as e:
                 logger.exception(e)
-                OpusProgram.stop(dde_connection)
+                OpusProgram.stop(logger, dde_connection)
                 with interfaces.StateInterface.update_state() as state:
                     state.opus_state.macro_filepath = None
                     state.opus_state.macro_id = None
-                    state.exceptions_state.add_exception(origin="opus", exception=e)
+                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")
                 break
 
     @staticmethod
-    def test_setup(config: types.Config) -> None:
-        OpusProgram.start(config)
+    def test_setup(config: types.Config, logger: utils.Logger) -> None:
+        OpusProgram.start(config, logger)
 
         dde_connection = DDEConnection()
         dde_connection.setup()
@@ -446,4 +449,4 @@ class OpusThread(AbstractThread):
         dde_connection.stop_macro(config.opus.macro_path.root)
         time.sleep(2)
 
-        OpusProgram.stop(dde_connection)
+        OpusProgram.stop(logger, dde_connection)
