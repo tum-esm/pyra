@@ -94,7 +94,7 @@ def run() -> None:
     thread_instances: list[threads.abstract_thread.AbstractThread] = [
         threads.CamTrackerThread(),
         threads.HeliosThread(),
-        threads.MeasurementDecisionThread(),
+        threads.CASThread(),
         threads.OpusControlThread(),
         threads.SystemChecksThread(),
         threads.UploadThread(),

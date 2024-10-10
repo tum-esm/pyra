@@ -4,11 +4,11 @@ import time
 from .abstract_thread import AbstractThread
 from packages.core import interfaces, types, utils
 
-logger = utils.Logger(origin="measurement-decision")
 
-
-class MeasurementDecisionThread(AbstractThread):
-    """Thread for checking the system's state (CPU usage, disk utilization, etc.)"""
+class CASThread(AbstractThread):
+    """Thread for to evaluate whether to conduct measurements or not.
+    
+    CAS = Condition Assessment System."""
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -18,7 +18,7 @@ class MeasurementDecisionThread(AbstractThread):
     @staticmethod
     def get_new_thread_object() -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=MeasurementDecisionThread.main, daemon=True)
+        return threading.Thread(target=CASThread.main, daemon=True)
 
     @staticmethod
     def main(headless: bool = False) -> None:
@@ -26,6 +26,8 @@ class MeasurementDecisionThread(AbstractThread):
         don't write to log files but print to console."""
 
         # TODO: implement #232
+
+        logger = utils.Logger(origin="cas")
 
         while True:
             try:
@@ -56,29 +58,27 @@ class MeasurementDecisionThread(AbstractThread):
                 d = config.measurement_decision
                 logger.debug(f"Decision mode for measurements is: {d.mode}.")
 
-                measurements_should_be_running: bool
+                should_measure: bool
                 if state.plc_state.state.rain == True:
                     logger.debug("not trying to measuring when PLC detected rain")
-                    measurements_should_be_running = False
+                    should_measure = False
                 else:
                     if d.mode == "manual":
-                        measurements_should_be_running = d.manual_decision_result
+                        should_measure = d.manual_decision_result
                     elif d.mode == "cli":
-                        measurements_should_be_running = d.cli_decision_result
+                        should_measure = d.cli_decision_result
                     else:
-                        measurements_should_be_running = MeasurementDecisionThread.get_automatic_decision(
-                            config, state, sun_elevation
+                        should_measure = CASThread.get_automatic_decision(
+                            logger, config, state, sun_elevation
                         )
 
-                logger.info(
-                    f"Measurements should be running is set to: {measurements_should_be_running}."
-                )
+                logger.info(f"Measurements should be running is set to: {should_measure}.")
 
                 # UPDATE STATE
 
                 interfaces.ActivityHistoryInterface.add_datapoint(
                     cli_calls=state.recent_cli_calls,
-                    is_measuring=measurements_should_be_running,
+                    is_measuring=should_measure,
                     is_uploading=state.upload_is_running,
                 )
                 with interfaces.StateInterface.update_state() as s:
@@ -86,7 +86,7 @@ class MeasurementDecisionThread(AbstractThread):
                     s.position.longitude = camtracker_coordinates[1]
                     s.position.altitude = camtracker_coordinates[2]
                     s.position.sun_elevation = sun_elevation
-                    s.measurements_should_be_running = measurements_should_be_running
+                    s.measurements_should_be_running = should_measure
                     s.recent_cli_calls -= state.recent_cli_calls
                     state.exceptions_state.clear_exception_origin("measurement-decision")
 
@@ -104,6 +104,7 @@ class MeasurementDecisionThread(AbstractThread):
 
     @staticmethod
     def get_automatic_decision(
+        logger: utils.Logger,
         config: types.Config,
         state: types.StateObject,
         current_sun_elevation: float,
