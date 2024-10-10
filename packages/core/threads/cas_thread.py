@@ -4,6 +4,8 @@ import time
 from .abstract_thread import AbstractThread
 from packages.core import interfaces, types, utils
 
+ORIGIN = "cas"
+
 
 class CASThread(AbstractThread):
     """Thread for to evaluate whether to conduct measurements or not.
@@ -27,7 +29,7 @@ class CASThread(AbstractThread):
 
         # TODO: implement #232
 
-        logger = utils.Logger(origin="cas")
+        logger = utils.Logger(origin=ORIGIN)
 
         while True:
             try:
@@ -69,7 +71,7 @@ class CASThread(AbstractThread):
                         should_measure = d.cli_decision_result
                     else:
                         should_measure = CASThread.get_automatic_decision(
-                            logger, config, state, sun_elevation
+                            config, logger, state, sun_elevation
                         )
 
                 logger.info(f"Measurements should be running is set to: {should_measure}.")
@@ -88,7 +90,7 @@ class CASThread(AbstractThread):
                     s.position.sun_elevation = sun_elevation
                     s.measurements_should_be_running = should_measure
                     s.recent_cli_calls -= state.recent_cli_calls
-                    state.exceptions_state.clear_exception_origin("measurement-decision")
+                    state.exceptions_state.clear_exception_origin(ORIGIN)
 
                 # SLEEP
 
@@ -100,12 +102,12 @@ class CASThread(AbstractThread):
             except Exception as e:
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin="measurement-decision", exception=e)
+                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
 
     @staticmethod
     def get_automatic_decision(
-        logger: utils.Logger,
         config: types.Config,
+        logger: utils.Logger,
         state: types.StateObject,
         current_sun_elevation: float,
     ) -> bool:

@@ -9,7 +9,7 @@ import tum_esm_utils
 from .abstract_thread import AbstractThread
 from packages.core import interfaces, types, utils
 
-logger = utils.Logger(origin="camtracker")
+ORIGIN = "camtracker"
 
 
 class TrackerPosition(pydantic.BaseModel):
@@ -27,7 +27,7 @@ class TrackerPosition(pydantic.BaseModel):
 
 class CamTrackerProgram:
     @staticmethod
-    def start(config: types.Config) -> None:
+    def start(config: types.Config, logger: utils.Logger) -> None:
         """Starts the OPUS.exe with os.startfile()."""
 
         interfaces.ActivityHistoryInterface.add_datapoint(camtracker_startups=1)
@@ -55,7 +55,7 @@ class CamTrackerProgram:
         logger.info("Successfully started CamTracker")
 
     @staticmethod
-    def is_running() -> bool:
+    def is_running(logger: utils.Logger) -> bool:
         """Checks if CamTracker is already running by searching for processes with
         the executable `camtracker*.exe`."""
 
@@ -76,7 +76,7 @@ class CamTrackerProgram:
         return False
 
     @staticmethod
-    def stop(config: types.Config) -> None:
+    def stop(config: types.Config, logger: utils.Logger) -> None:
         """Closes OPUS via DDE/force kills it via psutil. If no DDEConnection
         is provided, the function will force kill OPUS right away."""
 
@@ -177,6 +177,7 @@ class CamTrackerThread(AbstractThread):
     def main(headless: bool = False) -> None:
         """Main entrypoint of the thread."""
 
+        logger = utils.Logger(origin=ORIGIN, just_print=headless)
         last_camtracker_start_time: Optional[float] = None
 
         while True:
@@ -185,19 +186,19 @@ class CamTrackerThread(AbstractThread):
                 config = types.Config.load()
                 t1 = time.time()
 
-                camtracker_is_running = CamTrackerProgram.is_running()
+                camtracker_is_running = CamTrackerProgram.is_running(logger)
                 measurements_should_be_running = (
                     interfaces.StateInterface.load_state().measurements_should_be_running
                 ) or False
 
                 if measurements_should_be_running and (not camtracker_is_running):
                     logger.info("CamTracker should be running, but is not.")
-                    CamTrackerProgram.start(config)
+                    CamTrackerProgram.start(config, logger)
                     last_camtracker_start_time = time.time()
 
                 if (not measurements_should_be_running) and camtracker_is_running:
                     logger.info("CamTracker should not be running, but is.")
-                    CamTrackerProgram.stop(config)
+                    CamTrackerProgram.stop(config, logger)
                     last_camtracker_start_time = None
 
                 # CHECK WHETHER CAMTRACKER IS RUNNING CORRECTLY
@@ -207,19 +208,19 @@ class CamTrackerThread(AbstractThread):
                     check_camtracker_state = last_camtracker_start_time < (time.time() - 180)
                     if check_camtracker_state:
                         logger.info("Checking motor positions.")
-                        result = CamTrackerThread.check_tracker_motor_positions(config)
+                        result = CamTrackerThread.check_tracker_motor_positions(config, logger)
                         logger.info(f"Tracker position check result: {result}")
                         match result:
                             case "no logs" | "logs too old":
                                 if config.camtracker.restart_if_logs_are_too_old:
                                     logger.info("Restarting CamTracker because logs are too old.")
-                                    CamTrackerProgram.stop(config)
+                                    CamTrackerProgram.stop(config, logger)
                                     continue
                             case "invalid":
                                 logger.error(
                                     "Restarting CamTracker because tracker offsets are too high."
                                 )
-                                CamTrackerProgram.stop(config)
+                                CamTrackerProgram.stop(config, logger)
                                 continue
                             case "valid":
                                 logger.info("Tracker offsets are within threshold.")
@@ -230,7 +231,7 @@ class CamTrackerThread(AbstractThread):
                         logger.info(f"Enclosure cover state: {cover_state}")
                         if cover_state == "closed":
                             logger.error("Enclosure cover is still closed. Stopping CamTracker.")
-                            CamTrackerProgram.stop(config)
+                            CamTrackerProgram.stop(config, logger)
                             continue
                     else:
                         logger.info(
@@ -242,7 +243,7 @@ class CamTrackerThread(AbstractThread):
                 clear_issues = (last_camtracker_start_time is None) or check_camtracker_state
                 if clear_issues:
                     with interfaces.StateInterface.update_state() as state:
-                        state.exceptions_state.clear_exception_origin("camtracker")
+                        state.exceptions_state.clear_exception_origin(ORIGIN)
                 else:
                     logger.info(
                         "Waiting CamTracker checks to run at least once before clearing issues."
@@ -259,7 +260,7 @@ class CamTrackerThread(AbstractThread):
                 logger.exception(e)
                 CamTrackerProgram.stop()
                 with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin="camtracker", exception=e)
+                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")
@@ -267,7 +268,7 @@ class CamTrackerThread(AbstractThread):
 
     @staticmethod
     def check_tracker_motor_positions(
-        config: types.Config
+        config: types.Config, logger: utils.Logger
     ) -> Literal["no logs", "logs too old", "valid", "invalid"]:
         """Checks whether CamTracker is running and is pointing in the right direction.
 
