@@ -1,5 +1,6 @@
 import os
 import signal
+import sys
 import time
 from typing import Any, Callable, Literal
 from packages.core import types, utils, interfaces, modules, threads
@@ -71,6 +72,19 @@ def run() -> None:
             logger.error("Could not load config, waiting 10 seconds")
             time.sleep(10)
 
+    # Check Python version and platform
+
+    if (not config.general.test_mode) and (sys.platform != "win32"):
+        subject = "UnsupportedPlatformError"
+        details = f"This function cannot be run on this platform ({sys.platform}). It requires 32-bit Windows."
+        logger.error(f"{subject}: {details}")
+        return
+    if (sys.version_info.major != 3) or (sys.version_info.minor < 10):
+        subject = "UnsupportedPythonVersionError"
+        details = f"This function requires Python >= 3.10. Current version is {sys.version_info.major}.{sys.version_info.minor}."
+        logger.error(f"{subject}: {details}")
+        return
+
     logger.info("Loading astronomical dataset")
     utils.Astronomy.load_astronomical_dataset()
 
@@ -96,7 +110,7 @@ def run() -> None:
         threads.HeliosThread(),
         threads.CASThread(),
         threads.OpusThread(),
-        threads.SystemChecksThread(),
+        threads.SystemHealthThread(),
         threads.UploadThread(),
     ]
 

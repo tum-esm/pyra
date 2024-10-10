@@ -1,11 +1,12 @@
-import sys
 import threading
 import tum_esm_utils
 from .abstract_thread import AbstractThread
 from packages.core import interfaces, types, utils
 
+ORIGIN = "system-health"
 
-class SystemChecksThread(AbstractThread):
+
+class SystemHealthThread(AbstractThread):
     """Thread for checking the system's state (CPU usage, disk utilization, etc.)"""
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
@@ -16,41 +17,18 @@ class SystemChecksThread(AbstractThread):
     @staticmethod
     def get_new_thread_object() -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=SystemChecksThread.main, daemon=True)
+        return threading.Thread(target=SystemHealthThread.main, daemon=True)
 
     @staticmethod
     def main(headless: bool = False) -> None:
         """Main entrypoint of the thread. In headless mode, 
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="system-checks", just_print=headless)
-        logger.info("Running SystemChecks")
+        logger = utils.Logger(origin=ORIGIN, just_print=headless)
 
         while True:
             try:
-                # WINDOWS32 AND PYTHON VERSION >= 3.10
-
-                if sys.platform != "win32":
-                    subject = "UnsupportedPlatformError"
-                    details = f"This function cannot be run on this platform ({sys.platform}). It requires 32-bit Windows."
-                    logger.error(f"{subject}: {details}")
-                    with interfaces.StateInterface.update_state() as state:
-                        state.exceptions_state.add_exception_state_item(
-                            types.ExceptionStateItem(
-                                origin="system-checks", subject=subject, details=details
-                            )
-                        )
-
-                if (sys.version_info.major != 3) or (sys.version_info.minor < 10):
-                    subject = "UnsupportedPythonVersionError"
-                    details = f"This function requires Python >= 3.10. Current version is {sys.version_info.major}.{sys.version_info.minor}."
-                    logger.error(f"{subject}: {details}")
-                    with interfaces.StateInterface.update_state() as state:
-                        state.exceptions_state.add_exception_state_item(
-                            types.ExceptionStateItem(
-                                origin="system-checks", subject=subject, details=details
-                            )
-                        )
+                logger.info("Running system health checks")
 
                 # CPU/MEMORY USAGE AND BOOT TIME
 
@@ -73,7 +51,7 @@ class SystemChecksThread(AbstractThread):
                     with interfaces.StateInterface.update_state() as state:
                         state.exceptions_state.add_exception_state_item(
                             types.ExceptionStateItem(
-                                origin="system-checks", subject=subject, details=details
+                                origin=ORIGIN, subject=subject, details=details
                             )
                         )
                     logger.error(f"{subject}: {details}")
@@ -89,7 +67,7 @@ class SystemChecksThread(AbstractThread):
                         with interfaces.StateInterface.update_state() as state:
                             state.exceptions_state.add_exception_state_item(
                                 types.ExceptionStateItem(
-                                    origin="system-checks", subject=subject, details=details
+                                    origin=ORIGIN, subject=subject, details=details
                                 )
                             )
                         logger.error(f"{subject}: {details}")
@@ -101,11 +79,11 @@ class SystemChecksThread(AbstractThread):
                         last_boot_time=str(last_boot_time),
                         filled_disk_space_fraction=disk_space,
                     )
-                    state.exceptions_state.clear_exception_origin("system-checks")
+                    state.exceptions_state.clear_exception_origin(ORIGIN)
 
-                logger.info("Waiting 3 minutes before next system check")
+                logger.info("Waiting 3 minutes before next check")
 
             except Exception as e:
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin="system-checks", exception=e)
+                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
