@@ -244,6 +244,7 @@ class OpusControlThread(AbstractThread):
 
         logger.info("Loading state file")
         state = interfaces.StateInterface.load_state()
+        thread_start_time = time.time()
 
         if OpusProgram.is_running():
             logger.info("OPUS is already running")
@@ -339,10 +340,11 @@ class OpusControlThread(AbstractThread):
 
                 # CHECK IF MACRO HAS CRASHED
 
-                if current_macro_filepath is not None:
-                    assert current_macro_id is not None, "this should not happen"
-                    if not dde_connection.macro_is_running(current_macro_id):
-                        raise RuntimeError("Macro has stopped/crashed")
+                if thread_start_time < (time.time() - 60):
+                    if current_macro_filepath is not None:
+                        assert current_macro_id is not None, "this should not happen"
+                        if not dde_connection.macro_is_running(current_macro_id):
+                            raise RuntimeError("Macro has stopped/crashed")
 
                 # STARTING MACRO
 
@@ -358,7 +360,6 @@ class OpusControlThread(AbstractThread):
                             dde_connection.stop_macro(current_macro_filepath, current_macro_id)
                             current_macro_filepath = None
                             current_macro_id = None
-                            observed_macro_crashes = []
                             logger.info("Successfully stopped Macro")
 
                 # STOPPING MACRO
@@ -368,19 +369,25 @@ class OpusControlThread(AbstractThread):
                     dde_connection.stop_macro(current_macro_filepath, current_macro_id)
                     current_macro_filepath = None
                     current_macro_id = None
-                    observed_macro_crashes = []
                     logger.info(f"Successfully stopped Macro")
 
                 # UPDATING STATE
+
+                clear_issues = thread_start_time < (time.time() - 180)
+                if not clear_issues:
+                    logger.info(
+                        "Waiting for thread to run for 3 minutes before clearing exceptions"
+                    )
 
                 with interfaces.StateInterface.update_state() as state:
                     state.opus_state.macro_filepath = current_macro_filepath
                     state.opus_state.macro_id = current_macro_id
 
                     # TODO: turn this into a function
-                    state.current_exceptions = [
-                        e for e in state.current_exceptions if (e.origin != "opus")
-                    ]
+                    if clear_issues:
+                        state.current_exceptions = [
+                            e for e in state.current_exceptions if (e.origin != "opus")
+                        ]
 
                 # SLEEP
 
