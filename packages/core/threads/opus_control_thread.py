@@ -221,10 +221,14 @@ class OpusProgram:
 
 
 class OpusControlThread(AbstractThread):
-    """Thread for controlling OPUS. This thread starts/stops the OPUS executable
-    whenever it is not running.
+    """Thread for controlling OPUS.
     
-    TODO"""
+    * starts/stops the OPUS executable whenever it is not running and `config.general.min_sun_elevation` is reached
+    * starts/stops the macro whenever measurements should be running
+    * raises an exception if the macro crashes unexpectedly
+    * on startup, detects if OPUS is already running an unidentified macro - if so, stops OPUS entirely
+    * stores the macro ID so if Pyra Core or this thread crashes, it can continue using the same macro thread
+    """
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
