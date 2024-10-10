@@ -227,6 +227,7 @@ class OpusControlThread(AbstractThread):
     * raises an exception if the macro crashes unexpectedly
     * on startup, detects if OPUS is already running an unidentified macro - if so, stops OPUS entirely
     * stores the macro ID so if Pyra Core or this thread crashes, it can continue using the same macro thread
+    * Pings the EM27 every 5 minutes to check if it is still connected
     """
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
@@ -248,6 +249,9 @@ class OpusControlThread(AbstractThread):
         logger.info("Loading state file")
         state = interfaces.StateInterface.load_state()
         thread_start_time = time.time()
+
+        measurement_start_time = time.time()
+        last_successful_ping_time = time.time()
 
         if OpusProgram.is_running():
             logger.info("OPUS is already running")
@@ -341,6 +345,19 @@ class OpusControlThread(AbstractThread):
                         if not cover_is_open:
                             measurements_should_be_running = False
 
+                if measurements_should_be_running:
+                    if measurement_start_time < (time.time() - 60):
+                        if last_successful_ping_time < (time.time() - 300):
+                            logger.info("Pinging EM27")
+                            tum_esm_utils.timing.wait_for_condition(
+                                is_successful=lambda: os.
+                                system("ping -n 3 " + config.opus.em27_ip.root) == 0,
+                                timeout_seconds=90,
+                                timeout_message="EM27 did not respond to ping within 90 seconds.",
+                                check_interval_seconds=9,
+                            )
+                            logger.info("Successfully pinged EM27")
+
                 # CHECK IF MACRO HAS CRASHED
 
                 if thread_start_time < (time.time() - 60):
@@ -349,7 +366,7 @@ class OpusControlThread(AbstractThread):
                         if not dde_connection.macro_is_running(current_macro_id):
                             raise RuntimeError("Macro has stopped/crashed")
 
-                # STARTING MACRO
+                # STARTING MACRO / STOPPING MACRO WHEN MACRO FILE CHANGES
 
                 if measurements_should_be_running:
                     if current_macro_filepath is None:
@@ -357,6 +374,7 @@ class OpusControlThread(AbstractThread):
                         current_macro_filepath = config.opus.macro_path.root
                         current_macro_id = dde_connection.start_macro(current_macro_filepath)
                         logger.info(f"Successfully started Macro {current_macro_filepath}")
+                        measurement_start_time = time.time()
                     else:
                         if config.opus.macro_path.root != current_macro_filepath:
                             logger.info("Macro file has changed, stopping macro")
