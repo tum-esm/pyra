@@ -1,11 +1,12 @@
 from __future__ import annotations
-import contextlib
 from typing import Any, Generator, Literal, Optional
+import contextlib
 import datetime
 import os
 import filelock
 import pydantic
 import tum_esm_utils
+from .enclosures import tum_enclosure
 
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
@@ -14,32 +15,6 @@ _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
 class StricterBaseModel(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(extra="forbid", validate_assignment=True)
-
-
-class StrictFilePath(pydantic.RootModel[str]):
-    root: str
-
-    @pydantic.field_validator('root')
-    @classmethod
-    def path_should_exist(cls, v: str, info: pydantic.ValidationInfo) -> str:
-        ignore_path_existence = (info.context.get('ignore-path-existence')
-                                 == True) if isinstance(info.context, dict) else False
-        if (not ignore_path_existence) and (not os.path.isfile(v)):
-            raise ValueError('File does not exist')
-        return v
-
-
-class StrictDirectoryPath(pydantic.RootModel[str]):
-    root: str
-
-    @pydantic.field_validator('root')
-    @classmethod
-    def path_should_exist(cls, v: str, info: pydantic.ValidationInfo) -> str:
-        ignore_path_existence = (info.context.get('ignore-path-existence')
-                                 == True) if isinstance(info.context, dict) else False
-        if (not ignore_path_existence) and (not os.path.isdir(v)):
-            raise ValueError('Directory does not exist')
-        return v
 
 
 class StrictIPAdress(pydantic.RootModel[str]):
@@ -81,9 +56,9 @@ class PartialGeneralConfig(StricterBaseModel):
 
 class OpusConfig(StricterBaseModel):
     em27_ip: StrictIPAdress
-    executable_path: StrictFilePath
-    experiment_path: StrictFilePath
-    macro_path: StrictFilePath
+    executable_path: tum_esm_utils.validators.StrictFilePath
+    experiment_path: tum_esm_utils.validators.StrictFilePath
+    macro_path: tum_esm_utils.validators.StrictFilePath
     username: str
     password: str
 
@@ -92,18 +67,18 @@ class PartialOpusConfig(StricterBaseModel):
     """Like `OpusConfig`, but all fields are optional."""
 
     em27_ip: Optional[StrictIPAdress] = None
-    executable_path: Optional[StrictFilePath] = None
-    experiment_path: Optional[StrictFilePath] = None
-    macro_path: Optional[StrictFilePath] = None
+    executable_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
+    experiment_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
+    macro_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
     username: Optional[str] = None
     password: Optional[str] = None
 
 
 class CamtrackerConfig(StricterBaseModel):
-    config_path: StrictFilePath
-    executable_path: StrictFilePath
-    learn_az_elev_path: StrictFilePath
-    sun_intensity_path: StrictFilePath
+    config_path: tum_esm_utils.validators.StrictFilePath
+    executable_path: tum_esm_utils.validators.StrictFilePath
+    learn_az_elev_path: tum_esm_utils.validators.StrictFilePath
+    sun_intensity_path: tum_esm_utils.validators.StrictFilePath
     motor_offset_threshold: float = pydantic.Field(..., ge=0, le=360)
     restart_if_logs_are_too_old: bool
     restart_if_cover_remains_closed: bool
@@ -112,10 +87,10 @@ class CamtrackerConfig(StricterBaseModel):
 class PartialCamtrackerConfig(StricterBaseModel):
     """Like `CamtrackerConfig` but all fields are optional."""
 
-    config_path: Optional[StrictFilePath] = None
-    executable_path: Optional[StrictFilePath] = None
-    learn_az_elev_path: Optional[StrictFilePath] = None
-    sun_intensity_path: Optional[StrictFilePath] = None
+    config_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
+    executable_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
+    learn_az_elev_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
+    sun_intensity_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
     motor_offset_threshold: Optional[float] = pydantic.Field(None, ge=0, le=360)
     restart_if_logs_are_too_old: Optional[bool] = None
     restart_if_cover_remains_closed: Optional[bool] = None
@@ -177,20 +152,6 @@ class PartialMeasurementTriggersConfig(StricterBaseModel):
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
 
 
-class TUMEnclosureConfig(StricterBaseModel):
-    ip: StrictIPAdress
-    version: Literal[1, 2]
-    controlled_by_user: bool
-
-
-class PartialTUMEnclosureConfig(StricterBaseModel):
-    """Like `TUMEnclosureConfig`, but all fields are optional."""
-
-    ip: Optional[StrictIPAdress] = None
-    version: Optional[Literal[1, 2]] = None
-    controlled_by_user: Optional[bool] = None
-
-
 class HeliosConfig(StricterBaseModel):
     camera_id: int = pydantic.Field(..., ge=0, le=999999)
     evaluation_size: int = pydantic.Field(..., ge=1, le=100)
@@ -222,7 +183,7 @@ class UploadStreamConfig(StricterBaseModel):
     label: str
     variant: Literal["directories", "files"]
     dated_regex: str
-    src_directory: StrictDirectoryPath
+    src_directory: tum_esm_utils.validators.StrictDirectoryPath
     dst_directory: str
     remove_src_after_upload: bool
 
@@ -254,7 +215,7 @@ class Config(StricterBaseModel):
     error_email: ErrorEmailConfig
     measurement_decision: MeasurementDecisionConfig
     measurement_triggers: MeasurementTriggersConfig
-    tum_enclosure: Optional[TUMEnclosureConfig] = None
+    tum_enclosure: Optional[tum_enclosure.TUMEnclosureConfig] = None
     helios: Optional[HeliosConfig] = None
     upload: Optional[UploadConfig] = None
 
@@ -365,7 +326,7 @@ class PartialConfig(StricterBaseModel):
     error_email: Optional[PartialErrorEmailConfig] = None
     measurement_decision: Optional[PartialMeasurementDecisionConfig] = None
     measurement_triggers: Optional[PartialMeasurementTriggersConfig] = None
-    tum_enclosure: Optional[PartialTUMEnclosureConfig] = None
+    tum_enclosure: Optional[tum_enclosure.PartialTUMEnclosureConfig] = None
     helios: Optional[PartialHeliosConfig] = None
     upload: Optional[PartialUploadConfig] = None
 
