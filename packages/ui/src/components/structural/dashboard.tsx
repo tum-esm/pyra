@@ -21,7 +21,7 @@ export default function Dashboard() {
     const { runPromisingCommand } = fetchUtils.useCommand();
 
     const enclosureControlsIsVisible =
-        centralConfig?.tum_plc !== null && centralConfig?.tum_plc !== undefined;
+        centralConfig?.tum_enclosure !== null && centralConfig?.tum_enclosure !== undefined;
 
     async function fetchConfig() {
         runPromisingCommand({

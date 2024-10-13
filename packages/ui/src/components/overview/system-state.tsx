@@ -62,7 +62,7 @@ export function SystemState() {
 
     return (
         <>
-            {centralConfig.tum_plc !== null && (
+            {centralConfig.tum_enclosure !== null && (
                 <div className="grid w-full grid-cols-6 px-4 pb-1 text-sm gap-x-1">
                     <StatePanel title="Cover Angle">
                         {renderString(coreState.plc_state.actors.current_angle, {

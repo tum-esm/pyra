@@ -3,4 +3,4 @@ from .exception_email_client import ExceptionEmailClient
 from .functions import read_last_file_line
 from .helios_image_processing import HeliosImageProcessing
 from .logger import Logger
-from .tum_plc_logger import TUMPLCLogger
+from .tum_enclosure_logger import TUMEnclosureLogger

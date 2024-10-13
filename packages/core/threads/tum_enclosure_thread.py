@@ -14,7 +14,7 @@ class TUMEnclosureThread(AbstractThread):
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
 
-        return config.tum_plc is not None
+        return config.tum_enclosure is not None
 
     @staticmethod
     def get_new_thread_object() -> threading.Thread:

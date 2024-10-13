@@ -299,7 +299,7 @@ class CamTrackerThread(AbstractThread):
         "angle not reported" if the cover position has not beenreported
         by the PLC yet."""
 
-        if config.tum_plc is None:
+        if config.tum_enclosure is None:
             return "not configured"
 
         current_cover_angle = interfaces.StateInterface.load_state().plc_state.actors.current_angle

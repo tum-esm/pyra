@@ -43,16 +43,16 @@ class EnclosureControl:
         if self.config.general.test_mode:
             return
 
-        if self.config.tum_plc is None:
+        if self.config.tum_enclosure is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
     def __initialize(self) -> None:
         """Initializes the default PLC settings at startup or activation in config."""
-        assert self.config.tum_plc is not None
+        assert self.config.tum_enclosure is not None
 
         self.plc_interface = interfaces.PLCInterface(
-            self.config.tum_plc.version, self.config.tum_plc.ip
+            self.config.tum_enclosure.version, self.config.tum_enclosure.ip
         )
         self.plc_interface.connect()
         self.plc_interface.set_auto_temperature(True)
@@ -68,7 +68,7 @@ class EnclosureControl:
         self.config = new_config
 
         # Skips the rest of run if module not activated in config
-        if self.config.tum_plc is None:
+        if self.config.tum_enclosure is None:
             logger.debug("Skipping EnclosureControl without a TUM PLC")
             return
 
@@ -93,8 +93,8 @@ class EnclosureControl:
                 self.__initialize()
             else:
                 self.plc_interface.update_config(
-                    self.config.tum_plc.version,
-                    self.config.tum_plc.ip,
+                    self.config.tum_enclosure.version,
+                    self.config.tum_enclosure.ip,
                 )
                 self.plc_interface.connect()
 
@@ -109,7 +109,7 @@ class EnclosureControl:
             with interfaces.StateInterface.update_state() as s:
                 s.plc_state = self.plc_state
             current_state.plc_state = self.plc_state
-            utils.TUMPLCLogger.log(new_config, current_state)
+            utils.TUMEnclosureLogger.log(new_config, current_state)
 
             # Perform a power cycle of the camera every day at midnight
             logger.debug("Performing camera power cycle.")
@@ -138,7 +138,7 @@ class EnclosureControl:
                 self.motor_reset_needed_in_last_iteration = False
 
             # Skip writing to the PLC as the user took over control from the automation
-            if self.config.tum_plc.controlled_by_user:
+            if self.config.tum_enclosure.controlled_by_user:
                 logger.debug("Skipping EnclosureControl because enclosure is controlled by user")
                 self.last_plc_connection_time = time.time()
                 return

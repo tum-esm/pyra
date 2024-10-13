@@ -13,9 +13,7 @@ PYRA_CLI_PATH = os.path.join(PROJECT_DIR, "packages", "cli", "main.py")
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 
 
-def assert_config_file_content(
-    expected_content: types.Config, message: str
-) -> None:
+def assert_config_file_content(expected_content: types.Config, message: str) -> None:
     actual_content = types.Config.load(ignore_path_existence=True)
     print(f"actual_content: {actual_content.model_dump_json(indent=4)}")
     print(f"expected_content: {expected_content.model_dump_json(indent=4)}")
@@ -23,9 +21,7 @@ def assert_config_file_content(
 
 
 def run_cli_command(
-    command: list[str],
-    should_succeed: bool = False,
-    should_fail: bool = False
+    command: list[str], should_succeed: bool = False, should_fail: bool = False
 ) -> str:
     process = subprocess.run(
         [INTERPRETER_PATH, PYRA_CLI_PATH, *command],
@@ -54,9 +50,7 @@ def test_get_config(sample_config: types.Config) -> None:
     )
 
     # get config from file
-    assert_config_file_content(
-        config_object_1, "output from cli does not match file content"
-    )
+    assert_config_file_content(config_object_1, "output from cli does not match file content")
 
 
 @pytest.mark.order(3)
@@ -76,24 +70,16 @@ def test_update_config(sample_config: types.Config) -> None:
         {"camtracker": {"sun_intensity_path": 10}},
         {"error_email": {"unknown-key": 10}},
         {"measurement_decision": {"mode": "valid-type-but-invalid-value"}},
-        {
-            "measurement_triggers": {
-                "start_time": {"hour": "10", "invalid-key": 0}
-            }
-        },
+        {"measurement_triggers": {"start_time": {"hour": "10", "invalid-key": 0}}},
         {"measurement_triggers": {"max_sun_elevation": 100}},
     ]
 
     # run "pyra-cli config update" for some invalid variables
     for update in updates:
-        stdout = run_cli_command(["config", "update",
-                                  json.dumps(update)],
-                                 should_fail=True)
+        stdout = run_cli_command(["config", "update", json.dumps(update)], should_fail=True)
         assert "Config update is invalid" in stdout
 
-    assert_config_file_content(
-        sample_config, "config.json should not have changed"
-    )
+    assert_config_file_content(sample_config, "config.json should not have changed")
 
     updates = [
         {"general": {"seconds_per_core_interval": 400}},
@@ -107,9 +93,7 @@ def test_update_config(sample_config: types.Config) -> None:
         if i == 0:
             config.general.seconds_per_core_interval = 400
         if i == 1:
-            config.opus.em27_ip = types.config.StrictIPAdress(
-                root="17.17.17.17"
-            )
+            config.opus.em27_ip = types.config.StrictIPAdress(root="17.17.17.17")
         if i == 2:
             config.camtracker.motor_offset_threshold = 40.7
         if i == 3:
@@ -121,56 +105,40 @@ def test_update_config(sample_config: types.Config) -> None:
 
     # run "pyra-cli config update" for some valid variables
     for index, update in enumerate(updates):
-        stdout = run_cli_command(["config", "update",
-                                  json.dumps(update)],
-                                 should_succeed=True)
+        stdout = run_cli_command(["config", "update", json.dumps(update)], should_succeed=True)
         assert "Updated config file" in stdout
         sample_config = transform(sample_config, index)
 
-        assert_config_file_content(
-            sample_config, "config.json did not update as expected"
-        )
+        assert_config_file_content(sample_config, "config.json did not update as expected")
 
 
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_add_default_config(sample_config: types.Config) -> None:
 
-    cases = ["helios", "tum_plc"]
+    cases = ["helios", "tum_enclosure"]
 
     for c in cases:
-        stdout = run_cli_command(["config", "update",
-                                  json.dumps({c: None})],
-                                 should_succeed=True)
+        stdout = run_cli_command(["config", "update", json.dumps({c: None})], should_succeed=True)
         assert "Updated config file" in stdout
         if c == "helios":
             sample_config.helios = None
-        if c == "tum_plc":
-            sample_config.tum_plc = None
+        if c == "tum_enclosure":
+            sample_config.tum_enclosure = None
 
-    assert_config_file_content(
-        sample_config, "config.json is in an unexpected state"
-    )
+    assert_config_file_content(sample_config, "config.json is in an unexpected state")
 
     for c in cases:
-        with open(
-            os.path.join(PROJECT_DIR, "config", f"{c}.config.default.json"), "r"
-        ) as f:
+        with open(os.path.join(PROJECT_DIR, "config", f"{c}.config.default.json"), "r") as f:
             default_subconfig = json.load(f)
-        stdout = run_cli_command([
-            "config", "update",
-            json.dumps({c: default_subconfig})
-        ],
+        stdout = run_cli_command(["config", "update",
+                                  json.dumps({c: default_subconfig})],
                                  should_succeed=True)
         assert "Updated config file" in stdout
         if c == "helios":
-            sample_config.helios = types.config.HeliosConfig.model_validate(
+            sample_config.helios = types.config.HeliosConfig.model_validate(default_subconfig)
+        if c == "tum_enclosure":
+            sample_config.tum_enclosure = types.config.TumPlcConfig.model_validate(
                 default_subconfig
             )
-        if c == "tum_plc":
-            sample_config.tum_plc = types.config.TumPlcConfig.model_validate(
-                default_subconfig
-            )
-        assert_config_file_content(
-            sample_config, f'config.json does not include the "{c}" config'
-        )
+        assert_config_file_content(sample_config, f'config.json does not include the "{c}" config')

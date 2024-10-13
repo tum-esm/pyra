@@ -61,7 +61,7 @@ export const configSchema = z.object({
         }),
         min_sun_elevation: floatSchema,
     }),
-    tum_plc: z
+    tum_enclosure: z
         .object({
             ip: z.string(),
             version: intSchema,

@@ -177,14 +177,14 @@ class PartialMeasurementTriggersConfig(StricterBaseModel):
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
 
 
-class TumPlcConfig(StricterBaseModel):
+class TUMEnclosureConfig(StricterBaseModel):
     ip: StrictIPAdress
     version: Literal[1, 2]
     controlled_by_user: bool
 
 
-class PartialTumPlcConfig(StricterBaseModel):
-    """Like `TumPlcConfig`, but all fields are optional."""
+class PartialTUMEnclosureConfig(StricterBaseModel):
+    """Like `TUMEnclosureConfig`, but all fields are optional."""
 
     ip: Optional[StrictIPAdress] = None
     version: Optional[Literal[1, 2]] = None
@@ -254,7 +254,7 @@ class Config(StricterBaseModel):
     error_email: ErrorEmailConfig
     measurement_decision: MeasurementDecisionConfig
     measurement_triggers: MeasurementTriggersConfig
-    tum_plc: Optional[TumPlcConfig] = None
+    tum_enclosure: Optional[TUMEnclosureConfig] = None
     helios: Optional[HeliosConfig] = None
     upload: Optional[UploadConfig] = None
 
@@ -365,7 +365,7 @@ class PartialConfig(StricterBaseModel):
     error_email: Optional[PartialErrorEmailConfig] = None
     measurement_decision: Optional[PartialMeasurementDecisionConfig] = None
     measurement_triggers: Optional[PartialMeasurementTriggersConfig] = None
-    tum_plc: Optional[PartialTumPlcConfig] = None
+    tum_enclosure: Optional[PartialTUMEnclosureConfig] = None
     helios: Optional[PartialHeliosConfig] = None
     upload: Optional[PartialUploadConfig] = None
 

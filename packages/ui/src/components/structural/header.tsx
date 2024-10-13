@@ -9,7 +9,7 @@ export function Header(props: {
 }) {
     const { tabs, activeTab, setActiveTab } = props;
     const { centralConfig } = useConfigStore();
-    const plcIsControlledByUser = centralConfig?.tum_plc?.controlled_by_user;
+    const plcIsControlledByUser = centralConfig?.tum_enclosure?.controlled_by_user;
 
     async function monitoredSetActiveTab(t: string) {
         if (

@@ -54,15 +54,13 @@ SAMPLE_CONFIG = types.Config(
         stop_time={"hour": 21, "minute": 0, "second": 0},
         min_sun_elevation=0,
     ),
-    tum_plc=None,
+    tum_enclosure=None,
     helios=None,
     upload=None,
 )
 
 
-def save_file(
-    original_path: str, temporary_path: str, test_content: str
-) -> None:
+def save_file(original_path: str, temporary_path: str, test_content: str) -> None:
     assert not os.path.exists(temporary_path)
 
     try:
@@ -92,9 +90,7 @@ def sample_config() -> Generator[types.Config, None, None]:
     """
 
     original_config_path = os.path.join(PROJECT_DIR, "config", "config.json")
-    temporary_config_path = os.path.join(
-        PROJECT_DIR, "config", "config.tmp.json"
-    )
+    temporary_config_path = os.path.join(PROJECT_DIR, "config", "config.tmp.json")
     config_string = SAMPLE_CONFIG.model_dump_json(indent=4)
     save_file(original_config_path, temporary_config_path, config_string)
 
@@ -114,9 +110,7 @@ def original_config() -> Any:
     """
 
     original_config_path = os.path.join(PROJECT_DIR, "config", "config.json")
-    temporary_config_path = os.path.join(
-        PROJECT_DIR, "config", "config.tmp.json"
-    )
+    temporary_config_path = os.path.join(PROJECT_DIR, "config", "config.tmp.json")
 
     assert os.path.isfile(original_config_path)
     with open(original_config_path) as f:
@@ -142,9 +136,7 @@ def empty_logs() -> Any:
     save_file(original_info_logs_path, temporary_info_logs_path, "")
 
     original_debug_logs_path = os.path.join(PROJECT_DIR, "logs", "debug.log")
-    temporary_debug_logs_path = os.path.join(
-        PROJECT_DIR, "logs", "debug.tmp.log"
-    )
+    temporary_debug_logs_path = os.path.join(PROJECT_DIR, "logs", "debug.tmp.log")
     save_file(original_debug_logs_path, temporary_debug_logs_path, "")
 
     # run the respective test

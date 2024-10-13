@@ -87,17 +87,18 @@ export default function ControlTab() {
     const { coreState } = useCoreStateStore();
     const { centralConfig, setConfigItem } = useConfigStore();
     const { setCoreStateItem } = useCoreStateStore();
-    const plcIsControlledByUser = centralConfig?.tum_plc?.controlled_by_user;
+    const plcIsControlledByUser = centralConfig?.tum_enclosure?.controlled_by_user;
 
     const { commandIsRunning, runPromisingCommand } = fetchUtils.useCommand();
     const buttonsAreDisabled = !plcIsControlledByUser || commandIsRunning;
 
     async function setPlcIsControlledByUser(v: boolean) {
         runPromisingCommand({
-            command: () => fetchUtils.backend.updateConfig({ tum_plc: { controlled_by_user: v } }),
+            command: () =>
+                fetchUtils.backend.updateConfig({ tum_enclosure: { controlled_by_user: v } }),
             label: 'toggling PLC control mode',
             successLabel: 'successfully toggled PLC control mode',
-            onSuccess: () => setConfigItem('tum_plc.controlled_by_user', v),
+            onSuccess: () => setConfigItem('tum_enclosure.controlled_by_user', v),
         });
     }
 

@@ -2,14 +2,14 @@ import { configurationComponents, essentialComponents } from '../..';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 import { Button } from '../../ui/button';
 
-export default function ConfigSectionTumPlc() {
+export default function ConfigSectionTUMEnclosure() {
     const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
 
-    const centralSectionConfig = centralConfig?.tum_plc;
-    const localSectionConfig = localConfig?.tum_plc;
+    const centralSectionConfig = centralConfig?.tum_enclosure;
+    const localSectionConfig = localConfig?.tum_enclosure;
 
     function addDefault() {
-        setLocalConfigItem('tum_plc', {
+        setLocalConfigItem('tum_enclosure', {
             ip: '10.10.0.4',
             version: 1,
             controlled_by_user: false,
@@ -17,7 +17,7 @@ export default function ConfigSectionTumPlc() {
     }
 
     function setNull() {
-        setLocalConfigItem('tum_plc', null);
+        setLocalConfigItem('tum_enclosure', null);
     }
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
@@ -53,13 +53,13 @@ export default function ConfigSectionTumPlc() {
             <configurationComponents.ConfigElementText
                 title="IP"
                 value={localSectionConfig.ip}
-                setValue={(v: string) => setLocalConfigItem('tum_plc.ip', v)}
+                setValue={(v: string) => setLocalConfigItem('tum_enclosure.ip', v)}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.ip : 'null'}
             />
             <configurationComponents.ConfigElementText
                 title="Version"
                 value={localSectionConfig.version}
-                setValue={(v: any) => setLocalConfigItem('tum_plc.version', v)}
+                setValue={(v: any) => setLocalConfigItem('tum_enclosure.version', v)}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.version : 'null'}
                 numeric
             />

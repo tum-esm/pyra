@@ -6,8 +6,8 @@ from packages.core import types
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 
 
-class TUMPLCLogger:
-    """A class to save the current PLC state to a log file."""
+class TUMEnclosureLogger:
+    """A class to save the current TUM Enclosure state to a log file."""
     @staticmethod
     def log(config: types.Config, state: types.StateObject) -> None:
         now = datetime.datetime.now()
@@ -28,8 +28,8 @@ class TUMPLCLogger:
         ]
         stringed_log_line = [str(item).lower() if item is not None else "null" for item in log_line]
         current_log_file = os.path.join(
-            _PROJECT_DIR, "logs", "tum-plc",
-            f"{config.general.station_id}-plc-logs-{now.strftime('%Y-%m-%d')}.csv"
+            _PROJECT_DIR, "logs", "tum-enclosure",
+            f"{config.general.station_id}-tum-enclosure-logs-{now.strftime('%Y-%m-%d')}.csv"
         )
         if not os.path.isfile(current_log_file):
             with open(current_log_file, "w") as f:

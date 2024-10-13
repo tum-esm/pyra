@@ -17,7 +17,7 @@ export namespace customTypes {
         | 'camtracker'
         | 'error_email'
         | 'measurement_triggers'
-        | 'tum_plc'
+        | 'tum_enclosure'
         | 'helios'
         | 'upload';
     export type config = {
@@ -62,7 +62,7 @@ export namespace customTypes {
             stop_time: { hour: number; minute: number; second: number };
             min_sun_elevation: number;
         };
-        tum_plc: null | {
+        tum_enclosure: null | {
             ip: string;
             version: number;
             controlled_by_user: boolean;
@@ -131,7 +131,7 @@ export namespace customTypes {
             stop_time?: { hour?: number; minute?: number; second?: number };
             min_sun_elevation?: number;
         };
-        tum_plc?: null | {
+        tum_enclosure?: null | {
             ip?: string;
             version?: number;
             controlled_by_user?: boolean;

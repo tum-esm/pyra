@@ -41,7 +41,7 @@ const hardwareSections: {
     label: string;
     icon: (props: TablerIconsProps) => JSX.Element;
 }[] = [
-    { key: 'tum_plc', label: 'TUM Enclosure', icon: IconCpu },
+    { key: 'tum_enclosure', label: 'TUM Enclosure', icon: IconCpu },
     { key: 'helios', label: 'Helios', icon: IconCpu },
 ];
 
@@ -166,7 +166,9 @@ export default function ConfigurationTab() {
                 {activeKey === 'measurement_triggers' && (
                     <configurationComponents.ConfigSectionMeasurementTriggers />
                 )}
-                {activeKey === 'tum_plc' && <configurationComponents.ConfigSectionTumPlc />}
+                {activeKey === 'tum_enclosure' && (
+                    <configurationComponents.ConfigSectionTUMEnclosure />
+                )}
                 {activeKey === 'helios' && <configurationComponents.ConfigSectionHelios />}
                 {activeKey === 'upload' && <configurationComponents.ConfigSectionUpload />}
                 {configIsDiffering() && (

@@ -29,7 +29,7 @@ export default function OverviewTab() {
             <div className="flex flex-row items-center w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-300">
                 <div>System State</div>
                 <div className="flex-grow" />
-                {centralConfig?.tum_plc && (
+                {centralConfig?.tum_enclosure && (
                     <Button onClick={closeCover} className="mt-1.5">
                         force cover close
                     </Button>

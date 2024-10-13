@@ -27,9 +27,11 @@ def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
     plc_interface = None
 
     try:
-        assert config.tum_plc is not None, "PLC not configured"
-        assert config.tum_plc.controlled_by_user, "PLC is controlled by automation"
-        plc_interface = interfaces.PLCInterface(config.tum_plc.version, config.tum_plc.ip)
+        assert config.tum_enclosure is not None, "PLC not configured"
+        assert config.tum_enclosure.controlled_by_user, "PLC is controlled by automation"
+        plc_interface = interfaces.PLCInterface(
+            config.tum_enclosure.version, config.tum_enclosure.ip
+        )
         plc_interface.connect()
     except Exception as e:
         _print_red(str(e))
@@ -137,8 +139,8 @@ def _close_cover() -> None:
         s.recent_cli_calls += 1
     logger.info('running command "plc close-cover"')
     with types.Config.update_in_context() as config:
-        assert config.tum_plc is not None, "PLC not configured"
-        config.tum_plc.controlled_by_user = True
+        assert config.tum_enclosure is not None, "PLC not configured"
+        config.tum_enclosure.controlled_by_user = True
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_interface.set_sync_to_tracker(False)
