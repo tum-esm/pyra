@@ -12,7 +12,7 @@ from packages.cli.commands import (
     config_command_group,
     core_command_group,
     logs_command_group,
-    plc_command_group,
+    tum_enclosure_command_group,
     remove_filelocks,
     state_command_group,
     test_command_group,
@@ -42,7 +42,7 @@ cli.add_command(print_cli_information, name="info")
 cli.add_command(config_command_group, name="config")
 cli.add_command(core_command_group, name="core")
 cli.add_command(logs_command_group, name="logs")
-cli.add_command(plc_command_group, name="plc")
+cli.add_command(tum_enclosure_command_group, name="tum-enclosure")
 cli.add_command(remove_filelocks, name="remove-filelocks")
 cli.add_command(state_command_group, name="state")
 cli.add_command(test_command_group, name="test")

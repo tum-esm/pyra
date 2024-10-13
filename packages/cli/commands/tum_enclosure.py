@@ -9,8 +9,8 @@ from packages.core import types, utils, interfaces, modules
 logger = utils.Logger(origin="cli")
 
 
-@click.group(name="plc")
-def plc_command_group() -> None:
+@click.group(name="tum-enclosure")
+def tum_enclosure_command_group() -> None:
     pass
 
 
@@ -40,7 +40,7 @@ def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
     return plc_interface
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="read",
     help="Read current state from plc.",
 )
@@ -56,7 +56,7 @@ def _read(no_indent: bool) -> None:
         plc_interface.disconnect()
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="reset",
     help="Run plc function 'reset()'",
 )
@@ -104,7 +104,7 @@ def _wait_until_cover_is_at_angle(
             )
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="set-cover-angle",
     help="Run plc function 'move_cover()'",
 )
@@ -130,7 +130,7 @@ def _set_cover_angle(angle: str) -> None:
         plc_interface.disconnect()
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="close-cover",
     help="Run plc function 'force_cover_close()'",
 )
@@ -165,7 +165,7 @@ def _set_boolean_plc_state(
         plc_interface.disconnect()
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="set-sync-to-tracker",
     help="Run plc function 'set_sync_to_tracker()'",
 )
@@ -177,7 +177,7 @@ def _set_sync_to_tracker(state: Literal["true", "false"]) -> None:
     _set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="set-auto-temperature",
     help="Run plc function 'set_auto_temperature()'",
 )
@@ -189,7 +189,7 @@ def _set_auto_temperature(state: Literal["true", "false"]) -> None:
     _set_boolean_plc_state(state, lambda p: p.set_auto_temperature)
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="set-heater-power",
     help="Run plc function 'set_power_heater()'",
 )
@@ -201,7 +201,7 @@ def _set_heater_power(state: Literal["true", "false"]) -> None:
     _set_boolean_plc_state(state, lambda p: p.set_power_heater)
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="set-camera-power",
     help="Run plc function 'set_camera_heater()'",
 )
@@ -213,7 +213,7 @@ def _set_camera_power(state: Literal["true", "false"]) -> None:
     _set_boolean_plc_state(state, lambda p: p.set_power_camera)
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="set-router-power",
     help="Run plc function 'set_power_router()'",
 )
@@ -225,7 +225,7 @@ def _set_router_power(state: Literal["true", "false"]) -> None:
     _set_boolean_plc_state(state, lambda p: p.set_power_router)
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="set-spectrometer-power",
     help="Run plc function 'set_power_spectrometer()'",
 )
@@ -237,7 +237,7 @@ def _set_spectrometer_power(state: Literal["true", "false"]) -> None:
     _set_boolean_plc_state(state, lambda p: p.set_power_spectrometer)
 
 
-@plc_command_group.command(
+@tum_enclosure_command_group.command(
     name="set-computer-power",
     help="Run plc function 'set_power_computer()'",
 )
