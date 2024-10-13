@@ -75,8 +75,8 @@ def _reset() -> None:
             running_time += 2
             if not plc_interface.reset_is_needed():
                 with interfaces.StateInterface.update_state() as state:
-                    if state.plc_state is not None:
-                        state.plc_state.state.reset_needed = False
+                    if state.tum_enclosure_state is not None:
+                        state.tum_enclosure_state.state.reset_needed = False
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
         _print_green("Ok")
@@ -94,8 +94,8 @@ def _wait_until_cover_is_at_angle(
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
             with interfaces.StateInterface.update_state() as state:
-                state.plc_state.actors.current_angle = current_cover_angle
-                state.plc_state.state.cover_closed = (current_cover_angle == 0)
+                state.tum_enclosure_state.actors.current_angle = current_cover_angle
+                state.tum_enclosure_state.state.cover_closed = (current_cover_angle == 0)
             break
 
         if running_time > timeout:
@@ -153,7 +153,7 @@ def _close_cover() -> None:
         plc_interface.disconnect()
 
 
-def _set_boolean_plc_state(
+def _set_boolean_tum_enclosure_state(
     state: Literal["true", "false"],
     get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool], None]],
 ) -> None:
@@ -174,7 +174,7 @@ def _set_sync_to_tracker(state: Literal["true", "false"]) -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
     logger.info(f'running command "plc set-sync-to-tracker {state}"')
-    _set_boolean_plc_state(state, lambda p: p.set_sync_to_tracker)
+    _set_boolean_tum_enclosure_state(state, lambda p: p.set_sync_to_tracker)
 
 
 @tum_enclosure_command_group.command(
@@ -186,7 +186,7 @@ def _set_auto_temperature(state: Literal["true", "false"]) -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
     logger.info(f'running command "plc set-auto-temperature {state}"')
-    _set_boolean_plc_state(state, lambda p: p.set_auto_temperature)
+    _set_boolean_tum_enclosure_state(state, lambda p: p.set_auto_temperature)
 
 
 @tum_enclosure_command_group.command(
@@ -198,7 +198,7 @@ def _set_heater_power(state: Literal["true", "false"]) -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
     logger.info(f'running command "plc set-heater-power {state}"')
-    _set_boolean_plc_state(state, lambda p: p.set_power_heater)
+    _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_heater)
 
 
 @tum_enclosure_command_group.command(
@@ -210,7 +210,7 @@ def _set_camera_power(state: Literal["true", "false"]) -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
     logger.info(f'running command "plc set-camera-power {state}"')
-    _set_boolean_plc_state(state, lambda p: p.set_power_camera)
+    _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_camera)
 
 
 @tum_enclosure_command_group.command(
@@ -222,7 +222,7 @@ def _set_router_power(state: Literal["true", "false"]) -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
     logger.info(f'running command "plc set-router-power {state}"')
-    _set_boolean_plc_state(state, lambda p: p.set_power_router)
+    _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_router)
 
 
 @tum_enclosure_command_group.command(
@@ -234,7 +234,7 @@ def _set_spectrometer_power(state: Literal["true", "false"]) -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
     logger.info(f'running command "plc set-spectrometer-power {state}"')
-    _set_boolean_plc_state(state, lambda p: p.set_power_spectrometer)
+    _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_spectrometer)
 
 
 @tum_enclosure_command_group.command(
@@ -246,4 +246,4 @@ def _set_computer_power(state: Literal["true", "false"]) -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
     logger.info(f'running command "plc set-computer-power {state}"')
-    _set_boolean_plc_state(state, lambda p: p.set_power_computer)
+    _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_computer)

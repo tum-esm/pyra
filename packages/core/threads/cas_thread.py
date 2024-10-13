@@ -61,7 +61,7 @@ class CASThread(AbstractThread):
                 logger.debug(f"Decision mode for measurements is: {d.mode}.")
 
                 should_measure: bool
-                if state.plc_state.state.rain == True:
+                if state.tum_enclosure_state.state.rain == True:
                     logger.debug("not trying to measuring when PLC detected rain")
                     should_measure = False
                 else:

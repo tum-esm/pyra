@@ -100,7 +100,8 @@ def _stop_pyra_core() -> None:
 
     if config.tum_enclosure is not None:
         _print_green("Running teardown for TUM enclosure")
-        current_cover_angle = interfaces.StateInterface.load_state().plc_state.actors.current_angle
+        current_cover_angle = interfaces.StateInterface.load_state(
+        ).tum_enclosure_state.actors.current_angle
         if current_cover_angle == 0:
             _print_green("Cover is already closed")
         else:

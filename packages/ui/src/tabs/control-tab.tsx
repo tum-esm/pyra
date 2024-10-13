@@ -118,14 +118,14 @@ export default function ControlTab() {
 
     async function reset() {
         await runPLCCommand(['reset'], 'running PLC reset', 'successfully reset the PLC', () =>
-            setCoreStateItem('plc_state.reset_needed', false)
+            setCoreStateItem('tum_enclosure_state.reset_needed', false)
         );
     }
 
     async function closeCover() {
         await runPLCCommand(['close-cover'], 'closing cover', 'successfully closed cover', () => {
-            setCoreStateItem('plc_state.state.cover_closed', true);
-            setCoreStateItem('plc_state.actors.current_angle', 0);
+            setCoreStateItem('tum_enclosure_state.state.cover_closed', true);
+            setCoreStateItem('tum_enclosure_state.actors.current_angle', 0);
         });
     }
 
@@ -136,8 +136,8 @@ export default function ControlTab() {
                 'moving cover',
                 'successfully moved cover',
                 () => {
-                    setCoreStateItem('plc_state.state.cover_closed', angle === 0);
-                    setCoreStateItem('plc_state.actors.current_angle', angle);
+                    setCoreStateItem('tum_enclosure_state.state.cover_closed', angle === 0);
+                    setCoreStateItem('tum_enclosure_state.actors.current_angle', angle);
                 }
             );
         } else {
@@ -147,84 +147,84 @@ export default function ControlTab() {
 
     async function toggleSyncToTracker() {
         if (coreState !== undefined) {
-            const newValue = !coreState.plc_state.control.sync_to_tracker;
+            const newValue = !coreState.tum_enclosure_state.control.sync_to_tracker;
             await runPLCCommand(
                 ['set-sync-to-tracker', JSON.stringify(newValue)],
                 'toggling sync-to-tracker',
                 'successfully toggled sync-to-tracker',
-                () => setCoreStateItem('plc_state.control.sync_to_tracker', newValue)
+                () => setCoreStateItem('tum_enclosure_state.control.sync_to_tracker', newValue)
             );
         }
     }
 
     async function toggleAutoTemperature() {
         if (coreState !== undefined) {
-            const newValue = !coreState.plc_state.control.auto_temp_mode;
+            const newValue = !coreState.tum_enclosure_state.control.auto_temp_mode;
             await runPLCCommand(
                 ['set-auto-temperature', JSON.stringify(newValue)],
                 'toggling auto-temperature',
                 'successfully toggled auto-temperature',
-                () => setCoreStateItem('plc_state.control.auto_temp_mode', newValue)
+                () => setCoreStateItem('tum_enclosure_state.control.auto_temp_mode', newValue)
             );
         }
     }
 
     async function togglePowerHeater() {
         if (coreState !== undefined) {
-            const newValue = !coreState.plc_state.power.heater;
+            const newValue = !coreState.tum_enclosure_state.power.heater;
             await runPLCCommand(
                 ['set-heater-power', JSON.stringify(newValue)],
                 'toggling heater power',
                 'successfully toggled heater power',
-                () => setCoreStateItem('plc_state.power.heater', newValue)
+                () => setCoreStateItem('tum_enclosure_state.power.heater', newValue)
             );
         }
     }
 
     async function togglePowerCamera() {
         if (coreState !== undefined) {
-            const newValue = !coreState.plc_state.power.camera;
+            const newValue = !coreState.tum_enclosure_state.power.camera;
             await runPLCCommand(
                 ['set-camera-power', JSON.stringify(newValue)],
                 'toggling camera power',
                 'successfully toggled camera power',
-                () => setCoreStateItem('plc_state.power.camera', newValue)
+                () => setCoreStateItem('tum_enclosure_state.power.camera', newValue)
             );
         }
     }
 
     async function togglePowerRouter() {
         if (coreState !== undefined) {
-            const newValue = !coreState.plc_state.power.router;
+            const newValue = !coreState.tum_enclosure_state.power.router;
             await runPLCCommand(
                 ['set-router-power', JSON.stringify(newValue)],
                 'toggling router power',
                 'successfully toggled router power',
-                () => setCoreStateItem('plc_state.power.router', newValue)
+                () => setCoreStateItem('tum_enclosure_state.power.router', newValue)
             );
         }
     }
 
     async function togglePowerSpectrometer() {
         if (coreState !== undefined) {
-            const newValue = !coreState.plc_state.power.spectrometer;
+            const newValue = !coreState.tum_enclosure_state.power.spectrometer;
             await runPLCCommand(
                 ['set-spectrometer-power', JSON.stringify(newValue)],
                 'toggling spectrometer power',
                 'successfully toggled spectrometer power',
-                () => setCoreStateItem('plc_state.power.spectrometer', newValue)
+                () => setCoreStateItem('tum_enclosure_state.power.spectrometer', newValue)
             );
         }
     }
 
     async function togglePowerComputer() {
         if (coreState !== undefined) {
-            const newValue = !coreState.plc_state.power.computer;
+            const newValue = !coreState.tum_enclosure_state.power.computer;
             await runPLCCommand(
                 ['set-computer-power', JSON.stringify(newValue)],
                 'toggling computer power',
                 'successfully toggled computer power',
-                () => setCoreStateItem('plc_state.power.computer', newValue)
+                () => setCoreStateItem('tum_enclosure_state.power.computer', newValue)
             );
         }
     }
@@ -249,10 +249,10 @@ export default function ControlTab() {
                 <div className="text-sm text-slate-700">
                     Last PLC-read:{' '}
                     {coreState === undefined ||
-                    coreState.plc_state.last_full_fetch === null ||
-                    coreState.plc_state.last_full_fetch === undefined
+                    coreState.tum_enclosure_state.last_full_fetch === null ||
+                    coreState.tum_enclosure_state.last_full_fetch === undefined
                         ? '-'
-                        : coreState?.plc_state.last_full_fetch}
+                        : coreState?.tum_enclosure_state.last_full_fetch}
                 </div>
             </div>
             <div className="flex flex-col w-full text-sm divide-y divide-slate-300">
@@ -264,7 +264,9 @@ export default function ControlTab() {
                             {
                                 variable: {
                                     key: 'Reset needed',
-                                    value: renderBoolValue(coreState.plc_state.state.reset_needed),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.state.reset_needed
+                                    ),
                                 },
                                 action: {
                                     label: 'reset now',
@@ -274,13 +276,17 @@ export default function ControlTab() {
                             {
                                 variable: {
                                     key: 'Motor failed',
-                                    value: renderBoolValue(coreState.plc_state.state.motor_failed),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.state.motor_failed
+                                    ),
                                 },
                             },
                             {
                                 variable: {
                                     key: 'UPS alert',
-                                    value: renderBoolValue(coreState.plc_state.state.ups_alert),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.state.ups_alert
+                                    ),
                                 },
                             },
                         ]}
@@ -293,7 +299,9 @@ export default function ControlTab() {
                             {
                                 variable: {
                                     key: 'Cover is closed',
-                                    value: renderBoolValue(coreState.plc_state.state.cover_closed),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.state.cover_closed
+                                    ),
                                 },
                                 action: {
                                     label: 'force cover close',
@@ -303,7 +311,9 @@ export default function ControlTab() {
                             {
                                 variable: {
                                     key: 'Rain detected',
-                                    value: renderBoolValue(coreState.plc_state.state.rain),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.state.rain
+                                    ),
                                 },
                             },
                         ]}
@@ -317,7 +327,7 @@ export default function ControlTab() {
                                 variable: {
                                     key: 'Current cover angle',
                                     value: renderStringValue(
-                                        coreState.plc_state.actors.current_angle,
+                                        coreState.tum_enclosure_state.actors.current_angle,
                                         '°'
                                     ),
                                 },
@@ -325,7 +335,8 @@ export default function ControlTab() {
                                     label: 'move to angle',
                                     callback: moveCover,
                                     variant: 'numeric',
-                                    initialValue: coreState.plc_state.actors.current_angle || 0,
+                                    initialValue:
+                                        coreState.tum_enclosure_state.actors.current_angle || 0,
                                     postfix: '°',
                                 },
                             },
@@ -333,11 +344,11 @@ export default function ControlTab() {
                                 variable: {
                                     key: 'Sync to CamTracker',
                                     value: renderBoolValue(
-                                        coreState.plc_state.control.sync_to_tracker
+                                        coreState.tum_enclosure_state.control.sync_to_tracker
                                     ),
                                 },
                                 action: {
-                                    label: coreState.plc_state.control.sync_to_tracker
+                                    label: coreState.tum_enclosure_state.control.sync_to_tracker
                                         ? 'do not sync'
                                         : 'sync',
                                     callback: toggleSyncToTracker,
@@ -354,7 +365,7 @@ export default function ControlTab() {
                                 variable: {
                                     key: 'Temperature',
                                     value: renderStringValue(
-                                        coreState.plc_state.sensors.temperature,
+                                        coreState.tum_enclosure_state.sensors.temperature,
                                         ' °C'
                                     ),
                                 },
@@ -363,7 +374,7 @@ export default function ControlTab() {
                                 variable: {
                                     key: 'Humidity',
                                     value: renderStringValue(
-                                        coreState.plc_state.sensors.humidity,
+                                        coreState.tum_enclosure_state.sensors.humidity,
                                         '%'
                                     ),
                                 },
@@ -372,7 +383,7 @@ export default function ControlTab() {
                                 variable: {
                                     key: 'Fan Speed',
                                     value: renderStringValue(
-                                        coreState.plc_state.actors.fan_speed,
+                                        coreState.tum_enclosure_state.actors.fan_speed,
                                         '%'
                                     ),
                                 },
@@ -381,11 +392,11 @@ export default function ControlTab() {
                                 variable: {
                                     key: 'Auto temperature',
                                     value: renderBoolValue(
-                                        coreState.plc_state.control.auto_temp_mode
+                                        coreState.tum_enclosure_state.control.auto_temp_mode
                                     ),
                                 },
                                 action: {
-                                    label: coreState.plc_state.control.auto_temp_mode
+                                    label: coreState.tum_enclosure_state.control.auto_temp_mode
                                         ? 'disable'
                                         : 'enable',
                                     callback: toggleAutoTemperature,
@@ -401,30 +412,40 @@ export default function ControlTab() {
                             {
                                 variable: {
                                     key: 'Camera Power',
-                                    value: renderBoolValue(coreState.plc_state.power.camera),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.power.camera
+                                    ),
                                 },
                                 action: {
-                                    label: coreState.plc_state.power.camera ? 'disable' : 'enable',
+                                    label: coreState.tum_enclosure_state.power.camera
+                                        ? 'disable'
+                                        : 'enable',
                                     callback: togglePowerCamera,
                                 },
                             },
                             {
                                 variable: {
                                     key: 'Router Power',
-                                    value: renderBoolValue(coreState.plc_state.power.router),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.power.router
+                                    ),
                                 },
                                 action: {
-                                    label: coreState.plc_state.power.router ? 'disable' : 'enable',
+                                    label: coreState.tum_enclosure_state.power.router
+                                        ? 'disable'
+                                        : 'enable',
                                     callback: togglePowerRouter,
                                 },
                             },
                             {
                                 variable: {
                                     key: 'Spectrometer Power',
-                                    value: renderBoolValue(coreState.plc_state.power.spectrometer),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.power.spectrometer
+                                    ),
                                 },
                                 action: {
-                                    label: coreState.plc_state.power.spectrometer
+                                    label: coreState.tum_enclosure_state.power.spectrometer
                                         ? 'disable'
                                         : 'enable',
                                     callback: togglePowerSpectrometer,
@@ -433,10 +454,12 @@ export default function ControlTab() {
                             {
                                 variable: {
                                     key: 'Computer Power',
-                                    value: renderBoolValue(coreState.plc_state.power.computer),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.power.computer
+                                    ),
                                 },
                                 action: {
-                                    label: coreState.plc_state.power.computer
+                                    label: coreState.tum_enclosure_state.power.computer
                                         ? 'disable'
                                         : 'enable',
                                     callback: togglePowerComputer,
@@ -445,10 +468,14 @@ export default function ControlTab() {
                             {
                                 variable: {
                                     key: 'Heater power',
-                                    value: renderBoolValue(coreState.plc_state.power.heater),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.power.heater
+                                    ),
                                 },
                                 action: {
-                                    label: coreState.plc_state.power.heater ? 'disable' : 'enable',
+                                    label: coreState.tum_enclosure_state.power.heater
+                                        ? 'disable'
+                                        : 'enable',
                                     callback: togglePowerHeater,
                                 },
                             },
@@ -462,34 +489,40 @@ export default function ControlTab() {
                             {
                                 variable: {
                                     key: 'Camera',
-                                    value: renderBoolValue(coreState.plc_state.connections.camera),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.connections.camera
+                                    ),
                                 },
                             },
                             {
                                 variable: {
                                     key: 'Computer',
                                     value: renderBoolValue(
-                                        coreState.plc_state.connections.computer
+                                        coreState.tum_enclosure_state.connections.computer
                                     ),
                                 },
                             },
                             {
                                 variable: {
                                     key: 'Heater',
-                                    value: renderBoolValue(coreState.plc_state.connections.heater),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.connections.heater
+                                    ),
                                 },
                             },
                             {
                                 variable: {
                                     key: 'Router',
-                                    value: renderBoolValue(coreState.plc_state.connections.router),
+                                    value: renderBoolValue(
+                                        coreState.tum_enclosure_state.connections.router
+                                    ),
                                 },
                             },
                             {
                                 variable: {
                                     key: 'Spectrometer',
                                     value: renderBoolValue(
-                                        coreState.plc_state.connections.spectrometer
+                                        coreState.tum_enclosure_state.connections.spectrometer
                                     ),
                                 },
                             },

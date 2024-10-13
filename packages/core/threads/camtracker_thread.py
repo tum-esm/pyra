@@ -302,7 +302,8 @@ class CamTrackerThread(AbstractThread):
         if config.tum_enclosure is None:
             return "not configured"
 
-        current_cover_angle = interfaces.StateInterface.load_state().plc_state.actors.current_angle
+        current_cover_angle = interfaces.StateInterface.load_state(
+        ).tum_enclosure_state.actors.current_angle
 
         if current_cover_angle is None:
             return "angle not reported"

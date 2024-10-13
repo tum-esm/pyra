@@ -1,90 +1,45 @@
-import traceback
 from typing import Literal, Optional
+import traceback
 import datetime
 import pydantic
+from .enclosures import tum_enclosure
 
 
-class ExceptionStateItem(pydantic.BaseModel):
+class StricterBaseModel(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(extra="forbid", validate_assignment=True)
+
+
+# --- SUBSTATES ---
+
+
+class ExceptionStateItem(StricterBaseModel):
     origin: str
     subject: str
     details: Optional[str] = None
     send_emails: Optional[bool] = True
 
 
-class Position(pydantic.BaseModel):
+class Position(StricterBaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     altitude: Optional[float] = None
     sun_elevation: Optional[float] = None
 
 
-class OperatingSystemState(pydantic.BaseModel):
+class OperatingSystemState(StricterBaseModel):
     cpu_usage: Optional[list[float]] = None
     memory_usage: Optional[float] = None
     last_boot_time: Optional[str] = None
     filled_disk_space_fraction: Optional[float] = None
 
 
-class PLCStateActors(pydantic.BaseModel):
-    fan_speed: Optional[int] = None
-    current_angle: Optional[int] = None
-
-
-class PLCStateControl(pydantic.BaseModel):
-    auto_temp_mode: Optional[bool] = None
-    manual_control: Optional[bool] = None
-    manual_temp_mode: Optional[bool] = None
-    sync_to_tracker: Optional[bool] = None
-
-
-class PLCStateSensors(pydantic.BaseModel):
-    humidity: Optional[int] = None
-    temperature: Optional[int] = None
-
-
-class PLCStateState(pydantic.BaseModel):
-    cover_closed: Optional[bool] = None
-    motor_failed: Optional[bool] = None
-    rain: Optional[bool] = None
-    reset_needed: Optional[bool] = None
-    ups_alert: Optional[bool] = None
-
-
-class PLCStatePower(pydantic.BaseModel):
-    camera: Optional[bool] = None
-    computer: Optional[bool] = None
-    heater: Optional[bool] = None
-    router: Optional[bool] = None
-    spectrometer: Optional[bool] = None
-
-
-class PLCStateConnections(pydantic.BaseModel):
-    camera: Optional[bool] = None
-    computer: Optional[bool] = None
-    heater: Optional[bool] = None
-    router: Optional[bool] = None
-    spectrometer: Optional[bool] = None
-
-
-class PLCState(pydantic.BaseModel):
-    last_full_fetch: Optional[datetime.datetime] = None
-    actors: PLCStateActors = PLCStateActors()
-    control: PLCStateControl = PLCStateControl()
-    sensors: PLCStateSensors = PLCStateSensors()
-    state: PLCStateState = PLCStateState()
-    power: PLCStatePower = PLCStatePower()
-    connections: PLCStateConnections = PLCStateConnections()
-
-    model_config = pydantic.ConfigDict(extra="forbid")
-
-
-class OpusState(pydantic.BaseModel):
+class OpusState(StricterBaseModel):
     experiment_filepath: Optional[str] = None
     macro_filepath: Optional[str] = None
     macro_id: Optional[int] = None
 
 
-class ExceptionsState(pydantic.BaseModel):
+class ExceptionsState(StricterBaseModel):
     current: list[ExceptionStateItem] = pydantic.Field(
         [], description="List of exceptions that are currently active."
     )
@@ -116,13 +71,16 @@ class ExceptionsState(pydantic.BaseModel):
         self.current = [e for e in self.current if e.origin != origin]
 
 
-class StateObject(pydantic.BaseModel):
+# --- STATE ---
+
+
+class StateObject(StricterBaseModel):
     last_updated: datetime.datetime
     recent_cli_calls: int = 0
     helios_indicates_good_conditions: Optional[Literal["yes", "no", "inconclusive"]] = None
     position: Position = Position()
     measurements_should_be_running: Optional[bool] = None
-    plc_state: PLCState = PLCState()
+    tum_enclosure_state: tum_enclosure.TUMEnclosureState = tum_enclosure.TUMEnclosureState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
     exceptions_state: ExceptionsState = ExceptionsState()
     upload_is_running: Optional[bool] = None
@@ -136,6 +94,6 @@ class StateObject(pydantic.BaseModel):
         self.helios_indicates_good_conditions = None
         self.position = Position()
         self.measurements_should_be_running = None
-        self.plc_state = PLCState()
+        self.tum_enclosure_state = tum_enclosure.TUMEnclosureState()
         self.operating_system_state = OperatingSystemState()
         self.upload_is_running = None

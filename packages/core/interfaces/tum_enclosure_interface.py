@@ -340,33 +340,33 @@ class TUMEnclosureInterface:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.camera)
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.power.camera = new_state
+            state.tum_enclosure_state.power.camera = new_state
 
     def set_power_computer(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         assert self.specification.power.computer is not None
         self.__update_bool(new_state, self.specification.power.computer)
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.power.computer = new_state
+            state.tum_enclosure_state.power.computer = new_state
 
     def set_power_heater(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.heater)
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.power.heater = new_state
+            state.tum_enclosure_state.power.heater = new_state
 
     def set_power_router(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         assert self.specification.power.router is not None, "Router is not configured"
         self.__update_bool(new_state, self.specification.power.router)
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.power.router = new_state
+            state.tum_enclosure_state.power.router = new_state
 
     def set_power_spectrometer(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.spectrometer)
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.power.spectrometer = new_state
+            state.tum_enclosure_state.power.spectrometer = new_state
 
     # PLC.CONTROL SETTERS
 
@@ -374,26 +374,26 @@ class TUMEnclosureInterface:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.sync_to_tracker)
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.control.sync_to_tracker = new_state
+            state.tum_enclosure_state.control.sync_to_tracker = new_state
 
     def set_manual_control(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_control)
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.control.manual_control = new_state
+            state.tum_enclosure_state.control.manual_control = new_state
 
     def set_auto_temperature(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.auto_temp_mode)
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.control.auto_temp_mode = new_state
+            state.tum_enclosure_state.control.auto_temp_mode = new_state
 
     def set_manual_temperature(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_temp_mode)
 
         with interfaces.StateInterface.update_state() as state:
-            state.plc_state.control.manual_temp_mode = new_state
+            state.tum_enclosure_state.control.manual_temp_mode = new_state
 
     def reset(self) -> None:
         """Does not check, whether the value has been changed"""

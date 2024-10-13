@@ -18,13 +18,13 @@ class TUMEnclosureLogger:
             timestamp,
             datetime_string,
             state.position.sun_elevation,
-            state.plc_state.power.heater,
-            state.plc_state.power.spectrometer,
-            state.plc_state.state.rain,
-            state.plc_state.actors.fan_speed,
-            state.plc_state.actors.current_angle,
-            state.plc_state.sensors.temperature,
-            state.plc_state.sensors.humidity,
+            state.tum_enclosure_state.power.heater,
+            state.tum_enclosure_state.power.spectrometer,
+            state.tum_enclosure_state.state.rain,
+            state.tum_enclosure_state.actors.fan_speed,
+            state.tum_enclosure_state.actors.current_angle,
+            state.tum_enclosure_state.sensors.temperature,
+            state.tum_enclosure_state.sensors.humidity,
         ]
         stringed_log_line = [str(item).lower() if item is not None else "null" for item in log_line]
         current_log_file = os.path.join(

@@ -347,8 +347,8 @@ class OpusThread(AbstractThread):
                 state = interfaces.StateInterface.load_state()
                 measurements_should_be_running = state.measurements_should_be_running == True
                 if measurements_should_be_running:
-                    if state.plc_state.actors.current_angle is not None:
-                        cover_is_open = 20 < state.plc_state.actors.current_angle < 340
+                    if state.tum_enclosure_state.actors.current_angle is not None:
+                        cover_is_open = 20 < state.tum_enclosure_state.actors.current_angle < 340
                         if not cover_is_open:
                             measurements_should_be_running = False
 

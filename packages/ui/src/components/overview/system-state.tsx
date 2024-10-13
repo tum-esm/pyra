@@ -65,25 +65,25 @@ export function SystemState() {
             {centralConfig.tum_enclosure !== null && (
                 <div className="grid w-full grid-cols-6 px-4 pb-1 text-sm gap-x-1">
                     <StatePanel title="Cover Angle">
-                        {renderString(coreState.plc_state.actors.current_angle, {
+                        {renderString(coreState.tum_enclosure_state.actors.current_angle, {
                             appendix: ' °',
                         })}
                     </StatePanel>
                     <StatePanel title="Temperature">
-                        {renderString(coreState.plc_state.sensors.temperature, {
+                        {renderString(coreState.tum_enclosure_state.sensors.temperature, {
                             appendix: ' °C',
                         })}
                     </StatePanel>
                     <StatePanel title="Humidity">
-                        {renderString(coreState.plc_state.sensors.humidity, {
+                        {renderString(coreState.tum_enclosure_state.sensors.humidity, {
                             appendix: ' rH',
                         })}
                     </StatePanel>
                     <StatePanel title="Heater Power">
-                        {renderBoolean(coreState.plc_state.power.heater)}
+                        {renderBoolean(coreState.tum_enclosure_state.power.heater)}
                     </StatePanel>
                     <StatePanel title="Rain Detected">
-                        {renderBoolean(coreState.plc_state.state.rain)}
+                        {renderBoolean(coreState.tum_enclosure_state.state.rain)}
                     </StatePanel>
                     <StatePanel title="Helios Edge Pixels">
                         {renderNumber(
@@ -93,8 +93,8 @@ export function SystemState() {
                     </StatePanel>
                 </div>
             )}
-            {coreState?.plc_state.state.rain === true &&
-                coreState?.plc_state.state.cover_closed === false && (
+            {coreState?.tum_enclosure_state.state.rain === true &&
+                coreState?.tum_enclosure_state.state.cover_closed === false && (
                     <div className="w-full px-4 mb-4 -mt-2 text-sm">
                         <div
                             className={
@@ -162,27 +162,27 @@ export function TumEnclosureState() {
         <>
             <div className="grid w-full grid-cols-5 px-4 pb-4 text-sm gap-x-1">
                 <StatePanel title="Cover Angle">
-                    {renderString(coreState.plc_state.actors.current_angle, {
+                    {renderString(coreState.tum_enclosure_state.actors.current_angle, {
                         appendix: ' °',
                     })}
                 </StatePanel>
                 <StatePanel title="Enclosure Temperature">
-                    {renderString(coreState.plc_state.sensors.temperature, {
+                    {renderString(coreState.tum_enclosure_state.sensors.temperature, {
                         appendix: ' °C',
                     })}
                 </StatePanel>
                 <StatePanel title="Reset Needed">
-                    {renderBoolean(coreState.plc_state.state.reset_needed)}
+                    {renderBoolean(coreState.tum_enclosure_state.state.reset_needed)}
                 </StatePanel>
                 <StatePanel title="Motor Failed">
-                    {renderBoolean(coreState.plc_state.state.motor_failed)}
+                    {renderBoolean(coreState.tum_enclosure_state.state.motor_failed)}
                 </StatePanel>
                 <StatePanel title="Rain Detected">
-                    {renderBoolean(coreState.plc_state.state.rain)}
+                    {renderBoolean(coreState.tum_enclosure_state.state.rain)}
                 </StatePanel>
             </div>
-            {coreState?.plc_state.state.rain === true &&
-                coreState?.plc_state.state.cover_closed === false && (
+            {coreState?.tum_enclosure_state.state.rain === true &&
+                coreState?.tum_enclosure_state.state.cover_closed === false && (
                     <div className="w-full px-4 mb-4 -mt-2 text-sm">
                         <div
                             className={
