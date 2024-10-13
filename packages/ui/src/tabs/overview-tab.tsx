@@ -11,7 +11,7 @@ export default function OverviewTab() {
 
     function closeCover() {
         runPromisingCommand({
-            command: () => fetchUtils.backend.writeToPLC(['close-cover']),
+            command: () => fetchUtils.backend.writeToTUMEnclosure(['close-cover']),
             label: 'closing cover',
             successLabel: 'successfully closed cover',
         });

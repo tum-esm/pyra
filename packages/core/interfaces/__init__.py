@@ -1,3 +1,3 @@
 from .activity_history import ActivityHistoryInterface
-from .plc_interface import PLCInterface
+from .tum_enclosure_interface import TUMEnclosureInterface
 from .state_interface import StateInterface

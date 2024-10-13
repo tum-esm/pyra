@@ -51,8 +51,8 @@ const backend = {
     updateConfig: async (newConfig: any): Promise<ChildProcess> => {
         return await callCLI(['config', 'update', JSON.stringify(newConfig)]);
     },
-    writeToPLC: async (command: string[]): Promise<ChildProcess> => {
-        return await callCLI(['plc', ...command]);
+    writeToTUMEnclosure: async (command: string[]): Promise<ChildProcess> => {
+        return await callCLI(['tum-enclosure', ...command]);
     },
     testOpus: async (): Promise<ChildProcess> => {
         return await callCLI(['test', 'opus']);

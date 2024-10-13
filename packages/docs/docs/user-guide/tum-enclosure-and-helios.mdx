@@ -3,11 +3,11 @@ sidebar_position: 6
 hide_table_of_contents: true
 ---
 
-# TUM PLC & Helios
+# TUM Enclosure & Helios
 
 The TUM weather protection enclosure and Helios setup hardware is unavailable to buy off the shelf yet. Please [contact us](/docs/intro/contact) if you want to acquire our hardware.
 
-<img src='/img/docs/muccnet-image-roof.jpg' className='tw-mb-6 tw-rounded-lg' />
+<img src="/img/docs/muccnet-image-roof.jpg" className="tw-mb-6 tw-rounded-lg" />
 
 The TUM hardware used by [MUCCnet](https://atmosphere.ei.tum.de/) has been described in [Dietrich et al. 2021 (doi.org/10.5194/amt-14-1111-2021)](https://doi.org/10.5194/amt-14-1111-2021) and [Heinle et al. 2018 (doi.org/10.5194/amt-11-2173-2018)](https://doi.org/10.5194/amt-11-2173-2018).
 
@@ -23,37 +23,37 @@ Helios evaluates the current sun state - whether direct or diffuse sunlight exis
 
 The Helios hardware comprises a transparent globe with black stripes glued to it and a translucent milky glass with a camera pointing upwards attached below.
 
-<div className='tw-flex tw-justify-center tw-w-full'>
-    <img
-        src='/img/docs/helios-hardware.png'
-        className='tw-mb-2 tw-rounded-lg !tw-h-64'
-    />
+<div className="tw-flex tw-justify-center tw-w-full">
+  <img
+    src="/img/docs/helios-hardware.png"
+    className="tw-mb-2 tw-rounded-lg !tw-h-64"
+  />
 </div>
 
 Helios will periodically take images with that camera, process them, and evaluate shadow conditions. The processing will detect the lens circle and cut off the outer 10% of the radius - a lot of unwanted shadows can occur on the edges due to dirt from the outside. Finally, it will use a canny edge filter and count the pixels where "fast transitions between light and dark" can be found. If the pixel count is above a certain threshold (configurable), the sunlight conditions are categorized as "good".
 
 Example images in **bad** conditions:
 
-<div className='tw-flex tw-flex-col xl:tw-flex-row tw-items-center tw-justify-center tw-w-full tw-gap-x-2 tw-gap-y-2 -tw-mt-3 tw-mb-4'>
-    <img
-        src='/img/docs/helios-example-image-bad-raw.jpg'
-        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
-    />
-    <img
-        src='/img/docs/helios-example-image-bad-processed.jpg'
-        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
-    />
+<div className="tw-flex tw-flex-col xl:tw-flex-row tw-items-center tw-justify-center tw-w-full tw-gap-x-2 tw-gap-y-2 -tw-mt-3 tw-mb-4">
+  <img
+    src="/img/docs/helios-example-image-bad-raw.jpg"
+    className="tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48"
+  />
+  <img
+    src="/img/docs/helios-example-image-bad-processed.jpg"
+    className="tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48"
+  />
 </div>
 
 Example images in **good** conditions:
 
-<div className='tw-flex tw-flex-col xl:tw-flex-row tw-items-center tw-justify-center tw-w-full tw-gap-x-2 tw-gap-y-2 -tw-mt-3 tw-mb-4'>
-    <img
-        src='/img/docs/helios-example-image-good-raw.jpg'
-        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
-    />
-    <img
-        src='/img/docs/helios-example-image-good-processed.jpg'
-        className='tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48'
-    />
+<div className="tw-flex tw-flex-col xl:tw-flex-row tw-items-center tw-justify-center tw-w-full tw-gap-x-2 tw-gap-y-2 -tw-mt-3 tw-mb-4">
+  <img
+    src="/img/docs/helios-example-image-good-raw.jpg"
+    className="tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48"
+  />
+  <img
+    src="/img/docs/helios-example-image-good-processed.jpg"
+    className="tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48"
+  />
 </div>

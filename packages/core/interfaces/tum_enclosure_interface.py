@@ -6,7 +6,7 @@ import os
 import snap7.exceptions
 from packages.core import types, utils, interfaces
 
-logger = utils.Logger(origin="plc-interface")
+logger = utils.Logger(origin="tum-enclosure-plc")
 
 _PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PLCSpecification] = {
     1:
@@ -94,7 +94,7 @@ _PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PLCSpecification] = {
 }
 
 
-class PLCInterface:
+class TUMEnclosureInterface:
     """Uses the snap7 library to connect to the Siemens PLC operating the
     enclosure hardware.
 
@@ -131,8 +131,7 @@ class PLCInterface:
 
         Reconnecting to PLC, when IP has changed."""
 
-        if (self.plc_version
-            != new_plc_version) or (self.plc_ip != new_plc_ip.root):
+        if (self.plc_version != new_plc_version) or (self.plc_ip != new_plc_ip.root):
             logger.debug("PLC ip has changed, reconnecting now")
             self.disconnect()
             self.plc_version = new_plc_version
@@ -148,9 +147,7 @@ class PLCInterface:
 
         while True:
             if (time.time() - start_time) > 30:
-                raise snap7.exceptions.Snap7Exception(
-                    "Connect to PLC timed out."
-                )
+                raise snap7.exceptions.Snap7Exception("Connect to PLC timed out.")
 
             try:
                 self.plc.connect(self.plc_ip, 0, 1)
@@ -210,8 +207,7 @@ class PLCInterface:
         """Read the whole state of the PLC"""
 
         plc_db_content: dict[int, bytearray] = {}
-        plc_db_size = {1: {3: 6, 8: 26, 25: 10}, 2: {3: 5, 6: 17,
-                                                     8: 25}}[self.plc_version]
+        plc_db_size = {1: {3: 6, 8: 26, 25: 10}, 2: {3: 5, 6: 17, 8: 25}}[self.plc_version]
 
         for db_index, db_size in plc_db_size.items():
             plc_db_content[db_index] = self.plc.db_read(db_index, 0, db_size)
@@ -222,18 +218,12 @@ class PLCInterface:
         def _get_int(spec: Optional[tuple[int, int, int]]) -> Optional[int]:
             if spec is None:
                 return None
-            return snap7.util.get_int(
-                plc_db_content[spec[0]], spec[1]
-            )  # type: ignore
+            return snap7.util.get_int(plc_db_content[spec[0]], spec[1])  # type: ignore
 
-        def _get_bool(
-            spec: Optional[tuple[int, int, int, int]]
-        ) -> Optional[bool]:
+        def _get_bool(spec: Optional[tuple[int, int, int, int]]) -> Optional[bool]:
             if spec is None:
                 return None
-            return snap7.util.get_bool(
-                plc_db_content[spec[0]], spec[1], spec[3]
-            )  # type: ignore
+            return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])  # type: ignore
 
         s = self.specification
 
@@ -322,9 +312,7 @@ class PLCInterface:
 
         return value
 
-    def __write_bool(
-        self, action: tuple[int, int, int, int], value: bool
-    ) -> None:
+    def __write_bool(self, action: tuple[int, int, int, int], value: bool) -> None:
         """Changes a BOOL value in the PLC database."""
 
         db_number, start, size, bool_index = action
@@ -337,9 +325,7 @@ class PLCInterface:
 
     # PLC.POWER SETTERS
 
-    def __update_bool(
-        self, new_state: bool, spec: tuple[int, int, int, int]
-    ) -> None:
+    def __update_bool(self, new_state: bool, spec: tuple[int, int, int, int]) -> None:
         """Update a boolean value on the PLC.
 
         1. low-level direct-write new_state to PLC according to spec
@@ -348,7 +334,7 @@ class PLCInterface:
 
         self.__write_bool(spec, new_state)
         if self.__read_bool(spec) != new_state:
-            raise PLCInterface.PLCError("PLC state did not change")
+            raise TUMEnclosureInterface.PLCError("PLC state did not change")
 
     def set_power_camera(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
@@ -386,9 +372,7 @@ class PLCInterface:
 
     def set_sync_to_tracker(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
-        self.__update_bool(
-            new_state, self.specification.control.sync_to_tracker
-        )
+        self.__update_bool(new_state, self.specification.control.sync_to_tracker)
         with interfaces.StateInterface.update_state() as state:
             state.plc_state.control.sync_to_tracker = new_state
 
@@ -406,9 +390,7 @@ class PLCInterface:
 
     def set_manual_temperature(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
-        self.__update_bool(
-            new_state, self.specification.control.manual_temp_mode
-        )
+        self.__update_bool(new_state, self.specification.control.manual_temp_mode)
 
         with interfaces.StateInterface.update_state() as state:
             state.plc_state.control.manual_temp_mode = new_state

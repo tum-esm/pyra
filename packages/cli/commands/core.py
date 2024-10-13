@@ -95,10 +95,11 @@ def _stop_pyra_core() -> None:
     state = interfaces.StateInterface.load_state()
 
     if config.general.test_mode:
-        _print_green("Skip closing TUM_PLC, CamTracker, and OPUS in test mode")
+        _print_green("Skip closing Enlosure, CamTracker, and OPUS teardown in test mode")
         exit(0)
 
-    if config.tum_plc is not None:
+    if config.tum_enclosure is not None:
+        _print_green("Running teardown for TUM enclosure")
         current_cover_angle = interfaces.StateInterface.load_state().plc_state.actors.current_angle
         if current_cover_angle == 0:
             _print_green("Cover is already closed")

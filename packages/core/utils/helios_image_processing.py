@@ -14,7 +14,7 @@ _IMG_DIR = os.path.join(_LOGS_DIR, "helios")
 class HeliosImageProcessing:
     """Class for processing images from the Helios camera.
 
-    See https://pyra.esm.ei.tum.de/docs/user-guide/tum-plc-and-helios#what-does-helios-do
+    See https://pyra.esm.ei.tum.de/docs/user-guide/tum-enclosure-and-helios#what-does-helios-do
     for more information on Helios."""
     @staticmethod
     def _get_circle_mask(

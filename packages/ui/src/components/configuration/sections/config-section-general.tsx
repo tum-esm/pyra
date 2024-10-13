@@ -39,8 +39,8 @@ export default function ConfigSectionGeneral() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                The TUM PLC will start its operation one degree earlier. Helios will start at this
-                angle.
+                The TUM Enclosure Spectrometer will power up three degrees below. Helios will start
+                at this angle.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
@@ -55,3 +55,5 @@ export default function ConfigSectionGeneral() {
         </>
     );
 }
+
+// TODO: change poweron time to 3 minutes

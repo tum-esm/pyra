@@ -18,7 +18,7 @@ def test_default_config() -> None:
         types.Config.load(f.read(), ignore_path_existence=True)
 
     with open(os.path.join(CONFIG_DIR, "tum_enclosure.config.default.json"), "r") as f:
-        types.config.TumPlcConfig.model_validate_json(f.read())
+        types.config.TUMEnclosureConfig.model_validate_json(f.read())
 
     with open(os.path.join(CONFIG_DIR, "helios.config.default.json"), "r") as f:
         types.config.HeliosConfig.model_validate_json(f.read())

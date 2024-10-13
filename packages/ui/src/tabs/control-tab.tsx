@@ -109,7 +109,7 @@ export default function ControlTab() {
         onSuccess: () => void
     ) {
         runPromisingCommand({
-            command: () => fetchUtils.backend.writeToPLC(command),
+            command: () => fetchUtils.backend.writeToTUMEnclosure(command),
             label: label,
             successLabel: successLabel,
             onSuccess: onSuccess,
