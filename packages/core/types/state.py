@@ -66,6 +66,11 @@ class ExceptionsState(StricterBaseModel):
 
         self.current = [e for e in self.current if e.origin != origin]
 
+    def clear_exception_subject(self, subject: str) -> None:
+        """Clear all exceptions with the given subject."""
+
+        self.current = [e for e in self.current if e.subject != subject]
+
 
 # --- STATE ---
 
