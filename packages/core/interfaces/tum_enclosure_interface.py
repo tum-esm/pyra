@@ -121,6 +121,7 @@ class TUMEnclosureInterface:
         self.plc_version = plc_version
         self.plc_ip = plc_ip.root
         self.specification = _PLC_SPECIFICATION_VERSIONS[plc_version]
+        self.plc = snap7.client.Client()
 
     # CONNECTION/CLASS MANAGEMENT
 
@@ -139,11 +140,11 @@ class TUMEnclosureInterface:
             self.connect()
 
     def connect(self) -> None:
-        """Connects to the PLC Snap7. Times out after 30 seconds."""
+        """Connects to the PLC Snap7. Times out after 30 seconds.
+        
+        Raises snap7.exceptions.Snap7Exception if connection fails."""
 
-        self.plc = snap7.client.Client()
         start_time = time.time()
-
         while True:
             if (time.time() - start_time) > 30:
                 raise snap7.exceptions.Snap7Exception("Connect to PLC timed out.")
@@ -173,10 +174,13 @@ class TUMEnclosureInterface:
         except snap7.exceptions.Snap7Exception:
             self.plc.destroy()
             logger.debug("Disconnected ungracefully from PLC.")
+        self.plc = snap7.client.Client()
 
-    def is_responsive(self) -> bool:
-        """Pings the PLC"""
+    def is_connected(self) -> bool:
+        """Check the PLC connection and ping the PLC IP address."""
 
+        if not self.plc.get_connected():
+            return False
         return os.system("ping -n 1 " + self.plc_ip) == 0
 
     # DIRECT READ FUNCTIONS
