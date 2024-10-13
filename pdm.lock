@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:63429a5e61978858fb8a73ba350c2f6dbc14ef3e4fbd0a331e72e335d09ad7ed"
+content_hash = "sha256:2a1558abe1eace9dd93f14acf734503144b75d0741ff88dbb6a91d1dd8285062"
 
 [[metadata.targets]]
 requires_python = "==3.10.*"
@@ -895,7 +895,7 @@ files = [
 
 [[package]]
 name = "tum-esm-utils"
-version = "2.3.2"
+version = "2.3.3"
 requires_python = "<4.0,>=3.10"
 summary = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
 groups = ["default"]
@@ -908,8 +908,8 @@ dependencies = [
     "tailwind-colors>=1.3.0",
 ]
 files = [
-    {file = "tum_esm_utils-2.3.2-py3-none-any.whl", hash = "sha256:1096b0adf0bb3a21936c20a39ca14c1cd7591a476a9832f82df655fe41a18645"},
-    {file = "tum_esm_utils-2.3.2.tar.gz", hash = "sha256:554d7f0a5fb510e7b1e3720d79b9cf30c6e2388a99cb9964d17f44fbad6a27ab"},
+    {file = "tum_esm_utils-2.3.3-py3-none-any.whl", hash = "sha256:ad609f3b7eee1463226f02bb45c727565991c3f9f5b641cd3e947493bee66915"},
+    {file = "tum_esm_utils-2.3.3.tar.gz", hash = "sha256:6549cf173322e826c6a0b66d04144c4ddf457476681fa9c024f51fd44fb6fe2f"},
 ]
 
 [[package]]

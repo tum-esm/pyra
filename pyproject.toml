@@ -23,6 +23,7 @@ dependencies = [
     "filelock>=3.16.1",
     "psutil>=6.0.0",
     "brukeropus>=1.1.0",
+    "tum-esm-utils>=2.3.3",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"
@@ -66,6 +67,8 @@ module = [
     "psutil",
     "skyfield.*",
     "fabric.*",
+    "brukeropus",
+    "brukeropus.*",
 ]
 ignore_missing_imports = true
 

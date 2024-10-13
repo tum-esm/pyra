@@ -5,6 +5,7 @@ import time
 import os
 import snap7.exceptions
 from packages.core import types, utils, interfaces
+from tum_esm_utils.validators import StrictIPv4Adress
 
 logger = utils.Logger(origin="tum-enclosure-plc")
 
@@ -115,7 +116,7 @@ class TUMEnclosureInterface:
     def __init__(
         self,
         plc_version: Literal[1, 2],
-        plc_ip: types.StrictIPAdress,
+        plc_ip: StrictIPv4Adress,
     ) -> None:
         self.plc_version = plc_version
         self.plc_ip = plc_ip.root
@@ -123,9 +124,7 @@ class TUMEnclosureInterface:
 
     # CONNECTION/CLASS MANAGEMENT
 
-    def update_config(
-        self, new_plc_version: Literal[1, 2], new_plc_ip: types.StrictIPAdress
-    ) -> None:
+    def update_config(self, new_plc_version: Literal[1, 2], new_plc_ip: StrictIPv4Adress) -> None:
         """Update the internally used config (executed at the)
         beginning of enclosure-control's run-function.
 

@@ -3,11 +3,7 @@ import traceback
 import datetime
 import pydantic
 from .enclosures import tum_enclosure
-
-
-class StricterBaseModel(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(extra="forbid", validate_assignment=True)
-
+from tum_esm_utils.validators import StricterBaseModel
 
 # --- SUBSTATES ---
 

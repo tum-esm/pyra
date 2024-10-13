@@ -4,6 +4,7 @@ import sys
 from packages.core import types
 import pytest
 import os
+from tum_esm_utils.validators import StrictIPv4Adress
 from ..fixtures import sample_config
 
 dir = os.path.dirname
@@ -93,7 +94,7 @@ def test_update_config(sample_config: types.Config) -> None:
         if i == 0:
             config.general.seconds_per_core_interval = 400
         if i == 1:
-            config.opus.em27_ip = types.config.StrictIPAdress(root="17.17.17.17")
+            config.opus.em27_ip = StrictIPv4Adress(root="17.17.17.17")
         if i == 2:
             config.camtracker.motor_offset_threshold = 40.7
         if i == 3:

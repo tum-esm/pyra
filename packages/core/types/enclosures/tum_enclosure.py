@@ -1,21 +1,12 @@
 from typing import Literal, Optional
 import datetime
-import pydantic
-
-
-class StricterBaseModel(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(extra="forbid", validate_assignment=True)
-
-
-class StrictIPAdress(pydantic.RootModel[str]):
-    root: str = pydantic.Field(..., pattern=r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?")
-
+from tum_esm_utils.validators import StrictIPv4Adress, StricterBaseModel
 
 # --- CONFIG ---
 
 
 class TUMEnclosureConfig(StricterBaseModel):
-    ip: StrictIPAdress
+    ip: StrictIPv4Adress
     version: Literal[1, 2]
     controlled_by_user: bool
 
@@ -23,7 +14,7 @@ class TUMEnclosureConfig(StricterBaseModel):
 class PartialTUMEnclosureConfig(StricterBaseModel):
     """Like `TUMEnclosureConfig`, but all fields are optional."""
 
-    ip: Optional[StrictIPAdress] = None
+    ip: Optional[StrictIPv4Adress] = None
     version: Optional[Literal[1, 2]] = None
     controlled_by_user: Optional[bool] = None
 

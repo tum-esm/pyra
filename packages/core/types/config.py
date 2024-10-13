@@ -6,19 +6,12 @@ import os
 import filelock
 import pydantic
 import tum_esm_utils
+from tum_esm_utils.validators import StrictIPv4Adress, StricterBaseModel
 from .enclosures import tum_enclosure
 
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
 _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
-
-
-class StricterBaseModel(pydantic.BaseModel):
-    model_config = pydantic.ConfigDict(extra="forbid", validate_assignment=True)
-
-
-class StrictIPAdress(pydantic.RootModel[str]):
-    root: str = pydantic.Field(..., pattern=r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d{1,5})?")
 
 
 class TimeDict(StricterBaseModel):
@@ -55,7 +48,7 @@ class PartialGeneralConfig(StricterBaseModel):
 
 
 class OpusConfig(StricterBaseModel):
-    em27_ip: StrictIPAdress
+    em27_ip: StrictIPv4Adress
     executable_path: tum_esm_utils.validators.StrictFilePath
     experiment_path: tum_esm_utils.validators.StrictFilePath
     macro_path: tum_esm_utils.validators.StrictFilePath
@@ -66,7 +59,7 @@ class OpusConfig(StricterBaseModel):
 class PartialOpusConfig(StricterBaseModel):
     """Like `OpusConfig`, but all fields are optional."""
 
-    em27_ip: Optional[StrictIPAdress] = None
+    em27_ip: Optional[StrictIPv4Adress] = None
     executable_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
     experiment_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
     macro_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
@@ -189,7 +182,7 @@ class UploadStreamConfig(StricterBaseModel):
 
 
 class UploadConfig(StricterBaseModel):
-    host: StrictIPAdress
+    host: StrictIPv4Adress
     user: str
     password: str
     only_upload_at_night: bool
@@ -200,7 +193,7 @@ class UploadConfig(StricterBaseModel):
 class PartialUploadConfig(StricterBaseModel):
     """Like `UploadConfig`, but all fields are optional."""
 
-    host: Optional[StrictIPAdress] = None
+    host: Optional[StrictIPv4Adress] = None
     user: Optional[str] = None
     password: Optional[str] = None
     only_upload_at_night: Optional[bool] = None
