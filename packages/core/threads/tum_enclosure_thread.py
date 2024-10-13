@@ -34,12 +34,6 @@ class TUMEnclosureThread(AbstractThread):
         plc_interface: Optional[interfaces.TUMEnclosureInterface] = None
         last_plc_connection_time: Optional[float] = None
 
-        # TODO: implement camera power up and down
-        # TODO: implement better PLC reset
-        # TODO: implement PLC read
-        # TODO: implement spectrometer power on/off
-        # TODO: implement cover open/close
-
         while True:
             try:
                 t1 = time.time()
@@ -92,10 +86,34 @@ class TUMEnclosureThread(AbstractThread):
                         subject="Could not connect to PLC for 6 minutes"
                     )
 
+                # READING PLC
+
+                # TODO:
+
+                # RESETTING PLC
+
+                # TODO: implement better PLC reset
+                # reset every 30 seconds until it state.reset_needed and state.motor_failed are False
+                # send an email if the reset does not work for 3 minutes
+
+                # CAMERA POWER CYCLE
+
+                # TODO:
+
+                # SPECTROMETER POWER
+
+                # TODO:
+
+                # SYNC COVER TO TRACKER
+
+                # TODO:
+                # wait here until cover is actually closed
+                # if sync to tracker was set, assert that it is still true (no emails though)
+
                 # SLEEP
 
                 t2 = time.time()
-                sleep_time = max(5, 60 - (t2 - t1))
+                sleep_time = max(5, 40 - (t2 - t1))
                 logger.info(f"Sleeping {sleep_time} seconds")
                 time.sleep(sleep_time)
 
