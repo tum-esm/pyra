@@ -9,5 +9,6 @@ from .plc_specification import (
     PLCSpecificationPower,
     PLCSpecificationConnections,
 )
-from .state import Position, TUMEnclosureState, OperatingSystemState, StateObject, ExceptionStateItem
+from .state import Position, OperatingSystemState, StateObject, ExceptionStateItem
+from .enclosures.tum_enclosure import TUMEnclosureState
 from .enclosures import tum_enclosure

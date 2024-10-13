@@ -51,7 +51,7 @@ class EnclosureControl:
         """Initializes the default PLC settings at startup or activation in config."""
         assert self.config.tum_enclosure is not None
 
-        self.plc_interface = interfaces.PLCInterface(
+        self.plc_interface = interfaces.TUMEnclosureInterface(
             self.config.tum_enclosure.version, self.config.tum_enclosure.ip
         )
         self.plc_interface.connect()
@@ -176,7 +176,7 @@ class EnclosureControl:
             now = time.time()
             seconds_since_error_occured = now - self.last_plc_connection_time
             if seconds_since_error_occured > 600:
-                raise interfaces.PLCInterface.PLCError(
+                raise interfaces.TUMEnclosureInterface.PLCError(
                     "Snap7Exception/RuntimeError persisting for 10+ minutes"
                 )
             else:

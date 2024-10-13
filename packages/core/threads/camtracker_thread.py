@@ -47,7 +47,7 @@ class CamTrackerProgram:
             show_cmd=2,
         )
         tum_esm_utils.timing.wait_for_condition(
-            is_successful=CamTrackerProgram.is_running,
+            is_successful=lambda: CamTrackerProgram.is_running(logger),
             timeout_message="CamTracker did not start within 90 seconds.",
             timeout_seconds=90,
             check_interval_seconds=8,
@@ -89,14 +89,15 @@ class CamTrackerProgram:
 
         try:
             tum_esm_utils.timing.wait_for_condition(
-                is_successful=lambda: not CamTrackerProgram.is_running(),
+                is_successful=lambda: not CamTrackerProgram.is_running(logger),
+                timeout_message="CamTracker did not stop within 90 seconds.",
                 timeout_seconds=90,
                 check_interval_seconds=9,
             )
             logger.info("Successfully stopped CamTracker")
             return
         except TimeoutError as e:
-            logger.error("Camtracker did not stop within 90 seconds.")
+            logger.error(f"Could not stop CamTracker gracefully: {e}")
 
         logger.info("Force killing CamTracker")
         for p in psutil.process_iter():
@@ -155,8 +156,8 @@ class CamTrackerProgram:
             ),
             elevation=float_values[1],
             azimuth=float_values[2],
-            elev_offset=float_values[3],
-            az_offset=float_values[4],
+            elevation_offset=float_values[3],
+            azimuth_offset=float_values[4],
             ellipse_distance=float_values[5],
         )
 
@@ -258,7 +259,7 @@ class CamTrackerThread(AbstractThread):
 
             except Exception as e:
                 logger.exception(e)
-                CamTrackerProgram.stop()
+                CamTrackerProgram.stop(config, logger)
                 with interfaces.StateInterface.update_state() as state:
                     state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
                 logger.info("Sleeping 2 minutes")
@@ -313,16 +314,13 @@ class CamTrackerThread(AbstractThread):
             return "closed"
 
     @staticmethod
-    def test_setup(self) -> None:
+    def test_setup(config: types.Config, logger: utils.Logger) -> None:
         """Function to test the functonality of this module. Starts up
         CamTracker to initialize the tracking mirrors. Then moves mirrors
         back to parking position and shuts dosn CamTracker."""
 
-        assert (
-            not CamTrackerProgram.is_running(),
+        assert not CamTrackerProgram.is_running(logger), \
             "This test cannot be run if CamTracker is already running"
-        )
-        config = types.Config.load()
-        CamTrackerProgram.start(config)
+        CamTrackerProgram.start(config, logger)
         time.sleep(2)
-        CamTrackerProgram.stop(config)
+        CamTrackerProgram.stop(config, logger)

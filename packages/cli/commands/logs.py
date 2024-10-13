@@ -97,7 +97,9 @@ def split_log_files_by_origin(path: str) -> None:
         origin: Optional[str] = None
         for line in lines:
             if line_with_origin_pattern.match(line):
-                origin = line_with_origin_pattern.match(line).group(1)
+                m = line_with_origin_pattern.match(line)
+                assert m is not None
+                origin = m.group(1)
                 if origin not in data:
                     data[origin] = []
 

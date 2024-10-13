@@ -22,14 +22,14 @@ def _print_red(text: str) -> None:
     click.echo(click.style(text, fg="red"))
 
 
-def _get_plc_interface() -> Optional[interfaces.PLCInterface]:
+def _get_plc_interface() -> Optional[interfaces.TUMEnclosureInterface]:
     config = types.Config.load()
     plc_interface = None
 
     try:
         assert config.tum_enclosure is not None, "PLC not configured"
         assert config.tum_enclosure.controlled_by_user, "PLC is controlled by automation"
-        plc_interface = interfaces.PLCInterface(
+        plc_interface = interfaces.TUMEnclosureInterface(
             config.tum_enclosure.version, config.tum_enclosure.ip
         )
         plc_interface.connect()
@@ -84,7 +84,9 @@ def _reset() -> None:
 
 
 def _wait_until_cover_is_at_angle(
-    plc_interface: interfaces.PLCInterface, new_cover_angle: int, timeout: float = 15
+    plc_interface: interfaces.TUMEnclosureInterface,
+    new_cover_angle: int,
+    timeout: float = 15
 ) -> None:
     # waiting until cover is at this angle
     running_time = 0
@@ -155,7 +157,7 @@ def _close_cover() -> None:
 
 def _set_boolean_tum_enclosure_state(
     state: Literal["true", "false"],
-    get_setter_function: Callable[[interfaces.PLCInterface], Callable[[bool], None]],
+    get_setter_function: Callable[[interfaces.TUMEnclosureInterface], Callable[[bool], None]],
 ) -> None:
     plc_interface = _get_plc_interface()
     if plc_interface is not None:

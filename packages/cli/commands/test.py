@@ -27,9 +27,9 @@ def _test_opus() -> None:
     logger.info('running command "test opus"')
     config = types.Config.load()
     try:
-        threads.OpusThread.test_setup(config)
+        threads.OpusThread.test_setup(config, logger)
     finally:
-        threads.opus_thread.OpusProgram.stop()
+        threads.opus_thread.OpusProgram.stop(logger)
     _print_green("Successfully tested opus connection.")
 
 
@@ -40,7 +40,7 @@ def _test_camtracker() -> None:
         state.recent_cli_calls += 1
     logger.info('running command "test camtracker"')
     config = types.Config.load()
-    modules.sun_tracking.SunTracking(config).test_setup()
+    threads.camtracker_thread.CamTrackerThread.test_setup(config, logger)
     _print_green("Successfully tested CamTracker connection.")
 
 
