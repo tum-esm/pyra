@@ -200,6 +200,13 @@ class TUMEnclosureInterface:
 
         return self.__read_bool(self.specification.state.reset_needed)
 
+    def motor_has_failed(self) -> bool:
+        """Reads the single value "state.motor_failed" """
+        spec = self.specification.state.motor_failed
+        if spec is None:
+            return False
+        return self.__read_bool(spec)
+
     def get_cover_angle(self) -> int:
         """Reads the single value "actors.current_angle" """
         return self.__read_int(self.specification.actors.current_angle)

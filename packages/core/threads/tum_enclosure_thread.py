@@ -33,6 +33,7 @@ class TUMEnclosureThread(AbstractThread):
         logger = utils.Logger(origin=ORIGIN)
         plc_interface: Optional[interfaces.TUMEnclosureInterface] = None
         last_plc_connection_time: Optional[float] = None
+        last_camera_down_time: Optional[float] = None
 
         while True:
             try:
@@ -89,7 +90,7 @@ class TUMEnclosureThread(AbstractThread):
                 try:
                     # READING PLC
 
-                    logger.info("Reading PLC")
+                    logger.info("Reading PLC registers")
                     plc_state = plc_interface.read()
 
                     logger.debug("Updating enclosure state")
@@ -106,13 +107,14 @@ class TUMEnclosureThread(AbstractThread):
                         if plc_interface.get_cover_angle() != 0:
                             logger.warning("Rain detected, but cover is closed yet")
 
+                        # wait 30 seconds for the PLC to close the cover on its own
                         start_time = time.time()
                         while True:
                             if plc_interface.get_cover_angle() == 0:
                                 logger.info("Cover is closed now")
                                 break
 
-                            if (time.time() - start_time) > 30:
+                            if (time.time() - start_time) > 32:
                                 logger.warning("Cover is still not closed")
                                 with interfaces.StateInterface.update_state() as state:
                                     state.exceptions_state.add_exception_state_item(
@@ -121,7 +123,40 @@ class TUMEnclosureThread(AbstractThread):
                                             subject="Rain detected but cover is not closed"
                                         )
                                     )
+                                break
 
+                            time.sleep(5)
+
+                        if plc_interface.get_cover_angle() != 0:
+                            logger.info("Cover is still not closed, trying to close it manually")
+
+                            logger.info("Reading PLC registers")
+                            state = plc_interface.read()
+                            synced_to_tracker = state.control.sync_to_tracker
+                            manual_control = state.control.manual_control
+                            while True:
+                                TUMEnclosureThread.handle_plc_errors(
+                                    plc_interface, logger, timeout=30
+                                )
+
+                                if synced_to_tracker != False:
+                                    logger.info("Disabling syncing to tracker")
+                                    plc_interface.set_sync_to_tracker(False)
+                                    synced_to_tracker = False
+
+                                if manual_control != True:
+                                    logger.info("Enabling manual control")
+                                    plc_interface.set_manual_control(True)
+                                    manual_control = True
+
+                                logger.info("Manually setting cover angle to 0")
+                                plc_interface.set_cover_angle(0)
+                                time.sleep(5)
+                                if plc_interface.get_cover_angle() == 0:
+                                    logger.info("Cover is closed now")
+                                    break
+
+                        continue
                     else:
                         with interfaces.StateInterface.update_state() as state:
                             state.exceptions_state.clear_exception_subject(
