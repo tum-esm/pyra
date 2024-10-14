@@ -2,8 +2,8 @@ import os
 import signal
 import sys
 import time
-from typing import Any, Callable, Literal
-from packages.core import types, utils, interfaces, modules, threads
+from typing import Any
+from packages.core import types, utils, interfaces, threads
 
 logger = utils.Logger(origin="main")
 
@@ -52,6 +52,8 @@ def run() -> None:
     **Terminology:** modules are executed one by one in each mainloop iteration.
     Threads are executed in parallel to the mainloop and are started/stopped
     according to the config.
+
+    TODO: refactor this doc
     """
 
     logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
@@ -88,18 +90,6 @@ def run() -> None:
     logger.info("Loading astronomical dataset")
     utils.Astronomy.load_astronomical_dataset()
 
-    # these modules will be executed one by one in each
-    # mainloop iteration
-    logger.info("Initializing mainloop modules")
-    mainloop_modules: list[tuple[
-        Literal[
-            "enclosure-control",
-        ],
-        Callable[[types.Config], None],
-    ]] = [
-        ("enclosure-control", modules.enclosure_control.EnclosureControl(config).run),
-    ]
-
     # these thread classes always exist and start their
     # dedicated mainloop in a parallel thread if the
     # respective service is configured. The threads itself
@@ -107,10 +97,11 @@ def run() -> None:
     logger.info("Initializing threads")
     thread_instances: list[threads.abstract_thread.AbstractThread] = [
         threads.CamTrackerThread(),
-        threads.HeliosThread(),
         threads.CASThread(),
+        threads.HeliosThread(),
         threads.OpusThread(),
         threads.SystemHealthThread(),
+        threads.TUMEnclosureThread(),
         threads.UploadThread(),
     ]
 
@@ -162,22 +153,6 @@ def run() -> None:
         if config.general.test_mode:
             logger.info("pyra-core in test mode")
             logger.debug("Skipping HeliosThread and UploadThread in test mode")
-
-        # loop over every module, when one of the modules
-        # encounters an exception, this inner loop stops
-        # and the exception will be processed (logs, emails)
-        new_exception = None
-        for module_name, module_function in mainloop_modules:
-            try:
-                module_function(config)
-                with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.clear_exception_origin(module_name)
-            except Exception as e:
-                new_exception = e
-                logger.exception(new_exception)
-
-                with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin=module_name, exception=e)
 
         # send emails on occured/resolved exceptions
         _send_exception_emails(config)
