@@ -99,10 +99,41 @@ class TUMEnclosureThread(AbstractThread):
                     logger.debug("Logging enclosure state")
                     utils.TUMEnclosureLogger.log(config, s)
 
+                    # CHECKING FOR OPEN COVER DURING RAIN
+
+                    if plc_state.state.rain and (plc_state.actors.current_angle != 0):
+                        time.sleep(5)
+                        if plc_interface.get_cover_angle() != 0:
+                            logger.warning("Rain detected, but cover is closed yet")
+
+                        start_time = time.time()
+                        while True:
+                            if plc_interface.get_cover_angle() == 0:
+                                logger.info("Cover is closed now")
+                                break
+
+                            if (time.time() - start_time) > 30:
+                                logger.warning("Cover is still not closed")
+                                with interfaces.StateInterface.update_state() as state:
+                                    state.exceptions_state.add_exception_state_item(
+                                        types.ExceptionStateItem(
+                                            origin=ORIGIN,
+                                            subject="Rain detected but cover is not closed"
+                                        )
+                                    )
+
+                    else:
+                        with interfaces.StateInterface.update_state() as state:
+                            state.exceptions_state.clear_exception_subject(
+                                subject="Rain detected but cover is not closed"
+                            )
+
                     # SKIP REMAINING LOGIC IF IN USER CONTROLLED MODE
 
                     if config.tum_enclosure.controlled_by_user:
-                        logger.info("User is controlling the TUM Enclosure, skipping operational logic")
+                        logger.info(
+                            "User is controlling the TUM Enclosure, skipping operational logic"
+                        )
                         t2 = time.time()
                         sleep_time = max(5, 15 - (t2 - t1))
                         logger.info(f"Sleeping {sleep_time} seconds")
@@ -111,10 +142,17 @@ class TUMEnclosureThread(AbstractThread):
 
                     # RESETTING PLC
 
-                    if plc_state.state.reset_needed == True:
+                    if plc_state.state.reset_needed:
                         logger.info("PLC indicates a reset is needed")
                         start_time = time.time()
                         while True:
+                            plc_interface.reset()
+                            time.sleep(3)
+                            if not plc_interface.reset_is_needed():
+                                logger.info("PLC reset was successful")
+                                plc_state.state.reset_needed = False
+                                break
+
                             if (time.time() - start_time) > 180:
                                 with interfaces.StateInterface.update_state() as state:
                                     state.exceptions_state.add_exception_state_item(
@@ -125,13 +163,7 @@ class TUMEnclosureThread(AbstractThread):
                                     )
                                 break
 
-                            plc_interface.reset()
-                            time.sleep(3)
-                            if not plc_interface.reset_is_needed():
-                                logger.info("PLC reset was successful")
-                                plc_state.state.reset_needed = False
-                                break
-                    else:
+                    elif plc_state.state.reset_needed == False:
                         with interfaces.StateInterface.update_state() as state:
                             state.exceptions_state.clear_exception_subject(
                                 subject="PLC reset was required but did not work"
