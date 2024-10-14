@@ -53,6 +53,7 @@ class TUMEnclosureThread(AbstractThread):
                     )
                     try:
                         plc_interface.connect()
+                        plc_interface.set_auto_temperature(True)
                     except snap7.exceptions.Snap7Exception as e:
                         logger.error("Could not connect to PLC")
                         logger.exception(e)
@@ -84,13 +85,6 @@ class TUMEnclosureThread(AbstractThread):
                 # UPDATING RECONNECTION STATE
 
                 last_plc_connection_time = time.time()
-                if exception_was_set != False:
-                    exception_was_set = False
-                    with interfaces.StateInterface.update_state() as _s:
-                        _s.exceptions_state.clear_exception_subject(
-                            subject="Could not connect to PLC for 6 minutes"
-                        )
-
                 try:
                     # READING PLC
 
@@ -162,13 +156,6 @@ class TUMEnclosureThread(AbstractThread):
                                     break
 
                         continue
-                    else:
-                        if exception_was_set != False:
-                            exception_was_set = False
-                            with interfaces.StateInterface.update_state() as _s:
-                                _s.exceptions_state.clear_exception_subject(
-                                    subject="Rain detected but cover is not closed"
-                                )
 
                     # SKIP REMAINING LOGIC IF IN USER CONTROLLED MODE
 
@@ -236,9 +223,57 @@ class TUMEnclosureThread(AbstractThread):
 
                     # SYNC COVER TO TRACKER
 
-                    # TODO:
-                    # wait here until cover is actually closed
-                    # if sync to tracker was set, assert that it is still true (no emails though)
+                    if state.measurements_should_be_running is None:
+                        logger.warning(
+                            "Measurements should be running is not yet set, skipping cover sync"
+                        )
+                    else:
+                        # open cover
+                        if state.measurements_should_be_running and (
+                            not plc_state.control.sync_to_tracker
+                        ):
+                            logger.info("Syncing cover to tracker")
+                            plc_interface.set_sync_to_tracker(True)
+                            plc_state.control.sync_to_tracker = True
+
+                        # close cover
+                        elif (not state.measurements_should_be_running
+                             ) and (plc_state.control.sync_to_tracker):
+                            logger.info("Disabling syncing cover to tracker")
+                            plc_interface.set_sync_to_tracker(False)
+                            plc_state.control.sync_to_tracker = False
+
+                        # check if cover is closed
+                        if (not plc_state.control.sync_to_tracker):
+                            if plc_state.actors.current_angle != 0:
+                                logger.info("Manually setting cover angle to 0")
+                                plc_interface.set_manual_control(True)
+                                plc_interface.set_cover_angle(0)
+                                plc_interface.set_manual_control(False)
+                                start_time = time.time()
+
+                                while True:
+                                    TUMEnclosureThread.handle_plc_errors(
+                                        plc_interface, logger, timeout=30
+                                    )
+                                    time.sleep(5)
+                                    if plc_interface.get_cover_angle() == 0:
+                                        plc_state.actors.current_angle = 0
+                                        logger.info("Cover is closed now")
+                                        break
+
+                                    if (time.time() - start_time) > 62:
+                                        logger.error("Cover is still not closed")
+                                        exception_was_set = True
+                                        with interfaces.StateInterface.update_state() as _s:
+                                            _s.exceptions_state.add_exception_state_item(
+                                                types.ExceptionStateItem(
+                                                    origin=ORIGIN,
+                                                    subject=
+                                                    "Cover did not closed after disabling sync to tracker and moving to 0°"
+                                                )
+                                            )
+                                        break
 
                     # CLEAR EXCEPTIONS
 
