@@ -101,9 +101,31 @@ class TUMEnclosureThread(AbstractThread):
 
                     # RESETTING PLC
 
-                # TODO: implement better PLC reset
-                # reset every 30 seconds until it state.reset_needed and state.motor_failed are False
-                # send an email if the reset does not work for 3 minutes
+                    if plc_state.state.reset_needed == True:
+                        logger.info("PLC indicates a reset is needed")
+                        start_time = time.time()
+                        while True:
+                            if (time.time() - start_time) > 180:
+                                with interfaces.StateInterface.update_state() as state:
+                                    state.exceptions_state.add_exception_state_item(
+                                        types.ExceptionStateItem(
+                                            origin=ORIGIN,
+                                            subject="PLC reset was required but did not work",
+                                        )
+                                    )
+                                break
+
+                            plc_interface.reset()
+                            time.sleep(3)
+                            if not plc_interface.reset_is_needed():
+                                logger.info("PLC reset was successful")
+                                plc_state.state.reset_needed = False
+                                break
+                    else:
+                        with interfaces.StateInterface.update_state() as state:
+                            state.exceptions_state.clear_exception_subject(
+                                subject="PLC reset was required but did not work"
+                            )
 
                     # CAMERA POWER CYCLE
 
