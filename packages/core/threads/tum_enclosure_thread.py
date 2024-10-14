@@ -99,6 +99,16 @@ class TUMEnclosureThread(AbstractThread):
                     logger.debug("Logging enclosure state")
                     utils.TUMEnclosureLogger.log(config, s)
 
+                    # SKIP REMAINING LOGIC IF IN USER CONTROLLED MODE
+
+                    if config.tum_enclosure.controlled_by_user:
+                        logger.info("User is controlling the TUM Enclosure, skipping operational logic")
+                        t2 = time.time()
+                        sleep_time = max(5, 15 - (t2 - t1))
+                        logger.info(f"Sleeping {sleep_time} seconds")
+                        time.sleep(sleep_time)
+                        continue
+
                     # RESETTING PLC
 
                     if plc_state.state.reset_needed == True:
