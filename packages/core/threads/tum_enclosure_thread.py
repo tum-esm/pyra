@@ -86,36 +86,53 @@ class TUMEnclosureThread(AbstractThread):
                         subject="Could not connect to PLC for 6 minutes"
                     )
 
-                # READING PLC
+                try:
+                    # READING PLC
 
-                # TODO:
+                    logger.info("Reading PLC")
+                    plc_state = plc_interface.read()
 
-                # RESETTING PLC
+                    logger.debug("Updating enclosure state")
+                    with interfaces.StateInterface.update_state() as s:
+                        s.tum_enclosure_state = plc_state
+
+                    logger.debug("Logging enclosure state")
+                    utils.TUMEnclosureLogger.log(config, s)
+
+                    # RESETTING PLC
 
                 # TODO: implement better PLC reset
                 # reset every 30 seconds until it state.reset_needed and state.motor_failed are False
                 # send an email if the reset does not work for 3 minutes
 
-                # CAMERA POWER CYCLE
+                    # CAMERA POWER CYCLE
 
-                # TODO:
+                    # TODO:
 
-                # SPECTROMETER POWER
+                    # SPECTROMETER POWER
 
-                # TODO:
+                    # TODO:
 
-                # SYNC COVER TO TRACKER
+                    # SYNC COVER TO TRACKER
 
-                # TODO:
-                # wait here until cover is actually closed
-                # if sync to tracker was set, assert that it is still true (no emails though)
+                    # TODO:
+                    # wait here until cover is actually closed
+                    # if sync to tracker was set, assert that it is still true (no emails though)
 
-                # SLEEP
+                    # SLEEP
 
-                t2 = time.time()
-                sleep_time = max(5, 40 - (t2 - t1))
-                logger.info(f"Sleeping {sleep_time} seconds")
-                time.sleep(sleep_time)
+                    t2 = time.time()
+                    sleep_time = max(5, 40 - (t2 - t1))
+                    logger.info(f"Sleeping {sleep_time} seconds")
+                    time.sleep(sleep_time)
+
+                except snap7.exceptions.Snap7Exception as e:
+                    logger.error("PLC connection lost during interaction")
+                    logger.exception(e)
+                    plc_interface = None
+                    logger.info("Waiting 60 seconds before retrying")
+                    time.sleep(60)
+                    continue
 
             except Exception as e:
                 logger.exception(e)
