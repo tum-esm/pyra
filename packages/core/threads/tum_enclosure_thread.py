@@ -181,7 +181,29 @@ class TUMEnclosureThread(AbstractThread):
 
                     # CAMERA POWER CYCLE
 
-                    # TODO:
+                    # power up the camera if it is off but should be on
+                    if (last_camera_down_time is None) and (plc_state.power.camera != True):
+                        logger.info("Powering up the camera as it is off but should be on")
+                        plc_interface.set_power_camera(True)
+                        plc_state.power.camera = True
+
+                    current_time = datetime.datetime.now()
+
+                    # power down the camera
+                    if ((current_time.hour == 0) and (current_time.minute < 30) and
+                        (last_camera_down_time is None)):
+                        logger.info("Powering down the camera")
+                        plc_interface.set_power_camera(False)
+                        plc_state.power.camera = False
+                        last_camera_down_time = time.time()
+
+                    # power up the camera
+                    if (last_camera_down_time
+                        is not None) and ((time.time() - last_camera_down_time) > 300):
+                        logger.info("Powering up the camera")
+                        plc_interface.set_power_camera(True)
+                        plc_state.power.camera = True
+                        last_camera_down_time = None
 
                     # SPECTROMETER POWER
 
@@ -200,7 +222,10 @@ class TUMEnclosureThread(AbstractThread):
                     logger.info(f"Sleeping {sleep_time} seconds")
                     time.sleep(sleep_time)
 
-                except snap7.exceptions.Snap7Exception as e:
+                except (
+                    snap7.exceptions.Snap7Exception,
+                    interfaces.TUMEnclosureInterface.PLCError,
+                ) as e:
                     logger.error("PLC connection lost during interaction")
                     logger.exception(e)
                     plc_interface = None
