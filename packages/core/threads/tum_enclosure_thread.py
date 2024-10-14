@@ -214,7 +214,25 @@ class TUMEnclosureThread(AbstractThread):
 
                     # SPECTROMETER POWER
 
-                    # TODO:
+                    state = interfaces.StateInterface.load_state()
+
+                    if state.position.sun_elevation is None:
+                        logger.warning(
+                            "Sun elevation is not yet set, skipping spectrometer power toggle"
+                        )
+                    else:
+                        min_sun_angle = config.general.min_sun_elevation - 3
+                        power_should_be_on = state.position.sun_elevation > min_sun_angle
+
+                        if power_should_be_on and (not plc_state.power.spectrometer):
+                            logger.info("Powering up the spectrometer")
+                            plc_interface.set_power_spectrometer(True)
+                            plc_state.power.spectrometer = True
+
+                        elif (not power_should_be_on) and (plc_state.power.spectrometer == True):
+                            logger.info("Powering down the spectrometer")
+                            plc_interface.set_power_spectrometer(False)
+                            plc_state.power.spectrometer = False
 
                     # SYNC COVER TO TRACKER
 
