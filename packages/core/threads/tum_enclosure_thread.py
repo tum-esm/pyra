@@ -142,32 +142,7 @@ class TUMEnclosureThread(AbstractThread):
 
                     # RESETTING PLC
 
-                    if plc_state.state.reset_needed:
-                        logger.info("PLC indicates a reset is needed")
-                        start_time = time.time()
-                        while True:
-                            plc_interface.reset()
-                            time.sleep(3)
-                            if not plc_interface.reset_is_needed():
-                                logger.info("PLC reset was successful")
-                                plc_state.state.reset_needed = False
-                                break
-
-                            if (time.time() - start_time) > 180:
-                                with interfaces.StateInterface.update_state() as state:
-                                    state.exceptions_state.add_exception_state_item(
-                                        types.ExceptionStateItem(
-                                            origin=ORIGIN,
-                                            subject="PLC reset was required but did not work",
-                                        )
-                                    )
-                                break
-
-                    elif plc_state.state.reset_needed == False:
-                        with interfaces.StateInterface.update_state() as state:
-                            state.exceptions_state.clear_exception_subject(
-                                subject="PLC reset was required but did not work"
-                            )
+                    TUMEnclosureThread.handle_plc_errors(plc_interface, logger)
 
                     # CAMERA POWER CYCLE
 
@@ -202,3 +177,43 @@ class TUMEnclosureThread(AbstractThread):
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as state:
                     state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+
+    @staticmethod
+    def handle_plc_errors(
+        plc_interface: interfaces.TUMEnclosureInterface,
+        logger: utils.Logger,
+        timeout: int = 180
+    ) -> None:
+        """Resetting the PLC if needed. If the reset doesn't work,
+        add an exception to the state object."""
+
+        r = plc_interface.reset_is_needed()
+        m = plc_interface.motor_has_failed()
+        if r or m:
+            if r:
+                logger.info("PLC indicates a reset is needed")
+            if m:
+                logger.info("PLC indicates that the motor has failed")
+            start_time = time.time()
+            while True:
+                plc_interface.reset()
+                time.sleep(3)
+                if not (r or m):
+                    logger.info("PLC reset was successful")
+                    break
+
+                if (time.time() - start_time) > timeout:
+                    with interfaces.StateInterface.update_state() as state:
+                        state.exceptions_state.add_exception_state_item(
+                            types.ExceptionStateItem(
+                                origin=ORIGIN,
+                                subject="PLC reset was required but did not work",
+                            )
+                        )
+                    break
+        else:
+            logger.info("PLC reset is not needed")
+            with interfaces.StateInterface.update_state() as state:
+                state.exceptions_state.clear_exception_subject(
+                    subject="PLC reset was required but did not work"
+                )
