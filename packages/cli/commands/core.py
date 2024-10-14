@@ -107,9 +107,7 @@ def _stop_pyra_core() -> None:
         else:
             try:
                 click.echo("Closing cover")
-                enclosure = modules.enclosure_control.EnclosureControl(config)
-                enclosure.force_cover_close()
-                enclosure.plc_interface.disconnect()
+                threads.TUMEnclosureThread.force_cover_close(config, logger)
                 _print_green("Successfully closed cover")
             except Exception as e:
                 _print_red(f"Failed to close cover: {e}")

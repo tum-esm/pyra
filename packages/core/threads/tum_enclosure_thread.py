@@ -344,3 +344,25 @@ class TUMEnclosureThread(AbstractThread):
                 state.exceptions_state.clear_exception_subject(
                     subject="PLC reset was required but did not work"
                 )
+
+    @staticmethod
+    def force_cover_close(config: types.Config, logger: utils.Logger) -> None:
+        """Force the cover to close by disabling syncing to tracker."""
+
+        plc_interface = interfaces.TUMEnclosureInterface(
+            plc_version=config.tum_enclosure.version,
+            plc_ip=config.tum_enclosure.ip,
+        )
+        logger.info("Connecting to PLC")
+        plc_interface.connect()
+        plc_interface.set_auto_temperature(True)
+        TUMEnclosureThread.handle_plc_errors(plc_interface, logger)
+
+        logger.info("Manually closing cover")
+        plc_interface.set_sync_to_tracker(False)
+        plc_interface.set_manual_control(True)
+        plc_interface.set_cover_angle(0)
+        plc_interface.set_manual_control(False)
+
+        logger.info("Disconnecting from PLC")
+        plc_interface.disconnect()
