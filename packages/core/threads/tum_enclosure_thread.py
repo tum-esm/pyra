@@ -34,9 +34,10 @@ class TUMEnclosureThread(AbstractThread):
         plc_interface: Optional[interfaces.TUMEnclosureInterface] = None
         last_plc_connection_time: Optional[float] = None
         last_camera_down_time: Optional[float] = None
+        exception_was_set: Optional[bool] = None
 
-        while True:
-            try:
+        try:
+            while True:
                 t1 = time.time()
 
                 logger.info("Loading configuration file")
@@ -57,8 +58,9 @@ class TUMEnclosureThread(AbstractThread):
                         logger.exception(e)
                         plc_interface = None
                         if last_plc_connection_time < (time.time() - 360):
-                            with interfaces.StateInterface.update_state() as state:
-                                state.exceptions_state.add_exception_state_item(
+                            exception_was_set = True
+                            with interfaces.StateInterface.update_state() as _s:
+                                _s.exceptions_state.add_exception_state_item(
                                     types.ExceptionStateItem(
                                         origin=ORIGIN,
                                         subject="Could not connect to PLC for 6 minutes",
@@ -82,10 +84,12 @@ class TUMEnclosureThread(AbstractThread):
                 # UPDATING RECONNECTION STATE
 
                 last_plc_connection_time = time.time()
-                with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.clear_exception_subject(
-                        subject="Could not connect to PLC for 6 minutes"
-                    )
+                if exception_was_set != False:
+                    exception_was_set = False
+                    with interfaces.StateInterface.update_state() as _s:
+                        _s.exceptions_state.clear_exception_subject(
+                            subject="Could not connect to PLC for 6 minutes"
+                        )
 
                 try:
                     # READING PLC
@@ -116,8 +120,9 @@ class TUMEnclosureThread(AbstractThread):
 
                             if (time.time() - start_time) > 32:
                                 logger.warning("Cover is still not closed")
-                                with interfaces.StateInterface.update_state() as state:
-                                    state.exceptions_state.add_exception_state_item(
+                                exception_was_set = True
+                                with interfaces.StateInterface.update_state() as _s:
+                                    _s.exceptions_state.add_exception_state_item(
                                         types.ExceptionStateItem(
                                             origin=ORIGIN,
                                             subject="Rain detected but cover is not closed"
@@ -158,10 +163,12 @@ class TUMEnclosureThread(AbstractThread):
 
                         continue
                     else:
-                        with interfaces.StateInterface.update_state() as state:
-                            state.exceptions_state.clear_exception_subject(
-                                subject="Rain detected but cover is not closed"
-                            )
+                        if exception_was_set != False:
+                            exception_was_set = False
+                            with interfaces.StateInterface.update_state() as _s:
+                                _s.exceptions_state.clear_exception_subject(
+                                    subject="Rain detected but cover is not closed"
+                                )
 
                     # SKIP REMAINING LOGIC IF IN USER CONTROLLED MODE
 
@@ -215,6 +222,13 @@ class TUMEnclosureThread(AbstractThread):
                     # wait here until cover is actually closed
                     # if sync to tracker was set, assert that it is still true (no emails though)
 
+                    # CLEAR EXCEPTIONS
+
+                    if exception_was_set != False:
+                        exception_was_set = False
+                        with interfaces.StateInterface.update_state() as _s:
+                            _s.exceptions_state.clear_exception_origin(origin=ORIGIN)
+
                     # SLEEP
 
                     t2 = time.time()
@@ -233,10 +247,10 @@ class TUMEnclosureThread(AbstractThread):
                     time.sleep(60)
                     continue
 
-            except Exception as e:
-                logger.exception(e)
-                with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+        except Exception as e:
+            logger.exception(e)
+            with interfaces.StateInterface.update_state() as state:
+                state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
 
     @staticmethod
     def handle_plc_errors(
