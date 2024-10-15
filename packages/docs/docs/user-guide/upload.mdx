@@ -4,59 +4,39 @@ sidebar_label: Upload
 hide_table_of_contents: true
 ---
 
-# The Upload Process
+# Upload
 
-## Interferograms Directory Structure
+You can use this upload to transfer your interferograms, local pressure files, helios images or any other data generated day by day.
 
-We have set up our OPUS macro files to produce a directory structure like this:
+You can upload daily directories like this:
 
 ```
-📁 <IFG OUTPOUT DIR>
-    📁 YYYYMMDD
-        📄 stationid-YYYYMMDD.0001
-        📄 stationid-YYYYMMDD.0002
-        📄 ...
-    📁 YYYYMMDD
-        📄 stationid-YYYYMMDD.0001
-        📄 stationid-YYYYMMDD.0002
-        📄 ...
+📁 data-directory-1
+├── 📁 20190101
+│   ├── 📄 file1.txt
+│   ├── 📄 file2.txt
+│   └── 📄 file3.txt
+└── 📁 20190102
+    ├── 📄 file1.txt
+    ├── 📄 file2.txt
+    └── 📄 file3.txt
 ```
 
-:::note
+Or daily files like this:
 
-When using [Helios](/docs/user-guide/tum-plc-and-helios), saved images will be stored inside `/logs/helios/` in the same directory structure as the interferograms output directory. This is why the upload can be used for both types of data.
-
-We will expand this to be useable for an arbitrary number of directories in the future: See [GitHub](https://github.com/tum-esm/pyra/issues?q=is%3Aissue+is%3Aopen+label%3A%22Update%3A+Upload+Improvements%22).
-
-:::
-
-## How the Upload works
-
-The upload uses an `upload-meta.json` file in each `YYYYMMDD` directory to save the upload state. You should not modify this file or the `YYYYMMDD` directories manually! Example file:
-
-```json
-{
-    "complete": false,
-    "fileList": ["file 1", "file 2", "..."],
-    "createdTime": 0,
-    "lastModifiedTime": 0
-}
+```
+📁 data-directory-2
+├── 📄 20190101.txt
+├── 📄 20190102-a.txt
+├── 📄 20190102-b.txt
+└── 📄 20190103.txt
 ```
 
-The upload can handle interruptions and continue where it was stopped. After uploading each directory, Pyra will calculate a checksum locally and remotely - this is why the server needs to have Python 3.10 installed. Only when the checksums match, the `upload-meta.json` will get a `complete = true` indicator.
+You just have to point the upload to one or more directories and specify a "date regex" - i.e. a regex that contains the symbols `%Y`, `%m`, and `%d` that matches your file/directory naming scheme.
 
-The idea of the `complete=true` flag is that the post-processing should only consider data where the upload is complete.
+As long as the upload runs, there will be a file `data-directory-1/20190101/.do-not-touch` or `data-directory-2/.do-not-touch` that indicates that the upload is not finished yet. This file will be deleted after the checksum of the local and remote directory matches.
 
-## Measures to ensure upload-integrity
+Optionally, you can remove the local data, once the upload is done.
 
-1. The `complete=true` flag will also only be set, when the checksums match.
+You can read more about the `circadian-scp-upload` library [here](https://github.com/dostuffthatmatters/circadian-scp-upload). We have already uploaded about 8TB of data using this upload code and use it since 2022. The library has CI tests for all kinds of file system layouts - feel free to use it for your own projects :)
 
-2. The local files will only be deleted when the checksums of the local and remote directory are equal: Every missing, additional, or modified file in the `fileList` will change the checksum.
-
-3. We wrote a test script that generates a bunch of sample directories and sample files, runs the upload, and checks the final upload state. See [/docs/developer-guide/testing-and-ci](/docs/developer-guide/testing-and-ci).
-
-:::note
-
-More details about the individual upload steps can be found [in the developer guide](/docs/developer-guide/upload-in-detail).
-
-:::
