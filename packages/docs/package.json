@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "dev": "cd ../ui && yarn && cd ../docs && docusaurus start",
-    "build": "cd ../ui && yarn && cd ../docs && docusaurus build",
+    "dev": "docusaurus start",
+    "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
