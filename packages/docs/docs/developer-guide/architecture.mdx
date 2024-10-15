@@ -35,7 +35,6 @@ hide_table_of_contents: true
 -   `types` contains all types used in the codebase. The whole codebase has static-type hints. A static-type analysis can be done using MyPy (see `scripts/`).
 -   `utils` contains all supporting functionality used in one or more places.
 -   `interfaces` includes the "low-level" code to interact with the PLC, the operating system, and the config- and state files.
--   `modules` contains the steps Pyra Core runs sequentially on the main thread.
 -   `threads` contains the logic that Pyra Core runs parallel to the main thread.
 
 ### Import hierarchy
@@ -45,9 +44,7 @@ hide_table_of_contents: true
       A["types"] -- imported by --> B;
       B["utils"] -- imported by --> C;
       C["interfaces"] -- imported by --> D;
-      C -- imported by --> E;
-      D["modules"] -- imported by --> F;
-      E["threads"] -- imported by --> F["main.py"];
+      D["threads"] -- imported by --> E["main.py"];
 ```
 
 _\* the graph is transient_
