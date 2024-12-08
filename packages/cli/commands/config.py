@@ -1,10 +1,12 @@
 """Read or update the `config.json` file."""
 
+import os
 import shutil
 import time
+
 import click
-import os
 import tum_esm_utils
+
 from packages.core import interfaces, types, utils
 
 _dir = os.path.dirname

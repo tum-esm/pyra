@@ -1,8 +1,10 @@
 import datetime
 import threading
 import time
-from .abstract_thread import AbstractThread
+
 from packages.core import interfaces, types, utils
+
+from .abstract_thread import AbstractThread
 
 ORIGIN = "cas"
 

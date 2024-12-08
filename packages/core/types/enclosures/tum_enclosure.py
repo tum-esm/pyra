@@ -1,6 +1,7 @@
-from typing import Literal, Optional
 import datetime
-from tum_esm_utils.validators import StrictIPv4Adress, StricterBaseModel
+from typing import Literal, Optional
+
+from tum_esm_utils.validators import StricterBaseModel, StrictIPv4Adress
 
 # --- CONFIG ---
 

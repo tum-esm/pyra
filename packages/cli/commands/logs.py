@@ -1,11 +1,13 @@
 """Interact with log files"""
 
-from typing import Optional
-import click
+import glob
 import os
 import re
-import glob
+from typing import Optional
+
+import click
 import tum_esm_utils
+
 from packages.core import interfaces, utils
 
 _dir = os.path.dirname

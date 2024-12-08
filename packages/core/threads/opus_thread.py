@@ -1,11 +1,14 @@
-from typing import Optional
 import os
 import threading
 import time
+from typing import Optional
+
 import psutil
 import tum_esm_utils
+
+from packages.core import interfaces, types, utils
+
 from .abstract_thread import AbstractThread
-from packages.core import types, utils, interfaces
 
 ORIGIN = "opus"
 

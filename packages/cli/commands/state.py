@@ -1,6 +1,7 @@
 """Read the current state.json file."""
 
 import click
+
 from packages.core import interfaces, utils
 
 logger = utils.Logger(origin="cli")

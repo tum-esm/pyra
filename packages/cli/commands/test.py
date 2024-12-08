@@ -1,7 +1,8 @@
-import click
 import circadian_scp_upload
-from packages.core import interfaces, types, utils, threads
+import click
 import fabric.runners
+
+from packages.core import interfaces, threads, types, utils
 
 logger = utils.Logger(origin="cli")
 

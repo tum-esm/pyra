@@ -1,9 +1,10 @@
+import email.mime.multipart
+import email.mime.text
 import json
 import os
 import smtplib
 import ssl
-import email.mime.text
-import email.mime.multipart
+
 from packages.core import types
 
 _dir = os.path.dirname

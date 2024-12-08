@@ -3,7 +3,8 @@ import signal
 import sys
 import time
 from typing import Any
-from packages.core import types, utils, interfaces, threads
+
+from packages.core import interfaces, threads, types, utils
 
 logger = utils.Logger(origin="main")
 

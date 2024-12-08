@@ -1,7 +1,8 @@
-from typing import Optional
 import datetime
 import os
 import traceback
+from typing import Optional
+
 import filelock
 
 _dir = os.path.dirname

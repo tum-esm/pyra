@@ -1,11 +1,14 @@
 from __future__ import annotations
-from typing import Generator
+
 import contextlib
 import datetime
 import os
+from typing import Generator
+
 import pydantic
 import tum_esm_utils
-from packages.core import utils, types
+
+from packages.core import types, utils
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))

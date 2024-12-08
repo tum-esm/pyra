@@ -1,12 +1,14 @@
 """Start and stop the pyra-core background process."""
 
+import os
 import subprocess
 import sys
+
 import click
-import os
 import filelock
 import tum_esm_utils
-from packages.core import interfaces, types, utils, threads
+
+from packages.core import interfaces, threads, types, utils
 
 dir = os.path.dirname
 _PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))

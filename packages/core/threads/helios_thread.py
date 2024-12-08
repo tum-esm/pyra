@@ -1,14 +1,17 @@
 import datetime
-from typing import Any, Optional
 import os
 import threading
 import time
+from typing import Any, Optional
+
 import cv2 as cv
 import numpy as np
 import pydantic
 import tum_esm_utils
+
+from packages.core import interfaces, types, utils
+
 from .abstract_thread import AbstractThread
-from packages.core import types, utils, interfaces
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))

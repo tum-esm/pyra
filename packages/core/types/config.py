@@ -1,13 +1,16 @@
 from __future__ import annotations
-from typing import Any, Generator, Literal, Optional
+
 import contextlib
 import datetime
 import os
+from typing import Any, Generator, Literal, Optional
+
 import filelock
 import pydantic
 import tum_esm_utils
-from tum_esm_utils.validators import StrictIPv4Adress, StricterBaseModel
-from .enclosures.tum_enclosure import TUMEnclosureConfig, PartialTUMEnclosureConfig
+from tum_esm_utils.validators import StricterBaseModel, StrictIPv4Adress
+
+from .enclosures.tum_enclosure import PartialTUMEnclosureConfig, TUMEnclosureConfig
 
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")

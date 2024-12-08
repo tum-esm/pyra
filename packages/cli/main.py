@@ -1,8 +1,9 @@
 """Pyra CLI entry point. Use `pyra-cli --help`/`pyra-cli $command --help`
 to see all available commands.`"""
 
-import click
 import sys
+
+import click
 import tum_esm_utils
 
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=3)
@@ -12,10 +13,10 @@ from packages.cli.commands import (
     config_command_group,
     core_command_group,
     logs_command_group,
-    tum_enclosure_command_group,
     remove_filelocks,
     state_command_group,
     test_command_group,
+    tum_enclosure_command_group,
 )
 from packages.core import utils
 

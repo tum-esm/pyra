@@ -1,8 +1,7 @@
-import sys
-import os
 import hashlib
+import os
 import pathlib
-
+import sys
 
 assert len(sys.argv) == 2, 'call this script with "python <scriptname> <directoryname>"'
 assert sys.version.startswith("3.10"), "script requires Python 3.10"

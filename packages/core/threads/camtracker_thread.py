@@ -1,13 +1,16 @@
-from typing import Literal, Optional
 import datetime
 import os
 import threading
 import time
+from typing import Literal, Optional
+
 import psutil
 import pydantic
 import tum_esm_utils
-from .abstract_thread import AbstractThread
+
 from packages.core import interfaces, types, utils
+
+from .abstract_thread import AbstractThread
 
 ORIGIN = "camtracker"
 

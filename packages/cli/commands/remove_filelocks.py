@@ -1,8 +1,10 @@
 """Remove all filelocks. Helpful when any of the programs crashed during
 writing to a file. Normally, this should not be necessary."""
 
-import click
 import os
+
+import click
+
 from packages.core import interfaces, utils
 
 _dir = os.path.dirname

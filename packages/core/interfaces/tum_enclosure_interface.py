@@ -1,11 +1,13 @@
-from typing import Literal, Optional
 import datetime
-import snap7
-import time
 import os
+import time
+from typing import Literal, Optional
+
+import snap7
 import snap7.exceptions
-from packages.core import types, utils, interfaces
 from tum_esm_utils.validators import StrictIPv4Adress
+
+from packages.core import interfaces, types, utils
 
 logger = utils.Logger(origin="tum-enclosure-plc")
 

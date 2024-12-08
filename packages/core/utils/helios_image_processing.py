@@ -1,7 +1,8 @@
-from typing import Any, Literal, Optional
 import datetime
 import math
 import os
+from typing import Any, Literal, Optional
+
 import cv2 as cv
 import numpy as np
 

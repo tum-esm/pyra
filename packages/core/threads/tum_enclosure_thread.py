@@ -4,8 +4,10 @@ import time
 from typing import Optional
 
 import snap7.exceptions
-from .abstract_thread import AbstractThread
+
 from packages.core import interfaces, types, utils
+
+from .abstract_thread import AbstractThread
 
 ORIGIN = "tum-enclosure"
 

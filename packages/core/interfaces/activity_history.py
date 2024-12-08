@@ -1,9 +1,12 @@
 from __future__ import annotations
-from typing import Optional
+
 import datetime
 import json
 import os
+from typing import Optional
+
 import pydantic
+
 from packages.core import types
 
 _dir = os.path.dirname

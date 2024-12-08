@@ -1,7 +1,10 @@
 import threading
+
 import tum_esm_utils
-from .abstract_thread import AbstractThread
+
 from packages.core import interfaces, types, utils
+
+from .abstract_thread import AbstractThread
 
 ORIGIN = "system-health"
 
