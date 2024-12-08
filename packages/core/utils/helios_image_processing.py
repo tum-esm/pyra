@@ -170,10 +170,20 @@ class HeliosImageProcessing:
         return img
 
     @staticmethod
+    def adjust_image_brightness_in_post(
+        frame: np.ndarray[Any, Any],
+        target_image_brightness: float,
+    ) -> np.ndarray[Any, Any]:
+        mean_brightness = np.mean(frame)
+        scaling_factor = target_image_brightness / mean_brightness
+        return frame * scaling_factor
+        
+    @staticmethod
     def get_edge_fraction(
         frame: np.ndarray[Any, Any],
         station_id: str,
         edge_color_threshold: int,
+        target_pixel_brightness: float,
         save_images_to_archive: bool = False,
         save_current_image: bool = False,
     ) -> float:
@@ -191,9 +201,12 @@ class HeliosImageProcessing:
 
         Returns the "edge pixel fraction".
         """
+        
+        # adjust the brightness of the frame to a target value
+        evenly_lit_frame = HeliosImageProcessing.adjust_image_brightness_in_post(frame, target_pixel_brightness)
 
         # transform image from 1280x720 to 640x360
-        downscaled_image = cv.resize(frame, None, fx=0.5, fy=0.5)
+        downscaled_image = cv.resize(evenly_lit_frame, None, fx=0.5, fy=0.5)
 
         # for each rgb pixel [234,234,234] only consider the gray value (234)
         grayscale_image = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)

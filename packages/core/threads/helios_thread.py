@@ -234,6 +234,7 @@ class HeliosInterface:
             frame=frame,
             station_id=station_id,
             edge_color_threshold=edge_color_threshold,
+            target_pixel_brightness=self.target_pixel_brightness,
             save_images_to_archive=save_images_to_archive,
             save_current_image=save_current_image,
         )
