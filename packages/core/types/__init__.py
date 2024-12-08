@@ -1,5 +1,5 @@
 from .activity_history import ActivityDatapoint, ActivityDatapointList, ActivityHistory
-from .enclosures.tum_enclosure import TUMEnclosureState
+from .enclosures import tum_enclosure
 from .config import Config, PartialConfig
 from .plc_specification import (
     PLCSpecification,

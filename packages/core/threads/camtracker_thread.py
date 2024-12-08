@@ -237,9 +237,9 @@ class CamTrackerThread(AbstractThread):
                                 )
                                 with interfaces.StateInterface.update_state() as state:
                                     state.exceptions_state.add_exception_state_item(
-                                        origin=ORIGIN,
+                                        types.ExceptionStateItem(origin=ORIGIN,
                                         subject=
-                                        "Camtracker was started but cover did not open in 3 minutes"
+                                        "Camtracker was started but cover did not open in 3 minutes")
                                     )
                                 CamTrackerProgram.stop(config, logger)
                                 continue

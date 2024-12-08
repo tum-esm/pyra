@@ -32,7 +32,7 @@ class TUMEnclosureThread(AbstractThread):
 
         logger = utils.Logger(origin=ORIGIN)
         plc_interface: Optional[interfaces.TUMEnclosureInterface] = None
-        last_plc_connection_time: Optional[float] = None
+        last_plc_connection_time: float = time.time()
         last_camera_down_time: Optional[float] = None
         exception_was_set: Optional[bool] = None
 
@@ -42,14 +42,18 @@ class TUMEnclosureThread(AbstractThread):
 
                 logger.info("Loading configuration file")
                 config = types.Config.load()
+                enclosure_config = config.tum_enclosure
+                if enclosure_config is None:
+                    logger.info("TUM Enclosure configuration not found, shutting down")
+                    break
 
                 # CONNECTING TO PLC
 
                 if plc_interface is None:
                     logger.info("Connecting to PLC")
                     plc_interface = interfaces.TUMEnclosureInterface(
-                        plc_version=config.tum_enclosure.version,
-                        plc_ip=config.tum_enclosure.ip,
+                        plc_version=enclosure_config.version,
+                        plc_ip=enclosure_config.ip,
                     )
                     try:
                         plc_interface.connect()
@@ -72,8 +76,8 @@ class TUMEnclosureThread(AbstractThread):
                         continue
                 else:
                     plc_interface.update_config(
-                        new_plc_version=config.tum_enclosure.version,
-                        new_plc_ip=config.tum_enclosure.ip,
+                        new_plc_version=enclosure_config.version,
+                        new_plc_ip=enclosure_config.ip,
                     )
                     if not plc_interface.is_connected():
                         logger.error("PLC connection lost")
@@ -130,9 +134,9 @@ class TUMEnclosureThread(AbstractThread):
                             logger.info("Cover is still not closed, trying to close it manually")
 
                             logger.info("Reading PLC registers")
-                            state = plc_interface.read()
-                            synced_to_tracker = state.control.sync_to_tracker
-                            manual_control = state.control.manual_control
+                            plc_state = plc_interface.read()
+                            synced_to_tracker = plc_state.control.sync_to_tracker
+                            manual_control = plc_state.control.manual_control
                             while True:
                                 TUMEnclosureThread.handle_plc_errors(
                                     plc_interface, logger, timeout=30
@@ -159,7 +163,7 @@ class TUMEnclosureThread(AbstractThread):
 
                     # SKIP REMAINING LOGIC IF IN USER CONTROLLED MODE
 
-                    if config.tum_enclosure.controlled_by_user:
+                    if enclosure_config.controlled_by_user:
                         logger.info(
                             "User is controlling the TUM Enclosure, skipping operational logic"
                         )
@@ -349,9 +353,14 @@ class TUMEnclosureThread(AbstractThread):
     def force_cover_close(config: types.Config, logger: utils.Logger) -> None:
         """Force the cover to close by disabling syncing to tracker."""
 
+        enclosure_config = config.tum_enclosure
+        if enclosure_config is None:
+            logger.error("TUM Enclosure configuration not found")
+            return
+
         plc_interface = interfaces.TUMEnclosureInterface(
-            plc_version=config.tum_enclosure.version,
-            plc_ip=config.tum_enclosure.ip,
+            plc_version=enclosure_config.version,
+            plc_ip=enclosure_config.ip,
         )
         logger.info("Connecting to PLC")
         plc_interface.connect()

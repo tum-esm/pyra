@@ -4,7 +4,7 @@ import json
 import time
 from typing import Callable, Literal, Optional
 import click
-from packages.core import types, utils, interfaces
+from packages.core import types, utils, interfaces, threads
 
 logger = utils.Logger(origin="cli")
 
@@ -101,7 +101,7 @@ def _wait_until_cover_is_at_angle(
             break
 
         if running_time > timeout:
-            raise modules.enclosure_control.EnclosureControl.CoverError(
+            raise Exception(
                 f"Cover took too long to move, latest cover angle: {current_cover_angle}"
             )
 

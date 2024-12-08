@@ -137,16 +137,16 @@ class HeliosImageProcessing:
 
         img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
         img = cv.circle(img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2)
-        img = HeliosImageProcessing._add_text_to_image(
+        img = HeliosImageProcessing.add_text_to_image(
             img, f"{round(edge_fraction * 100, 2)}%", position="bottom-left"
         )
-        img = HeliosImageProcessing._add_text_to_image(
+        img = HeliosImageProcessing.add_text_to_image(
             img, f"{datetime.datetime.now()}", position="top-left"
         )
         return img
 
     @staticmethod
-    def _add_text_to_image(
+    def add_text_to_image(
         img: np.ndarray[Any, Any],
         text: str,
         color: tuple[int, int, int] = (200, 0, 0),
@@ -176,7 +176,7 @@ class HeliosImageProcessing:
     ) -> np.ndarray[Any, Any]:
         mean_brightness = np.mean(frame)
         scaling_factor = target_image_brightness / mean_brightness
-        return frame * scaling_factor
+        return frame * scaling_factor  # type: ignore
         
     @staticmethod
     def get_edge_fraction(
