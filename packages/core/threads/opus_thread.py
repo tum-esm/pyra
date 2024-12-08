@@ -191,11 +191,11 @@ class OpusProgram:
 
         try:
             if (dde_connection is not None) and dde_connection.is_working():
-                logger.info(f"Requesting to stop OPUS via DDE")
+                logger.info("Requesting to stop OPUS via DDE")
                 dde_connection.request("UnloadAll()", expect_ok=True)
                 dde_connection.request("CLOSE_OPUS", expect_ok=True)
 
-                logger.info(f"Waiting for OPUS to close gracefully")
+                logger.info("Waiting for OPUS to close gracefully")
                 try:
                     tum_esm_utils.timing.wait_for_condition(
                         is_successful=lambda: not OpusProgram.is_running(logger),
@@ -350,7 +350,7 @@ class OpusThread(AbstractThread):
                 # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
 
                 state = interfaces.StateInterface.load_state()
-                measurements_should_be_running = state.measurements_should_be_running == True
+                measurements_should_be_running = bool(state.measurements_should_be_running)
                 if measurements_should_be_running:
                     if state.tum_enclosure_state.actors.current_angle is not None:
                         cover_is_open = 20 < state.tum_enclosure_state.actors.current_angle < 340
@@ -400,7 +400,7 @@ class OpusThread(AbstractThread):
                     logger.info("Stopping macro")
                     dde_connection.stop_macro(*current_macro_id_and_filepath)
                     current_macro_id_and_filepath = None
-                    logger.info(f"Successfully stopped Macro")
+                    logger.info("Successfully stopped Macro")
 
                 # UPDATING STATE
 

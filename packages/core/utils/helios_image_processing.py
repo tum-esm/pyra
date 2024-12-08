@@ -269,9 +269,9 @@ class HeliosImageProcessing:
                     ), processed_frame
                 )
             if save_current_image:
-                cv.imwrite(os.path.join(_LOGS_DIR, f"current-helios-view-raw.jpg"), frame)
+                cv.imwrite(os.path.join(_LOGS_DIR, "current-helios-view-raw.jpg"), frame)
                 cv.imwrite(
-                    os.path.join(_LOGS_DIR, f"current-helios-view-processed.jpg"), processed_frame
+                    os.path.join(_LOGS_DIR, "current-helios-view-processed.jpg"), processed_frame
                 )
 
         return edge_fraction

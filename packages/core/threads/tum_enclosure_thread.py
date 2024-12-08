@@ -142,12 +142,12 @@ class TUMEnclosureThread(AbstractThread):
                                     plc_interface, logger, timeout=30
                                 )
 
-                                if synced_to_tracker != False:
+                                if synced_to_tracker:
                                     logger.info("Disabling syncing to tracker")
                                     plc_interface.set_sync_to_tracker(False)
                                     synced_to_tracker = False
 
-                                if manual_control != True:
+                                if not manual_control:
                                     logger.info("Enabling manual control")
                                     plc_interface.set_manual_control(True)
                                     manual_control = True
@@ -180,7 +180,7 @@ class TUMEnclosureThread(AbstractThread):
                     # CAMERA POWER CYCLE
 
                     # power up the camera if it is off but should be on
-                    if (last_camera_down_time is None) and (plc_state.power.camera != True):
+                    if (last_camera_down_time is None) and (not plc_state.power.camera):
                         logger.info("Powering up the camera as it is off but should be on")
                         plc_interface.set_power_camera(True)
                         plc_state.power.camera = True
@@ -220,7 +220,7 @@ class TUMEnclosureThread(AbstractThread):
                             plc_interface.set_power_spectrometer(True)
                             plc_state.power.spectrometer = True
 
-                        elif (not power_should_be_on) and (plc_state.power.spectrometer == True):
+                        elif (not power_should_be_on) and (plc_state.power.spectrometer):
                             logger.info("Powering down the spectrometer")
                             plc_interface.set_power_spectrometer(False)
                             plc_state.power.spectrometer = False
@@ -281,7 +281,7 @@ class TUMEnclosureThread(AbstractThread):
 
                     # CLEAR EXCEPTIONS
 
-                    if exception_was_set != False:
+                    if not exception_was_set:
                         exception_was_set = False
                         with interfaces.StateInterface.update_state() as _s:
                             _s.exceptions_state.clear_exception_origin(origin=ORIGIN)

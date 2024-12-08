@@ -15,7 +15,7 @@ def _get_log_line_datetime(log_line: str) -> Optional[datetime.datetime]:
     try:
         assert len(log_line) >= 19
         return datetime.datetime.strptime(log_line[: 19], "%Y-%m-%d %H:%M:%S")
-    except:
+    except (AssertionError, ValueError):
         return None
 
 

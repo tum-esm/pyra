@@ -1,5 +1,5 @@
-from . import types
-from . import utils
-from . import interfaces
-from . import threads
-from . import main
+from . import types as types
+from . import utils as utils
+from . import interfaces as interfaces
+from . import threads as threads
+from . import main as main

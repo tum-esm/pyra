@@ -134,7 +134,7 @@ class UploadThread(AbstractThread):
 
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
-                logger.info(f"waiting 60 minutes until looking for new files/directories")
+                logger.info("waiting 60 minutes until looking for new files/directories")
                 waiting_start_time = datetime.datetime.now()
                 for i in range(60):
                     for _ in range(6):
@@ -147,7 +147,7 @@ class UploadThread(AbstractThread):
                     # trying again at 1am because then new directories could be uploaded
                     if waiting_start_time.hour == 0 and datetime.datetime.now().hour == 1:
                         logger.info(
-                            f"abort waiting because there might be new data to upload at 1am"
+                            "abort waiting because there might be new data to upload at 1am"
                         )
 
                     minutes_left = 59 - i
@@ -163,7 +163,7 @@ class UploadThread(AbstractThread):
                     s.upload_is_running = False
                     s.exceptions_state.add_exception(origin=ORIGIN, exception=e)
                 logger.info(
-                    f"waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
+                    "waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
                 )
                 for i in range(20):
                     for _ in range(6):

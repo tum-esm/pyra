@@ -69,7 +69,7 @@ def _get_config(
     name="update",
     short_help="Update the config.json file.",
     help=
-    f"Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
+    "Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
 )
 @click.argument("content", default="{}")
 @tum_esm_utils.decorators.with_filelock(
@@ -117,7 +117,7 @@ def _update_config(content: str) -> None:
 @config_command_group.command(
     name="validate",
     help=
-    f"Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
+    "Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
 )
 def _validate_current_config() -> None:
     try:
@@ -126,4 +126,4 @@ def _validate_current_config() -> None:
         _print_red(f"Current config file is invalid\n{e}")
         exit(1)
 
-    _print_green(f"Current config file is valid")
+    _print_green("Current config file is valid")

@@ -49,7 +49,7 @@ class HeliosInterface:
                 self.update_camera_settings(exposure=self.current_exposure)
                 return
             else:
-                logger.debug(f"could not open camera, retrying in 2 seconds")
+                logger.debug("could not open camera, retrying in 2 seconds")
                 time.sleep(2)
 
         raise CameraError(f"could not initialize camera in {initialization_tries} tries")
@@ -337,7 +337,7 @@ class HeliosThread(AbstractThread):
                     except CameraError as e:
                         logger.error(f"could not initialize HeliosInterface: {repr(e)}")
                         logger.exception(e)
-                        logger.info(f"sleeping 30 seconds, reinitializing HeliosInterface")
+                        logger.info("sleeping 30 seconds, reinitializing HeliosInterface")
                         time.sleep(30)
                         continue
 
@@ -430,7 +430,7 @@ class HeliosThread(AbstractThread):
                         ).total_seconds() >= config.helios.min_seconds_between_state_changes)
                         if update_state_file:
                             logger.info(
-                                f"State change: " + {
+                                "State change: " + {
                                     True: "GOOD",
                                     False: "BAD",
                                     None: "None",
@@ -479,5 +479,5 @@ class HeliosThread(AbstractThread):
                 with interfaces.StateInterface.update_state() as s:
                     s.exceptions_state.add_exception(origin=ORIGIN, exception=e)
 
-                logger.info(f"sleeping 30 seconds, reinitializing HeliosThread")
+                logger.info("sleeping 30 seconds, reinitializing HeliosThread")
                 time.sleep(30)

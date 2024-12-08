@@ -1,3 +1,3 @@
-from .activity_history import ActivityHistoryInterface
-from .tum_enclosure_interface import TUMEnclosureInterface
-from .state_interface import StateInterface
+from .activity_history import ActivityHistoryInterface as ActivityHistoryInterface
+from .tum_enclosure_interface import TUMEnclosureInterface as TUMEnclosureInterface
+from .state_interface import StateInterface as StateInterface

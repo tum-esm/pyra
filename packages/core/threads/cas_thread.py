@@ -61,7 +61,7 @@ class CASThread(AbstractThread):
                 logger.debug(f"Decision mode for measurements is: {d.mode}.")
 
                 should_measure: bool
-                if state.tum_enclosure_state.state.rain == True:
+                if state.tum_enclosure_state.state.rain:
                     logger.debug("not trying to measuring when PLC detected rain")
                     should_measure = False
                 else:
@@ -165,7 +165,7 @@ class CASThread(AbstractThread):
             helios_result = state.helios_indicates_good_conditions
 
             if helios_result == "inconclusive" or helios_result is None:
-                logger.debug(f"Helios does not nave enough images yet.")
+                logger.debug("Helios does not nave enough images yet.")
                 return False
 
             logger.debug(
