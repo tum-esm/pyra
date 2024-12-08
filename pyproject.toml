@@ -34,22 +34,21 @@ dev = [
     "pytest>=7.4.4",
     "pytest-cov>=4.1.0",
     "lazydocs>=0.4.8",
-    "yapf>=0.40.2",
     "mypy>=1.8.0",
     "types-pywin32>=306.0.0.20240106",
     "types-psutil>=5.9.5.20240106",
     "types-paramiko>=3.4.0.20240106",
     "types-invoke>=2.0.0.10",
     "pytest-order>=1.2.1",
+    "ruff>=0.8.2",
 ]
 
-[tool.yapf]
-based_on_style = "facebook"
-coalesce_brackets = true
-split_before_dict_set_generator = true
-each_dict_entry_on_separate_line = false
-spaces_around_subscript_colon = true
-column_limit = 100
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+ignore = ["E402", "E741"]
+exclude = ["tests/*"]
 
 [tool.mypy]
 strict = true
@@ -78,10 +77,7 @@ filterwarnings = [
     'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
     'ignore:getargs:DeprecationWarning',
 ]
-markers = [
-    "ci: can be run in a CI environment",
-    "integration: can only be run on a configured system",
-]
+markers = ["ci: can be run in a CI environment", "integration: can only be run on a configured system"]
 
 [tool.pdm.options]
 add = ["--no-self"]
