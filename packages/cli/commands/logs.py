@@ -63,12 +63,14 @@ def _archive_logs() -> None:
     _print_red("this command is deprecated without a replacement")
 
 
-@logs_command_group.command(name="split-log-files-by-origin")
+@logs_command_group.command(
+    name="split-log-files-by-origin",
+    help="Split a set of logfiles by origin into different files. You can use UNIX-style wildcards.",
+)
 @click.argument(
     "path",
     type=str,
     default="./*.log",
-    help="Path to the log files. You can use UNIX-style wildcards."
 )
 def split_log_files_by_origin(path: str) -> None:
     """Split log files by origin."""

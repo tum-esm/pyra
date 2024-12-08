@@ -1,1 +1,5 @@
-from . import tum_enclosure
+from .tum_enclosure import (
+    TUMEnclosureState,
+    TUMEnclosureConfig,
+    PartialTUMEnclosureConfig,
+)

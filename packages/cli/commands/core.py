@@ -6,7 +6,7 @@ import click
 import os
 import filelock
 import tum_esm_utils
-from packages.core import interfaces, modules, types, utils, threads
+from packages.core import interfaces, types, utils, threads
 
 dir = os.path.dirname
 _PROJECT_DIR = dir(dir(dir(dir(os.path.abspath(__file__)))))

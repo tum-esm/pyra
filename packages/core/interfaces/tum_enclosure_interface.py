@@ -213,7 +213,7 @@ class TUMEnclosureInterface:
 
     # BULK READ
 
-    def read(self) -> types.tum_enclosure.TUMEnclosureState:
+    def read(self) -> types.TUMEnclosureState:
         """Read the whole state of the PLC"""
 
         plc_db_content: dict[int, bytearray] = {}

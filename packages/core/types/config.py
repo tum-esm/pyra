@@ -7,7 +7,7 @@ import filelock
 import pydantic
 import tum_esm_utils
 from tum_esm_utils.validators import StrictIPv4Adress, StricterBaseModel
-from .enclosures import tum_enclosure
+from .enclosures.tum_enclosure import TUMEnclosureConfig, PartialTUMEnclosureConfig
 
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
@@ -208,7 +208,7 @@ class Config(StricterBaseModel):
     error_email: ErrorEmailConfig
     measurement_decision: MeasurementDecisionConfig
     measurement_triggers: MeasurementTriggersConfig
-    tum_enclosure: Optional[tum_enclosure.TUMEnclosureConfig] = None
+    tum_enclosure: Optional[TUMEnclosureConfig] = None
     helios: Optional[HeliosConfig] = None
     upload: Optional[UploadConfig] = None
 
@@ -319,7 +319,7 @@ class PartialConfig(StricterBaseModel):
     error_email: Optional[PartialErrorEmailConfig] = None
     measurement_decision: Optional[PartialMeasurementDecisionConfig] = None
     measurement_triggers: Optional[PartialMeasurementTriggersConfig] = None
-    tum_enclosure: Optional[tum_enclosure.PartialTUMEnclosureConfig] = None
+    tum_enclosure: Optional[PartialTUMEnclosureConfig] = None
     helios: Optional[PartialHeliosConfig] = None
     upload: Optional[PartialUploadConfig] = None
 

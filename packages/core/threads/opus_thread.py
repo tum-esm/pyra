@@ -6,7 +6,6 @@ import psutil
 import tum_esm_utils
 from .abstract_thread import AbstractThread
 from packages.core import types, utils, interfaces
-import brukeropus.control.dde
 
 ORIGIN = "opus"
 
@@ -14,12 +13,14 @@ ORIGIN = "opus"
 class DDEConnection:
     """Class for handling DDE connections to OPUS."""
     def __init__(self, logger: utils.Logger) -> None:
+        import brukeropus.control.dde
         self.client: Optional[brukeropus.control.dde.DDEClient] = None
         self.logger = logger
 
     def setup(self) -> None:
         """Set up a new DDE connection to OPUS. Tear down the 
         old connection if it exists."""
+        import brukeropus.control.dde
 
         if self.client is not None:
             self.logger.info("Destroying old DDE connection")
