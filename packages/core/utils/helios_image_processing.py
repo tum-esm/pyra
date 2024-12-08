@@ -137,16 +137,16 @@ class HeliosImageProcessing:
 
         img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
         img = cv.circle(img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2)
-        img = HeliosImageProcessing.add_text_to_image(
+        img = HeliosImageProcessing._add_text_to_image(
             img, f"{round(edge_fraction * 100, 2)}%", position="bottom-left"
         )
-        img = HeliosImageProcessing.add_text_to_image(
+        img = HeliosImageProcessing._add_text_to_image(
             img, f"{datetime.datetime.now()}", position="top-left"
         )
         return img
 
     @staticmethod
-    def add_text_to_image(
+    def _add_text_to_image(
         img: np.ndarray[Any, Any],
         text: str,
         color: tuple[int, int, int] = (200, 0, 0),
@@ -170,7 +170,7 @@ class HeliosImageProcessing:
         return img
 
     @staticmethod
-    def adjust_image_brightness_in_post(
+    def _adjust_image_brightness_in_post(
         frame: np.ndarray[Any, Any],
         target_image_brightness: float,
     ) -> np.ndarray[Any, Any]:
@@ -203,7 +203,7 @@ class HeliosImageProcessing:
         """
         
         # adjust the brightness of the frame to a target value
-        evenly_lit_frame = HeliosImageProcessing.adjust_image_brightness_in_post(frame, target_pixel_brightness)
+        evenly_lit_frame = HeliosImageProcessing._adjust_image_brightness_in_post(frame, target_pixel_brightness)
 
         # transform image from 1280x720 to 640x360
         downscaled_image = cv.resize(evenly_lit_frame, None, fx=0.5, fy=0.5)
