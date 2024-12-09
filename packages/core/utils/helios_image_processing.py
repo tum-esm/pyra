@@ -1,9 +1,8 @@
 import datetime
-import math
 import os
-from typing import Any, Literal, Optional
-
-import cv2 as cv
+from typing import Any, Optional
+from PIL import Image, ImageDraw
+import skimage
 import numpy as np
 
 _dir = os.path.dirname
@@ -17,158 +16,107 @@ class HeliosImageProcessing:
 
     See https://pyra.esm.ei.tum.de/docs/user-guide/tum-enclosure-and-helios#what-does-helios-do
     for more information on Helios."""
-    @staticmethod
-    def _get_circle_mask(
-        img_shape: tuple[int, int],
-        radius: int,
-        center_x: int,
-        center_y: int,
-    ) -> np.ndarray[Any, Any]:
-        """
-        input: image width/height, circle radius/center_x/center_y
 
-        output: binary mask (2D array) like
+    def _get_lense_crop_contrast(
+        image: np.ndarray,
+        cx: float,
+        cy: float,
+        radius: float,
+    ) -> float:
+        """If you cut the image into two parts given a circle with center cx, cy and radius,
+        this function returns the difference in mean color between the two parts."""
 
-        ```
-        [
-            [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0],
-            [0 0 0 0 0 0 1 1 1 1 1 0 0 0 0 0],
-            [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0],
-            [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0],
-            [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0],
-            [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0],
-            [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0],
-            [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0],
-            [0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0]
-        ]
-        ```
-
-        This code was adapted from https://stackoverflow.com/a/39074620/8255842.
-        """
-
-        y, x = np.indices(img_shape)
-        return np.array((np.abs(np.hypot(center_x - x, center_y - y)) < radius).astype(np.uint8))
-
-    @staticmethod
-    def _moving_average(
-        xs: list[float],
-        n: int = 3,
-    ) -> list[float]:
-        ret = np.cumsum(xs)
-        ret[n :] = ret[n :] - ret[:-n]
-        return list(ret[n - 1 :] / n)
-
-    @staticmethod
-    def _get_binary_mask(frame: np.ndarray[Any, Any]) -> np.ndarray[Any, Any]:
-        """
-        input: gray image matrix (2D matrix) with integer values for each pixel
-        output: binary mask (same shape) that has 0s for dark pixels and 1s for bright pixels
-        """
-
-        blurred_image = cv.medianBlur(frame, 7)
-        # kmeans only supports matrices with datatype np.float32 !!
-        # apply kmeans (bin colors to the 2 most dominant ones)
-        _, kmeans_labels, kmeans_centers = cv.kmeans(
-            data=np.array(blurred_image.flatten(), dtype=np.float32),
-            K=2,
-            bestLabels=None,  # type: ignore
-            criteria=(cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 10, 1.0),
-            attempts=5,
-            flags=cv.KMEANS_PP_CENTERS,
+        rr, cc = skimage.draw.disk((cy, cx), radius, shape=image.shape)
+        inner_mask = np.zeros(image.shape, dtype=np.uint8)
+        inner_mask[rr, cc] = 1
+        outer_mask = np.ones(image.shape, dtype=np.uint8) - inner_mask
+        return abs(
+            (np.sum(image * inner_mask) / np.sum(inner_mask))
+            - (np.sum(image * outer_mask) / np.sum(outer_mask))
         )
 
-        # labels array is [1, 0, 0, 1,...] = one label (= color index) for each pixel
-        binary_mask = np.reshape(kmeans_labels, frame.shape)
+    def _get_lense_position(bw_image: np.ndarray) -> Optional[tuple[float, float, float]]:
+        """Determine the position of the lense in the image."""
 
-        # flip colors if color with index 0 is the bright one
-        if kmeans_centers[0][0] > kmeans_centers[1][0]:
-            binary_mask = (binary_mask - 1) * -1
+        bw_image = bw_image * (60 / np.mean(bw_image))
 
-        return binary_mask
+        # run canny edge detection
+        edges = skimage.feature.canny(bw_image, sigma=7, low_threshold=3, high_threshold=10)
 
-    @staticmethod
-    def _get_circle_location(
-        grayscale_image: np.ndarray[Any, Any]
-    ) -> Optional[tuple[int, int, int]]:
-        """
-        input: binary mask (2D array) like
-        [[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-        [0 0 0 0 0 0 1 1 1 1 1 0 0 0 0 0]
-        [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0]
-        [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0]
-        [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0]
-        [0 0 0 0 1 1 1 1 1 1 1 1 1 0 0 0]
-        [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0]
-        [0 0 0 0 0 1 1 1 1 1 1 1 0 0 0 0]
-        [0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0]]
+        # computing possible radii of lense
+        image_height = min(bw_image.shape)
+        min_lense_size = round(image_height * 0.5 * 0.85)
+        max_lense_size = round(image_height * 0.5 * 1.15)
+        lense_radii = np.arange(min_lense_size, max_lense_size, 2)
 
-        output: center_x, center_y, r
-        """
-        image_height, image_width = grayscale_image.shape[0], grayscale_image.shape[1]
-
-        circles = cv.HoughCircles(
-            grayscale_image,
-            cv.HOUGH_GRADIENT,
-            dp=20,
-            minDist=250,
-            minRadius=round((image_height * 0.85) * 0.5),
-            maxRadius=round((image_height * 1.15) * 0.5),
+        # pick the 50 best circles
+        hough_res = skimage.transform.hough_circle(edges, lense_radii)
+        _, cx, cy, radii = skimage.transform.hough_circle_peaks(
+            hough_res,
+            lense_radii,
+            min_xdistance=2,
+            min_ydistance=2,
+            total_num_peaks=50,
         )
-
-        if circles is None:
+        if len(radii) == 0:
             return None
 
-        # get the circle that is closest to the image center
-        x, y, r = min(
-            np.round(circles[0, :]).astype("int"),  # type: ignore
-            key=lambda c: math.pow(c[0] - (image_width * 0.5), 2)  # type: ignore
-            + pow(c[1] - (image_height * 0.5), 2),
+        # order the circles based on contrast
+        contrasts: list[tuple[float, int]] = sorted(
+            zip(
+                [
+                    HeliosImageProcessing._get_lense_crop_contrast(bw_image, cx[i], cy[i], radii[i])
+                    for i in range(len(radii))
+                ],
+                range(len(radii)),
+            ),
+            key=lambda x: x[0],
+            reverse=True,
         )
-        return round(x), round(y), round(r)
+
+        # determine the best circle based on contrast and hough circle peaks
+        ranking = zip(range(len(contrasts)), [x[1] for x in contrasts])
+        sorted_ranking = sorted(ranking, key=lambda x: x[0] + x[1])
+        best_circle_index = sorted_ranking[0][1]
+
+        return cx[best_circle_index], cy[best_circle_index], radii[best_circle_index]
 
     @staticmethod
-    def add_markings_to_image(
-        img: np.ndarray[Any, Any],
+    def _annotate_processed_image(
+        bw_frame: np.ndarray[Any, Any],
         edge_fraction: float,
         circle_cx: int,
         circle_cy: int,
         circle_r: int,
-    ) -> np.ndarray[Any, Any]:
+    ) -> Image:
         """Put text for edge fraction and mark circles in image."""
+        rgb_frame = np.stack((bw_frame,) * 3, axis=-1)
 
-        img = cv.circle(img, (circle_cx, circle_cy), circle_r, (100, 0, 0), 2)
-        img = cv.circle(img, (circle_cx, circle_cy), round(circle_r * 0.9), (100, 0, 0), 2)
-        img = HeliosImageProcessing.add_text_to_image(
-            img, f"{round(edge_fraction * 100, 2)}%", position="bottom-left"
-        )
-        img = HeliosImageProcessing.add_text_to_image(
-            img, f"{datetime.datetime.now()}", position="top-left"
-        )
-        return img
+        # draw outer circle
+        rr, cc = skimage.draw.disk((circle_cy, circle_cx), circle_r, shape=bw_frame.shape)
+        outer_circle = np.zeros(rgb_frame.shape, dtype=np.uint8)
+        outer_circle[rr, cc, 0] = 255
+        outer_circle = skimage.morphology.dilation(outer_circle, skimage.morphology.disk(3))
 
-    @staticmethod
-    def add_text_to_image(
-        img: np.ndarray[Any, Any],
-        text: str,
-        color: tuple[int, int, int] = (200, 0, 0),
-        position: Literal["top-left", "bottom-left"] = "bottom-left",
-    ) -> np.ndarray[Any, Any]:
-        """Put some text on the bottom left of an image"""
-
-        if (position == "bottom-left"):
-            origin = (10, img.shape[0] - 15)
-        else:
-            origin = (10, 15)
-        cv.putText(
-            img,  # type: ignore
-            text=text,
-            org=origin,
-            fontFace=None,
-            fontScale=0.8,
-            color=color,
-            thickness=2,
+        # draw inner circle
+        rr, cc = skimage.draw.disk(
+            (circle_cy, circle_cx), round(circle_r * 0.9), shape=bw_frame.shape
         )
-        return img
+        inner_circle = np.zeros(rgb_frame.shape, dtype=np.uint8)
+        inner_circle[rr, cc, 2] = 255
+        inner_circle = skimage.morphology.dilation(inner_circle, skimage.morphology.disk(3))
+
+        # combine images
+        img = rgb_frame + outer_circle + inner_circle
+        img[img > 255] = 255
+
+        # add text
+        pil_image = Image.fromarray(img)
+        draw = ImageDraw.Draw(pil_image)
+        draw.text((10, 10), f"{edge_fraction * 100:.2f}%", (255, 255, 255))
+        draw.text((10, 30), f"{datetime.datetime.now()}", (255, 255, 255))
+
+        return pil_image
 
     @staticmethod
     def _adjust_image_brightness_in_post(
@@ -178,71 +126,59 @@ class HeliosImageProcessing:
         mean_brightness = np.mean(frame)
         scaling_factor = target_image_brightness / mean_brightness
         return frame * scaling_factor  # type: ignore
-        
+
     @staticmethod
     def get_edge_fraction(
         frame: np.ndarray[Any, Any],
         station_id: str,
         edge_color_threshold: int,
         target_pixel_brightness: float,
+        lense_circle: tuple[int, int, int],
         save_images_to_archive: bool = False,
         save_current_image: bool = False,
     ) -> float:
-        """
-        For a given frame determine the number of "edge pixels" with
+        """For a given frame determine the number of "edge pixels" with
         respect to the inner 90% of the lense diameter and the "status".
         The status is 1 when the edge pixels are above the given threshold
-        and 0 otherwise.
+        and 0 otherwise."""
 
-        1. Downscale image (faster processing)
-        2. Convert to grayscale image
-        3. Determine position and size of circular opening
-        4. Determine edges in image (canny edge filter)
-        5. Only consider edges inside 0.9 * circleradius
-
-        Returns the "edge pixel fraction".
-        """
-        
         # adjust the brightness of the frame to a target value
-        evenly_lit_frame = HeliosImageProcessing._adjust_image_brightness_in_post(frame, target_pixel_brightness)
+        bw_frame: np.ndarray = np.mean(frame, axis=2)
+        evenly_lit_frame: np.ndarray = bw_frame * (target_pixel_brightness / np.mean(frame))
 
         # transform image from 1280x720 to 640x360
-        downscaled_image = cv.resize(evenly_lit_frame, None, fx=0.5, fy=0.5)
-
-        # for each rgb pixel [234,234,234] only consider the gray value (234)
-        grayscale_image = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)
-
-        # determine lense position and size from binary mask
-        circle_location = HeliosImageProcessing._get_circle_location(grayscale_image)
-        if circle_location is None:
-            return 0
-        else:
-            circle_cx, circle_cy, circle_r = circle_location
+        downscaled_image: np.ndarray = skimage.transform.rescale(evenly_lit_frame, 0.5)
 
         # only consider edges and make them bold
-        edges_only = np.array(
-            cv.Canny(grayscale_image, edge_color_threshold, edge_color_threshold), dtype=np.float32
-        )
-        edges_only_dilated = cv.dilate(
-            edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
+        edges_dilated: np.ndarray = skimage.morphology.dilation(
+            skimage.feature.canny(
+                downscaled_image,
+                sigma=7,
+                low_threshold=round(edge_color_threshold / 3),
+                high_threshold=edge_color_threshold,
+            ),
+            skimage.morphology.disk(5),
         )
 
         # blacken the outer 10% of the circle radius
-        edges_only_dilated *= HeliosImageProcessing._get_circle_mask( # type: ignore
-            edges_only_dilated.shape,  # type: ignore
-            round(circle_r * 0.9),
-            circle_cx,
-            circle_cy,
-        )
+        inner_mask = np.zeros(evenly_lit_frame.shape, dtype=np.uint8)
+        inner_mask[
+            skimage.draw.disk(
+                center=(lense_circle[1], lense_circle[0]),
+                radius=lense_circle[2] * 0.9,
+                shape=evenly_lit_frame.shape,
+            )
+        ] = 1
+        edges_dilated_masked: np.ndarray = edges_dilated * inner_mask
 
         # determine how many pixels inside the circle are made up of "edge pixels"
-        pixels_inside_circle: int = np.sum(3.141592 * pow(circle_r * 0.9, 2))
+        pixels_inside_circle: int = np.sum(3.141592 * pow(lense_circle[2] * 0.9, 2))
         edge_fraction: float = 0
         if pixels_inside_circle != 0:
             edge_fraction = round(
-                (np.sum(edges_only_dilated) / 255) /  # type: ignore
-                pixels_inside_circle,
-                6
+                (np.sum(edges_dilated_masked) / 255)  # type: ignore
+                / pixels_inside_circle,
+                6,
             )
 
         if save_images_to_archive or save_current_image:
@@ -253,25 +189,27 @@ class HeliosImageProcessing:
                 os.mkdir(img_directory_path)
 
             edge_fraction_str = str(edge_fraction) + ("0" * (8 - len(str(edge_fraction))))
-            processed_frame = HeliosImageProcessing.add_markings_to_image(
-                edges_only_dilated, edge_fraction, circle_cx, circle_cy, circle_r
+            processed_frame = HeliosImageProcessing._annotate_processed_image(
+                edges_dilated, edge_fraction, *lense_circle
             )
             if save_images_to_archive:
-                cv.imwrite(
+                skimage.io.imsave(
                     os.path.join(
                         img_directory_path,
-                        f"{station_id}-{img_timestamp}-{edge_fraction_str}-raw.jpg"
-                    ), frame
+                        f"{station_id}-{img_timestamp}-{edge_fraction_str}-raw.jpg",
+                    ),
+                    frame,
                 )
-                cv.imwrite(
+                skimage.io.imsave(
                     os.path.join(
                         img_directory_path,
-                        f"{station_id}-{img_timestamp}-{edge_fraction_str}-processed.jpg"
-                    ), processed_frame
+                        f"{station_id}-{img_timestamp}-{edge_fraction_str}-processed.jpg",
+                    ),
+                    processed_frame,
                 )
             if save_current_image:
-                cv.imwrite(os.path.join(_LOGS_DIR, "current-helios-view-raw.jpg"), frame)
-                cv.imwrite(
+                skimage.io.imsave(os.path.join(_LOGS_DIR, "current-helios-view-raw.jpg"), frame)
+                skimage.io.imsave(
                     os.path.join(_LOGS_DIR, "current-helios-view-processed.jpg"), processed_frame
                 )
 
