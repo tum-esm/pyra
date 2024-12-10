@@ -1,6 +1,10 @@
+import datetime
 import math
+import os
 from typing import Any, Optional
 import numpy as np
+from PIL import Image
+from .helios_image_processing import HeliosImageProcessing
 
 
 class OldHeliosImageProcessing:
@@ -116,10 +120,9 @@ class OldHeliosImageProcessing:
     @staticmethod
     def get_edge_fraction(
         frame: np.ndarray[Any, Any],
-        station_id: str,
         edge_color_threshold: int,
         save_images_to_archive: bool = False,
-        save_current_image: bool = False,
+        image_name: Optional[str] = None,
     ) -> float:
         """
         For a given frame determine the number of "edge pixels" with
@@ -137,14 +140,11 @@ class OldHeliosImageProcessing:
         """
         import cv2 as cv
 
-        # transform image from 1280x720 to 640x360
-        downscaled_image = cv.resize(frame, None, fx=0.5, fy=0.5)
-
         # for each rgb pixel [234,234,234] only consider the gray value (234)
-        grayscale_image = cv.cvtColor(downscaled_image, cv.COLOR_BGR2GRAY)
+        bw_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
         # determine lense position and size from binary mask
-        circle_location = OldHeliosImageProcessing._get_circle_location(grayscale_image)
+        circle_location = OldHeliosImageProcessing._get_circle_location(bw_frame)
         if circle_location is None:
             return 0
         else:
@@ -152,7 +152,7 @@ class OldHeliosImageProcessing:
 
         # only consider edges and make them bold
         edges_only = np.array(
-            cv.Canny(grayscale_image, edge_color_threshold, edge_color_threshold), dtype=np.float32
+            cv.Canny(bw_frame, edge_color_threshold, edge_color_threshold), dtype=np.float32
         )
         edges_only_dilated = cv.dilate(
             edges_only, cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
