@@ -35,16 +35,24 @@ class HeliosImageProcessing:
             - (np.sum(image * outer_mask) / np.sum(outer_mask))
         )
 
-    def get_lense_position(bw_image: np.ndarray) -> Optional[tuple[float, float, float]]:
+    def get_lense_position(
+        frame: np.ndarray[Any, Any],
+        use_downscaling: bool = False,
+    ) -> Optional[tuple[float, float, float]]:
         """Determine the position of the lense in the image."""
 
-        bw_image = bw_image * (60 / np.mean(bw_image))
+        bw_frame = skimage.color.rgb2gray(frame)
+        if use_downscaling:
+            bw_frame = skimage.transform.rescale(bw_frame, 0.5)
+
+        # adjust frame color
+        bw_frame = bw_frame * (60 / np.mean(bw_frame))
 
         # run canny edge detection
-        edges = skimage.feature.canny(bw_image, sigma=7, low_threshold=3, high_threshold=10)
+        edges = skimage.feature.canny(bw_frame, sigma=7, low_threshold=3, high_threshold=10)
 
         # computing possible radii of lense
-        image_height = min(bw_image.shape)
+        image_height = min(bw_frame.shape)
         min_lense_size = round(image_height * 0.5 * 0.85)
         max_lense_size = round(image_height * 0.5 * 1.15)
         lense_radii = np.arange(min_lense_size, max_lense_size, 2)
@@ -65,7 +73,7 @@ class HeliosImageProcessing:
         contrasts: list[tuple[float, int]] = sorted(
             zip(
                 [
-                    HeliosImageProcessing._get_lense_crop_contrast(bw_image, cx[i], cy[i], radii[i])
+                    HeliosImageProcessing._get_lense_crop_contrast(bw_frame, cx[i], cy[i], radii[i])
                     for i in range(len(radii))
                 ],
                 range(len(radii)),
@@ -79,10 +87,15 @@ class HeliosImageProcessing:
         sorted_ranking = sorted(ranking, key=lambda x: x[0] + x[1])
         best_circle_index = sorted_ranking[0][1]
 
-        return cx[best_circle_index] * 2, cy[best_circle_index] * 2, radii[best_circle_index] * 2
+        multiplier = 2 if use_downscaling else 1
+        return (
+            cx[best_circle_index] * multiplier,
+            cy[best_circle_index] * multiplier,
+            radii[best_circle_index] * multiplier,
+        )
 
     @staticmethod
-    def _annotate_processed_image(
+    def annotate_processed_image(
         bw_frame: np.ndarray[Any, Any],
         edge_fraction: float,
         circle_cx: int,
@@ -114,8 +127,8 @@ class HeliosImageProcessing:
         # add text
         pil_image = Image.fromarray((rgb_frame * 255).astype(np.uint8))
         draw = ImageDraw.Draw(pil_image)
-        draw.text((10, 10), f"{edge_fraction * 100:.2f}%", (255, 255, 255))
-        draw.text((10, 30), f"{datetime.datetime.now()}", (255, 255, 255))
+        draw.text((10, 10), f"{datetime.datetime.now()}", (255, 255, 255), font_size=25)
+        draw.text((10, 40), f"{edge_fraction * 100:.2f}%", (255, 255, 255), font_size=25)
 
         return pil_image
 
@@ -137,6 +150,7 @@ class HeliosImageProcessing:
         lense_circle: tuple[int, int, int],
         save_images_to_archive: bool = False,
         save_current_image: bool = False,
+        image_name: Optional[str] = None,
     ) -> float:
         """For a given frame determine the number of "edge pixels" with
         respect to the inner 90% of the lense diameter and the "status".
@@ -157,7 +171,7 @@ class HeliosImageProcessing:
             skimage.feature.canny(
                 evenly_lit_frame,
                 sigma=7,
-                low_threshold=round(edge_color_threshold * 0.8),
+                low_threshold=round(edge_color_threshold * 0.5),
                 high_threshold=edge_color_threshold,
             ),
             skimage.morphology.disk(2),
@@ -183,6 +197,7 @@ class HeliosImageProcessing:
                 6,
             )
 
+        # optionally save images to local disk
         if save_images_to_archive or save_current_image:
             now = datetime.datetime.now()
             img_timestamp = now.strftime("%Y%m%d-%H%M%S")
@@ -191,33 +206,28 @@ class HeliosImageProcessing:
                 os.mkdir(img_directory_path)
 
             edge_fraction_str = str(edge_fraction) + ("0" * (8 - len(str(edge_fraction))))
-            processed_frame = HeliosImageProcessing._annotate_processed_image(
+            raw_image = Image.fromarray((skimage.color.gray2rgb(evenly_lit_frame)).astype(np.uint8))
+            processed_image = HeliosImageProcessing.annotate_processed_image(
                 edges_dilated, edge_fraction, *lense_circle
             )
 
-            if save_images_to_archive or save_current_image:
-                raw_image = Image.fromarray(
-                    (skimage.color.gray2rgb(bw_frame) * 255).astype(np.uint8)
+            # used in post-analysis
+            if save_images_to_archive:
+                image_slug = os.path.join(
+                    img_directory_path, f"{station_id}-{img_timestamp}-{edge_fraction_str}"
                 )
-                if save_images_to_archive:
-                    raw_image.save(
-                        os.path.join(
-                            img_directory_path,
-                            f"{station_id}-{img_timestamp}-{edge_fraction_str}-raw.jpg",
-                        ),
-                    )
-                    processed_frame.save(
-                        os.path.join(
-                            img_directory_path,
-                            f"{station_id}-{img_timestamp}-{edge_fraction_str}-edges.jpg",
-                        ),
-                    )
-                if save_current_image:
-                    raw_image.save(
-                        os.path.join(_LOGS_DIR, "current-helios-view-raw.jpg"),
-                    )
-                    processed_frame.save(
-                        os.path.join(_LOGS_DIR, "current-helios-view-processed.jpg"),
-                    )
+                if image_name is not None:
+                    image_slug = os.path.join(img_directory_path, image_name)
+                raw_image.save(image_slug + "-raw.jpg")
+                processed_image.save(image_slug + "-processed.jpg")
+
+            # used by the UI
+            if save_current_image:
+                raw_image.save(
+                    os.path.join(_LOGS_DIR, "current-helios-view-raw.jpg"),
+                )
+                processed_image.save(
+                    os.path.join(_LOGS_DIR, "current-helios-view-processed.jpg"),
+                )
 
         return edge_fraction
