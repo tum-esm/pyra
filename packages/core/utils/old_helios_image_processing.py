@@ -118,7 +118,6 @@ class OldHeliosImageProcessing:
         frame: np.ndarray[Any, Any],
         station_id: str,
         edge_color_threshold: int,
-        target_pixel_brightness: float,
         save_images_to_archive: bool = False,
         save_current_image: bool = False,
     ) -> float:
