@@ -6,6 +6,10 @@ import numpy as np
 from PIL import Image
 from .helios_image_processing import HeliosImageProcessing
 
+_dir = os.path.dirname
+_PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
+_IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios")
+
 
 class OldHeliosImageProcessing:
     """Old class for processing images from the Helios camera (Pyra 4.0.X and 4.1.X).
@@ -175,5 +179,22 @@ class OldHeliosImageProcessing:
                 / pixels_inside_circle,
                 6,
             )
+
+        # optionally save images to local disk
+        if save_images_to_archive:
+            now = datetime.datetime.now()
+            img_directory_path = os.path.join(_IMG_DIR, now.strftime("%Y%m%d"))
+            if not os.path.exists(img_directory_path):
+                os.mkdir(img_directory_path)
+
+            raw_image = Image.fromarray((cv.cvtColor(bw_frame, cv.COLOR_GRAY2BGR)).astype(np.uint8))
+            processed_image = HeliosImageProcessing.annotate_processed_image(
+                edges_only_dilated, edge_fraction, *circle_location
+            )
+            assert image_name is not None
+            image_slug = os.path.join(img_directory_path, image_name)
+
+            raw_image.save(image_slug + "-raw.jpg")
+            processed_image.save(image_slug + "-processed.jpg")
 
         return edge_fraction
