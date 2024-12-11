@@ -276,6 +276,7 @@ class OpusThread(AbstractThread):
 
         measurement_start_time = time.time()
         last_successful_ping_time = time.time()
+        peak_position_has_been_set: bool = False
 
         if OpusProgram.is_running(logger):
             logger.info("OPUS is already running")
@@ -342,6 +343,17 @@ class OpusThread(AbstractThread):
                     OpusProgram.stop(logger, dde_connection)
                     dde_connection.teardown()
                     continue
+
+                # POSSIBLY SET PEAK POSITION
+
+                if opus_should_be_running and (not peak_position_has_been_set):
+                    try:
+                        OpusProgram.set_peak_position(config, logger)
+                        peak_position_has_been_set = True
+                    except ValueError:
+                        pass
+                if (not opus_should_be_running) and peak_position_has_been_set:
+                    peak_position_has_been_set = False
 
                 # IDLE AT NIGHT
 
@@ -476,3 +488,24 @@ class OpusThread(AbstractThread):
         time.sleep(2)
 
         OpusProgram.stop(logger, dde_connection)
+
+    @staticmethod
+    def set_peak_position(config: types.Config, logger: utils.Logger) -> None:
+        """Set the peak position based on the latest OPUS files.
+
+        The function throws a ValueError if the peak position cannot be set."""
+
+        # 1. find newest three OPUS files that are unloaded
+        pass
+
+        # 2. compute peak position of these files using the first channel
+        pass
+
+        # 3. compare the peak positions to each other
+        pass
+
+        # 4. compare the new peak position to the currently set peak position
+        pass
+
+        # 5. set new peak position if allclose
+        pass
