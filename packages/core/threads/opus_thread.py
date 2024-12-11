@@ -451,7 +451,19 @@ class OpusThread(AbstractThread):
 
                 # DETECT WHEN EM27 HAD A POWER CYCLE SINCE LAST PEAK POSITION CHECK
 
-                # TODO
+                if config.opus.automatic_peak_positioning and (
+                    last_peak_positioning_time is not None
+                ):
+                    last_em27_powerup_time = interfaces.EM27Interface.get_last_powerup_timestamp(
+                        config.opus.em27_ip
+                    )
+                    if last_em27_powerup_time is None:
+                        logger.info("Could not determine last powerup time of EM27")
+                    elif last_peak_positioning_time < (last_em27_powerup_time + 175):
+                        logger.info(
+                            "EM27 had a power cycle since the last peak positioning, repeating peak positioning in the next loop"
+                        )
+                        last_peak_positioning_time = None
 
                 # UPDATING STATE
 
