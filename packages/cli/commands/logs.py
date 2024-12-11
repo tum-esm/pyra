@@ -53,8 +53,7 @@ def _read_logs(level: str) -> None:
 # FIXME: remove this with the next breaking release
 @logs_command_group.command(
     name="archive",
-    help=
-    "Archive the current log files. This command will write all log lines from the current info.log and debug.log files into the logs/archive directory."
+    help="Archive the current log files. This command will write all log lines from the current info.log and debug.log files into the logs/archive directory.",
 )
 def _archive_logs() -> None:
     with interfaces.StateInterface.update_state() as s:
@@ -79,7 +78,7 @@ def split_log_files_by_origin(path: str) -> None:
 
     logger.info(f'running command "logs split-log-files-by-origin {path}"')
     line_with_origin_pattern = re.compile(
-        r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+ [^\s]+ \- ([\w\d\-_]+) \- '
+        r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+ [^\s]+ \- ([\w\d\-_]+) \- "
     )
     # 2024-10-09 01:40:16.089891 UTC+0 - enclosure-control -
 
@@ -94,7 +93,7 @@ def split_log_files_by_origin(path: str) -> None:
             continue
 
         print(f"Splitting {f}")
-        with open(f, 'r') as file:
+        with open(f, "r") as file:
             lines = file.read().strip(" \t\n").split("\n")
 
         data: dict[str, list[str]] = {}
@@ -120,5 +119,5 @@ def split_log_files_by_origin(path: str) -> None:
         for origin, lines in data.items():
             new_path = f"{f[:-4]}-{origin}.log"
             print(f"Writing logs subset to {new_path}")
-            with open(new_path, 'w') as file:
+            with open(new_path, "w") as file:
                 file.write("\n".join(lines))

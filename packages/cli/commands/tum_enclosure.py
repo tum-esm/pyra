@@ -86,9 +86,7 @@ def _reset() -> None:
 
 
 def _wait_until_cover_is_at_angle(
-    plc_interface: interfaces.TUMEnclosureInterface,
-    new_cover_angle: int,
-    timeout: float = 15
+    plc_interface: interfaces.TUMEnclosureInterface, new_cover_angle: int, timeout: float = 15
 ) -> None:
     # waiting until cover is at this angle
     running_time = 0
@@ -99,7 +97,7 @@ def _wait_until_cover_is_at_angle(
         if abs(new_cover_angle - current_cover_angle) <= 3:
             with interfaces.StateInterface.update_state() as state:
                 state.tum_enclosure_state.actors.current_angle = current_cover_angle
-                state.tum_enclosure_state.state.cover_closed = (current_cover_angle == 0)
+                state.tum_enclosure_state.state.cover_closed = current_cover_angle == 0
             break
 
         if running_time > timeout:

@@ -18,8 +18,7 @@ def _print_green(text: str) -> None:
 
 @click.command(
     name="remove-filelocks",
-    help=
-    "Remove all filelocks. Helpful when any of the programs crashed during writing to a file. Normally, this should not be necessary."
+    help="Remove all filelocks. Helpful when any of the programs crashed during writing to a file. Normally, this should not be necessary.",
 )
 def remove_filelocks() -> None:
     with interfaces.StateInterface.update_state() as s:

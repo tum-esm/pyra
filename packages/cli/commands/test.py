@@ -89,7 +89,7 @@ def _test_uploading() -> None:
         except Exception as e:
             logger.debug(f"Exception: {e}")
             _print_red(
-                "Upload user account does not have a home directory, " + "command \"ls ~\" failed"
+                "Upload user account does not have a home directory, " + 'command "ls ~" failed'
             )
             exit(1)
 
@@ -102,7 +102,7 @@ def _test_uploading() -> None:
         except Exception as e:
             logger.debug(f"Exception: {e}")
             _print_red(
-                "Python3.10 is not installed on upload server, " +
-                "command \"python3.10 --version\" failed"
+                "Python3.10 is not installed on upload server, "
+                + 'command "python3.10 --version" failed'
             )
             exit(1)

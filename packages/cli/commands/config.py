@@ -34,8 +34,7 @@ def _print_red(text: str) -> None:
 @config_command_group.command(
     name="get",
     short_help="Read the config.json file.",
-    help=
-    "Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence.",
+    help="Read the current config.json file. If it does not exist, use the config.default.json as the config.json. The command validates the structure of the config.json but skips verifying filepath existence.",
 )
 @click.option("--no-indent", default=False, is_flag=True)
 @click.option("--check-path-existence", default=False, is_flag=True)
@@ -49,8 +48,8 @@ def _get_config(
         time.sleep(2)
         if not os.path.isfile(_CONFIG_FILE_PATH):
             logger.info(
-                f'Config file not found at "{_CONFIG_FILE_PATH}". ' +
-                "Copying over default config file."
+                f'Config file not found at "{_CONFIG_FILE_PATH}". '
+                + "Copying over default config file."
             )
             shutil.copyfile(_DEFAULT_CONFIG_FILE_PATH, _CONFIG_FILE_PATH)
     try:
@@ -62,7 +61,7 @@ def _get_config(
     click.echo(
         click.style(
             config.model_dump_json(indent=None if no_indent else 4),
-            fg=None if no_color else "green"
+            fg=None if no_color else "green",
         )
     )
 
@@ -70,8 +69,7 @@ def _get_config(
 @config_command_group.command(
     name="update",
     short_help="Update the config.json file.",
-    help=
-    "Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
+    help="Update config. Only a subset of the required config variables has to be passed. The non-occuring values will be reused from the current config.\n\nThe required schema can be found in the documentation (user guide -> usage).",
 )
 @click.argument("content", default="{}")
 @tum_esm_utils.decorators.with_filelock(
@@ -118,8 +116,7 @@ def _update_config(content: str) -> None:
 
 @config_command_group.command(
     name="validate",
-    help=
-    "Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence."
+    help="Validate the current config.json file.\n\nThe required schema can be found in the documentation (user guide -> usage). This validation will check filepath existence.",
 )
 def _validate_current_config() -> None:
     try:

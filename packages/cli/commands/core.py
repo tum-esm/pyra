@@ -40,8 +40,7 @@ def core_command_group() -> None:
 
 @core_command_group.command(
     name="start",
-    help=
-    "Start pyra-core as a background process. Return the process id. Prevents spawning multiple processes."
+    help="Start pyra-core as a background process. Return the process id. Prevents spawning multiple processes.",
 )
 def _start_pyra_core() -> None:
     with interfaces.StateInterface.update_state() as s:
@@ -72,8 +71,7 @@ def _start_pyra_core() -> None:
 
 @core_command_group.command(
     name="stop",
-    help=
-    "Stop the pyra-core background process. Return the process id of terminated processes. This command will force quit the OPUS process."
+    help="Stop the pyra-core background process. Return the process id of terminated processes. This command will force quit the OPUS process.",
 )
 def _stop_pyra_core() -> None:
     with interfaces.StateInterface.update_state() as s:
@@ -89,8 +87,8 @@ def _stop_pyra_core() -> None:
         exit(0)
 
     _print_green(
-        f"Terminated {len(termination_pids)} pyra-core background " +
-        f"processe(s) with process ID(s) {termination_pids}"
+        f"Terminated {len(termination_pids)} pyra-core background "
+        + f"processe(s) with process ID(s) {termination_pids}"
     )
 
     config = types.Config.load(ignore_path_existence=True)
@@ -102,8 +100,9 @@ def _stop_pyra_core() -> None:
 
     if config.tum_enclosure is not None:
         _print_green("Running teardown for TUM enclosure")
-        current_cover_angle = interfaces.StateInterface.load_state(
-        ).tum_enclosure_state.actors.current_angle
+        current_cover_angle = (
+            interfaces.StateInterface.load_state().tum_enclosure_state.actors.current_angle
+        )
         if current_cover_angle == 0:
             _print_green("Cover is already closed")
         else:
@@ -128,8 +127,9 @@ def _stop_pyra_core() -> None:
     try:
         if threads.opus_thread.OpusProgram.is_running(opus_logger):
             dde_connection = threads.opus_thread.DDEConnection(opus_logger)
-            if ((state.opus_state.macro_filepath is not None) and
-                (state.opus_state.macro_id is not None)):
+            if (state.opus_state.macro_filepath is not None) and (
+                state.opus_state.macro_id is not None
+            ):
                 dde_connection.stop_macro(
                     state.opus_state.macro_filepath, state.opus_state.macro_id
                 )
