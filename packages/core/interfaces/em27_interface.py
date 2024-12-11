@@ -1,5 +1,7 @@
+import re
 from typing import Optional
 import tum_esm_utils
+import requests
 
 
 class EM27Interface:
@@ -10,8 +12,17 @@ class EM27Interface:
         """Get the peak position of the EM27.
 
         This reads the ABP value from the EM27 via http://{ip}/config/servmenuA.htm"""
-        # TODO
-        pass
+        body = (
+            requests.get(f"http://{ip.root}/config/servmenuA.htm")
+            .text.replace("\n", "")
+            .replace("\t", "")
+            .replace(" ", "")
+            .lower()
+        )
+        r = re.findall(r'<inputname="abp"value="(\d+)"', body)
+        if len(r) != 1:
+            return None
+        return int(r[0])
 
     @staticmethod
     def set_peak_position(ip: tum_esm_utils.validators.StrictIPv4Adress) -> Optional[int]:
