@@ -61,6 +61,7 @@ export namespace customTypes {
             start_time: { hour: number; minute: number; second: number };
             stop_time: { hour: number; minute: number; second: number };
             min_sun_elevation: number;
+            shutdown_grace_period: number;
         };
         tum_enclosure: null | {
             ip: string;
@@ -130,6 +131,7 @@ export namespace customTypes {
             start_time?: { hour?: number; minute?: number; second?: number };
             stop_time?: { hour?: number; minute?: number; second?: number };
             min_sun_elevation?: number;
+            shutdown_grace_period?: number;
         };
         tum_enclosure?: null | {
             ip?: string;

@@ -60,6 +60,7 @@ export const configSchema = z.object({
             second: intSchema,
         }),
         min_sun_elevation: floatSchema,
+        shutdown_grace_period: floatSchema,
     }),
     tum_enclosure: z
         .object({

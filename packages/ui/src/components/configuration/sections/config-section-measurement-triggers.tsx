@@ -74,6 +74,20 @@ export default function ConfigSectionMeasurementTriggers() {
                 Pyra may only do measurements, when sun angle is higher than this value. This angle
                 will only have an effect if it is higher than "general.min_sun_elevation".
             </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementText
+                title="Shutdown Grace Period"
+                value={localSectionConfig.shutdown_grace_period}
+                setValue={(v: number) =>
+                    setLocalConfigItem('measurement_triggers.shutdown_grace_period', v)
+                }
+                oldValue={centralSectionConfig.shutdown_grace_period}
+                postfix="second(s)"
+                numeric
+            />
+            <configurationComponents.ConfigElementNote>
+            How long to wait to stop measurements after the trigger conditions are not met anymore.
+            </configurationComponents.ConfigElementNote>
         </>
     );
 }

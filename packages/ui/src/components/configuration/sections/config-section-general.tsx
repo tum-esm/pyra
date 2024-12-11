@@ -40,7 +40,7 @@ export default function ConfigSectionGeneral() {
             />
             <configurationComponents.ConfigElementNote>
                 The TUM Enclosure Spectrometer will power up three degrees below. Helios will start
-                at this angle.
+                at this angle. Manual measurements will start at this angle.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
