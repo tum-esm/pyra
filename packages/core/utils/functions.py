@@ -40,7 +40,7 @@ def read_last_file_line(
 
 def find_most_recent_files(
     directory_path: str,
-    time_limit: int,
+    time_limit: float,
     time_indicator: Literal["created", "modified"],
 ) -> list[str]:
     """Find the most recently modified files in a directory.

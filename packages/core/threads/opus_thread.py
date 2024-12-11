@@ -2,8 +2,9 @@ import datetime
 import os
 import threading
 import time
-from typing import Optional
+from typing import Any, Optional
 
+import numpy as np
 import psutil
 import tum_esm_utils
 
@@ -446,7 +447,7 @@ class OpusThread(AbstractThread):
                             try:
                                 OpusThread.set_peak_position(config, logger)
                                 last_peak_positioning_time = time.time()
-                            except ValueError as e:
+                            except (ValueError, RuntimeError) as e:
                                 logger.error(f"Could not set peak position: {e}")
 
                 # DETECT WHEN EM27 HAD A POWER CYCLE SINCE LAST PEAK POSITION CHECK
@@ -525,9 +526,9 @@ class OpusThread(AbstractThread):
     def set_peak_position(config: types.Config, logger: utils.Logger) -> None:
         """Set the peak position based on the latest OPUS files.
 
-        The function throws a ValueError if the peak position cannot be set."""
+        The function throws a `ValueError` or `RuntimeError` if the peak position cannot be set."""
 
-        # 1. find newest three OPUS files that are unloaded
+        # find newest three readable OPUS files
         today = datetime.date.today()
         ifg_file_directory = (
             config.opus.interferogram_path.replace("%Y", f"{today.year}:4d")
@@ -538,19 +539,53 @@ class OpusThread(AbstractThread):
         if not os.path.exists(ifg_file_directory):
             raise ValueError(f"Directory {ifg_file_directory} does not exist")
 
-        most_recent_files = utils.find_most_recent_files(ifg_file_directory, 600)
+        # Only consider files created within the last 10 minutes
+        # and at least 1 minute after the last powerup of the EM27
+        last_em27_powerup_time = interfaces.EM27Interface.get_last_powerup_timestamp(
+            config.opus.em27_ip
+        )
+        if last_em27_powerup_time is None:
+            raise RuntimeError("Could not determine last powerup time of EM27")
+        time_since_powerup = time.time() - last_em27_powerup_time
+        most_recent_files = utils.find_most_recent_files(
+            ifg_file_directory,
+            time_limit=min(600, time_since_powerup - 60),
+            time_indicator="created",
+        )
 
-        # 2. compute peak position of these files using the first channel
-        pass
+        # compute peak position of these files using the first channel
+        latest_peak_positions: list[int] = []
+        for f in most_recent_files:
+            try:
+                ifg = tum_esm_utils.opus.OpusFile.read(f, read_all_channels=False).interferogram
+                assert ifg is not None
+                fwd_pass: np.ndarray[Any, Any] = ifg[0][: ifg.shape[1] // 2]
+                assert len(fwd_pass) == 114256, "Interferogram has wrong length"
+                computed_peak = int(np.argmax(fwd_pass))
+                ifg_center = fwd_pass.shape[0] // 2
+                assert abs(computed_peak - ifg_center) < 200, "Peak is too far off"
+                latest_peak_positions.append(computed_peak)
+            except:
+                pass
+            if len(latest_peak_positions) == 3:
+                break
+        if len(latest_peak_positions) < 3:
+            raise ValueError(
+                f"Could not read enough peak positions from interferograms (read {len(latest_peak_positions)}"
+            )
 
-        # 3. compare the peak positions to each other
-        pass
+        # compare the peak positions to each other
+        d01 = abs(latest_peak_positions[0] - latest_peak_positions[1])
+        d02 = abs(latest_peak_positions[0] - latest_peak_positions[2])
+        d12 = abs(latest_peak_positions[1] - latest_peak_positions[2])
+        if max(d01, d02, d12) > 10:
+            raise ValueError(f"Peak positions are too far apart: {latest_peak_positions}")
+        new_peak_position = round(sum(latest_peak_positions) / 3)
 
-        # 4. compare the new peak position to the currently set peak position
+        # set new peak position
         current_peak_position = interfaces.EM27Interface.get_peak_position(config.opus.em27_ip)
         if current_peak_position is None:
-            raise ValueError("Could not read the current peak position")
-        pass
+            raise RuntimeError("Could not read the current peak position")
 
-        # 5. set new peak position if allclose
-        pass
+        logger.info(f"Updating peak position from {current_peak_position} to {new_peak_position}")
+        interfaces.EM27Interface.set_peak_position(config.opus.em27_ip, new_peak_position)
