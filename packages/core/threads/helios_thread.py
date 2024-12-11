@@ -275,6 +275,7 @@ class HeliosInterface:
         target_pixel_brightness: int,
         save_images_to_archive: bool,
         save_current_image: bool,
+        lense_finder: LenseFinder,
     ) -> float:
         """Take an image and evaluate the sun conditions. Run autoexposure
         function every 5 minutes. Returns the edge fraction."""
@@ -295,16 +296,22 @@ class HeliosInterface:
             self.adjust_exposure()
 
         rgb_frame = self.take_image()
+        lense_finder.update_lense_position(rgb_frame)
+        lense = lense_finder.current_lense
+        if lense is None:
+            self.logger.warning("No lense found in image -> not evaluating edge fraction")
+            return 0.0
+
         edge_fraction = utils.HeliosImageProcessing.get_edge_fraction(
             rgb_frame=rgb_frame,
             station_id=station_id,
             edge_color_threshold=edge_color_threshold,
             target_pixel_brightness=self.target_pixel_brightness,
+            lense_circle=lense,
             save_images_to_archive=save_images_to_archive,
             save_current_image=save_current_image,
         )
         self.logger.debug(f"exposure = {self.current_exposure}, edge_fraction = {edge_fraction}")
-
         return edge_fraction
 
 
@@ -354,6 +361,7 @@ class HeliosThread(AbstractThread):
         config = types.Config.load()
         assert config.helios is not None, "This is a bug in Pyra"
         helios_instance: Optional[HeliosInterface] = None
+        lense_finder = LenseFinder(logger)
 
         # a list storing the last n calculated edge fractions
         edge_fraction_history = tum_esm_utils.datastructures.RingList(
@@ -434,6 +442,7 @@ class HeliosThread(AbstractThread):
                         target_pixel_brightness=config.helios.target_pixel_brightness,
                         save_images_to_archive=(config.helios.save_images_to_archive),
                         save_current_image=(config.helios.save_current_image),
+                        lense_finder=lense_finder,
                     )
                     repeated_camera_error_count = 0
                 except CameraError as e:

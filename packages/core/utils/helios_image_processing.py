@@ -42,7 +42,7 @@ class HeliosImageProcessing:
     def get_lense_position(
         frame: np.ndarray[Any, Any],
         use_downscaling: bool = False,
-    ) -> Optional[tuple[float, float, float]]:
+    ) -> Optional[tuple[int, int, int]]:
         """Determine the position of the lense in the image."""
 
         bw_frame = skimage.color.rgb2gray(frame)
@@ -93,9 +93,9 @@ class HeliosImageProcessing:
 
         multiplier = 2 if use_downscaling else 1
         return (
-            cx[best_circle_index] * multiplier,
-            cy[best_circle_index] * multiplier,
-            radii[best_circle_index] * multiplier,
+            round(cx[best_circle_index] * multiplier),
+            round(cy[best_circle_index] * multiplier),
+            round(radii[best_circle_index] * multiplier),
         )
 
     @staticmethod
