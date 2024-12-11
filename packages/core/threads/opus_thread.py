@@ -150,7 +150,7 @@ class DDEConnection:
         answer = self.request(f"RUN_MACRO {macro_path}", expect_ok=True)
         return int(answer[1])
 
-    def stop_macro(self, macro_path: str, macro_id: int) -> None:
+    def stop_macro(self, macro_id: int, macro_path: str) -> None:
         """Stop a macro in OPUS."""
         self.request(f"KILL_MACRO {os.path.basename(macro_path)}", expect_ok=True)
         tum_esm_utils.timing.wait_for_condition(
@@ -267,47 +267,44 @@ class OpusThread(AbstractThread):
     def main(headless: bool = False) -> None:
         logger = utils.Logger(origin=ORIGIN)
 
-        current_experiment_filepath: Optional[str] = None
-        current_macro_id_and_filepath: Optional[tuple[str, int]] = None
+        current_experiment: Optional[str] = None  # filepath
+        current_macro: Optional[tuple[int, str]] = None  # id and filepath
         dde_connection = DDEConnection(logger)
 
         logger.info("Loading state file")
         state = interfaces.StateInterface.load_state()
-        thread_start_time = time.time()
 
-        measurement_start_time = time.time()
+        thread_start_time = time.time()
         last_successful_ping_time = time.time()
-        peak_position_has_been_set: bool = False
+        last_measurement_start_time: Optional[float] = None
+        last_peak_positioning_time: Optional[float] = None
+
+        # CHECK IF OPUS IS ALREADY RUNNING
+        # ONLY RESTART IF THERE IS AN UNIDENTIFIED MACRO RUNNING
 
         if OpusProgram.is_running(logger):
             logger.info("OPUS is already running")
 
             dde_connection.setup()
+            current_experiment = dde_connection.get_loaded_experiment()
+
             if dde_connection.some_macro_is_running():
                 logger.info("Some macro is already running")
+                mid = state.opus_state.macro_id
+                mfp = state.opus_state.macro_filepath
 
-                if state.opus_state.macro_id is None:
+                if (mid is None) or (mfp is None) or (not dde_connection.macro_is_running(mid)):
                     logger.info("Macro ID is unknown, stopping OPUS entirely")
                     OpusProgram.stop(logger, dde_connection)
                 else:
-                    if dde_connection.macro_is_running(state.opus_state.macro_id):
-                        logger.info("The Macro started by Pyra is still running, nothing to do")
-                        current_experiment_filepath = dde_connection.get_loaded_experiment()
-                        current_macro_filepath = state.opus_state.macro_filepath
-                        current_macro_id = state.opus_state.macro_id
-
-                    else:
-                        logger.info(
-                            "The Macro running in OPUS is not the one started by Pyra, stopping OPUS entirely"
-                        )
-                        OpusProgram.stop(logger, dde_connection)
-            else:
-                current_experiment_filepath = dde_connection.get_loaded_experiment()
+                    logger.info("The Macro started by Pyra is still running, nothing to do")
+                    current_macro = (mid, mfp)
+                    last_measurement_start_time = time.time()
 
         with interfaces.StateInterface.update_state() as state:
-            state.opus_state.experiment_filepath = current_experiment_filepath
-            state.opus_state.macro_filepath = current_macro_filepath
-            state.opus_state.macro_id = current_macro_id
+            state.opus_state.experiment_filepath = current_experiment
+            state.opus_state.macro_id = None if current_macro is None else current_macro[0]
+            state.opus_state.macro_filepath = None if current_macro is None else current_macro[1]
 
         while True:
             try:
@@ -315,48 +312,37 @@ class OpusThread(AbstractThread):
                 config = types.Config.load()
                 t1 = time.time()
 
-                # START AND OPUS
-
                 opus_should_be_running = (
                     utils.Astronomy.get_current_sun_elevation(config)
                     >= config.general.min_sun_elevation
                 )
+
+                # START OPUS
+
                 if opus_should_be_running and (not OpusProgram.is_running(logger)):
-                    logger.info("OPUS should be running")
+                    logger.info("OPUS should be running, starting OPUS")
                     OpusProgram.start(config, logger)
                     dde_connection.setup()
                     continue
+
+                # STOP OPUS
+
                 if (not opus_should_be_running) and OpusProgram.is_running(logger):
-                    logger.info("OPUS should not be running")
-                    if current_macro_id_and_filepath is not None:
-                        if dde_connection.macro_is_running(current_macro_id_and_filepath[1]):
-                            logger.info("Stopping macro")
-                            dde_connection.stop_macro(
-                                current_macro_id_and_filepath[0], current_macro_id_and_filepath[1]
-                            )
-                            current_macro_id_and_filepath = None
-                            with interfaces.StateInterface.update_state() as state:
-                                state.opus_state.macro_filepath = None
-                                state.opus_state.macro_id = None
-                    else:
-                        current_macro_id_and_filepath = None
+                    logger.info("OPUS should not be running, stopping OPUS")
+                    if current_macro is None:
                         logger.info("No macro to stop")
+                    else:
+                        if dde_connection.macro_is_running(current_macro[0]):
+                            logger.info("Stopping macro")
+                            dde_connection.stop_macro(*current_macro)
+                            current_macro = None
+                            with interfaces.StateInterface.update_state() as state:
+                                state.opus_state.macro_id = None
+                                state.opus_state.macro_filepath = None
+
                     OpusProgram.stop(logger, dde_connection)
                     dde_connection.teardown()
                     continue
-
-                # POSSIBLY SET PEAK POSITION
-
-                if config.opus.automatic_peak_positioning:
-                    if opus_should_be_running and (not peak_position_has_been_set):
-                        logger.info("Trying to set peak position")
-                        try:
-                            OpusProgram.set_peak_position(config, logger)
-                            peak_position_has_been_set = True
-                        except ValueError as e:
-                            logger.error(f"Could not set peak position: {e}")
-                    if (not opus_should_be_running) and peak_position_has_been_set:
-                        peak_position_has_been_set = False
 
                 # IDLE AT NIGHT
 
@@ -365,92 +351,113 @@ class OpusThread(AbstractThread):
                     time.sleep(180)
                     continue
 
-                # LOAD EXPERIMENT
+                # LOAD CORRECT EXPERIMENT
 
-                if config.opus.experiment_path.root != current_experiment_filepath:
-                    if current_experiment_filepath is None:
+                if config.opus.experiment_path.root != current_experiment:
+                    if current_experiment is None:
                         logger.info("Loading experiment")
                     else:
                         logger.info("Experiment file has changed, loading new experiment")
                     dde_connection.load_experiment(config.opus.experiment_path.root)
-                    current_experiment_filepath = config.opus.experiment_path.root
-                    logger.info(f"Experiment file {current_experiment_filepath} was loaded")
+                    current_experiment = config.opus.experiment_path.root
+                    logger.info(f"Experiment file {current_experiment} was loaded")
                     with interfaces.StateInterface.update_state() as state:
-                        state.opus_state.experiment_filepath = current_experiment_filepath
+                        state.opus_state.experiment_filepath = current_experiment
 
                 # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
 
                 state = interfaces.StateInterface.load_state()
                 measurements_should_be_running = bool(state.measurements_should_be_running)
                 if measurements_should_be_running:
+                    # only measure if cover is open
                     if state.tum_enclosure_state.actors.current_angle is not None:
-                        cover_is_open = 20 < state.tum_enclosure_state.actors.current_angle < 340
-                        if not cover_is_open:
-                            measurements_should_be_running = False
+                        measurements_should_be_running = (
+                            20 < state.tum_enclosure_state.actors.current_angle < 340
+                        )
+
+                # PING EM27 EVERY 5 MINUTES
 
                 if measurements_should_be_running:
-                    if measurement_start_time < (time.time() - 60):
-                        if last_successful_ping_time < (time.time() - 300):
-                            logger.info("Pinging EM27")
-                            tum_esm_utils.timing.wait_for_condition(
-                                is_successful=lambda: os.system(
-                                    "ping -n 3 " + config.opus.em27_ip.root
-                                )
-                                == 0,
-                                timeout_seconds=90,
-                                timeout_message="EM27 did not respond to ping within 90 seconds.",
-                                check_interval_seconds=9,
-                            )
-                            logger.info("Successfully pinged EM27")
+                    if last_successful_ping_time < (time.time() - 300):
+                        logger.info("Pinging EM27")
+                        tum_esm_utils.timing.wait_for_condition(
+                            is_successful=lambda: os.system("ping -n 3 " + config.opus.em27_ip.root)
+                            == 0,
+                            timeout_seconds=90,
+                            timeout_message="EM27 did not respond to ping within 90 seconds.",
+                            check_interval_seconds=9,
+                        )
+                        last_successful_ping_time = time.time()
+                        logger.info("Successfully pinged EM27")
 
-                # CHECK IF MACRO HAS CRASHED
+                # STARTING MACRO
 
-                if thread_start_time < (time.time() - 60):
-                    if current_macro_id_and_filepath is not None:
-                        if not dde_connection.macro_is_running(current_macro_id_and_filepath[1]):
-                            raise RuntimeError("Macro has stopped/crashed")
+                if measurements_should_be_running and (current_macro is None):
+                    logger.info("Starting macro")
+                    mid = dde_connection.start_macro(config.opus.macro_path.root)
+                    current_macro = (mid, config.opus.macro_path.root)
+                    logger.info(f"Successfully started Macro {current_macro[1]}")
+                    last_measurement_start_time = time.time()
 
-                # STARTING MACRO / STOPPING MACRO WHEN MACRO FILE CHANGES
+                # STOPPING MACRO WHEN MACRO FILE CHANGES
 
-                if measurements_should_be_running:
-                    if current_macro_id_and_filepath is None:
-                        logger.info("Starting macro")
-                        mid = dde_connection.start_macro(config.opus.macro_path.root)
-                        current_macro_id_and_filepath = (config.opus.macro_path.root, mid)
-                        logger.info(f"Successfully started Macro {config.opus.macro_path.root}")
-                        measurement_start_time = time.time()
-                    else:
-                        if config.opus.macro_path.root != current_macro_id_and_filepath[0]:
-                            logger.info("Macro file has changed, stopping macro")
-                            dde_connection.stop_macro(*current_macro_id_and_filepath)
-                            current_macro_id_and_filepath = None
-                            logger.info("Successfully stopped Macro")
+                if measurements_should_be_running and (current_macro is not None):
+                    if config.opus.macro_path.root != current_macro[1]:
+                        logger.info("Macro file has changed, stopping macro")
+                        dde_connection.stop_macro(current_macro)
+                        current_macro = None
+                        last_measurement_start_time = None
+                        logger.info("Successfully stopped Macro")
 
                 # STOPPING MACRO
 
-                if (not measurements_should_be_running) and (
-                    current_macro_id_and_filepath is not None
-                ):
+                if (not measurements_should_be_running) and (current_macro is not None):
                     logger.info("Stopping macro")
-                    dde_connection.stop_macro(*current_macro_id_and_filepath)
-                    current_macro_id_and_filepath = None
+                    dde_connection.stop_macro(*current_macro)
+                    current_macro = None
+                    last_measurement_start_time = None
                     logger.info("Successfully stopped Macro")
+
+                # CHECK IF MACRO HAS CRASHED
+
+                if current_macro is not None:
+                    assert last_measurement_start_time is not None
+                    if (time.time() - last_measurement_start_time) > 60:
+                        if dde_connection.macro_is_running(current_macro[0]):
+                            logger.debug("Macro is running as expected")
+                        else:
+                            raise RuntimeError("Macro has stopped/crashed")
+
+                # POSSIBLY SET PEAK POSITION
+
+                if config.opus.automatic_peak_positioning and (last_peak_positioning_time is None):
+                    if current_macro is not None:
+                        logger.info("Trying to set peak position")
+                        try:
+                            OpusThread.set_peak_position(config, logger)
+                            last_peak_positioning_time = time.time()
+                        except ValueError as e:
+                            logger.error(f"Could not set peak position: {e}")
+
+                # DETECT WHEN EM27 HAD A POWER CYCLE SINCE LAST PEAK POSITION CHECK
+
+                # TODO
 
                 # UPDATING STATE
 
-                clear_issues = thread_start_time < (time.time() - 180)
+                clear_issues = (time.time() - thread_start_time) >= 180
                 if not clear_issues:
                     logger.info(
                         "Waiting for thread to run for 3 minutes before clearing exceptions"
                     )
 
                 with interfaces.StateInterface.update_state() as state:
-                    if current_macro_id_and_filepath is not None:
-                        state.opus_state.macro_filepath = current_macro_id_and_filepath[0]
-                        state.opus_state.macro_id = current_macro_id_and_filepath[1]
-                    else:
-                        state.opus_state.macro_filepath = None
+                    if current_macro is None:
                         state.opus_state.macro_id = None
+                        state.opus_state.macro_filepath = None
+                    else:
+                        state.opus_state.macro_id = current_macro[0]
+                        state.opus_state.macro_filepath = current_macro[1]
                     if clear_issues:
                         state.exceptions_state.clear_exception_origin(ORIGIN)
 
@@ -465,8 +472,8 @@ class OpusThread(AbstractThread):
                 logger.exception(e)
                 OpusProgram.stop(logger, dde_connection)
                 with interfaces.StateInterface.update_state() as state:
-                    state.opus_state.macro_filepath = None
                     state.opus_state.macro_id = None
+                    state.opus_state.macro_filepath = None
                     state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
@@ -487,7 +494,7 @@ class OpusThread(AbstractThread):
         time.sleep(5)
         assert dde_connection.macro_is_running(macro_id), "Macro is not running"
 
-        dde_connection.stop_macro(config.opus.macro_path.root, macro_id)
+        dde_connection.stop_macro(macro_id, config.opus.macro_path.root)
         time.sleep(2)
 
         OpusProgram.stop(logger, dde_connection)
