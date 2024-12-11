@@ -201,9 +201,6 @@ class HeliosImageProcessing:
         if save_images_to_archive or save_current_image:
             now = datetime.datetime.now()
             img_timestamp = now.strftime("%Y%m%d-%H%M%S")
-            img_directory_path = os.path.join(_IMG_DIR, now.strftime("%Y%m%d"))
-            if not os.path.exists(img_directory_path):
-                os.mkdir(img_directory_path)
 
             edge_fraction_str = str(edge_fraction) + ("0" * (8 - len(str(edge_fraction))))
             raw_image = Image.fromarray((skimage.color.gray2rgb(evenly_lit_frame)).astype(np.uint8))
@@ -213,6 +210,8 @@ class HeliosImageProcessing:
 
             # used in post-analysis
             if save_images_to_archive:
+                img_directory_path = os.path.join(_IMG_DIR, now.strftime("%Y%m%d"))
+                os.makedirs(img_directory_path, exist_ok=True)
                 image_slug = os.path.join(
                     img_directory_path, f"{station_id}-{img_timestamp}-{edge_fraction_str}"
                 )
