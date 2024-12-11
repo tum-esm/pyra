@@ -17,8 +17,9 @@ class HeliosImageProcessing:
     See https://pyra.esm.ei.tum.de/docs/user-guide/tum-enclosure-and-helios#what-does-helios-do
     for more information on Helios."""
 
+    @staticmethod
     def _get_lense_crop_contrast(
-        image: np.ndarray,
+        image: np.ndarray[Any, Any],
         cx: float,
         cy: float,
         radius: float,
@@ -27,14 +28,17 @@ class HeliosImageProcessing:
         this function returns the difference in mean color between the two parts."""
 
         rr, cc = skimage.draw.disk((cy, cx), radius, shape=image.shape)
-        inner_mask = np.zeros(image.shape, dtype=np.uint8)
+        inner_mask: np.ndarray[Any, Any] = np.zeros(image.shape, dtype=np.uint8)
         inner_mask[rr, cc] = 1
-        outer_mask = np.ones(image.shape, dtype=np.uint8) - inner_mask
-        return abs(
-            (np.sum(image * inner_mask) / np.sum(inner_mask))
-            - (np.sum(image * outer_mask) / np.sum(outer_mask))
+        outer_mask: np.ndarray[Any, Any] = np.ones(image.shape, dtype=np.uint8) - inner_mask
+        return float(
+            abs(
+                (np.sum(image * inner_mask) / np.sum(inner_mask))
+                - (np.sum(image * outer_mask) / np.sum(outer_mask))
+            )
         )
 
+    @staticmethod
     def get_lense_position(
         frame: np.ndarray[Any, Any],
         use_downscaling: bool = False,
@@ -158,16 +162,18 @@ class HeliosImageProcessing:
         and 0 otherwise."""
 
         # convert the image to black and white
-        bw_frame: np.ndarray = skimage.color.rgb2gray(rgb_frame)
+        bw_frame: np.ndarray[Any, Any] = skimage.color.rgb2gray(rgb_frame)
 
         # adjust the brightness of the frame to a target value
-        evenly_lit_frame: np.ndarray = bw_frame * (target_pixel_brightness / np.mean(bw_frame))
+        evenly_lit_frame: np.ndarray[Any, Any] = bw_frame * (
+            target_pixel_brightness / np.mean(bw_frame)
+        )
 
         # transform image from 1280x720 to 640x360
         # downscaled_image: np.ndarray = skimage.transform.rescale(evenly_lit_frame, 0.5)
 
         # only consider edges and make them bold
-        edges_dilated: np.ndarray = skimage.morphology.dilation(
+        edges_dilated: np.ndarray[Any, Any] = skimage.morphology.dilation(
             skimage.feature.canny(
                 evenly_lit_frame,
                 sigma=7,

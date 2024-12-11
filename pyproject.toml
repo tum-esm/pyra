@@ -25,6 +25,7 @@ dependencies = [
     "tum-esm-utils[opus]>=2.5.0",
     "scikit-image>=0.24.0",
     "pillow>=11.0.0",
+    "requests>=2.32.3",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"
@@ -42,6 +43,7 @@ dev = [
     "types-invoke>=2.0.0.10",
     "pytest-order>=1.2.1",
     "ruff>=0.8.2",
+    "types-requests>=2.32.0.20241016",
 ]
 
 [tool.ruff]
@@ -55,6 +57,7 @@ exclude = ["tests/*"]
 strict = true
 implicit_reexport = true
 warn_unused_ignores = false
+untyped_calls_exclude = ["skimage"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
@@ -69,6 +72,7 @@ module = [
     "fabric.*",
     "brukeropus",
     "brukeropus.*",
+    "skimage.*",
 ]
 ignore_missing_imports = true
 
@@ -78,7 +82,10 @@ filterwarnings = [
     'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
     'ignore:getargs:DeprecationWarning',
 ]
-markers = ["ci: can be run in a CI environment", "integration: can only be run on a configured system"]
+markers = [
+    "ci: can be run in a CI environment",
+    "integration: can only be run on a configured system",
+]
 
 [tool.pdm.options]
 add = ["--no-self"]

@@ -404,7 +404,7 @@ class OpusThread(AbstractThread):
                 if measurements_should_be_running and (current_macro is not None):
                     if config.opus.macro_path.root != current_macro[1]:
                         logger.info("Macro file has changed, stopping macro")
-                        dde_connection.stop_macro(current_macro)
+                        dde_connection.stop_macro(*current_macro)
                         current_macro = None
                         last_measurement_start_time = None
                         logger.info("Successfully stopped Macro")

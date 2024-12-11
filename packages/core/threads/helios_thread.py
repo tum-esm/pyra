@@ -10,7 +10,7 @@ import pydantic
 import tum_esm_utils
 
 from packages.core import interfaces, types, utils
-
+from PIL import Image, ImageDraw
 from .abstract_thread import AbstractThread
 
 _dir = os.path.dirname
@@ -179,13 +179,13 @@ class HeliosInterface:
             mean_colors: list[float] = []
             for i in range(_NUMBER_OF_EXPOSURE_IMAGES):
                 time.sleep(0.1)
-                img: Any = self.take_image(trow_away_white_images=False)
-                mean_colors.append(round(float(np.mean(img)), 3))
-                img = utils.HeliosImageProcessing.add_text_to_image(
-                    img, f"mean={mean_colors[-1]}", color=(0, 0, 255)
-                )
-                cv.imwrite(
-                    os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i+1}.jpg"), img
+                rgb_frame: Any = self.take_image(trow_away_white_images=False)
+                mean_colors.append(round(float(np.mean(rgb_frame)), 3))
+                pil_image = Image.fromarray((rgb_frame * 255).astype(np.uint8))
+                draw = ImageDraw.Draw(pil_image)
+                draw.text((10, 10), f"mean={mean_colors[-1]}", (255, 255, 255), font_size=25)
+                pil_image.save(
+                    os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i+1}.jpg")
                 )
 
             # calculate mean color of all 3 images
@@ -237,10 +237,9 @@ class HeliosInterface:
             self.last_autoexposure_time = now
             self.adjust_exposure()
 
-        frame = self.take_image()
-
+        rgb_frame = self.take_image()
         edge_fraction = utils.HeliosImageProcessing.get_edge_fraction(
-            frame=frame,
+            rgb_frame=rgb_frame,
             station_id=station_id,
             edge_color_threshold=edge_color_threshold,
             target_pixel_brightness=self.target_pixel_brightness,
@@ -250,6 +249,9 @@ class HeliosInterface:
         self.logger.debug(f"exposure = {self.current_exposure}, edge_fraction = {edge_fraction}")
 
         return edge_fraction
+
+
+# TODO: add lense finding logic
 
 
 class HeliosThread(AbstractThread):

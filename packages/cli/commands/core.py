@@ -131,7 +131,7 @@ def _stop_pyra_core() -> None:
                 state.opus_state.macro_id is not None
             ):
                 dde_connection.stop_macro(
-                    state.opus_state.macro_filepath, state.opus_state.macro_id
+                    state.opus_state.macro_id, state.opus_state.macro_filepath
                 )
             threads.opus_thread.OpusProgram.stop(opus_logger, dde_connection)
             _print_green("Successfully closed OPUS")
