@@ -35,6 +35,8 @@ export namespace customTypes {
             macro_path: string;
             username: string;
             password: string;
+            automatic_peak_positioning: boolean;
+            interferogram_path: string;
         };
         camtracker: {
             config_path: string;
@@ -105,6 +107,8 @@ export namespace customTypes {
             macro_path?: string;
             username?: string;
             password?: string;
+            automatic_peak_positioning?: boolean;
+            interferogram_path?: string;
         };
         camtracker?: {
             config_path?: string;

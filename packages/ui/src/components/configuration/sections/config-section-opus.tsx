@@ -82,6 +82,27 @@ export default function ConfigSectionOpus() {
                 setValue={(v: string) => setLocalConfigItem('opus.password', v)}
                 oldValue={centralSectionConfig.password}
             />
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementBooleanToggle
+                title="Use Automatic Peak Positioning"
+                value={localSectionConfig.automatic_peak_positioning}
+                setValue={(v: boolean) => setLocalConfigItem(`opus.automatic_peak_positioning`, v)}
+                oldValue={centralSectionConfig.automatic_peak_positioning}
+            />
+            <configurationComponents.ConfigElementText
+                title="Interferogram Path"
+                value={localSectionConfig.interferogram_path}
+                setValue={(v: string) => setLocalConfigItem('opus.interferogram_path', v)}
+                oldValue={centralSectionConfig.interferogram_path}
+                showSelector="directory"
+            />
+            <configurationComponents.ConfigElementNote>
+                The Interferogram path should point to the directory containing today's interferograms
+                files. You can use the wildcards '%Y', '%y', '%m', '%d' that will be replaced by the
+                current date. Refer to the documentation for this 'automatic peak positioning'. Do not
+                attach a '*' to the end - after replacing the date, it should point to exactly one
+                directory.
+            </configurationComponents.ConfigElementNote>
         </>
     );
 }

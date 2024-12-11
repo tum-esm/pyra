@@ -21,6 +21,8 @@ export const configSchema = z.object({
         macro_path: z.string(),
         username: z.string(),
         password: z.string(),
+        automatic_peak_positioning: z.boolean(),
+        interferogram_path: z.string(),
     }),
     camtracker: z.object({
         config_path: z.string(),
