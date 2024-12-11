@@ -346,14 +346,16 @@ class OpusThread(AbstractThread):
 
                 # POSSIBLY SET PEAK POSITION
 
-                if opus_should_be_running and (not peak_position_has_been_set):
-                    try:
-                        OpusProgram.set_peak_position(config, logger)
-                        peak_position_has_been_set = True
-                    except ValueError:
-                        pass
-                if (not opus_should_be_running) and peak_position_has_been_set:
-                    peak_position_has_been_set = False
+                if config.opus.automatic_peak_positioning:
+                    if opus_should_be_running and (not peak_position_has_been_set):
+                        logger.info("Trying to set peak position")
+                        try:
+                            OpusProgram.set_peak_position(config, logger)
+                            peak_position_has_been_set = True
+                        except ValueError as e:
+                            logger.error(f"Could not set peak position: {e}")
+                    if (not opus_should_be_running) and peak_position_has_been_set:
+                        peak_position_has_been_set = False
 
                 # IDLE AT NIGHT
 

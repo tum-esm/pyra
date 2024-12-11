@@ -13,7 +13,7 @@
     "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx",
     "username": "Default",
     "password": "...",
-    "automatic_peak_positioning": true,
+    "automatic_peak_positioning": false,
     "interferogram_path": ""
   },
   "camtracker": {
