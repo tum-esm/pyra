@@ -20,6 +20,63 @@ _NUMBER_OF_EXPOSURE_IMAGES = 3
 ORIGIN = "helios"
 
 
+class LenseFinder:
+    def __init__(self, logger: utils.Logger) -> None:
+        self.logger = logger
+        self._previous_lense: Optional[tuple[int, int, int]] = None
+        self._lense: Optional[tuple[int, int, int]] = None
+        self._last_update: Optional[float] = None
+
+    def update_lense_position(self, rgb_frame: np.ndarray[Any, Any]) -> None:
+        # only update every 3 minutes
+        if (self._last_update is not None) and ((time.time() - self._last_update) < 180):
+            return
+
+        # use three lense positions to determine the next position
+        previous, current = self._previous_lense, self._lense
+        new = utils.HeliosImageProcessing.get_lense_position(rgb_frame, use_downscaling=True)
+
+        # don't update if no lense was found
+        if new is None:
+            self.logger.debug("No lense found in image -> not updating")
+            return
+
+        # simply update if no two previous lenses are available
+        if (previous is None) or (current is None):
+            self._previous_lense, self._lense, self._last_update = current, new, time.time()
+            self.logger.debug("No previous lense available -> updating")
+            return
+
+        # update if new lense is close to current lense
+        if (
+            max(
+                abs(new[0] - current[0]),
+                abs(new[1] - current[1]),
+                abs(new[2] - current[2]),
+            )
+            <= 5
+        ):
+            self._previous_lense, self._lense, self._last_update = current, new, time.time()
+            self.logger.debug("New lense is close to current lense -> updating")
+            return
+
+        # update anyway if fit is not stable yet
+        if (
+            max(
+                abs(current[0] - previous[0]),
+                abs(current[1] - previous[1]),
+                abs(current[2] - previous[2]),
+            )
+            > 5
+        ):
+            self._previous_lense, self._lense, self._last_update = current, new, time.time()
+            self.logger.debug("Current lense is very different from previous lense -> updating")
+
+    @property
+    def current_lense(self) -> Optional[tuple[int, int, int]]:
+        return self._lense
+
+
 class CameraError(Exception):
     pass
 
