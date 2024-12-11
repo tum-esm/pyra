@@ -25,9 +25,11 @@ class EM27Interface:
         return int(r[0])
 
     @staticmethod
-    def set_peak_position(ip: tum_esm_utils.validators.StrictIPv4Adress) -> Optional[int]:
+    def set_peak_position(
+        ip: tum_esm_utils.validators.StrictIPv4Adress,
+        new_peak_position: int,
+    ) -> None:
         """Set the peak position of the EM27.
 
         It is equivalent to setting the ABP via http://{ip}/config/servmenuA.htm"""
-        # TODO
-        pass
+        requests.get(f"http://{ip.root}/config/servmenuA.htm?sub=Send^&ABP={new_peak_position}^")
