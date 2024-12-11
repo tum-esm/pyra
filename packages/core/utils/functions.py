@@ -2,6 +2,7 @@ import datetime
 import glob
 import os
 import time
+from typing import Literal
 
 
 def read_last_file_line(
@@ -37,7 +38,11 @@ def read_last_file_line(
         return last_line.decode().strip()[::-1]
 
 
-def find_most_recent_files(directory_path: str, time_limit: int) -> list[str]:
+def find_most_recent_files(
+    directory_path: str,
+    time_limit: int,
+    time_indicator: Literal["created", "modified"],
+) -> list[str]:
     """Find the most recently modified files in a directory.
 
     Args:
@@ -49,15 +54,16 @@ def find_most_recent_files(directory_path: str, time_limit: int) -> list[str]:
         (the most recent first) and only including files modified within the
         time limit.
     """
+    if time_limit <= 0:
+        return []
+
     current_timestamp = time.time()
     files = [f for f in glob.glob(os.path.join(directory_path, "*")) if os.path.isfile(f)]
     modification_times = [os.path.getmtime(f) for f in files]
+    creation_times = [os.path.getctime(f) for f in files]
+    times = modification_times if time_indicator == "modified" else creation_times
     merged = sorted(
-        [
-            (f, t)
-            for f, t in list(zip(files, modification_times))
-            if t >= (current_timestamp - time_limit)
-        ],
+        [(f, t) for f, t in list(zip(files, times)) if t >= (current_timestamp - time_limit)],
         key=lambda x: x[1],
         reverse=True,
     )
