@@ -57,6 +57,14 @@ class OpusConfig(StricterBaseModel):
     macro_path: tum_esm_utils.validators.StrictFilePath
     username: str
     password: str
+    automatic_peak_positioning: bool = pydantic.Field(
+        ..., description="Whether to use automatic peak positioning"
+    )
+    interferogram_path: str = pydantic.Field(
+        ...,
+        description="Path to the directory containing today's interferograms files. You can use the wildcards '%Y', '%y', '%m', '%d' that will be replaced on the current date. Refer to the documentation for this 'automatic peak positioning'. Do not attach a '*' to the end - after replacing the date, it should point to exactly one directory.",
+        examples=["/path/to/interferograms/%Y-%m-%d"],
+    )
 
 
 class PartialOpusConfig(StricterBaseModel):
@@ -68,6 +76,8 @@ class PartialOpusConfig(StricterBaseModel):
     macro_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
     username: Optional[str] = None
     password: Optional[str] = None
+    automatic_peak_positioning: Optional[bool] = None
+    interferogram_path: Optional[str] = None
 
 
 class CamtrackerConfig(StricterBaseModel):

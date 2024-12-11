@@ -12,7 +12,9 @@
     "experiment_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\XPM\\experiment.xpm",
     "macro_path": "C:\\Users\\Public\\Documents\\Bruker\\OPUS_7.8.44\\Macro\\macro.mtx",
     "username": "Default",
-    "password": "..."
+    "password": "...",
+    "automatic_peak_positioning": true,
+    "interferogram_path": ""
   },
   "camtracker": {
     "config_path": "C:\\Users\\Public\\Documents\\Bruker\\camtracker_3_9_1_0\\CamTrackerConfig.txt",

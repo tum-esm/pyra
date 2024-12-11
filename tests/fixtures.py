@@ -22,6 +22,8 @@ SAMPLE_CONFIG = types.Config(
         macro_path=EXISTING_TEST_FILE_PATH,
         username="Default",
         password="...",
+        automatic_peak_positioning=True,
+        interferogram_path="",
     ),
     camtracker=types.config.CamtrackerConfig(
         config_path=EXISTING_TEST_FILE_PATH,
