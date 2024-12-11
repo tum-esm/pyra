@@ -565,7 +565,7 @@ class OpusThread(AbstractThread):
                 ifg_center = fwd_pass.shape[0] // 2
                 assert abs(computed_peak - ifg_center) < 200, "Peak is too far off"
                 latest_peak_positions.append(computed_peak)
-            except:
+            except Exception:
                 pass
             if len(latest_peak_positions) == 3:
                 break

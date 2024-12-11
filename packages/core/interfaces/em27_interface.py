@@ -16,7 +16,7 @@ class EM27Interface:
         This reads the ABP value from the EM27 via http://{ip}/config/servmenuA.htm"""
         try:
             raw_body = requests.get(f"http://{ip.root}/config/servmenuA.htm", timeout=3)
-        except:
+        except Exception:
             return None
         body = raw_body.text.replace("\n", "").replace("\t", "").replace(" ", "").lower()
         r: list[str] = re.findall(r'<inputname="abp"value="(\d+)"', body)
@@ -49,7 +49,7 @@ class EM27Interface:
         This reads the ABP value from the EM27 via http://{ip}/config/cfg_ctrler.htm"""
         try:
             raw_body = requests.get(f"http://{ip.root}/config/cfg_ctrler.htm", timeout=3)
-        except:
+        except Exception:
             return None
         body = raw_body.text.replace("\n", "").replace("\t", "").replace(" ", "").lower()
         r: list[str] = re.findall(r"<td id=tila>([^<]+)</td>", body)
