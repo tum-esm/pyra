@@ -1,3 +1,4 @@
+import datetime
 import glob
 import os
 import time
@@ -61,3 +62,29 @@ def find_most_recent_files(directory_path: str, time_limit: int) -> list[str]:
         reverse=True,
     )
     return [f for f, t in merged]
+
+
+def parse_verbal_timedelta_string(timedelta_string: str) -> datetime.timedelta:
+    """Parse a timedelta string like "1 year, 2 days, 3 hours, 4 mn" into a timedelta object.
+
+    The string does not have to contain all components. The only requirement is that the
+    components are separated by ", "."""
+
+    years = days = hours = minutes = 0
+
+    # Parse each part
+    for part in timedelta_string.split(", "):
+        if "year" in part:
+            years = int(part.split(" ")[0])
+        elif "day" in part:
+            days = int(part.split(" ")[0])
+        elif "hour" in part:
+            hours = int(part.split(" ")[0])
+        elif ("mn" in part) or ("min" in part):
+            minutes = int(part.split(" ")[0])
+
+    # Convert years to days (approximate, assuming 365 days per year)
+    days += years * 365
+
+    # Create and return the timedelta object
+    return datetime.timedelta(days=days, hours=hours, minutes=minutes)
