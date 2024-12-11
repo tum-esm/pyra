@@ -30,9 +30,8 @@ class CASThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        # TODO: implement #232
-
         logger = utils.Logger(origin=ORIGIN)
+        last_good_automatic_decision: float = 0
 
         while True:
             try:
@@ -79,6 +78,17 @@ class CASThread(AbstractThread):
                         should_measure = CASThread.get_automatic_decision(
                             config, logger, state, sun_elevation
                         )
+                        if should_measure:
+                            last_good_automatic_decision = time.time()
+                        else:
+                            time_since_last_good_decision = (
+                                time.time() - last_good_automatic_decision
+                            )
+                            if time_since_last_good_decision < 300:
+                                should_measure = True
+                                logger.info(
+                                    f"Last good automatic decision was {time_since_last_good_decision} seconds ago – not shutting down yet."
+                                )
 
                 logger.info(f"Measurements should be running is set to: {should_measure}.")
 
