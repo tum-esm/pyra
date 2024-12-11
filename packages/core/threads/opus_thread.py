@@ -559,14 +559,26 @@ class OpusThread(AbstractThread):
             try:
                 ifg = tum_esm_utils.opus.OpusFile.read(f, read_all_channels=False).interferogram
                 assert ifg is not None
+
                 fwd_pass: np.ndarray[Any, Any] = ifg[0][: ifg.shape[1] // 2]
-                assert len(fwd_pass) == 114256, "Interferogram has wrong length"
+                assert (
+                    len(fwd_pass) == 114256
+                ), f"Interferogram has wrong length (got {len(fwd_pass)}, expected 114256)"
+
                 computed_peak = int(np.argmax(fwd_pass))
                 ifg_center = fwd_pass.shape[0] // 2
-                assert abs(computed_peak - ifg_center) < 200, "Peak is too far off"
+                assert (
+                    abs(computed_peak - ifg_center) < 200
+                ), f"Peak is too far off (center = {ifg_center}, peak = {computed_peak})"
+
+                dc_amplitude = abs(np.mean(fwd_pass[:100]))
+                assert (
+                    dc_amplitude >= 0.02
+                ), f"DC amplitude is too low (dc amplitude = {dc_amplitude})"
+
                 latest_peak_positions.append(computed_peak)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Could not read peak position from {f}: {e}")
             if len(latest_peak_positions) == 3:
                 break
         if len(latest_peak_positions) < 3:
