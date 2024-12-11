@@ -53,6 +53,7 @@ SAMPLE_CONFIG = types.Config(
         start_time={"hour": 7, "minute": 0, "second": 0},
         stop_time={"hour": 21, "minute": 0, "second": 0},
         min_sun_elevation=0,
+        shutdown_grace_period=300,
     ),
     tum_enclosure=None,
     helios=None,

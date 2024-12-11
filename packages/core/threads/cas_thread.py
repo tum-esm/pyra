@@ -84,7 +84,10 @@ class CASThread(AbstractThread):
                             time_since_last_good_decision = (
                                 time.time() - last_good_automatic_decision
                             )
-                            if time_since_last_good_decision < 300:
+                            if (
+                                time_since_last_good_decision
+                                < config.measurement_triggers.shutdown_grace_period
+                            ):
                                 should_measure = True
                                 logger.info(
                                     f"Last good automatic decision was {time_since_last_good_decision} seconds ago – not shutting down yet."

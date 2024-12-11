@@ -135,6 +135,12 @@ class MeasurementTriggersConfig(StricterBaseModel):
     start_time: TimeDict
     stop_time: TimeDict
     min_sun_elevation: float = pydantic.Field(..., ge=0, le=90)
+    shutdown_grace_period: float = pydantic.Field(
+        ...,
+        ge=0,
+        le=3600,
+        description="How long to wait to stop measurements after the trigger conditions are not met anymore (in seconds)",
+    )
 
 
 class PartialMeasurementTriggersConfig(StricterBaseModel):
@@ -146,6 +152,12 @@ class PartialMeasurementTriggersConfig(StricterBaseModel):
     start_time: Optional[PartialTimeDict] = None
     stop_time: Optional[PartialTimeDict] = None
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
+    shutdown_grace_period: Optional[float] = pydantic.Field(
+        None,
+        ge=0,
+        le=3600,
+        description="How long to wait to stop measurements after the trigger conditions are not met anymore (in seconds)",
+    )
 
 
 class HeliosConfig(StricterBaseModel):
