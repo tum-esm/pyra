@@ -432,12 +432,22 @@ class OpusThread(AbstractThread):
 
                 if config.opus.automatic_peak_positioning and (last_peak_positioning_time is None):
                     if current_macro is not None:
-                        logger.info("Trying to set peak position")
-                        try:
-                            OpusThread.set_peak_position(config, logger)
-                            last_peak_positioning_time = time.time()
-                        except ValueError as e:
-                            logger.error(f"Could not set peak position: {e}")
+                        last_em27_powerup_time = (
+                            interfaces.EM27Interface.get_last_powerup_timestamp(config.opus.em27_ip)
+                        )
+                        if last_em27_powerup_time is None:
+                            logger.info("Could not determine last powerup time of EM27")
+                        elif (time.time() - last_em27_powerup_time) < 180:
+                            logger.info(
+                                "EM27 was powered up less than 3 minutes ago, skipping peak positioning"
+                            )
+                        else:
+                            logger.info("Trying to set peak position")
+                            try:
+                                OpusThread.set_peak_position(config, logger)
+                                last_peak_positioning_time = time.time()
+                            except ValueError as e:
+                                logger.error(f"Could not set peak position: {e}")
 
                 # DETECT WHEN EM27 HAD A POWER CYCLE SINCE LAST PEAK POSITION CHECK
 
