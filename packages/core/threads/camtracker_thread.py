@@ -260,6 +260,22 @@ class CamTrackerThread(AbstractThread):
                                     subject="Camtracker was started but cover did not open in 3 minutes"
                                 )
 
+                # CLEAR EXCEPTIONS
+                # besides the one about the cover not opening
+
+                with interfaces.StateInterface.update_state() as state:
+                    state.exceptions_state.current = [
+                        e
+                        for e in state.exceptions_state.current
+                        if (
+                            (e.origin != ORIGIN)
+                            and (
+                                e.subject
+                                != "Camtracker was started but cover did not open in 3 minutes"
+                            )
+                        )
+                    ]
+
                 # SLEEP
 
                 t2 = time.time()
