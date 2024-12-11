@@ -11,8 +11,9 @@ ORIGIN = "cas"
 
 class CASThread(AbstractThread):
     """Thread for to evaluate whether to conduct measurements or not.
-    
+
     CAS = Condition Assessment System."""
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -26,7 +27,7 @@ class CASThread(AbstractThread):
 
     @staticmethod
     def main(headless: bool = False) -> None:
-        """Main entrypoint of the thread. In headless mode, 
+        """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
         # TODO: implement #232
@@ -69,6 +70,9 @@ class CASThread(AbstractThread):
                 else:
                     if d.mode == "manual":
                         should_measure = d.manual_decision_result
+                        if config.general.min_sun_elevation > sun_elevation:
+                            logger.debug("Manual decision not considered due to low sun elevation.")
+                            should_measure = False
                     elif d.mode == "cli":
                         should_measure = d.cli_decision_result
                     else:
@@ -127,11 +131,13 @@ class CASThread(AbstractThread):
             triggers.consider_helios = False
 
         # If not triggers are considered during automatic mode return False
-        if not any([
-            triggers.consider_sun_elevation,
-            triggers.consider_time,
-            triggers.consider_helios,
-        ]):
+        if not any(
+            [
+                triggers.consider_sun_elevation,
+                triggers.consider_time,
+                triggers.consider_helios,
+            ]
+        ):
             logger.info("No triggers are activated.")
             return False
 
@@ -153,8 +159,9 @@ class CASThread(AbstractThread):
         if triggers.consider_time:
             logger.info("Time as a trigger is considered.")
             time_is_valid = (
-                triggers.start_time.as_datetime_time() < datetime.datetime.now().time() <
-                triggers.stop_time.as_datetime_time()
+                triggers.start_time.as_datetime_time()
+                < datetime.datetime.now().time()
+                < triggers.stop_time.as_datetime_time()
             )
             logger.debug(f"Time conditions are {'' if time_is_valid else 'not '}fulfilled.")
             if not time_is_valid:
