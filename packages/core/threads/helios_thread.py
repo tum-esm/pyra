@@ -130,8 +130,13 @@ class HeliosInterface:
         for _ in range(retries + 1):
             ret, frame = self.camera.read()
             if ret:
-                if trow_away_white_images and np.mean(frame  # type: ignore
-                                                     ) > 240:
+                if (
+                    trow_away_white_images
+                    and np.mean(
+                        frame  # type: ignore
+                    )
+                    > 240
+                ):
                     # image is mostly white
                     continue
                 return np.array(frame)
@@ -150,6 +155,7 @@ class HeliosInterface:
         3. image 1 -> 0.1s sleep -> image 2 -> 0.1s sleep -> image 3
         8. calculate mean color of all 3 images
         9. save images to disk"""
+
         class ExposureResult(pydantic.BaseModel):
             exposure: int
             means: list[float]
@@ -187,7 +193,7 @@ class HeliosInterface:
 
         self.logger.debug(f"exposure results: {exposure_results}")
         means: list[float] = [sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results]
-        for m1, m2 in zip(means[:-1], means[1 :]):
+        for m1, m2 in zip(means[:-1], means[1:]):
             assert m1 < m2 + 5, "mean colors should increase with increasing exposure"
 
         assert len(exposure_results) > 0, "no possible exposures found"
@@ -222,8 +228,8 @@ class HeliosInterface:
             perform_autoexposure = True
         if self.target_pixel_brightness != target_pixel_brightness:
             self.logger.debug(
-                "performing autoexposure because target_pixel_brightness changed" +
-                f" ({self.target_pixel_brightness} -> {target_pixel_brightness})"
+                "performing autoexposure because target_pixel_brightness changed"
+                + f" ({self.target_pixel_brightness} -> {target_pixel_brightness})"
             )
             perform_autoexposure = True
         if perform_autoexposure:
@@ -264,12 +270,16 @@ class HeliosThread(AbstractThread):
 
     The result of this constant sunlight evaluation is written
     to the StateInterface."""
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
 
-        return ((config.helios is not None) and (not config.general.test_mode) and
-                (config.measurement_triggers.consider_helios))
+        return (
+            (config.helios is not None)
+            and (not config.general.test_mode)
+            and (config.measurement_triggers.consider_helios)
+        )
 
     @staticmethod
     def get_new_thread_object() -> threading.Thread:
@@ -278,7 +288,7 @@ class HeliosThread(AbstractThread):
 
     @staticmethod
     def main(headless: bool = False) -> None:
-        """Main entrypoint of the thread. In headless mode, 
+        """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin=ORIGIN, just_print=headless)
@@ -349,8 +359,8 @@ class HeliosThread(AbstractThread):
                 new_max_history_size = config.helios.evaluation_size
                 if current_max_history_size != new_max_history_size:
                     logger.debug(
-                        "Size of Helios history has changed: " +
-                        f"{current_max_history_size} -> {new_max_history_size}"
+                        "Size of Helios history has changed: "
+                        + f"{current_max_history_size} -> {new_max_history_size}"
                     )
                     edge_fraction_history.set_max_size(new_max_history_size)
 
@@ -373,8 +383,8 @@ class HeliosThread(AbstractThread):
                         raise e
                     else:
                         logger.debug(
-                            f"camera occured ({repeated_camera_error_count} time(s) in a row). " +
-                            "sleeping 30 seconds, reinitializing Helios"
+                            f"camera occured ({repeated_camera_error_count} time(s) in a row). "
+                            + "sleeping 30 seconds, reinitializing Helios"
                         )
                         del helios_instance
                         helios_instance = None
@@ -384,8 +394,8 @@ class HeliosThread(AbstractThread):
                 # append sun status to status history
                 edge_fraction_history.append(new_edge_fraction)
                 logger.debug(
-                    f"New Helios edge_fraction: {new_edge_fraction}. " +
-                    f"Current history: {edge_fraction_history.get()}"
+                    f"New Helios edge_fraction: {new_edge_fraction}. "
+                    + f"Current history: {edge_fraction_history.get()}"
                 )
 
                 # evaluate sun state only if list is filled
@@ -428,26 +438,30 @@ class HeliosThread(AbstractThread):
                         # only do state change if last_state_change is long ago in
                         # the past see https://github.com/tum-esm/pyra/issues/195
 
-                        update_state_file = last_state_change is None or ((
-                            datetime.datetime.now() - last_state_change
-                        ).total_seconds() >= config.helios.min_seconds_between_state_changes)
+                        update_state_file = last_state_change is None or (
+                            (datetime.datetime.now() - last_state_change).total_seconds()
+                            >= config.helios.min_seconds_between_state_changes
+                        )
                         if update_state_file:
                             logger.info(
-                                "State change: " + {
+                                "State change: "
+                                + {
                                     True: "GOOD",
                                     False: "BAD",
                                     None: "None",
-                                }[current_state] + " -> " + {
+                                }[current_state]
+                                + " -> "
+                                + {
                                     True: "GOOD",
                                     False: "BAD",
                                 }[new_state]
                             )
                             with interfaces.StateInterface.update_state() as s:
-                                s.helios_indicates_good_conditions= {  # type: ignore
-                                        None: "inconclusive",
-                                        True: "yes",
-                                        False: "no",
-                                    }[new_state]
+                                s.helios_indicates_good_conditions = {  # type: ignore
+                                    None: "inconclusive",
+                                    True: "yes",
+                                    False: "no",
+                                }[new_state]
 
                             current_state = new_state
                             last_state_change = datetime.datetime.now()

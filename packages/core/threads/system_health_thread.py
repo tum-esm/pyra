@@ -11,6 +11,7 @@ ORIGIN = "system-health"
 
 class SystemHealthThread(AbstractThread):
     """Thread for checking the system's state (CPU usage, disk utilization, etc.)"""
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -24,7 +25,7 @@ class SystemHealthThread(AbstractThread):
 
     @staticmethod
     def main(headless: bool = False) -> None:
-        """Main entrypoint of the thread. In headless mode, 
+        """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin=ORIGIN, just_print=headless)
@@ -66,7 +67,9 @@ class SystemHealthThread(AbstractThread):
                 if battery_level is not None:
                     if battery_level < 30:
                         subject = "LowEnergyError"
-                        details = "The battery of the system is below 30%. Please check the power supply."
+                        details = (
+                            "The battery of the system is below 30%. Please check the power supply."
+                        )
                         with interfaces.StateInterface.update_state() as state:
                             state.exceptions_state.add_exception_state_item(
                                 types.ExceptionStateItem(

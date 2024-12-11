@@ -14,8 +14,9 @@ ORIGIN = "tum-enclosure"
 
 class TUMEnclosureThread(AbstractThread):
     """Thread for to evaluate whether to conduct measurements or not.
-    
+
     CAS = Condition Assessment System."""
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -29,7 +30,7 @@ class TUMEnclosureThread(AbstractThread):
 
     @staticmethod
     def main(headless: bool = False) -> None:
-        """Main entrypoint of the thread. In headless mode, 
+        """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin=ORIGIN)
@@ -125,7 +126,7 @@ class TUMEnclosureThread(AbstractThread):
                                     _s.exceptions_state.add_exception_state_item(
                                         types.ExceptionStateItem(
                                             origin=ORIGIN,
-                                            subject="Rain detected but cover is not closed"
+                                            subject="Rain detected but cover is not closed",
                                         )
                                     )
                                 break
@@ -190,16 +191,20 @@ class TUMEnclosureThread(AbstractThread):
                     current_time = datetime.datetime.now()
 
                     # power down the camera
-                    if ((current_time.hour == 0) and (current_time.minute < 30) and
-                        (last_camera_down_time is None)):
+                    if (
+                        (current_time.hour == 0)
+                        and (current_time.minute < 30)
+                        and (last_camera_down_time is None)
+                    ):
                         logger.info("Powering down the camera")
                         plc_interface.set_power_camera(False)
                         plc_state.power.camera = False
                         last_camera_down_time = time.time()
 
                     # power up the camera
-                    if (last_camera_down_time
-                        is not None) and ((time.time() - last_camera_down_time) > 300):
+                    if (last_camera_down_time is not None) and (
+                        (time.time() - last_camera_down_time) > 300
+                    ):
                         logger.info("Powering up the camera")
                         plc_interface.set_power_camera(True)
                         plc_state.power.camera = True
@@ -243,14 +248,15 @@ class TUMEnclosureThread(AbstractThread):
                             plc_state.control.sync_to_tracker = True
 
                         # close cover
-                        elif (not state.measurements_should_be_running
-                             ) and (plc_state.control.sync_to_tracker):
+                        elif (not state.measurements_should_be_running) and (
+                            plc_state.control.sync_to_tracker
+                        ):
                             logger.info("Disabling syncing cover to tracker")
                             plc_interface.set_sync_to_tracker(False)
                             plc_state.control.sync_to_tracker = False
 
                         # check if cover is closed
-                        if (not plc_state.control.sync_to_tracker):
+                        if not plc_state.control.sync_to_tracker:
                             if plc_state.actors.current_angle != 0:
                                 logger.info("Manually setting cover angle to 0")
                                 plc_interface.set_manual_control(True)
@@ -275,8 +281,7 @@ class TUMEnclosureThread(AbstractThread):
                                             _s.exceptions_state.add_exception_state_item(
                                                 types.ExceptionStateItem(
                                                     origin=ORIGIN,
-                                                    subject=
-                                                    "Cover did not closed after disabling sync to tracker and moving to 0°"
+                                                    subject="Cover did not closed after disabling sync to tracker and moving to 0°",
                                                 )
                                             )
                                         break
@@ -313,9 +318,7 @@ class TUMEnclosureThread(AbstractThread):
 
     @staticmethod
     def handle_plc_errors(
-        plc_interface: interfaces.TUMEnclosureInterface,
-        logger: utils.Logger,
-        timeout: int = 180
+        plc_interface: interfaces.TUMEnclosureInterface, logger: utils.Logger, timeout: int = 180
     ) -> None:
         """Resetting the PLC if needed. If the reset doesn't work,
         add an exception to the state object."""

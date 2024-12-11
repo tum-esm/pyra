@@ -240,17 +240,17 @@ class CamTrackerThread(AbstractThread):
                                 )
                                 with interfaces.StateInterface.update_state() as state:
                                     state.exceptions_state.add_exception_state_item(
-                                        types.ExceptionStateItem(origin=ORIGIN,
-                                        subject=
-                                        "Camtracker was started but cover did not open in 3 minutes")
+                                        types.ExceptionStateItem(
+                                            origin=ORIGIN,
+                                            subject="Camtracker was started but cover did not open in 3 minutes",
+                                        )
                                     )
                                 CamTrackerProgram.stop(config, logger)
                                 continue
                             if cover_state == "open":
                                 with interfaces.StateInterface.update_state() as state:
                                     state.exceptions_state.clear_exception_subject(
-                                        subject=
-                                        "Camtracker was started but cover did not open in 3 minutes"
+                                        subject="Camtracker was started but cover did not open in 3 minutes"
                                     )
                         else:
                             logger.info(
@@ -293,15 +293,16 @@ class CamTrackerThread(AbstractThread):
         if tracker_position.dt < datetime.datetime.now() - datetime.timedelta(minutes=5):
             return "logs too old"
 
-        if ((abs(tracker_position.azimuth_offset) <= config.camtracker.motor_offset_threshold) and
-            (abs(tracker_position.elevation_offset) <= config.camtracker.motor_offset_threshold)):
+        if (abs(tracker_position.azimuth_offset) <= config.camtracker.motor_offset_threshold) and (
+            abs(tracker_position.elevation_offset) <= config.camtracker.motor_offset_threshold
+        ):
             return "valid"
         else:
             return "invalid"
 
     @staticmethod
     def get_enclosure_cover_state(
-        config: types.Config
+        config: types.Config,
     ) -> Literal["not configured", "angle not reported", "open", "closed"]:
         """Checks whether the TUM PLC cover is open or closed. Returns
         "angle not reported" if the cover position has not beenreported
@@ -310,8 +311,9 @@ class CamTrackerThread(AbstractThread):
         if config.tum_enclosure is None:
             return "not configured"
 
-        current_cover_angle = interfaces.StateInterface.load_state(
-        ).tum_enclosure_state.actors.current_angle
+        current_cover_angle = (
+            interfaces.StateInterface.load_state().tum_enclosure_state.actors.current_angle
+        )
 
         if current_cover_angle is None:
             return "angle not reported"
@@ -326,8 +328,9 @@ class CamTrackerThread(AbstractThread):
         CamTracker to initialize the tracking mirrors. Then moves mirrors
         back to parking position and shuts dosn CamTracker."""
 
-        assert not CamTrackerProgram.is_running(logger), \
-            "This test cannot be run if CamTracker is already running"
+        assert not CamTrackerProgram.is_running(
+            logger
+        ), "This test cannot be run if CamTracker is already running"
         CamTrackerProgram.start(config, logger)
         time.sleep(2)
         CamTrackerProgram.stop(config, logger)

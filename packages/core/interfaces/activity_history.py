@@ -32,7 +32,7 @@ def _load_current_activity_history() -> types.ActivityHistory:
 
 
 class ActivityHistoryInterface:
-    """Logging the system activity every minute to 
+    """Logging the system activity every minute to
     `logs/activity/activity-YYYY-MM-DD.json` to plot
     it in the UI."""
 
@@ -54,9 +54,7 @@ class ActivityHistoryInterface:
 
         current_local_datetime = datetime.datetime.now()
 
-        if (
-            ActivityHistoryInterface.current_activity_history.date != current_local_datetime.date()
-        ):
+        if ActivityHistoryInterface.current_activity_history.date != current_local_datetime.date():
             ActivityHistoryInterface.dump_current_activity_history()
             ActivityHistoryInterface.current_activity_history = types.ActivityHistory(
                 date=current_local_datetime.date()
@@ -72,10 +70,9 @@ class ActivityHistoryInterface:
             last_activity_datapoint = new_history.datapoints.root[-1]
 
         if last_activity_datapoint is not None:
-            if (
-                last_activity_datapoint.local_time.strftime("%H:%M")
-                != current_local_datetime.strftime("%H:%M")
-            ):
+            if last_activity_datapoint.local_time.strftime(
+                "%H:%M"
+            ) != current_local_datetime.strftime("%H:%M"):
                 last_activity_datapoint = None
 
         # creating a new datapoint if none exist for the current minute
@@ -109,9 +106,10 @@ class ActivityHistoryInterface:
         # writing the activity history to the file if
         #   * first datapoint of the instance running
         #   * last write was at least 5 minutes ago
-        if ((last_activity_datapoint is None) or
-            ((ActivityHistoryInterface.last_write_time - current_local_datetime).total_seconds()
-             >= 300)):
+        if (last_activity_datapoint is None) or (
+            (ActivityHistoryInterface.last_write_time - current_local_datetime).total_seconds()
+            >= 300
+        ):
             ActivityHistoryInterface.dump_current_activity_history()
 
     @staticmethod

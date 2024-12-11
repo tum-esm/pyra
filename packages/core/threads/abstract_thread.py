@@ -9,6 +9,7 @@ logger = utils.Logger(origin="helios")
 
 class AbstractThread(abc.ABC):
     """Abstract base class for all threads"""
+
     def __init__(self) -> None:
         """Initialize the thread instance. This does not start the
         thread but only initializes the instance that triggers the
@@ -16,7 +17,7 @@ class AbstractThread(abc.ABC):
 
         # credits to https://stackoverflow.com/a/1176023/8255842
         self.logger: utils.Logger = utils.Logger(
-            origin=re.sub(r'(?<!^)(?=[A-Z])', '-', self.__class__.__name__).lower()
+            origin=re.sub(r"(?<!^)(?=[A-Z])", "-", self.__class__.__name__).lower()
         )
         self.thread = self.get_new_thread_object()
         self.is_initialized = False
@@ -66,5 +67,5 @@ class AbstractThread(abc.ABC):
     @staticmethod
     @abc.abstractmethod
     def main(headless: bool = False) -> None:
-        """Main entrypoint of the thread. In headless mode, 
+        """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""

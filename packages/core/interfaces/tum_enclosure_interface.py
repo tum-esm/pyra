@@ -12,88 +12,86 @@ from packages.core import interfaces, types, utils
 logger = utils.Logger(origin="tum-enclosure-plc")
 
 _PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PLCSpecification] = {
-    1:
-        types.PLCSpecification(
-            actors=types.PLCSpecificationActors(
-                current_angle=(25, 6, 2),
-                fan_speed=(8, 18, 2),
-                move_cover=(25, 8, 2),
-                nominal_angle=(25, 8, 2),
-            ),
-            control=types.PLCSpecificationControl(
-                auto_temp_mode=(8, 24, 1, 2),
-                manual_control=(8, 24, 1, 5),
-                manual_temp_mode=(8, 24, 1, 3),
-                reset=(3, 4, 1, 5),
-                sync_to_tracker=(8, 16, 1, 0),
-            ),
-            sensors=types.PLCSpecificationSensors(
-                humidity=(8, 22, 2),
-                temperature=(8, 20, 2),
-            ),
-            state=types.PLCSpecificationState(
-                cover_closed=(25, 2, 1, 2),
-                motor_failed=(8, 12, 1, 3),
-                rain=(8, 6, 1, 0),
-                reset_needed=(3, 2, 1, 2),
-                ups_alert=(8, 0, 1, 1),
-            ),
-            power=types.PLCSpecificationPower(
-                camera=(8, 16, 1, 2),
-                computer=(8, 16, 1, 6),
-                heater=(8, 16, 1, 5),
-                router=(8, 16, 1, 3),
-                spectrometer=(8, 16, 1, 1),
-            ),
-            connections=types.PLCSpecificationConnections(
-                camera=(8, 14, 1, 6),
-                computer=(8, 14, 1, 3),
-                heater=(8, 14, 1, 1),
-                router=(8, 14, 1, 2),
-                spectrometer=(8, 14, 1, 0),
-            ),
+    1: types.PLCSpecification(
+        actors=types.PLCSpecificationActors(
+            current_angle=(25, 6, 2),
+            fan_speed=(8, 18, 2),
+            move_cover=(25, 8, 2),
+            nominal_angle=(25, 8, 2),
         ),
-    2:
-        types.PLCSpecification(
-            actors=types.PLCSpecificationActors(
-                current_angle=(6, 6, 2),
-                fan_speed=(8, 4, 2),
-                move_cover=(6, 8, 2),
-                nominal_angle=(6, 8, 2),
-            ),
-            control=types.PLCSpecificationControl(
-                auto_temp_mode=(8, 24, 1, 5),
-                manual_control=(8, 12, 1, 7),
-                manual_temp_mode=(8, 24, 1, 4),
-                reset=(3, 4, 1, 5),
-                sync_to_tracker=(8, 8, 1, 1),
-            ),
-            sensors=types.PLCSpecificationSensors(
-                humidity=(8, 22, 2),
-                temperature=(8, 16, 2),
-            ),
-            state=types.PLCSpecificationState(
-                cover_closed=(6, 16, 1, 1),
-                motor_failed=None,
-                rain=(3, 0, 1, 0),
-                reset_needed=(3, 2, 1, 2),
-                ups_alert=(8, 13, 1, 6),
-            ),
-            power=types.PLCSpecificationPower(
-                camera=(8, 8, 1, 4),  # K5 Relay
-                computer=None,
-                heater=(8, 12, 1, 7),  # K3 Relay
-                router=None,  # not allowed
-                spectrometer=(8, 8, 1, 2),  # K4 Relay
-            ),
-            connections=types.PLCSpecificationConnections(
-                camera=None,
-                computer=(8, 13, 1, 2),
-                heater=(8, 6, 1, 1),
-                router=(8, 12, 1, 4),
-                spectrometer=None,
-            ),
+        control=types.PLCSpecificationControl(
+            auto_temp_mode=(8, 24, 1, 2),
+            manual_control=(8, 24, 1, 5),
+            manual_temp_mode=(8, 24, 1, 3),
+            reset=(3, 4, 1, 5),
+            sync_to_tracker=(8, 16, 1, 0),
         ),
+        sensors=types.PLCSpecificationSensors(
+            humidity=(8, 22, 2),
+            temperature=(8, 20, 2),
+        ),
+        state=types.PLCSpecificationState(
+            cover_closed=(25, 2, 1, 2),
+            motor_failed=(8, 12, 1, 3),
+            rain=(8, 6, 1, 0),
+            reset_needed=(3, 2, 1, 2),
+            ups_alert=(8, 0, 1, 1),
+        ),
+        power=types.PLCSpecificationPower(
+            camera=(8, 16, 1, 2),
+            computer=(8, 16, 1, 6),
+            heater=(8, 16, 1, 5),
+            router=(8, 16, 1, 3),
+            spectrometer=(8, 16, 1, 1),
+        ),
+        connections=types.PLCSpecificationConnections(
+            camera=(8, 14, 1, 6),
+            computer=(8, 14, 1, 3),
+            heater=(8, 14, 1, 1),
+            router=(8, 14, 1, 2),
+            spectrometer=(8, 14, 1, 0),
+        ),
+    ),
+    2: types.PLCSpecification(
+        actors=types.PLCSpecificationActors(
+            current_angle=(6, 6, 2),
+            fan_speed=(8, 4, 2),
+            move_cover=(6, 8, 2),
+            nominal_angle=(6, 8, 2),
+        ),
+        control=types.PLCSpecificationControl(
+            auto_temp_mode=(8, 24, 1, 5),
+            manual_control=(8, 12, 1, 7),
+            manual_temp_mode=(8, 24, 1, 4),
+            reset=(3, 4, 1, 5),
+            sync_to_tracker=(8, 8, 1, 1),
+        ),
+        sensors=types.PLCSpecificationSensors(
+            humidity=(8, 22, 2),
+            temperature=(8, 16, 2),
+        ),
+        state=types.PLCSpecificationState(
+            cover_closed=(6, 16, 1, 1),
+            motor_failed=None,
+            rain=(3, 0, 1, 0),
+            reset_needed=(3, 2, 1, 2),
+            ups_alert=(8, 13, 1, 6),
+        ),
+        power=types.PLCSpecificationPower(
+            camera=(8, 8, 1, 4),  # K5 Relay
+            computer=None,
+            heater=(8, 12, 1, 7),  # K3 Relay
+            router=None,  # not allowed
+            spectrometer=(8, 8, 1, 2),  # K4 Relay
+        ),
+        connections=types.PLCSpecificationConnections(
+            camera=None,
+            computer=(8, 13, 1, 2),
+            heater=(8, 6, 1, 1),
+            router=(8, 12, 1, 4),
+            spectrometer=None,
+        ),
+    ),
 }
 
 
@@ -103,6 +101,7 @@ class TUMEnclosureInterface:
 
     Manual: https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
     """
+
     @staticmethod
     class PLCError(Exception):
         """
@@ -143,7 +142,7 @@ class TUMEnclosureInterface:
 
     def connect(self) -> None:
         """Connects to the PLC Snap7. Times out after 30 seconds.
-        
+
         Raises snap7.exceptions.Snap7Exception if connection fails."""
 
         start_time = time.time()

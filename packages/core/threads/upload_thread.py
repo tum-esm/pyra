@@ -14,7 +14,7 @@ ORIGIN = "upload"
 
 class UploadThread(AbstractThread):
     """Thread for uploading data to a server via SCP.
-    
+
     See https://github.com/dostuffthatmatters/circadian-scp-upload for
     a description of how this is implemented."""
 
@@ -35,12 +35,13 @@ class UploadThread(AbstractThread):
         current_state = interfaces.StateInterface.load_state()
 
         # don't upload while system is starting up
-        if ((current_state.measurements_should_be_running is None) or
-            (current_state.position.sun_elevation is None)):
+        if (current_state.measurements_should_be_running is None) or (
+            current_state.position.sun_elevation is None
+        ):
             return False
 
         # (optional) don't upload during the day
-        if (config.upload.only_upload_at_night and (current_state.position.sun_elevation > 0)):
+        if config.upload.only_upload_at_night and (current_state.position.sun_elevation > 0):
             return False
 
         # update last time of known measurements
@@ -50,8 +51,9 @@ class UploadThread(AbstractThread):
         # don't upload if system has been measuring in the last 10 minutes
         if config.upload.only_upload_when_not_measuring:
             if UploadThread.last_measurement_time is not None:
-                if ((datetime.datetime.now() - UploadThread.last_measurement_time).total_seconds()
-                    < 600):
+                if (
+                    datetime.datetime.now() - UploadThread.last_measurement_time
+                ).total_seconds() < 600:
                     return False
 
         return True
@@ -63,7 +65,7 @@ class UploadThread(AbstractThread):
 
     @staticmethod
     def main(headless: bool = False) -> None:
-        """Main entrypoint of the thread. In headless mode, 
+        """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin=ORIGIN, just_print=headless)
@@ -111,11 +113,12 @@ class UploadThread(AbstractThread):
                             variant=stream.variant,
                             callbacks=circadian_scp_upload.UploadClientCallbacks(
                                 dated_regex=stream.dated_regex,
-                                log_info=lambda message: logger.
-                                debug(f"{stream.label} - {message}"),
-                                log_error=lambda message: logger.
-                                error(f"{stream.label} - {message}"),
-
+                                log_info=lambda message: logger.debug(
+                                    f"{stream.label} - {message}"
+                                ),
+                                log_error=lambda message: logger.error(
+                                    f"{stream.label} - {message}"
+                                ),
                                 # callback that is called periodically during the upload
                                 # process to check if the upload should be aborted
                                 should_abort_upload=upload_should_abort,
@@ -179,8 +182,8 @@ class UploadThread(AbstractThread):
                     minutes_left = 19 - i
                     if minutes_left > 0:
                         logger.info(
-                            f"waiting {minutes_left} more minutes until looking " +
-                            "for new files/directories"
+                            f"waiting {minutes_left} more minutes until looking "
+                            + "for new files/directories"
                         )
 
                 logger.info("stopping upload thread")

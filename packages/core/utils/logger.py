@@ -15,7 +15,7 @@ def _get_log_line_datetime(log_line: str) -> Optional[datetime.datetime]:
     """Returns the date, if a log line is starting with a valid date."""
     try:
         assert len(log_line) >= 19
-        return datetime.datetime.strptime(log_line[: 19], "%Y-%m-%d %H:%M:%S")
+        return datetime.datetime.strptime(log_line[:19], "%Y-%m-%d %H:%M:%S")
     except (AssertionError, ValueError):
         return None
 
@@ -72,14 +72,15 @@ class Logger:
         """Format the log line string and write it to "logs/debug.log"
         and possibly "logs/info.log"""
         now = datetime.datetime.now()
-        utc_offset = round((datetime.datetime.now() - datetime.datetime.utcnow()).total_seconds() /
-                           3600, 1)
+        utc_offset = round(
+            (datetime.datetime.now() - datetime.datetime.utcnow()).total_seconds() / 3600, 1
+        )
         if round(utc_offset) == utc_offset:
             utc_offset = round(utc_offset)
 
         log_string = (
-            f"{now} UTC{'' if utc_offset < 0 else '+'}{utc_offset} " +
-            f"- {self.origin} - {level} - {message}\n"
+            f"{now} UTC{'' if utc_offset < 0 else '+'}{utc_offset} "
+            + f"- {self.origin} - {level} - {message}\n"
         )
         if self.just_print:
             print(log_string, end="")
@@ -93,7 +94,8 @@ class Logger:
                 with open(
                     os.path.join(
                         _PROJECT_DIR, "logs", "archive", f"{now.strftime('%Y-%m-%d')}-debug.log"
-                    ), "a"
+                    ),
+                    "a",
                 ) as f:
                     f.write(log_string)
 
@@ -113,12 +115,12 @@ class Logger:
                 return
 
             lines_to_be_kept: list[str] = []
-            latest_log_time_to_keep = (datetime.datetime.now() - datetime.timedelta(minutes=5))
+            latest_log_time_to_keep = datetime.datetime.now() - datetime.timedelta(minutes=5)
             for index, line in enumerate(log_lines_in_file):
                 line_time = _get_log_line_datetime(line)
                 if line_time is not None:
                     if line_time > latest_log_time_to_keep:
-                        lines_to_be_kept = log_lines_in_file[index :]
+                        lines_to_be_kept = log_lines_in_file[index:]
                         break
 
             with open(_DEBUG_LOG_FILE, "w") as f:

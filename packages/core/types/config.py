@@ -231,10 +231,10 @@ class Config(StricterBaseModel):
     def load(
         config_object: Optional[str | dict[Any, Any]] = None,
         with_filelock: bool = True,
-        ignore_path_existence: bool = False
+        ignore_path_existence: bool = False,
     ) -> Config:
         """Load the config file.
-        
+
         Args:
             config_object:          If provided, the config file will be ignored and
                                     the provided content will be used instead. Defaults
@@ -244,9 +244,9 @@ class Config(StricterBaseModel):
             ignore_path_existence:  If True, the existence of the file and directory
                                     paths used in the whole config file will not be
                                     checked. Defaults to False.
-        
+
         Returns:  The loaded config object.
-        
+
         Raises:
             ValueError:  If the config file is invalid.
         """
@@ -286,7 +286,7 @@ class Config(StricterBaseModel):
                 pretty_errors.append(f"Error in {location}: {message} (value: {value})")
 
             # the "from None" suppresses the pydantic exception
-            raise ValueError("Config is invalid:\n" + ',\n'.join(pretty_errors)) from None
+            raise ValueError("Config is invalid:\n" + ",\n".join(pretty_errors)) from None
 
     def dump(self, with_filelock: bool = True) -> None:
         if with_filelock:
@@ -302,9 +302,9 @@ class Config(StricterBaseModel):
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_CONFIG_LOCK_PATH, timeout=5)
     def update_in_context() -> Generator[Config, None, None]:
         """Update the confug file in a context manager.
-        
+
         Example:
-        
+
         ```python
         with Config.update_in_context() as state:
             config.somesetting = somevalue
@@ -341,15 +341,15 @@ class PartialConfig(StricterBaseModel):
     @staticmethod
     def load(config_object: str, ignore_path_existence: bool = False) -> PartialConfig:
         """Load a partial config file.
-        
+
         Args:
             config_object:          JSON string containing a partial config.
             ignore_path_existence:  If True, the existence of the file and directory
                                     paths used in the whole config file will not be
                                     checked. Defaults to False.
-        
+
         Returns:  The loaded partial config object.
-        
+
         Raises:
             ValueError:  If the config file is invalid.
         """

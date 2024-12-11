@@ -49,9 +49,9 @@ class StateInterface:
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=5)
     def update_state() -> Generator[types.StateObject, None, None]:
         """Update the state file in a context manager.
-        
+
         Example:
-        
+
         ```python
         with interfaces.StateInterface.update_state_in_context() as state:
             state.helios_indicates_good_conditions = "yes"

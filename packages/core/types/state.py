@@ -59,7 +59,7 @@ class ExceptionsState(StricterBaseModel):
                 origin=origin,
                 subject=type(exception).__name__,
                 details="\n".join(traceback.format_exception(exception)),
-                send_emails=send_emails
+                send_emails=send_emails,
             )
         )
 

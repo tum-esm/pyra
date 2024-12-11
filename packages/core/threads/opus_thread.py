@@ -15,13 +15,15 @@ ORIGIN = "opus"
 
 class DDEConnection:
     """Class for handling DDE connections to OPUS."""
+
     def __init__(self, logger: utils.Logger) -> None:
         import brukeropus.control.dde
+
         self.client: Optional[brukeropus.control.dde.DDEClient] = None
         self.logger = logger
 
     def setup(self) -> None:
-        """Set up a new DDE connection to OPUS. Tear down the 
+        """Set up a new DDE connection to OPUS. Tear down the
         old connection if it exists."""
         import brukeropus.control.dde
 
@@ -59,15 +61,16 @@ class DDEConnection:
         command: str,
         expected_answer: Optional[list[str]] = None,
         expect_ok: Optional[bool] = None,
-        timeout: float = 5
+        timeout: float = 5,
     ) -> list[str]:
-        """Send a request to the OPUS DDE server. Run `setup()` if the 
+        """Send a request to the OPUS DDE server. Run `setup()` if the
         connection is not yet established."""
 
         if self.client is None:
             self.setup()
         raw_answer: bytes = self.client.request(  # type: ignore
-            command, timeout=int(timeout * 1000))
+            command, timeout=int(timeout * 1000)
+        )
         answer = raw_answer.decode("utf-8").strip("\n").split("\n\n")
         if expected_answer is not None:
             if answer != expected_answer:
@@ -85,12 +88,12 @@ class DDEConnection:
         return int(answer[1])
 
     def macro_is_running(self, macro_id: int) -> bool:
-        answer = self.request(f'MACRO_RESULTS {macro_id}', expect_ok=True)
+        answer = self.request(f"MACRO_RESULTS {macro_id}", expect_ok=True)
         return int(answer[1]) == 0
 
     def some_macro_is_running(self) -> bool:
         """Check if any macro is currently running in OPUS.
-        
+
         In theory, we could also check whether the correct macro is running using
         `READ_PARAMETER MPT` and `READ_PARAMETER MFN`. However, these variables do
         not seem to be updated right away, so we cannot rely on them."""
@@ -100,18 +103,26 @@ class DDEConnection:
 
         # some common functions executed inside Macro routines that take some time
         common_functions = [
-            "MeasureReference", "MeasureSample", "MeasureRepeated", "MeasureRapidTRS",
-            "MeasureStepScanTrans", "UserDialog", "Baseline", "PeakPick", "Timer", "SendCommand"
+            "MeasureReference",
+            "MeasureSample",
+            "MeasureRepeated",
+            "MeasureRapidTRS",
+            "MeasureStepScanTrans",
+            "UserDialog",
+            "Baseline",
+            "PeakPick",
+            "Timer",
+            "SendCommand",
         ]
 
         # check twice for any thread that is executing a common function
         for function in common_functions:
-            answer = self.request(f'FIND_FUNCTION {function}')
+            answer = self.request(f"FIND_FUNCTION {function}")
             if len(answer) == 2:
                 active_thread_ids.add(int(answer[1]))
         time.sleep(3)
         for function in common_functions:
-            answer = self.request(f'FIND_FUNCTION {function}')
+            answer = self.request(f"FIND_FUNCTION {function}")
             if len(answer) == 2:
                 active_thread_ids.add(int(answer[1]))
 
@@ -123,9 +134,9 @@ class DDEConnection:
         return len(active_thread_ids) > 0
 
     def get_loaded_experiment(self) -> str:
-        self.request('OPUS_PARAMETERS', expect_ok=True)
-        xpp_answer = self.request('READ_PARAMETER XPP', expect_ok=True)
-        exp_answer = self.request('READ_PARAMETER EXP', expect_ok=True)
+        self.request("OPUS_PARAMETERS", expect_ok=True)
+        xpp_answer = self.request("READ_PARAMETER XPP", expect_ok=True)
+        exp_answer = self.request("READ_PARAMETER EXP", expect_ok=True)
         return os.path.join(xpp_answer[1], exp_answer[1])
 
     def load_experiment(self, experiment_path: str) -> None:
@@ -151,6 +162,7 @@ class DDEConnection:
 
 class OpusProgram:
     """Class for starting and stopping OPUS."""
+
     @staticmethod
     def start(config: types.Config, logger: utils.Logger) -> None:
         """Starts the OPUS.exe with os.startfile()."""
@@ -231,7 +243,7 @@ class OpusProgram:
 
 class OpusThread(AbstractThread):
     """Thread for controlling OPUS.
-    
+
     * starts/stops the OPUS executable whenever it is not running and `config.general.min_sun_elevation` is reached
     * starts/stops the macro whenever measurements should be running
     * raises an exception if the macro crashes unexpectedly
@@ -239,6 +251,7 @@ class OpusThread(AbstractThread):
     * stores the macro ID so if Pyra Core or this thread crashes, it can continue using the same macro thread
     * Pings the EM27 every 5 minutes to check if it is still connected
     """
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -365,8 +378,10 @@ class OpusThread(AbstractThread):
                         if last_successful_ping_time < (time.time() - 300):
                             logger.info("Pinging EM27")
                             tum_esm_utils.timing.wait_for_condition(
-                                is_successful=lambda: os.
-                                system("ping -n 3 " + config.opus.em27_ip.root) == 0,
+                                is_successful=lambda: os.system(
+                                    "ping -n 3 " + config.opus.em27_ip.root
+                                )
+                                == 0,
                                 timeout_seconds=90,
                                 timeout_message="EM27 did not respond to ping within 90 seconds.",
                                 check_interval_seconds=9,
@@ -398,8 +413,9 @@ class OpusThread(AbstractThread):
 
                 # STOPPING MACRO
 
-                if (not measurements_should_be_running
-                   ) and (current_macro_id_and_filepath is not None):
+                if (not measurements_should_be_running) and (
+                    current_macro_id_and_filepath is not None
+                ):
                     logger.info("Stopping macro")
                     dde_connection.stop_macro(*current_macro_id_and_filepath)
                     current_macro_id_and_filepath = None
