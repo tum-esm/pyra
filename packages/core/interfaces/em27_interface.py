@@ -1,7 +1,9 @@
+import datetime
 import re
 from typing import Optional
 import tum_esm_utils
 import requests
+from packages.core import utils
 
 
 class EM27Interface:
@@ -38,3 +40,25 @@ class EM27Interface:
         except Exception as e:
             raise RuntimeError(f"Could not set peak position: {e}")
 
+    @staticmethod
+    def get_last_powerup_timestamp(
+        ip: tum_esm_utils.validators.StrictIPv4Adress,
+    ) -> Optional[float]:
+        """Get the peak position of the EM27.
+
+        This reads the ABP value from the EM27 via http://{ip}/config/cfg_ctrler.htm"""
+        try:
+            raw_body = requests.get(f"http://{ip.root}/config/cfg_ctrler.htm", timeout=3)
+        except:
+            return None
+        body = raw_body.text.replace("\n", "").replace("\t", "").replace(" ", "").lower()
+        r: list[str] = re.findall(r"<td id=tila>([^<]+)</td>", body)
+        if len(r) != 1:
+            return None
+
+        dt = utils.parse_verbal_timedelta_string(r[0])
+        last_powerup_time = datetime.datetime.now() - dt
+        return last_powerup_time.timestamp()
+
+
+#
