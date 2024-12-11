@@ -184,6 +184,12 @@ class CamTrackerThread(AbstractThread):
         logger = utils.Logger(origin=ORIGIN, just_print=headless)
         last_camtracker_start_time: Optional[float] = None
 
+        # STOP CAMTRACKER IF IT IS RUNNING
+        config = types.Config.load()
+        if CamTrackerProgram.is_running(logger):
+            logger.info("Stopping CamTracker")
+            CamTrackerProgram.stop(config, logger)
+
         while True:
             try:
                 logger.info("Loading configuration file")
@@ -191,9 +197,9 @@ class CamTrackerThread(AbstractThread):
                 t1 = time.time()
 
                 camtracker_is_running = CamTrackerProgram.is_running(logger)
-                measurements_should_be_running = (
+                measurements_should_be_running = bool(
                     interfaces.StateInterface.load_state().measurements_should_be_running
-                ) or False
+                )
 
                 if measurements_should_be_running and (not camtracker_is_running):
                     logger.info("CamTracker should be running, but is not.")
@@ -203,59 +209,56 @@ class CamTrackerThread(AbstractThread):
                 if (not measurements_should_be_running) and camtracker_is_running:
                     logger.info("CamTracker should not be running, but is.")
                     CamTrackerProgram.stop(config, logger)
+                    camtracker_is_running = False
                     last_camtracker_start_time = None
 
-                if measurements_should_be_running:
-                    # CHECK WHETHER CAMTRACKER IS RUNNING CORRECTLY
-
-                    if last_camtracker_start_time is not None:
-                        if last_camtracker_start_time < (time.time() - 180):
-                            logger.info("Checking motor positions.")
-                            result = CamTrackerThread.check_tracker_motor_positions(config, logger)
-                            logger.info(f"Tracker position check result: {result}")
-                            match result:
-                                case "no logs" | "logs too old":
-                                    if config.camtracker.restart_if_logs_are_too_old:
-                                        logger.info(
-                                            "Restarting CamTracker because logs are too old."
-                                        )
-                                        CamTrackerProgram.stop(config, logger)
-                                        continue
-                                case "invalid":
-                                    logger.error(
-                                        "Restarting CamTracker because tracker offsets are too high."
-                                    )
+                # CHECK WHETHER CAMTRACKER IS RUNNING CORRECTLY
+                if measurements_should_be_running and (last_camtracker_start_time is not None):
+                    if (time.time() - last_camtracker_start_time) < 180:
+                        logger.info(
+                            "Waiting 3 minutes after CamTracker start to check motor positions."
+                        )
+                    else:
+                        logger.info("Checking motor positions.")
+                        result = CamTrackerThread.check_tracker_motor_positions(config, logger)
+                        logger.info(f"Tracker position check result: {result}")
+                        match result:
+                            case "no logs" | "logs too old":
+                                if config.camtracker.restart_if_logs_are_too_old:
+                                    logger.info("Restarting CamTracker because logs are too old.")
                                     CamTrackerProgram.stop(config, logger)
                                     continue
-                                case "valid":
-                                    logger.info("Tracker offsets are within threshold.")
-
-                            logger.info("Checking enclosure cover state.")
-                            cover_state = CamTrackerThread.get_enclosure_cover_state(config)
-                            logger.info(f"Enclosure cover state: {cover_state}")
-
-                            if cover_state == "closed":
+                            case "invalid":
                                 logger.error(
-                                    "Enclosure cover is still closed. Stopping CamTracker."
+                                    "Restarting CamTracker because tracker offsets are too high."
                                 )
-                                with interfaces.StateInterface.update_state() as state:
-                                    state.exceptions_state.add_exception_state_item(
-                                        types.ExceptionStateItem(
-                                            origin=ORIGIN,
-                                            subject="Camtracker was started but cover did not open in 3 minutes",
-                                        )
-                                    )
                                 CamTrackerProgram.stop(config, logger)
                                 continue
-                            if cover_state == "open":
-                                with interfaces.StateInterface.update_state() as state:
-                                    state.exceptions_state.clear_exception_subject(
-                                        subject="Camtracker was started but cover did not open in 3 minutes"
+                            case "valid":
+                                logger.info("Tracker offsets are within threshold.")
+
+                        logger.info("Checking enclosure cover state.")
+                        cover_state = CamTrackerThread.get_enclosure_cover_state(config)
+                        logger.info(f"Enclosure cover state: {cover_state}")
+
+                        if config.camtracker.restart_if_cover_remains_closed and (
+                            cover_state == "closed"
+                        ):
+                            logger.error("Enclosure cover is still closed. Stopping CamTracker.")
+                            with interfaces.StateInterface.update_state() as state:
+                                state.exceptions_state.add_exception_state_item(
+                                    types.ExceptionStateItem(
+                                        origin=ORIGIN,
+                                        subject="Camtracker was started but cover did not open in 3 minutes",
                                     )
-                        else:
-                            logger.info(
-                                "Waiting 3 minutes after CamTracker start to check motor positions."
-                            )
+                                )
+                            CamTrackerProgram.stop(config, logger)
+                            continue
+                        if cover_state == "open":
+                            with interfaces.StateInterface.update_state() as state:
+                                state.exceptions_state.clear_exception_subject(
+                                    subject="Camtracker was started but cover did not open in 3 minutes"
+                                )
 
                 # SLEEP
 
