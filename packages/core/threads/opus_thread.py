@@ -1,3 +1,4 @@
+import datetime
 import os
 import threading
 import time
@@ -498,7 +499,17 @@ class OpusThread(AbstractThread):
         The function throws a ValueError if the peak position cannot be set."""
 
         # 1. find newest three OPUS files that are unloaded
-        pass
+        today = datetime.date.today()
+        ifg_file_directory = (
+            config.opus.interferogram_path.replace("%Y", f"{today.year}:4d")
+            .replace("%y", f"{today.year % 100}:2d")
+            .replace("%m", f"{today.month}:2d")
+            .replace("%d", f"{today.day}:2d")
+        )
+        if not os.path.exists(ifg_file_directory):
+            raise ValueError(f"Directory {ifg_file_directory} does not exist")
+
+        most_recent_files = utils.find_most_recent_files(ifg_file_directory, 600)
 
         # 2. compute peak position of these files using the first channel
         pass
@@ -507,6 +518,9 @@ class OpusThread(AbstractThread):
         pass
 
         # 4. compare the new peak position to the currently set peak position
+        current_peak_position = interfaces.EM27Interface.get_peak_position(config.opus.em27_ip)
+        if current_peak_position is None:
+            raise ValueError("Could not read the current peak position")
         pass
 
         # 5. set new peak position if allclose
