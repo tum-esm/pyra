@@ -590,7 +590,7 @@ class OpusThread(AbstractThread):
         d01 = abs(latest_peak_positions[0] - latest_peak_positions[1])
         d02 = abs(latest_peak_positions[0] - latest_peak_positions[2])
         d12 = abs(latest_peak_positions[1] - latest_peak_positions[2])
-        if max(d01, d02, d12) > 10:
+        if max(d01, d02, d12) > 1:
             raise ValueError(f"Peak positions are too far apart: {latest_peak_positions}")
         new_peak_position = round(sum(latest_peak_positions) / 3)
 
