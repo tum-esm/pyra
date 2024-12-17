@@ -75,6 +75,9 @@ class ExceptionEmailClient:
         message.attach(email.mime.text.MIMEText(text, "plain"))
         message.attach(email.mime.text.MIMEText(html, "html"))
 
+        if config.general.test_mode:
+            return
+
         # Create secure connection with server and send email
         context = ssl.create_default_context()
         if config.error_email.smtp_port == 587:

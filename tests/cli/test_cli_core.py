@@ -56,7 +56,7 @@ def test_start_stop_procedure(sample_config: types.Config, empty_logs: Any) -> N
     assert pid_string.isnumeric()
     pid = int(pid_string)
 
-    time.sleep(8)
+    time.sleep(4)
 
     with open(DEBUG_LOG_PATH, "r") as f:
         actual_log_lines = f.read()
