@@ -186,7 +186,7 @@ class CamTrackerThread(AbstractThread):
 
         # STOP CAMTRACKER IF IT IS RUNNING
         config = types.Config.load()
-        if CamTrackerProgram.is_running(logger):
+        if CamTrackerProgram.is_running(logger) and (not config.general.test_mode):
             logger.info("Stopping CamTracker")
             CamTrackerProgram.stop(config, logger)
 
@@ -200,6 +200,11 @@ class CamTrackerThread(AbstractThread):
                 measurements_should_be_running = bool(
                     interfaces.StateInterface.load_state().measurements_should_be_running
                 )
+
+                if config.general.test_mode:
+                    logger.info("CamTracker thread is skipped in test mode")
+                    time.sleep(15)
+                    continue
 
                 if measurements_should_be_running and (not camtracker_is_running):
                     logger.info("CamTracker should be running, but is not.")

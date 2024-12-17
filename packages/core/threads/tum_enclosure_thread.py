@@ -50,6 +50,11 @@ class TUMEnclosureThread(AbstractThread):
                     logger.info("TUM Enclosure configuration not found, shutting down")
                     break
 
+                if config.general.test_mode:
+                    logger.info("TUM Enclosure thread is skipped in test mode")
+                    time.sleep(15)
+                    continue
+
                 # CONNECTING TO PLC
 
                 if plc_interface is None:

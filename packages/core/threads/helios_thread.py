@@ -410,6 +410,11 @@ class HeliosThread(AbstractThread):
                     time.sleep(300)
                     continue
 
+                if config.general.test_mode:
+                    logger.info("Helios thread is skipped in test mode")
+                    time.sleep(15)
+                    continue
+
                 # initialize HeliosInterface if necessary
                 if helios_instance is None:
                     try:

@@ -275,6 +275,9 @@ class OpusThread(AbstractThread):
         logger.info("Loading state file")
         state = interfaces.StateInterface.load_state()
 
+        logger.info("Loading configuration file")
+        config = types.Config.load()
+
         thread_start_time = time.time()
         last_successful_ping_time = time.time()
         last_measurement_start_time: Optional[float] = None
@@ -283,7 +286,7 @@ class OpusThread(AbstractThread):
         # CHECK IF OPUS IS ALREADY RUNNING
         # ONLY RESTART IF THERE IS AN UNIDENTIFIED MACRO RUNNING
 
-        if OpusProgram.is_running(logger):
+        if OpusProgram.is_running(logger) and (not config.general.test_mode):
             logger.info("OPUS is already running")
 
             dde_connection.setup()
@@ -317,6 +320,11 @@ class OpusThread(AbstractThread):
                     utils.Astronomy.get_current_sun_elevation(config)
                     >= config.general.min_sun_elevation
                 )
+
+                if config.general.test_mode:
+                    logger.info("OPUS thread is skipped in test mode")
+                    time.sleep(15)
+                    continue
 
                 # START OPUS
 

@@ -28,10 +28,6 @@ class UploadThread(AbstractThread):
         if config.upload is None:
             return False
 
-        # don't upload in test mode
-        if config.general.test_mode:
-            return False
-
         current_state = interfaces.StateInterface.load_state()
 
         # don't upload while system is starting up
@@ -91,6 +87,11 @@ class UploadThread(AbstractThread):
                     return
 
                 logger.info("starting upload")
+
+                if config.general.test_mode:
+                    logger.info("upload is skipped in test mode")
+                    time.sleep(15)
+                    continue
 
                 with circadian_scp_upload.RemoteConnection(
                     config.upload.host.root,
