@@ -6,6 +6,7 @@ authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
     { name = "Patrick Aigner", email = "patrick.aigner@tum.de" },
     { name = "Andreas Luther", email = "andreas.luther@tum.de" },
+    { name = "Friedrich Klappenbach", email = "friedrich.klappenbach@tum.de" },
 ]
 dependencies = [
     "numpy==2.2.0",
@@ -33,16 +34,16 @@ license = { text = "GPL-3" }
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.4",
-    "pytest-cov>=4.1.0",
     "lazydocs>=0.4.8",
     "mypy>=1.8.0",
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+    "pytest-order>=1.2.1",
+    "ruff>=0.8.2",
     "types-pywin32>=306.0.0.20240106",
     "types-psutil>=5.9.5.20240106",
     "types-paramiko>=3.4.0.20240106",
     "types-invoke>=2.0.0.10",
-    "pytest-order>=1.2.1",
-    "ruff>=0.8.2",
     "types-requests>=2.32.0.20241016",
 ]
 
@@ -82,10 +83,7 @@ filterwarnings = [
     'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
     'ignore:getargs:DeprecationWarning',
 ]
-markers = [
-    "ci: can be run in a CI environment",
-    "integration: can only be run on a configured system",
-]
+markers = ["ci: can be run in a CI environment", "integration: can only be run on a configured system"]
 
 [tool.pdm.options]
 add = ["--no-self"]
