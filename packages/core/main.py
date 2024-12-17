@@ -153,7 +153,6 @@ def run() -> None:
 
         if config.general.test_mode:
             logger.info("pyra-core in test mode")
-            logger.debug("Skipping HeliosThread and UploadThread in test mode")
 
         # send emails on occured/resolved exceptions
         _send_exception_emails(config)
@@ -161,11 +160,9 @@ def run() -> None:
         # wait rest of loop time
         logger.info("Ending iteration")
         elapsed_time = time.time() - start_time
-        seconds_per_core_interval = config.general.seconds_per_core_interval
         if config.general.test_mode:
-            seconds_per_core_interval = 10
             interfaces.ActivityHistoryInterface.dump_current_activity_history()
-        time_to_wait = seconds_per_core_interval - elapsed_time
+        time_to_wait = config.general.seconds_per_core_interval - elapsed_time
         if time_to_wait > 0:
             logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
             time.sleep(time_to_wait)

@@ -285,7 +285,7 @@ class CamTrackerThread(AbstractThread):
 
                 t2 = time.time()
                 sleep_time = max(5, 30 - (t2 - t1))
-                logger.info(f"Sleeping {sleep_time} seconds")
+                logger.info(f"Sleeping {sleep_time:.2f} seconds")
                 time.sleep(sleep_time)
 
             except Exception as e:
