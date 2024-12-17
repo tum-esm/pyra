@@ -6,9 +6,7 @@ PROJECT_DIR = dir(dir(os.path.abspath(__file__)))
 
 TOML_PATH = os.path.join(PROJECT_DIR, "pyproject.toml")
 PACKAGE_JSON_PATH = os.path.join(PROJECT_DIR, "packages", "ui", "package.json")
-TAURI_JSON_PATH = os.path.join(
-    PROJECT_DIR, "packages", "ui", "src-tauri", "tauri.conf.json"
-)
+TAURI_JSON_PATH = os.path.join(PROJECT_DIR, "packages", "ui", "src-tauri", "tauri.conf.json")
 
 # load version number
 with open(TOML_PATH, "r") as f:

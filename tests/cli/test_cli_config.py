@@ -32,8 +32,8 @@ def run_cli_command(
     stdout = process.stdout.decode()
     stderr = process.stderr.decode()
     print(f"command: {command}")
-    print("stdout: " + stdout.strip(' \n'))
-    print("stderr: " + stderr.strip(' \n'), end="\n\n")
+    print("stdout: " + stdout.strip(" \n"))
+    print("stderr: " + stderr.strip(" \n"), end="\n\n")
     if should_succeed:
         assert process.returncode == 0
     if should_fail:
@@ -64,7 +64,6 @@ def test_validate_current_config(sample_config: types.Config) -> None:
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_update_config(sample_config: types.Config) -> None:
-
     updates = [
         {"general": {"seconds_per_core_interval": False}},
         {"opus": {"experiment_path": ["should not be an array"]}},
@@ -116,7 +115,6 @@ def test_update_config(sample_config: types.Config) -> None:
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_add_default_config(sample_config: types.Config) -> None:
-
     cases = ["helios", "tum_enclosure"]
 
     for c in cases:
@@ -132,9 +130,9 @@ def test_add_default_config(sample_config: types.Config) -> None:
     for c in cases:
         with open(os.path.join(PROJECT_DIR, "config", f"{c}.config.default.json"), "r") as f:
             default_subconfig = json.load(f)
-        stdout = run_cli_command(["config", "update",
-                                  json.dumps({c: default_subconfig})],
-                                 should_succeed=True)
+        stdout = run_cli_command(
+            ["config", "update", json.dumps({c: default_subconfig})], should_succeed=True
+        )
         assert "Updated config file" in stdout
         if c == "helios":
             sample_config.helios = types.config.HeliosConfig.model_validate(default_subconfig)

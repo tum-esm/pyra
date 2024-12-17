@@ -13,7 +13,6 @@ from packages.core import types
 @pytest.mark.order(2)
 @pytest.mark.ci
 def test_default_config() -> None:
-
     with open(os.path.join(CONFIG_DIR, "config.default.json"), "r") as f:
         types.Config.load(f.read(), ignore_path_existence=True)
 

@@ -31,9 +31,7 @@ def run_cli_command(command: list[str]) -> str:
 
 @pytest.mark.order(3)
 @pytest.mark.ci
-def test_start_stop_procedure(
-    sample_config: types.Config, empty_logs: Any
-) -> None:
+def test_start_stop_procedure(sample_config: types.Config, empty_logs: Any) -> None:
     # terminate all pyra-core processes
     run_cli_command(["core", "stop"])
 
@@ -51,8 +49,9 @@ def test_start_stop_procedure(
     assert stdout_4.startswith("Started background process with process ID")
 
     pid_string = (
-        stdout_4.replace("Started background process with process ID",
-                         "").replace("\n", "").replace(" ", "")
+        stdout_4.replace("Started background process with process ID", "")
+        .replace("\n", "")
+        .replace(" ", "")
     )
     assert pid_string.isnumeric()
     pid = int(pid_string)
@@ -79,9 +78,7 @@ def test_start_stop_procedure(
     parsed_line_times: int = 0
     for line in actual_log_lines.split("\n"):
         try:
-            line_time = datetime.strptime(
-                line.split(" - ")[0][: 19], "%Y-%m-%d %H:%M:%S"
-            )
+            line_time = datetime.strptime(line.split(" - ")[0][:19], "%Y-%m-%d %H:%M:%S")
             parsed_line_times += 1
             assert (now - line_time).total_seconds() < 12
         except ValueError:
@@ -90,9 +87,7 @@ def test_start_stop_procedure(
     assert parsed_line_times >= 5, "Could not parse the timestamps of the log lines"
 
     stdout_5 = run_cli_command(["core", "is-running"])
-    assert stdout_5.startswith(
-        f"pyra-core is running with process ID(s) [{pid}]"
-    )
+    assert stdout_5.startswith(f"pyra-core is running with process ID(s) [{pid}]")
 
     stdout_6 = run_cli_command(["core", "stop"])
     assert stdout_6.startswith(
