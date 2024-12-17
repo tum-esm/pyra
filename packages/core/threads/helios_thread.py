@@ -315,9 +315,6 @@ class HeliosInterface:
         return edge_fraction
 
 
-# TODO: add lense finding logic
-
-
 class HeliosThread(AbstractThread):
     """Thread for determining the current sun conditions in a
     parallel mainloop.
@@ -497,7 +494,6 @@ class HeliosThread(AbstractThread):
 
                     logger.debug(f"New state: {'GOOD' if new_state else 'BAD'}")
                     if current_state == new_state:
-                        # TODO: simplify this logic
                         logger.debug("State did not change")
                         with interfaces.StateInterface.update_state() as s:
                             s.helios_indicates_good_conditions = {  # type: ignore
