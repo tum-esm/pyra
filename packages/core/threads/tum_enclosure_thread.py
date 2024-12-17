@@ -9,13 +9,13 @@ from packages.core import interfaces, types, utils
 
 from .abstract_thread import AbstractThread
 
-ORIGIN = "tum-enclosure"
-
 
 class TUMEnclosureThread(AbstractThread):
     """Thread for to evaluate whether to conduct measurements or not.
 
     CAS = Condition Assessment System."""
+
+    logger_origin = "tum-enclosure-thread"
 
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
@@ -33,7 +33,7 @@ class TUMEnclosureThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin=ORIGIN)
+        logger = utils.Logger(origin="tum-enclosure")
         plc_interface: Optional[interfaces.TUMEnclosureInterface] = None
         last_plc_connection_time: float = time.time()
         last_camera_down_time: Optional[float] = None
@@ -75,7 +75,7 @@ class TUMEnclosureThread(AbstractThread):
                             with interfaces.StateInterface.update_state() as _s:
                                 _s.exceptions_state.add_exception_state_item(
                                     types.ExceptionStateItem(
-                                        origin=ORIGIN,
+                                        origin="tum-enclosure",
                                         subject="Could not connect to PLC for 6 minutes",
                                     )
                                 )
@@ -130,7 +130,7 @@ class TUMEnclosureThread(AbstractThread):
                                 with interfaces.StateInterface.update_state() as _s:
                                     _s.exceptions_state.add_exception_state_item(
                                         types.ExceptionStateItem(
-                                            origin=ORIGIN,
+                                            origin="tum-enclosure",
                                             subject="Rain detected but cover is not closed",
                                         )
                                     )
@@ -285,7 +285,7 @@ class TUMEnclosureThread(AbstractThread):
                                         with interfaces.StateInterface.update_state() as _s:
                                             _s.exceptions_state.add_exception_state_item(
                                                 types.ExceptionStateItem(
-                                                    origin=ORIGIN,
+                                                    origin="tum-enclosure",
                                                     subject="Cover did not closed after disabling sync to tracker and moving to 0°",
                                                 )
                                             )
@@ -296,7 +296,7 @@ class TUMEnclosureThread(AbstractThread):
                     if not exception_was_set:
                         exception_was_set = False
                         with interfaces.StateInterface.update_state() as _s:
-                            _s.exceptions_state.clear_exception_origin(origin=ORIGIN)
+                            _s.exceptions_state.clear_exception_origin(origin="tum-enclosure")
 
                     # SLEEP
 
@@ -319,7 +319,7 @@ class TUMEnclosureThread(AbstractThread):
         except Exception as e:
             logger.exception(e)
             with interfaces.StateInterface.update_state() as state:
-                state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+                state.exceptions_state.add_exception(origin="tum-enclosure", exception=e)
 
     @staticmethod
     def handle_plc_errors(
@@ -347,7 +347,7 @@ class TUMEnclosureThread(AbstractThread):
                     with interfaces.StateInterface.update_state() as state:
                         state.exceptions_state.add_exception_state_item(
                             types.ExceptionStateItem(
-                                origin=ORIGIN,
+                                origin="tum-enclosure",
                                 subject="PLC reset was required but did not work",
                             )
                         )

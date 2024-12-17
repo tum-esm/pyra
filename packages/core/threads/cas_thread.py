@@ -6,13 +6,13 @@ from packages.core import interfaces, types, utils
 
 from .abstract_thread import AbstractThread
 
-ORIGIN = "cas"
-
 
 class CASThread(AbstractThread):
     """Thread for to evaluate whether to conduct measurements or not.
 
     CAS = Condition Assessment System."""
+
+    logger_origin = "cas-thread"
 
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
@@ -30,7 +30,7 @@ class CASThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin=ORIGIN)
+        logger = utils.Logger(origin="cas")
         last_good_automatic_decision: float = 0
 
         while True:
@@ -109,7 +109,7 @@ class CASThread(AbstractThread):
                     s.position.sun_elevation = sun_elevation
                     s.measurements_should_be_running = should_measure
                     s.recent_cli_calls -= state.recent_cli_calls
-                    state.exceptions_state.clear_exception_origin(ORIGIN)
+                    state.exceptions_state.clear_exception_origin("cas")
 
                 # SLEEP
 
@@ -121,7 +121,7 @@ class CASThread(AbstractThread):
             except Exception as e:
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+                    state.exceptions_state.add_exception(origin="cas", exception=e)
 
     @staticmethod
     def get_automatic_decision(

@@ -9,8 +9,6 @@ from packages.core import interfaces, types, utils
 
 from .abstract_thread import AbstractThread
 
-ORIGIN = "upload"
-
 
 class UploadThread(AbstractThread):
     """Thread for uploading data to a server via SCP.
@@ -18,6 +16,7 @@ class UploadThread(AbstractThread):
     See https://github.com/dostuffthatmatters/circadian-scp-upload for
     a description of how this is implemented."""
 
+    logger_origin = "upload-thread"
     last_measurement_time: Optional[datetime.datetime] = None
 
     @staticmethod
@@ -64,7 +63,7 @@ class UploadThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin=ORIGIN, just_print=headless)
+        logger = utils.Logger(origin="upload", just_print=headless)
         config = types.Config.load()
         assert config.upload is not None
 
@@ -137,7 +136,7 @@ class UploadThread(AbstractThread):
 
                 with interfaces.StateInterface.update_state() as s:
                     s.upload_is_running = False
-                    s.exceptions_state.clear_exception_origin(ORIGIN)
+                    s.exceptions_state.clear_exception_origin("upload")
 
                 # sleep 15 minutes until running again
                 # stop thread if upload config has changed
@@ -168,7 +167,7 @@ class UploadThread(AbstractThread):
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as s:
                     s.upload_is_running = False
-                    s.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+                    s.exceptions_state.add_exception(origin="upload", exception=e)
                 logger.info(
                     "waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
                 )

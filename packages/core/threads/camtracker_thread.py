@@ -12,8 +12,6 @@ from packages.core import interfaces, types, utils
 
 from .abstract_thread import AbstractThread
 
-ORIGIN = "camtracker"
-
 
 class TrackerPosition(pydantic.BaseModel):
     dt: datetime.datetime = pydantic.Field(..., description="Datetime of the tracker position")
@@ -166,6 +164,8 @@ class CamTrackerProgram:
 
 
 class CamTrackerThread(AbstractThread):
+    logger_origin = "camtracker-thread"
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -181,7 +181,7 @@ class CamTrackerThread(AbstractThread):
     def main(headless: bool = False) -> None:
         """Main entrypoint of the thread."""
 
-        logger = utils.Logger(origin=ORIGIN, just_print=headless)
+        logger = utils.Logger(origin="camtracker", just_print=headless)
         last_camtracker_start_time: Optional[float] = None
 
         # STOP CAMTRACKER IF IT IS RUNNING
@@ -253,7 +253,7 @@ class CamTrackerThread(AbstractThread):
                             with interfaces.StateInterface.update_state() as state:
                                 state.exceptions_state.add_exception_state_item(
                                     types.ExceptionStateItem(
-                                        origin=ORIGIN,
+                                        origin="camtracker",
                                         subject="Camtracker was started but cover did not open in 3 minutes",
                                     )
                                 )
@@ -273,7 +273,7 @@ class CamTrackerThread(AbstractThread):
                         e
                         for e in state.exceptions_state.current
                         if (
-                            (e.origin != ORIGIN)
+                            (e.origin != "camtracker")
                             and (
                                 e.subject
                                 != "Camtracker was started but cover did not open in 3 minutes"
@@ -292,7 +292,7 @@ class CamTrackerThread(AbstractThread):
                 logger.exception(e)
                 CamTrackerProgram.stop(config, logger)
                 with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+                    state.exceptions_state.add_exception(origin="camtracker", exception=e)
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")

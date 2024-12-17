@@ -1,4 +1,5 @@
 import threading
+import time
 
 import tum_esm_utils
 
@@ -6,11 +7,11 @@ from packages.core import interfaces, types, utils
 
 from .abstract_thread import AbstractThread
 
-ORIGIN = "system-health"
-
 
 class SystemHealthThread(AbstractThread):
     """Thread for checking the system's state (CPU usage, disk utilization, etc.)"""
+
+    logger_origin = "system-health-thread"
 
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
@@ -28,7 +29,7 @@ class SystemHealthThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin=ORIGIN, just_print=headless)
+        logger = utils.Logger(origin="system-health", just_print=headless)
 
         while True:
             try:
@@ -55,7 +56,7 @@ class SystemHealthThread(AbstractThread):
                     with interfaces.StateInterface.update_state() as state:
                         state.exceptions_state.add_exception_state_item(
                             types.ExceptionStateItem(
-                                origin=ORIGIN, subject=subject, details=details
+                                origin="system-health", subject=subject, details=details
                             )
                         )
                     logger.error(f"{subject}: {details}")
@@ -73,7 +74,7 @@ class SystemHealthThread(AbstractThread):
                         with interfaces.StateInterface.update_state() as state:
                             state.exceptions_state.add_exception_state_item(
                                 types.ExceptionStateItem(
-                                    origin=ORIGIN, subject=subject, details=details
+                                    origin="system-health", subject=subject, details=details
                                 )
                             )
                         logger.error(f"{subject}: {details}")
@@ -85,11 +86,12 @@ class SystemHealthThread(AbstractThread):
                         last_boot_time=str(last_boot_time),
                         filled_disk_space_fraction=disk_space,
                     )
-                    state.exceptions_state.clear_exception_origin(ORIGIN)
+                    state.exceptions_state.clear_exception_origin("system-health")
 
-                logger.info("Waiting 3 minutes before next check")
+                logger.info("Waiting 2 minutes before next check")
+                time.sleep(120)
 
             except Exception as e:
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+                    state.exceptions_state.add_exception(origin="system-health", exception=e)

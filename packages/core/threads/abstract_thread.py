@@ -1,24 +1,23 @@
 import abc
 import re
 import threading
+from typing import Optional
 
 from packages.core import types, utils
-
-logger = utils.Logger(origin="helios")
 
 
 class AbstractThread(abc.ABC):
     """Abstract base class for all threads"""
+
+    logger_origin: Optional[str] = None
 
     def __init__(self) -> None:
         """Initialize the thread instance. This does not start the
         thread but only initializes the instance that triggers the
         thread to start and stop correctly."""
 
-        # credits to https://stackoverflow.com/a/1176023/8255842
-        self.logger: utils.Logger = utils.Logger(
-            origin=re.sub(r"(?<!^)(?=[A-Z])", "-", self.__class__.__name__).lower()
-        )
+        assert self.__class__.logger_origin is not None
+        self.logger: utils.Logger = utils.Logger(origin=self.__class__.logger_origin)
         self.thread = self.get_new_thread_object()
         self.is_initialized = False
 

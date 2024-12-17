@@ -17,7 +17,6 @@ _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _AUTOEXPOSURE_IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios-autoexposure")
 _NUMBER_OF_EXPOSURE_IMAGES = 3
-ORIGIN = "helios"
 
 
 class LenseFinder:
@@ -334,6 +333,8 @@ class HeliosThread(AbstractThread):
     The result of this constant sunlight evaluation is written
     to the StateInterface."""
 
+    logger_origin = "helios-thread"
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -354,7 +355,7 @@ class HeliosThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin=ORIGIN, just_print=headless)
+        logger = utils.Logger(origin="helios", just_print=headless)
         config = types.Config.load()
         assert config.helios is not None, "This is a bug in Pyra"
         helios_instance: Optional[HeliosInterface] = None
@@ -546,7 +547,7 @@ class HeliosThread(AbstractThread):
                 # clear exceptions
 
                 with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.clear_exception_origin(ORIGIN)
+                    state.exceptions_state.clear_exception_origin("helios")
 
                 # wait rest of loop time
                 elapsed_time = time.time() - start_time
@@ -563,7 +564,7 @@ class HeliosThread(AbstractThread):
                 logger.error(f"error in HeliosThread: {repr(e)}")
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as s:
-                    s.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+                    s.exceptions_state.add_exception(origin="helios", exception=e)
 
                 logger.info("sleeping 30 seconds, reinitializing HeliosThread")
                 time.sleep(30)

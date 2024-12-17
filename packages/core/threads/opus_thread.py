@@ -12,14 +12,15 @@ from packages.core import interfaces, types, utils
 
 from .abstract_thread import AbstractThread
 
-ORIGIN = "opus"
-
 
 class DDEConnection:
     """Class for handling DDE connections to OPUS."""
 
     def __init__(self, logger: utils.Logger) -> None:
-        import brukeropus.control.dde
+        try:
+            import brukeropus.control.dde
+        except ImportError:
+            pass
 
         self.client: Optional[brukeropus.control.dde.DDEClient] = None
         self.logger = logger
@@ -254,6 +255,8 @@ class OpusThread(AbstractThread):
     * Pings the EM27 every 5 minutes to check if it is still connected
     """
 
+    logger_origin = "opus-thread"
+
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -266,7 +269,7 @@ class OpusThread(AbstractThread):
 
     @staticmethod
     def main(headless: bool = False) -> None:
-        logger = utils.Logger(origin=ORIGIN)
+        logger = utils.Logger(origin="opus")
 
         current_experiment: Optional[str] = None  # filepath
         current_macro: Optional[tuple[int, str]] = None  # id and filepath
@@ -490,7 +493,7 @@ class OpusThread(AbstractThread):
                         state.opus_state.macro_id = current_macro[0]
                         state.opus_state.macro_filepath = current_macro[1]
                     if clear_issues:
-                        state.exceptions_state.clear_exception_origin(ORIGIN)
+                        state.exceptions_state.clear_exception_origin("opus")
 
                 # SLEEP
 
@@ -505,7 +508,7 @@ class OpusThread(AbstractThread):
                 with interfaces.StateInterface.update_state() as state:
                     state.opus_state.macro_id = None
                     state.opus_state.macro_filepath = None
-                    state.exceptions_state.add_exception(origin=ORIGIN, exception=e)
+                    state.exceptions_state.add_exception(origin="opus", exception=e)
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")
