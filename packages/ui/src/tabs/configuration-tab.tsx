@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import React, { useState, JSX } from 'react';
 import { customTypes } from '../custom-types';
 import { configurationComponents } from '../components';
 import toast from 'react-hot-toast';
 import {
+    Icon,
     IconAdjustmentsFilled,
     IconCpu,
     IconFileUpload,
     IconMail,
     IconMicroscope,
+    IconProps,
     IconSettings,
     IconSunFilled,
-    TablerIconsProps,
 } from '@tabler/icons-react';
 import { Button } from '../components/ui/button';
 import { configSchema, useConfigStore } from '../utils/zustand-utils/config-zustand';
@@ -22,7 +23,7 @@ import { getDiff } from 'recursive-diff';
 const sections: {
     key: customTypes.configSectionKey;
     label: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
 }[] = [
     { key: 'general', label: 'General', icon: IconSettings },
     { key: 'opus', label: 'OPUS', icon: IconMicroscope },
@@ -39,7 +40,7 @@ const sections: {
 const hardwareSections: {
     key: customTypes.configSectionKey;
     label: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
 }[] = [
     { key: 'tum_enclosure', label: 'TUM Enclosure', icon: IconCpu },
     { key: 'helios', label: 'Helios', icon: IconCpu },
@@ -80,7 +81,7 @@ export default function ConfigurationTab() {
                     setErrorMessage(undefined);
                     setConfig(parsedLocalConfig);
                 },
-                onError: (p: ChildProcess) => {
+                onError: (p: ChildProcess<string>) => {
                     setErrorMessage(p.stdout);
                 },
             });
@@ -102,7 +103,7 @@ export default function ConfigurationTab() {
         section: {
             key: customTypes.configSectionKey;
             label: string;
-            icon: (props: TablerIconsProps) => JSX.Element;
+            icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
         };
     }) => (
         <div

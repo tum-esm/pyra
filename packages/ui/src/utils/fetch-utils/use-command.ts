@@ -7,7 +7,7 @@ export default function useCommand() {
     const { addUiLogLine } = useLogsStore();
     const [commandIsRunning, setCommandIsRunning] = useState(false);
 
-    function exitFromFailedProcess(p: ChildProcess, label: string): string {
+    function exitFromFailedProcess(p: ChildProcess<string>, label: string): string {
         addUiLogLine(
             `Error while ${label}.`,
             `stdout: "${p.stdout.trim()}"\nstderr: "${p.stderr.trim()}"`
@@ -16,11 +16,11 @@ export default function useCommand() {
     }
 
     function runPromisingCommand(args: {
-        command: () => Promise<ChildProcess>;
+        command: () => Promise<ChildProcess<string>>;
         label: string;
         successLabel: string;
-        onSuccess?: (p: ChildProcess) => void;
-        onError?: (p: ChildProcess) => void;
+        onSuccess?: (p: ChildProcess<string>) => void;
+        onError?: (p: ChildProcess<string>) => void;
     }): void {
         if (commandIsRunning) {
             toast.error('Cannot run multiple commands at the same time');
@@ -28,14 +28,14 @@ export default function useCommand() {
             setCommandIsRunning(true);
             toast.promise(args.command(), {
                 loading: args.label,
-                success: (p: ChildProcess) => {
+                success: (p: ChildProcess<string>) => {
                     if (args.onSuccess) {
                         args.onSuccess(p);
                     }
                     setCommandIsRunning(false);
                     return args.successLabel;
                 },
-                error: (p: ChildProcess) => {
+                error: (p: ChildProcess<string>) => {
                     if (args.onError) {
                         args.onError(p);
                     }

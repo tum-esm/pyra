@@ -28,7 +28,7 @@ export default function Dashboard() {
             command: fetchUtils.backend.getConfig,
             label: 'loading config file',
             successLabel: 'successfully loaded config file',
-            onSuccess: (p: ChildProcess) => {
+            onSuccess: (p: ChildProcess<string>) => {
                 setConfig(JSON.parse(p.stdout));
             },
         });

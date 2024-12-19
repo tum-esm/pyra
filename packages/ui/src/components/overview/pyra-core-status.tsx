@@ -24,14 +24,14 @@ export default function PyraCoreStatus() {
             command: fetchUtils.backend.checkPyraCoreState,
             label: 'checking Pyra Core state',
             successLabel: 'successfully checked Pyra Core state',
-            onSuccess: (p: ChildProcess) => {
+            onSuccess: (p: ChildProcess<string>) => {
                 if (p.stdout.includes('not running')) {
                     setPyraCorePid(-1);
                 } else {
                     setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
                 }
             },
-            onError: (p: ChildProcess) => checkPyraCoreState(),
+            onError: (p: ChildProcess<string>) => checkPyraCoreState(),
         });
     }
 
@@ -41,7 +41,7 @@ export default function PyraCoreStatus() {
             command: fetchUtils.backend.startPyraCore,
             label: 'starting Pyra Core',
             successLabel: 'successfully started Pyra Core',
-            onSuccess: (p: ChildProcess) => {
+            onSuccess: (p: ChildProcess<string>) => {
                 setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
             },
         });
@@ -54,7 +54,7 @@ export default function PyraCoreStatus() {
             label: 'stopping Pyra Core',
             successLabel: 'successfully stopped Pyra Core',
             onSuccess: () => setPyraCorePid(-1),
-            onError: (p: ChildProcess) => checkPyraCoreState(),
+            onError: (p: ChildProcess<string>) => checkPyraCoreState(),
         });
     }
 

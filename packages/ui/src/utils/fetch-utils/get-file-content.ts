@@ -1,4 +1,4 @@
-import { readBinaryFile } from '@tauri-apps/plugin-fs';
+import { readFile } from '@tauri-apps/plugin-fs';
 import { BaseDirectory, join } from '@tauri-apps/api/path';
 import { split, tail } from 'lodash';
 
@@ -16,7 +16,7 @@ async function getFileContent(filePath: string): Promise<string> {
 
     console.debug(`Reading file: "${absoluteFilePath}" in ~/Documents`);
     return new TextDecoder('utf-8').decode(
-        await readBinaryFile(absoluteFilePath, { dir: BaseDirectory.Document })
+        await readFile(absoluteFilePath, { baseDir: BaseDirectory.Document })
     );
 }
 

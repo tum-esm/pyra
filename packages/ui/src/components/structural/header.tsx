@@ -19,7 +19,7 @@ export function Header(props: {
         ) {
             const switchTabsAnyways = await ask('Switch tabs anyways?', {
                 title: 'PLC is still controlled by user',
-                type: 'warning',
+                kind: 'warning',
             });
             if (switchTabsAnyways) {
                 setActiveTab(t);
