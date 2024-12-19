@@ -83,8 +83,24 @@ export default function ConfigSectionOpus() {
                 oldValue={centralSectionConfig.password}
             />
             <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementNote>
+                <p>
+                    The Autmatic Peak Positioning feature searches for OPUS files that have been
+                    written to the local disk within the last 10 minutes (and since the last
+                    EM27/SUN powerup). It loads the interferograms from these OPUS files using the{' '}
+                    <a
+                        href="https://tum-esm-utils.netlify.app/api-reference#tum_esm_utilsopus"
+                        className="inline font-semibold text-blue-500"
+                    >
+                        tum-esm-utils
+                    </a>{' '}
+                    Python library and calculates the peak position. If the peak position from the
+                    last three readable OPUS files is identical and is less than 200 points off the
+                    center, it will send this new peak position to the EM27/SUN.
+                </p>
+            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementBooleanToggle
-                title="Use Automatic Peak Positioning"
+                title="Autom. Peak Positioning"
                 value={localSectionConfig.automatic_peak_positioning}
                 setValue={(v: boolean) => setLocalConfigItem(`opus.automatic_peak_positioning`, v)}
                 oldValue={centralSectionConfig.automatic_peak_positioning}
@@ -97,11 +113,11 @@ export default function ConfigSectionOpus() {
                 showSelector="directory"
             />
             <configurationComponents.ConfigElementNote>
-                The Interferogram path should point to the directory containing today's interferograms
-                files. You can use the wildcards '%Y', '%y', '%m', '%d' that will be replaced by the
-                current date. Refer to the documentation for this 'automatic peak positioning'. Do not
-                attach a '*' to the end - after replacing the date, it should point to exactly one
-                directory.
+                The Interferogram path should point to the directory containing today's
+                interferograms files. You can use the wildcards '%Y', '%y', '%m', '%d' that will be
+                replaced by the current date. Refer to the documentation for this 'automatic peak
+                positioning'. Do not attach a '*' to the end - after replacing the date, it should
+                point to exactly one directory.
             </configurationComponents.ConfigElementNote>
         </>
     );
