@@ -16,7 +16,7 @@ import { Button } from '../components/ui/button';
 import { configSchema, useConfigStore } from '../utils/zustand-utils/config-zustand';
 import fetchUtils from '../utils/fetch-utils';
 import { join, omit, takeWhile, pick } from 'lodash';
-import { ChildProcess } from '@tauri-apps/api/shell';
+import { ChildProcess } from '@tauri-apps/plugin-shell';
 import { getDiff } from 'recursive-diff';
 
 const sections: {

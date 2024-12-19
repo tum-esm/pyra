@@ -3,7 +3,7 @@ import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 import { Button } from '../../ui/button';
 import { fetchUtils } from '../../../utils';
 import { join } from '@tauri-apps/api/path';
-import { convertFileSrc } from '@tauri-apps/api/tauri';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
 

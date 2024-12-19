@@ -1,4 +1,4 @@
-import { readBinaryFile } from '@tauri-apps/api/fs';
+import { readBinaryFile } from '@tauri-apps/plugin-fs';
 import { BaseDirectory, join } from '@tauri-apps/api/path';
 import { split, tail } from 'lodash';
 

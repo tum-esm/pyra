@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { shell } from '@tauri-apps/api';
+import {  } from '@tauri-apps/api';
 import { essentialComponents } from '../components';
 import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
 import Toggle from '../components/essential/toggle';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
+import * as shell from "@tauri-apps/plugin-shell"
 
 export default function LogTab() {
     const [logType, setLogType] = useState<'main' | 'upload' | 'helios' | 'ui'>('main');

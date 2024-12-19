@@ -9,7 +9,7 @@ import {
     IconPower,
 } from '@tabler/icons-react';
 import { useEffect } from 'react';
-import { ChildProcess } from '@tauri-apps/api/shell';
+import { ChildProcess } from '@tauri-apps/plugin-shell';
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 

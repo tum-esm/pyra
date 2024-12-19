@@ -1,4 +1,4 @@
-import { ChildProcess } from '@tauri-apps/api/shell';
+import { ChildProcess } from '@tauri-apps/plugin-shell';
 import { useLogsStore } from '../zustand-utils/logs-zustand';
 import toast from 'react-hot-toast';
 import { useState } from 'react';

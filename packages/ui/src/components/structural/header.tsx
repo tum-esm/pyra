@@ -1,4 +1,4 @@
-import { ask } from '@tauri-apps/api/dialog';
+import { ask } from '@tauri-apps/plugin-dialog';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 import { IconBugFilled, IconBook } from '@tabler/icons-react';
 

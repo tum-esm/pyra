@@ -1,4 +1,4 @@
-import { Command, ChildProcess } from '@tauri-apps/api/shell';
+import { Command, ChildProcess } from '@tauri-apps/plugin-shell';
 import { join } from '@tauri-apps/api/path';
 import fetchUtils from '.';
 

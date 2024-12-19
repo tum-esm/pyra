@@ -6,7 +6,7 @@ import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zustand';
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
-import { ChildProcess } from '@tauri-apps/api/shell';
+import { ChildProcess } from '@tauri-apps/plugin-shell';
 import { useConfigStore, configSchema } from '../../utils/zustand-utils/config-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
