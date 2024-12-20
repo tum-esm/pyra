@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
 import { essentialComponents } from '../components';
 import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
-import Toggle from '../components/essential/toggle';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 import * as shell from '@tauri-apps/plugin-shell';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '../components/ui/select';
+import { Separator } from '../components/ui/separator';
 
 // TODO: add tab to render all logs
-// TODO: make threads logs buttons into dropdown
 
 export default function LogTab() {
     const [logType, setLogType] = useState<
+        | 'All'
         | 'Main'
         | 'OPUS'
         | 'CamTracker'
@@ -22,6 +29,8 @@ export default function LogTab() {
     >('Main');
 
     const [liveUpdateIsActice, setLiveUpdateIsActive] = useState(true);
+
+    const [renderedAllLogs, setRenderedAllLogs] = useState<string[] | undefined>(undefined);
     const [renderedMainLogs, setRenderedMainLogs] = useState<string[] | undefined>(undefined);
     const [renderedOpusLogs, setRenderedOpusLogs] = useState<string[] | undefined>(undefined);
     const [renderedCamtrackerLogs, setRenderedCamtrackerLogs] = useState<string[] | undefined>(
@@ -37,6 +46,7 @@ export default function LogTab() {
     const { coreLogs, uiLogs } = useLogsStore();
     useEffect(() => {
         if (liveUpdateIsActice) {
+            setRenderedAllLogs(coreLogs.all);
             setRenderedMainLogs(coreLogs.main);
             setRenderedOpusLogs(coreLogs.opus);
             setRenderedCamtrackerLogs(coreLogs.camtracker);
@@ -75,7 +85,9 @@ export default function LogTab() {
     }
 
     const renderedLogs =
-        logType === 'Main'
+        logType === 'All'
+            ? renderedAllLogs
+            : logType === 'Main'
             ? renderedMainLogs
             : logType === 'OPUS'
             ? renderedOpusLogs
@@ -99,21 +111,26 @@ export default function LogTab() {
                     toggle={setLiveUpdateIsActive}
                 />
                 {coreLogs === undefined && <essentialComponents.Spinner />}
-                <Toggle
-                    value={logType}
-                    setValue={(lt: any) => setLogType(lt)}
-                    values={[
-                        'Main',
-                        'OPUS',
-                        'CamTracker',
-                        'CAS',
-                        'System Health',
-                        'Upload',
-                        'TUM Enclosure',
-                        'Helios',
-                        'UI',
-                    ]}
-                />
+                <Select onValueChange={(value) => setLogType(value as any)}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Main" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="All">All Logs</SelectItem>   
+                        <SelectItem value="Main">Main</SelectItem>
+                        <Separator className="my-1" />
+                        <SelectItem value="OPUS">OPUS</SelectItem>
+                        <SelectItem value="CamTracker">CamTracker</SelectItem>
+                        <SelectItem value="CAS">CAS</SelectItem>
+                        <SelectItem value="System Health">System Health</SelectItem>
+                        <SelectItem value="Upload">Upload</SelectItem>
+                        <Separator className="my-1" />
+                        <SelectItem value="TUM Enclosure">TUM Enclosure</SelectItem>
+                        <SelectItem value="Helios">Helios</SelectItem>
+                        <Separator className="my-1" />
+                        <SelectItem value="UI">UI</SelectItem>
+                    </SelectContent>
+                </Select>
                 <div className="flex-grow" />
                 <essentialComponents.Button onClick={openLogsFolder} variant="white">
                     open logs folder
