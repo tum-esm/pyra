@@ -5,7 +5,7 @@ import { useConfigStore } from '../utils/zustand-utils/config-zustand';
 import { Button } from '../components/ui/button';
 
 export default function OverviewTab() {
-    const { mainLogs } = useLogsStore();
+    const { coreLogs } = useLogsStore();
     const { runPromisingCommand } = fetchUtils.useCommand();
     const { centralConfig } = useConfigStore();
 
@@ -40,13 +40,13 @@ export default function OverviewTab() {
                 Recent Logs
             </div>
             <div className="w-[calc(100%-2rem)] mx-4 rounded-lg overflow-hidden font-mono text-xs bg-white border border-slate-200 py-1">
-                {(mainLogs === undefined || mainLogs.length === 0) && (
+                {(coreLogs.main === undefined || coreLogs.main.length === 0) && (
                     <div className="p-2">
                         <essentialComponents.Spinner />
                     </div>
                 )}
-                {mainLogs !== undefined &&
-                    mainLogs
+                {coreLogs.main !== undefined &&
+                    coreLogs.main
                         .slice(-15)
                         .map((l, i) => (
                             <essentialComponents.CoreLogLine key={`${i} ${l}`} text={l} />

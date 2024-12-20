@@ -4,24 +4,46 @@ import { essentialComponents } from '../components';
 import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
 import Toggle from '../components/essential/toggle';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
-import * as shell from "@tauri-apps/plugin-shell"
+import * as shell from '@tauri-apps/plugin-shell';
 
 export default function LogTab() {
-    const [logType, setLogType] = useState<'main' | 'upload' | 'helios' | 'ui'>('main');
+    const [logType, setLogType] = useState<
+        | 'Main'
+        | 'OPUS'
+        | 'CamTracker'
+        | 'CAS'
+        | 'System Health'
+        | 'Upload'
+        | 'TUM Enclosure'
+        | 'Helios'
+        | 'UI'
+    >('Main');
 
     const [liveUpdateIsActice, setLiveUpdateIsActive] = useState(true);
     const [renderedMainLogs, setRenderedMainLogs] = useState<string[] | undefined>(undefined);
+    const [renderedOpusLogs, setRenderedOpusLogs] = useState<string[] | undefined>(undefined);
+    const [renderedCamtrackerLogs, setRenderedCamtrackerLogs] = useState<string[] | undefined>(
+        undefined
+    );
+    const [renderedCasLogs, setRenderedCasLogs] = useState<string[] | undefined>(undefined);
     const [renderedUploadLogs, setRenderedUploadLogs] = useState<string[] | undefined>(undefined);
+    const [renderedTumEnclosureLogs, setRenderedTumEnclosureLogs] = useState<string[] | undefined>(
+        undefined
+    );
     const [renderedHeliosLogs, setRenderedHeliosLogs] = useState<string[] | undefined>(undefined);
 
-    const { mainLogs, uploadLogs, heliosLogs, uiLogs } = useLogsStore();
+    const { coreLogs, uiLogs } = useLogsStore();
     useEffect(() => {
         if (liveUpdateIsActice) {
-            setRenderedMainLogs(mainLogs);
-            setRenderedUploadLogs(uploadLogs);
-            setRenderedHeliosLogs(heliosLogs);
+            setRenderedMainLogs(coreLogs.main);
+            setRenderedOpusLogs(coreLogs.opus);
+            setRenderedCamtrackerLogs(coreLogs.camtracker);
+            setRenderedCasLogs(coreLogs.cas);
+            setRenderedUploadLogs(coreLogs.upload);
+            setRenderedTumEnclosureLogs(coreLogs.tum_enclosure);
+            setRenderedHeliosLogs(coreLogs.helios);
         }
-    }, [mainLogs, uploadLogs, heliosLogs, liveUpdateIsActice]);
+    }, [coreLogs, liveUpdateIsActice]);
 
     async function openLogsFolder() {
         let baseDir: string;
@@ -51,10 +73,20 @@ export default function LogTab() {
     }
 
     const renderedLogs =
-        logType === 'main'
+        logType === 'Main'
             ? renderedMainLogs
-            : logType === 'upload'
+            : logType === 'OPUS'
+            ? renderedOpusLogs
+            : logType === 'CamTracker'
+            ? renderedCamtrackerLogs
+            : logType === 'CAS'
+            ? renderedCasLogs
+            : logType === 'System Health'
+            ? coreLogs.system_health
+            : logType === 'Upload'
             ? renderedUploadLogs
+            : logType === 'TUM Enclosure'
+            ? renderedTumEnclosureLogs
             : renderedHeliosLogs;
 
     return (
@@ -64,11 +96,21 @@ export default function LogTab() {
                     isLive={liveUpdateIsActice}
                     toggle={setLiveUpdateIsActive}
                 />
-                {mainLogs === undefined && <essentialComponents.Spinner />}
+                {coreLogs === undefined && <essentialComponents.Spinner />}
                 <Toggle
                     value={logType}
                     setValue={(lt: any) => setLogType(lt)}
-                    values={['main', 'upload', 'helios', 'ui']}
+                    values={[
+                        'Main',
+                        'OPUS',
+                        'CamTracker',
+                        'CAS',
+                        'System Health',
+                        'Upload',
+                        'TUM Enclosure',
+                        'Helios',
+                        'UI',
+                    ]}
                 />
                 <div className="flex-grow" />
                 <essentialComponents.Button onClick={openLogsFolder} variant="white">
@@ -81,7 +123,7 @@ export default function LogTab() {
                     'border-t border-gray-250 bg-whites flex-grow bg-slate-50'
                 }
             >
-                {logType !== 'ui' && renderedLogs !== undefined && (
+                {logType !== 'UI' && renderedLogs !== undefined && (
                     <>
                         {renderedLogs.map((l, i) => (
                             <essentialComponents.CoreLogLine text={l} key={`${i} ${l}`} />
@@ -91,7 +133,7 @@ export default function LogTab() {
                         )}
                     </>
                 )}
-                {logType === 'ui' && (
+                {logType === 'UI' && (
                     <>
                         {uiLogs.map((l, i) => (
                             <essentialComponents.UILogLine logLine={l} key={`${i} ${l.text}`} />

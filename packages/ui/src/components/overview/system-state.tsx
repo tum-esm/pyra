@@ -44,15 +44,15 @@ function StateBarPanel(props: { title: string; value: number | null }) {
 export function SystemState() {
     const { coreState } = useCoreStateStore();
     const { centralConfig } = useConfigStore();
-    const { heliosLogs } = useLogsStore();
+    const { coreLogs } = useLogsStore();
 
-    if (!coreState || !centralConfig || !heliosLogs) {
+    if (!coreState || !centralConfig || !coreLogs.helios) {
         return <></>;
     }
 
     // heliosLogs contain the string "edge_fraction = 0.0"
     // look for the last occurence of this string using regex
-    const lastEdgeFraction = heliosLogs
+    const lastEdgeFraction = coreLogs.helios
         .join('\n')
         .match(/edge_fraction = \d+(\.\d+)?\s*\n/g)
         ?.slice(-1)[0];
