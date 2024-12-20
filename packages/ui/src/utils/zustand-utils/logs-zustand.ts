@@ -1,52 +1,112 @@
 import { create } from 'zustand';
 
 interface LogsStore {
-    allLogs: string[] | undefined;
-    mainLogs: string[] | undefined;
-    uploadLogs: string[] | undefined;
-    heliosLogs: string[] | undefined;
+    coreLogs: {
+        all: string[] | undefined;
+        main: string[] | undefined;
+        opus: string[] | undefined;
+        camtracker: string[] | undefined;
+        cas: string[] | undefined;
+        system_health: string[] | undefined;
+        upload: string[] | undefined;
+        tum_enclosure: string[] | undefined;
+        helios: string[] | undefined;
+    };
     uiLogs: { timestamp: number; text: string; details: string }[];
     setLogs: (allLogs: string[]) => void;
     addUiLogLine: (text: string, details: string) => void;
 }
 
 export const useLogsStore = create<LogsStore>()((set) => ({
-    allLogs: undefined,
-    mainLogs: undefined,
-    uploadLogs: undefined,
-    heliosLogs: undefined,
+    coreLogs: {
+        all: undefined,
+        main: undefined,
+        opus: undefined,
+        camtracker: undefined,
+        cas: undefined,
+        system_health: undefined,
+        upload: undefined,
+        tum_enclosure: undefined,
+        helios: undefined,
+    },
     uiLogs: [],
     setLogs: (allLogs) =>
         set(() => {
             const newLogs: {
-                [key in 'main' | 'upload' | 'helios']: string[];
+                [key in
+                    | 'main'
+                    | 'opus'
+                    | 'camtracker'
+                    | 'cas'
+                    | 'system_health'
+                    | 'upload'
+                    | 'tum_enclosure'
+                    | 'helios']: string[];
             } = {
                 main: [],
+                opus: [],
+                camtracker: [],
+                cas: [],
+                system_health: [],
                 upload: [],
+                tum_enclosure: [],
                 helios: [],
             };
-            let currentCategory: 'main' | 'upload' | 'helios' = 'main';
+            let currentCategory:
+                | 'main'
+                | 'opus'
+                | 'camtracker'
+                | 'cas'
+                | 'system_health'
+                | 'upload'
+                | 'tum_enclosure'
+                | 'helios' = 'main';
             allLogs.forEach((logLine) => {
                 if (logLine.replace(' ', '').length > 0) {
-                    // example log line:
-                    // 2023-10-09 17:45:56.060208 UTC+2 - system-checks -
+                    // example log line: "2023-10-09 17:45:56.060208 UTC+2 - system-checks - ..."
                     if (logLine.match(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.* - .* - .*/)) {
-                        if (logLine.split(' - ')[1].trim() === 'upload') {
-                            currentCategory = 'upload';
-                        } else if (logLine.split(' - ')[1].trim() === 'helios') {
-                            currentCategory = 'helios';
-                        } else {
-                            currentCategory = 'main';
+                        let logLineOrigin = logLine.split(' - ')[1].trim();
+                        switch (logLineOrigin) {
+                            case 'opus':
+                                currentCategory = 'opus';
+                                break;
+                            case 'camtracker':
+                                currentCategory = 'camtracker';
+                                break;
+                            case 'cas':
+                                currentCategory = 'cas';
+                                break;
+                            case 'system-health':
+                                currentCategory = 'system_health';
+                                break;
+                            case 'tum-enclosure':
+                                currentCategory = 'tum_enclosure';
+                                break;
+                            case 'upload':
+                                currentCategory = 'upload';
+                                break;
+                            case 'helios':
+                                currentCategory = 'helios';
+                                break;
+                            default:
+                                currentCategory = 'main';
                         }
                     }
                     newLogs[currentCategory].push(logLine);
                 }
             });
             return {
-                allLogs,
-                mainLogs: newLogs.main,
-                uploadLogs: newLogs.upload,
-                heliosLogs: newLogs.helios,
+                coreLogs: {
+                    all: allLogs,
+                    main: newLogs.main,
+                    opus: newLogs.opus,
+                    camtracker: newLogs.camtracker,
+                    cas: newLogs.cas,
+                    system_health: newLogs.system_health,
+                    upload: newLogs.upload,
+                    tum_enclosure: newLogs.tum_enclosure,
+                    helios: newLogs.helios,
+                },
             };
         }),
     addUiLogLine: (text, details) =>
