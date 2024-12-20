@@ -12,7 +12,7 @@ import {
 } from '../components/ui/select';
 import { Separator } from '../components/ui/separator';
 
-// TODO: add tab to render all logs
+// TODO: auto scroll to bottom when logs are updated (in live mode)
 
 export default function LogTab() {
     const [logType, setLogType] = useState<

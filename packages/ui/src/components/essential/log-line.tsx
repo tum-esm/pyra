@@ -1,3 +1,5 @@
+// TODO: option to not have lines before "start iteration"
+
 export function CoreLogLine(props: { text: string }) {
     const text = props.text.replace('\\r', '');
 
