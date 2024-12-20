@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import {  } from '@tauri-apps/api';
 import { essentialComponents } from '../components';
 import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
 import Toggle from '../components/essential/toggle';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
 import * as shell from '@tauri-apps/plugin-shell';
+
+// TODO: add tab to render all logs
+// TODO: make threads logs buttons into dropdown
 
 export default function LogTab() {
     const [logType, setLogType] = useState<
