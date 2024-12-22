@@ -270,16 +270,17 @@ class OpusThread(AbstractThread):
     @staticmethod
     def main(headless: bool = False) -> None:
         logger = utils.Logger(origin="opus")
+        logger.info("Starting OPUS thread")
 
         current_experiment: Optional[str] = None  # filepath
         current_macro: Optional[tuple[int, str]] = None  # id and filepath
         dde_connection = DDEConnection(logger)
 
-        logger.info("Loading state file")
-        state = interfaces.StateInterface.load_state()
-
-        logger.info("Loading configuration file")
+        logger.debug("Loading configuration file")
         config = types.Config.load()
+
+        logger.debug("Loading state file")
+        state = interfaces.StateInterface.load_state()
 
         thread_start_time = time.time()
         last_successful_ping_time = time.time()
@@ -315,9 +316,11 @@ class OpusThread(AbstractThread):
 
         while True:
             try:
-                logger.info("Loading configuration file")
-                config = types.Config.load()
                 t1 = time.time()
+                logger.info("Starting iteration")
+
+                logger.debug("Loading configuration file")
+                config = types.Config.load()
 
                 opus_should_be_running = (
                     utils.Astronomy.get_current_sun_elevation(config)
@@ -326,6 +329,7 @@ class OpusThread(AbstractThread):
 
                 if config.general.test_mode:
                     logger.info("OPUS thread is skipped in test mode")
+                    logger.debug("Sleeping 15 seconds")
                     time.sleep(15)
                     continue
 
@@ -359,7 +363,7 @@ class OpusThread(AbstractThread):
                 # IDLE AT NIGHT
 
                 if not opus_should_be_running:
-                    logger.info("Sleeping 3 minutes")
+                    logger.debug("Sleeping 180 seconds")
                     time.sleep(180)
                     continue
 

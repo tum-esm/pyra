@@ -33,7 +33,7 @@ class SystemHealthThread(AbstractThread):
 
         while True:
             try:
-                logger.info("Running system health checks")
+                logger.info("Starting iteration")
 
                 # CPU/MEMORY USAGE AND BOOT TIME
 
@@ -88,8 +88,8 @@ class SystemHealthThread(AbstractThread):
                     )
                     state.exceptions_state.clear_exception_origin("system-health")
 
-                logger.info("Waiting 2 minutes before next check")
-                time.sleep(120)
+                logger.debug("Sleeping 60 seconds")
+                time.sleep(60)
 
             except Exception as e:
                 logger.exception(e)

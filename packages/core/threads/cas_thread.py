@@ -36,11 +36,12 @@ class CASThread(AbstractThread):
         while True:
             try:
                 t1 = time.time()
+                logger.info("Starting iteration")
 
-                logger.info("Loading configuration file")
+                logger.debug("Loading configuration file")
                 config = types.Config.load()
 
-                logger.info("Loading state file")
+                logger.debug("Loading state file")
                 state = interfaces.StateInterface.load_state()
 
                 # FETCH COORDINATES AND SUN ELEVATION
@@ -114,8 +115,8 @@ class CASThread(AbstractThread):
                 # SLEEP
 
                 t2 = time.time()
-                sleep_time = max(5, 60 - (t2 - t1))
-                logger.info(f"Sleeping {sleep_time:.2f} seconds")
+                sleep_time = max(5, 20 - (t2 - t1))
+                logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                 time.sleep(sleep_time)
 
             except Exception as e:

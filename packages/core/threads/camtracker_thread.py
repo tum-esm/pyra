@@ -192,9 +192,11 @@ class CamTrackerThread(AbstractThread):
 
         while True:
             try:
-                logger.info("Loading configuration file")
-                config = types.Config.load()
                 t1 = time.time()
+                logger.info("Starting iteration")
+
+                logger.debug("Loading configuration file")
+                config = types.Config.load()
 
                 camtracker_is_running = CamTrackerProgram.is_running(logger)
                 measurements_should_be_running = bool(
