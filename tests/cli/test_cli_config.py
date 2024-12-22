@@ -87,6 +87,7 @@ def test_update_config(sample_config: types.Config) -> None:
         {"camtracker": {"motor_offset_threshold": 40.7}},
         {"error_email": {"smtp_password": "very very very secure password"}},
         {"measurement_triggers": {"stop_time": {"hour": 7, "minute": 0}}},
+        {"general": {"seconds_per_core_interval": 30}},
     ]
 
     def transform(config: types.Config, i: int) -> types.Config:
@@ -101,6 +102,8 @@ def test_update_config(sample_config: types.Config) -> None:
         if i == 4:
             config.measurement_triggers.stop_time.hour = 7
             config.measurement_triggers.stop_time.minute = 0
+        if i == 5:
+            config.general.seconds_per_core_interval = 30
         return config
 
     # run "pyra-cli config update" for some valid variables
@@ -141,3 +144,12 @@ def test_add_default_config(sample_config: types.Config) -> None:
                 default_subconfig
             )
         assert_config_file_content(sample_config, f'config.json does not include the "{c}" config')
+
+    for c in cases:
+        stdout = run_cli_command(["config", "update", json.dumps({c: None})], should_succeed=True)
+        assert "Updated config file" in stdout
+        if c == "helios":
+            sample_config.helios = None
+        if c == "tum_enclosure":
+            sample_config.tum_enclosure = None
+        assert_config_file_content(sample_config, "config.json is in an unexpected state")

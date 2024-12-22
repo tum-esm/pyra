@@ -40,5 +40,5 @@ def test_version_numbers() -> None:
     with open(
         os.path.join(PROJECT_DIR, "packages", "ui", "src-tauri", "tauri.conf.json"), "r"
     ) as f:
-        tauri_conf_version = json.load(f)["package"]["version"]
+        tauri_conf_version = json.load(f)["version"]
     assert tauri_conf_version == pyproject_version
