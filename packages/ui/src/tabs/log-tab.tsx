@@ -11,6 +11,7 @@ import {
     SelectValue,
 } from '../components/ui/select';
 import { Separator } from '../components/ui/separator';
+import { Checkbox } from '../components/ui/checkbox';
 
 // TODO: auto scroll to bottom when logs are updated (in live mode)
 
@@ -29,6 +30,7 @@ export default function LogTab() {
     >('Main');
 
     const [liveUpdateIsActice, setLiveUpdateIsActive] = useState(true);
+    const [showDebugLogs, setShowDebugLogs] = useState(true);
 
     const [renderedAllLogs, setRenderedAllLogs] = useState<string[] | undefined>(undefined);
     const [renderedMainLogs, setRenderedMainLogs] = useState<string[] | undefined>(undefined);
@@ -103,6 +105,14 @@ export default function LogTab() {
             ? renderedTumEnclosureLogs
             : renderedHeliosLogs;
 
+    const filteredRenderedLogs = renderedLogs?.filter((l) => {
+        if (showDebugLogs) {
+            return true;
+        } else {
+            return !l.includes(' - DEBUG - ');
+        }
+    });
+
     return (
         <div className={'flex flex-col w-full h-[calc(100vh-3.5rem)] overflow-hidden '}>
             <div className="px-6 py-4 bg-white flex-row-center gap-x-2 ">
@@ -131,6 +141,13 @@ export default function LogTab() {
                         <SelectItem value="UI">UI</SelectItem>
                     </SelectContent>
                 </Select>
+                <div className="flex flex-row items-center justify-center ml-4 gap-x-2">
+                    <Checkbox
+                        onClick={() => setShowDebugLogs(!showDebugLogs)}
+                        checked={showDebugLogs}
+                    />
+                    <div>verbose</div>
+                </div>
                 <div className="flex-grow" />
                 <essentialComponents.Button onClick={openLogsFolder} variant="white">
                     open logs folder
@@ -142,16 +159,16 @@ export default function LogTab() {
                     'border-t border-gray-250 bg-whites flex-grow bg-slate-50'
                 }
             >
-                {logType !== 'UI' && renderedLogs !== undefined && (
+                {logType !== 'UI' && filteredRenderedLogs !== undefined && (
                     <>
-                        {renderedLogs.map((l, i) => (
+                        {filteredRenderedLogs.map((l, i) => (
                             <essentialComponents.CoreLogLine
                                 text={l}
                                 key={`${i} ${l}`}
                                 displayInterationSeparator={logType != 'All'}
                             />
                         ))}
-                        {renderedLogs.length == 0 && (
+                        {filteredRenderedLogs.length == 0 && (
                             <div className="px-4 py-2">logs are empty</div>
                         )}
                     </>
