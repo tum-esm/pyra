@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { essentialComponents } from '../components';
 import { documentDir, downloadDir, join } from '@tauri-apps/api/path';
 import { useLogsStore } from '../utils/zustand-utils/logs-zustand';
@@ -13,8 +13,6 @@ import {
 import { Separator } from '../components/ui/separator';
 import { Checkbox } from '../components/ui/checkbox';
 
-// TODO: auto scroll to bottom when logs are updated (in live mode)
-
 export default function LogTab() {
     const [logType, setLogType] = useState<
         | 'All'
@@ -28,6 +26,8 @@ export default function LogTab() {
         | 'Helios'
         | 'UI'
     >('Main');
+
+    const logsContainerRef = useRef<HTMLDivElement>(null);
 
     const [liveUpdateIsActice, setLiveUpdateIsActive] = useState(true);
     const [showDebugLogs, setShowDebugLogs] = useState(true);
@@ -56,6 +56,9 @@ export default function LogTab() {
             setRenderedUploadLogs(coreLogs.upload);
             setRenderedTumEnclosureLogs(coreLogs.tum_enclosure);
             setRenderedHeliosLogs(coreLogs.helios);
+            if (logsContainerRef.current) {
+                logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+            }
         }
     }, [coreLogs, liveUpdateIsActice]);
 
@@ -158,6 +161,7 @@ export default function LogTab() {
                     'w-full !py-2 !mb-0 font-mono text-xs overflow-y-scroll ' +
                     'border-t border-gray-250 bg-whites flex-grow bg-slate-50'
                 }
+                ref={logsContainerRef}
             >
                 {logType !== 'UI' && filteredRenderedLogs !== undefined && (
                     <>
