@@ -34,6 +34,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
         set(() => {
             const newLogs: {
                 [key in
+                    | 'all'
                     | 'main'
                     | 'opus'
                     | 'camtracker'
@@ -43,6 +44,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                     | 'tum_enclosure'
                     | 'helios']: string[];
             } = {
+                all: [],
                 main: [],
                 opus: [],
                 camtracker: [],
@@ -62,7 +64,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                 | 'tum_enclosure'
                 | 'helios' = 'main';
             allLogs.forEach((logLine) => {
-                if (logLine.replace(' ', '').length > 0) {
+                if (logLine.trim().length > 0) {
                     // example log line: "2023-10-09 17:45:56.060208 UTC+2 - system-checks - ..."
                     if (logLine.match(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}.* - .* - .*/)) {
                         let logLineOrigin = logLine.split(' - ')[1].trim();
@@ -92,21 +94,12 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                                 currentCategory = 'main';
                         }
                     }
-                    newLogs[currentCategory].push(logLine);
+                    newLogs.all.push(logLine.trim());
+                    newLogs[currentCategory].push(logLine.trim());
                 }
             });
             return {
-                coreLogs: {
-                    all: allLogs,
-                    main: newLogs.main,
-                    opus: newLogs.opus,
-                    camtracker: newLogs.camtracker,
-                    cas: newLogs.cas,
-                    system_health: newLogs.system_health,
-                    upload: newLogs.upload,
-                    tum_enclosure: newLogs.tum_enclosure,
-                    helios: newLogs.helios,
-                },
+                coreLogs: newLogs,
             };
         }),
     addUiLogLine: (text, details) =>
