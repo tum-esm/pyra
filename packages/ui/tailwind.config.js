@@ -1,4 +1,5 @@
-const colors = require('tailwindcss/colors');
+import colors from 'tailwindcss/colors';
+
 const customColors = {
     // colors used from https://tailwindcss.com/docs/customizing-colors
     blue: {
