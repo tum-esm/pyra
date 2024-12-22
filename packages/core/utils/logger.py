@@ -2,6 +2,7 @@ import datetime
 import os
 import traceback
 from typing import Optional
+import time
 
 import filelock
 
@@ -14,8 +15,8 @@ _LOG_FILES_LOCK = os.path.join(_PROJECT_DIR, "logs", ".logs.lock")
 def _get_log_line_datetime(log_line: str) -> Optional[datetime.datetime]:
     """Returns the date, if a log line is starting with a valid date."""
     try:
-        assert len(log_line) >= 19
-        return datetime.datetime.strptime(log_line[:19], "%Y-%m-%d %H:%M:%S")
+        assert len(log_line) >= 25
+        return datetime.datetime.strptime(log_line[:25], "%Y-%m-%d %H:%M:%S UTC%z")
     except (AssertionError, ValueError):
         return None
 
@@ -32,7 +33,7 @@ class Logger:
     log files and providing a simple API.
     """
 
-    last_archive_time = datetime.datetime(1970, 1, 1)
+    last_archive_time = datetime.datetime.now().astimezone()
 
     def __init__(
         self,
@@ -71,16 +72,9 @@ class Logger:
     def _write_log_line(self, level: str, message: str) -> None:
         """Format the log line string and write it to "logs/debug.log"
         and possibly "logs/info.log"""
-        now = datetime.datetime.now()
-        utc_offset = round(
-            (datetime.datetime.now() - datetime.datetime.utcnow()).total_seconds() / 3600, 1
-        )
-        if round(utc_offset) == utc_offset:
-            utc_offset = round(utc_offset)
-
+        now = datetime.datetime.now().astimezone()
         log_string = (
-            f"{now} UTC{'' if utc_offset < 0 else '+'}{utc_offset} "
-            + f"- {self.origin} - {level} - {message}\n"
+            f"{now.strftime('%Y-%m-%d %H:%M:%S.%f UTC%z')} - {self.origin} - {level} - {message}\n"
         )
         if self.just_print:
             print(log_string, end="")
@@ -115,7 +109,9 @@ class Logger:
                 return
 
             lines_to_be_kept: list[str] = []
-            latest_log_time_to_keep = datetime.datetime.now() - datetime.timedelta(minutes=5)
+            latest_log_time_to_keep = datetime.datetime.now().astimezone() - datetime.timedelta(
+                minutes=5
+            )
             for index, line in enumerate(log_lines_in_file):
                 line_time = _get_log_line_datetime(line)
                 if line_time is not None:
