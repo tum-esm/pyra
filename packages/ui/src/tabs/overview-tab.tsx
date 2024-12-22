@@ -40,16 +40,21 @@ export default function OverviewTab() {
                 Recent Logs
             </div>
             <div className="w-[calc(100%-2rem)] mx-4 rounded-lg overflow-hidden font-mono text-xs bg-white border border-slate-200 py-1">
-                {(coreLogs.main === undefined || coreLogs.main.length === 0) && (
+                {(coreLogs.all === undefined || coreLogs.all.length === 0) && (
                     <div className="p-2">
                         <essentialComponents.Spinner />
                     </div>
                 )}
-                {coreLogs.main !== undefined &&
-                    coreLogs.main
+                {coreLogs.all !== undefined &&
+                    coreLogs.all
+                        .filter((l) => !l.includes(' - DEBUG - '))
                         .slice(-15)
                         .map((l, i) => (
-                            <essentialComponents.CoreLogLine key={`${i} ${l}`} text={l} />
+                            <essentialComponents.CoreLogLine
+                                key={`${i} ${l}`}
+                                text={l}
+                                displayInterationSeparator={false}
+                            />
                         ))}
             </div>
         </div>

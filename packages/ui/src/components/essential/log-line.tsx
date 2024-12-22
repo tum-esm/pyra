@@ -34,12 +34,21 @@ export function CoreLogLine(props: { text: string; displayInterationSeparator?: 
 
     let showSeparator: boolean = false;
     let highlightLine: boolean = false;
-    if (logMessage.includes('Starting mainloop') || logMessage.match(/Starting [A-Z].+ thread/)) {
-        showSeparator = true;
+    if (logMessage.includes('Starting mainloop')) {
         highlightLine = true;
-    }
-    if (props.displayInterationSeparator && logMessage.includes('Starting iteration')) {
         showSeparator = true;
+    }
+    if (logMessage.includes('Starting iteration')) {
+        if (props.displayInterationSeparator) {
+            showSeparator = true;
+        }
+    }
+
+    if (logMessage.match(/Starting [A-Z].+ thread/)) {
+        highlightLine = true;
+        if (props.displayInterationSeparator) {
+            showSeparator = true;
+        }
     }
 
     return (
