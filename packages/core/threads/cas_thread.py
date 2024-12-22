@@ -36,7 +36,7 @@ class CASThread(AbstractThread):
         while True:
             try:
                 t1 = time.time()
-                logger.info("Starting iteration")
+                logger.debug("Starting iteration")
 
                 logger.debug("Loading configuration file")
                 config = types.Config.load()
@@ -61,11 +61,11 @@ class CASThread(AbstractThread):
                 # DECIDING WHETHER TO MEASURE
 
                 d = config.measurement_decision
-                logger.debug(f"Decision mode for measurements is: {d.mode}.")
+                logger.info(f"Decision mode for measurements is: {d.mode}.")
 
                 should_measure: bool
                 if state.tum_enclosure_state.state.rain:
-                    logger.debug("not trying to measuring when PLC detected rain")
+                    logger.info("not trying to measuring when PLC detected rain")
                     should_measure = False
                 else:
                     if d.mode == "manual":
@@ -152,12 +152,12 @@ class CASThread(AbstractThread):
                 triggers.consider_helios,
             ]
         ):
-            logger.info("No triggers are activated.")
+            logger.warning("No triggers are activated. This might be a mistake.")
             return False
 
         # Evaluate sun elevation if trigger is active
         if triggers.consider_sun_elevation:
-            logger.info("Sun elevation as a trigger is considered.")
+            logger.debug("Sun elevation as a trigger is considered.")
             if config.general.min_sun_elevation > triggers.min_sun_elevation:
                 logger.warning(
                     "`config.general.min_sun_elevation` is higher than `config.measurement_triggers.min_sun_elevation`. This might be a mistake."
@@ -171,7 +171,7 @@ class CASThread(AbstractThread):
 
         # Evaluate time if trigger is active
         if triggers.consider_time:
-            logger.info("Time as a trigger is considered.")
+            logger.debug("Time as a trigger is considered.")
             time_is_valid = (
                 triggers.start_time.as_datetime_time()
                 < datetime.datetime.now().time()
@@ -184,7 +184,7 @@ class CASThread(AbstractThread):
         # Read latest Helios decision from StateInterface if trigger is active
         # Helios runs in a thread and evaluates the sun conditions consistanly during day.
         if triggers.consider_helios:
-            logger.info("Helios as a trigger is considered.")
+            logger.debug("Helios as a trigger is considered.")
             helios_result = state.helios_indicates_good_conditions
 
             if helios_result == "inconclusive" or helios_result is None:

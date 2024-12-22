@@ -33,7 +33,7 @@ class SystemHealthThread(AbstractThread):
 
         while True:
             try:
-                logger.info("Starting iteration")
+                logger.debug("Starting iteration")
 
                 # CPU/MEMORY USAGE AND BOOT TIME
 

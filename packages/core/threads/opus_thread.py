@@ -317,7 +317,7 @@ class OpusThread(AbstractThread):
         while True:
             try:
                 t1 = time.time()
-                logger.info("Starting iteration")
+                logger.debug("Starting iteration")
 
                 logger.debug("Loading configuration file")
                 config = types.Config.load()
@@ -503,7 +503,7 @@ class OpusThread(AbstractThread):
 
                 t2 = time.time()
                 sleep_time = max(5, 30 - (t2 - t1))
-                logger.info(f"Sleeping {sleep_time:.2f} seconds")
+                logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                 time.sleep(sleep_time)
 
             except Exception as e:
@@ -513,7 +513,7 @@ class OpusThread(AbstractThread):
                     state.opus_state.macro_id = None
                     state.opus_state.macro_filepath = None
                     state.exceptions_state.add_exception(origin="opus", exception=e)
-                logger.info("Sleeping 2 minutes")
+                logger.info("Sleeping 120 seconds")
                 time.sleep(120)
                 logger.info("Stopping thread")
                 break

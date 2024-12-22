@@ -43,7 +43,7 @@ class TUMEnclosureThread(AbstractThread):
             while True:
                 t1 = time.time()
 
-                logger.info("Loading configuration file")
+                logger.debug("Loading configuration file")
                 config = types.Config.load()
                 enclosure_config = config.tum_enclosure
                 if enclosure_config is None:
@@ -58,7 +58,7 @@ class TUMEnclosureThread(AbstractThread):
                 # CONNECTING TO PLC
 
                 if plc_interface is None:
-                    logger.info("Connecting to PLC")
+                    logger.debug("Connecting to PLC")
                     plc_interface = interfaces.TUMEnclosureInterface(
                         plc_version=enclosure_config.version,
                         plc_ip=enclosure_config.ip,
@@ -66,6 +66,7 @@ class TUMEnclosureThread(AbstractThread):
                     try:
                         plc_interface.connect()
                         plc_interface.set_auto_temperature(True)
+                        logger.info("Successfully connected to PLC")
                     except snap7.exceptions.Snap7Exception as e:
                         logger.error("Could not connect to PLC")
                         logger.exception(e)
@@ -100,7 +101,7 @@ class TUMEnclosureThread(AbstractThread):
                 try:
                     # READING PLC
 
-                    logger.info("Reading PLC registers")
+                    logger.debug("Reading PLC registers")
                     plc_state = plc_interface.read()
 
                     logger.debug("Updating enclosure state")
@@ -177,7 +178,7 @@ class TUMEnclosureThread(AbstractThread):
                         )
                         t2 = time.time()
                         sleep_time = max(5, 15 - (t2 - t1))
-                        logger.info(f"Sleeping {sleep_time:.2f} seconds")
+                        logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                         time.sleep(sleep_time)
                         continue
 
@@ -302,7 +303,7 @@ class TUMEnclosureThread(AbstractThread):
 
                     t2 = time.time()
                     sleep_time = max(5, 40 - (t2 - t1))
-                    logger.info(f"Sleeping {sleep_time:.2f} seconds")
+                    logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                     time.sleep(sleep_time)
 
                 except (

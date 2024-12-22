@@ -209,12 +209,12 @@ class CamTrackerThread(AbstractThread):
                     continue
 
                 if measurements_should_be_running and (not camtracker_is_running):
-                    logger.info("CamTracker should be running, but is not.")
+                    logger.info("CamTracker should be running, but is not. Starting CamTracker.")
                     CamTrackerProgram.start(config, logger)
                     last_camtracker_start_time = time.time()
 
                 if (not measurements_should_be_running) and camtracker_is_running:
-                    logger.info("CamTracker should not be running, but is.")
+                    logger.info("CamTracker should not be running, but is. Stopping CamTracker.")
                     CamTrackerProgram.stop(config, logger)
                     camtracker_is_running = False
                     last_camtracker_start_time = None
@@ -226,9 +226,9 @@ class CamTrackerThread(AbstractThread):
                             "Waiting 3 minutes after CamTracker start to check motor positions."
                         )
                     else:
-                        logger.info("Checking motor positions.")
+                        logger.debug("Checking motor positions.")
                         result = CamTrackerThread.check_tracker_motor_positions(config, logger)
-                        logger.info(f"Tracker position check result: {result}")
+                        logger.debug(f"Tracker position check result: {result}")
                         match result:
                             case "no logs" | "logs too old":
                                 if config.camtracker.restart_if_logs_are_too_old:
@@ -242,11 +242,11 @@ class CamTrackerThread(AbstractThread):
                                 CamTrackerProgram.stop(config, logger)
                                 continue
                             case "valid":
-                                logger.info("Tracker offsets are within threshold.")
+                                logger.debug("Tracker offsets are within threshold.")
 
-                        logger.info("Checking enclosure cover state.")
+                        logger.debug("Checking enclosure cover state.")
                         cover_state = CamTrackerThread.get_enclosure_cover_state(config)
-                        logger.info(f"Enclosure cover state: {cover_state}")
+                        logger.debug(f"Enclosure cover state: {cover_state}")
 
                         if config.camtracker.restart_if_cover_remains_closed and (
                             cover_state == "closed"
@@ -287,7 +287,7 @@ class CamTrackerThread(AbstractThread):
 
                 t2 = time.time()
                 sleep_time = max(5, 30 - (t2 - t1))
-                logger.info(f"Sleeping {sleep_time:.2f} seconds")
+                logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                 time.sleep(sleep_time)
 
             except Exception as e:

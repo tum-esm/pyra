@@ -410,6 +410,7 @@ class HeliosThread(AbstractThread):
 
                 if config.general.test_mode:
                     logger.info("Helios thread is skipped in test mode")
+                    logger.debug("Sleeping 15 seconds")
                     time.sleep(15)
                     continue
 
@@ -428,7 +429,7 @@ class HeliosThread(AbstractThread):
                 current_max_history_size = edge_fraction_history.get_max_size()
                 new_max_history_size = config.helios.evaluation_size
                 if current_max_history_size != new_max_history_size:
-                    logger.debug(
+                    logger.info(
                         "Size of Helios history has changed: "
                         + f"{current_max_history_size} -> {new_max_history_size}"
                     )
@@ -453,7 +454,7 @@ class HeliosThread(AbstractThread):
                     if repeated_camera_error_count > 3:
                         raise e
                     else:
-                        logger.debug(
+                        logger.info(
                             f"camera occured ({repeated_camera_error_count} time(s) in a row). "
                             + "sleeping 30 seconds, reinitializing Helios"
                         )
@@ -566,5 +567,6 @@ class HeliosThread(AbstractThread):
                 with interfaces.StateInterface.update_state() as s:
                     s.exceptions_state.add_exception(origin="helios", exception=e)
 
-                logger.info("sleeping 30 seconds, reinitializing HeliosThread")
-                time.sleep(30)
+                logger.info("sleeping 60 seconds, reinitializing HeliosThread")
+                time.sleep(60)
+                break
