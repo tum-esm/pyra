@@ -146,7 +146,7 @@ def _stop_pyra_core() -> None:
     name="is-running", help="Checks whether the pyra-core background process is running."
 )
 def _pyra_core_is_running() -> None:
-    logger.info('running command "core is-running"')
+    logger.debug('running command "core is-running"')
     existing_pids = tum_esm_utils.processes.get_process_pids(_RUN_PYRA_CORE_SCRIPT_PATH)
     if len(existing_pids) > 0:
         _print_green(f"pyra-core is running with process ID(s) {existing_pids}")

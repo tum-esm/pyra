@@ -126,7 +126,7 @@ def run() -> None:
 
     while True:
         start_time = time.time()
-        logger.info("Starting iteration")
+        logger.debug("Starting iteration")
 
         interfaces.ActivityHistoryInterface.add_datapoint(
             has_errors=len(state.exceptions_state.current) > 0,
@@ -148,17 +148,21 @@ def run() -> None:
             continue
 
         # check whether the threads are running and possibly (re)start them
+        thread_states: list[bool] = []
         for thread_instance in thread_instances:
-            thread_instance.update_thread_state(config)
+            r = thread_instance.update_thread_state(config)
+            thread_states.append(r)
+        if all(thread_states):
+            logger.info("All threads are running/pausing correctly")
 
         if config.general.test_mode:
-            logger.info("pyra-core in test mode")
+            logger.debug("pyra-core in test mode")
 
         # send emails on occured/resolved exceptions
         _send_exception_emails(config)
 
         # wait rest of loop time
-        logger.info("Ending iteration")
+        logger.debug("Finished iteration")
         elapsed_time = time.time() - start_time
         if config.general.test_mode:
             interfaces.ActivityHistoryInterface.dump_current_activity_history()

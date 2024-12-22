@@ -21,11 +21,14 @@ class AbstractThread(abc.ABC):
         self.thread = self.get_new_thread_object()
         self.is_initialized = False
 
-    def update_thread_state(self, config: types.Config) -> None:
+    def update_thread_state(self, config: types.Config) -> bool:
         """Use `self.should_be_running` to determine if the thread
         should be running or not. If it should be running and it is
         not running, start the thread. If it should not be running
-        and it is running, stop the thread."""
+        and it is running, stop the thread.
+
+        Returns True if the thread is running/pausing correctly, False
+        otherwise."""
 
         should_be_running: bool = self.__class__.should_be_running(config)
 
@@ -33,8 +36,9 @@ class AbstractThread(abc.ABC):
             if self.is_initialized:
                 if self.thread.is_alive():
                     self.logger.debug("Thread is running correctly")
+                    return True
                 else:
-                    self.logger.debug("Thread has crashed, running teardown")
+                    self.logger.debug("Thread has crashed/stopped, running teardown")
                     self.thread.join()
                     # set up a new thread instance for the next time the thread should start
                     self.thread = self.get_new_thread_object()
@@ -52,6 +56,9 @@ class AbstractThread(abc.ABC):
                 self.is_initialized = False
             else:
                 self.logger.debug("Thread is pausing")
+                return True
+
+        return False
 
     @staticmethod
     @abc.abstractmethod

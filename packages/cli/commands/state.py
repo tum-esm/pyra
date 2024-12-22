@@ -15,6 +15,6 @@ def state_command_group() -> None:
 @state_command_group.command(name="get", help="Read the current state.json file.")
 @click.option("--indent", is_flag=True, help="Print the JSON in an indented manner")
 def _get_state(indent: bool) -> None:
-    logger.info('running command "state get"')
+    logger.debug('running command "state get"')
     state = interfaces.StateInterface.load_state()
     click.echo(state.model_dump_json(indent=(2 if indent else None)))

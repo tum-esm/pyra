@@ -50,7 +50,7 @@ def _get_plc_interface() -> Optional[interfaces.TUMEnclosureInterface]:
 def _read(no_indent: bool) -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
-    logger.info('running command "plc read"')
+    logger.debug('running command "plc read"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         plc_readings = plc_interface.read()

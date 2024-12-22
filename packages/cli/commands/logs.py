@@ -38,7 +38,7 @@ def _print_red(text: str) -> None:
     timeout=5,
 )
 def _read_logs(level: str) -> None:
-    logger.info('running command "logs read"')
+    logger.debug('running command "logs read"')
 
     if level == "INFO":
         _print_red("Pyra ^4.1 does not have info log files anymore, only debug log files.")
@@ -58,7 +58,7 @@ def _read_logs(level: str) -> None:
 def _archive_logs() -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
-    logger.info('running command "logs archive"')
+    logger.debug('running command "logs archive"')
 
     utils.Logger.archive()
     _print_red("this command is deprecated without a replacement")
@@ -76,7 +76,7 @@ def _archive_logs() -> None:
 def split_log_files_by_origin(path: str) -> None:
     """Split log files by origin."""
 
-    logger.info(f'running command "logs split-log-files-by-origin {path}"')
+    logger.debug(f'running command "logs split-log-files-by-origin {path}"')
     line_with_origin_pattern = re.compile(
         r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+ [^\s]+ \- ([\w\d\-_]+) \- "
     )

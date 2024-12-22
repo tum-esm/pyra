@@ -23,7 +23,7 @@ def _print_green(text: str) -> None:
 def remove_filelocks() -> None:
     with interfaces.StateInterface.update_state() as s:
         s.recent_cli_calls += 1
-    logger.info('running command "remove-filelocks"')
+    logger.debug('running command "remove-filelocks"')
     lock_files = [
         os.path.join(_PROJECT_DIR, "config", ".config.lock"),
         os.path.join(_PROJECT_DIR, "config", ".state.lock"),
