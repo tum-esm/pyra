@@ -116,7 +116,7 @@ export default function LogTab() {
                         <SelectValue placeholder="Main" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="All">All Logs</SelectItem>   
+                        <SelectItem value="All">All Logs</SelectItem>
                         <SelectItem value="Main">Main</SelectItem>
                         <Separator className="my-1" />
                         <SelectItem value="OPUS">OPUS</SelectItem>
@@ -145,7 +145,11 @@ export default function LogTab() {
                 {logType !== 'UI' && renderedLogs !== undefined && (
                     <>
                         {renderedLogs.map((l, i) => (
-                            <essentialComponents.CoreLogLine text={l} key={`${i} ${l}`} />
+                            <essentialComponents.CoreLogLine
+                                text={l}
+                                key={`${i} ${l}`}
+                                displayInterationSeparator={logType != 'All'}
+                            />
                         ))}
                         {renderedLogs.length == 0 && (
                             <div className="px-4 py-2">logs are empty</div>

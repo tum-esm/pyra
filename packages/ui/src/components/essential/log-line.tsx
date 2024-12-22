@@ -1,6 +1,4 @@
-// TODO: option to not have lines before "start iteration"
-
-export function CoreLogLine(props: { text: string }) {
+export function CoreLogLine(props: { text: string; displayInterationSeparator?: boolean }) {
     const text = props.text.replace('\\r', '');
 
     if (
@@ -22,7 +20,7 @@ export function CoreLogLine(props: { text: string }) {
     let textStyle: string;
     switch (logType) {
         case 'DEBUG':
-            textStyle = 'font-light text-gray-500';
+            textStyle = 'font-light text-gray-450';
             break;
         case 'WARNING':
         case 'CRITICAL':
@@ -31,13 +29,22 @@ export function CoreLogLine(props: { text: string }) {
             textStyle = 'font-bold text-red-700 bg-red-75 ';
             break;
         default:
-            textStyle = 'font-medium text-gray-800';
+            textStyle = 'font-medium text-gray-950';
+    }
+
+    let showSeparator: boolean = false;
+    let highlightLine: boolean = false;
+    if (logMessage.includes('Starting mainloop') || logMessage.match(/Starting [A-Z].+ thread/)) {
+        showSeparator = true;
+        highlightLine = true;
+    }
+    if (props.displayInterationSeparator && logMessage.includes('Starting iteration')) {
+        showSeparator = true;
     }
 
     return (
         <>
-            {(logMessage.includes('Starting mainloop') ||
-                logMessage.includes('Starting iteration')) && (
+            {showSeparator && (
                 <hr className="w-full my-1.5 border-0 bg-gray-200 first:hidden h-px" />
             )}
             <div
@@ -45,9 +52,7 @@ export function CoreLogLine(props: { text: string }) {
                     'flex flex-row items-start justify-start leading-tight ' +
                     `gap-x-3 ${textStyle} pl-4 py-0.5 flex-shrink-0 ` +
                     `w-full !break-all first-of-type:pt-2 last-of-type:pb-2 ` +
-                    (logMessage.includes('Starting mainloop')
-                        ? ' bg-teal-100 font-bold text-teal-700 '
-                        : ' ')
+                    (highlightLine ? ' bg-teal-200 font-bold text-teal-950 ' : ' ')
                 }
             >
                 <div className="flex-shrink-0">{timeStamp}</div>
