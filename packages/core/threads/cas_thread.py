@@ -31,6 +31,7 @@ class CASThread(AbstractThread):
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin="cas")
+        logger.info("Starting Condition Assessment System (CAS) thread.")
         last_good_automatic_decision: float = 0
 
         while True:

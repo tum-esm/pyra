@@ -34,6 +34,8 @@ class TUMEnclosureThread(AbstractThread):
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin="tum-enclosure")
+        logger.info("Starting TUM Enclosure thread")
+
         plc_interface: Optional[interfaces.TUMEnclosureInterface] = None
         last_plc_connection_time: float = time.time()
         last_camera_down_time: Optional[float] = None

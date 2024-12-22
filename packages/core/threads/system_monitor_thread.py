@@ -30,6 +30,7 @@ class SystemMonitorThread(AbstractThread):
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin="system-monitor", just_print=headless)
+        logger.info("Starting System Monitor thread")
 
         while True:
             try:
@@ -38,10 +39,12 @@ class SystemMonitorThread(AbstractThread):
                 # CPU/MEMORY USAGE AND BOOT TIME
 
                 cpu_usage = tum_esm_utils.system.get_cpu_usage()
-                logger.debug(f"Current CPU usage for all cores is {cpu_usage}%.")
+                logger.debug(
+                    f"Current CPU usage for all cores is: {' | '.join([f'{int(u)} %' for u in cpu_usage])}."
+                )
 
                 memory_usage = tum_esm_utils.system.get_memory_usage()
-                logger.debug(f"Current v_memory usage for the system is {memory_usage}.")
+                logger.debug(f"Current v_memory usage for the system is {memory_usage} %.")
 
                 last_boot_time = tum_esm_utils.system.get_last_boot_time()
                 logger.debug(f"The system is running since {last_boot_time}.")
@@ -49,7 +52,7 @@ class SystemMonitorThread(AbstractThread):
                 # DISK SPACE
 
                 disk_space = tum_esm_utils.system.get_disk_space()
-                logger.debug(f"The disk is currently filled with {disk_space}%.")
+                logger.debug(f"The disk is currently filled with {disk_space} %.")
                 if disk_space > 90:
                     subject = "StorageError"
                     details = "Disk space is more than 90%. This is bad for the OS stability."
@@ -64,7 +67,7 @@ class SystemMonitorThread(AbstractThread):
                 # BATTERY LEVEL
 
                 battery_level = tum_esm_utils.system.get_system_battery()
-                logger.debug(f"The battery level is {battery_level}%.")
+                logger.debug(f"The battery level is {battery_level} %.")
                 if battery_level is not None:
                     if battery_level < 30:
                         subject = "LowEnergyError"

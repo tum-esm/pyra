@@ -356,6 +356,8 @@ class HeliosThread(AbstractThread):
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin="helios", just_print=headless)
+        logger.info("Starting Helios thread")
+
         config = types.Config.load()
         assert config.helios is not None, "This is a bug in Pyra"
         helios_instance: Optional[HeliosInterface] = None

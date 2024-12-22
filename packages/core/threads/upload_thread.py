@@ -64,6 +64,8 @@ class UploadThread(AbstractThread):
         don't write to log files but print to console."""
 
         logger = utils.Logger(origin="upload", just_print=headless)
+        logger.info("Starting Upload thread")
+
         config = types.Config.load()
         assert config.upload is not None
 

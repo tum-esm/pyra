@@ -182,6 +182,7 @@ class CamTrackerThread(AbstractThread):
         """Main entrypoint of the thread."""
 
         logger = utils.Logger(origin="camtracker", just_print=headless)
+        logger.info("Starting CamTracker thread")
         last_camtracker_start_time: Optional[float] = None
 
         # STOP CAMTRACKER IF IT IS RUNNING
