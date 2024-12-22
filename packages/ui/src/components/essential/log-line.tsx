@@ -1,9 +1,7 @@
 export function CoreLogLine(props: { text: string; displayInterationSeparator?: boolean }) {
     const text = props.text.replace('\\r', '');
 
-    if (
-        !text.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC(\+|-)\d(\.\d)? - .* - .* - .*/)
-    ) {
+    if (!text.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC(\+|-)\d{4} - .* - .* - .*/)) {
         const textStyle =
             text === 'More log lines inside logs folder ...'
                 ? 'text-gray-400'

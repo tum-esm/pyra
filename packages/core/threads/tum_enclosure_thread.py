@@ -338,10 +338,14 @@ class TUMEnclosureThread(AbstractThread):
                 logger.info("PLC indicates a reset is needed")
             if m:
                 logger.info("PLC indicates that the motor has failed")
+            logger.info(f"Trying to reset for {timeout} second until raising exception")
             start_time = time.time()
             while True:
+                logger.info("sending reset")
                 plc_interface.reset()
-                time.sleep(3)
+                time.sleep(5)
+                r = plc_interface.reset_is_needed()
+                m = plc_interface.motor_has_failed()
                 if not (r or m):
                     logger.info("PLC reset was successful")
                     break
@@ -356,7 +360,7 @@ class TUMEnclosureThread(AbstractThread):
                         )
                     break
         else:
-            logger.info("PLC reset is not needed")
+            logger.debug("PLC reset is not needed")
             with interfaces.StateInterface.update_state() as state:
                 state.exceptions_state.clear_exception_subject(
                     subject="PLC reset was required but did not work"

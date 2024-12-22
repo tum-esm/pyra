@@ -48,7 +48,7 @@ class CamTrackerProgram:
             show_cmd=2,
         )
         tum_esm_utils.timing.wait_for_condition(
-            is_successful=lambda: CamTrackerProgram.is_running(logger),
+            is_successful=lambda: CamTrackerProgram.is_running(),
             timeout_message="CamTracker did not start within 90 seconds.",
             timeout_seconds=90,
             check_interval_seconds=8,
@@ -56,11 +56,10 @@ class CamTrackerProgram:
         logger.info("Successfully started CamTracker")
 
     @staticmethod
-    def is_running(logger: utils.Logger) -> bool:
+    def is_running() -> bool:
         """Checks if CamTracker is already running by searching for processes with
         the executable `camtracker*.exe`."""
 
-        logger.debug("Checking if CamTracker is running")
         for p in psutil.process_iter():
             try:
                 name = p.name().lower()
@@ -90,7 +89,7 @@ class CamTrackerProgram:
 
         try:
             tum_esm_utils.timing.wait_for_condition(
-                is_successful=lambda: not CamTrackerProgram.is_running(logger),
+                is_successful=lambda: not CamTrackerProgram.is_running(),
                 timeout_message="CamTracker did not stop within 90 seconds.",
                 timeout_seconds=90,
                 check_interval_seconds=9,
@@ -187,7 +186,7 @@ class CamTrackerThread(AbstractThread):
 
         # STOP CAMTRACKER IF IT IS RUNNING
         config = types.Config.load()
-        if CamTrackerProgram.is_running(logger) and (not config.general.test_mode):
+        if CamTrackerProgram.is_running() and (not config.general.test_mode):
             logger.info("Stopping CamTracker")
             CamTrackerProgram.stop(config, logger)
 
@@ -199,7 +198,7 @@ class CamTrackerThread(AbstractThread):
                 logger.debug("Loading configuration file")
                 config = types.Config.load()
 
-                camtracker_is_running = CamTrackerProgram.is_running(logger)
+                camtracker_is_running = CamTrackerProgram.is_running()
                 measurements_should_be_running = bool(
                     interfaces.StateInterface.load_state().measurements_should_be_running
                 )
@@ -355,8 +354,8 @@ class CamTrackerThread(AbstractThread):
         CamTracker to initialize the tracking mirrors. Then moves mirrors
         back to parking position and shuts dosn CamTracker."""
 
-        assert not CamTrackerProgram.is_running(
-            logger
+        assert (
+            not CamTrackerProgram.is_running()
         ), "This test cannot be run if CamTracker is already running"
         CamTrackerProgram.start(config, logger)
         time.sleep(2)

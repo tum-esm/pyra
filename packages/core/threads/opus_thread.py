@@ -524,7 +524,7 @@ class OpusThread(AbstractThread):
 
         dde_connection = DDEConnection(logger)
         dde_connection.setup()
-
+        
         dde_connection.load_experiment(config.opus.experiment_path.root)
         time.sleep(5)
 
