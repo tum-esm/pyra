@@ -8,10 +8,10 @@ from packages.core import interfaces, types, utils
 from .abstract_thread import AbstractThread
 
 
-class SystemHealthThread(AbstractThread):
+class SystemMonitorThread(AbstractThread):
     """Thread for checking the system's state (CPU usage, disk utilization, etc.)"""
 
-    logger_origin = "system-health-thread"
+    logger_origin = "system-monitor-thread"
 
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
@@ -22,14 +22,14 @@ class SystemHealthThread(AbstractThread):
     @staticmethod
     def get_new_thread_object() -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=SystemHealthThread.main, daemon=True)
+        return threading.Thread(target=SystemMonitorThread.main, daemon=True)
 
     @staticmethod
     def main(headless: bool = False) -> None:
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="system-health", just_print=headless)
+        logger = utils.Logger(origin="system-monitor", just_print=headless)
 
         while True:
             try:
@@ -56,7 +56,7 @@ class SystemHealthThread(AbstractThread):
                     with interfaces.StateInterface.update_state() as state:
                         state.exceptions_state.add_exception_state_item(
                             types.ExceptionStateItem(
-                                origin="system-health", subject=subject, details=details
+                                origin="system-monitor", subject=subject, details=details
                             )
                         )
                     logger.error(f"{subject}: {details}")
@@ -74,7 +74,7 @@ class SystemHealthThread(AbstractThread):
                         with interfaces.StateInterface.update_state() as state:
                             state.exceptions_state.add_exception_state_item(
                                 types.ExceptionStateItem(
-                                    origin="system-health", subject=subject, details=details
+                                    origin="system-monitor", subject=subject, details=details
                                 )
                             )
                         logger.error(f"{subject}: {details}")
@@ -86,7 +86,7 @@ class SystemHealthThread(AbstractThread):
                         last_boot_time=str(last_boot_time),
                         filled_disk_space_fraction=disk_space,
                     )
-                    state.exceptions_state.clear_exception_origin("system-health")
+                    state.exceptions_state.clear_exception_origin("system-monitor")
 
                 logger.debug("Sleeping 60 seconds")
                 time.sleep(60)
@@ -94,4 +94,4 @@ class SystemHealthThread(AbstractThread):
             except Exception as e:
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin="system-health", exception=e)
+                    state.exceptions_state.add_exception(origin="system-monitor", exception=e)

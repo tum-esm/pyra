@@ -22,7 +22,7 @@ export default function LogTab() {
         | 'OPUS'
         | 'CamTracker'
         | 'CAS'
-        | 'System Health'
+        | 'System Monitor'
         | 'Upload'
         | 'TUM Enclosure'
         | 'Helios'
@@ -97,8 +97,8 @@ export default function LogTab() {
             ? renderedCamtrackerLogs
             : logType === 'CAS'
             ? renderedCasLogs
-            : logType === 'System Health'
-            ? coreLogs.system_health
+            : logType === 'System Monitor'
+            ? coreLogs.system_monitor
             : logType === 'Upload'
             ? renderedUploadLogs
             : logType === 'TUM Enclosure'
@@ -131,8 +131,8 @@ export default function LogTab() {
                         <Separator className="my-1" />
                         <SelectItem value="OPUS">OPUS</SelectItem>
                         <SelectItem value="CamTracker">CamTracker</SelectItem>
-                        <SelectItem value="CAS">CAS</SelectItem>
-                        <SelectItem value="System Health">System Health</SelectItem>
+                        <SelectItem value="CAS">Condition Assessment</SelectItem>
+                        <SelectItem value="System Monitor">System Monitor</SelectItem>
                         <SelectItem value="Upload">Upload</SelectItem>
                         <Separator className="my-1" />
                         <SelectItem value="TUM Enclosure">TUM Enclosure</SelectItem>

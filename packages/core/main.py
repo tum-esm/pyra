@@ -101,7 +101,7 @@ def run() -> None:
         threads.CASThread(),
         threads.HeliosThread(),
         threads.OpusThread(),
-        threads.SystemHealthThread(),
+        threads.SystemMonitorThread(),
         threads.TUMEnclosureThread(),
         threads.UploadThread(),
     ]

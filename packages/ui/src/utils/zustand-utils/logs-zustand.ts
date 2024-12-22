@@ -7,7 +7,7 @@ interface LogsStore {
         opus: string[] | undefined;
         camtracker: string[] | undefined;
         cas: string[] | undefined;
-        system_health: string[] | undefined;
+        system_monitor: string[] | undefined;
         upload: string[] | undefined;
         tum_enclosure: string[] | undefined;
         helios: string[] | undefined;
@@ -24,7 +24,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
         opus: undefined,
         camtracker: undefined,
         cas: undefined,
-        system_health: undefined,
+        system_monitor: undefined,
         upload: undefined,
         tum_enclosure: undefined,
         helios: undefined,
@@ -39,7 +39,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                     | 'opus'
                     | 'camtracker'
                     | 'cas'
-                    | 'system_health'
+                    | 'system_monitor'
                     | 'upload'
                     | 'tum_enclosure'
                     | 'helios']: string[];
@@ -49,7 +49,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                 opus: [],
                 camtracker: [],
                 cas: [],
-                system_health: [],
+                system_monitor: [],
                 upload: [],
                 tum_enclosure: [],
                 helios: [],
@@ -59,7 +59,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                 | 'opus'
                 | 'camtracker'
                 | 'cas'
-                | 'system_health'
+                | 'system_monitor'
                 | 'upload'
                 | 'tum_enclosure'
                 | 'helios' = 'main';
@@ -78,8 +78,8 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                             case 'cas':
                                 currentCategory = 'cas';
                                 break;
-                            case 'system-health':
-                                currentCategory = 'system_health';
+                            case 'system-monitor':
+                                currentCategory = 'system_monitor';
                                 break;
                             case 'tum-enclosure':
                                 currentCategory = 'tum_enclosure';
