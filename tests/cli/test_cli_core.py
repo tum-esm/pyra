@@ -104,7 +104,7 @@ def test_start_stop_procedure(
         "cas - INFO - Decision mode for measurements is: automatic.",
         "cas - DEBUG - Evaluating automatic decision",
         "cas - INFO - Measurements should be running is set to: ",
-        "cas - DEBUG - Sleeping 19.",
+        "cas - DEBUG - Sleeping 29.",
         # opus
         "opus - INFO - Starting OPUS thread",
         "opus - INFO - OPUS thread is skipped in test mode",
