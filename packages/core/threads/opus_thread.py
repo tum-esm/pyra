@@ -381,7 +381,7 @@ class OpusThread(AbstractThread):
                 # IDLE AT NIGHT
 
                 if not opus_should_be_running:
-                    logger.debug("Sleeping 180 seconds")
+                    logger.debug("Sleeping 3 minutes")
                     time.sleep(180)
                     continue
 
@@ -520,7 +520,7 @@ class OpusThread(AbstractThread):
                 # SLEEP
 
                 t2 = time.time()
-                sleep_time = max(5, 30 - (t2 - t1))
+                sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
                 logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                 time.sleep(sleep_time)
 
@@ -531,7 +531,7 @@ class OpusThread(AbstractThread):
                     state.opus_state.macro_id = None
                     state.opus_state.macro_filepath = None
                     state.exceptions_state.add_exception(origin="opus", exception=e)
-                logger.info("Sleeping 120 seconds")
+                logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")
                 break

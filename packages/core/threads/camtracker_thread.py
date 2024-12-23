@@ -286,7 +286,7 @@ class CamTrackerThread(AbstractThread):
                 # SLEEP
 
                 t2 = time.time()
-                sleep_time = max(5, 30 - (t2 - t1))
+                sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
                 logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                 time.sleep(sleep_time)
 

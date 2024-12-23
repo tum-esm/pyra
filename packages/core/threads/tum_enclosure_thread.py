@@ -180,7 +180,7 @@ class TUMEnclosureThread(AbstractThread):
                             "User is controlling the TUM Enclosure, skipping operational logic"
                         )
                         t2 = time.time()
-                        sleep_time = max(5, 15 - (t2 - t1))
+                        sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
                         logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                         time.sleep(sleep_time)
                         continue
@@ -305,7 +305,7 @@ class TUMEnclosureThread(AbstractThread):
                     # SLEEP
 
                     t2 = time.time()
-                    sleep_time = max(5, 40 - (t2 - t1))
+                    sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
                     logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                     time.sleep(sleep_time)
 
