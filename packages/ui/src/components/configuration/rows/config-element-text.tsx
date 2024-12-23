@@ -27,7 +27,7 @@ export default function ConfigElementText(props: {
     }
 
     function parseNumericValue(v: string): string {
-        const parsedValue = `${v}`.replace(/[^\d\.]/g, '');
+        const parsedValue = `${v}`.replace(/[^\d\.\+\-]/g, '');
         if (parsedValue === '') {
             return '0';
         }

@@ -44,6 +44,7 @@ class TUMEnclosureThread(AbstractThread):
         try:
             while True:
                 t1 = time.time()
+                logger.debug("Starting iteration")
 
                 logger.debug("Loading configuration file")
                 config = types.Config.load()
