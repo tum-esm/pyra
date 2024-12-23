@@ -84,7 +84,11 @@ class DDEConnection:
         raw_answer: bytes = self.client.request(  # type: ignore
             command, timeout=int(timeout * 1000)
         )
-        answer = raw_answer.decode("utf-8").strip("\n").split("\n\n")
+        raw_utf8_answer = raw_answer.decode("utf-8").strip("\n")
+        while "\n\n" in raw_utf8_answer:
+            raw_utf8_answer = raw_utf8_answer.replace("\n\n", "\n")
+        answer = raw_utf8_answer.split("\n")
+        
         if expected_answer is not None:
             if answer != expected_answer:
                 raise RuntimeError(
@@ -102,7 +106,7 @@ class DDEConnection:
 
     def macro_is_running(self, macro_id: int) -> bool:
         answer = self.request(f"MACRO_RESULTS {macro_id}", expect_ok=True)
-        return int(answer[1]) == 0
+        return int(answer[1]) == 1
 
     def some_macro_is_running(self) -> bool:
         """Check if any macro is currently running in OPUS.
@@ -131,12 +135,12 @@ class DDEConnection:
         # check twice for any thread that is executing a common function
         for function in common_functions:
             answer = self.request(f"FIND_FUNCTION {function}")
-            if len(answer) == 2:
+            if len(answer) >= 2:
                 active_thread_ids.add(int(answer[1]))
         time.sleep(3)
         for function in common_functions:
             answer = self.request(f"FIND_FUNCTION {function}")
-            if len(answer) == 2:
+            if len(answer) >= 2:
                 active_thread_ids.add(int(answer[1]))
 
         # the main thread always runs some common functions for some reason
