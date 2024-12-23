@@ -22,7 +22,7 @@ def _send_exception_emails(config: types.Config) -> None:
         if len(new_exception_emails) > 0:
             utils.ExceptionEmailClient.handle_occured_exceptions(config, new_exception_emails)
 
-        if not any([e.send_emails for e in current_exceptions]):
+        if any([e.send_emails for e in notified_exceptions]) and (not any([e.send_emails for e in current_exceptions])):
             utils.ExceptionEmailClient.handle_resolved_exception(config)
 
         state.exceptions_state.notified = state.exceptions_state.current
@@ -30,32 +30,10 @@ def _send_exception_emails(config: types.Config) -> None:
 
 def run() -> None:
     """The entrypoint of PYRA Core.
-
-    This function infinitely loops over a sequence of modules:
-
-    1. Read the config
-
-    2. Check whether `HeliosThread`, `SystemChecksThread`, and `UploadThread` are running
-
-    3. Possibly start/stop the threads according to the config
-
-    4. Run `MeasurementConditions` module
-
-    5. Run `EnclosureControl` module
-
-    6. Run `SunTracking` module
-
-    7. Run `OpusMeasurement` module
-
-    The mainloop logs all exceptions and sends out emails when new exceptions
-    occur and when all exceptions have been resolved.
-
-    **Terminology:** modules are executed one by one in each mainloop iteration.
-    Threads are executed in parallel to the mainloop and are started/stopped
-    according to the config.
-
-    TODO: refactor this doc
-    """
+    
+    Starting with Pyra 4.2.0, the mainloop is only responsible for starting
+    and stopping the different threads, and sendinging out emails on occured
+    and resolved exceptions. The actual work is done by the threads."""
 
     logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
 
