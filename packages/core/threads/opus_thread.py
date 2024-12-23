@@ -40,7 +40,7 @@ class DDEConnection:
 
         while True:
             try:
-                self.client = brukeropus.control.dde.DDEClient("OPUS", "System")
+                self.client = brukeropus.control.dde.DDEClient("OPUS", "OPUS/System")
                 time.sleep(0.5)
                 assert self.is_working()
                 break
