@@ -1,5 +1,3 @@
-from .activity_history import ActivityDatapoint as ActivityDatapoint
-from .activity_history import ActivityDatapointList as ActivityDatapointList
 from .activity_history import ActivityHistory as ActivityHistory
 from .enclosures import tum_enclosure as tum_enclosure
 from .plc_specification import PLCSpecification as PLCSpecification
