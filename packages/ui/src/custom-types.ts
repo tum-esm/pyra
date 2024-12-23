@@ -23,7 +23,7 @@ export namespace customTypes {
     export type config = {
         general: {
             version: '4.0.7';
-            seconds_per_core_interval: number;
+            seconds_per_core_iteration: number;
             test_mode: boolean;
             station_id: string;
             min_sun_elevation: number;
@@ -95,7 +95,7 @@ export namespace customTypes {
     export type partialConfig = {
         general?: {
             version?: '4.0.7';
-            seconds_per_core_interval?: number;
+            seconds_per_core_iteration?: number;
             test_mode?: boolean;
             station_id?: string;
             min_sun_elevation?: number;

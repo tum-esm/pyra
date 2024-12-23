@@ -34,7 +34,7 @@ class PartialTimeDict(StricterBaseModel):
 
 class GeneralConfig(StricterBaseModel):
     version: Literal["4.2.0"]
-    seconds_per_core_interval: float = pydantic.Field(..., ge=5, le=600)
+    seconds_per_core_iteration: float = pydantic.Field(..., ge=5, le=600)
     test_mode: bool
     station_id: str
     min_sun_elevation: float = pydantic.Field(..., ge=-90, le=90)
@@ -44,7 +44,7 @@ class PartialGeneralConfig(StricterBaseModel):
     """Like `GeneralConfig`, but all fields are optional."""
 
     version: Literal["4.2.0"] = "4.2.0"
-    seconds_per_core_interval: Optional[float] = pydantic.Field(None, ge=5, le=600)
+    seconds_per_core_iteration: Optional[float] = pydantic.Field(None, ge=5, le=600)
     test_mode: Optional[bool] = None
     station_id: Optional[str] = None
     min_sun_elevation: Optional[float] = pydantic.Field(None, ge=-90, le=90)

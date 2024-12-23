@@ -144,7 +144,7 @@ def run() -> None:
         elapsed_time = time.time() - start_time
         if config.general.test_mode:
             interfaces.ActivityHistoryInterface.dump_current_activity_history()
-        time_to_wait = config.general.seconds_per_core_interval - elapsed_time
+        time_to_wait = config.general.seconds_per_core_iteration - elapsed_time
         if time_to_wait > 0:
             logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
             time.sleep(time_to_wait)

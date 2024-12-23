@@ -9,7 +9,7 @@ const intSchema = floatSchema; //z.union([z.number(), z.string().transform((x) =
 export const configSchema = z.object({
     general: z.object({
         version: z.string(),
-        seconds_per_core_interval: floatSchema,
+        seconds_per_core_iteration: floatSchema,
         test_mode: z.boolean(),
         station_id: z.string(),
         min_sun_elevation: floatSchema,

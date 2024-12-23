@@ -65,7 +65,7 @@ def test_validate_current_config(sample_config: types.Config) -> None:
 @pytest.mark.ci
 def test_update_config(sample_config: types.Config) -> None:
     updates = [
-        {"general": {"seconds_per_core_interval": False}},
+        {"general": {"seconds_per_core_iteration": False}},
         {"opus": {"experiment_path": ["should not be an array"]}},
         {"camtracker": {"sun_intensity_path": 10}},
         {"error_email": {"unknown-key": 10}},
@@ -82,17 +82,17 @@ def test_update_config(sample_config: types.Config) -> None:
     assert_config_file_content(sample_config, "config.json should not have changed")
 
     updates = [
-        {"general": {"seconds_per_core_interval": 400}},
+        {"general": {"seconds_per_core_iteration": 400}},
         {"opus": {"em27_ip": "17.17.17.17"}},
         {"camtracker": {"motor_offset_threshold": 40.7}},
         {"error_email": {"smtp_password": "very very very secure password"}},
         {"measurement_triggers": {"stop_time": {"hour": 7, "minute": 0}}},
-        {"general": {"seconds_per_core_interval": 30}},
+        {"general": {"seconds_per_core_iteration": 30}},
     ]
 
     def transform(config: types.Config, i: int) -> types.Config:
         if i == 0:
-            config.general.seconds_per_core_interval = 400
+            config.general.seconds_per_core_iteration = 400
         if i == 1:
             config.opus.em27_ip = StrictIPv4Adress(root="17.17.17.17")
         if i == 2:
@@ -103,7 +103,7 @@ def test_update_config(sample_config: types.Config) -> None:
             config.measurement_triggers.stop_time.hour = 7
             config.measurement_triggers.stop_time.minute = 0
         if i == 5:
-            config.general.seconds_per_core_interval = 30
+            config.general.seconds_per_core_iteration = 30
         return config
 
     # run "pyra-cli config update" for some valid variables

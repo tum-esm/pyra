@@ -23,10 +23,12 @@ export default function ConfigSectionGeneral() {
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
-                title="Seconds Per Core Interval"
-                value={localSectionConfig.seconds_per_core_interval}
-                setValue={(v: number) => setLocalConfigItem('general.seconds_per_core_interval', v)}
-                oldValue={centralSectionConfig.seconds_per_core_interval}
+                title="Seconds Per Core-Iteration"
+                value={localSectionConfig.seconds_per_core_iteration}
+                setValue={(v: number) =>
+                    setLocalConfigItem('general.seconds_per_core_iteration', v)
+                }
+                oldValue={centralSectionConfig.seconds_per_core_iteration}
                 postfix="second(s)"
                 numeric
             />
