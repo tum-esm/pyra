@@ -15,8 +15,8 @@ _LOG_FILES_LOCK = os.path.join(_PROJECT_DIR, "logs", ".logs.lock")
 def _get_log_line_datetime(log_line: str) -> Optional[datetime.datetime]:
     """Returns the date, if a log line is starting with a valid date."""
     try:
-        assert len(log_line) >= 25
-        return datetime.datetime.strptime(log_line[:25], "%Y-%m-%d %H:%M:%S UTC%z")
+        assert len(log_line) >= 35
+        return datetime.datetime.strptime(log_line[:35], "%Y-%m-%d %H:%M:%S.%f UTC%z")
     except (AssertionError, ValueError):
         return None
 
