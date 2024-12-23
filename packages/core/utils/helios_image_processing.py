@@ -131,8 +131,8 @@ class HeliosImageProcessing:
         # add text
         pil_image = Image.fromarray((rgb_frame * 255).astype(np.uint8))
         draw = ImageDraw.Draw(pil_image)
-        draw.text((10, 10), f"{datetime.datetime.now()}", (255, 255, 255), font_size=25)
-        draw.text((10, 40), f"{edge_fraction * 100:.2f}%", (255, 255, 255), font_size=25)
+        draw.text((10, 10), f"{datetime.datetime.now()}", (255, 255, 255), font_size=35)
+        draw.text((10, 50), f"{edge_fraction * 100:.2f}%", (255, 255, 255), font_size=35)
 
         return pil_image
 
@@ -168,6 +168,7 @@ class HeliosImageProcessing:
         evenly_lit_frame: np.ndarray[Any, Any] = bw_frame * (
             target_pixel_brightness / np.mean(bw_frame)
         )
+        evenly_lit_frame[evenly_lit_frame > 255] = 255
 
         # transform image from 1280x720 to 640x360
         # downscaled_image: np.ndarray = skimage.transform.rescale(evenly_lit_frame, 0.5)
@@ -177,8 +178,8 @@ class HeliosImageProcessing:
             skimage.feature.canny(
                 evenly_lit_frame,
                 sigma=7,
-                low_threshold=round(edge_color_threshold * 0.5),
-                high_threshold=edge_color_threshold,
+                low_threshold=round(edge_color_threshold * (1 / 7) * 0.5),
+                high_threshold=round(edge_color_threshold * (1 / 7)),
             ),
             skimage.morphology.disk(2),
         ).astype(np.uint8)
@@ -235,4 +236,4 @@ class HeliosImageProcessing:
                     os.path.join(_LOGS_DIR, "current-helios-view-processed.jpg"),
                 )
 
-        return edge_fraction
+        return float(edge_fraction)

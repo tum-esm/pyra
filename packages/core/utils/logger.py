@@ -114,6 +114,7 @@ class Logger:
             )
             for index, line in enumerate(log_lines_in_file):
                 line_time = _get_log_line_datetime(line)
+                print(line_time, latest_log_time_to_keep)
                 if line_time is not None:
                     if line_time > latest_log_time_to_keep:
                         lines_to_be_kept = log_lines_in_file[index:]

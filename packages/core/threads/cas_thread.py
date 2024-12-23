@@ -92,7 +92,7 @@ class CASThread(AbstractThread):
                             ):
                                 should_measure = True
                                 logger.info(
-                                    f"Last good automatic decision was {time_since_last_good_decision} seconds ago – not shutting down yet."
+                                    f"Last good automatic decision was {time_since_last_good_decision:.2f} seconds ago. Waiting for {config.measurement_triggers.shutdown_grace_period} seconds of bad conditions until shutting down."
                                 )
 
                 logger.info(f"Measurements should be running is set to: {should_measure}.")
