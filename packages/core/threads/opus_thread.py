@@ -105,8 +105,12 @@ class DDEConnection:
         return int(answer[1])
 
     def macro_is_running(self, macro_id: int) -> bool:
+        """Check if a macro is currently running in OPUS."""
         answer = self.request(f"MACRO_RESULTS {macro_id}", expect_ok=True)
-        return int(answer[1]) == 1
+        # The OPUS documentation is ambiguous about the return value. It
+        # seems that 0 means "there is no result yet", i.e. the macro is
+        # still running
+        return int(answer[1]) == 0
 
     def some_macro_is_running(self) -> bool:
         """Check if any macro is currently running in OPUS.
