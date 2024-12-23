@@ -116,7 +116,7 @@ def _stop_pyra_core() -> None:
 
     camtracker_logger = utils.Logger(origin="camtracker")
     try:
-        if threads.camtracker_thread.CamTrackerProgram.is_running(camtracker_logger):
+        if threads.camtracker_thread.CamTrackerProgram.is_running():
             threads.camtracker_thread.CamTrackerProgram.stop(config, camtracker_logger)
         _print_green("Successfully closed CamTracker")
     except Exception as e:
