@@ -47,7 +47,7 @@ class PartialGeneralConfig(StricterBaseModel):
     seconds_per_core_interval: Optional[float] = pydantic.Field(None, ge=5, le=600)
     test_mode: Optional[bool] = None
     station_id: Optional[str] = None
-    min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
+    min_sun_elevation: Optional[float] = pydantic.Field(None, ge=-90, le=90)
 
 
 class OpusConfig(StricterBaseModel):
@@ -161,7 +161,7 @@ class PartialMeasurementTriggersConfig(StricterBaseModel):
     consider_helios: Optional[bool] = None
     start_time: Optional[PartialTimeDict] = None
     stop_time: Optional[PartialTimeDict] = None
-    min_sun_elevation: Optional[float] = pydantic.Field(None, ge=0, le=90)
+    min_sun_elevation: Optional[float] = pydantic.Field(None, ge=-90, le=90)
     shutdown_grace_period: Optional[float] = pydantic.Field(
         None,
         ge=0,
