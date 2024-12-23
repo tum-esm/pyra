@@ -39,6 +39,7 @@ class Logger:
         self,
         origin: str = "pyra.core",
         just_print: bool = False,
+        perform_archiving: bool = False,
     ) -> None:
         """Create a new logger instance.
 
@@ -47,6 +48,7 @@ class Logger:
 
         self.origin: str = origin
         self.just_print: bool = just_print
+        self.perform_archiving: bool = perform_archiving
 
     def debug(self, message: str) -> None:
         """Write a debug log (to debug only). Used for verbose output"""
@@ -94,9 +96,10 @@ class Logger:
                     f.write(log_string)
 
         # Archive lines older than 5 minutes, every 5 minutes
-        if (now - Logger.last_archive_time).total_seconds() > 300:
-            Logger.archive()
-            Logger.last_archive_time = now
+        if self.perform_archiving:
+            if (now - Logger.last_archive_time).total_seconds() > 300:
+                Logger.archive()
+                Logger.last_archive_time = now
 
     @staticmethod
     def archive() -> None:
@@ -114,7 +117,6 @@ class Logger:
             )
             for index, line in enumerate(log_lines_in_file):
                 line_time = _get_log_line_datetime(line)
-                print(line_time, latest_log_time_to_keep)
                 if line_time is not None:
                     if line_time > latest_log_time_to_keep:
                         lines_to_be_kept = log_lines_in_file[index:]

@@ -6,8 +6,6 @@ from typing import Any
 
 from packages.core import interfaces, threads, types, utils
 
-logger = utils.Logger(origin="main")
-
 
 def _send_exception_emails(config: types.Config) -> None:
     """Send emails on occured/resolved exceptions."""
@@ -22,7 +20,9 @@ def _send_exception_emails(config: types.Config) -> None:
         if len(new_exception_emails) > 0:
             utils.ExceptionEmailClient.handle_occured_exceptions(config, new_exception_emails)
 
-        if any([e.send_emails for e in notified_exceptions]) and (not any([e.send_emails for e in current_exceptions])):
+        if any([e.send_emails for e in notified_exceptions]) and (
+            not any([e.send_emails for e in current_exceptions])
+        ):
             utils.ExceptionEmailClient.handle_resolved_exception(config)
 
         state.exceptions_state.notified = state.exceptions_state.current
@@ -30,11 +30,12 @@ def _send_exception_emails(config: types.Config) -> None:
 
 def run() -> None:
     """The entrypoint of PYRA Core.
-    
+
     Starting with Pyra 4.2.0, the mainloop is only responsible for starting
     and stopping the different threads, and sendinging out emails on occured
     and resolved exceptions. The actual work is done by the threads."""
 
+    logger = utils.Logger(origin="main", perform_archiving=True)
     logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
 
     # Loop until a valid config has been found. Without
