@@ -32,6 +32,8 @@ class SystemMonitorThread(AbstractThread):
         logger = utils.Logger(origin="system-monitor", just_print=headless)
         logger.info("Starting System Monitor thread")
 
+        # TODO: load todays activity history, create new, empty one if not existing
+
         while True:
             try:
                 logger.debug("Starting iteration")
@@ -82,6 +84,8 @@ class SystemMonitorThread(AbstractThread):
                             )
                         logger.error(f"{subject}: {details}")
 
+                # UPDATE STATE AND FETCH RECENT ACTIVITY
+
                 with interfaces.StateInterface.update_state() as state:
                     state.operating_system_state = types.OperatingSystemState(
                         cpu_usage=cpu_usage,
@@ -90,6 +94,22 @@ class SystemMonitorThread(AbstractThread):
                         filled_disk_space_fraction=disk_space,
                     )
                     state.exceptions_state.clear_exception_origin("system-monitor")
+
+                    core_is_running = True
+                    is_measuring = state.measurements_should_be_running
+                    is_uploading = state.activity.upload_is_running
+                    new_camtracker_startups = state.activity.camtracker_startups
+                    new_opus_startups = state.activity.opus_startups
+                    new_cli_calls = state.activity.cli_calls
+                    has_errors = len(state.exceptions_state.current) > 0
+
+                    state.activity.camtracker_startups = 0
+                    state.activity.opus_startups = 0
+                    state.activity.cli_calls = 0
+
+                # WRITE OUT UPDATED ACTIVITY HISTORY
+
+                # TODO
 
                 logger.debug("Sleeping 60 seconds")
                 time.sleep(60)
