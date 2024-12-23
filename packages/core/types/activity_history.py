@@ -1,33 +1,14 @@
 from __future__ import annotations
-
 import datetime
-
 import pydantic
 
 
-class ActivityDatapoint(pydantic.BaseModel):
-    """A datapoint of the activity history."""
-
-    local_time: datetime.time
-    is_measuring: bool = False
-    has_errors: bool = False
-    is_uploading: bool = False
-    camtracker_startups: int = 0
-    opus_startups: int = 0
-    cli_calls: int = 0
-
-
-class ActivityDatapointList(pydantic.RootModel[list[ActivityDatapoint]]):
-    """A datapoint of the activity history."""
-
-    root: list[ActivityDatapoint]
-
-
-example = {"localTime": "12:00", "measuring": True, "errors": False, "uploading": False}
-
-
-class ActivityHistory(pydantic.BaseModel):
-    """A datapoint of the activity history."""
-
-    datapoints: ActivityDatapointList = ActivityDatapointList(root=[])
+class NewActivityHistory(pydantic.baseModel):
     date: datetime.date
+    core_is_running: list[int] = [0] * 24 * 20
+    is_measuring: list[int] = [0] * 24 * 20
+    has_errors: list[int] = [0] * 24 * 20
+    camtracker_startups: list[int] = [0] * 24 * 20
+    opus_startups: list[int] = [0] * 24 * 20
+    cli_calls: list[int] = [0] * 24 * 20
+    upload_is_running: list[int] = [0] * 24 * 20

@@ -74,29 +74,35 @@ class ExceptionsState(StricterBaseModel):
         self.current = [e for e in self.current if e.subject != subject]
 
 
+class ActivityState(StricterBaseModel):
+    cli_calls: int = 0
+    camtracker_startups: int = 0
+    opus_startups: int = 0
+    upload_is_running: bool = False
+    # has_errors, is_measuring can be inferred from the other state fields
+
+
 # --- STATE ---
 
 
 class StateObject(StricterBaseModel):
     last_updated: datetime.datetime
-    recent_cli_calls: int = 0
     helios_indicates_good_conditions: Optional[Literal["yes", "no", "inconclusive"]] = None
     position: Position = Position()
     measurements_should_be_running: Optional[bool] = None
     tum_enclosure_state: TUMEnclosureState = TUMEnclosureState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
     exceptions_state: ExceptionsState = ExceptionsState()
-    upload_is_running: Optional[bool] = None
     opus_state: OpusState = OpusState()
+    activity: ActivityState = ActivityState()
 
     model_config = pydantic.ConfigDict(extra="forbid")
 
     def reset(self) -> None:
         """Reset the state object to its initial values but keep the exceptions."""
-        self.recent_cli_calls = 0
         self.helios_indicates_good_conditions = None
         self.position = Position()
         self.measurements_should_be_running = None
         self.tum_enclosure_state = TUMEnclosureState()
         self.operating_system_state = OperatingSystemState()
-        self.upload_is_running = None
+        self.activity = ActivityState()
