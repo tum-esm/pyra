@@ -62,6 +62,12 @@ export default function LogTab() {
         }
     }, [coreLogs, liveUpdateIsActice]);
 
+    useEffect(() => {
+        if (logsContainerRef.current) {
+            logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+        }
+    }, [logType]);
+
     async function openLogsFolder() {
         let baseDir: string;
         let filePath: string;
