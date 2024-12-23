@@ -66,7 +66,7 @@ class CASThread(AbstractThread):
 
                 should_measure: bool
                 if state.tum_enclosure_state.state.rain:
-                    logger.info("not trying to measuring when PLC detected rain")
+                    logger.info("Not trying to measuring when PLC detected rain")
                     should_measure = False
                 else:
                     if d.mode == "manual":

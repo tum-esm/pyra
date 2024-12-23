@@ -193,7 +193,7 @@ class CamTrackerThread(AbstractThread):
         while True:
             try:
                 t1 = time.time()
-                logger.info("Starting iteration")
+                logger.debug("Starting iteration")
 
                 logger.debug("Loading configuration file")
                 config = types.Config.load()

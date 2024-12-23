@@ -224,7 +224,7 @@ class HeliosInterface:
             time.sleep(0.2)
             assert (
                 self.camera.get(cv.CAP_PROP_EXPOSURE) == exposure
-            ), f"could not set exposure to {exposure}"
+            ), f"Could not set exposure to {exposure}"
 
             # throw away some images after changing settings. I don't know
             # why this is necessary, but it resolves a lot of issues
@@ -247,10 +247,10 @@ class HeliosInterface:
             # calculate mean color of all 3 images
             exposure_results.append(ExposureResult(exposure=exposure, means=mean_colors))
 
-        self.logger.debug(f"exposure results: {exposure_results}")
+        self.logger.debug(f"Exposure results: {exposure_results}")
         means: list[float] = [sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results]
         for m1, m2 in zip(means[:-1], means[1:]):
-            assert m1 < m2 + 5, "mean colors should increase with increasing exposure"
+            assert m1 < m2 + 5, "Mean colors should increase with increasing exposure"
 
         assert len(exposure_results) > 0, "no possible exposures found"
         new_exposure = int(
@@ -264,7 +264,7 @@ class HeliosInterface:
         self.update_camera_settings(exposure=new_exposure)
 
         if new_exposure != self.current_exposure:
-            self.logger.info(f"changing exposure: {self.current_exposure} -> {new_exposure}")
+            self.logger.info(f"Changing exposure: {self.current_exposure} -> {new_exposure}")
             self.current_exposure = new_exposure
 
     def run(
@@ -281,11 +281,11 @@ class HeliosInterface:
         perform_autoexposure: bool = False
         now = time.time()
         if (now - self.last_autoexposure_time) > 300:
-            self.logger.debug("performing autoexposure after 5 minutes")
+            self.logger.debug("Performing autoexposure after 5 minutes")
             perform_autoexposure = True
         if self.target_pixel_brightness != target_pixel_brightness:
             self.logger.debug(
-                "performing autoexposure because target_pixel_brightness changed"
+                "Performing autoexposure because target_pixel_brightness changed"
                 + f" ({self.target_pixel_brightness} -> {target_pixel_brightness})"
             )
             perform_autoexposure = True
