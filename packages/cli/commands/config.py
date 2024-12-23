@@ -77,7 +77,8 @@ def _get_config(
     timeout=5,
 )
 def _update_config(content: str) -> None:
-    # TODO: write cli call start into activity state
+    with interfaces.StateInterface.update_state() as s:
+        s.activity.cli_calls += 1
     logger.info(f'running command "config update" with content: "{content}"')
 
     try:

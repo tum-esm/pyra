@@ -188,7 +188,8 @@ class OpusProgram:
     def start(config: types.Config, logger: utils.Logger) -> None:
         """Starts the OPUS.exe with os.startfile()."""
 
-        # TODO: write opus start into activity state
+        with interfaces.StateInterface.update_state() as s:
+            s.activity.opus_startups += 1
 
         logger.info("Starting OPUS")
         os.startfile(  # type: ignore

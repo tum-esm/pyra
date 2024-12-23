@@ -103,9 +103,10 @@ class UploadThread(AbstractThread):
                         if not stream.is_active:
                             logger.info(f"skipping upload of '{stream.label}'")
                             continue
+                        with interfaces.StateInterface.update_state() as s:
+                            s.activity.upload_is_running = True
                         logger.info(f"starting to upload '{stream.label}'")
                         logger.debug(f"stream config: {stream.model_dump_json()}")
-                        # TODO: write upload state into activity state
                         circadian_scp_upload.DailyTransferClient(
                             remote_connection=remote_connection,
                             src_path=stream.src_directory.root,
@@ -125,7 +126,8 @@ class UploadThread(AbstractThread):
                                 should_abort_upload=upload_should_abort,
                             ),
                         ).run()
-                        # TODO: write upload_activity into activity state
+                        with interfaces.StateInterface.update_state() as s:
+                            s.activity.upload_is_running = False
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
@@ -134,8 +136,8 @@ class UploadThread(AbstractThread):
 
                 logger.info("finished upload")
 
-                # TODO: write upload_activity into activity state
                 with interfaces.StateInterface.update_state() as s:
+                    s.activity.upload_is_running = False  # not necessary, but ...
                     s.exceptions_state.clear_exception_origin("upload")
 
                 # sleep 15 minutes until running again
@@ -166,7 +168,7 @@ class UploadThread(AbstractThread):
                 logger.error(f"error in UploadThread: {repr(e)}")
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as s:
-                    s.upload_is_running = False
+                    s.activity.upload_is_running = False
                     s.exceptions_state.add_exception(origin="upload", exception=e)
                 logger.info(
                     "waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"

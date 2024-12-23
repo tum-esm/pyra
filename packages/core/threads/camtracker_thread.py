@@ -31,7 +31,8 @@ class CamTrackerProgram:
     def start(config: types.Config, logger: utils.Logger) -> None:
         """Starts the OPUS.exe with os.startfile()."""
 
-        # TODO: write camtracker start into activity state
+        with interfaces.StateInterface.update_state() as s:
+            s.activity.camtracker_startups += 1
 
         # removing old stop file
         stop_file_path = os.path.join(
