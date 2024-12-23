@@ -67,8 +67,8 @@ class SystemMonitorThread(AbstractThread):
                 # BATTERY LEVEL
 
                 battery_level = tum_esm_utils.system.get_system_battery()
-                logger.debug(f"The battery level is {battery_level} %.")
                 if battery_level is not None:
+                    logger.debug(f"The battery level is {battery_level} %.")
                     if battery_level < 30:
                         subject = "LowEnergyError"
                         details = (
