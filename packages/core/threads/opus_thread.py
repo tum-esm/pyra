@@ -40,7 +40,7 @@ class DDEConnection:
         
         while True:
             try:
-                self.client = brukeropus.control.dde.DDEClient("Opus", "System")
+                self.client = brukeropus.control.dde.DDEClient("OPUS", "System")
                 time.sleep(0.5)
                 assert self.is_working()
                 break
@@ -58,7 +58,7 @@ class DDEConnection:
         if self.client is None:
             return False
         answer = self.request("COMMAND_SAY hello")
-        return (answer[0] == "OK") and (answer[1] == "hello")
+        return answer[0] == "hello"
 
     def teardown(self) -> None:
         """Tear down the current DDE connection."""
@@ -93,7 +93,7 @@ class DDEConnection:
         if expect_ok is not None:
             assert answer[0] == "OK"
 
-        return answer
+        return [a.strip() for a in answer]
 
     def get_main_thread_id(self) -> int:
         """Get the main thread ID of OPUS."""
