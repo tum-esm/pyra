@@ -43,8 +43,7 @@ def core_command_group() -> None:
     help="Start pyra-core as a background process. Return the process id. Prevents spawning multiple processes.",
 )
 def _start_pyra_core() -> None:
-    with interfaces.StateInterface.update_state() as s:
-        s.recent_cli_calls += 1
+    # TODO: write cli call start into activity state
     logger.info('running command "core start"')
 
     existing_pids = tum_esm_utils.processes.get_process_pids(_RUN_PYRA_CORE_SCRIPT_PATH)
@@ -74,8 +73,7 @@ def _start_pyra_core() -> None:
     help="Stop the pyra-core background process. Return the process id of terminated processes. This command will force quit the OPUS process.",
 )
 def _stop_pyra_core() -> None:
-    with interfaces.StateInterface.update_state() as s:
-        s.recent_cli_calls += 1
+    # TODO: write cli call start into activity state
     logger.info('running command "core stop"')
 
     termination_pids = tum_esm_utils.processes.terminate_process(

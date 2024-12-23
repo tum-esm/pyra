@@ -107,10 +107,6 @@ def run() -> None:
         start_time = time.time()
         logger.debug("Starting iteration")
 
-        interfaces.ActivityHistoryInterface.add_datapoint(
-            has_errors=len(state.exceptions_state.current) > 0,
-        )
-
         # load config at the beginning of each mainloop iteration
         try:
             config = types.Config.load()

@@ -105,8 +105,7 @@ class UploadThread(AbstractThread):
                             continue
                         logger.info(f"starting to upload '{stream.label}'")
                         logger.debug(f"stream config: {stream.model_dump_json()}")
-                        with interfaces.StateInterface.update_state() as s:
-                            s.upload_is_running = True
+                        # TODO: write upload state into activity state
                         circadian_scp_upload.DailyTransferClient(
                             remote_connection=remote_connection,
                             src_path=stream.src_directory.root,
@@ -126,8 +125,7 @@ class UploadThread(AbstractThread):
                                 should_abort_upload=upload_should_abort,
                             ),
                         ).run()
-                        with interfaces.StateInterface.update_state() as s:
-                            s.upload_is_running = False
+                        # TODO: write upload_activity into activity state
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
@@ -136,8 +134,8 @@ class UploadThread(AbstractThread):
 
                 logger.info("finished upload")
 
+                # TODO: write upload_activity into activity state
                 with interfaces.StateInterface.update_state() as s:
-                    s.upload_is_running = False
                     s.exceptions_state.clear_exception_origin("upload")
 
                 # sleep 15 minutes until running again

@@ -99,18 +99,12 @@ class CASThread(AbstractThread):
 
                 # UPDATE STATE
 
-                interfaces.ActivityHistoryInterface.add_datapoint(
-                    cli_calls=state.recent_cli_calls,
-                    is_measuring=should_measure,
-                    is_uploading=state.upload_is_running,
-                )
                 with interfaces.StateInterface.update_state() as s:
                     s.position.latitude = camtracker_coordinates[0]
                     s.position.longitude = camtracker_coordinates[1]
                     s.position.altitude = camtracker_coordinates[2]
                     s.position.sun_elevation = sun_elevation
                     s.measurements_should_be_running = should_measure
-                    s.recent_cli_calls -= state.recent_cli_calls
                     state.exceptions_state.clear_exception_origin("cas")
 
                 # SLEEP
