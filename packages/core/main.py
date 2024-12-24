@@ -93,7 +93,6 @@ def run() -> None:
     # that the core is shutting down
     def _graceful_teardown(*args: Any) -> None:
         logger.info("Received shutdown signal, starting graceful teardown")
-        interfaces.ActivityHistoryInterface.dump_current_activity_history()
         with interfaces.StateInterface.update_state() as state:
             state.reset()
         logger.info("Graceful teardown complete")
@@ -139,8 +138,6 @@ def run() -> None:
         # wait rest of loop time
         logger.debug("Finished iteration")
         elapsed_time = time.time() - start_time
-        if config.general.test_mode:
-            interfaces.ActivityHistoryInterface.dump_current_activity_history()
         time_to_wait = config.general.seconds_per_core_iteration - elapsed_time
         if time_to_wait > 0:
             logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")

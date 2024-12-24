@@ -114,12 +114,12 @@ class SystemMonitorThread(AbstractThread):
 
                 current_ah_index = types.ActivityHistory.get_current_minute_index()
                 activity_history.core_is_running[current_ah_index] = 1
-                activity_history.is_measuring[current_ah_index] = int(is_measuring)
-                activity_history.has_errors[current_ah_index] = int(has_errors)
+                activity_history.is_measuring[current_ah_index] = 1 if is_measuring else 0
+                activity_history.has_errors[current_ah_index] = 1 if has_errors else 0
                 activity_history.camtracker_startups[current_ah_index] += new_camtracker_startups
                 activity_history.opus_startups[current_ah_index] += new_opus_startups
                 activity_history.cli_calls[current_ah_index] += new_cli_calls
-                activity_history.upload_is_running[current_ah_index] = int(is_uploading)
+                activity_history.upload_is_running[current_ah_index] = 1 if is_uploading else 0
 
                 if (time.time() - last_activity_history_dump) > 180:
                     activity_history.dump()
