@@ -9,7 +9,7 @@ from tum_esm_utils.validators import StrictIPv4Adress
 
 from packages.core import interfaces, types, utils
 
-logger = utils.Logger(origin="tum-enclosure-plc")
+logger = utils.Logger(origin="tum-enclosure")
 
 _PLC_SPECIFICATION_VERSIONS: dict[Literal[1, 2], types.PLCSpecification] = {
     1: types.PLCSpecification(
