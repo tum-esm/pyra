@@ -3,12 +3,8 @@ import moment from 'moment';
 import {
     ActivitySection,
     useActivityHistoryStore,
-    ACTIVITY_BUCKETS_PER_HOUR,
 } from '../../utils/zustand-utils/activity-zustand';
 import { useState } from 'react';
-import React from 'react';
-
-const SHOW_ALL_BARS: boolean = false;
 
 function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
     let fraction = time.hour() / 24.0 + time.minute() / (24.0 * 60) + time.second() / (24.0 * 3600);
@@ -18,54 +14,36 @@ function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
     return `${(fraction * 100).toFixed(2)}%`;
 }
 
-function hourFractionToTimeString(hourFraction: number) {
-    const hour = Math.floor(hourFraction);
-    const minute = Math.floor((hourFraction - hour) * 60);
-    return `${hour < 10 ? '0' : ''}${hour}:${minute < 10 ? '0' : ''}${minute}`;
-}
-
-function getSectionHoverLabel(
-    section: ActivitySection,
-    label: string,
-    accumulatedValue: number,
-    variant: 'fraction' | 'count'
-) {
-    const fraction = (accumulatedValue * ACTIVITY_BUCKETS_PER_HOUR) / 60;
-    return (
-        `${hourFractionToTimeString(section.from_hour)} ` +
-        `- ${hourFractionToTimeString(section.to_hour)} | ${label} ` +
-        (variant === 'fraction'
-            ? `${Math.round(fraction * 100)} % of the time`
-            : `${accumulatedValue} times`)
-    );
-}
-
-function sectionToStyle(
-    section: ActivitySection,
-    accumulatedValue: number = 60 / ACTIVITY_BUCKETS_PER_HOUR
-) {
-    const opacity =
-        accumulatedValue === 0
-            ? 0
-            : 0.25 + 0.75 * ((accumulatedValue * ACTIVITY_BUCKETS_PER_HOUR) / 60);
-
+function sectionToStyle(section: ActivitySection) {
     return {
-        left: `${(section.from_hour / 24.0) * 100}%`,
-        right: `${(1 - section.to_hour / 24.0) * 100}%`,
-        opacity: SHOW_ALL_BARS ? 1 : opacity,
+        left: `${(section.from_minute_index / (24 * 60)) * 100}%`,
+        right: `${(1 - (section.to_minute_index + 1) / (24 * 60)) * 100}%`,
     };
 }
 
+function getSectionHoverLabel(label: string, section: ActivitySection) {
+    const fromTime = `${Math.floor(section.from_minute_index / 60)}:${
+        section.from_minute_index % 60
+    }`;
+    const toTime = `${Math.floor((section.to_minute_index + 1) / 60)}:${
+        (section.to_minute_index + 1) % 60
+    }`;
+    return `${label} from ${fromTime} to ${toTime}`;
+}
+
 function ActivityPlot() {
-    const now = moment();
     const { activitySections } = useActivityHistoryStore();
     const localUTCOffset = moment().utcOffset();
-
     const [hoverLabel, setHoverLabel] = useState<string | undefined>(undefined);
+
+    const now = moment();
 
     if (activitySections === undefined) {
         return <div>loading ...</div>;
     }
+
+    // TODO: refine naming of ah fields
+    // TODO: reintroduce the counted hover labels
 
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
@@ -106,146 +84,77 @@ function ActivityPlot() {
                                 style={{ left: `${h / 0.24}%` }}
                             />
                         ))}
-                        {activitySections.map((s, i) => (
-                            <React.Fragment key={i}>
-                                <div
-                                    className="absolute top-0 z-20 h-2 cursor-pointer bg-slate-300 hover:bg-slate-200"
-                                    style={sectionToStyle(s, s.isRunning)}
-                                    onMouseOver={() =>
-                                        setHoverLabel(
-                                            getSectionHoverLabel(
-                                                s,
-                                                'core was running',
-                                                s.isRunning,
-                                                'fraction'
-                                            )
-                                        )
-                                    }
-                                    onMouseLeave={() => setHoverLabel(undefined)}
-                                />
-                                {s.isMeasuring > 0 && (
-                                    <div
-                                        className="absolute z-20 h-2 bg-green-400 cursor-pointer top-2 hover:bg-green-300"
-                                        style={sectionToStyle(s, s.isMeasuring)}
-                                        onMouseOver={() =>
-                                            setHoverLabel(
-                                                getSectionHoverLabel(
-                                                    s,
-                                                    'system was measuring',
-                                                    s.isMeasuring,
-                                                    'fraction'
-                                                )
-                                            )
-                                        }
-                                        onMouseLeave={() => setHoverLabel(undefined)}
-                                    />
-                                )}
-                                {s.hasErrors > 0 && (
-                                    <div
-                                        className="absolute z-20 h-2 bg-red-400 cursor-pointer top-4 hover:bg-red-300"
-                                        style={sectionToStyle(s, s.hasErrors)}
-                                        onMouseOver={() =>
-                                            setHoverLabel(
-                                                getSectionHoverLabel(
-                                                    s,
-                                                    'system had errors',
-                                                    s.hasErrors,
-                                                    'fraction'
-                                                )
-                                            )
-                                        }
-                                        onMouseLeave={() => setHoverLabel(undefined)}
-                                    />
-                                )}
-                                {s.isUploading > 0 && (
-                                    <div
-                                        className="absolute z-20 h-2 cursor-pointer bg-fuchsia-400 top-6 hover:bg-fuchsia-300"
-                                        style={sectionToStyle(s, s.isUploading)}
-                                        onMouseOver={() =>
-                                            setHoverLabel(
-                                                getSectionHoverLabel(
-                                                    s,
-                                                    'system was uploading',
-                                                    s.isUploading,
-                                                    'fraction'
-                                                )
-                                            )
-                                        }
-                                        onMouseLeave={() => setHoverLabel(undefined)}
-                                    />
-                                )}
-                                {s.camtrackerStartups > 0 && (
-                                    <div
-                                        className="absolute z-20 h-2 cursor-pointer bg-violet-400 top-8 hover:bg-violet-300"
-                                        style={sectionToStyle(s)}
-                                        onMouseOver={() =>
-                                            setHoverLabel(
-                                                getSectionHoverLabel(
-                                                    s,
-                                                    'camtracker was started',
-                                                    s.camtrackerStartups,
-                                                    'count'
-                                                )
-                                            )
-                                        }
-                                        onMouseLeave={() => setHoverLabel(undefined)}
-                                    />
-                                )}
-                                {s.opusStartups > 0 && (
-                                    <div
-                                        className="absolute z-20 h-2 bg-purple-400 cursor-pointer top-10 hover:bg-purple-300"
-                                        style={sectionToStyle(s)}
-                                        onMouseOver={() =>
-                                            setHoverLabel(
-                                                getSectionHoverLabel(
-                                                    s,
-                                                    'opus was started',
-                                                    s.opusStartups,
-                                                    'count'
-                                                )
-                                            )
-                                        }
-                                        onMouseLeave={() => setHoverLabel(undefined)}
-                                    />
-                                )}
-                                {s.cliCalls > 0 && (
-                                    <div
-                                        className="absolute z-20 h-2 bg-indigo-400 cursor-pointer top-12 hover:bg-indigo-300"
-                                        style={sectionToStyle(s)}
-                                        onMouseOver={() =>
-                                            setHoverLabel(
-                                                getSectionHoverLabel(
-                                                    s,
-                                                    'the CLI was called',
-                                                    s.cliCalls,
-                                                    'count'
-                                                )
-                                            )
-                                        }
-                                        onMouseLeave={() => setHoverLabel(undefined)}
-                                    />
-                                )}
-                            </React.Fragment>
+                        {activitySections.core_is_running.map((s, i) => (
+                            <div
+                                className="absolute top-0 z-20 h-2 cursor-pointer bg-slate-300 hover:bg-slate-200"
+                                style={sectionToStyle(s)}
+                                onMouseOver={() =>
+                                    setHoverLabel(getSectionHoverLabel('core was running', s))
+                                }
+                                onMouseLeave={() => setHoverLabel(undefined)}
+                            />
                         ))}
-                        {/* blue line of current time */}
-                        {/* blue label "now" */}
-                        {/*<div
-                        className="absolute z-30 w-[2.5px] -mx-px bg-gray-900 -top-0.5 h-10 rounded-full"
-                        style={{ left: timeToPercentage(now) }}
-                    />
-                    <div
-                        className={
-                            'absolute -top-0.5 z-30 h-10 text-gray-900 flex-row-center ' +
-                            'px-1 text-xs font-medium'
-                        }
-                        style={
-                            now.hour() < 23
-                                ? { left: timeToPercentage(now) }
-                                : { right: timeToPercentage(now, true) }
-                        }
-                    >
-                        now
-                    </div>*/}
+                        {activitySections.is_measuring.map((s, i) => (
+                            <div
+                                className="absolute z-20 h-2 bg-green-300 cursor-pointer top-2 hover:bg-green-200"
+                                style={sectionToStyle(s)}
+                                onMouseOver={() =>
+                                    setHoverLabel(getSectionHoverLabel('system was measuring', s))
+                                }
+                                onMouseLeave={() => setHoverLabel(undefined)}
+                            />
+                        ))}
+                        {activitySections.has_errors.map((s, i) => (
+                            <div
+                                className="absolute z-20 h-2 bg-red-300 cursor-pointer top-4 hover:bg-red-200"
+                                style={sectionToStyle(s)}
+                                onMouseOver={() =>
+                                    setHoverLabel(getSectionHoverLabel('core had errors', s))
+                                }
+                                onMouseLeave={() => setHoverLabel(undefined)}
+                            />
+                        ))}
+                        {activitySections.upload_is_running.map((s, i) => (
+                            <div
+                                className="absolute z-20 h-2 cursor-pointer bg-fuchsia-300 top-6 hover:bg-fuchsia-200"
+                                style={sectionToStyle(s)}
+                                onMouseOver={() =>
+                                    setHoverLabel(getSectionHoverLabel('was uploading', s))
+                                }
+                                onMouseLeave={() => setHoverLabel(undefined)}
+                            />
+                        ))}
+                        {activitySections.camtracker_startups.map((s, i) => (
+                            <div
+                                className="absolute z-20 h-2 cursor-pointer bg-violet-300 top-8 hover:bg-violet-200"
+                                style={sectionToStyle(s)}
+                                onMouseOver={() =>
+                                    setHoverLabel(getSectionHoverLabel('camtracker was started', s))
+                                }
+                                onMouseLeave={() => setHoverLabel(undefined)}
+                            />
+                        ))}
+                        {activitySections.opus_startups.map((s, i) => (
+                            <div
+                                className="absolute z-20 h-2 bg-purple-300 cursor-pointer top-10 hover:bg-purple-200"
+                                style={sectionToStyle(s)}
+                                onMouseOver={() =>
+                                    setHoverLabel(getSectionHoverLabel('opus was started', s))
+                                }
+                                onMouseLeave={() => setHoverLabel(undefined)}
+                            />
+                        ))}
+                        {activitySections.cli_calls.map((s, i) => (
+                            <div
+                                className="absolute z-20 h-2 bg-indigo-300 cursor-pointer top-12 hover:bg-indigo-200"
+                                style={sectionToStyle(s)}
+                                onMouseOver={() =>
+                                    setHoverLabel(getSectionHoverLabel('CLI was called', s))
+                                }
+                                onMouseLeave={() => setHoverLabel(undefined)}
+                            />
+                        ))}
+
                         {/* gray blocks of past and future time */}
                         <div
                             className="absolute top-0 z-0 h-full bg-gray-700 rounded-l-lg"
