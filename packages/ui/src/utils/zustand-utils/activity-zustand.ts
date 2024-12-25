@@ -15,6 +15,7 @@ export type ActivityHistory = z.infer<typeof activityHistorySchema>;
 export type ActivitySection = {
     from_minute_index: number;
     to_minute_index: number;
+    count: number;
 };
 
 function parseActivityHistoryTimeSeries(ts: number[]): ActivitySection[] {
@@ -26,9 +27,11 @@ function parseActivityHistoryTimeSeries(ts: number[]): ActivitySection[] {
                 currentSection = {
                     from_minute_index: i,
                     to_minute_index: i,
+                    count: ts[i],
                 };
             } else {
                 currentSection.to_minute_index = i;
+                currentSection.count += ts[i];
             }
         } else {
             if (currentSection) {

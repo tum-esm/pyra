@@ -21,14 +21,24 @@ function sectionToStyle(section: ActivitySection) {
     };
 }
 
-function getSectionHoverLabel(label: string, section: ActivitySection) {
+function getSectionHoverLabel(
+    label: string,
+    section: ActivitySection,
+    variant: 'count' | 'span' = 'span'
+) {
     const fromTime = `${Math.floor(section.from_minute_index / 60)}:${
         section.from_minute_index % 60
     }`;
     const toTime = `${Math.floor((section.to_minute_index + 1) / 60)}:${
         (section.to_minute_index + 1) % 60
     }`;
-    return `${label} from ${fromTime} to ${toTime}`;
+    if (variant === 'count') {
+        return `${label}  ${section.count} time${
+            section.count != 1 ? 's' : ''
+        } between ${fromTime} to ${toTime}`;
+    } else {
+        return `${label} from ${fromTime} to ${toTime}`;
+    }
 }
 
 function ActivityPlot() {
@@ -41,8 +51,6 @@ function ActivityPlot() {
     if (activitySections === undefined) {
         return <div>loading ...</div>;
     }
-
-    // TODO: reintroduce the counted hover labels
 
     return (
         <div className="flex flex-row items-center w-full gap-x-4">
@@ -83,7 +91,7 @@ function ActivityPlot() {
                                 style={{ left: `${h / 0.24}%` }}
                             />
                         ))}
-                        {activitySections.is_running.map((s, i) => (
+                        {activitySections.is_running.map((s) => (
                             <div
                                 className="absolute top-0 z-20 h-2 cursor-pointer bg-slate-300 hover:bg-slate-200"
                                 style={sectionToStyle(s)}
@@ -93,7 +101,7 @@ function ActivityPlot() {
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
                         ))}
-                        {activitySections.is_measuring.map((s, i) => (
+                        {activitySections.is_measuring.map((s) => (
                             <div
                                 className="absolute z-20 h-2 bg-green-300 cursor-pointer top-2 hover:bg-green-200"
                                 style={sectionToStyle(s)}
@@ -103,7 +111,7 @@ function ActivityPlot() {
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
                         ))}
-                        {activitySections.has_errors.map((s, i) => (
+                        {activitySections.has_errors.map((s) => (
                             <div
                                 className="absolute z-20 h-2 bg-red-300 cursor-pointer top-4 hover:bg-red-200"
                                 style={sectionToStyle(s)}
@@ -113,7 +121,7 @@ function ActivityPlot() {
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
                         ))}
-                        {activitySections.is_uploading.map((s, i) => (
+                        {activitySections.is_uploading.map((s) => (
                             <div
                                 className="absolute z-20 h-2 cursor-pointer bg-fuchsia-300 top-6 hover:bg-fuchsia-200"
                                 style={sectionToStyle(s)}
@@ -123,32 +131,38 @@ function ActivityPlot() {
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
                         ))}
-                        {activitySections.camtracker_startups.map((s, i) => (
+                        {activitySections.camtracker_startups.map((s) => (
                             <div
                                 className="absolute z-20 h-2 cursor-pointer bg-violet-300 top-8 hover:bg-violet-200"
                                 style={sectionToStyle(s)}
                                 onMouseOver={() =>
-                                    setHoverLabel(getSectionHoverLabel('camtracker was started', s))
+                                    setHoverLabel(
+                                        getSectionHoverLabel('camtracker was started', s, 'count')
+                                    )
                                 }
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
                         ))}
-                        {activitySections.opus_startups.map((s, i) => (
+                        {activitySections.opus_startups.map((s) => (
                             <div
                                 className="absolute z-20 h-2 bg-purple-300 cursor-pointer top-10 hover:bg-purple-200"
                                 style={sectionToStyle(s)}
                                 onMouseOver={() =>
-                                    setHoverLabel(getSectionHoverLabel('opus was started', s))
+                                    setHoverLabel(
+                                        getSectionHoverLabel('opus was started', s, 'count')
+                                    )
                                 }
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
                         ))}
-                        {activitySections.cli_calls.map((s, i) => (
+                        {activitySections.cli_calls.map((s) => (
                             <div
                                 className="absolute z-20 h-2 bg-indigo-300 cursor-pointer top-12 hover:bg-indigo-200"
                                 style={sectionToStyle(s)}
                                 onMouseOver={() =>
-                                    setHoverLabel(getSectionHoverLabel('CLI was called', s))
+                                    setHoverLabel(
+                                        getSectionHoverLabel('cli was called', s, 'count')
+                                    )
                                 }
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
