@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { z } from 'zod';
 
+export const MINUTES_PER_BIN = 5;
+
 const activityHistorySchema = z.object({
     is_running: z.array(z.number()).length(24 * 60),
     is_measuring: z.array(z.number()).length(24 * 60),
@@ -19,19 +21,27 @@ export type ActivitySection = {
 };
 
 function parseActivityHistoryTimeSeries(ts: number[]): ActivitySection[] {
+    const smallerTs: number[] = [];
+    for (let i = 0; i < ts.length; i++) {
+        if (i % MINUTES_PER_BIN === 0) {
+            smallerTs.push(ts[i]);
+        } else {
+            smallerTs[smallerTs.length - 1] += ts[i];
+        }
+    }
     const sections: ActivitySection[] = [];
     let currentSection: ActivitySection | undefined = undefined;
-    for (let i = 0; i < ts.length; i++) {
-        if (ts[i] > 0) {
+    for (let i = 0; i < smallerTs.length; i++) {
+        if (smallerTs[i] > 0) {
             if (!currentSection) {
                 currentSection = {
-                    from_minute_index: i,
-                    to_minute_index: i,
-                    count: ts[i],
+                    from_minute_index: i * MINUTES_PER_BIN,
+                    to_minute_index: i * MINUTES_PER_BIN,
+                    count: smallerTs[i],
                 };
             } else {
-                currentSection.to_minute_index = i;
-                currentSection.count += ts[i];
+                currentSection.to_minute_index = i * MINUTES_PER_BIN;
+                currentSection.count += smallerTs[i];
             }
         } else {
             if (currentSection) {

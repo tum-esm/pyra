@@ -1,6 +1,7 @@
 import { range } from 'lodash';
 import moment from 'moment';
 import {
+    MINUTES_PER_BIN,
     ActivitySection,
     useActivityHistoryStore,
 } from '../../utils/zustand-utils/activity-zustand';
@@ -17,7 +18,7 @@ function timeToPercentage(time: moment.Moment, fromRight: boolean = false) {
 function sectionToStyle(section: ActivitySection) {
     return {
         left: `${(section.from_minute_index / (24 * 60)) * 100}%`,
-        right: `${(1 - (section.to_minute_index + 1) / (24 * 60)) * 100}%`,
+        right: `${(1 - (section.to_minute_index + MINUTES_PER_BIN) / (24 * 60)) * 100}%`,
     };
 }
 
@@ -26,18 +27,17 @@ function getSectionHoverLabel(
     section: ActivitySection,
     variant: 'count' | 'span' = 'span'
 ) {
-    const fromTime = `${Math.floor(section.from_minute_index / 60)}:${
-        section.from_minute_index % 60
-    }`;
-    const toTime = `${Math.floor((section.to_minute_index + 1) / 60)}:${
-        (section.to_minute_index + 1) % 60
-    }`;
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const tts = (n: number) => `${pad(Math.floor(n / 60))}:${pad(n % 60)}`;
+
     if (variant === 'count') {
-        return `${label}  ${section.count} time${
-            section.count != 1 ? 's' : ''
-        } between ${fromTime} to ${toTime}`;
+        return `${label}  ${section.count} time${section.count != 1 ? 's' : ''} between ${tts(
+            section.from_minute_index
+        )} to ${tts(section.to_minute_index + MINUTES_PER_BIN)}`;
     } else {
-        return `${label} from ${fromTime} to ${toTime}`;
+        return `${label} from ${tts(section.from_minute_index)} to ${tts(
+            section.to_minute_index + MINUTES_PER_BIN
+        )}`;
     }
 }
 
@@ -77,17 +77,17 @@ function ActivityPlot() {
                             'w-full relative h-full border border-slate-200 rounded-lg overflow-hidden'
                         }
                     >
-                        {range(0.25, 24, 0.25).map((h) => (
+                        {range(1 / 6, 24, 1 / 6).map((h) => (
                             <div
                                 key={`thin-hour-line-${h}`}
-                                className="absolute top-0 z-10 w-[1.5px] h-14 bg-gray-600 translate-x-[-1px]"
+                                className="absolute top-0 z-10 w-[1px] h-14 bg-gray-600 translate-x-[-1px]"
                                 style={{ left: `${h / 0.24}%` }}
                             />
                         ))}
                         {range(1, 24).map((h) => (
                             <div
                                 key={`bold-hour-line-${h}`}
-                                className="absolute top-0 z-10 w-[1.5px] h-14 bg-gray-400 translate-x-[-1px]"
+                                className="absolute top-0 z-10 w-[1px] h-14 bg-gray-400 translate-x-[-1px]"
                                 style={{ left: `${h / 0.24}%` }}
                             />
                         ))}
@@ -193,7 +193,7 @@ function ActivityPlot() {
                         <span className="px-2 py-0.5 text-violet-700 bg-violet-100">
                             opus startups
                         </span>
-                        <span className="px-2 py-0.5 text-indigo-700 bg-indigo-100">CLI calls</span>
+                        <span className="px-2 py-0.5 text-indigo-700 bg-indigo-100">cli calls</span>
                     </div>
                     <div className="flex-grow" />
                     <div className=" text-slate-400">
