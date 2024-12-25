@@ -14,12 +14,8 @@ class EM27Interface:
         """Get the peak position of the EM27.
 
         This reads the ABP value from the EM27 via http://{ip}/config/servmenuA.htm"""
-        try:
-            raw_body = requests.get(f"http://{ip.root}/config/servmenuA.htm", timeout=3)
-        except Exception:
-            return None
-        body = raw_body.text.replace("\n", "").replace("\t", "").replace(" ", "").lower()
-        r: list[str] = re.findall(r'<inputname="abp"value="(\d+)"', body)
+        body = EM27Interface._get_html(ip, "/config/servmenuA.htm")
+        r: list[str] = re.findall(r'<input name="abp" value="(\d+)"', body)
         if len(r) != 1:
             return None
         return int(r[0])
@@ -47,11 +43,7 @@ class EM27Interface:
         """Get the peak position of the EM27.
 
         This reads the ABP value from the EM27 via http://{ip}/config/cfg_ctrler.htm"""
-        try:
-            raw_body = requests.get(f"http://{ip.root}/config/cfg_ctrler.htm", timeout=3)
-        except Exception:
-            return None
-        body = raw_body.text.replace("\n", "").replace("\t", "").replace(" ", "").lower()
+        body = EM27Interface._get_html(ip, "/config/cfg_ctrler.htm")
         r: list[str] = re.findall(r"<td id=tila>([^<]+)</td>", body)
         if len(r) != 1:
             return None
@@ -60,5 +52,17 @@ class EM27Interface:
         last_powerup_time = datetime.datetime.now() - dt
         return last_powerup_time.timestamp()
 
-
-#
+    @staticmethod
+    def _get_html(
+        ip: tum_esm_utils.validators.StrictIPv4Adress,
+        url: str,
+    ) -> Optional[float]:
+        """Fetches a HTML page from the EM27: http://{ip}{url}"""
+        try:
+            raw_body = requests.get(f"http://{ip.root}{url}", timeout=3)
+        except Exception:
+            return None
+        body = raw_body.text.replace("\n", " ").replace("\t", " ").lower()
+        while "  " in body:
+            body = body.replace("  ", " ")
+        return body
