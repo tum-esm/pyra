@@ -25,7 +25,7 @@ class DDEConnection:
         self.client: Optional[brukeropus.control.dde.DDEClient] = None
         self.logger = logger
 
-    def setup(self, timeout: int = 180) -> None:
+    def setup(self, timeout: int = 60, attempts: int = 3) -> None:
         """Set up a new DDE connection to OPUS. Tear down the
         old connection if it exists."""
         import brukeropus.control.dde
@@ -35,20 +35,34 @@ class DDEConnection:
             self.teardown()
             time.sleep(0.5)
 
-        self.logger.info("Setting up new DDE connection")
-        start_time: float = time.time()
+        failed_attempts: int = 0
+        success: bool = False
 
         while True:
-            try:
-                self.client = brukeropus.control.dde.DDEClient("OPUS", "OPUS/System")
-                time.sleep(0.5)
-                assert self.is_working()
+            self.logger.info(f"Setting up new DDE connection (attempt {failed_attempts + 1})")
+            start_time: float = time.time()
+
+            while True:
+                try:
+                    self.client = brukeropus.control.dde.DDEClient("OPUS", "OPUS/System")
+                    time.sleep(0.5)
+                    success = self.is_working()
+                    break
+                except Exception as e:
+                    self.logger.debug(f"Could not connect to OPUS: {e}")
+                    if (time.time() - start_time) > timeout:
+                        failed_attempts += 1
+                        self.logger.warning(
+                            f"Attempt {failed_attempts} to set up DDE connection failed"
+                        )
+                        if failed_attempts >= attempts:
+                            raise RuntimeError("DDE connection to OPUS is not working")
+                        else:
+                            break
+                time.sleep(3.5)
+
+            if success:
                 break
-            except Exception as e:
-                self.logger.debug(f"Could not connect to OPUS: {e}")
-                if (time.time() - start_time) > timeout:
-                    raise RuntimeError("DDE connection to OPUS is not working")
-            time.sleep(3.5)
 
         answer = self.request("GET_VERSION_EXTENDED")
         self.logger.info(f"Connected to OPUS version {answer[0]}")
