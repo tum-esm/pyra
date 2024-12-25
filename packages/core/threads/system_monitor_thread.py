@@ -1,5 +1,3 @@
-import datetime
-import os
 import threading
 import time
 
@@ -33,10 +31,7 @@ class SystemMonitorThread(AbstractThread):
 
         logger = utils.Logger(origin="system-monitor", just_print=headless)
         logger.info("Starting System Monitor thread")
-
-        # load todays activity history, create new, empty one if not existing
-        activity_history = types.ActivityHistory.get(datetime.date.today())
-        last_activity_history_dump = time.time()
+        activity_history_interface = interfaces.ActivityHistoryInterface(logger)
 
         while True:
             try:
@@ -112,24 +107,25 @@ class SystemMonitorThread(AbstractThread):
 
                 # WRITE OUT UPDATED ACTIVITY HISTORY
 
-                current_ah_index = types.ActivityHistory.get_current_minute_index()
-                activity_history.core_is_running[current_ah_index] = 1
-                activity_history.is_measuring[current_ah_index] = 1 if is_measuring else 0
-                activity_history.has_errors[current_ah_index] = 1 if has_errors else 0
-                activity_history.camtracker_startups[current_ah_index] += new_camtracker_startups
-                activity_history.opus_startups[current_ah_index] += new_opus_startups
-                activity_history.cli_calls[current_ah_index] += new_cli_calls
-                activity_history.upload_is_running[current_ah_index] = 1 if is_uploading else 0
+                current_ah, current_ah_index = activity_history_interface.get()
 
-                if (time.time() - last_activity_history_dump) > 180:
-                    activity_history.dump()
-                    last_activity_history_dump = time.time()
+                current_ah.core_is_running[current_ah_index] = 1
+                current_ah.is_measuring[current_ah_index] = 1 if is_measuring else 0
+                current_ah.has_errors[current_ah_index] = 1 if has_errors else 0
+                current_ah.camtracker_startups[current_ah_index] += new_camtracker_startups
+                current_ah.opus_startups[current_ah_index] += new_opus_startups
+                current_ah.cli_calls[current_ah_index] += new_cli_calls
+                current_ah.upload_is_running[current_ah_index] = 1 if is_uploading else 0
+
+                activity_history_interface.update(current_ah)
+
+                # SLEEP FOR 30 SECONDS
 
                 logger.debug("Sleeping 30 seconds")
                 time.sleep(30)
 
             except Exception as e:
                 logger.exception(e)
-                activity_history.dump()
+                activity_history_interface.flush()
                 with interfaces.StateInterface.update_state() as state:
                     state.exceptions_state.add_exception(origin="system-monitor", exception=e)
