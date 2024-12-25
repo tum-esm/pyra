@@ -595,10 +595,22 @@ class OpusThread(AbstractThread):
         if last_em27_powerup_time is None:
             raise RuntimeError("Could not determine last powerup time of EM27")
         time_since_powerup = time.time() - last_em27_powerup_time
+        logger.debug(f"Time since last powerup: {time_since_powerup:.2f} seconds")
+
+        # fetching current peak position
+        current_peak_position = interfaces.EM27Interface.get_peak_position(config.opus.em27_ip)
+        if current_peak_position is None:
+            raise RuntimeError("Could not read the current peak position")
+        logger.debug(f"Current peak position: {current_peak_position}")
+
+        # find the most recent files
         most_recent_files = utils.find_most_recent_files(
             ifg_file_directory,
             time_limit=min(600, time_since_powerup - 60),
             time_indicator="created",
+        )
+        logger.debug(
+            f"Found {len(most_recent_files)} files less than 10 minutes old created after the last powerup"
         )
 
         # compute peak position of these files using the first channel
@@ -624,6 +636,7 @@ class OpusThread(AbstractThread):
                     dc_amplitude >= 0.02
                 ), f"DC amplitude is too low (dc amplitude = {dc_amplitude})"
 
+                logger.debug(f"Read peak position {computed_peak} from {f}")
                 latest_peak_positions.append(computed_peak)
             except Exception as e:
                 logger.debug(f"Could not read peak position from {f}: {e}")
@@ -640,12 +653,14 @@ class OpusThread(AbstractThread):
         d12 = abs(latest_peak_positions[1] - latest_peak_positions[2])
         if max(d01, d02, d12) > 1:
             raise ValueError(f"Peak positions are too far apart: {latest_peak_positions}")
-        new_peak_position = round(sum(latest_peak_positions) / 3)
+        current_file_peak_position = round(sum(latest_peak_positions) / 3)
+        offset_from_center = current_file_peak_position - 57128
+        new_peak_position = current_peak_position + offset_from_center
+        logger.debug(
+            f"Currently recorded interferograms have peak positions: {current_file_peak_position}"
+            + f" ({offset_from_center:+d} points offset from center)"
+        )
 
         # set new peak position
-        current_peak_position = interfaces.EM27Interface.get_peak_position(config.opus.em27_ip)
-        if current_peak_position is None:
-            raise RuntimeError("Could not read the current peak position")
-
         logger.info(f"Updating peak position from {current_peak_position} to {new_peak_position}")
         interfaces.EM27Interface.set_peak_position(config.opus.em27_ip, new_peak_position)
