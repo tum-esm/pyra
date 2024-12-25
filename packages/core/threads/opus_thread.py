@@ -642,20 +642,22 @@ class OpusThread(AbstractThread):
                 latest_peak_positions.append(computed_peak)
             except Exception as e:
                 logger.debug(f"Could not read peak position from {f}: {e}")
-            if len(latest_peak_positions) == 3:
+            if len(latest_peak_positions) == 5:
                 break
-        if len(latest_peak_positions) < 3:
+        if len(latest_peak_positions) < 5:
             raise ValueError(
-                f"Could not read enough peak positions from interferograms (read {len(latest_peak_positions)}"
+                f"Could not read enough peak positions from interferograms (read {len(latest_peak_positions)}, expected 5)"
             )
 
         # compare the peak positions to each other
         d01 = abs(latest_peak_positions[0] - latest_peak_positions[1])
-        d02 = abs(latest_peak_positions[0] - latest_peak_positions[2])
         d12 = abs(latest_peak_positions[1] - latest_peak_positions[2])
-        if max(d01, d02, d12) > 1:
-            raise ValueError(f"Peak positions are too far apart: {latest_peak_positions}")
-        current_file_peak_position = round(sum(latest_peak_positions) / 3)
+        d23 = abs(latest_peak_positions[2] - latest_peak_positions[3])
+        d34 = abs(latest_peak_positions[3] - latest_peak_positions[4])
+        if (d01 > 0) or (d12 > 0) or (d23 > 0) or (d34 > 0):
+            raise ValueError(f"Peak positions are not identical: {latest_peak_positions}")
+
+        current_file_peak_position = round(sum(latest_peak_positions) / 5)
         offset_from_center = current_file_peak_position - 57128
         new_peak_position = current_peak_position + offset_from_center
         logger.debug(
