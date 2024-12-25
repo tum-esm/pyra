@@ -109,13 +109,13 @@ class SystemMonitorThread(AbstractThread):
 
                 current_ah, current_ah_index = activity_history_interface.get()
 
-                current_ah.core_is_running[current_ah_index] = 1
+                current_ah.is_running[current_ah_index] = 1
                 current_ah.is_measuring[current_ah_index] = 1 if is_measuring else 0
                 current_ah.has_errors[current_ah_index] = 1 if has_errors else 0
                 current_ah.camtracker_startups[current_ah_index] += new_camtracker_startups
                 current_ah.opus_startups[current_ah_index] += new_opus_startups
                 current_ah.cli_calls[current_ah_index] += new_cli_calls
-                current_ah.upload_is_running[current_ah_index] = 1 if is_uploading else 0
+                current_ah.is_uploading[current_ah_index] = 1 if is_uploading else 0
 
                 activity_history_interface.update(current_ah)
 

@@ -42,7 +42,6 @@ function ActivityPlot() {
         return <div>loading ...</div>;
     }
 
-    // TODO: refine naming of ah fields
     // TODO: reintroduce the counted hover labels
 
     return (
@@ -84,7 +83,7 @@ function ActivityPlot() {
                                 style={{ left: `${h / 0.24}%` }}
                             />
                         ))}
-                        {activitySections.core_is_running.map((s, i) => (
+                        {activitySections.is_running.map((s, i) => (
                             <div
                                 className="absolute top-0 z-20 h-2 cursor-pointer bg-slate-300 hover:bg-slate-200"
                                 style={sectionToStyle(s)}
@@ -99,7 +98,7 @@ function ActivityPlot() {
                                 className="absolute z-20 h-2 bg-green-300 cursor-pointer top-2 hover:bg-green-200"
                                 style={sectionToStyle(s)}
                                 onMouseOver={() =>
-                                    setHoverLabel(getSectionHoverLabel('system was measuring', s))
+                                    setHoverLabel(getSectionHoverLabel('was measuring', s))
                                 }
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
@@ -114,7 +113,7 @@ function ActivityPlot() {
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
                         ))}
-                        {activitySections.upload_is_running.map((s, i) => (
+                        {activitySections.is_uploading.map((s, i) => (
                             <div
                                 className="absolute z-20 h-2 cursor-pointer bg-fuchsia-300 top-6 hover:bg-fuchsia-200"
                                 style={sectionToStyle(s)}
