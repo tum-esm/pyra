@@ -579,10 +579,10 @@ class OpusThread(AbstractThread):
         # find newest three readable OPUS files
         today = datetime.date.today()
         ifg_file_directory = (
-            config.opus.interferogram_path.replace("%Y", f"{today.year}:4d")
-            .replace("%y", f"{today.year % 100}:2d")
-            .replace("%m", f"{today.month}:2d")
-            .replace("%d", f"{today.day}:2d")
+            config.opus.interferogram_path.replace("%Y", f"{today.year:4d}")
+            .replace("%y", f"{today.year % 100:2d}")
+            .replace("%m", f"{today.month:2d}")
+            .replace("%d", f"{today.day:2d}")
         )
         if not os.path.exists(ifg_file_directory):
             raise ValueError(f"Directory {ifg_file_directory} does not exist")
