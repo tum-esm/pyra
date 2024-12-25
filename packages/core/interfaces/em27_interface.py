@@ -15,6 +15,8 @@ class EM27Interface:
 
         This reads the ABP value from the EM27 via http://{ip}/config/servmenuA.htm"""
         body = EM27Interface._get_html(ip, "/config/servmenuA.htm")
+        if body is None:
+            return None
         r: list[str] = re.findall(r'<input name="abp" value="(\d+)"', body)
         if len(r) != 1:
             return None
@@ -44,6 +46,8 @@ class EM27Interface:
 
         This reads the ABP value from the EM27 via http://{ip}/config/cfg_ctrler.htm"""
         body = EM27Interface._get_html(ip, "/config/cfg_ctrler.htm")
+        if body is None:
+            return None
         r: list[str] = re.findall(r"<td id=tila>([^<]+)</td>", body)
         if len(r) != 1:
             return None
@@ -56,7 +60,7 @@ class EM27Interface:
     def _get_html(
         ip: tum_esm_utils.validators.StrictIPv4Adress,
         url: str,
-    ) -> Optional[float]:
+    ) -> Optional[str]:
         """Fetches a HTML page from the EM27: http://{ip}{url}"""
         try:
             raw_body = requests.get(f"http://{ip.root}{url}", timeout=3)

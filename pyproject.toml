@@ -23,11 +23,11 @@ dependencies = [
     "filelock>=3.16.1",
     "psutil>=6.1.0",
     "brukeropus>=1.1.0",
-    "tum-esm-utils[opus]>=2.5.0",
     "scikit-image>=0.24.0",
     "pillow>=11.0.0",
     "requests>=2.32.3",
     "opencv-python>=4.10.0.84",
+    "tum-esm-utils[opus]>=2.5.1",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"

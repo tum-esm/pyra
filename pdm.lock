@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:58f8c971ae739f673926b0329f7774a7504c06d6ec2759723f6ccb0a080b4c25"
+content_hash = "sha256:37f38d09ed6f5b702d08d4446fbe5c5e72aa635cacc79d714d7959c2e06a08aa"
 
 [[metadata.targets]]
 requires_python = "==3.10.*"
@@ -1039,7 +1039,7 @@ files = [
 
 [[package]]
 name = "tum-esm-utils"
-version = "2.5.0"
+version = "2.5.1"
 requires_python = "<4.0,>=3.10"
 summary = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
 groups = ["default"]
@@ -1052,24 +1052,24 @@ dependencies = [
     "tailwind-colors>=1.3.0",
 ]
 files = [
-    {file = "tum_esm_utils-2.5.0-py3-none-any.whl", hash = "sha256:6d79e45779207804093278c6fb81cc0de94e9ead02c14b60bfeeb02611d08505"},
-    {file = "tum_esm_utils-2.5.0.tar.gz", hash = "sha256:fc2aad2da47814b9ba3e23d1730f8166baa5d64c2a4101f4f3f783116ce6864a"},
+    {file = "tum_esm_utils-2.5.1-py3-none-any.whl", hash = "sha256:645a56924811b0599967f17a910c27fc2f9c5822688b5301f503c697775b2af8"},
+    {file = "tum_esm_utils-2.5.1.tar.gz", hash = "sha256:4552b5a5374c60643ac6a4db64a7e41f7b50127585df099ac0ce6f7fdcbebbaf"},
 ]
 
 [[package]]
 name = "tum-esm-utils"
-version = "2.5.0"
+version = "2.5.1"
 extras = ["opus"]
 requires_python = "<4.0,>=3.10"
 summary = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
 groups = ["default"]
 dependencies = [
     "numpy>=2.1.3",
-    "tum-esm-utils==2.5.0",
+    "tum-esm-utils==2.5.1",
 ]
 files = [
-    {file = "tum_esm_utils-2.5.0-py3-none-any.whl", hash = "sha256:6d79e45779207804093278c6fb81cc0de94e9ead02c14b60bfeeb02611d08505"},
-    {file = "tum_esm_utils-2.5.0.tar.gz", hash = "sha256:fc2aad2da47814b9ba3e23d1730f8166baa5d64c2a4101f4f3f783116ce6864a"},
+    {file = "tum_esm_utils-2.5.1-py3-none-any.whl", hash = "sha256:645a56924811b0599967f17a910c27fc2f9c5822688b5301f503c697775b2af8"},
+    {file = "tum_esm_utils-2.5.1.tar.gz", hash = "sha256:4552b5a5374c60643ac6a4db64a7e41f7b50127585df099ac0ce6f7fdcbebbaf"},
 ]
 
 [[package]]
