@@ -169,10 +169,10 @@ class UploadThread(AbstractThread):
                 logger.exception(e)
                 with interfaces.StateInterface.update_state() as s:
                     s.activity.upload_is_running = False
-                    s.exceptions_state.add_exception(origin="upload", exception=e)
-                logger.info(
-                    "waiting 20 minutes due to an error in the UploadThread, then restarting upload thread"
-                )
+                    s.exceptions_state.add_exception(
+                        origin="upload", exception=e, send_emails=False
+                    )
+                logger.info("waiting 20 minutes until retrying")
                 for i in range(20):
                     for _ in range(6):
                         if upload_should_abort():
