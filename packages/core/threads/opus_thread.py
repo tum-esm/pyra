@@ -597,13 +597,10 @@ class OpusThread(AbstractThread):
         if last_em27_powerup_time is None:
             raise RuntimeError("Could not determine last powerup time of EM27")
         time_since_powerup = time.time() - last_em27_powerup_time
-        logger.debug(f"Time since last powerup: {time_since_powerup:.2f} seconds")
+        logger.debug(f"APP: Time since last powerup is {time_since_powerup:.2f} seconds")
 
-        # fetching current peak position
-        current_peak_position = interfaces.EM27Interface.get_peak_position(config.opus.em27_ip)
-        if current_peak_position is None:
-            raise RuntimeError("Could not read the current peak position")
-        logger.debug(f"Current peak position: {current_peak_position}")
+        # I don't use this interface to read ABP anymore, because sometime it is set to -1
+        # current_peak_position = interfaces.EM27Interface.get_peak_position(config.opus.em27_ip)
 
         # find the most recent files
         most_recent_files = utils.find_most_recent_files(
@@ -612,59 +609,76 @@ class OpusThread(AbstractThread):
             time_indicator="created",
         )
         logger.debug(
-            f"Found {len(most_recent_files)} files less than 10 minutes old created after the last powerup"
+            f"APP: Found {len(most_recent_files)} files less than 10 minutes old created after the last powerup"
         )
 
         # compute peak position of these files using the first channel
-        latest_peak_positions: list[int] = []
+        configured_abps: list[int] = []
+        computed_pps: list[int] = []
         for f in most_recent_files:
             try:
-                ifg = tum_esm_utils.opus.OpusFile.read(f, read_all_channels=False).interferogram
+                opus_file = tum_esm_utils.opus.OpusFile.read(f, read_all_channels=False)
+                ifg = opus_file.interferogram
                 assert ifg is not None
+
+                # use ABP from files rather than from web interface
+                abp = opus_file.channel_parameters[0].instrument["ABP"]
+                assert isinstance(abp, (float, int)), f"ABP is not a number (got {abp})"
 
                 fwd_pass: np.ndarray[Any, Any] = ifg[0][: ifg.shape[1] // 2]
                 assert (
                     len(fwd_pass) == 114256
                 ), f"Interferogram has wrong length (got {len(fwd_pass)}, expected 114256)"
 
-                computed_peak = int(np.argmax(fwd_pass))
+                peak = int(np.argmax(np.abs(fwd_pass)))
                 ifg_center = fwd_pass.shape[0] // 2
                 assert (
-                    abs(computed_peak - ifg_center) < 200
-                ), f"Peak is too far off (center = {ifg_center}, peak = {computed_peak})"
+                    abs(peak - ifg_center) < 200
+                ), f"Peak is too far off (center = {ifg_center}, peak = {peak})"
 
                 dc_amplitude = abs(np.mean(fwd_pass[:100]))
                 assert (
                     dc_amplitude >= 0.02
-                ), f"DC amplitude is too low (dc amplitude = {dc_amplitude})"
+                ), f"DC amplitude is too low (DC amplitude = {dc_amplitude})"
 
-                logger.debug(f"Read peak position {computed_peak} from {f}")
-                latest_peak_positions.append(computed_peak)
+                logger.debug(
+                    f"APP: {f} - Found peak position {peak} (ABP = {abp}, DC amplitude = {dc_amplitude})"
+                )
+                configured_abps.append(int(abp))
+                computed_pps.append(peak)
             except Exception as e:
-                logger.debug(f"Could not read peak position from {f}: {e}")
-            if len(latest_peak_positions) == 5:
+                logger.debug(f"APP: {f} - Could not determine read peak position ({e})")
+            if len(computed_pps) == 5:
                 break
-        if len(latest_peak_positions) < 5:
+        if len(computed_pps) < 5:
             raise ValueError(
-                f"Could not read enough peak positions from interferograms (read {len(latest_peak_positions)}, expected 5)"
+                f"Could not read enough peak positions from interferograms (read {len(computed_pps)}, expected 5)"
             )
+        assert len(configured_abps) == 5
 
-        # compare the peak positions to each other
-        d01 = abs(latest_peak_positions[0] - latest_peak_positions[1])
-        d12 = abs(latest_peak_positions[1] - latest_peak_positions[2])
-        d23 = abs(latest_peak_positions[2] - latest_peak_positions[3])
-        d34 = abs(latest_peak_positions[3] - latest_peak_positions[4])
-        if (d01 > 0) or (d12 > 0) or (d23 > 0) or (d34 > 0):
-            raise ValueError(f"Peak positions are not identical: {latest_peak_positions}")
+        # compare computed peak positions to each other
+        if any([p != computed_pps[0] for p in computed_pps[1:]]):
+            raise ValueError(f"Peak positions are not identical: {computed_pps}")
 
-        current_file_peak_position = round(sum(latest_peak_positions) / 5)
-        offset_from_center = current_file_peak_position - 57128
-        new_peak_position = current_peak_position + offset_from_center
+        # compare ABP values to each other
+        if any([a != configured_abps[0] for a in configured_abps[1:]]):
+            raise ValueError(f"ABP values are not identical: {configured_abps}")
+
+        # only use the values if ABP and computed peak stays constant for 5 interferograms
+        configured_abp = configured_abps[0]
+        computed_pp = computed_pps[0]
+        logger.debug(f"APP: Currently configured ABP is {configured_abp}")
+
+        # the computed peak should be directly in the center of the interferogram
+        # hence, from the offset the pp has from the center, we can compute the change
+        # in ABP that is necessary to center the peak position
+        pp_offset_from_center = computed_pp - 57128
+        new_abp = configured_abp + pp_offset_from_center
         logger.debug(
-            f"Currently recorded interferograms have peak positions: {current_file_peak_position}"
-            + f" ({offset_from_center:+d} points offset from center)"
+            f"Currently recorded interferograms have peak positions: {computed_pp}"
+            + f" ({pp_offset_from_center:+d} points offset from center)"
         )
 
         # set new peak position
-        logger.info(f"Updating peak position from {current_peak_position} to {new_peak_position}")
-        interfaces.EM27Interface.set_peak_position(config.opus.em27_ip, new_peak_position)
+        logger.info(f"Updating peak position from {configured_abp} to {new_abp}")
+        interfaces.EM27Interface.set_peak_position(config.opus.em27_ip, new_abp)
