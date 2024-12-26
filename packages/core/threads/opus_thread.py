@@ -25,7 +25,7 @@ class DDEConnection:
         self.client: Optional[brukeropus.control.dde.DDEClient] = None
         self.logger = logger
 
-    def setup(self, timeout: int = 60, attempts: int = 3) -> None:
+    def setup(self, timeout: int = 75, attempts: int = 3) -> None:
         """Set up a new DDE connection to OPUS. Tear down the
         old connection if it exists."""
         import brukeropus.control.dde
@@ -39,9 +39,18 @@ class DDEConnection:
         success: bool = False
 
         while True:
-            self.logger.info(f"Setting up new DDE connection (attempt {failed_attempts + 1})")
+            self.logger.info(
+                f"Setting up new DDE connection (attempt {failed_attempts + 1} of {attempts})"
+            )
+            if not OpusProgram.is_running(self.logger):
+                OpusProgram.start(types.Config.load(), self.logger)
+                time.sleep(5)
+            else:
+                self.logger.info("OPUS is already running")
+
             start_time: float = time.time()
 
+            # try building the DDE connection until timeout
             while True:
                 try:
                     self.client = brukeropus.control.dde.DDEClient("OPUS", "OPUS/System")
@@ -50,11 +59,14 @@ class DDEConnection:
                     break
                 except Exception as e:
                     self.logger.debug(f"Could not connect to OPUS: {e}")
+                    self.client = None
                     if (time.time() - start_time) > timeout:
                         failed_attempts += 1
                         self.logger.warning(
                             f"Attempt {failed_attempts} to set up DDE connection failed"
                         )
+                        OpusProgram.stop(self.logger)
+                        time.sleep(10)
                         if failed_attempts >= attempts:
                             raise RuntimeError("DDE connection to OPUS is not working")
                         else:
@@ -548,8 +560,8 @@ class OpusThread(AbstractThread):
                     state.opus_state.macro_id = None
                     state.opus_state.macro_filepath = None
                     state.exceptions_state.add_exception(origin="opus", exception=e)
-                logger.info("Sleeping 2 minutes")
-                time.sleep(120)
+                logger.info("Sleeping 3 minutes until retrying")
+                time.sleep(180)
                 logger.info("Stopping thread")
                 break
 
