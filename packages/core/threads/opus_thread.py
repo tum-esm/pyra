@@ -44,7 +44,6 @@ class DDEConnection:
             )
             if not OpusProgram.is_running(self.logger):
                 OpusProgram.start(types.Config.load(), self.logger)
-                time.sleep(5)
             else:
                 self.logger.info("OPUS is already running")
 
@@ -53,8 +52,8 @@ class DDEConnection:
             # try building the DDE connection until timeout
             while True:
                 try:
-                    self.client = brukeropus.control.dde.DDEClient("OPUS", "OPUS/System")
-                    time.sleep(0.5)
+                    self.client = brukeropus.control.dde.DDEClient("Opus", "System")
+                    time.sleep(3)
                     success = self.is_working()
                     break
                 except Exception as e:
@@ -71,7 +70,7 @@ class DDEConnection:
                             raise RuntimeError("DDE connection to OPUS is not working")
                         else:
                             break
-                time.sleep(3.5)
+                time.sleep(5)
 
             if success:
                 break
@@ -233,6 +232,7 @@ class OpusProgram:
             check_interval_seconds=8,
         )
         logger.info("Successfully started OPUS")
+        time.sleep(5)
 
     @staticmethod
     def is_running(logger: utils.Logger) -> bool:
