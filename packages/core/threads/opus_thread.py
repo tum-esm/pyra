@@ -621,7 +621,7 @@ class OpusThread(AbstractThread):
             time_indicator="created",
         )
         logger.debug(
-            f"APP: Found {len(most_recent_files)} files less than 10 minutes old created after the last powerup"
+            f"APP: Found {len(most_recent_files)} files created since the last powerup and less than 10 minutes old"
         )
 
         # compute peak position of these files using the first channel
@@ -659,12 +659,12 @@ class OpusThread(AbstractThread):
                 configured_abps.append(int(abp))
                 computed_pps.append(peak)
             except Exception as e:
-                logger.debug(f"APP: {f} - Could not determine read peak position ({e})")
+                logger.debug(f"APP: {f} - Could not determine peak position ({e})")
             if len(computed_pps) == 5:
                 break
         if len(computed_pps) < 5:
             raise ValueError(
-                f"Could not read enough peak positions from interferograms (read {len(computed_pps)}, expected 5)"
+                f"Could not determine enough peak positions from interferograms (found {len(computed_pps)}, expected 5)"
             )
         assert len(configured_abps) == 5
 
