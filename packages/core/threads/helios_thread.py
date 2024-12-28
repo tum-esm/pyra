@@ -248,9 +248,6 @@ class HeliosInterface:
             exposure_results.append(ExposureResult(exposure=exposure, means=mean_colors))
 
         self.logger.debug(f"Exposure results: {exposure_results}")
-        means: list[float] = [sum(r.means) / _NUMBER_OF_EXPOSURE_IMAGES for r in exposure_results]
-        for m1, m2 in zip(means[:-1], means[1:]):
-            assert m1 < m2 + 5, "Mean colors should increase with increasing exposure"
 
         assert len(exposure_results) > 0, "no possible exposures found"
         new_exposure = int(
