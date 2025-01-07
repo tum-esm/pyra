@@ -200,7 +200,7 @@ class UploadStreamConfig(StricterBaseModel):
     is_active: bool
     label: str
     variant: Literal["directories", "files"]
-    dated_regex: str
+    dated_regex: str = pydantic.Field(..., pattern="^\^.*\$$")
     src_directory: tum_esm_utils.validators.StrictDirectoryPath
     dst_directory: str
     remove_src_after_upload: bool
