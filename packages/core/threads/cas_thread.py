@@ -42,6 +42,8 @@ class CASThread(AbstractThread):
 
                 logger.debug("Loading configuration file")
                 config = types.Config.load()
+                if config.general.test_mode:
+                    time.sleep(0.1)  # for the tests to work
 
                 logger.debug("Loading state file")
                 state = interfaces.StateInterface.load_state()
