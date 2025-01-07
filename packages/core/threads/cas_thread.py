@@ -33,6 +33,7 @@ class CASThread(AbstractThread):
         logger = utils.Logger(origin="cas")
         logger.info("Starting Condition Assessment System (CAS) thread.")
         last_good_automatic_decision: float = 0
+        last_rain_detection: float = 0
 
         while True:
             try:
@@ -59,14 +60,21 @@ class CASThread(AbstractThread):
                 )
                 logger.debug(f"Theoretical sun elevation is: {sun_elevation} degrees.")
 
+                # RAIN DETECTION
+
+                if state.tum_enclosure_state.state.rain:
+                    last_rain_detection = time.time()
+
                 # DECIDING WHETHER TO MEASURE
 
                 d = config.measurement_decision
                 logger.info(f"Decision mode for measurements is: {d.mode}.")
 
                 should_measure: bool
-                if state.tum_enclosure_state.state.rain:
-                    logger.info("Not trying to measuring when PLC detected rain")
+                if (time.time() - last_rain_detection) < 600:
+                    logger.info(
+                        "Not trying to measure when rain was detected within the last 10 minutes."
+                    )
                     should_measure = False
                 else:
                     if d.mode == "manual":
