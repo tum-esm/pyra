@@ -121,24 +121,30 @@ def run() -> None:
             time.sleep(10)
             continue
 
-        # check whether the threads are running and possibly (re)start them
-        thread_states: list[bool] = []
-        for thread_instance in thread_instances:
-            r = thread_instance.update_thread_state(config)
-            thread_states.append(r)
-        if all(thread_states):
-            logger.info("All threads are running/pausing correctly")
+        try:
+            # check whether the threads are running and possibly (re)start them
+            thread_states: list[bool] = []
+            for thread_instance in thread_instances:
+                r = thread_instance.update_thread_state(config)
+                thread_states.append(r)
+            if all(thread_states):
+                logger.info("All threads are running/pausing correctly")
 
-        if config.general.test_mode:
-            logger.debug("pyra-core in test mode")
+            if config.general.test_mode:
+                logger.debug("pyra-core in test mode")
 
-        # send emails on occured/resolved exceptions
-        _send_exception_emails(config)
+            # send emails on occured/resolved exceptions
+            _send_exception_emails(config)
 
-        # wait rest of loop time
-        logger.debug("Finished iteration")
-        elapsed_time = time.time() - start_time
-        time_to_wait = config.general.seconds_per_core_iteration - elapsed_time
-        if time_to_wait > 0:
-            logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
-            time.sleep(time_to_wait)
+            # wait rest of loop time
+            logger.debug("Finished iteration")
+            elapsed_time = time.time() - start_time
+            time_to_wait = config.general.seconds_per_core_iteration - elapsed_time
+            if time_to_wait > 0:
+                logger.debug(f"Waiting {round(time_to_wait, 2)} second(s)")
+                time.sleep(time_to_wait)
+
+        except Exception as e:
+            logger.exception(e)
+            logger.error("An error occured in the mainloop, waiting 15 seconds")
+            time.sleep(15)
