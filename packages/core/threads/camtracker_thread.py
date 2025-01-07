@@ -252,20 +252,34 @@ class CamTrackerThread(AbstractThread):
                         if config.camtracker.restart_if_cover_remains_closed and (
                             cover_state == "closed"
                         ):
-                            logger.error("Enclosure cover is still closed. Stopping CamTracker.")
-                            with interfaces.StateInterface.update_state() as state:
-                                state.exceptions_state.add_exception_state_item(
-                                    types.ExceptionStateItem(
-                                        origin="camtracker",
-                                        subject="Camtracker was started but cover did not open in 3 minutes",
+                            t1 = time.time()
+                            while True:
+                                time.sleep(5)
+                                state = interfaces.StateInterface.load_state()
+                                if state.tum_enclosure_state.state.rain or (
+                                    not state.measurements_should_be_running
+                                ):
+                                    logger.info("Enclosure cover is closed due to rain.")
+                                    break
+                                if (time.time() - t1) > (
+                                    config.general.seconds_per_core_iteration + 5
+                                ):
+                                    logger.error(
+                                        "Enclosure cover is closed even though, there is no rain. Stopping CamTracker."
                                     )
-                                )
-                            CamTrackerProgram.stop(config, logger)
-                            continue
+                                    with interfaces.StateInterface.update_state() as state:
+                                        state.exceptions_state.add_exception_state_item(
+                                            types.ExceptionStateItem(
+                                                origin="camtracker",
+                                                subject="Camtracker was started but cover is closed.",
+                                            )
+                                        )
+                                    CamTrackerProgram.stop(config, logger)
+                                    break
                         if cover_state == "open":
                             with interfaces.StateInterface.update_state() as state:
                                 state.exceptions_state.clear_exception_subject(
-                                    subject="Camtracker was started but cover did not open in 3 minutes"
+                                    subject="Camtracker was started but cover is closed."
                                 )
 
                 # CLEAR EXCEPTIONS
@@ -277,10 +291,7 @@ class CamTrackerThread(AbstractThread):
                         for e in state.exceptions_state.current
                         if (
                             (e.origin != "camtracker")
-                            and (
-                                e.subject
-                                != "Camtracker was started but cover did not open in 3 minutes"
-                            )
+                            and (e.subject != "Camtracker was started but cover is closed.")
                         )
                     ]
 
