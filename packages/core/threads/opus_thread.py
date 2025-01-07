@@ -25,7 +25,7 @@ class DDEConnection:
         self.client: Optional[brukeropus.control.dde.DDEClient] = None
         self.logger = logger
 
-    def setup(self, timeout: int = 75, attempts: int = 3) -> None:
+    def setup(self, timeout: int = 60, attempts: int = 5) -> None:
         """Set up a new DDE connection to OPUS. Tear down the
         old connection if it exists."""
         import brukeropus.control.dde
@@ -65,7 +65,6 @@ class DDEConnection:
                             f"Attempt {failed_attempts} to set up DDE connection failed"
                         )
                         OpusProgram.stop(self.logger)
-                        time.sleep(10)
                         if failed_attempts >= attempts:
                             raise RuntimeError("DDE connection to OPUS is not working")
                         else:
@@ -74,6 +73,9 @@ class DDEConnection:
 
             if success:
                 break
+
+            self.logger.debug("Sleeping 2 minutes before retrying")
+            time.sleep(120)
 
         answer = self.request("GET_VERSION_EXTENDED")
         self.logger.info(f"Connected to OPUS version {answer[0]}")
