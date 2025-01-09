@@ -12,12 +12,14 @@ import { useEffect } from 'react';
 import { ChildProcess } from '@tauri-apps/plugin-shell';
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
+import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
 
 export default function PyraCoreStatus() {
     const { pyraCorePid, setPyraCorePid } = useCoreProcessStore();
     const { runPromisingCommand } = fetchUtils.useCommand();
     const { coreState } = useCoreStateStore();
     const { centralConfig } = useConfigStore();
+    const { coreLogs } = useLogsStore();
 
     function checkPyraCoreState() {
         runPromisingCommand({
@@ -59,6 +61,34 @@ export default function PyraCoreStatus() {
     }
 
     useEffect(checkPyraCoreState, []);
+
+    let measurementStatusRemarks: string | undefined = undefined;
+    if (coreState && centralConfig) {
+        const sun_elevation = coreState.position.sun_elevation;
+        const min_sun_elevation = centralConfig.general.min_sun_elevation;
+        if (sun_elevation !== null) {
+            if (sun_elevation < min_sun_elevation) {
+                measurementStatusRemarks = `Sun elevation (${sun_elevation.toFixed(
+                    2
+                )}°) is below minimum (${min_sun_elevation}°)`;
+            }
+        }
+        if (measurementStatusRemarks === undefined && coreLogs.cas) {
+            let rainBlock = false;
+            coreLogs.cas.forEach((log) => {
+                if (
+                    log.includes(
+                        'Not trying to measure when rain was detected within the last 3 minutes.'
+                    )
+                ) {
+                    rainBlock = true;
+                }
+            });
+            if (rainBlock) {
+                measurementStatusRemarks = 'Rain was detected within the last 3 minutes';
+            }
+        }
+    }
 
     return (
         <>
@@ -122,11 +152,17 @@ export default function PyraCoreStatus() {
                         <IconMicroscopeOff size={18} />
                     )}
                     <div>
-                        System is{' '}
-                        <strong className="font-semibold">
-                            {!coreState.measurements_should_be_running && 'not'} measuring
-                        </strong>
-                        {coreState.measurements_should_be_running === null && ' during startup'}
+                        {coreState.measurements_should_be_running == true && 'System is measuring'}
+                        {coreState.measurements_should_be_running === false &&
+                            'System is not measuring'}
+                        {coreState.measurements_should_be_running == null &&
+                            'System is not measuring during startup'}
+
+                        {coreState.measurements_should_be_running === false &&
+                            centralConfig.measurement_decision.mode == 'manual' &&
+                            centralConfig.measurement_decision.manual_decision_result &&
+                            measurementStatusRemarks !== undefined &&
+                            ` (${measurementStatusRemarks})`}
                     </div>
                 </div>
             )}
