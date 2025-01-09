@@ -73,9 +73,9 @@ class CASThread(AbstractThread):
                 logger.info(f"Decision mode for measurements is: {d.mode}.")
 
                 should_measure: bool
-                if (time.time() - last_rain_detection) < 600:
+                if (time.time() - last_rain_detection) < 180:
                     logger.info(
-                        "Not trying to measure when rain was detected within the last 10 minutes."
+                        "Not trying to measure when rain was detected within the last 3 minutes."
                     )
                     should_measure = False
                 else:
