@@ -146,35 +146,44 @@ class OpusThread(AbstractThread):
         last_measurement_start_time: Optional[float] = None
         last_peak_positioning_time: Optional[float] = None
 
-        # CHECK IF OPUS IS ALREADY RUNNING
-        # ONLY RESTART IF THERE IS AN UNIDENTIFIED MACRO RUNNING
+        try:
+            # CHECK IF OPUS IS ALREADY RUNNING
+            # ONLY RESTART IF THERE IS AN UNIDENTIFIED MACRO RUNNING
+            if OpusProgram.is_running(logger) and (not config.general.test_mode):
+                logger.info("OPUS is already running")
 
-        if OpusProgram.is_running(logger) and (not config.general.test_mode):
-            logger.info("OPUS is already running")
-
-            dde_connection.setup()
-            current_experiment = dde_connection.get_loaded_experiment()
-
-            if dde_connection.some_macro_is_running():
-                logger.info("Some macro is already running")
-                mid = state.opus_state.macro_id
-                mfp = state.opus_state.macro_filepath
-
-                if (mid is None) or (mfp is None) or (not dde_connection.macro_is_running(mid)):
-                    logger.info("Macro ID is unknown, stopping OPUS entirely")
-                    OpusProgram.stop(logger, dde_connection)
+                if not interfaces.OPUSHTTPInterface.is_working():
+                    logger.warning("OPUS HTTP interface is not working, stopping OPUS")
+                    OpusProgram.stop(logger)
                 else:
-                    logger.info("The Macro started by Pyra is still running, nothing to do")
-                    current_macro = (mid, mfp)
-                    last_measurement_start_time = time.time()
+                    logger.info("OPUS HTTP interface is working")
+                    current_experiment = interfaces.OPUSHTTPInterface.get_loaded_experiment()
 
-        with interfaces.StateInterface.update_state() as state:
-            state.opus_state.experiment_filepath = current_experiment
-            state.opus_state.macro_id = None if current_macro is None else current_macro[0]
-            state.opus_state.macro_filepath = None if current_macro is None else current_macro[1]
+                    if interfaces.OPUSHTTPInterface.some_macro_is_running():
+                        logger.info("Some macro is already running")
+                        mid = state.opus_state.macro_id
+                        mfp = state.opus_state.macro_filepath
 
-        while True:
-            try:
+                        if (
+                            (mid is None)
+                            or (mfp is None)
+                            or (not interfaces.OPUSHTTPInterface.macro_is_running(mid))
+                        ):
+                            logger.info("Macro ID is unknown, stopping OPUS entirely")
+                            OpusProgram.stop(logger)
+                        else:
+                            logger.info("The Macro started by Pyra is still running, nothing to do")
+                            current_macro = (mid, mfp)
+                            last_measurement_start_time = time.time()
+
+            with interfaces.StateInterface.update_state() as state:
+                state.opus_state.experiment_filepath = current_experiment
+                state.opus_state.macro_id = None if current_macro is None else current_macro[0]
+                state.opus_state.macro_filepath = (
+                    None if current_macro is None else current_macro[1]
+                )
+
+            while True:
                 t1 = time.time()
                 logger.debug("Starting iteration")
 
@@ -365,17 +374,17 @@ class OpusThread(AbstractThread):
                 logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                 time.sleep(sleep_time)
 
-            except Exception as e:
-                logger.exception(e)
-                OpusProgram.stop(logger, dde_connection)
-                with interfaces.StateInterface.update_state() as state:
-                    state.opus_state.macro_id = None
-                    state.opus_state.macro_filepath = None
-                    state.exceptions_state.add_exception(origin="opus", exception=e)
-                logger.info("Sleeping 3 minutes until retrying")
-                time.sleep(180)
-                logger.info("Stopping thread")
-                break
+        except Exception as e:
+            logger.exception(e)
+            OpusProgram.stop(logger)
+            with interfaces.StateInterface.update_state() as state:
+                state.opus_state.macro_id = None
+                state.opus_state.macro_filepath = None
+                state.exceptions_state.add_exception(origin="opus", exception=e)
+            logger.info("Sleeping 3 minutes until retrying")
+            time.sleep(180)
+            logger.info("Stopping thread")
+            return
 
     @staticmethod
     def test_setup(config: types.Config, logger: utils.Logger) -> None:
