@@ -155,6 +155,44 @@ class OPUSHTTPInterface:
         except:
             raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
 
+    @staticmethod
+    def start_macro(macro_path: str) -> int:
+        """Start a macro in OPUS. Returns the macro ID."""
+
+        answer = OPUSHTTPInterface._request(f"RUN_MACRO {macro_path}")
+        try:
+            assert len(answer) == 2
+            assert answer[0] == "OK"
+            return int(answer[1])
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
+
+    @staticmethod
+    def macro_is_running(macro_id: int) -> bool:
+        """Check if the given macro is running."""
+
+        answer = OPUSHTTPInterface._request(f"MACRO_RESULTS {macro_id}")
+        # The OPUS documentation is ambiguous about the return value. It
+        # seems that 0 means "there is no result yet", i.e. the macro is
+        # still running
+        try:
+            assert len(answer) == 2
+            assert answer[0] == "OK"
+            return int(answer[1]) == 0
+        except:
+            return ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
+
+    @staticmethod
+    def stop_macro(macro_path: str) -> None:
+        """Stop a macro in OPUS."""
+
+        answer = OPUSHTTPInterface._request(f"KILL_MACRO {os.path.basename(macro_path)}")
+        try:
+            assert len(answer) == 1
+            assert answer[0] == "OK"
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
+
 
 if __name__ == "__main__":
     t1 = time.time()
