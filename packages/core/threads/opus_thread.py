@@ -27,17 +27,24 @@ class OpusProgram:
         os.startfile(  # type: ignore
             os.path.basename(config.opus.executable_path.root),
             cwd=os.path.dirname(config.opus.executable_path.root),
-            arguments=f"/LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD={config.opus.username}@{config.opus.password}",
+            arguments=f"/HTTPSERVER=ON /LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD={config.opus.username}@{config.opus.password}",
             show_cmd=2,
         )
         tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: OpusProgram.is_running(logger),
             timeout_message="OPUS.exe did not start within 90 seconds.",
-            timeout_seconds=90,
-            check_interval_seconds=8,
+            timeout_seconds=60,
+            check_interval_seconds=5,
         )
+        tum_esm_utils.timing.wait_for_condition(
+            is_successful=interfaces.OPUSHTTPInterface.is_working,
+            timeout_message="OPUS HTTP interface did not start within 90 seconds.",
+            timeout_seconds=60,
+            check_interval_seconds=5,
+        )
+
         logger.info("Successfully started OPUS")
-        time.sleep(5)
+        time.sleep(3)
 
     @staticmethod
     def is_running(logger: utils.Logger) -> bool:
@@ -55,28 +62,28 @@ class OpusProgram:
         return False
 
     @staticmethod
-    def stop(logger: utils.Logger, dde_connection: Optional[DDEConnection] = None) -> None:
-        """Closes OPUS via DDE/force kills it via psutil. If no DDEConnection
-        is provided, the function will force kill OPUS right away."""
+    def stop(logger: utils.Logger) -> None:
+        """Closes OPUS. First via the HTTP interface, then forcefully by killing the process."""
 
         try:
-            if (dde_connection is not None) and dde_connection.is_working():
-                logger.info("Requesting to stop OPUS via DDE")
-                dde_connection.request("UnloadAll()", expect_ok=True)
-                dde_connection.request("CLOSE_OPUS", expect_ok=True)
+            logger.info("Trying to stop OPUS gracefully via HTTP interface")
+            interfaces.OPUSHTTPInterface.unload_all_files()
+            logger.info("Successfully unloaded all files")
+            time.sleep(1)
+            interfaces.OPUSHTTPInterface.close_opus()
 
-                logger.info("Waiting for OPUS to close gracefully")
-                try:
-                    tum_esm_utils.timing.wait_for_condition(
-                        is_successful=lambda: not OpusProgram.is_running(logger),
-                        timeout_message="OPUS.exe did not stop within 60 seconds.",
-                        timeout_seconds=60,
-                        check_interval_seconds=4,
-                    )
-                    logger.info("Successfully stopped OPUS")
-                    return
-                except TimeoutError:
-                    logger.warning("OPUS.exe did not stop gracefully within 60 seconds.")
+            logger.info("Waiting for OPUS to close gracefully")
+            try:
+                tum_esm_utils.timing.wait_for_condition(
+                    is_successful=lambda: not OpusProgram.is_running(logger),
+                    timeout_message="OPUS.exe did not stop within 60 seconds.",
+                    timeout_seconds=60,
+                    check_interval_seconds=4,
+                )
+                logger.info("Successfully stopped OPUS")
+                return
+            except TimeoutError:
+                logger.warning("OPUS.exe did not stop gracefully within 60 seconds.")
         except Exception as e:
             logger.exception(e)
             logger.error("Could not stop OPUS via DDE")

@@ -193,6 +193,28 @@ class OPUSHTTPInterface:
         except:
             raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
 
+    @staticmethod
+    def unload_all_files() -> None:
+        """Unload all files in OPUS. This should be done before closing it."""
+
+        answer = OPUSHTTPInterface._request("COMMAND_LINE UnloadAll()")
+        try:
+            assert len(answer) == 1
+            assert answer[0] == "OK"
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
+
+    @staticmethod
+    def close_opus() -> None:
+        """Close OPUS."""
+
+        answer = OPUSHTTPInterface._request("CLOSE_OPUS")
+        try:
+            assert len(answer) == 1
+            assert answer[0] == "OK"
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
+
 
 if __name__ == "__main__":
     t1 = time.time()
