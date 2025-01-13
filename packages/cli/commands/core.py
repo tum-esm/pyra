@@ -126,14 +126,14 @@ def _stop_pyra_core() -> None:
     opus_logger = utils.Logger(origin="opus")
     try:
         if threads.opus_thread.OpusProgram.is_running(opus_logger):
-            dde_connection = threads.opus_thread.DDEConnection(opus_logger)
-            if (state.opus_state.macro_filepath is not None) and (
-                state.opus_state.macro_id is not None
-            ):
-                dde_connection.stop_macro(
-                    state.opus_state.macro_id, state.opus_state.macro_filepath
-                )
-            threads.opus_thread.OpusProgram.stop(opus_logger, dde_connection)
+            try:
+                if (state.opus_state.macro_filepath is not None) and (
+                    state.opus_state.macro_id is not None
+                ):
+                    interfaces.OPUSHTTPInterface.stop_macro(state.opus_state.macro_filepath)
+            except Exception as e:
+                _print_red(f"Failed to stop OPUS macro: {e}")
+            threads.opus_thread.OpusProgram.stop(opus_logger)
             _print_green("Successfully closed OPUS")
         else:
             _print_green("OPUS is already closed")

@@ -144,7 +144,7 @@ class OPUSHTTPInterface:
         return os.path.join(xpp_answer[1], exp_answer[1])
 
     @staticmethod
-    def load_experiment(experiment_path: str) -> bool:
+    def load_experiment(experiment_path: str) -> None:
         """Load an experiment file into OPUS."""
 
         answer = OPUSHTTPInterface._request(f"LOAD_EXPERIMENT {experiment_path}")
@@ -180,7 +180,7 @@ class OPUSHTTPInterface:
             assert answer[0] == "OK"
             return int(answer[1]) == 0
         except:
-            return ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
 
     @staticmethod
     def stop_macro(macro_path: str) -> None:

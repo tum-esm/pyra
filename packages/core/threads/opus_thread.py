@@ -216,7 +216,7 @@ class OpusThread(AbstractThread):
                     else:
                         if interfaces.OPUSHTTPInterface.macro_is_running(current_macro[0]):
                             logger.info("Stopping macro")
-                            interfaces.OPUSHTTPInterface.stop_macro(*current_macro)
+                            interfaces.OPUSHTTPInterface.stop_macro(current_macro[1])
                             current_macro = None
                             with interfaces.StateInterface.update_state() as state:
                                 state.opus_state.macro_id = None
@@ -280,24 +280,25 @@ class OpusThread(AbstractThread):
                     logger.info(f"Successfully started Macro {current_macro[1]}")
                     last_measurement_start_time = time.time()
 
-                # STOPPING MACRO WHEN MACRO FILE CHANGES
+                # STOPPING MACRO WHEN MACRO FILE CHANGES OR MEASUREMENTS SHOULD NOT BE RUNNING
 
-                if measurements_should_be_running and (current_macro is not None):
-                    if config.opus.macro_path.root != current_macro[1]:
-                        logger.info("Macro file has changed, stopping macro")
-                        interfaces.OPUSHTTPInterface.stop_macro(*current_macro)
+                if current_macro is not None:
+                    should_stop_macro: bool = False
+                    if measurements_should_be_running and (
+                        config.opus.macro_path.root != current_macro[1]
+                    ):
+                        logger.info("Macro file has changed")
+                        should_stop_macro = True
+
+                    if not measurements_should_be_running:
+                        logger.info("Macro should not be running")
+                        should_stop_macro = True
+
+                    if should_stop_macro:
+                        interfaces.OPUSHTTPInterface.stop_macro(current_macro[1])
                         current_macro = None
                         last_measurement_start_time = None
                         logger.info("Successfully stopped Macro")
-
-                # STOPPING MACRO
-
-                if (not measurements_should_be_running) and (current_macro is not None):
-                    logger.info("Stopping macro")
-                    interfaces.OPUSHTTPInterface.stop_macro(*current_macro)
-                    current_macro = None
-                    last_measurement_start_time = None
-                    logger.info("Successfully stopped Macro")
 
                 # CHECK IF MACRO HAS CRASHED
 
@@ -394,7 +395,7 @@ class OpusThread(AbstractThread):
         time.sleep(5)
         assert interfaces.OPUSHTTPInterface.macro_is_running(macro_id), "Macro is not running"
 
-        interfaces.OPUSHTTPInterface.stop_macro(macro_id, config.opus.macro_path.root)
+        interfaces.OPUSHTTPInterface.stop_macro(config.opus.macro_path.root)
         time.sleep(2)
 
         OpusProgram.stop(logger)
