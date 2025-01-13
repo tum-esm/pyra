@@ -200,16 +200,16 @@ class OpusThread(AbstractThread):
                     time.sleep(15)
                     continue
 
-                # START OPUS
+                # START AND STOP OPUS
 
-                if opus_should_be_running and (not OpusProgram.is_running(logger)):
+                opus_is_running = OpusProgram.is_running(logger)
+
+                if opus_should_be_running and (not opus_is_running):
                     logger.info("OPUS should be running, starting OPUS")
                     OpusProgram.start(config, logger)
                     continue
 
-                # STOP OPUS
-
-                if (not opus_should_be_running) and OpusProgram.is_running(logger):
+                if (not opus_should_be_running) and opus_is_running:
                     logger.info("OPUS should not be running, stopping OPUS")
                     if current_macro is None:
                         logger.info("No macro to stop")
@@ -229,8 +229,8 @@ class OpusThread(AbstractThread):
                 # IDLE AT NIGHT
 
                 if not opus_should_be_running:
-                    logger.debug("Sleeping 1 minute (nothing to do)")
-                    time.sleep(60)
+                    logger.debug("Sleeping 30 seconds (idling at night)")
+                    time.sleep(30)
                     continue
 
                 # LOAD CORRECT EXPERIMENT
