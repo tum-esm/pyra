@@ -206,7 +206,7 @@ class OPUSHTTPInterface:
 
         answer = OPUSHTTPInterface._request("COMMAND_LINE UnloadAll()")
         try:
-            assert len(answer) == 1
+            assert len(answer) >= 1
             assert answer[0] == "OK"
         except:
             raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
