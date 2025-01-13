@@ -114,7 +114,7 @@ class OPUSHTTPInterface:
         return len(active_thread_ids) > 0
 
     @staticmethod
-    def get_loaded_experiment() -> Optional[str]:
+    def get_loaded_experiment() -> str:
         """Get the path to the currently loaded experiment."""
 
         # Set the parameter mode (opus vs. file parameters)

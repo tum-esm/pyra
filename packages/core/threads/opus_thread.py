@@ -33,13 +33,13 @@ class OpusProgram:
         tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: OpusProgram.is_running(logger),
             timeout_message="OPUS.exe did not start within 90 seconds.",
-            timeout_seconds=60,
+            timeout_seconds=90,
             check_interval_seconds=5,
         )
         tum_esm_utils.timing.wait_for_condition(
             is_successful=interfaces.OPUSHTTPInterface.is_working,
             timeout_message="OPUS HTTP interface did not start within 90 seconds.",
-            timeout_seconds=60,
+            timeout_seconds=90,
             check_interval_seconds=5,
         )
 
@@ -86,7 +86,7 @@ class OpusProgram:
                 logger.warning("OPUS.exe did not stop gracefully within 60 seconds.")
         except Exception as e:
             logger.exception(e)
-            logger.error("Could not stop OPUS via DDE")
+            logger.error("Could not stop OPUS gracefully via HTTP interface")
 
         logger.info("Force killing OPUS")
         for p in psutil.process_iter():
@@ -133,7 +133,6 @@ class OpusThread(AbstractThread):
 
         current_experiment: Optional[str] = None  # filepath
         current_macro: Optional[tuple[int, str]] = None  # id and filepath
-        dde_connection = DDEConnection(logger)
 
         logger.debug("Loading configuration file")
         config = types.Config.load()
@@ -206,7 +205,6 @@ class OpusThread(AbstractThread):
                 if opus_should_be_running and (not OpusProgram.is_running(logger)):
                     logger.info("OPUS should be running, starting OPUS")
                     OpusProgram.start(config, logger)
-                    dde_connection.setup()
                     continue
 
                 # STOP OPUS
@@ -216,16 +214,15 @@ class OpusThread(AbstractThread):
                     if current_macro is None:
                         logger.info("No macro to stop")
                     else:
-                        if dde_connection.macro_is_running(current_macro[0]):
+                        if interfaces.OPUSHTTPInterface.macro_is_running(current_macro[0]):
                             logger.info("Stopping macro")
-                            dde_connection.stop_macro(*current_macro)
+                            interfaces.OPUSHTTPInterface.stop_macro(*current_macro)
                             current_macro = None
                             with interfaces.StateInterface.update_state() as state:
                                 state.opus_state.macro_id = None
                                 state.opus_state.macro_filepath = None
 
-                    OpusProgram.stop(logger, dde_connection)
-                    dde_connection.teardown()
+                    OpusProgram.stop(logger)
                     continue
 
                 # IDLE AT NIGHT
@@ -242,7 +239,7 @@ class OpusThread(AbstractThread):
                         logger.info("Loading experiment")
                     else:
                         logger.info("Experiment file has changed, loading new experiment")
-                    dde_connection.load_experiment(config.opus.experiment_path.root)
+                    interfaces.OPUSHTTPInterface.load_experiment(config.opus.experiment_path.root)
                     current_experiment = config.opus.experiment_path.root
                     logger.info(f"Experiment file {current_experiment} was loaded")
                     with interfaces.StateInterface.update_state() as state:
@@ -278,7 +275,7 @@ class OpusThread(AbstractThread):
 
                 if measurements_should_be_running and (current_macro is None):
                     logger.info("Starting macro")
-                    mid = dde_connection.start_macro(config.opus.macro_path.root)
+                    mid = interfaces.OPUSHTTPInterface.start_macro(config.opus.macro_path.root)
                     current_macro = (mid, config.opus.macro_path.root)
                     logger.info(f"Successfully started Macro {current_macro[1]}")
                     last_measurement_start_time = time.time()
@@ -288,7 +285,7 @@ class OpusThread(AbstractThread):
                 if measurements_should_be_running and (current_macro is not None):
                     if config.opus.macro_path.root != current_macro[1]:
                         logger.info("Macro file has changed, stopping macro")
-                        dde_connection.stop_macro(*current_macro)
+                        interfaces.OPUSHTTPInterface.stop_macro(*current_macro)
                         current_macro = None
                         last_measurement_start_time = None
                         logger.info("Successfully stopped Macro")
@@ -297,7 +294,7 @@ class OpusThread(AbstractThread):
 
                 if (not measurements_should_be_running) and (current_macro is not None):
                     logger.info("Stopping macro")
-                    dde_connection.stop_macro(*current_macro)
+                    interfaces.OPUSHTTPInterface.stop_macro(*current_macro)
                     current_macro = None
                     last_measurement_start_time = None
                     logger.info("Successfully stopped Macro")
@@ -307,7 +304,7 @@ class OpusThread(AbstractThread):
                 if current_macro is not None:
                     assert last_measurement_start_time is not None
                     if (time.time() - last_measurement_start_time) > 60:
-                        if dde_connection.macro_is_running(current_macro[0]):
+                        if interfaces.OPUSHTTPInterface.macro_is_running(current_macro[0]):
                             logger.debug("Macro is running as expected")
                         else:
                             raise RuntimeError("Macro has stopped/crashed")
@@ -390,20 +387,17 @@ class OpusThread(AbstractThread):
     def test_setup(config: types.Config, logger: utils.Logger) -> None:
         OpusProgram.start(config, logger)
 
-        dde_connection = DDEConnection(logger)
-        dde_connection.setup()
-
-        dde_connection.load_experiment(config.opus.experiment_path.root)
+        interfaces.OPUSHTTPInterface.load_experiment(config.opus.experiment_path.root)
         time.sleep(5)
 
-        macro_id = dde_connection.start_macro(config.opus.macro_path.root)
+        macro_id = interfaces.OPUSHTTPInterface.start_macro(config.opus.macro_path.root)
         time.sleep(5)
-        assert dde_connection.macro_is_running(macro_id), "Macro is not running"
+        assert interfaces.OPUSHTTPInterface.macro_is_running(macro_id), "Macro is not running"
 
-        dde_connection.stop_macro(macro_id, config.opus.macro_path.root)
+        interfaces.OPUSHTTPInterface.stop_macro(macro_id, config.opus.macro_path.root)
         time.sleep(2)
 
-        OpusProgram.stop(logger, dde_connection)
+        OpusProgram.stop(logger)
 
     @staticmethod
     def set_peak_position(config: types.Config, logger: utils.Logger) -> None:
@@ -459,20 +453,20 @@ class OpusThread(AbstractThread):
                 assert isinstance(abp, (float, int)), f"ABP is not a number (got {abp})"
 
                 fwd_pass: np.ndarray[Any, Any] = ifg[0][: ifg.shape[1] // 2]
-                assert (
-                    len(fwd_pass) == 114256
-                ), f"Interferogram has wrong length (got {len(fwd_pass)}, expected 114256)"
+                assert len(fwd_pass) == 114256, (
+                    f"Interferogram has wrong length (got {len(fwd_pass)}, expected 114256)"
+                )
 
                 peak = int(np.argmax(np.abs(fwd_pass)))
                 ifg_center = fwd_pass.shape[0] // 2
-                assert (
-                    abs(peak - ifg_center) < 200
-                ), f"Peak is too far off (center = {ifg_center}, peak = {peak})"
+                assert abs(peak - ifg_center) < 200, (
+                    f"Peak is too far off (center = {ifg_center}, peak = {peak})"
+                )
 
                 dc_amplitude = abs(np.mean(fwd_pass[:100]))
-                assert (
-                    dc_amplitude >= 0.02
-                ), f"DC amplitude is too low (DC amplitude = {dc_amplitude})"
+                assert dc_amplitude >= 0.02, (
+                    f"DC amplitude is too low (DC amplitude = {dc_amplitude})"
+                )
 
                 logger.debug(
                     f"APP: {f} - Found peak position {peak} (ABP = {abp}, DC amplitude = {dc_amplitude})"
