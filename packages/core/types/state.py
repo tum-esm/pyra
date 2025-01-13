@@ -35,6 +35,7 @@ class OpusState(StricterBaseModel):
     experiment_filepath: Optional[str] = None
     macro_filepath: Optional[str] = None
     macro_id: Optional[int] = None
+    last_http_connection_issue_time: Optional[float] = None
 
 
 class ExceptionsState(StricterBaseModel):

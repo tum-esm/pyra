@@ -37,12 +37,15 @@ class OpusProgram:
             timeout_seconds=90,
             check_interval_seconds=5,
         )
-        tum_esm_utils.timing.wait_for_condition(
-            is_successful=OpusHTTPInterface.is_working,
-            timeout_message="OPUS HTTP interface did not start within 90 seconds.",
-            timeout_seconds=90,
-            check_interval_seconds=5,
-        )
+        try:
+            tum_esm_utils.timing.wait_for_condition(
+                is_successful=OpusHTTPInterface.is_working,
+                timeout_message="OPUS HTTP interface did not start within 90 seconds.",
+                timeout_seconds=90,
+                check_interval_seconds=5,
+            )
+        except TimeoutError:
+            raise ConnectionError("OPUS HTTP interface did not start within 90 seconds.")
 
         logger.info("Successfully started OPUS")
         time.sleep(3)
@@ -145,6 +148,7 @@ class OpusThread(AbstractThread):
         last_successful_ping_time = time.time()
         last_measurement_start_time: Optional[float] = None
         last_peak_positioning_time: Optional[float] = None
+        last_http_connection_issue_time: Optional[float] = None
 
         try:
             # CHECK IF OPUS IS ALREADY RUNNING
@@ -182,6 +186,7 @@ class OpusThread(AbstractThread):
                 state.opus_state.macro_filepath = (
                     None if current_macro is None else current_macro[1]
                 )
+                last_http_connection_issue_time = state.opus_state.last_http_connection_issue_time
 
             while True:
                 t1 = time.time()
@@ -377,10 +382,33 @@ class OpusThread(AbstractThread):
         except Exception as e:
             logger.exception(e)
             OpusProgram.stop(logger)
+
+            silence_exception: bool = False
+            now = time.time()
+
+            # forget about the last http connection issue if it was more than 10 minutes ago
+            if last_http_connection_issue_time is not None:
+                if (now - last_http_connection_issue_time) > 600:
+                    last_http_connection_issue_time = None
+
+            if isinstance(e, ConnectionError):
+                if last_http_connection_issue_time is None:
+                    silence_exception = True
+                    logger.error(
+                        "Not sending emails about ConnectionError when it doesn't repeat within 10 minutes"
+                    )
+                else:
+                    logger.error(
+                        "ConnectionError repeated within 10 minutes, sending email about it"
+                    )
+                last_http_connection_issue_time = now
+
             with interfaces.StateInterface.update_state() as state:
                 state.opus_state.macro_id = None
                 state.opus_state.macro_filepath = None
-                state.exceptions_state.add_exception(origin="opus", exception=e)
+                state.opus_state.last_http_connection_issue_time = last_http_connection_issue_time
+                if not silence_exception:
+                    state.exceptions_state.add_exception(origin="opus", exception=e)
             logger.info("Sleeping 3 minutes until retrying")
             time.sleep(180)
             logger.info("Stopping thread")
@@ -456,20 +484,20 @@ class OpusThread(AbstractThread):
                 assert isinstance(abp, (float, int)), f"ABP is not a number (got {abp})"
 
                 fwd_pass: np.ndarray[Any, Any] = ifg[0][: ifg.shape[1] // 2]
-                assert (
-                    len(fwd_pass) == 114256
-                ), f"Interferogram has wrong length (got {len(fwd_pass)}, expected 114256)"
+                assert len(fwd_pass) == 114256, (
+                    f"Interferogram has wrong length (got {len(fwd_pass)}, expected 114256)"
+                )
 
                 peak = int(np.argmax(np.abs(fwd_pass)))
                 ifg_center = fwd_pass.shape[0] // 2
-                assert (
-                    abs(peak - ifg_center) < 200
-                ), f"Peak is too far off (center = {ifg_center}, peak = {peak})"
+                assert abs(peak - ifg_center) < 200, (
+                    f"Peak is too far off (center = {ifg_center}, peak = {peak})"
+                )
 
                 dc_amplitude = abs(np.mean(fwd_pass[:100]))
-                assert (
-                    dc_amplitude >= 0.02
-                ), f"DC amplitude is too low (DC amplitude = {dc_amplitude})"
+                assert dc_amplitude >= 0.02, (
+                    f"DC amplitude is too low (DC amplitude = {dc_amplitude})"
+                )
 
                 logger.debug(
                     f"APP: {f} - Found peak position {peak} (ABP = {abp}, DC amplitude = {dc_amplitude})"

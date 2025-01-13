@@ -132,6 +132,7 @@ def run() -> None:
 
             if config.general.test_mode:
                 logger.debug("pyra-core in test mode")
+                time.sleep(0.1)  # for the tests to work
 
             # send emails on occured/resolved exceptions
             _send_exception_emails(config)
