@@ -262,6 +262,8 @@ class OpusThread(AbstractThread):
                         measurements_should_be_running = (
                             20 < state.tum_enclosure_state.actors.current_angle < 340
                         )
+                        if not measurements_should_be_running:
+                            logger.info("Cover is closed, not running any measurements")
 
                 # PING EM27 EVERY 5 MINUTES
 
