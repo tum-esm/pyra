@@ -1,4 +1,5 @@
 from typing import Optional
+import os
 import time
 import socket
 
@@ -111,6 +112,48 @@ class OPUSHTTPInterface:
 
         # if there is any thread that is not the main thread, then a macro is running
         return len(active_thread_ids) > 0
+
+    @staticmethod
+    def get_loaded_experiment() -> Optional[str]:
+        """Get the path to the currently loaded experiment."""
+
+        # Set the parameter mode (opus vs. file parameters)
+        answer1 = OPUSHTTPInterface._request("OPUS_PARAMETERS")
+        try:
+            assert len(answer1) == 1
+            assert answer1[0] == "OK"
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer1}")
+
+        # Get the path to the experiment file
+        xpp_answer = OPUSHTTPInterface._request("READ_PARAMETER XPP")
+        try:
+            assert len(xpp_answer) == 2
+            assert xpp_answer[0] == "OK"
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {xpp_answer}")
+
+        # Get the name of the experiment file
+        exp_answer = OPUSHTTPInterface._request("READ_PARAMETER EXP")
+        try:
+            assert len(exp_answer) == 2
+            assert exp_answer[0] == "OK"
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {exp_answer}")
+
+        return os.path.join(xpp_answer[1], exp_answer[1])
+
+    @staticmethod
+    def load_experiment(experiment_path: str) -> bool:
+        """Load an experiment file into OPUS."""
+
+        answer = OPUSHTTPInterface._request(f"LOAD_EXPERIMENT {experiment_path}")
+        try:
+            assert answer is not None
+            assert len(answer) == 1
+            assert answer[0] == "OK"
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
 
 
 if __name__ == "__main__":
