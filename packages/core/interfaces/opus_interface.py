@@ -2,6 +2,7 @@ from typing import Optional
 import os
 import time
 import socket
+import tenacity
 
 
 class OPUSHTTPInterface:
@@ -12,11 +13,17 @@ class OPUSHTTPInterface:
     because OPUS closes the socket after the answer has been sent."""
 
     @staticmethod
+    @tenacity.retry(
+        retry=tenacity.retry_if_exception_type(ConnectionError),
+        reraise=True,
+        stop=tenacity.stop_after_attempt(3),
+        wait=tenacity.wait_fixed(10),
+    )
     def _request(request: str) -> list[str]:
         answer_lines: Optional[list[str]] = None
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(8)
+            s.settimeout(10)
             s.connect(("localhost", 80))
             url = f"/OpusCommand.htm?{request.replace(' ', '%20')}"
             s.sendall(f"GET {url}\r\nHost: localhost\r\n\r\n".encode("utf-8"))

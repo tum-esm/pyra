@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:dded08458872f8a47e7be045f96d01075f1ee94689918bbcd35f667ade71d4e0"
+content_hash = "sha256:034fb580e61d853314b9f3c6f35cb96bd2cdf630f0bde7106481ac00ca6bbba5"
 
 [[metadata.targets]]
 requires_python = "==3.10.*"
@@ -978,6 +978,17 @@ groups = ["default"]
 files = [
     {file = "tailwind_colors-1.3.0-py3-none-any.whl", hash = "sha256:aa047acfe2037302016028b1c0ef65585c33d983945de704acf7ef8b665f729e"},
     {file = "tailwind_colors-1.3.0.tar.gz", hash = "sha256:8b9360937afa65e657ec9c3311264d2339e8f6463659050b6ac1e2efa6a7179e"},
+]
+
+[[package]]
+name = "tenacity"
+version = "9.0.0"
+requires_python = ">=3.8"
+summary = "Retry code until it succeeds"
+groups = ["default"]
+files = [
+    {file = "tenacity-9.0.0-py3-none-any.whl", hash = "sha256:93de0c98785b27fcf659856aa9f54bfbd399e29969b0621bc7f762bd441b4539"},
+    {file = "tenacity-9.0.0.tar.gz", hash = "sha256:807f37ca97d62aa361264d497b0e31e92b8027044942bfa756160d908320d73b"},
 ]
 
 [[package]]
