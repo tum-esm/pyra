@@ -54,6 +54,64 @@ class OPUSHTTPInterface:
         except:
             return False
 
+    @staticmethod
+    def get_main_thread_id() -> int:
+        """Get the main thread ID of OPUS."""
+
+        answer = OPUSHTTPInterface._request("FIND_FUNCTION 0")
+        try:
+            assert len(answer) == 2
+            assert answer[0] == "OK"
+            return int(answer[1])
+        except:
+            raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
+
+    @staticmethod
+    def some_macro_is_running() -> bool:
+        """Check if any macro is currently running in OPUS.
+
+        In theory, we could also check whether the correct macro is running using
+        `READ_PARAMETER MPT` and `READ_PARAMETER MFN`. However, these variables do
+        not seem to be updated right away, so we cannot rely on them."""
+
+        main_thread_id = OPUSHTTPInterface.get_main_thread_id()
+        active_thread_ids: set[int] = set()
+
+        # some common functions executed inside Macro routines that take some time
+        common_functions = [
+            "MeasureReference",
+            "MeasureSample",
+            "MeasureRepeated",
+            "MeasureRapidTRS",
+            "MeasureStepScanTrans",
+            "UserDialog",
+            "Baseline",
+            "PeakPick",
+            "Timer",
+            "SendCommand",
+        ]
+
+        # check twice for any thread that is executing a common function
+        for i in range(2):
+            for function in common_functions:
+                answer = OPUSHTTPInterface._request(f"FIND_FUNCTION {function}")
+                try:
+                    assert len(answer) >= 1
+                    assert answer[0] == "OK"
+                    for thread_id in answer[1:]:
+                        active_thread_ids.add(int(thread_id))
+                except:
+                    raise ConnectionError(f"Invalid response from OPUS HTTP interface: {answer}")
+            if i == 0:
+                time.sleep(3)
+
+        # the main thread always runs some common functions for some reason
+        if main_thread_id in active_thread_ids:
+            active_thread_ids.remove(main_thread_id)
+
+        # if there is any thread that is not the main thread, then a macro is running
+        return len(active_thread_ids) > 0
+
 
 if __name__ == "__main__":
     t1 = time.time()
@@ -69,3 +127,4 @@ if __name__ == "__main__":
     print(f"Request 3: {t4 - t3:.6f}")
 
     print(OPUSHTTPInterface.is_working())
+    print(OPUSHTTPInterface.get_main_thread_id())
