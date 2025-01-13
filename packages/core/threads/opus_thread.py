@@ -223,13 +223,14 @@ class OpusThread(AbstractThread):
                                 state.opus_state.macro_filepath = None
 
                     OpusProgram.stop(logger)
+                    time.sleep(3)
                     continue
 
                 # IDLE AT NIGHT
 
                 if not opus_should_be_running:
-                    logger.debug("Sleeping 3 minutes")
-                    time.sleep(180)
+                    logger.debug("Sleeping 1 minute (nothing to do)")
+                    time.sleep(60)
                     continue
 
                 # LOAD CORRECT EXPERIMENT
