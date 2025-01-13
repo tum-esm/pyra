@@ -26,8 +26,7 @@ dependencies = [
     "pillow>=11.0.0",
     "requests>=2.32.3",
     "opencv-python>=4.10.0.84",
-    "tum-esm-utils[opus]>=2.5.1",
-    "tenacity>=9.0.0",
+    "tum-esm-utils[opus]>=2.6.0",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"

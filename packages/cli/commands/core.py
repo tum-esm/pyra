@@ -130,7 +130,7 @@ def _stop_pyra_core() -> None:
                 if (state.opus_state.macro_filepath is not None) and (
                     state.opus_state.macro_id is not None
                 ):
-                    interfaces.OPUSHTTPInterface.stop_macro(state.opus_state.macro_filepath)
+                    tum_esm_utils.opus.OpusHTTPInterface.stop_macro(state.opus_state.macro_filepath)
             except Exception as e:
                 _print_red(f"Failed to stop OPUS macro: {e}")
             threads.opus_thread.OpusProgram.stop(opus_logger)
