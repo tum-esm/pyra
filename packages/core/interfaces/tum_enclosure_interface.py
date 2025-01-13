@@ -180,7 +180,10 @@ class TUMEnclosureInterface:
     def is_connected(self) -> bool:
         """Check the PLC connection and ping the PLC IP address."""
 
-        if not self.plc.get_connected():
+        try:
+            if not self.plc.get_connected():
+                return False
+        except Exception:
             return False
         return os.system("ping -n 1 " + self.plc_ip) == 0
 
@@ -217,65 +220,68 @@ class TUMEnclosureInterface:
     def read(self) -> types.tum_enclosure.TUMEnclosureState:
         """Read the whole state of the PLC"""
 
-        plc_db_content: dict[int, bytearray] = {}
-        plc_db_size = {1: {3: 6, 8: 26, 25: 10}, 2: {3: 5, 6: 17, 8: 25}}[self.plc_version]
+        try:
+            plc_db_content: dict[int, bytearray] = {}
+            plc_db_size = {1: {3: 6, 8: 26, 25: 10}, 2: {3: 5, 6: 17, 8: 25}}[self.plc_version]
 
-        for db_index, db_size in plc_db_size.items():
-            plc_db_content[db_index] = self.plc.db_read(db_index, 0, db_size)
-            self.__sleep_while_cpu_is_busy()
+            for db_index, db_size in plc_db_size.items():
+                plc_db_content[db_index] = self.plc.db_read(db_index, 0, db_size)
+                self.__sleep_while_cpu_is_busy()
 
-        logger.debug(f"new plc bulk read: {plc_db_content}")
+            logger.debug(f"new plc bulk read: {plc_db_content}")
 
-        def _get_int(spec: Optional[tuple[int, int, int]]) -> Optional[int]:
-            if spec is None:
-                return None
-            return snap7.util.get_int(plc_db_content[spec[0]], spec[1])  # type: ignore
+            def _get_int(spec: Optional[tuple[int, int, int]]) -> Optional[int]:
+                if spec is None:
+                    return None
+                return snap7.util.get_int(plc_db_content[spec[0]], spec[1])  # type: ignore
 
-        def _get_bool(spec: Optional[tuple[int, int, int, int]]) -> Optional[bool]:
-            if spec is None:
-                return None
-            return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])  # type: ignore
+            def _get_bool(spec: Optional[tuple[int, int, int, int]]) -> Optional[bool]:
+                if spec is None:
+                    return None
+                return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])  # type: ignore
 
-        s = self.specification
+            s = self.specification
 
-        return types.tum_enclosure.TUMEnclosureState(
-            last_full_fetch=datetime.datetime.now(),
-            actors=types.tum_enclosure.ActorsState(
-                fan_speed=_get_int(s.actors.fan_speed),
-                current_angle=_get_int(s.actors.current_angle),
-            ),
-            control=types.tum_enclosure.ControlState(
-                auto_temp_mode=_get_bool(s.control.auto_temp_mode),
-                manual_control=_get_bool(s.control.manual_control),
-                manual_temp_mode=_get_bool(s.control.manual_temp_mode),
-                sync_to_tracker=_get_bool(s.control.sync_to_tracker),
-            ),
-            sensors=types.tum_enclosure.SensorsState(
-                humidity=_get_int(s.sensors.humidity),
-                temperature=_get_int(s.sensors.temperature),
-            ),
-            state=types.tum_enclosure.StateState(
-                cover_closed=_get_bool(s.state.cover_closed),
-                motor_failed=_get_bool(s.state.motor_failed),
-                rain=_get_bool(s.state.rain),
-                reset_needed=_get_bool(s.state.reset_needed),
-                ups_alert=_get_bool(s.state.ups_alert),
-            ),
-            power=types.tum_enclosure.PowerState(
-                camera=_get_bool(s.power.camera),
-                computer=_get_bool(s.power.computer),
-                heater=_get_bool(s.power.heater),
-                router=_get_bool(s.power.router),
-                spectrometer=_get_bool(s.power.spectrometer),
-            ),
-            connections=types.tum_enclosure.ConnectionsState(
-                camera=_get_bool(s.connections.camera),
-                computer=_get_bool(s.connections.computer),
-                heater=_get_bool(s.connections.heater),
-                router=_get_bool(s.connections.router),
-                spectrometer=_get_bool(s.connections.spectrometer),
-            ),
-        )
+            return types.tum_enclosure.TUMEnclosureState(
+                last_full_fetch=datetime.datetime.now(),
+                actors=types.tum_enclosure.ActorsState(
+                    fan_speed=_get_int(s.actors.fan_speed),
+                    current_angle=_get_int(s.actors.current_angle),
+                ),
+                control=types.tum_enclosure.ControlState(
+                    auto_temp_mode=_get_bool(s.control.auto_temp_mode),
+                    manual_control=_get_bool(s.control.manual_control),
+                    manual_temp_mode=_get_bool(s.control.manual_temp_mode),
+                    sync_to_tracker=_get_bool(s.control.sync_to_tracker),
+                ),
+                sensors=types.tum_enclosure.SensorsState(
+                    humidity=_get_int(s.sensors.humidity),
+                    temperature=_get_int(s.sensors.temperature),
+                ),
+                state=types.tum_enclosure.StateState(
+                    cover_closed=_get_bool(s.state.cover_closed),
+                    motor_failed=_get_bool(s.state.motor_failed),
+                    rain=_get_bool(s.state.rain),
+                    reset_needed=_get_bool(s.state.reset_needed),
+                    ups_alert=_get_bool(s.state.ups_alert),
+                ),
+                power=types.tum_enclosure.PowerState(
+                    camera=_get_bool(s.power.camera),
+                    computer=_get_bool(s.power.computer),
+                    heater=_get_bool(s.power.heater),
+                    router=_get_bool(s.power.router),
+                    spectrometer=_get_bool(s.power.spectrometer),
+                ),
+                connections=types.tum_enclosure.ConnectionsState(
+                    camera=_get_bool(s.connections.camera),
+                    computer=_get_bool(s.connections.computer),
+                    heater=_get_bool(s.connections.heater),
+                    router=_get_bool(s.connections.router),
+                    spectrometer=_get_bool(s.connections.spectrometer),
+                ),
+            )
+        except Exception as e:
+            raise snap7.exceptions.Snap7Exception from e
 
     # LOW LEVEL READ FUNCTIONS
 
@@ -293,46 +299,49 @@ class TUMEnclosureInterface:
 
         action is tuple: db_number, start, size"""
 
-        msg: bytearray = self.plc.db_read(*action)
-        value: int = snap7.util.get_int(msg, 0)
-
-        self.__sleep_while_cpu_is_busy()
-
-        return value
+        try:
+            msg: bytearray = self.plc.db_read(*action)
+            value: int = snap7.util.get_int(msg, 0)
+            self.__sleep_while_cpu_is_busy()
+            return value
+        except Exception as e:
+            raise snap7.exceptions.Snap7Exception from e
 
     def __write_int(self, action: tuple[int, int, int], value: int) -> None:
         """Changes an INT value in the PLC database."""
 
-        db_number, start, size = action
-
-        msg = bytearray(size)
-        snap7.util.set_int(msg, 0, value)
-        self.plc.db_write(db_number, start, msg)
-
-        self.__sleep_while_cpu_is_busy()
+        try:
+            db_number, start, size = action
+            msg = bytearray(size)
+            snap7.util.set_int(msg, 0, value)
+            self.plc.db_write(db_number, start, msg)
+            self.__sleep_while_cpu_is_busy()
+        except Exception as e:
+            raise snap7.exceptions.Snap7Exception from e
 
     def __read_bool(self, action: tuple[int, int, int, int]) -> bool:
         """Reads a BOOL value in the PLC database."""
 
-        db_number, start, size, bool_index = action
-
-        msg: bytearray = self.plc.db_read(db_number, start, size)
-        value: bool = snap7.util.get_bool(msg, 0, bool_index)
-
-        self.__sleep_while_cpu_is_busy()
-
-        return value
+        try:
+            db_number, start, size, bool_index = action
+            msg: bytearray = self.plc.db_read(db_number, start, size)
+            value: bool = snap7.util.get_bool(msg, 0, bool_index)
+            self.__sleep_while_cpu_is_busy()
+            return value
+        except Exception as e:
+            raise snap7.exceptions.Snap7Exception from e
 
     def __write_bool(self, action: tuple[int, int, int, int], value: bool) -> None:
         """Changes a BOOL value in the PLC database."""
 
-        db_number, start, size, bool_index = action
-
-        msg = self.plc.db_read(db_number, start, size)
-        snap7.util.set_bool(msg, 0, bool_index, value)
-        self.plc.db_write(db_number, start, msg)
-
-        self.__sleep_while_cpu_is_busy()
+        try:
+            db_number, start, size, bool_index = action
+            msg = self.plc.db_read(db_number, start, size)
+            snap7.util.set_bool(msg, 0, bool_index, value)
+            self.plc.db_write(db_number, start, msg)
+            self.__sleep_while_cpu_is_busy()
+        except Exception as e:
+            raise snap7.exceptions.Snap7Exception from e
 
     # PLC.POWER SETTERS
 
