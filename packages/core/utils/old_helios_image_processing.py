@@ -12,7 +12,7 @@ _IMG_DIR = os.path.join(_PROJECT_DIR, "logs", "helios")
 
 
 class OldHeliosImageProcessing:
-    """Old class for processing images from the Helios camera (Pyra 4.0.X and 4.1.X).
+    """Old class for processing images from the Helios camera (Pyra 4.0 and 4.1).
 
     See https://pyra.esm.ei.tum.de/docs/user-guide/tum-enclosure-and-helios#what-does-helios-do
     for more information on Helios."""

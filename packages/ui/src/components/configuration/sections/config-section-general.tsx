@@ -57,5 +57,3 @@ export default function ConfigSectionGeneral() {
         </>
     );
 }
-
-// TODO: change poweron time to 3 minutes
