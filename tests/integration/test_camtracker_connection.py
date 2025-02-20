@@ -2,6 +2,7 @@ import pytest
 from packages.core import types, threads, utils
 
 
+@pytest.mark.order(3)
 @pytest.mark.integration
 def test_camtracker_connection() -> None:
     config = types.Config.load()

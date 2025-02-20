@@ -3,6 +3,7 @@ import pytest
 from packages.core import types
 
 
+@pytest.mark.order(2)
 @pytest.mark.integration
 def test_uploading() -> None:
     config = types.Config.load()

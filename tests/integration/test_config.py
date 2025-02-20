@@ -10,6 +10,7 @@ sys.path.append(PROJECT_DIR)
 from packages.core import types
 
 
+@pytest.mark.order(1)
 @pytest.mark.integration
 def test_config() -> None:
     types.Config.load()
