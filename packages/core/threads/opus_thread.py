@@ -222,7 +222,7 @@ class OpusThread(AbstractThread):
                     else:
                         if OpusHTTPInterface.macro_is_running(current_macro[0]):
                             logger.info("Stopping macro")
-                            OpusHTTPInterface.stop_macro(current_macro[0])
+                            OpusHTTPInterface.stop_macro(current_macro[1])
                             current_macro = None
                             with interfaces.StateInterface.update_state() as state:
                                 state.opus_state.macro_id = None
@@ -304,7 +304,7 @@ class OpusThread(AbstractThread):
                         should_stop_macro = True
 
                     if should_stop_macro:
-                        OpusHTTPInterface.stop_macro(current_macro[0])
+                        OpusHTTPInterface.stop_macro(current_macro[1])
                         current_macro = None
                         last_measurement_start_time = None
                         logger.info("Successfully stopped Macro")
@@ -427,7 +427,7 @@ class OpusThread(AbstractThread):
         time.sleep(5)
         assert OpusHTTPInterface.macro_is_running(macro_id), "Macro is not running"
 
-        OpusHTTPInterface.stop_macro(macro_id)
+        OpusHTTPInterface.stop_macro(config.opus.macro_path.root)
         time.sleep(2)
 
         tum_esm_utils.timing.wait_for_condition(
