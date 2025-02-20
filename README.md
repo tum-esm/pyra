@@ -43,7 +43,7 @@ Aigner, P.\* and Makowski, M.\* and Luther, A. and Dietrich, F. and Chen, J. (20
 **BibTex:**
 
 ```bibtex
-@article{amt-11-2173-2018,
+@article{Heinle2018,
     autho = {Heinle, L. and Chen, J.},
     title = {Automated enclosure and protection system for compact solar-tracking spectrometers},
     journal = {Atmospheric Measurement Techniques},
