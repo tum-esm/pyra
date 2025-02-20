@@ -1,4 +1,0 @@
-[build]
-base = "packages/docs/"
-publish = "build"
-command = "bun run build"
