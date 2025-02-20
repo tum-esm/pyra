@@ -162,7 +162,7 @@ class TUMEnclosureThread(AbstractThread):
                     # power down the camera
                     if (
                         (current_time.hour == 0)
-                        and (current_time.minute < 30)
+                        and (current_time.minute < 5)
                         and (last_camera_down_time is None)
                     ):
                         logger.info("Powering down the camera")
