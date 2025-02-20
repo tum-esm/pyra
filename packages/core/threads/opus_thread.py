@@ -430,6 +430,12 @@ class OpusThread(AbstractThread):
         OpusHTTPInterface.stop_macro(macro_id)
         time.sleep(2)
 
+        tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: not OpusHTTPInterface.macro_is_running(macro_id),
+            timeout_message="Macro did not stop within 60 seconds.",
+            timeout_seconds=60,
+            check_interval_seconds=4,
+        )
         OpusProgram.stop(logger)
 
     @staticmethod
