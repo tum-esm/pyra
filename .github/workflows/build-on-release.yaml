@@ -41,6 +41,12 @@ jobs:
           toolchain: stable
           cache-workspaces: "./packages/ui/src-tauri -> target"
 
+      - name: tauri build cache
+        uses: actions/cache@v4
+        with:
+          path: packages/ui/src-tauri/target
+          key: ${{ runner.os }}-tauri-cache
+
       - name: install dependencies
         run: bun install
 
