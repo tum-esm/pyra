@@ -61,6 +61,7 @@ jobs:
           draft: true
           prerelease: true
           body: "TODO: description"
+          target_commitish: release
           files: |
             packages/ui/src-tauri/target/release/bundle/msi/Pyra UI_${{ steps.read_version.outputs.version }}_x64_en-US.msi
             packages/ui/src-tauri/target/release/bundle/nsis/Pyra UI_${{ steps.read_version.outputs.version }}_x64-setup.exe
