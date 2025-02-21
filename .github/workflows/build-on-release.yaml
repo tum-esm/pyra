@@ -27,6 +27,22 @@ jobs:
       - name: Print version number
         run: echo "Building UI for PYRA version ${{ steps.read_version.outputs.version }}"
 
+      - name: Check if tag exists
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.read_version.outputs.version }}';
+            const tag = `v${version}`;
+            const { data: tags } = await github.repos.listTags({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            if (tags.some(t => t.name === tag)) {
+              core.setFailed(`Tag ${tag} already exists.`);
+            } else {
+              console.log(`Tag ${tag} does not exist.`);
+            }
+
       - name: set up node
         uses: actions/setup-node@v4
         with:
