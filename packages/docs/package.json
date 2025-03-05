@@ -19,6 +19,7 @@
     "@docusaurus/preset-classic": "^2.4.0",
     "@mdx-js/react": "^1.6.22",
     "@reduxjs/toolkit": "^1.9.3",
+    "@tabler/icons-react": "^3.31.0",
     "@tauri-apps/api": "^1.2.0",
     "clsx": "^1.2.1",
     "deep-diff": "^1.0.2",
