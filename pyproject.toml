@@ -1,7 +1,7 @@
 [project]
 name = "pyra"
 version = "4.2.0"
-description = "operate an EM27 station autonomously"
+description = "Automated EM27/SUN Greenhouse Gas Measurements"
 authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
     { name = "Patrick Aigner", email = "patrick.aigner@tum.de" },
@@ -82,10 +82,7 @@ filterwarnings = [
     'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
     'ignore:getargs:DeprecationWarning',
 ]
-markers = [
-    "ci: can be run in a CI environment",
-    "integration: can only be run on a configured system",
-]
+markers = ["ci: can be run in a CI environment", "integration: can only be run on a configured system"]
 
 [tool.pdm.options]
 add = ["--no-self"]

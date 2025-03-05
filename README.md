@@ -1,4 +1,4 @@
-# Pyra: Automated EM27/SUN Greenhouse Gas Measurement Software
+# Pyra: Automated EM27/SUN Greenhouse Gas Measurements
 
 **Source Code:** https://github.com/tum-esm/pyra (this website)<br/>
 **Documentation:** https://pyra.esm.ei.tum.de/docs<br/>
