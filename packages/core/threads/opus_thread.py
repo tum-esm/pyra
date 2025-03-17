@@ -317,7 +317,9 @@ class OpusThread(AbstractThread):
                         if OpusHTTPInterface.macro_is_running(current_macro[0]):
                             logger.debug("Macro is running as expected")
                         else:
-                            raise RuntimeError("Macro has stopped/crashed")
+                            logger.warning("Macro has stopped/crashed, restarting it")
+                            current_macro = None
+                            last_measurement_start_time = None
 
                 # POSSIBLY SET PEAK POSITION
 
