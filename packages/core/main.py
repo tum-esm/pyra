@@ -88,6 +88,7 @@ def run() -> None:
     logger.info("Removing temporary state from previous runs")
     with interfaces.StateInterface.update_state() as state:
         state.reset()
+        state.exceptions_state.clear_exception_subject("PyraCoreNotRunning")
 
     # Before shutting down: save the current activity history and log
     # that the core is shutting down
