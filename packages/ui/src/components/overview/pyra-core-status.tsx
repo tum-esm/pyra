@@ -1,6 +1,5 @@
 import { fetchUtils } from '../../utils';
 import { useCoreProcessStore } from '../../utils/zustand-utils/core-process-zustand';
-import { Button } from '../ui/button';
 import {
     IconCpu,
     IconCpuOff,
@@ -8,7 +7,6 @@ import {
     IconMicroscopeOff,
     IconPower,
 } from '@tabler/icons-react';
-import { useEffect } from 'react';
 import { ChildProcess } from '@tauri-apps/plugin-shell';
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
@@ -20,22 +18,6 @@ export default function PyraCoreStatus() {
     const { coreState } = useCoreStateStore();
     const { centralConfig } = useConfigStore();
     const { coreLogs } = useLogsStore();
-
-    function checkPyraCoreState() {
-        runPromisingCommand({
-            command: fetchUtils.backend.checkPyraCoreState,
-            label: 'checking Pyra Core state',
-            successLabel: 'successfully checked Pyra Core state',
-            onSuccess: (p: ChildProcess<string>) => {
-                if (p.stdout.includes('not running')) {
-                    setPyraCorePid(-1);
-                } else {
-                    setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
-                }
-            },
-            onError: (p: ChildProcess<string>) => checkPyraCoreState(),
-        });
-    }
 
     function startPyraCore() {
         setPyraCorePid(undefined);
@@ -56,11 +38,8 @@ export default function PyraCoreStatus() {
             label: 'stopping Pyra Core',
             successLabel: 'successfully stopped Pyra Core',
             onSuccess: () => setPyraCorePid(-1),
-            onError: (p: ChildProcess<string>) => checkPyraCoreState(),
         });
     }
-
-    useEffect(checkPyraCoreState, []);
 
     let measurementStatusRemarks: string | undefined = undefined;
     if (coreState && centralConfig) {
