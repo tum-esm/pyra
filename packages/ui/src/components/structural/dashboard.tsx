@@ -8,20 +8,37 @@ import { useActivityHistoryStore } from '../../utils/zustand-utils/activity-zust
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 import { ChildProcess } from '@tauri-apps/plugin-shell';
 import { useConfigStore, configSchema } from '../../utils/zustand-utils/config-zustand';
+import { useCoreProcessStore } from '../../utils/zustand-utils/core-process-zustand';
 
 type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
 const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState<TabType>('Overview');
+    const { setPyraCorePid } = useCoreProcessStore();
+    const { centralConfig, setConfig, setConfigItem } = useConfigStore();
+    const { setCoreState } = useCoreStateStore();
     const { setLogs, addUiLogLine } = useLogsStore();
     const { setActivityHistory } = useActivityHistoryStore();
-    const { setCoreState } = useCoreStateStore();
-    const { centralConfig, setConfig, setConfigItem } = useConfigStore();
     const { runPromisingCommand } = fetchUtils.useCommand();
 
     const enclosureControlsIsVisible =
         centralConfig?.tum_enclosure !== null && centralConfig?.tum_enclosure !== undefined;
+
+    function checkPyraCoreState() {
+        runPromisingCommand({
+            command: fetchUtils.backend.checkPyraCoreState,
+            label: 'checking Pyra Core state',
+            successLabel: 'successfully checked Pyra Core state',
+            onSuccess: (p: ChildProcess<string>) => {
+                if (p.stdout.includes('not running')) {
+                    setPyraCorePid(-1);
+                } else {
+                    setPyraCorePid(parseInt(p.stdout.replace(/[^\d]/g, '')));
+                }
+            },
+        });
+    }
 
     async function fetchConfig() {
         runPromisingCommand({
@@ -65,19 +82,22 @@ export default function Dashboard() {
     }
 
     useEffect(() => {
+        checkPyraCoreState();
         fetchConfig();
         fetchStateFile();
         fetchLogFile();
         fetchActivityFile();
 
-        const interval1 = setInterval(fetchStateFile, 5000);
-        const interval2 = setInterval(fetchLogFile, 5000);
-        const interval3 = setInterval(fetchActivityFile, 60000);
+        const interval1 = setInterval(checkPyraCoreState, 180000);
+        const interval2 = setInterval(fetchStateFile, 5000);
+        const interval3 = setInterval(fetchLogFile, 5000);
+        const interval4 = setInterval(fetchActivityFile, 60000);
 
         return () => {
             clearInterval(interval1);
             clearInterval(interval2);
             clearInterval(interval3);
+            clearInterval(interval4);
         };
     }, []);
 
