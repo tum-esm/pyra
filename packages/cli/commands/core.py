@@ -152,3 +152,50 @@ def _pyra_core_is_running() -> None:
         _print_green(f"pyra-core is running with process ID(s) {existing_pids}")
     else:
         _print_red("pyra-core is not running")
+
+        # check whether the following 3 log lines are at the end of the current log file
+        # crop 38 chars at the beginning of each line ("2025-01-13 22:45:01.756072 UTC+0100 - ")
+        expected_log_lines = [
+            'cli - INFO - running command "core stop"',
+            "main - INFO - Received shutdown signal, starting graceful teardown",
+            "main - INFO - Graceful teardown complete",
+        ]
+        logs_archive_path = os.path.join(_PROJECT_DIR, "logs", "archive")
+        log_files = [f for f in sorted(os.listdir(logs_archive_path)) if f.endswith("-debug.log")]
+        if len(log_files) == 0:
+            return
+        latest_log_file_path = os.path.join(logs_archive_path, log_files[-1])
+        latest_log_lines = [
+            (l[38:] if len(l) > 38 else l)
+            for l in tum_esm_utils.files.load_file(latest_log_file_path).strip("\n\t ").split("\n")
+        ]
+        if len(latest_log_lines) < 20:
+            return
+
+        # if not properly shut down, raise an exception and send an email
+        for el in expected_log_lines:
+            if el not in latest_log_lines[-20:]:
+                _print_red("pyra-core is not running")
+                _print_red(
+                    f"Pyra Core has not been shut down properly. Expected log line '{el}' not found in the last 20 lines of {latest_log_file_path}"
+                )
+
+                new_exception_state_item = types.ExceptionStateItem(
+                    origin="cli",
+                    subject="PyraCoreNotRunning",
+                    details="Pyra Core has not been shut down properly.",
+                    send_emails=True,
+                )
+                with interfaces.StateInterface.update_state() as s:
+                    if new_exception_state_item not in s.exceptions_state.current:
+                        _print_red("exception not raised yet, loading config")
+                        config = types.Config.load()
+                        utils.ExceptionEmailClient.handle_occured_exceptions(
+                            config, [new_exception_state_item]
+                        )
+                        s.exceptions_state.current.append(new_exception_state_item)
+                        s.exceptions_state.notified.append(new_exception_state_item)
+                    else:
+                        _print_red("exception already raised")
+
+                return
