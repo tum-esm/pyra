@@ -28,16 +28,17 @@ class UploadThread(AbstractThread):
             return False
 
         current_state = interfaces.StateInterface.load_state()
+        should_be_running: bool = True
 
         # don't upload while system is starting up
         if (current_state.measurements_should_be_running is None) or (
             current_state.position.sun_elevation is None
         ):
-            return False
+            should_be_running = False
 
         # (optional) don't upload during the day
         if config.upload.only_upload_at_night and (current_state.position.sun_elevation > 0):
-            return False
+            should_be_running = False
 
         # update last time of known measurements
         if current_state.measurements_should_be_running:
@@ -49,9 +50,15 @@ class UploadThread(AbstractThread):
                 if (
                     datetime.datetime.now() - UploadThread.last_measurement_time
                 ).total_seconds() < 600:
-                    return False
+                    should_be_running = False
 
-        return True
+        if not should_be_running:
+            if any([e.origin == "upload" for e in current_state.exceptions_state.current]):
+                with interfaces.StateInterface.update_state() as s:
+                    s.activity.upload_is_running = False  # not necessary, but ...
+                    s.exceptions_state.clear_exception_origin("upload")
+
+        return should_be_running
 
     @staticmethod
     def get_new_thread_object() -> threading.Thread:
