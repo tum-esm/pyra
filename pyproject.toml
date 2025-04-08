@@ -82,7 +82,10 @@ filterwarnings = [
     'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
     'ignore:getargs:DeprecationWarning',
 ]
-markers = ["ci: can be run in a CI environment", "integration: can only be run on a configured system"]
+markers = [
+    "ci: can be run in a CI environment",
+    "integration: can only be run on a configured system",
+]
 
 [tool.pdm.options]
 add = ["--no-self"]

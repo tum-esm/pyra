@@ -146,11 +146,15 @@ class UploadThread(AbstractThread):
                     s.activity.upload_is_running = False  # not necessary, but ...
                     s.exceptions_state.clear_exception_origin("upload")
 
-                # sleep 15 minutes until running again
+                # sleep 60 minutes until running again
                 # stop thread if upload config has changed
-                logger.info("waiting 60 minutes until looking for new files/directories")
                 waiting_start_time = datetime.datetime.now()
                 for i in range(60):
+                    minutes_left = 60 - i
+                    logger.info(
+                        f"waiting {minutes_left} more minutes until looking for new files/directories"
+                    )
+
                     for _ in range(6):
                         if upload_should_abort():
                             logger.info("stopping upload thread")
@@ -164,12 +168,6 @@ class UploadThread(AbstractThread):
                             "abort waiting because there might be new data to upload at 1am"
                         )
 
-                    minutes_left = 59 - i
-                    if minutes_left > 0:
-                        logger.info(
-                            f"waiting {minutes_left} more minutes until looking for new files/directories"
-                        )
-
             except Exception as e:
                 logger.error(f"error in UploadThread: {repr(e)}")
                 logger.exception(e)
@@ -178,21 +176,18 @@ class UploadThread(AbstractThread):
                     s.exceptions_state.add_exception(
                         origin="upload", exception=e, send_emails=False
                     )
-                logger.info("waiting 20 minutes until retrying")
                 for i in range(20):
+                    minutes_left = 20 - i
+                    logger.info(
+                        f"error in upload thread, waiting {minutes_left} more minutes until trying again"
+                    )
+
                     for _ in range(6):
                         if upload_should_abort():
                             logger.info("stopping upload thread")
                             return
 
                         time.sleep(10)
-
-                    minutes_left = 19 - i
-                    if minutes_left > 0:
-                        logger.info(
-                            f"waiting {minutes_left} more minutes until looking "
-                            + "for new files/directories"
-                        )
 
                 logger.info("stopping upload thread")
                 return
