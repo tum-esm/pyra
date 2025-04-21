@@ -147,7 +147,6 @@ class OpusThread(AbstractThread):
 
         thread_start_time = time.time()
         last_successful_ping_time = time.time()
-        last_measurement_start_time: Optional[float] = None
         last_peak_positioning_time: Optional[float] = None
         last_http_connection_issue_time: Optional[float] = None
 
@@ -179,7 +178,6 @@ class OpusThread(AbstractThread):
                         else:
                             logger.info("The Macro started by Pyra is still running, nothing to do")
                             current_macro = (mid, mfp)
-                            last_measurement_start_time = time.time()
 
             with interfaces.StateInterface.update_state() as state:
                 state.opus_state.experiment_filepath = current_experiment
@@ -285,10 +283,21 @@ class OpusThread(AbstractThread):
 
                 if measurements_should_be_running and (current_macro is None):
                     logger.info("Starting macro")
-                    mid = OpusHTTPInterface.start_macro(config.opus.macro_path.root)
+
+                    macro_successfully_started: bool = False
+                    mid = 0  # required for mypy checks to pass
+                    for i in range(5):
+                        mid = OpusHTTPInterface.start_macro(config.opus.macro_path.root)
+                        time.sleep(5)
+                        if OpusHTTPInterface.macro_is_running(mid):
+                            macro_successfully_started = True
+                            break
+
+                    if not macro_successfully_started:
+                        raise RuntimeError("Could not start macro within 3 tries")
+
                     current_macro = (mid, config.opus.macro_path.root)
                     logger.info(f"Successfully started Macro {current_macro[1]}")
-                    last_measurement_start_time = time.time()
 
                 # STOPPING MACRO WHEN MACRO FILE CHANGES OR MEASUREMENTS SHOULD NOT BE RUNNING
 
@@ -307,20 +316,16 @@ class OpusThread(AbstractThread):
                     if should_stop_macro:
                         OpusHTTPInterface.stop_macro(current_macro[1])
                         current_macro = None
-                        last_measurement_start_time = None
                         logger.info("Successfully stopped Macro")
 
                 # CHECK IF MACRO HAS CRASHED
 
                 if current_macro is not None:
-                    assert last_measurement_start_time is not None
-                    if (time.time() - last_measurement_start_time) > 60:
-                        if OpusHTTPInterface.macro_is_running(current_macro[0]):
-                            logger.debug("Macro is running as expected")
-                        else:
-                            logger.warning("Macro has stopped/crashed, restarting it")
-                            current_macro = None
-                            last_measurement_start_time = None
+                    if OpusHTTPInterface.macro_is_running(current_macro[0]):
+                        logger.debug("Macro is running as expected")
+                    else:
+                        logger.warning("Macro has stopped/crashed, restarting it")
+                        current_macro = None
 
                 # POSSIBLY SET PEAK POSITION
 
