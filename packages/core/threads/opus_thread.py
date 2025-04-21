@@ -119,6 +119,7 @@ class OpusThread(AbstractThread):
     """
 
     logger_origin = "opus-thread"
+    peak_position_cache: dict[str, tuple[int, int]] = {}
 
     @staticmethod
     def should_be_running(config: types.Config) -> bool:
@@ -480,10 +481,23 @@ class OpusThread(AbstractThread):
             f"APP: Found {len(most_recent_files)} files created since the last powerup and less than 10 minutes old"
         )
 
+        # remove unused cache items
+        unused_keys = set(OpusThread.peak_position_cache.keys()) - set(most_recent_files)
+        for k in unused_keys:
+            del OpusThread.peak_position_cache[k]
+
         # compute peak position of these files using the first channel
         configured_abps: list[int] = []
         computed_pps: list[int] = []
         for f in most_recent_files:
+            if len(computed_pps) == 5:
+                break
+
+            cache_result = OpusThread.peak_position_cache.get(f, None)
+            if cache_result is not None:
+                configured_abps.append(cache_result[0])
+                computed_pps.append(cache_result[1])
+                continue
             try:
                 opus_file = tum_esm_utils.opus.OpusFile.read(f, read_all_channels=False)
                 ifg = opus_file.interferogram
@@ -514,10 +528,9 @@ class OpusThread(AbstractThread):
                 )
                 configured_abps.append(int(abp))
                 computed_pps.append(peak)
+                OpusThread.peak_position_cache[f] = (int(abp), peak)
             except Exception as e:
                 logger.debug(f"APP: {f} - Could not determine peak position ({e})")
-            if len(computed_pps) == 5:
-                break
         if len(computed_pps) < 5:
             raise ValueError(
                 f"Could not determine enough peak positions from interferograms (found {len(computed_pps)}, expected 5)"

@@ -50,9 +50,9 @@ def find_most_recent_files(
         time_limit: The time limit in seconds.
 
     Returns:
-        A list of the most recently modified files sorted by modification time
-        (the most recent first) and only including files modified within the
-        time limit.
+        A list of the most recently modified absolute filepaths sorted by
+        modification time (the most recent first) and only including files
+        modified within the time limit.
     """
     if time_limit <= 0:
         return []
