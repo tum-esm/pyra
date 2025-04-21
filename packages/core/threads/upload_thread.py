@@ -37,6 +37,10 @@ class UploadThread(AbstractThread):
             assert current_state.measurements_should_be_running is not None
             assert current_state.position.sun_elevation is not None
 
+            # don't upload when the upload or all streams are deactivated
+            assert config.upload.is_active
+            assert any([s.is_active for s in config.upload.streams])
+
             # (optional) don't upload during the day
             if config.upload.only_upload_at_night:
                 assert current_state.position.sun_elevation <= 0
