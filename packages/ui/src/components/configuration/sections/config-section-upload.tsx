@@ -30,6 +30,7 @@ export default function ConfigSectionUpload() {
             host: '1.2.3.4',
             user: '...',
             password: '...',
+            is_active: false,
             only_upload_at_night: true,
             only_upload_when_not_measuring: true,
             streams: [],
@@ -139,6 +140,15 @@ export default function ConfigSectionUpload() {
                 setValue={(v: string) => setLocalConfigItem('upload.password', v)}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.password : 'null'}
             />
+            <configurationComponents.ConfigElementBooleanToggle
+                title="Active"
+                value={localSectionConfig.is_active}
+                setValue={(v: boolean) => setLocalConfigItem(`upload.is_active`, v)}
+                oldValue={centralSectionConfig !== null ? centralSectionConfig.is_active : null}
+            />
+            <configurationComponents.ConfigElementNote>
+                Enable/Disable all upload activity with this toggle
+            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementNote>
                 The upload only uploads data after the day of recording, so it works during active
@@ -159,13 +169,17 @@ export default function ConfigSectionUpload() {
             <configurationComponents.ConfigElementBooleanToggle
                 title="Only Upload When Not Measuring"
                 value={localSectionConfig.only_upload_when_not_measuring}
-                setValue={(v: boolean) => setLocalConfigItem(`upload.only_upload_when_not_measuring`, v)}
+                setValue={(v: boolean) =>
+                    setLocalConfigItem(`upload.only_upload_when_not_measuring`, v)
+                }
                 oldValue={
-                    centralSectionConfig !== null ? centralSectionConfig.only_upload_when_not_measuring : null
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.only_upload_when_not_measuring
+                        : null
                 }
             />
             <configurationComponents.ConfigElementNote>
-                Stops upload immediately 
+                Stops upload immediately when measurements start.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             {localSectionConfig.streams.map((stream, index) => (

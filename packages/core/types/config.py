@@ -205,7 +205,7 @@ class UploadStreamConfig(StricterBaseModel):
     is_active: bool
     label: str
     variant: Literal["directories", "files"]
-    dated_regex: str = pydantic.Field(..., pattern="^\^.*\$$")
+    dated_regex: str = pydantic.Field(..., pattern=r"^\^.*\$$")
     src_directory: tum_esm_utils.validators.StrictDirectoryPath
     dst_directory: str
     remove_src_after_upload: bool
@@ -215,6 +215,7 @@ class UploadConfig(StricterBaseModel):
     host: StrictIPv4Adress
     user: str
     password: str
+    is_active: bool
     only_upload_at_night: bool
     only_upload_when_not_measuring: bool
     streams: list[UploadStreamConfig]
@@ -226,6 +227,7 @@ class PartialUploadConfig(StricterBaseModel):
     host: Optional[StrictIPv4Adress] = None
     user: Optional[str] = None
     password: Optional[str] = None
+    is_active: Optional[bool] = None
     only_upload_at_night: Optional[bool] = None
     only_upload_when_not_measuring: Optional[bool] = None
     streams: Optional[list[UploadStreamConfig]] = None
