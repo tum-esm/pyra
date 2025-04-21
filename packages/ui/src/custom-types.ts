@@ -36,6 +36,7 @@ export namespace customTypes {
             username: string;
             password: string;
             automatic_peak_positioning: boolean;
+            automatic_peak_positioning_dcmin: number;
             interferogram_path: string;
         };
         camtracker: {
@@ -108,6 +109,7 @@ export namespace customTypes {
             username?: string;
             password?: string;
             automatic_peak_positioning?: boolean;
+            automatic_peak_positioning_dcmin?: number;
             interferogram_path?: string;
         };
         camtracker?: {

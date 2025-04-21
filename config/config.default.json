@@ -14,6 +14,7 @@
     "username": "Default",
     "password": "...",
     "automatic_peak_positioning": false,
+    "automatic_peak_positioning_dcmin": 0.02,
     "interferogram_path": ""
   },
   "camtracker": {

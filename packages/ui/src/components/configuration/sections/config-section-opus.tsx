@@ -85,8 +85,8 @@ export default function ConfigSectionOpus() {
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementNote>
                 <p>
-                    The Autmatic Peak Positioning feature searches for OPUS files that have been
-                    written to the local disk within the last 10 minutes (and since the last
+                    The Automatic Peak Positioning (APP) feature searches for OPUS files that have
+                    been written to the local disk within the last 10 minutes (and since the last
                     EM27/SUN powerup). It loads the interferograms from these OPUS files using the{' '}
                     <a
                         href="https://tum-esm-utils.netlify.app/api-reference#tum_esm_utilsopus"
@@ -100,13 +100,28 @@ export default function ConfigSectionOpus() {
                 </p>
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementBooleanToggle
-                title="Autom. Peak Positioning"
+                title="Enable APP"
                 value={localSectionConfig.automatic_peak_positioning}
                 setValue={(v: boolean) => setLocalConfigItem(`opus.automatic_peak_positioning`, v)}
                 oldValue={centralSectionConfig.automatic_peak_positioning}
             />
             <configurationComponents.ConfigElementText
-                title="Interferogram Path"
+                title="APP DC Min."
+                value={localSectionConfig.automatic_peak_positioning_dcmin}
+                setValue={(v: number) =>
+                    setLocalConfigItem(`opus.automatic_peak_positioning_dcmin`, v)
+                }
+                oldValue={centralSectionConfig.automatic_peak_positioning_dcmin}
+                numeric={true}
+            />
+            <configurationComponents.ConfigElementNote>
+                Only interferograms that have an absolute DC mean value larger than this setting
+                will be considered in the automatic peak positioning. This is an additional way to
+                ensure that the peak position is not saved when the sun is not in the center of the
+                receptor.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementText
+                title="APP Interferogram Path"
                 value={localSectionConfig.interferogram_path}
                 setValue={(v: string) => setLocalConfigItem('opus.interferogram_path', v)}
                 oldValue={centralSectionConfig.interferogram_path}

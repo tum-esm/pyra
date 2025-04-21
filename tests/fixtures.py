@@ -23,6 +23,7 @@ SAMPLE_CONFIG = types.Config(
         username="Default",
         password="...",
         automatic_peak_positioning=True,
+        automatic_peak_positioning_dcmin=0.02,
         interferogram_path="",
     ),
     camtracker=types.config.CamtrackerConfig(

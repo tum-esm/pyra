@@ -519,7 +519,7 @@ class OpusThread(AbstractThread):
                 )
 
                 dc_amplitude = abs(np.mean(fwd_pass[:100]))
-                assert dc_amplitude >= 0.02, (
+                assert dc_amplitude >= config.opus.automatic_peak_positioning_dcmin, (
                     f"DC amplitude is too low (DC amplitude = {dc_amplitude})"
                 )
 

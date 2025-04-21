@@ -60,6 +60,11 @@ class OpusConfig(StricterBaseModel):
     automatic_peak_positioning: bool = pydantic.Field(
         ..., description="Whether to use automatic peak positioning"
     )
+    automatic_peak_positioning_dcmin: float = pydantic.Field(
+        ...,
+        ge=0,
+        description="Minimum absolute DC mean value for interferograms to be considered in the automatic peak positioning. This is an additional way to ensure that the peak position is not saved when the sun is not in the center of the receptor.",
+    )
     interferogram_path: str = pydantic.Field(
         ...,
         description="Path to the directory containing today's interferograms files. You can use the wildcards '%Y', '%y', '%m', '%d' that will be replaced on the current date. Refer to the documentation for this 'automatic peak positioning'. Do not attach a '*' to the end - after replacing the date, it should point to exactly one directory.",
