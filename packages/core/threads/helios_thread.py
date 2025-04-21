@@ -354,6 +354,7 @@ class HeliosThread(AbstractThread):
 
         logger = utils.Logger(origin="helios", just_print=headless)
         logger.info("Starting Helios thread")
+        thread_start_time = time.time()
 
         config = types.Config.load()
         assert config.helios is not None, "This is a bug in Pyra"
@@ -372,7 +373,7 @@ class HeliosThread(AbstractThread):
         repeated_camera_error_count: int = 0
 
         while True:
-            start_time = time.time()
+            t1 = time.time()
             new_config = types.Config.load()
 
             try:
@@ -384,6 +385,13 @@ class HeliosThread(AbstractThread):
                         helios_instance = None
                     return
                 assert new_config.helios is not None, "This is a bug in Pyra"
+
+                if (thread_start_time - t1) > 43200:
+                    # Windows happens to have a problem with long-running multiprocesses/multithreads
+                    logger.debug(
+                        "Stopping and restarting thread after 12 hours for stability reasons"
+                    )
+                    return
 
                 if new_config.helios.camera_id != config.helios.camera_id:
                     if helios_instance is not None:
@@ -550,7 +558,7 @@ class HeliosThread(AbstractThread):
                     state.exceptions_state.clear_exception_origin("helios")
 
                 # wait rest of loop time
-                elapsed_time = time.time() - start_time
+                elapsed_time = time.time() - t1
                 time_to_wait = config.helios.seconds_per_interval - elapsed_time
                 if time_to_wait > 0:
                     logger.debug(f"Finished iteration, waiting {round(time_to_wait, 2)} second(s).")

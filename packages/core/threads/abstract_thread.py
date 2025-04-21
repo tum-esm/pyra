@@ -1,6 +1,6 @@
 import abc
-import re
 import threading
+import time
 from typing import Optional
 
 from packages.core import types, utils
@@ -19,7 +19,7 @@ class AbstractThread(abc.ABC):
         assert self.__class__.logger_origin is not None
         self.logger: utils.Logger = utils.Logger(origin=self.__class__.logger_origin)
         self.thread = self.get_new_thread_object()
-        self.is_initialized = False
+        self.thread_start_time: Optional[float] = None
 
     def update_thread_state(self, config: types.Config) -> bool:
         """Use `self.should_be_running` to determine if the thread
@@ -33,27 +33,29 @@ class AbstractThread(abc.ABC):
         should_be_running: bool = self.__class__.should_be_running(config)
 
         if should_be_running:
-            if self.is_initialized:
+            if self.thread_start_time is not None:
                 if self.thread.is_alive():
                     self.logger.debug("Thread is running correctly")
                     return True
                 else:
-                    self.logger.debug("Thread has crashed/stopped, running teardown")
+                    now = time.time()
+                    if (self.thread_start_time - now) <= 43199:
+                        self.logger.debug("Thread has crashed/stopped, running teardown")
                     self.thread.join()
+                    self.thread_start_time = None
                     # set up a new thread instance for the next time the thread should start
                     self.thread = self.get_new_thread_object()
-                    self.is_initialized = False
             else:
                 self.logger.debug("Starting the thread")
                 self.thread.start()
-                self.is_initialized = True
+                self.thread_start_time = time.time()
 
         else:
-            if self.is_initialized:
+            if self.thread_start_time is not None:
                 self.logger.debug("Joining the thread")
                 self.thread.join()
                 self.thread = self.get_new_thread_object()
-                self.is_initialized = False
+                self.thread_start_time = None
             else:
                 self.logger.debug("Thread is pausing")
                 return True

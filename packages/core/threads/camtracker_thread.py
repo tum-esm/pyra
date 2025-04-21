@@ -184,6 +184,7 @@ class CamTrackerThread(AbstractThread):
         logger = utils.Logger(origin="camtracker", just_print=headless)
         logger.info("Starting CamTracker thread")
         last_camtracker_start_time: Optional[float] = None
+        thread_start_time = time.time()
 
         # STOP CAMTRACKER IF IT IS RUNNING
         config = types.Config.load()
@@ -195,6 +196,13 @@ class CamTrackerThread(AbstractThread):
             try:
                 t1 = time.time()
                 logger.debug("Starting iteration")
+
+                if (thread_start_time - t1) > 43200:
+                    # Windows happens to have a problem with long-running multiprocesses/multithreads
+                    logger.debug(
+                        "Stopping and restarting thread after 12 hours for stability reasons"
+                    )
+                    return
 
                 logger.debug("Loading configuration file")
                 config = types.Config.load()
@@ -366,9 +374,9 @@ class CamTrackerThread(AbstractThread):
         CamTracker to initialize the tracking mirrors. Then moves mirrors
         back to parking position and shuts dosn CamTracker."""
 
-        assert (
-            not CamTrackerProgram.is_running()
-        ), "This test cannot be run if CamTracker is already running"
+        assert not CamTrackerProgram.is_running(), (
+            "This test cannot be run if CamTracker is already running"
+        )
         CamTrackerProgram.start(config, logger)
         time.sleep(2)
         CamTrackerProgram.stop(config, logger)

@@ -191,6 +191,13 @@ class OpusThread(AbstractThread):
                 t1 = time.time()
                 logger.debug("Starting iteration")
 
+                if (thread_start_time - t1) > 43200:
+                    # Windows happens to have a problem with long-running multiprocesses/multithreads
+                    logger.debug(
+                        "Stopping and restarting thread after 12 hours for stability reasons"
+                    )
+                    return
+
                 logger.debug("Loading configuration file")
                 config = types.Config.load()
 

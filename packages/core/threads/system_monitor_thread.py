@@ -32,10 +32,19 @@ class SystemMonitorThread(AbstractThread):
         logger = utils.Logger(origin="system-monitor", just_print=headless)
         logger.info("Starting System Monitor thread")
         activity_history_interface = interfaces.ActivityHistoryInterface(logger)
+        thread_start_time = time.time()
 
         while True:
             try:
                 logger.debug("Starting iteration")
+                t1 = time.time()
+
+                if (thread_start_time - t1) > 43200:
+                    # Windows happens to have a problem with long-running multiprocesses/multithreads
+                    logger.debug(
+                        "Stopping and restarting thread after 12 hours for stability reasons"
+                    )
+                    return
 
                 # CPU/MEMORY USAGE AND BOOT TIME
 

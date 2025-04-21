@@ -40,11 +40,19 @@ class TUMEnclosureThread(AbstractThread):
         last_plc_connection_time: float = time.time()
         last_camera_down_time: Optional[float] = None
         exception_was_set: Optional[bool] = None
+        thread_start_time = time.time()
 
         try:
             while True:
                 t1 = time.time()
                 logger.debug("Starting iteration")
+
+                if (thread_start_time - t1) > 43200:
+                    # Windows happens to have a problem with long-running multiprocesses/multithreads
+                    logger.debug(
+                        "Stopping and restarting thread after 12 hours for stability reasons"
+                    )
+                    return
 
                 logger.debug("Loading configuration file")
                 config = types.Config.load()

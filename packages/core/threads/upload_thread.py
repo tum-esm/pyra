@@ -75,6 +75,7 @@ class UploadThread(AbstractThread):
 
         logger = utils.Logger(origin="upload", just_print=headless)
         logger.info("Starting Upload thread")
+        thread_start_time = time.time()
 
         config = types.Config.load()
         assert config.upload is not None
@@ -89,6 +90,11 @@ class UploadThread(AbstractThread):
                     logger.info("upload config has changed")
                 if thread_should_not_be_running:
                     logger.info("upload thread should not be running")
+
+            if (thread_start_time - time.time()) > 43200:
+                # Windows happens to have a problem with long-running multiprocesses/multithreads
+                logger.debug("Stopping and restarting thread after 12 hours for stability reasons")
+                return True
             return upload_config_has_changed or thread_should_not_be_running
 
         while True:
