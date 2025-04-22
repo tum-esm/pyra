@@ -108,6 +108,7 @@ class TUMEnclosureThread(AbstractThread):
 
                 # UPDATING RECONNECTION STATE
 
+                # now the PLC is connected - otherwise it would loop in the section above
                 last_plc_connection_time = time.time()
                 try:
                     # READING PLC
@@ -265,6 +266,7 @@ class TUMEnclosureThread(AbstractThread):
 
                     # CLEAR EXCEPTIONS
 
+                    # `exception_was_set` variable used to recude the number of state updates
                     if not exception_was_set:
                         exception_was_set = False
                         with interfaces.StateInterface.update_state() as _s:

@@ -264,13 +264,16 @@ class CamTrackerThread(AbstractThread):
                             while True:
                                 time.sleep(5)
                                 state = interfaces.StateInterface.load_state()
-                                if state.tum_enclosure_state.state.rain or (
-                                    not state.measurements_should_be_running
-                                ):
+                                if state.tum_enclosure_state.state.rain:
                                     logger.info("Enclosure cover is closed due to rain.")
                                     break
+                                if not state.measurements_should_be_running:
+                                    logger.info(
+                                        "Measurements conditions have changed, hence no need to open cover."
+                                    )
+                                    break
                                 if (time.time() - t1) > (
-                                    config.general.seconds_per_core_iteration + 5
+                                    (config.general.seconds_per_core_iteration * 3) + 5
                                 ):
                                     logger.error(
                                         "Enclosure cover is closed even though, there is no rain. Stopping CamTracker."
@@ -280,6 +283,7 @@ class CamTrackerThread(AbstractThread):
                                             types.ExceptionStateItem(
                                                 origin="camtracker",
                                                 subject="Camtracker was started but cover is closed.",
+                                                details="Restarting CamTracker. No interaction needed.\n\nThis error might have been caused by the enclosures rain sensor being triggered long enough to cause the cover to be closed but too short for PYRA to read from rain sensor in time.",
                                             )
                                         )
                                     CamTrackerProgram.stop(config, logger)
