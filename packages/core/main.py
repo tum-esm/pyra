@@ -35,7 +35,7 @@ def run() -> None:
     and stopping the different threads, and sendinging out emails on occured
     and resolved exceptions. The actual work is done by the threads."""
 
-    logger = utils.Logger(origin="main", perform_archiving=True)
+    logger = utils.Logger(origin="main", main_thread=True)
     logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
 
     # Loop until a valid config has been found. Without

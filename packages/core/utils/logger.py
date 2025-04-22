@@ -39,16 +39,16 @@ class Logger:
         self,
         origin: str = "pyra.core",
         just_print: bool = False,
-        perform_archiving: bool = False,
+        main_thread: bool = False,
     ) -> None:
         """Create a new logger instance.
 
         With `just_print = True`, the log lines will be formatted
         like in the log files but only printed to the console."""
 
-        self.origin: str = origin
-        self.just_print: bool = just_print
-        self.perform_archiving: bool = perform_archiving
+        self.origin = origin
+        self.just_print = just_print
+        self.main_thread = main_thread
 
     def debug(self, message: str) -> None:
         """Write a debug log (to debug only). Used for verbose output"""
@@ -78,25 +78,42 @@ class Logger:
         log_string = (
             f"{now.strftime('%Y-%m-%d %H:%M:%S.%f UTC%z')} - {self.origin} - {level} - {message}\n"
         )
+
+        def _log_to_file() -> None:
+            # current logs that only contains from the last 5-10 minutes
+            with open(_DEBUG_LOG_FILE, "a") as f1:
+                f1.write(log_string)
+
+            # archive that contains all log lines
+            with open(
+                os.path.join(
+                    _PROJECT_DIR, "logs", "archive", f"{now.strftime('%Y-%m-%d')}-debug.log"
+                ),
+                "a",
+            ) as f:
+                f.write(log_string)
+
         if self.just_print:
             print(log_string, end="")
         else:
-            with filelock.FileLock(_LOG_FILES_LOCK, timeout=10):
-                # current logs that only contains from the last 5-10 minutes
-                with open(_DEBUG_LOG_FILE, "a") as f1:
-                    f1.write(log_string)
-
-                # archive that contains all log lines
-                with open(
-                    os.path.join(
-                        _PROJECT_DIR, "logs", "archive", f"{now.strftime('%Y-%m-%d')}-debug.log"
-                    ),
-                    "a",
-                ) as f:
-                    f.write(log_string)
+            if not self.main_thread:
+                with filelock.FileLock(_LOG_FILES_LOCK, timeout=15):
+                    _log_to_file()
+            else:
+                try:
+                    with filelock.FileLock(_LOG_FILES_LOCK, timeout=15):
+                        _log_to_file()
+                except filelock.Timeout:
+                    try:
+                        os.remove(_LOG_FILES_LOCK)
+                    except:
+                        pass
+                    time.sleep(5)
+                    _log_to_file()
+                    self.warning("Logger: Lock file was removed, retrying to write log line.")
 
         # Archive lines older than 5 minutes, every 5 minutes
-        if self.perform_archiving:
+        if self.main_thread:
             if (now - Logger.last_archive_time).total_seconds() > 300:
                 Logger.archive()
                 Logger.last_archive_time = now
