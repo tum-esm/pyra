@@ -34,17 +34,22 @@ class CamTrackerProgram:
         with interfaces.StateInterface.update_state() as s:
             s.activity.camtracker_startups += 1
 
-        # removing old stop file
-        stop_file_path = os.path.join(
-            os.path.dirname(config.camtracker.executable_path.root), "stop.txt"
-        )
-        if os.path.exists(stop_file_path):
-            os.remove(stop_file_path)
+        logger.info("Removing old stop.txt file")
+        # this has to be done for two directories because new CamTracker versions
+        # might look for this "stop.txt" file in the working directory instead of
+        # the directory where the executable is located
+        for d in [
+            os.path.dirname(config.camtracker.executable_path.root),
+            config.camtracker.working_directory_path.root,
+        ]:
+            stop_file_path = os.path.join(d, "stop.txt")
+            if os.path.exists(stop_file_path):
+                os.remove(stop_file_path)
 
         logger.info("Starting CamTracker")
         os.startfile(  # type: ignore
-            os.path.basename(config.camtracker.executable_path.root),
-            cwd=os.path.dirname(config.camtracker.executable_path.root),
+            config.camtracker.executable_path.root,
+            cwd=config.camtracker.working_directory_path.root,
             arguments="-autostart",
             show_cmd=2,
         )
@@ -81,12 +86,15 @@ class CamTrackerProgram:
         """Closes OPUS via DDE/force kills it via psutil. If no DDEConnection
         is provided, the function will force kill OPUS right away."""
 
-        stop_file_path = os.path.join(
-            os.path.dirname(config.camtracker.executable_path.root), "stop.txt"
-        )
         logger.info("Trying to stop CamTracker gracefully")
-        with open(stop_file_path, "w") as f:
-            f.write("")
+        # this has to be done for two directories because new CamTracker versions
+        # might look for this "stop.txt" file in the working directory instead of
+        # the directory where the executable is located
+        for d in [
+            os.path.dirname(config.camtracker.executable_path.root),
+            config.camtracker.working_directory_path.root,
+        ]:
+            tum_esm_utils.files.dump_file(os.path.join(d, "stop.txt"), "")
 
         try:
             tum_esm_utils.timing.wait_for_condition(
