@@ -105,6 +105,8 @@ export default function ConfigSectionCamtracker() {
                 for more than 5 minutes after startup, and these options are enabled, Pyra will
                 restart CamTracker. These states indicate that CamTracker is stuck at initialization
                 - usually fixed by a restart.
+                <br />
+                Only has an effect if an enclosure is configured.
             </configurationComponents.ConfigElementNote>
         </>
     );

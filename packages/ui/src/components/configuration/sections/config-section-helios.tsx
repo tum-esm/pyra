@@ -111,10 +111,11 @@ export default function ConfigSectionHelios() {
             />
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementNote>
-                In general: The lower these thresholds, the more sensitive is Helios. More sensitive
-                = more sun conditions are considered as "sunny enough to measure". Hence, when the
-                system should be measuring but is not, lower the thresholds. When CamTracker is
-                drifting a lot and is restarted frequently, increase the thresholds.
+                In general: The lower these thresholds, the more sensitive Helios is. More sensitive
+                = more sun conditions are considered as "sunny enough to measure".
+                <br />
+                Hence, when the system should be measuring but is not, lower the thresholds. When
+                CamTracker is drifting a lot and is restarted frequently, increase the thresholds.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Edge Pixel Threshold"
@@ -129,8 +130,9 @@ export default function ConfigSectionHelios() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                How many pixels of the lens should be considered as "edge". A starting value of `1%`
-                is a good baseline, i.e. 1% of the lens is an edge.
+                How many pixels of the lens should be considered an "edge" to count as "good
+                conditions". A starting value of `1%` is a good baseline, i.e. 1% of the lens is an
+                edge.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="Edge Color Threshold"

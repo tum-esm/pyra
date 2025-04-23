@@ -41,8 +41,9 @@ export default function ConfigSectionGeneral() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-                The TUM Enclosure Spectrometer will power up three degrees below. Helios will start
-                at this angle. Manual measurements will start at this angle.
+                The EM27/SUN will power up three degrees below to warm up (only if enclosure is
+                configured). Helios will start at this angle. Manual measurements will start at this
+                angle.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
@@ -52,7 +53,8 @@ export default function ConfigSectionGeneral() {
                 oldValue={centralSectionConfig.test_mode}
             />
             <configurationComponents.ConfigElementNote>
-                Only used in development.
+                Only used in development. Otherwise left at `no`. If enabled, Pyra does not connect
+                to the enclosure hardware, OPUS and CamTracker so it can run on any computer.
             </configurationComponents.ConfigElementNote>
         </>
     );

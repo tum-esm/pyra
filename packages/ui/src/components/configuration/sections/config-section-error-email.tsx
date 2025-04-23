@@ -53,9 +53,15 @@ export default function ConfigSectionErrorEmail() {
                 oldValue={centralSectionConfig.recipients}
             />
             <configurationComponents.ConfigElementNote>
-                Add multiple recipient emails by splitting them with a comma.
+                Add multiple recipient emails by splitting them with a comma, i.e.
+                `some.one@mail.com,another.one@mail.com`.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementNote>
+                The account used to send the error emails. We recommend using a functional account
+                from your institution, but you can also use public email providers like Gmail. We
+                can add instructions for your instition here.
+            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="SMTP Host"
                 value={localSectionConfig.smtp_host}

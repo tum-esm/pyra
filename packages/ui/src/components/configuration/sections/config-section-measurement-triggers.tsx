@@ -86,7 +86,10 @@ export default function ConfigSectionMeasurementTriggers() {
                 numeric
             />
             <configurationComponents.ConfigElementNote>
-            How long to wait to stop measurements after the trigger conditions are not met anymore.
+                How long to wait to stop measurements after the trigger conditions are not met
+                anymore. This is used to ensure that the systems does not turn on and off
+                measurements frequently in mixed weather conditions. It will turn on right away with
+                good conditions but wait a bit for consistenly bad conditions to turn off.
             </configurationComponents.ConfigElementNote>
         </>
     );

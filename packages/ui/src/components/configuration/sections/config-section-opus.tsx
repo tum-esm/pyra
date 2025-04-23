@@ -34,7 +34,7 @@ export default function ConfigSectionOpus() {
             </div>
             <div className="flex-shrink-0 w-full mt-1 text-xs text-slate-500 flex-row-left gap-x-1">
                 <p>
-                    This test will start up OPUS, run a macro, stop the macro and close OPUS again
+                    This test will start up OPUS, start a macro, stop the macro and close OPUS again
                     using the values specified below.
                     <br />
                     <strong className="text-slate-600">This can take up to 80 seconds</strong>.
@@ -86,8 +86,8 @@ export default function ConfigSectionOpus() {
             <configurationComponents.ConfigElementNote>
                 <p>
                     The Automatic Peak Positioning (APP) feature searches for OPUS files that have
-                    been written to the local disk within the last 10 minutes (and since the last
-                    EM27/SUN powerup). It loads the interferograms from these OPUS files using the{' '}
+                    been written to the local disk within the last 10 minutes and after the last
+                    EM27/SUN powerup. It loads the interferograms from these OPUS files using the{' '}
                     <a
                         href="https://tum-esm-utils.netlify.app/api-reference#tum_esm_utilsopus"
                         className="inline font-semibold text-blue-500"
@@ -95,8 +95,11 @@ export default function ConfigSectionOpus() {
                         tum-esm-utils
                     </a>{' '}
                     Python library and calculates the peak position. If the peak position from the
-                    last three readable OPUS files is identical and is less than 200 points off the
+                    last five readable OPUS files is identical and is less than 200 points off the
                     center, it will send this new peak position to the EM27/SUN.
+                    <br />
+                    Make sure to unload the ifg files frequently because the files loaded by OPUS
+                    cannot be read by any other program.
                 </p>
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementBooleanToggle
@@ -115,10 +118,10 @@ export default function ConfigSectionOpus() {
                 numeric={true}
             />
             <configurationComponents.ConfigElementNote>
-                Only interferograms that have an absolute DC mean value larger than this setting
-                will be considered in the automatic peak positioning. This is an additional way to
-                ensure that the peak position is not saved when the sun is not in the center of the
-                receptor.
+                Only interferograms that have an absolute DC mean value larger than this "APP DC
+                Min." setting will be considered in the automatic peak positioning. This is an
+                additional way to ensure that the peak position is not saved when the sun is not in
+                the center of the receptor.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementText
                 title="APP Interferogram Path"
@@ -131,7 +134,7 @@ export default function ConfigSectionOpus() {
                 The Interferogram path should point to the directory containing today's
                 interferograms files. You can use the wildcards '%Y', '%y', '%m', '%d' that will be
                 replaced by the current date. Refer to the documentation for this 'automatic peak
-                positioning'. Do not attach a '*' to the end - after replacing the date, it should
+                positioning'. Do not attach a '*' to the end: after replacing the date, it should
                 point to exactly one directory.
             </configurationComponents.ConfigElementNote>
         </>

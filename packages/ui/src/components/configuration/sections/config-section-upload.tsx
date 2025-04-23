@@ -109,8 +109,9 @@ export default function ConfigSectionUpload() {
                     >
                         github.com/dostuffthatmatters/circadian-scp-upload
                     </a>
-                    ). You can use it to upload your inteferograms, your datalogger files, and so
-                    on: Any data generated day by day that has to be uploaded to a server.
+                    ). You can use it to upload your inteferograms, your datalogger files, helios
+                    images, logs and so on – Any data generated day by day that has to be uploaded
+                    to a server.
                 </p>
             </div>
             {centralSectionConfig &&
@@ -151,9 +152,9 @@ export default function ConfigSectionUpload() {
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementNote>
-                The upload only uploads data after the day of recording, so it works during active
-                measurements. However, you can use the following two options to reduce the load on
-                the PC during measurements.
+                The upload only uploads data after the day of the recording, so it works during
+                active measurements. However, you can use the following two options to reduce the
+                load on the PC during measurements.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementBooleanToggle
                 title="Only Upload At Night"
@@ -178,9 +179,6 @@ export default function ConfigSectionUpload() {
                         : null
                 }
             />
-            <configurationComponents.ConfigElementNote>
-                Stops upload immediately when measurements start.
-            </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
             {localSectionConfig.streams.map((stream, index) => (
                 <Fragment key={`${index}`}>
