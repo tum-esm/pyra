@@ -3,8 +3,6 @@ import threading
 import time
 from typing import Optional
 
-import snap7.exceptions
-
 from packages.core import interfaces, types, utils
 
 from .abstract_thread import AbstractThread
@@ -78,7 +76,7 @@ class TUMEnclosureThread(AbstractThread):
                         plc_interface.connect()
                         plc_interface.set_auto_temperature(True)
                         logger.info("Successfully connected to PLC")
-                    except snap7.exceptions.Snap7Exception as e:
+                    except interfaces.TUMEnclosureInterface.PLCError as e:
                         logger.error("Could not connect to PLC")
                         logger.exception(e)
                         plc_interface = None
@@ -279,10 +277,7 @@ class TUMEnclosureThread(AbstractThread):
                     logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                     time.sleep(sleep_time)
 
-                except (
-                    snap7.exceptions.Snap7Exception,
-                    interfaces.TUMEnclosureInterface.PLCError,
-                ) as e:
+                except interfaces.TUMEnclosureInterface.PLCError as e:
                     logger.error("PLC connection lost during interaction")
                     logger.exception(e)
                     plc_interface = None

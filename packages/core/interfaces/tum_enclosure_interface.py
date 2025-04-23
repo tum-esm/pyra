@@ -4,7 +4,7 @@ import time
 from typing import Literal, Optional
 
 import snap7
-import snap7.exceptions
+import snap7.util
 from tum_esm_utils.validators import StrictIPv4Adress
 
 from packages.core import interfaces, types, utils
@@ -143,12 +143,12 @@ class TUMEnclosureInterface:
     def connect(self) -> None:
         """Connects to the PLC Snap7. Times out after 30 seconds.
 
-        Raises snap7.exceptions.Snap7Exception if connection fails."""
+        Raises TUMEnclosureInterface.PLCError if connection fails."""
 
         start_time = time.time()
         while True:
             if (time.time() - start_time) > 30:
-                raise snap7.exceptions.Snap7Exception("Connect to PLC timed out.")
+                raise TUMEnclosureInterface.PLCError("Connect to PLC timed out.")
 
             try:
                 self.plc.connect(self.plc_ip, 0, 1)
@@ -161,7 +161,7 @@ class TUMEnclosureInterface:
                 self.plc.destroy()
                 self.plc = snap7.client.Client()
 
-            except snap7.exceptions.Snap7Exception:
+            except Exception:
                 self.plc.destroy()
                 self.plc = snap7.client.Client()
 
@@ -172,7 +172,7 @@ class TUMEnclosureInterface:
             self.plc.disconnect()
             self.plc.destroy()
             logger.debug("Gracefully disconnected from PLC.")
-        except snap7.exceptions.Snap7Exception:
+        except Exception:
             self.plc.destroy()
             logger.debug("Disconnected ungracefully from PLC.")
         self.plc = snap7.client.Client()
@@ -281,7 +281,7 @@ class TUMEnclosureInterface:
                 ),
             )
         except Exception as e:
-            raise snap7.exceptions.Snap7Exception from e
+            raise TUMEnclosureInterface.PLCError from e
 
     # LOW LEVEL READ FUNCTIONS
 
@@ -305,7 +305,7 @@ class TUMEnclosureInterface:
             self.__sleep_while_cpu_is_busy()
             return value
         except Exception as e:
-            raise snap7.exceptions.Snap7Exception from e
+            raise TUMEnclosureInterface.PLCError from e
 
     def __write_int(self, action: tuple[int, int, int], value: int) -> None:
         """Changes an INT value in the PLC database."""
@@ -317,7 +317,7 @@ class TUMEnclosureInterface:
             self.plc.db_write(db_number, start, msg)
             self.__sleep_while_cpu_is_busy()
         except Exception as e:
-            raise snap7.exceptions.Snap7Exception from e
+            raise TUMEnclosureInterface.PLCError from e
 
     def __read_bool(self, action: tuple[int, int, int, int]) -> bool:
         """Reads a BOOL value in the PLC database."""
@@ -329,7 +329,7 @@ class TUMEnclosureInterface:
             self.__sleep_while_cpu_is_busy()
             return value
         except Exception as e:
-            raise snap7.exceptions.Snap7Exception from e
+            raise TUMEnclosureInterface.PLCError from e
 
     def __write_bool(self, action: tuple[int, int, int, int], value: bool) -> None:
         """Changes a BOOL value in the PLC database."""
@@ -341,7 +341,7 @@ class TUMEnclosureInterface:
             self.plc.db_write(db_number, start, msg)
             self.__sleep_while_cpu_is_busy()
         except Exception as e:
-            raise snap7.exceptions.Snap7Exception from e
+            raise TUMEnclosureInterface.PLCError from e
 
     # PLC.POWER SETTERS
 
