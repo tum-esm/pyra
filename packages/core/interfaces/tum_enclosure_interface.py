@@ -233,12 +233,12 @@ class TUMEnclosureInterface:
             def _get_int(spec: Optional[tuple[int, int, int]]) -> Optional[int]:
                 if spec is None:
                     return None
-                return snap7.util.get_int(plc_db_content[spec[0]], spec[1])  # type: ignore
+                return snap7.util.get_int(plc_db_content[spec[0]], spec[1])
 
             def _get_bool(spec: Optional[tuple[int, int, int, int]]) -> Optional[bool]:
                 if spec is None:
                     return None
-                return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])  # type: ignore
+                return snap7.util.get_bool(plc_db_content[spec[0]], spec[1], spec[3])
 
             s = self.specification
 

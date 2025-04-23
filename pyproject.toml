@@ -64,8 +64,6 @@ plugins = ["pydantic.mypy"]
 module = [
     "cv2",
     "jdcal",
-    "snap7",
-    "snap7.*",
     "deepdiff",
     "psutil",
     "skyfield.*",
