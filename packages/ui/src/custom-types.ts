@@ -42,6 +42,7 @@ export namespace customTypes {
         camtracker: {
             config_path: string;
             executable_path: string;
+            working_directory_path: string;
             learn_az_elev_path: string;
             sun_intensity_path: string;
             motor_offset_threshold: number;
@@ -115,6 +116,7 @@ export namespace customTypes {
         camtracker?: {
             config_path?: string;
             executable_path?: string;
+            working_directory_path?: string;
             learn_az_elev_path?: string;
             sun_intensity_path?: string;
             motor_offset_threshold?: number;

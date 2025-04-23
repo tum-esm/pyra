@@ -28,6 +28,7 @@ export const configSchema = z.object({
     camtracker: z.object({
         config_path: z.string(),
         executable_path: z.string(),
+        working_directory_path: z.string(),
         learn_az_elev_path: z.string(),
         sun_intensity_path: z.string(),
         motor_offset_threshold: floatSchema,

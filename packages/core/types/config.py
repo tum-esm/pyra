@@ -88,6 +88,7 @@ class PartialOpusConfig(StricterBaseModel):
 class CamtrackerConfig(StricterBaseModel):
     config_path: tum_esm_utils.validators.StrictFilePath
     executable_path: tum_esm_utils.validators.StrictFilePath
+    working_directory_path: tum_esm_utils.validators.StrictDirectoryPath
     learn_az_elev_path: tum_esm_utils.validators.StrictFilePath
     sun_intensity_path: tum_esm_utils.validators.StrictFilePath
     motor_offset_threshold: float = pydantic.Field(..., ge=0, le=360)
@@ -100,6 +101,7 @@ class PartialCamtrackerConfig(StricterBaseModel):
 
     config_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
     executable_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
+    working_directory_path: Optional[tum_esm_utils.validators.StrictDirectoryPath] = None
     learn_az_elev_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
     sun_intensity_path: Optional[tum_esm_utils.validators.StrictFilePath] = None
     motor_offset_threshold: Optional[float] = pydantic.Field(None, ge=0, le=360)

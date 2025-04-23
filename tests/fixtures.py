@@ -29,6 +29,7 @@ SAMPLE_CONFIG = types.Config(
     camtracker=types.config.CamtrackerConfig(
         config_path=EXISTING_TEST_FILE_PATH,
         executable_path=EXISTING_TEST_FILE_PATH,
+        working_directory_path=PROJECT_DIR,
         learn_az_elev_path=EXISTING_TEST_FILE_PATH,
         sun_intensity_path=EXISTING_TEST_FILE_PATH,
         motor_offset_threshold=10,
