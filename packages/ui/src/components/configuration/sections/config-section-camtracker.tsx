@@ -56,6 +56,16 @@ export default function ConfigSectionCamtracker() {
                 showSelector="file"
             />
             <configurationComponents.ConfigElementText
+                title="Working Directory Path"
+                value={localSectionConfig.working_directory_path}
+                setValue={(v: string) => setLocalConfigItem('camtracker.working_directory_path', v)}
+                oldValue={centralSectionConfig.working_directory_path}
+                showSelector="directory"
+            />
+            <configurationComponents.ConfigElementNote>
+                The working directory from within which CamTracker will be started.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementText
                 title="Sun Intensity Path"
                 value={localSectionConfig.sun_intensity_path}
                 setValue={(v: string) => setLocalConfigItem('camtracker.sun_intensity_path', v)}
