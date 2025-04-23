@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:e119f737529c62b9a6ec5bec513822635b7ab222a8279fc0e36f30e3b1787f4c"
+content_hash = "sha256:a20b075a3052a10b557cfe597a89a77b573c6c0b9a38ede265ca1555f0dba7ce"
 
 [[metadata.targets]]
 requires_python = "==3.10.*"
@@ -787,17 +787,16 @@ files = [
 
 [[package]]
 name = "python-snap7"
-version = "1.3"
-requires_python = ">=3.7"
+version = "2.0.2"
+requires_python = ">=3.9"
 summary = "Python wrapper for the snap7 library"
 groups = ["default"]
 files = [
-    {file = "python-snap7-1.3.tar.gz", hash = "sha256:fc2dada8e157a6e8f5e02b7a702f3103ec1d99ad2f06b69748a2c40405b3e229"},
-    {file = "python_snap7-1.3-py3-none-macosx_10_9_universal2.whl", hash = "sha256:c33ab26d7617ed527eaebdaf098f6947e70bb9338ada532db28397837a631831"},
-    {file = "python_snap7-1.3-py3-none-manylinux1_x86_64.whl", hash = "sha256:441d162f9dc08ab6790f1bd4e1940ca2fe8c0d9bdd7dda0ba4a4e7738dab82c8"},
-    {file = "python_snap7-1.3-py3-none-manylinux2014_aarch64.whl", hash = "sha256:f8bb72cf387b1af8e1e1b4bbbabf086ca7694c6024129c7a52054e3913f40ad6"},
-    {file = "python_snap7-1.3-py3-none-manylinux_2_24_armv7l.whl", hash = "sha256:5a7aaff9caceee34cfc3d0867d734990693430c353d56de08f7baaa05e7d0265"},
-    {file = "python_snap7-1.3-py3-none-win_amd64.whl", hash = "sha256:6eba58676033204e36e3ff957e3823c3076a20544f501a731b2ba62d96139cc6"},
+    {file = "python_snap7-2.0.2-py3-none-macosx_10_9_universal2.whl", hash = "sha256:ef46a030597014c6bd82dd7ec5b5b40817cb60f649d7370cab0c327636843e7d"},
+    {file = "python_snap7-2.0.2-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:b0238f71b83d94d5196437091fec7a0ce635baf7a43a0664561f5b2ecaf5a7f8"},
+    {file = "python_snap7-2.0.2-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:f893f363fdecaa21cf4b0f2648d2c71e30d2924e4f58f0993a6a59a818bdf96e"},
+    {file = "python_snap7-2.0.2-py3-none-win_amd64.whl", hash = "sha256:686e62b087a57c121758cba724ece2fb178d86a8e79f512bb40bf5160a6be833"},
+    {file = "python_snap7-2.0.2.tar.gz", hash = "sha256:10714da0d198f2c51b521c79dc00a0e273ae42c0abc5d44605a298266960d016"},
 ]
 
 [[package]]
