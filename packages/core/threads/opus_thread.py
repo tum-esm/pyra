@@ -486,11 +486,11 @@ class OpusThread(AbstractThread):
         # find the most recent files
         most_recent_files = utils.find_most_recent_files(
             ifg_file_directory,
-            time_limit=min(600, time_since_powerup - 60),
+            time_limit=min(900, time_since_powerup - 60),
             time_indicator="created",
         )
         logger.debug(
-            f"APP: Found {len(most_recent_files)} files created since the last powerup and less than 10 minutes old"
+            f"APP: Found {len(most_recent_files)} files created since the last powerup and less than 15 minutes old"
         )
 
         # remove unused cache items

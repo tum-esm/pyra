@@ -86,7 +86,7 @@ export default function ConfigSectionOpus() {
             <configurationComponents.ConfigElementNote>
                 <p>
                     The Automatic Peak Positioning (APP) feature searches for OPUS files that have
-                    been written to the local disk within the last 10 minutes and after the last
+                    been written to the local disk within the last 15 minutes and after the last
                     EM27/SUN powerup. It loads the interferograms from these OPUS files using the{' '}
                     <a
                         href="https://tum-esm-utils.netlify.app/api-reference#tum_esm_utilsopus"
