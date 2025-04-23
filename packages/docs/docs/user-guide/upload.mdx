@@ -6,7 +6,7 @@ hide_table_of_contents: true
 
 # Upload
 
-You can use this upload to transfer your interferograms, local pressure files, helios images or any other data generated day by day.
+You can use this upload to transfer your interferograms, local pressure files, Pyra logs, helios images, or any other data generated day by day.
 
 You can upload daily directories like this:
 
@@ -32,11 +32,10 @@ Or daily files like this:
 └── 📄 20190103.txt
 ```
 
-You just have to point the upload to one or more directories and specify a "date regex" - i.e. a regex that contains the symbols `%Y`, `%m`, and `%d` that matches your file/directory naming scheme.
+You just have to point the upload to one or more directories and specify a "date regex" - i.e., a regex that contains the symbols `%Y`, `%m`, and `%d` that matches your file/directory naming scheme.
 
 As long as the upload runs, there will be a file `data-directory-1/20190101/.do-not-touch` or `data-directory-2/.do-not-touch` that indicates that the upload is not finished yet. This file will be deleted after the checksum of the local and remote directory matches.
 
 Optionally, you can remove the local data, once the upload is done.
 
 You can read more about the `circadian-scp-upload` library [here](https://github.com/dostuffthatmatters/circadian-scp-upload). We have already uploaded about 8TB of data using this upload code and use it since 2022. The library has CI tests for all kinds of file system layouts - feel free to use it for your own projects :)
-

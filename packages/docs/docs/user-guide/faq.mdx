@@ -20,25 +20,25 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
 
 ## Pyra Shows a `filelock._error.Timeout` Exception
 
-In theory, Pyra may encounter a deadlock when reading state or log files - although we have never experienced it yet. The error message will say something like this:
+In theory, Pyra may encounter a deadlock when writing and reading state or log files. It is very rare (< once per instrument per 5 years) and mostly self-resolving since Pyra 4.2.1. The error message will say something like this:
 
 ```
 filelock._error.Timeout: The file lock 'C:\Users\ga56fem\Downloads\pyra\pyra-4.0.6\config\.state.lock' could not be acquired.
 ```
 
-You can use the CLI command `pyra-cli remove-filelocks` to resolve that.
+Stopping and restarting Pyra core resolves this error.
 
 :::note
 
-We are using the python library `filelock` to enforce exclusive use of state- and log-files: There should not be two processes simultaneously interacting with one of these files. This is necessary because we have at least 4 processes that work with these files: the CLI and the main-, upload- and helios-thread.
+We are using the Python library `filelock` to enforce exclusive use of state- and log-files: There should not be two processes simultaneously interacting with one of these files. This [semaphore](<https://en.wikipedia.org/wiki/Semaphore_(programming)>) is necessary because Pyra runs many threads accessing these files in parallel.
 
 :::
 
 ## Pyra Shuts Down The CamTracker Very Frequently
 
-There is a config setting `config.camtracker.motor_offset_threshold`, by default set to `10` degrees.
+The config setting `config.camtracker.motor_offset_threshold`, set to `10` degrees by default, controls the shutdown of CamTracker if it drifts too much.
 
-CamTracker reports its motor's offset from the theoretical sun position every few seconds. When the CamTracker has been on for at least 5 minutes, Pyra will check whether that reported offset is greater than the threshold. If so, Pyra will restart the CamTracker because this might mean that the CamTracker has lost the sun and is tracking something else in the sky.
+CamTracker reports its motor's offset from the theoretical sun position every few seconds. When CamTracker has been running for at least 5 minutes, Pyra will check whether that reported offset is greater than the threshold. If so, Pyra will restart the CamTracker because this might mean that the CamTracker has lost the sun and is tracking something else in the sky.
 
 In normal operation, you would see (debug) log lines like this every iteration:
 
@@ -46,7 +46,7 @@ In normal operation, you would see (debug) log lines like this every iteration:
 DEBUG - CamTracker motor position is valid
 ```
 
-If the motor position is not valid, you would see something like this:
+If the motor position is not valid, you will see something like this:
 
 ```log
 INFO - CamTracker motor position is over threshold.

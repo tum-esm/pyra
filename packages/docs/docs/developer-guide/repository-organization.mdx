@@ -48,10 +48,10 @@ hide_table_of_contents: true
 
 **Hierarchy:**
 
--   `development-...` contains stuff in active development and will be merged into `integration-x.y.z`.
--   `integration-x.y.z` is used during active station integration and will be merged into `main`.
--   `main` contains the latest running version that passed the integration and will be merged into `release` once enough changes have accumulated. Any branch can be released into `prerelease` to run the CI-Pipeline on demand.
--   `prerelease` will not be merged into anything else and is just used for development.
+- `development-...` contains stuff in active development and will be merged into `integration-x.y.z`.
+- `integration-x.y.z` is used during active station integration and will be merged into `main`.
+- `main` contains the latest running version that passed the integration and will be merged into `release` once enough changes have accumulated. Any branch can be released into `prerelease` to run the CI-Pipeline on demand.
+- `prerelease` will not be merged into anything else and is just used for development.
 
 ```mermaid
 graph TD;
@@ -64,32 +64,13 @@ graph TD;
 
 ## Issues and Releases
 
-Things we work on are managed via issues - bundled into milestones (each milestone represents a release). The issues should be closed once they are on the `main` branch via commit messages or pull requests ("closes #87", "fixes #70", etc. see [this list of keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)).
-
-**Issue Labels:**
-
--   <span className='tw-bg-gray-200 tw-text-gray-700 tw-px-1.5 tw-py-0.5 tw-rounded tw-font-mono tw-text-sm tw-font-bold'>
-        backlog
-    </span>
-    : Issues that are not urgent (feature ideas, improvements, etc.)
--   <span className='tw-bg-blue-200 tw-text-blue-700 tw-px-1.5 tw-py-0.5 tw-rounded tw-font-mono tw-text-sm tw-font-bold'>
-        status:...
-    </span>
-    : Used to indicate an issue's progress
--   <span className='tw-bg-green-200 tw-text-green-700 tw-px-1.5 tw-py-0.5 tw-rounded tw-font-mono tw-text-sm tw-font-bold'>
-        scope:...
-    </span>
-    : Used to indicate an issue's area of work
--   <span className='tw-bg-red-200 tw-text-red-700 tw-px-1.5 tw-py-0.5 tw-rounded tw-font-mono tw-text-sm tw-font-bold'>
-        type:...
-    </span>
-    : Used to indicate an issue's type of work
+Things we work on are managed via issues - bundled into milestones (each milestone represents a release). The issues should be closed once they are on the `main` branch via commit messages or pull requests ("closes #87", "fixes #70", etc. see [this list of keywords](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword)). The usage of each label is explained [here](https://github.com/tum-esm/pyra/labels).
 
 Planned releases are described on [GitHub](https://github.com/tum-esm/pyra/milestones).
 
 :::info
 
-We integrate new releases on two different machines. When the new software runs smoothly for some time, we make it an official release.
+We test new releases on two different machines. When the new software runs smoothly for some time, we make it an official release.
 
 :::
 

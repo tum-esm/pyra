@@ -8,31 +8,7 @@ hide_table_of_contents: true
 
 ## OPUS
 
-We use the `pywin32` Python library, which provides an interface to the [Windows DDE APIs](https://en.wikipedia.org/wiki/Dynamic_Data_Exchange). Pyra Core uses DDE to communicate with OPUS: Loading experiment files, starting and stopping macros, and stopping OPUS itself.
-
-```python
-import dde
-
-# initialize DDE client
-server = dde.CreateServer()
-server.Create("Client")
-conversation = dde.CreateConversation(server)
-
-# connect to OPUS
-conversation.ConnectTo("OPUS", "OPUS/System")
-assert self.conversation.Connected()
-
-# send a command to OPUS
-macro_path = "..."
-answer = conversation.Request(f"RUN_MACRO {macro_path}")
-logger.info(f"Started OPUS macro: {macro_path}")
-```
-
-:::note
-
-We are working on improving the reliability of that connection: https://github.com/tum-esm/pyra/issues/124
-
-:::
+Up to version 4.1.4, PYRA used DDE to communicate with OPUS. Since Microsoft replaced it internally with Windows 95, the interface has only been kept for compatibility reasons. This means that there is almost no documentation or libraries for DDE. Since OPUS also has an HTTP interface, Pyra 4.2.0 and above uses this HTTP interface. We added the OPUS HTTP Client to our Python utility library, so one can use it outside of PYRA to: [see `tum-esm-utils`](https://tum-esm-utils.netlify.app/example-usage#opus-http-interface).
 
 ## CamTracker
 
