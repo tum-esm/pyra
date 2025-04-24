@@ -295,6 +295,8 @@ class CamTrackerThread(AbstractThread):
                                             )
                                         )
                                     CamTrackerProgram.stop(config, logger)
+                                    camtracker_is_running = False
+                                    last_camtracker_start_time = None
                                     break
                         if cover_state == "open":
                             with interfaces.StateInterface.update_state() as state:
@@ -307,12 +309,7 @@ class CamTrackerThread(AbstractThread):
 
                 with interfaces.StateInterface.update_state() as state:
                     state.exceptions_state.current = [
-                        e
-                        for e in state.exceptions_state.current
-                        if (
-                            (e.origin != "camtracker")
-                            and (e.subject != "Camtracker was started but cover is closed.")
-                        )
+                        e for e in state.exceptions_state.current if ((e.origin != "camtracker") or (e.subject == "Camtracker was started but cover is closed."))
                     ]
 
                 # SLEEP
