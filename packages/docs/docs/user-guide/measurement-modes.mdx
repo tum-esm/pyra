@@ -12,7 +12,7 @@ The **"measurement decision"** (whether measurements should run or not) depends 
 - **Manual mode:** A start/stop button for manual control
 - **CLI mode:** The config contains a field where the CLI can add a decision result
 
-Pyra's measurement mode can be selected in the overview tab. In the logs and in the codebase, this system of determining whether to measure or not is called **Condition Assessment System (CAS)**.
+Pyra's measurement mode can be selected in the overview tab. In the logs and the codebase, this system of determining whether to measure or not is called **Condition Assessment System (CAS)**.
 
 <img src="/img/docs/measurement-modes.png" className="tw-rounded-lg tw-mb-4" />
 
@@ -32,8 +32,8 @@ In the configuration tab, you can select measurement triggers that should be con
 
 ## Manual Mode
 
-In manual mode, the system will always measure, when the sun is about the value configured at `config.general.min_sun_elevation` (you can set this to negative values too).
+In manual mode, the system will always measure when the sun is about the value configured at `config.general.min_sun_elevation` (you can set this to negative values too).
 
 ## CLI Mode
 
-CLI mode can be used when you have already built a system that evaluates measurement conditions and you want to tell Pyra when to start and stop measurements from an external source. Respective CLI commands are in the [next section](#cli-command-line-interface).
+CLI mode can be used when you have already built a system that evaluates measurement conditions and want to tell Pyra when to start and stop measurements from an external source. Respective CLI commands are in the [next section](#cli-command-line-interface).
