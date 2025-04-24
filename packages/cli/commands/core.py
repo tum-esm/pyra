@@ -175,7 +175,7 @@ def _pyra_core_is_running() -> None:
                 .strip("\n\t ")
                 .split("\n")
             )
-            for i, line in enumerate(lines)[::-1]:
+            for i, line in list(enumerate(lines))[::-1]:
                 if "main - INFO - " in line:
                     last_mainlog_line = i
 
@@ -206,9 +206,10 @@ def _pyra_core_is_running() -> None:
         # 3. only consider the log lines ± 200 lines around the last core activity
 
         last_mainlog_index: Optional[int] = None
-        for i, line in enumerate(lines)[::-1]:
+        for i, line in list(enumerate(log_lines))[::-1]:
             if "main - INFO - " in line:
                 last_mainlog_index = i
+                break
         assert last_mainlog_index is not None
 
         from_log_line_index = last_mainlog_index - 200

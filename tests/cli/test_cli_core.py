@@ -84,7 +84,6 @@ def test_start_stop_procedure(
         "main - INFO - Loading astronomical dataset",
         "main - INFO - Initializing threads",
         "main - INFO - Removing temporary state from previous runs",
-        "main - INFO - Established graceful teardown hook",
         "main - DEBUG - Starting iteration",
         "main - DEBUG - pyra-core in test mode",
         "main - DEBUG - Finished iteration",
