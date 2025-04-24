@@ -1,8 +1,10 @@
 """Start and stop the pyra-core background process."""
 
+import datetime
 import os
 import subprocess
 import sys
+from typing import Optional
 
 import click
 import filelock
@@ -80,7 +82,7 @@ def _stop_pyra_core() -> None:
 
     termination_pids = tum_esm_utils.processes.terminate_process(
         _RUN_PYRA_CORE_SCRIPT_PATH,
-        termination_timeout=8,
+        termination_timeout=20,
     )
     if len(termination_pids) == 0:
         _print_red("No active process to be terminated")
@@ -153,49 +155,87 @@ def _pyra_core_is_running() -> None:
     else:
         _print_red("pyra-core is not running")
 
-        # check whether the following 3 log lines are at the end of the current log file
-        # crop 38 chars at the beginning of each line ("2025-01-13 22:45:01.756072 UTC+0100 - ")
-        expected_log_lines = [
-            'cli - INFO - running command "core stop"',
-            "main - INFO - Received shutdown signal, starting graceful teardown",
-            "main - INFO - Graceful teardown complete",
-        ]
+        # CHECK WHETHER PYRA CORE WAS PROPERLY SHUT DOWN
+
+        # 1. search for the latest time the core was running
+
         logs_archive_path = os.path.join(_PROJECT_DIR, "logs", "archive")
-        log_files = [f for f in sorted(os.listdir(logs_archive_path)) if f.endswith("-debug.log")]
-        if len(log_files) == 0:
-            return
-        latest_log_file_path = os.path.join(logs_archive_path, log_files[-1])
-        latest_log_lines = [
-            (l[38:] if len(l) > 38 else l)
-            for l in tum_esm_utils.files.load_file(latest_log_file_path).strip("\n\t ").split("\n")
+        logfile_names = [
+            f for f in sorted(os.listdir(logs_archive_path)) if f.endswith("-debug.log")
         ]
-        if len(latest_log_lines) < 20:
+        last_main_log_date: Optional[datetime.date] = None
+        for logfile_name in logfile_names:
+            last_mainlog_line: Optional[int] = None
+            lines = (
+                tum_esm_utils.files.load_file(os.path.join(logs_archive_path, logfile_name))
+                .strip("\n\t ")
+                .split("\n")
+            )
+            for i, line in enumerate(lines)[::-1]:
+                if "main - INFO - " in line:
+                    last_mainlog_line = i
+
+            if last_mainlog_line is not None:
+                try:
+                    last_main_log_date = datetime.datetime.strptime(
+                        logfile_name[:10], "%Y-%m-%d"
+                    ).date()
+                except ValueError:
+                    pass
+        if last_main_log_date is None:
+            _print_red("core has never run before")
             return
 
-        # if not properly shut down, raise an exception and send an email
-        for el in expected_log_lines:
-            if el not in latest_log_lines[-20:]:
-                _print_red("pyra-core is not running")
-                _print_red(
-                    f"Pyra Core has not been shut down properly. Expected log line '{el}' not found in the last 20 lines of {latest_log_file_path}"
-                )
+        # 2. load the three log files around that date (date and date ± 1 day)
 
-                new_exception_state_item = types.ExceptionStateItem(
-                    origin="cli",
-                    subject="PyraCoreNotRunning",
-                    details="Pyra Core has not been shut down properly.",
-                    send_emails=True,
-                )
-                with interfaces.StateInterface.update_state() as s:
-                    if new_exception_state_item not in s.exceptions_state.current:
-                        _print_red("exception not raised yet, loading config")
-                        config = types.Config.load()
-                        utils.ExceptionEmailClient.handle_occured_exceptions(
-                            config, [new_exception_state_item]
-                        )
-                        s.exceptions_state.current.append(new_exception_state_item)
-                        s.exceptions_state.notified.append(new_exception_state_item)
-                    else:
-                        _print_red("exception already raised")
+        log_lines: list[str] = []
+        for offset in [-1, 0, 1]:
+            logfile_path = os.path.join(
+                logs_archive_path,
+                (last_main_log_date + datetime.timedelta(days=offset)).strftime(
+                    "%Y-%m-%d-debug.log"
+                ),
+            )
+            if os.path.exists(logfile_path):
+                log_lines += tum_esm_utils.files.load_file(logfile_path).strip("\t\n ").split("\n")
 
-                return
+        # 3. only consider the log lines ± 200 lines around the last core activity
+
+        last_mainlog_index: Optional[int] = None
+        for i, line in enumerate(lines)[::-1]:
+            if "main - INFO - " in line:
+                last_mainlog_index = i
+        assert last_mainlog_index is not None
+
+        from_log_line_index = last_mainlog_index - 200
+        to_log_line_index = last_mainlog_index + 200
+        if from_log_line_index < 0:
+            from_log_line_index = 0
+        if to_log_line_index >= len(log_lines):
+            to_log_line_index = len(log_lines) - 1
+        log_lines = log_lines[from_log_line_index:to_log_line_index]
+
+        # 4. Check whether core has been stopped properly
+
+        if 'cli - INFO - running command "core stop"' not in "\n".join(log_lines):
+            _print_red(f"Pyra Core has not been shut down properly")
+
+            new_exception_state_item = types.ExceptionStateItem(
+                origin="cli",
+                subject="PyraCoreNotRunning",
+                details="Pyra Core has not been shut down properly.",
+                send_emails=True,
+            )
+            with interfaces.StateInterface.update_state() as s:
+                if new_exception_state_item not in s.exceptions_state.current:
+                    _print_red("exception not raised yet, loading config")
+                    config = types.Config.load()
+                    utils.ExceptionEmailClient.handle_occured_exceptions(
+                        config, [new_exception_state_item]
+                    )
+                    s.exceptions_state.current.append(new_exception_state_item)
+                    s.exceptions_state.notified.append(new_exception_state_item)
+                else:
+                    _print_red("exception already raised")
+
+            return
