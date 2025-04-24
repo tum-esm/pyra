@@ -8,6 +8,27 @@ hide_table_of_contents: true
 
 Whenever powering up the spectrometer, the EM27/SUN does not know position of the pendulum fully accurate. That is why it is recommended to save the center position of recorded interferograms after every power up so that no points on one ifg side get lost because it is not stored centered. In OPUS, you can do this in "Measure > Setup Measurement Parameters > Check Signal". Or you can let PYRA do this after every power up by configuring it in the OPUS Configuration and save a few minutes per system per day.
 
-The Automatic Peak Positioning (APP) feature searches for OPUS files that have been written to the local disk within the last 15 minutes and after the last EM27/SUN powerup. It loads the interferograms from these OPUS files using the [`tum-esm-utils`](https://tum-esm-utils.netlify.app/api-reference#tum_esm_utilsopus) Python library and calculates the peak position. If the peak position from the last five readable OPUS files is identical and is less than 200 points off the center, it will send this new peak position to the EM27/SUN.
 
-Make sure to unload the ifg files frequently because the files loaded by OPUS cannot be read by any other program.
+The logs from the OPUS thread when performing the APP will look something like this:
+
+```log
+2025-04-19 04:44:23.020353 UTC+0000 - opus - DEBUG - Starting iteration
+2025-04-19 04:44:23.023355 UTC+0000 - opus - DEBUG - Loading configuration file
+2025-04-19 04:44:23.042385 UTC+0000 - opus - DEBUG - Checking if OPUS is running
+2025-04-19 04:44:23.082358 UTC+0000 - opus - DEBUG - Macro is running as expected
+2025-04-19 04:44:23.116354 UTC+0000 - opus - INFO - Trying to set peak position
+2025-04-19 04:44:23.140355 UTC+0000 - opus - DEBUG - APP: Time since last powerup is 5280.00 seconds
+2025-04-19 04:44:23.148357 UTC+0000 - opus - DEBUG - APP: Found 9 files created since the last powerup and less than 10 minutes old
+2025-04-19 04:44:23.152385 UTC+0000 - opus - DEBUG - APP: C:\MESSUNGEN\20250419\ma20250419s0e00a.0009 - Could not determine peak position ([Errno 13] Permission denied: 'C:\MESSUNGEN\20250419\ma20250419s0e00a.0009')
+2025-04-19 04:44:23.204388 UTC+0000 - opus - DEBUG - APP: C:\MESSUNGEN\20250419\ma20250419s0e00a.0008 - Found peak position 57123 (ABP = 60237, DC amplitude = 0.03186991322785616)
+2025-04-19 04:44:23.258355 UTC+0000 - opus - DEBUG - APP: C:\MESSUNGEN\20250419\ma20250419s0e00a.0007 - Found peak position 57123 (ABP = 60237, DC amplitude = 0.0316972940415144)
+2025-04-19 04:44:23.316386 UTC+0000 - opus - DEBUG - APP: C:\MESSUNGEN\20250419\ma20250419s0e00a.0006 - Found peak position 57123 (ABP = 60237, DC amplitude = 0.03151779551059008)
+2025-04-19 04:44:23.371357 UTC+0000 - opus - DEBUG - APP: C:\MESSUNGEN\20250419\ma20250419s0e00a.0005 - Found peak position 57123 (ABP = 60237, DC amplitude = 0.031326398849487305)
+2025-04-19 04:44:23.427355 UTC+0000 - opus - DEBUG - APP: C:\MESSUNGEN\20250419\ma20250419s0e00a.0004 - Found peak position 57123 (ABP = 60237, DC amplitude = 0.031152355410158636)
+2025-04-19 04:44:23.430355 UTC+0000 - opus - DEBUG - APP: Currently configured ABP is 60237
+2025-04-19 04:44:23.434366 UTC+0000 - opus - DEBUG - Currently recorded interferograms have peak positions: 57123 (-5 points offset from center)
+2025-04-19 04:44:23.437387 UTC+0000 - opus - INFO - Updating peak position from 60237 to 60232
+2025-04-19 04:44:23.512354 UTC+0000 - opus - DEBUG - Sleeping 19.51 seconds
+```
+
+Ensure to unload the interferogram files frequently because the files loaded by OPUS cannot be read by any other program. Otherwise, you will see many `Permission denied` exceptions until Pyra finds the first interferogram file from which to read the peak position.
