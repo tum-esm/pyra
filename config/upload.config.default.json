@@ -2,7 +2,7 @@
   "host": "1.2.3.4",
   "user": "...",
   "password": "...",
-  "is_active": false,
+  "is_active": true,
   "only_upload_at_night": true,
   "only_upload_when_not_measuring": true,
   "streams": [
