@@ -1,8 +1,6 @@
 import os
-import signal
 import sys
 import time
-from typing import Any
 
 from packages.core import interfaces, threads, types, utils
 
@@ -89,19 +87,6 @@ def run() -> None:
     with interfaces.StateInterface.update_state() as state:
         state.reset()
         state.exceptions_state.clear_exception_subject("PyraCoreNotRunning")
-
-    # Before shutting down: save the current activity history and log
-    # that the core is shutting down
-    def _graceful_teardown(*args: Any) -> None:
-        logger.info("Received shutdown signal, starting graceful teardown")
-        with interfaces.StateInterface.update_state() as state:
-            state.reset()
-        logger.info("Graceful teardown complete")
-        exit(0)
-
-    signal.signal(signal.SIGINT, _graceful_teardown)
-    signal.signal(signal.SIGTERM, _graceful_teardown)
-    logger.info("Established graceful teardown hook")
 
     while True:
         start_time = time.time()

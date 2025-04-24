@@ -143,6 +143,10 @@ def _stop_pyra_core() -> None:
         _print_red(f"Failed to close OPUS: {e}")
         exit(1)
 
+    _print_green("Successfully closed all processes, resetting temporary state")
+    with interfaces.StateInterface.update_state() as state:
+        state.reset()
+
 
 @core_command_group.command(
     name="is-running", help="Checks whether the pyra-core background process is running."
