@@ -82,6 +82,7 @@ class PartialOpusConfig(StricterBaseModel):
     username: Optional[str] = None
     password: Optional[str] = None
     automatic_peak_positioning: Optional[bool] = None
+    automatic_peak_positioning_dcmin: Optional[float] = None
     interferogram_path: Optional[str] = None
 
 
