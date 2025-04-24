@@ -22,7 +22,7 @@ export const configSchema = z.object({
         username: z.string(),
         password: z.string(),
         automatic_peak_positioning: z.boolean(),
-        automatic_peak_positioning_dcmin: z.number(),
+        automatic_peak_positioning_dcmin: floatSchema,
         interferogram_path: z.string(),
     }),
     camtracker: z.object({
