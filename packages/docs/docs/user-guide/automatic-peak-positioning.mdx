@@ -1,0 +1,13 @@
+---
+sidebar_position: 6
+sidebar_label: Automatic Peak Positioning
+hide_table_of_contents: true
+---
+
+# Automatic Peak Positioning (APP)
+
+Whenever powering up the spectrometer, the EM27/SUN does not know position of the pendulum fully accurate. That is why it is recommended to save the center position of recorded interferograms after every power up so that no points on one ifg side get lost because it is not stored centered. In OPUS, you can do this in "Measure > Setup Measurement Parameters > Check Signal". Or you can let PYRA do this after every power up by configuring it in the OPUS Configuration and save a few minutes per system per day.
+
+The Automatic Peak Positioning (APP) feature searches for OPUS files that have been written to the local disk within the last 15 minutes and after the last EM27/SUN powerup. It loads the interferograms from these OPUS files using the [`tum-esm-utils`](https://tum-esm-utils.netlify.app/api-reference#tum_esm_utilsopus) Python library and calculates the peak position. If the peak position from the last five readable OPUS files is identical and is less than 200 points off the center, it will send this new peak position to the EM27/SUN.
+
+Make sure to unload the ifg files frequently because the files loaded by OPUS cannot be read by any other program.
