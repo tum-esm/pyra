@@ -1,48 +1,12 @@
 ---
-sidebar_position: 4
-sidebar_label: Measurements
+sidebar_position: 5
+sidebar_label: Command Line Interface
 hide_table_of_contents: true
 ---
 
-# How to Start and Stop Measurements via CLI and UI
+# Command Line Interface (CLI)
 
-## Measurement Modes and Triggers
-
-The **measurement decision** (whether measurements should run or not) depends on the **measurement mode**:
-
-- **Automatic mode:** Measurement decision is made based on defined triggers (see below)
-- **Manual mode:** A start/stop button for manual control
-- **CLI mode:** The config contains a field where the CLI can add a decision result
-
-:::tip
-
-CLI mode can be used when you have already built a system that evaluates measurement conditions and you want to use Pyra for the rest of the operation. Respective CLI commands are in the [next section](#cli-command-line-interface).
-
-:::
-
-In the automation tab, Pyra's measurement mode can be selected.
-
-<img src="/img/docs/measurement-modes.png" className="tw-rounded-lg tw-mb-4" />
-
-In the configuration tab, you can select measurement triggers that should be considered in automatic mode. When multiple triggers are set, all triggers must be positive to start measurements (e.g., "above a certain sun angle AND between start and end time").
-
-<img src="/img/docs/triggers-config.png" className="tw-rounded-lg tw-mb-4" />
-
-:::note
-
-**Helios** is our module to determine whether direct sunlight (required by the EM27/SUN) is present. Please read about it [here](/docs/user-guide/tum-enclosure-and-helios).
-
-:::
-
-## CLI (Command Line Interface)
-
-:::tip
-
-Everything seen/clicked in the GUI can also be read/written via the CLI.
-
-The usage of any command is explained in its help menu (available in the terminal).
-
-:::
+Everything seen/clicked in the GUI can also be read/written via the CLI. All available commands can be found in the help menu (available in the terminal).
 
 ### CLI: Help Menu Examples
 
