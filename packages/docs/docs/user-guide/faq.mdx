@@ -54,3 +54,17 @@ INFO - Stopping CamTracker. Preparing for reinitialization.
 ```
 
 If that restart happens too often for your use case, you can increase this factor - or set it to `360` to disable it completely.
+
+## Exception "OPUS HTTP interface did not start within 90 seconds"
+
+When setting up a new system, it can happen that Pyra cannot connect to OPUS via the HTTP interface.
+
+1. The first time you start Pyra core, you will be asked to grant it some firewall permissions – in a Windows popup.
+
+2. After that, it is possible that some other software is using the localhost with a webserver. You have to disable this other software or move it to another port. Common software being enabled by default are the "Microsoft Internet Information Service" and
+
+## The system storage is very full even though there is not much data on it
+
+Due to the 24/7 operation of the systems, Windows might collect large amounts of temporary files and does not even remove them on restarts. We cannot influence this behavior, but only raise an exception when the System's storage is filled up by more than 90%.
+
+You can use the app [TreeSize](https://apps.microsoft.com/detail/xpddxv3sd1sb5k) or its free version [TreeSize Free](https://apps.microsoft.com/detail/xp9m26rsclnt88) to check where the storage is used.
