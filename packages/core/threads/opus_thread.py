@@ -44,8 +44,8 @@ class OpusProgram:
                 timeout_seconds=90,
                 check_interval_seconds=5,
             )
-        except TimeoutError:
-            raise ConnectionError("OPUS HTTP interface did not start within 90 seconds.")
+        except TimeoutError as e:
+            raise ConnectionError("OPUS HTTP interface did not start within 90 seconds.") from e
 
         logger.info("Successfully started OPUS")
         time.sleep(3)

@@ -87,7 +87,7 @@ def _update_config(content: str) -> None:
             ignore_path_existence=True,
         )
     except Exception as e:
-        raise RuntimeError(f"Could not load the current config.json file: {e}")
+        raise RuntimeError(f"Could not load the current config.json file: {e}") from e
 
     try:
         new_partial_config = types.PartialConfig.load(

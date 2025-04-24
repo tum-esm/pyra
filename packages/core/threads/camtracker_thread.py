@@ -140,7 +140,7 @@ class CamTrackerProgram:
         try:
             last_line = utils.read_last_file_line(ct_logfile_path)
         except OSError as e:
-            raise AssertionError(f"CamTracker logfile is empty: {e}")
+            raise AssertionError(f"CamTracker logfile is empty") from e
 
         # last_line: [Julian Date, Tracker Elevation, Tracker Azimuth,
         # Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px]
@@ -156,8 +156,8 @@ class CamTrackerProgram:
                 float(str_values[4]),
                 float(str_values[5]),
             )
-        except (AssertionError, ValueError):
-            raise AssertionError(f'Invalid last logfile line "{last_line}"')
+        except (AssertionError, ValueError) as e:
+            raise AssertionError(f'Invalid last logfile line "{last_line}"') from e
 
         return TrackerPosition(
             dt=(
