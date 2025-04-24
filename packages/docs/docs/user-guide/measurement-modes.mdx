@@ -4,30 +4,36 @@ sidebar_label: Measurement Modes
 hide_table_of_contents: true
 ---
 
-# Measurement Modes and Triggers
+# Measurement Modes
 
-The **measurement decision** (whether measurements should run or not) depends on the **measurement mode**:
+The **"measurement decision"** (whether measurements should run or not) depends on the **"measurement mode"**:
 
 - **Automatic mode:** Measurement decision is made based on defined triggers (see below)
 - **Manual mode:** A start/stop button for manual control
 - **CLI mode:** The config contains a field where the CLI can add a decision result
 
-:::tip
-
-CLI mode can be used when you have already built a system that evaluates measurement conditions and you want to use Pyra for the rest of the operation. Respective CLI commands are in the [next section](#cli-command-line-interface).
-
-:::
-
-In the automation tab, Pyra's measurement mode can be selected.
+Pyra's measurement mode can be selected in the overview tab.
 
 <img src="/img/docs/measurement-modes.png" className="tw-rounded-lg tw-mb-4" />
 
-In the configuration tab, you can select measurement triggers that should be considered in automatic mode. When multiple triggers are set, all triggers must be positive to start measurements (e.g., "above a certain sun angle AND between start and end time").
+## Automatic Mode
+
+In automatic mode, Pyra does measurements when certain conditions are met:
+
+- start/stop time
+- minimum sun elevation
+- Helios
+
+In the configuration tab, you can select measurement triggers that should be considered in automatic mode. When multiple triggers are set, all triggers must be positive to start measurements (e.g., "above a certain sun elevation AND between start and end time").
 
 <img src="/img/docs/triggers-config.png" className="tw-rounded-lg tw-mb-4" />
 
-:::note
-
 **Helios** is our module to determine whether direct sunlight (required by the EM27/SUN) is present. Please read about it [here](/docs/user-guide/tum-enclosure-and-helios).
 
-:::
+## Manual Mode
+
+In manual mode, the system will always measure, when the sun is about the value configured at `config.general.min_sun_elevation` (you can set this to negative values too).
+
+## CLI Mode
+
+CLI mode can be used when you have already built a system that evaluates measurement conditions and you want to tell Pyra when to start and stop measurements from an external source. Respective CLI commands are in the [next section](#cli-command-line-interface).
