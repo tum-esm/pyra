@@ -33,7 +33,7 @@ jobs:
           script: |
             const version = '${{ steps.read_version.outputs.version }}';
             const tag = `v${version}`;
-            const { data: tags } = await github.repos.listTags({
+            const { data: tags } = await github.rest.repos.listTags({
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
