@@ -10,7 +10,7 @@ authors = [
 ]
 dependencies = [
     "numpy>=2.2.5",
-    "click>=8.1.8",
+    "click==8.1.8",
     "python-snap7==2.0.2",
     "jdcal==1.4.1",
     "tqdm>=4.67.1",
