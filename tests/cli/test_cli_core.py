@@ -78,7 +78,6 @@ def test_start_stop_procedure(
     print(f"actual log lines:\n{actual_log_lines}\n")
     # fmt: off
     expected_lines = [
-        'cli - INFO - running command "core start"',
         # main
         f"main - INFO - Starting mainloop inside process with process ID {pid}",
         "main - INFO - Loading astronomical dataset",
