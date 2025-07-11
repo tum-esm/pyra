@@ -1,6 +1,6 @@
 [project]
 name = "pyra"
-version = "4.2.2"
+version = "4.2.3"
 description = "Automated EM27/SUN Greenhouse Gas Measurements"
 authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
@@ -57,7 +57,9 @@ exclude = ["tests/*"]
 strict = true
 implicit_reexport = true
 warn_unused_ignores = false
-untyped_calls_exclude = ["skimage"]
+untyped_calls_exclude = [
+    "skimage",
+]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
