@@ -101,7 +101,7 @@ class TUMEnclosureInterface:
     """
 
     @staticmethod
-    class PLCError(Exception):
+    class PLCError(BaseException):
         """
         Raised when updating a boolean value on the
         plc did not change its internal value.
@@ -281,7 +281,7 @@ class TUMEnclosureInterface:
                 ),
             )
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError from e
+            raise TUMEnclosureInterface.PLCError() from e
 
     # LOW LEVEL READ FUNCTIONS
 
@@ -305,7 +305,7 @@ class TUMEnclosureInterface:
             self.__sleep_while_cpu_is_busy()
             return value
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError from e
+            raise TUMEnclosureInterface.PLCError() from e
 
     def __write_int(self, action: tuple[int, int, int], value: int) -> None:
         """Changes an INT value in the PLC database."""
@@ -317,7 +317,7 @@ class TUMEnclosureInterface:
             self.plc.db_write(db_number, start, msg)
             self.__sleep_while_cpu_is_busy()
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError from e
+            raise TUMEnclosureInterface.PLCError() from e
 
     def __read_bool(self, action: tuple[int, int, int, int]) -> bool:
         """Reads a BOOL value in the PLC database."""
@@ -329,7 +329,7 @@ class TUMEnclosureInterface:
             self.__sleep_while_cpu_is_busy()
             return value
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError from e
+            raise TUMEnclosureInterface.PLCError() from e
 
     def __write_bool(self, action: tuple[int, int, int, int], value: bool) -> None:
         """Changes a BOOL value in the PLC database."""
@@ -341,7 +341,7 @@ class TUMEnclosureInterface:
             self.plc.db_write(db_number, start, msg)
             self.__sleep_while_cpu_is_busy()
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError from e
+            raise TUMEnclosureInterface.PLCError() from e
 
     # PLC.POWER SETTERS
 

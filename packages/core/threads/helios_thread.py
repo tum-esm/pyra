@@ -116,8 +116,7 @@ class HeliosInterface:
     def __del__(self) -> None:
         """Release the camera"""
 
-        if self.camera is not None:
-            self.camera.release()
+        self.camera.release()
 
     def get_available_exposures(self) -> list[int]:
         """Loop over every integer in [-20, ..., +20] and try to set
@@ -222,9 +221,9 @@ class HeliosInterface:
             # set new exposure and wait 0.3s after setting it
             self.camera.set(cv.CAP_PROP_EXPOSURE, exposure)
             time.sleep(0.2)
-            assert (
-                self.camera.get(cv.CAP_PROP_EXPOSURE) == exposure
-            ), f"Could not set exposure to {exposure}"
+            assert self.camera.get(cv.CAP_PROP_EXPOSURE) == exposure, (
+                f"Could not set exposure to {exposure}"
+            )
 
             # throw away some images after changing settings. I don't know
             # why this is necessary, but it resolves a lot of issues
@@ -241,7 +240,7 @@ class HeliosInterface:
                 draw = ImageDraw.Draw(pil_image)
                 draw.text((10, 10), f"mean={mean_colors[-1]}", (255, 255, 255), font_size=25)
                 pil_image.save(
-                    os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i+1}.jpg")
+                    os.path.join(_AUTOEXPOSURE_IMG_DIR, f"exposure-{exposure}-{i + 1}.jpg")
                 )
 
             # calculate mean color of all 3 images

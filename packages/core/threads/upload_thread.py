@@ -110,7 +110,7 @@ class UploadThread(AbstractThread):
                     time.sleep(15)
                     continue
 
-                with circadian_scp_upload.RemoteConnection(
+                with circadian_scp_upload.client.RemoteConnection(
                     config.upload.host.root,
                     config.upload.user,
                     config.upload.password,
@@ -123,13 +123,13 @@ class UploadThread(AbstractThread):
                             s.activity.upload_is_running = True
                         logger.info(f"starting to upload '{stream.label}'")
                         logger.debug(f"stream config: {stream.model_dump_json()}")
-                        circadian_scp_upload.DailyTransferClient(
+                        circadian_scp_upload.client.DailyTransferClient(
                             remote_connection=remote_connection,
                             src_path=stream.src_directory.root,
                             dst_path=stream.dst_directory,
                             remove_files_after_upload=stream.remove_src_after_upload,
                             variant=stream.variant,
-                            callbacks=circadian_scp_upload.UploadClientCallbacks(
+                            callbacks=circadian_scp_upload.utils.UploadClientCallbacks(
                                 dated_regex=stream.dated_regex,
                                 log_info=lambda message: logger.debug(
                                     f"{stream.label} - {message}"
