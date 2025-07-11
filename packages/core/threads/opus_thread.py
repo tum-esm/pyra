@@ -122,18 +122,22 @@ class OpusThread(AbstractThread):
     peak_position_cache: dict[str, tuple[int, int]] = {}
 
     @staticmethod
-    def should_be_running(config: types.Config) -> bool:
+    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
         """Based on the config, should the thread be running or not?"""
         return True
 
     @staticmethod
-    def get_new_thread_object() -> threading.Thread:
+    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=OpusThread.main, daemon=True)
+        return threading.Thread(
+            target=OpusThread.main,
+            daemon=True,
+            args=(logs_lock),
+        )
 
     @staticmethod
-    def main(headless: bool = False) -> None:
-        logger = utils.Logger(origin="opus")
+    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
+        logger = utils.Logger(origin="opus", lock=logs_lock)
         logger.info("Starting OPUS thread")
 
         current_experiment: Optional[str] = None  # filepath

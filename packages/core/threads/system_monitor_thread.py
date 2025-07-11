@@ -14,22 +14,26 @@ class SystemMonitorThread(AbstractThread):
     logger_origin = "system-monitor-thread"
 
     @staticmethod
-    def should_be_running(config: types.Config) -> bool:
+    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
         """Based on the config, should the thread be running or not?"""
 
         return True
 
     @staticmethod
-    def get_new_thread_object() -> threading.Thread:
+    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=SystemMonitorThread.main, daemon=True)
+        return threading.Thread(
+            target=SystemMonitorThread.main,
+            daemon=True,
+            args=(logs_lock),
+        )
 
     @staticmethod
-    def main(headless: bool = False) -> None:
+    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="system-monitor", just_print=headless)
+        logger = utils.Logger(origin="system-monitor", lock=logs_lock, just_print=headless)
         logger.info("Starting System Monitor thread")
         activity_history_interface = interfaces.ActivityHistoryInterface(logger)
         thread_start_time = time.time()

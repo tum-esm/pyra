@@ -332,7 +332,7 @@ class HeliosThread(AbstractThread):
     logger_origin = "helios-thread"
 
     @staticmethod
-    def should_be_running(config: types.Config) -> bool:
+    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
         """Based on the config, should the thread be running or not?"""
 
         return (
@@ -342,16 +342,20 @@ class HeliosThread(AbstractThread):
         )
 
     @staticmethod
-    def get_new_thread_object() -> threading.Thread:
+    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=HeliosThread.main, daemon=True)
+        return threading.Thread(
+            target=HeliosThread.main,
+            daemon=True,
+            args=(logs_lock),
+        )
 
     @staticmethod
-    def main(headless: bool = False) -> None:
+    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="helios", just_print=headless)
+        logger = utils.Logger(origin="helios", lock=logs_lock, just_print=headless)
         logger.info("Starting Helios thread")
         thread_start_time = time.time()
 

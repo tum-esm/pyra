@@ -20,7 +20,7 @@ class UploadThread(AbstractThread):
     last_measurement_time: Optional[datetime.datetime] = None
 
     @staticmethod
-    def should_be_running(config: types.Config) -> bool:
+    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
         """Based on the config, should the thread be running or not?"""
 
         # only upload when upload is configured
@@ -57,23 +57,27 @@ class UploadThread(AbstractThread):
 
         if not should_be_running:
             if any([e.origin == "upload" for e in current_state.exceptions_state.current]):
-                with interfaces.StateInterface.update_state() as s:
+                with interfaces.StateInterface.update_state(logger) as s:
                     s.activity.upload_is_running = False
                     s.exceptions_state.clear_exception_origin("upload")
 
         return should_be_running
 
     @staticmethod
-    def get_new_thread_object() -> threading.Thread:
+    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=UploadThread.main, daemon=True)
+        return threading.Thread(
+            target=UploadThread.main,
+            daemon=True,
+            args=(logs_lock),
+        )
 
     @staticmethod
-    def main(headless: bool = False) -> None:
+    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="upload", just_print=headless)
+        logger = utils.Logger(origin="upload", lock=logs_lock, just_print=headless)
         logger.info("Starting Upload thread")
         thread_start_time = time.time()
 

@@ -1,5 +1,6 @@
 import os
 import sys
+import threading
 import time
 
 from packages.core import interfaces, threads, types, utils
@@ -33,7 +34,8 @@ def run() -> None:
     and stopping the different threads, and sendinging out emails on occured
     and resolved exceptions. The actual work is done by the threads."""
 
-    logger = utils.Logger(origin="main", main_thread=True)
+    logs_lock = threading.Lock()
+    logger = utils.Logger(origin="main", lock=logs_lock, main_thread=True)
     logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
 
     # Loop until a valid config has been found. Without
@@ -74,13 +76,13 @@ def run() -> None:
     # load the config periodically and stop themselves
     logger.info("Initializing threads")
     thread_instances: list[threads.abstract_thread.AbstractThread] = [
-        threads.CamTrackerThread(),
-        threads.CASThread(),
-        threads.HeliosThread(),
-        threads.OpusThread(),
-        threads.SystemMonitorThread(),
-        threads.TUMEnclosureThread(),
-        threads.UploadThread(),
+        threads.CamTrackerThread(logs_lock),
+        threads.CASThread(logs_lock),
+        threads.HeliosThread(logs_lock),
+        threads.OpusThread(logs_lock),
+        threads.SystemMonitorThread(logs_lock),
+        threads.TUMEnclosureThread(logs_lock),
+        threads.UploadThread(logs_lock),
     ]
 
     logger.info("Removing temporary state from previous runs")

@@ -175,21 +175,25 @@ class CamTrackerThread(AbstractThread):
     logger_origin = "camtracker-thread"
 
     @staticmethod
-    def should_be_running(config: types.Config) -> bool:
+    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
         """Based on the config, should the thread be running or not?"""
 
         return not config.general.test_mode
 
     @staticmethod
-    def get_new_thread_object() -> threading.Thread:
+    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
         """Return a new thread object that is to be started."""
-        return threading.Thread(target=CamTrackerThread.main, daemon=True)
+        return threading.Thread(
+            target=CamTrackerThread.main,
+            daemon=True,
+            args=(logs_lock),
+        )
 
     @staticmethod
-    def main(headless: bool = False) -> None:
+    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
         """Main entrypoint of the thread."""
 
-        logger = utils.Logger(origin="camtracker", just_print=headless)
+        logger = utils.Logger(origin="camtracker", lock=logs_lock, just_print=headless)
         logger.info("Starting CamTracker thread")
         last_camtracker_start_time: Optional[float] = None
         thread_start_time = time.time()
