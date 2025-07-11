@@ -15,7 +15,7 @@ _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "logs", ".state.lock")
 _STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
 
-# TODO: migrate state lock from filelock.Lock to threading.Lock
+# TODO: reduce the number of state updates (only update when it changes)
 
 
 class StateInterface:

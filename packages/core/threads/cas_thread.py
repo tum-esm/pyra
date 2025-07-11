@@ -54,7 +54,7 @@ class CASThread(AbstractThread):
                     time.sleep(0.1)  # for the tests to work
 
                 logger.debug("Loading state file")
-                state = interfaces.StateInterface.load_state()
+                state = interfaces.StateInterface.load_state(logger)
 
                 # FETCH COORDINATES AND SUN ELEVATION
 
@@ -117,13 +117,13 @@ class CASThread(AbstractThread):
 
                 # UPDATE STATE
 
-                with interfaces.StateInterface.update_state() as s:
+                with interfaces.StateInterface.update_state(logger) as s:
                     s.position.latitude = camtracker_coordinates[0]
                     s.position.longitude = camtracker_coordinates[1]
                     s.position.altitude = camtracker_coordinates[2]
                     s.position.sun_elevation = sun_elevation
                     s.measurements_should_be_running = should_measure
-                    state.exceptions_state.clear_exception_origin("cas")
+                    s.exceptions_state.clear_exception_origin("cas")
 
                 # SLEEP
 
@@ -134,8 +134,8 @@ class CASThread(AbstractThread):
 
             except Exception as e:
                 logger.exception(e)
-                with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin="cas", exception=e)
+                with interfaces.StateInterface.update_state(logger) as s:
+                    s.exceptions_state.add_exception(origin="cas", exception=e)
 
     @staticmethod
     def get_automatic_decision(

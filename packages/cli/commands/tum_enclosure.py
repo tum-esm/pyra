@@ -76,9 +76,9 @@ def _reset() -> None:
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
-                with interfaces.StateInterface.update_state() as state:
-                    if state.tum_enclosure_state is not None:
-                        state.tum_enclosure_state.state.reset_needed = False
+                with interfaces.StateInterface.update_state(logger) as s:
+                    if s.tum_enclosure_state is not None:
+                        s.tum_enclosure_state.state.reset_needed = False
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
         _print_green("Ok")
@@ -95,9 +95,9 @@ def _wait_until_cover_is_at_angle(
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
-            with interfaces.StateInterface.update_state() as state:
-                state.tum_enclosure_state.actors.current_angle = current_cover_angle
-                state.tum_enclosure_state.state.cover_closed = current_cover_angle == 0
+            with interfaces.StateInterface.update_state(logger) as s:
+                s.tum_enclosure_state.actors.current_angle = current_cover_angle
+                s.tum_enclosure_state.state.cover_closed = current_cover_angle == 0
             break
 
         if running_time > timeout:
@@ -118,9 +118,9 @@ def _set_cover_angle(angle: str) -> None:
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
         new_cover_angle = int("".join([c for c in str(angle) if c.isnumeric() or c == "."]))
-        assert (new_cover_angle == 0) or (
-            new_cover_angle >= 110 and new_cover_angle <= 250
-        ), "angle has to be 0° or between 110° and 250°"
+        assert (new_cover_angle == 0) or (new_cover_angle >= 110 and new_cover_angle <= 250), (
+            "angle has to be 0° or between 110° and 250°"
+        )
 
         plc_interface.set_manual_control(True)
         plc_interface.set_sync_to_tracker(False)

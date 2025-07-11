@@ -144,8 +144,8 @@ def _stop_pyra_core() -> None:
         exit(1)
 
     _print_green("Successfully closed all processes, resetting temporary state")
-    with interfaces.StateInterface.update_state() as state:
-        state.reset()
+    with interfaces.StateInterface.update_state() as s:
+        s.reset()
 
 
 @core_command_group.command(

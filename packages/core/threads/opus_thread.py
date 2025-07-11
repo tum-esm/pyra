@@ -21,7 +21,7 @@ class OpusProgram:
     def start(config: types.Config, logger: utils.Logger) -> None:
         """Starts the OPUS.exe with os.startfile()."""
 
-        with interfaces.StateInterface.update_state() as s:
+        with interfaces.StateInterface.update_state(logger) as s:
             s.activity.opus_startups += 1
 
         logger.info("Starting OPUS")
@@ -143,7 +143,7 @@ class OpusThread(AbstractThread):
         config = types.Config.load()
 
         logger.debug("Loading state file")
-        state = interfaces.StateInterface.load_state()
+        state = interfaces.StateInterface.load_state(logger)
 
         thread_start_time = time.time()
         last_successful_ping_time = time.time()
@@ -179,13 +179,11 @@ class OpusThread(AbstractThread):
                             logger.info("The Macro started by Pyra is still running, nothing to do")
                             current_macro = (mid, mfp)
 
-            with interfaces.StateInterface.update_state() as state:
-                state.opus_state.experiment_filepath = current_experiment
-                state.opus_state.macro_id = None if current_macro is None else current_macro[0]
-                state.opus_state.macro_filepath = (
-                    None if current_macro is None else current_macro[1]
-                )
-                last_http_connection_issue_time = state.opus_state.last_http_connection_issue_time
+            with interfaces.StateInterface.update_state(logger) as s:
+                s.opus_state.experiment_filepath = current_experiment
+                s.opus_state.macro_id = None if current_macro is None else current_macro[0]
+                s.opus_state.macro_filepath = None if current_macro is None else current_macro[1]
+                last_http_connection_issue_time = s.opus_state.last_http_connection_issue_time
 
             while True:
                 t1 = time.time()
@@ -230,9 +228,9 @@ class OpusThread(AbstractThread):
                             logger.info("Stopping macro")
                             OpusHTTPInterface.stop_macro(current_macro[1])
                             current_macro = None
-                            with interfaces.StateInterface.update_state() as state:
-                                state.opus_state.macro_id = None
-                                state.opus_state.macro_filepath = None
+                            with interfaces.StateInterface.update_state(logger) as s:
+                                s.opus_state.macro_id = None
+                                s.opus_state.macro_filepath = None
 
                     OpusProgram.stop(logger)
                     time.sleep(3)
@@ -255,12 +253,12 @@ class OpusThread(AbstractThread):
                     OpusHTTPInterface.load_experiment(config.opus.experiment_path.root)
                     current_experiment = config.opus.experiment_path.root
                     logger.info(f"Experiment file {current_experiment} was loaded")
-                    with interfaces.StateInterface.update_state() as state:
-                        state.opus_state.experiment_filepath = current_experiment
+                    with interfaces.StateInterface.update_state(logger) as s:
+                        s.opus_state.experiment_filepath = current_experiment
 
                 # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
 
-                state = interfaces.StateInterface.load_state()
+                state = interfaces.StateInterface.load_state(logger)
                 measurements_should_be_running = bool(state.measurements_should_be_running)
                 if measurements_should_be_running:
                     # only measure if cover is open
@@ -379,15 +377,15 @@ class OpusThread(AbstractThread):
                         "Waiting for thread to run for 3 minutes before clearing exceptions"
                     )
 
-                with interfaces.StateInterface.update_state() as state:
+                with interfaces.StateInterface.update_state(logger) as s:
                     if current_macro is None:
-                        state.opus_state.macro_id = None
-                        state.opus_state.macro_filepath = None
+                        s.opus_state.macro_id = None
+                        s.opus_state.macro_filepath = None
                     else:
-                        state.opus_state.macro_id = current_macro[0]
-                        state.opus_state.macro_filepath = current_macro[1]
+                        s.opus_state.macro_id = current_macro[0]
+                        s.opus_state.macro_filepath = current_macro[1]
                     if clear_issues:
-                        state.exceptions_state.clear_exception_origin("opus")
+                        s.exceptions_state.clear_exception_origin("opus")
 
                 # SLEEP
 
@@ -420,12 +418,12 @@ class OpusThread(AbstractThread):
                     )
                 last_http_connection_issue_time = now
 
-            with interfaces.StateInterface.update_state() as state:
-                state.opus_state.macro_id = None
-                state.opus_state.macro_filepath = None
-                state.opus_state.last_http_connection_issue_time = last_http_connection_issue_time
+            with interfaces.StateInterface.update_state(logger) as s:
+                s.opus_state.macro_id = None
+                s.opus_state.macro_filepath = None
+                s.opus_state.last_http_connection_issue_time = last_http_connection_issue_time
                 if not silence_exception:
-                    state.exceptions_state.add_exception(origin="opus", exception=e)
+                    s.exceptions_state.add_exception(origin="opus", exception=e)
             logger.info("Sleeping 3 minutes until retrying")
             time.sleep(180)
             logger.info("Stopping thread")

@@ -5,12 +5,12 @@ import time
 from packages.core import interfaces, threads, types, utils
 
 
-def _send_exception_emails(config: types.Config) -> None:
+def _send_exception_emails(logger: utils.Logger, config: types.Config) -> None:
     """Send emails on occured/resolved exceptions."""
 
-    with interfaces.StateInterface.update_state() as state:
-        current_exceptions = state.exceptions_state.current
-        notified_exceptions = state.exceptions_state.notified
+    with interfaces.StateInterface.update_state(logger) as s:
+        current_exceptions = s.exceptions_state.current
+        notified_exceptions = s.exceptions_state.notified
 
         new_exception_emails = [
             e for e in current_exceptions if ((e not in notified_exceptions) and e.send_emails)
@@ -23,7 +23,7 @@ def _send_exception_emails(config: types.Config) -> None:
         ):
             utils.ExceptionEmailClient.handle_resolved_exception(config)
 
-        state.exceptions_state.notified = state.exceptions_state.current
+        s.exceptions_state.notified = s.exceptions_state.current
 
 
 def run() -> None:
@@ -84,9 +84,9 @@ def run() -> None:
     ]
 
     logger.info("Removing temporary state from previous runs")
-    with interfaces.StateInterface.update_state() as state:
-        state.reset()
-        state.exceptions_state.clear_exception_subject("PyraCoreNotRunning")
+    with interfaces.StateInterface.update_state(logger) as s:
+        s.reset()
+        s.exceptions_state.clear_exception_subject("PyraCoreNotRunning")
 
     while True:
         start_time = time.time()
@@ -121,7 +121,7 @@ def run() -> None:
                 time.sleep(0.1)  # for the tests to work
 
             # send emails on occured/resolved exceptions
-            _send_exception_emails(config)
+            _send_exception_emails(logger, config)
 
             # wait rest of loop time
             logger.debug("Finished iteration")

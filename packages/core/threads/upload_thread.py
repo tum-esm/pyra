@@ -27,7 +27,7 @@ class UploadThread(AbstractThread):
         if config.upload is None:
             return False
 
-        current_state = interfaces.StateInterface.load_state()
+        current_state = interfaces.StateInterface.load_state(logger)
         should_be_running: bool = True
         if current_state.measurements_should_be_running:
             UploadThread.last_measurement_time = datetime.datetime.now()
@@ -84,7 +84,7 @@ class UploadThread(AbstractThread):
             """Update the config from the main thread."""
             new_config = types.Config.load()
             upload_config_has_changed = new_config.upload != config.upload
-            thread_should_not_be_running = not UploadThread.should_be_running(new_config)
+            thread_should_not_be_running = not UploadThread.should_be_running(new_config, logger)
             if not silent:
                 if upload_config_has_changed:
                     logger.info("upload config has changed")
@@ -119,7 +119,7 @@ class UploadThread(AbstractThread):
                         if not stream.is_active:
                             logger.info(f"skipping upload of '{stream.label}'")
                             continue
-                        with interfaces.StateInterface.update_state() as s:
+                        with interfaces.StateInterface.update_state(logger) as s:
                             s.activity.upload_is_running = True
                         logger.info(f"starting to upload '{stream.label}'")
                         logger.debug(f"stream config: {stream.model_dump_json()}")
@@ -142,7 +142,7 @@ class UploadThread(AbstractThread):
                                 should_abort_upload=upload_should_abort,
                             ),
                         ).run()
-                        with interfaces.StateInterface.update_state() as s:
+                        with interfaces.StateInterface.update_state(logger) as s:
                             s.activity.upload_is_running = False
                         if upload_should_abort():
                             logger.info("stopping upload thread")
@@ -152,7 +152,7 @@ class UploadThread(AbstractThread):
 
                 logger.info("finished upload")
 
-                with interfaces.StateInterface.update_state() as s:
+                with interfaces.StateInterface.update_state(logger) as s:
                     s.activity.upload_is_running = False  # not necessary, but ...
                     s.exceptions_state.clear_exception_origin("upload")
 
@@ -181,7 +181,7 @@ class UploadThread(AbstractThread):
             except Exception as e:
                 logger.error(f"error in UploadThread: {repr(e)}")
                 logger.exception(e)
-                with interfaces.StateInterface.update_state() as s:
+                with interfaces.StateInterface.update_state(logger) as s:
                     s.activity.upload_is_running = False
                     s.exceptions_state.add_exception(
                         origin="upload", exception=e, send_emails=False

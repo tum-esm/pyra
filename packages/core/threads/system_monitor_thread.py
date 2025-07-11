@@ -66,8 +66,8 @@ class SystemMonitorThread(AbstractThread):
                 if disk_space > 90:
                     subject = "StorageError"
                     details = "Disk space is more than 90%. This is bad for the OS stability."
-                    with interfaces.StateInterface.update_state() as state:
-                        state.exceptions_state.add_exception_state_item(
+                    with interfaces.StateInterface.update_state(logger) as s:
+                        s.exceptions_state.add_exception_state_item(
                             types.ExceptionStateItem(
                                 origin="system-monitor", subject=subject, details=details
                             )
@@ -84,8 +84,8 @@ class SystemMonitorThread(AbstractThread):
                         details = (
                             "The battery of the system is below 30%. Please check the power supply."
                         )
-                        with interfaces.StateInterface.update_state() as state:
-                            state.exceptions_state.add_exception_state_item(
+                        with interfaces.StateInterface.update_state(logger) as s:
+                            s.exceptions_state.add_exception_state_item(
                                 types.ExceptionStateItem(
                                     origin="system-monitor", subject=subject, details=details
                                 )
@@ -94,25 +94,25 @@ class SystemMonitorThread(AbstractThread):
 
                 # UPDATE STATE AND FETCH RECENT ACTIVITY
 
-                with interfaces.StateInterface.update_state() as state:
-                    state.operating_system_state = types.OperatingSystemState(
+                with interfaces.StateInterface.update_state(logger) as s:
+                    s.operating_system_state = types.OperatingSystemState(
                         cpu_usage=cpu_usage,
                         memory_usage=memory_usage,
                         last_boot_time=str(last_boot_time),
                         filled_disk_space_fraction=disk_space,
                     )
-                    state.exceptions_state.clear_exception_origin("system-monitor")
+                    s.exceptions_state.clear_exception_origin("system-monitor")
 
-                    is_measuring = state.measurements_should_be_running
-                    has_errors = len(state.exceptions_state.current) > 0
-                    new_camtracker_startups = state.activity.camtracker_startups
-                    new_opus_startups = state.activity.opus_startups
-                    new_cli_calls = state.activity.cli_calls
-                    is_uploading = state.activity.upload_is_running
+                    is_measuring = s.measurements_should_be_running
+                    has_errors = len(s.exceptions_state.current) > 0
+                    new_camtracker_startups = s.activity.camtracker_startups
+                    new_opus_startups = s.activity.opus_startups
+                    new_cli_calls = s.activity.cli_calls
+                    is_uploading = s.activity.upload_is_running
 
-                    state.activity.camtracker_startups = 0
-                    state.activity.opus_startups = 0
-                    state.activity.cli_calls = 0
+                    s.activity.camtracker_startups = 0
+                    s.activity.opus_startups = 0
+                    s.activity.cli_calls = 0
 
                 # WRITE OUT UPDATED ACTIVITY HISTORY
 
@@ -136,5 +136,5 @@ class SystemMonitorThread(AbstractThread):
             except Exception as e:
                 logger.exception(e)
                 activity_history_interface.flush()
-                with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.add_exception(origin="system-monitor", exception=e)
+                with interfaces.StateInterface.update_state(logger) as s:
+                    s.exceptions_state.add_exception(origin="system-monitor", exception=e)

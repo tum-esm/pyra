@@ -378,7 +378,7 @@ class HeliosThread(AbstractThread):
 
             try:
                 # Check for termination
-                if not HeliosThread.should_be_running(new_config):
+                if not HeliosThread.should_be_running(new_config, logger):
                     if helios_instance is not None:
                         logger.info("Helios thread has been terminated")
                         del helios_instance
@@ -407,7 +407,7 @@ class HeliosThread(AbstractThread):
                 min_sun_elevation = config.general.min_sun_elevation
                 if current_sun_elevation < min_sun_elevation:
                     logger.debug("Current sun elevation below minimum, sleeping 5 minutes")
-                    with interfaces.StateInterface.update_state() as s:
+                    with interfaces.StateInterface.update_state(logger) as s:
                         s.helios_indicates_good_conditions = "no"
                     if helios_instance is not None:
                         del helios_instance
@@ -504,7 +504,7 @@ class HeliosThread(AbstractThread):
                     logger.debug(f"New state: {'GOOD' if new_state else 'BAD'}")
                     if current_state == new_state:
                         logger.debug("State did not change")
-                        with interfaces.StateInterface.update_state() as s:
+                        with interfaces.StateInterface.update_state(logger) as s:
                             s.helios_indicates_good_conditions = {  # type: ignore
                                 None: "inconclusive",
                                 True: "yes",
@@ -534,7 +534,7 @@ class HeliosThread(AbstractThread):
                                     False: "BAD",
                                 }[new_state]
                             )
-                            with interfaces.StateInterface.update_state() as s:
+                            with interfaces.StateInterface.update_state(logger) as s:
                                 s.helios_indicates_good_conditions = {  # type: ignore
                                     None: "inconclusive",
                                     True: "yes",
@@ -554,8 +554,8 @@ class HeliosThread(AbstractThread):
 
                 # clear exceptions
 
-                with interfaces.StateInterface.update_state() as state:
-                    state.exceptions_state.clear_exception_origin("helios")
+                with interfaces.StateInterface.update_state(logger) as s:
+                    s.exceptions_state.clear_exception_origin("helios")
 
                 # wait rest of loop time
                 elapsed_time = time.time() - t1
@@ -571,7 +571,7 @@ class HeliosThread(AbstractThread):
 
                 logger.error(f"error in HeliosThread: {repr(e)}")
                 logger.exception(e)
-                with interfaces.StateInterface.update_state() as s:
+                with interfaces.StateInterface.update_state(logger) as s:
                     s.exceptions_state.add_exception(origin="helios", exception=e)
 
                 logger.info("sleeping 60 seconds, reinitializing HeliosThread")
