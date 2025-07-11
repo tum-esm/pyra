@@ -15,7 +15,7 @@ _DEFAULT_CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.default
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
 _CONFIG_LOCK_PATH = os.path.join(_PROJECT_DIR, "config", ".config.lock")
 
-logger = utils.Logger(origin="cli")
+logger = utils.Logger(origin="cli", lock=None)
 
 
 @click.group()

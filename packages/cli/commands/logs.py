@@ -15,7 +15,7 @@ _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _DEBUG_LOG_FILE = os.path.join(_PROJECT_DIR, "logs", "debug.log")
 _LOG_FILES_LOCK = os.path.join(_PROJECT_DIR, "logs", ".logs.lock")
 
-logger = utils.Logger(origin="cli")
+logger = utils.Logger(origin="cli", lock=None)
 
 
 @click.group()

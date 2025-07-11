@@ -15,19 +15,19 @@ _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "logs", ".state.lock")
 _STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
 
-logger = utils.Logger(origin="state")
+# TODO: migrate state lock from filelock.Lock to threading.Lock
 
 
 class StateInterface:
     @staticmethod
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=5)
-    def load_state() -> types.StateObject:
+    def load_state(logger: utils.Logger) -> types.StateObject:
         """Load the state from the state file."""
 
-        return StateInterface._load_state_without_filelock()
+        return StateInterface._load_state_without_filelock(logger)
 
     @staticmethod
-    def _load_state_without_filelock() -> types.StateObject:
+    def _load_state_without_filelock(logger: utils.Logger) -> types.StateObject:
         """Load the state from the state file."""
 
         try:
@@ -47,7 +47,7 @@ class StateInterface:
     @staticmethod
     @contextlib.contextmanager
     @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=5)
-    def update_state() -> Generator[types.StateObject, None, None]:
+    def update_state(logger: utils.Logger) -> Generator[types.StateObject, None, None]:
         """Update the state file in a context manager.
 
         Example:
@@ -61,7 +61,7 @@ class StateInterface:
         interfere with the state file and the state
         """
 
-        state = StateInterface._load_state_without_filelock()
+        state = StateInterface._load_state_without_filelock(logger)
         state_before = state.model_copy(deep=True)
 
         yield state

@@ -20,7 +20,7 @@ from packages.cli.commands import (
 )
 from packages.core import utils
 
-logger = utils.Logger(origin="cli")
+logger = utils.Logger(origin="cli", lock=None)
 
 
 @click.command(help="Print Pyra version and code directory path.")

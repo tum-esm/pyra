@@ -4,7 +4,7 @@ import click
 
 from packages.core import interfaces, utils
 
-logger = utils.Logger(origin="cli")
+logger = utils.Logger(origin="cli", lock=None)
 
 
 @click.group()

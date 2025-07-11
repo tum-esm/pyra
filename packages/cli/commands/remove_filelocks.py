@@ -9,7 +9,7 @@ from packages.core import interfaces, utils
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-logger = utils.Logger(origin="cli")
+logger = utils.Logger(origin="cli", lock=None)
 
 
 def _print_green(text: str) -> None:

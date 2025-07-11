@@ -24,7 +24,7 @@ _run_pyra_core_lock = filelock.FileLock(
     timeout=0.5,
 )
 
-logger = utils.Logger(origin="cli")
+logger = utils.Logger(origin="cli", lock=None)
 
 
 def _print_green(text: str) -> None:

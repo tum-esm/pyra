@@ -8,7 +8,7 @@ import click
 
 from packages.core import interfaces, types, utils
 
-logger = utils.Logger(origin="cli")
+logger = utils.Logger(origin="cli", lock=None)
 
 
 @click.group(name="tum-enclosure")

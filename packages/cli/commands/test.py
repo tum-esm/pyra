@@ -4,7 +4,7 @@ import fabric.runners
 
 from packages.core import interfaces, threads, types, utils
 
-logger = utils.Logger(origin="cli")
+logger = utils.Logger(origin="cli", lock=None)
 
 
 def _print_green(text: str) -> None:

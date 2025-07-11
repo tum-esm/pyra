@@ -36,7 +36,7 @@ class Logger:
     def __init__(
         self,
         origin: str,
-        lock: threading.Lock,
+        lock: Optional[threading.Lock],
         just_print: bool = False,
         main_thread: bool = False,
     ) -> None:
@@ -84,13 +84,21 @@ class Logger:
         def _log_to_file(l: str) -> None:
             l = "".join(self.pending_log_lines) + l
             # current logs that only contains from the last 5-10 minutes
-            with open(_DEBUG_LOG_FILE, "a") as f1:
-                f1.write(l)
+            if self.origin != "cli":
+                with open(_DEBUG_LOG_FILE, "a") as f1:
+                    f1.write(l)
 
             # archive that contains all log lines
             with open(
                 os.path.join(
-                    _PROJECT_DIR, "logs", "archive", f"{now.strftime('%Y-%m-%d')}-debug.log"
+                    _PROJECT_DIR,
+                    "logs",
+                    "archive",
+                    (
+                        f"{now.strftime('%Y-%m-%d')}-debug"
+                        + ("-cli" if self.origin == "cli" else "")
+                        + ".log"
+                    ),
                 ),
                 "a",
             ) as f:
@@ -103,8 +111,11 @@ class Logger:
             print(log_string, end="")
         else:
             try:
-                with self.lock:
+                if self.lock is None:
                     _log_to_file(log_string)
+                else:
+                    with self.lock:
+                        _log_to_file(log_string)
             except TimeoutError:
                 self.pending_log_lines.append(log_string)
                 if (time.time() - self.last_successful_logging_time) > 300:
@@ -113,6 +124,7 @@ class Logger:
         # Archive lines older than 5 minutes, every 5 minutes
         if self.main_thread:
             if (now - Logger.last_archive_time).total_seconds() > 300:
+                assert self.lock is not None, "Logger.archive() can only be called with a lock."
                 Logger.archive(self.lock)
                 Logger.last_archive_time = now
 
