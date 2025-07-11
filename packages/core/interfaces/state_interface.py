@@ -53,7 +53,7 @@ class StateInterface:
         Example:
 
         ```python
-        with interfaces.StateInterface.update_state() as state:
+        with interfaces.StateInterface.update_state(logger) as state:
             state.helios_indicates_good_conditions = "yes"
         ```
 

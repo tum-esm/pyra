@@ -56,11 +56,6 @@ def _read_logs(level: str) -> None:
     help="Archive the current log files. This command will write all log lines from the current info.log and debug.log files into the logs/archive directory.",
 )
 def _archive_logs() -> None:
-    with interfaces.StateInterface.update_state() as s:
-        s.activity.cli_calls += 1
-    logger.debug('running command "logs archive"')
-
-    utils.Logger.archive()
     _print_red("this command is deprecated without a replacement")
 
 

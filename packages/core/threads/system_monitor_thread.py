@@ -25,7 +25,7 @@ class SystemMonitorThread(AbstractThread):
         return threading.Thread(
             target=SystemMonitorThread.main,
             daemon=True,
-            args=(logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod

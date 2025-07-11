@@ -27,7 +27,7 @@ class TUMEnclosureThread(AbstractThread):
         return threading.Thread(
             target=TUMEnclosureThread.main,
             daemon=True,
-            args=(logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod

@@ -347,7 +347,7 @@ class HeliosThread(AbstractThread):
         return threading.Thread(
             target=HeliosThread.main,
             daemon=True,
-            args=(logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod

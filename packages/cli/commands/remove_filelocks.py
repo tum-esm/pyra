@@ -21,7 +21,7 @@ def _print_green(text: str) -> None:
     help="Remove all filelocks. Helpful when any of the programs crashed during writing to a file. Normally, this should not be necessary.",
 )
 def remove_filelocks() -> None:
-    with interfaces.StateInterface.update_state() as s:
+    with interfaces.StateInterface.update_state(logger) as s:
         s.activity.cli_calls += 1
     logger.debug('running command "remove-filelocks"')
     lock_files = [

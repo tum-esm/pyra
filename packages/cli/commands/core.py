@@ -45,7 +45,7 @@ def core_command_group() -> None:
     help="Start pyra-core as a background process. Return the process id. Prevents spawning multiple processes.",
 )
 def _start_pyra_core() -> None:
-    with interfaces.StateInterface.update_state() as s:
+    with interfaces.StateInterface.update_state(logger) as s:
         s.activity.cli_calls += 1
     logger.info('running command "core start"')
 
@@ -76,7 +76,7 @@ def _start_pyra_core() -> None:
     help="Stop the pyra-core background process. Return the process id of terminated processes. This command will force quit the OPUS process.",
 )
 def _stop_pyra_core() -> None:
-    with interfaces.StateInterface.update_state() as s:
+    with interfaces.StateInterface.update_state(logger) as s:
         s.activity.cli_calls += 1
     logger.info('running command "core stop"')
 
@@ -94,7 +94,7 @@ def _stop_pyra_core() -> None:
     )
 
     config = types.Config.load(ignore_path_existence=True)
-    state = interfaces.StateInterface.load_state()
+    state = interfaces.StateInterface.load_state(logger)
 
     if config.general.test_mode:
         _print_green("Skip closing Enlosure, CamTracker, and OPUS teardown in test mode")
@@ -102,9 +102,9 @@ def _stop_pyra_core() -> None:
 
     if config.tum_enclosure is not None:
         _print_green("Running teardown for TUM enclosure")
-        current_cover_angle = (
-            interfaces.StateInterface.load_state().tum_enclosure_state.actors.current_angle
-        )
+        current_cover_angle = interfaces.StateInterface.load_state(
+            logger
+        ).tum_enclosure_state.actors.current_angle
         if current_cover_angle == 0:
             _print_green("Cover is already closed")
         else:
@@ -116,7 +116,7 @@ def _stop_pyra_core() -> None:
                 _print_red(f"Failed to close cover: {e}")
                 exit(1)
 
-    camtracker_logger = utils.Logger(origin="camtracker")
+    camtracker_logger = utils.Logger(origin="camtracker", lock=None)
     try:
         if threads.camtracker_thread.CamTrackerProgram.is_running():
             threads.camtracker_thread.CamTrackerProgram.stop(config, camtracker_logger)
@@ -125,7 +125,7 @@ def _stop_pyra_core() -> None:
         _print_red(f"Failed to close CamTracker: {e}")
         exit(1)
 
-    opus_logger = utils.Logger(origin="opus")
+    opus_logger = utils.Logger(origin="opus", lock=None)
     try:
         if threads.opus_thread.OpusProgram.is_running(opus_logger):
             try:
@@ -144,7 +144,7 @@ def _stop_pyra_core() -> None:
         exit(1)
 
     _print_green("Successfully closed all processes, resetting temporary state")
-    with interfaces.StateInterface.update_state() as s:
+    with interfaces.StateInterface.update_state(logger) as s:
         s.reset()
 
 
@@ -231,7 +231,7 @@ def _pyra_core_is_running() -> None:
                 details="Pyra Core has not been shut down properly.",
                 send_emails=True,
             )
-            with interfaces.StateInterface.update_state() as s:
+            with interfaces.StateInterface.update_state(logger) as s:
                 if new_exception_state_item not in s.exceptions_state.current:
                     _print_red("exception not raised yet, loading config")
                     config = types.Config.load()

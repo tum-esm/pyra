@@ -186,7 +186,7 @@ class CamTrackerThread(AbstractThread):
         return threading.Thread(
             target=CamTrackerThread.main,
             daemon=True,
-            args=(logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod

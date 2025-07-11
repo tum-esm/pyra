@@ -26,7 +26,7 @@ class CASThread(AbstractThread):
         return threading.Thread(
             target=CASThread.main,
             daemon=True,
-            args=(logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod

@@ -68,7 +68,7 @@ class Logger:
         """Write an error log (to debug and info)"""
         self._write_log_line("ERROR", message)
 
-    def exception(self, e: Exception) -> None:
+    def exception(self, e: BaseException) -> None:
         """Log the traceback of an exception"""
         tb = "\n".join(traceback.format_exception(e))
         self._write_log_line("EXCEPTION", f"{type(e).__name__} occured: {tb}")

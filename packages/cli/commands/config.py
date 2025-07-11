@@ -77,7 +77,7 @@ def _get_config(
     timeout=5,
 )
 def _update_config(content: str) -> None:
-    with interfaces.StateInterface.update_state() as s:
+    with interfaces.StateInterface.update_state(logger) as s:
         s.activity.cli_calls += 1
     logger.info(f'running command "config update" with content: "{content}"')
 
