@@ -154,6 +154,10 @@ class TUMEnclosureThread(AbstractThread):
                         logger.info(
                             "User is controlling the TUM Enclosure, skipping operational logic"
                         )
+                        if not exception_was_set:
+                            exception_was_set = False
+                            with interfaces.StateInterface.update_state(logger) as s:
+                                s.exceptions_state.clear_exception_origin(origin="tum-enclosure")
                         t2 = time.time()
                         sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
                         logger.debug(f"Sleeping {sleep_time:.2f} seconds")
