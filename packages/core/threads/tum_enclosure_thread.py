@@ -141,8 +141,7 @@ class TUMEnclosureThread(AbstractThread):
                                             subject="Rain detected but cover is not closed",
                                         )
                                     )
-                        else:
-                            logger.debug("Skipping remaining PLC logic during rain")
+                        logger.debug("Skipping remaining PLC logic during rain")
                         if not exception_was_set:
                             exception_was_set = False
                             with interfaces.StateInterface.update_state(logger) as s:
@@ -163,7 +162,7 @@ class TUMEnclosureThread(AbstractThread):
 
                     # RESETTING PLC
 
-                    TUMEnclosureThread.handle_plc_errors(plc_interface, logger)
+                    TUMEnclosureThread.clear_plc_reset(plc_interface, logger)
 
                     # CAMERA POWER CYCLE
 
@@ -250,7 +249,7 @@ class TUMEnclosureThread(AbstractThread):
                                 start_time = time.time()
 
                                 while True:
-                                    TUMEnclosureThread.handle_plc_errors(
+                                    TUMEnclosureThread.clear_plc_reset(
                                         plc_interface, logger, timeout=30
                                     )
                                     time.sleep(5)
@@ -300,15 +299,22 @@ class TUMEnclosureThread(AbstractThread):
                 s.exceptions_state.add_exception(origin="tum-enclosure", exception=e)
 
     @staticmethod
-    def handle_plc_errors(
-        plc_interface: interfaces.TUMEnclosureInterface, logger: utils.Logger, timeout: int = 180
+    def clear_plc_reset(
+        plc_interface: interfaces.TUMEnclosureInterface,
+        logger: utils.Logger,
+        timeout: int = 180,
     ) -> None:
         """Resetting the PLC if needed. If the reset doesn't work,
         add an exception to the state object."""
 
         r = plc_interface.reset_is_needed()
         m = plc_interface.motor_has_failed()
+
         if r or m:
+            if plc_interface.rain_is_detected():
+                logger.info("Rain is detected, skipping PLC reset")
+                return
+
             if r:
                 logger.info("PLC indicates a reset is needed")
             if m:
@@ -358,7 +364,7 @@ class TUMEnclosureThread(AbstractThread):
         logger.info("Connecting to PLC")
         plc_interface.connect()
         plc_interface.set_auto_temperature(True)
-        TUMEnclosureThread.handle_plc_errors(plc_interface, logger)
+        TUMEnclosureThread.clear_plc_reset(plc_interface, logger)
 
         logger.info("Manually closing cover")
         plc_interface.set_sync_to_tracker(False)
