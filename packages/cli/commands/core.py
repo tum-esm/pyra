@@ -25,6 +25,7 @@ _run_pyra_core_lock = filelock.FileLock(
 )
 
 logger = utils.Logger(origin="cli", lock=None)
+lifecycle_logger = utils.Logger(origin="lifecycle", lock=None)
 
 
 def _print_green(text: str) -> None:
@@ -48,6 +49,9 @@ def _start_pyra_core() -> None:
     with interfaces.StateInterface.update_state(logger) as s:
         s.activity.cli_calls += 1
     logger.info('running command "core start"')
+
+    # so that the start/stop also appears in the core logs (not only in the cli logs)
+    lifecycle_logger.info('running command "core start"')
 
     existing_pids = tum_esm_utils.processes.get_process_pids(_RUN_PYRA_CORE_SCRIPT_PATH)
     if len(existing_pids) > 0:
@@ -92,6 +96,9 @@ def _stop_pyra_core() -> None:
         f"Terminated {len(termination_pids)} pyra-core background "
         + f"processe(s) with process ID(s) {termination_pids}"
     )
+
+    # so that the start/stop also appears in the core logs (not only in the cli logs)
+    lifecycle_logger.info('running command "core stop"')
 
     config = types.Config.load(ignore_path_existence=True)
     state = interfaces.StateInterface.load_state(logger)
@@ -222,7 +229,7 @@ def _pyra_core_is_running() -> None:
 
         # 4. Check whether core has been stopped properly
 
-        if 'cli - INFO - running command "core stop"' not in "\n".join(log_lines):
+        if 'lifecycle - INFO - running command "core stop"' not in "\n".join(log_lines):
             _print_red(f"Pyra Core has not been shut down properly")
 
             new_exception_state_item = types.ExceptionStateItem(
