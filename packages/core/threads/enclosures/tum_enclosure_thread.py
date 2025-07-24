@@ -5,7 +5,7 @@ from typing import Optional
 
 from packages.core import interfaces, types, utils
 
-from .abstract_thread import AbstractThread
+from ..abstract_thread import AbstractThread
 
 
 class TUMEnclosureThread(AbstractThread):
