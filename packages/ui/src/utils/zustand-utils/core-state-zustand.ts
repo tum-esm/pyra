@@ -49,6 +49,19 @@ const coreStateSchema = z.object({
             spectrometer: z.boolean().nullable(),
         }),
     }),
+    coccon_spain_enclosure_state: z.object({
+        last_full_fetch: z.string().nullable(),
+        actors: z.object({
+            fan_speed: z.number().nullable(),
+            cover_position: z.number().nullable(),
+        }),
+        sensors: z.object({
+            humidity: z.number().nullable(),
+            temperature: z.number().nullable(),
+            wind_direction: z.number().nullable(),
+            wind_speed: z.number().nullable(),
+        }),
+    }),
     operating_system_state: z.object({
         cpu_usage: z.array(z.number()).nullable(),
         memory_usage: z.number().nullable(),

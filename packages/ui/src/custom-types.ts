@@ -18,6 +18,7 @@ export namespace customTypes {
         | 'error_email'
         | 'measurement_triggers'
         | 'tum_enclosure'
+        | 'coccon_spain_enclosure'
         | 'helios'
         | 'upload';
     export type config = {
@@ -71,6 +72,9 @@ export namespace customTypes {
             ip: string;
             version: number;
             controlled_by_user: boolean;
+        };
+        coccon_spain_enclosure: null | {
+            ip: string;
         };
         helios: null | {
             camera_id: number;
@@ -145,6 +149,9 @@ export namespace customTypes {
             ip?: string;
             version?: number;
             controlled_by_user?: boolean;
+        };
+        coccon_spain_enclosure?: null | {
+            ip?: string;
         };
         helios?: null | {
             camera_id?: number;
