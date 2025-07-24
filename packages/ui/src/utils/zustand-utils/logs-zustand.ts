@@ -10,6 +10,7 @@ interface LogsStore {
         system_monitor: string[] | undefined;
         upload: string[] | undefined;
         tum_enclosure: string[] | undefined;
+        coccon_spain_enclosure: string[] | undefined;
         helios: string[] | undefined;
     };
     uiLogs: { timestamp: number; text: string; details: string }[];
@@ -27,6 +28,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
         system_monitor: undefined,
         upload: undefined,
         tum_enclosure: undefined,
+        coccon_spain_enclosure: undefined,
         helios: undefined,
     },
     uiLogs: [],
@@ -42,6 +44,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                     | 'system_monitor'
                     | 'upload'
                     | 'tum_enclosure'
+                    | 'coccon_spain_enclosure'
                     | 'helios']: string[];
             } = {
                 all: [],
@@ -52,6 +55,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                 system_monitor: [],
                 upload: [],
                 tum_enclosure: [],
+                coccon_spain_enclosure: [],
                 helios: [],
             };
             let currentCategory:
@@ -62,6 +66,7 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                 | 'system_monitor'
                 | 'upload'
                 | 'tum_enclosure'
+                | 'coccon_spain_enclosure'
                 | 'helios' = 'main';
             allLogs.forEach((logLine) => {
                 if (logLine.trim().length > 0) {
@@ -83,6 +88,9 @@ export const useLogsStore = create<LogsStore>()((set) => ({
                                 break;
                             case 'tum-enclosure':
                                 currentCategory = 'tum_enclosure';
+                                break;
+                            case 'coccon-spain-enclosure':
+                                currentCategory = 'coccon_spain_enclosure';
                                 break;
                             case 'upload':
                                 currentCategory = 'upload';
