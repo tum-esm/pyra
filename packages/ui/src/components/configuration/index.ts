@@ -9,6 +9,7 @@ import ConfigSectionCamtracker from './sections/config-section-camtracker';
 import ConfigSectionMeasurementTriggers from './sections/config-section-measurement-triggers';
 import ConfigSectionOpus from './sections/config-section-opus';
 import ConfigSectionTUMEnclosure from './sections/config-section-tum-enclosure';
+import ConfigSectionCOCCONSpainEnclosure from './sections/config-section-coccon-spain-enclosure';
 import ConfigSectionHelios from './sections/config-section-helios';
 import ConfigSectionUpload from './sections/config-section-upload';
 import ConfigElementLine from './rows/config-element-line';
@@ -29,6 +30,7 @@ export default {
     ConfigSectionMeasurementTriggers,
     ConfigSectionOpus,
     ConfigSectionTUMEnclosure,
+    ConfigSectionCOCCONSpainEnclosure,
     ConfigSectionHelios,
     ConfigSectionUpload,
 };
