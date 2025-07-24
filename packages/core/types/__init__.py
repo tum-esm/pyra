@@ -1,5 +1,4 @@
 from .activity_history import ActivityHistory as ActivityHistory
-from .enclosures import tum_enclosure as tum_enclosure
 from .plc_specification import PLCSpecification as PLCSpecification
 from .plc_specification import PLCSpecificationActors as PLCSpecificationActors
 from .plc_specification import PLCSpecificationConnections as PLCSpecificationConnections
@@ -15,3 +14,6 @@ from .state import ExceptionStateItem as ExceptionStateItem
 from .state import OperatingSystemState as OperatingSystemState
 from .state import Position as Position
 from .state import StateObject as StateObject
+
+from .enclosures import tum_enclosure as tum_enclosure
+from .enclosures import coccon_spain_enclosure as coccon_spain_enclosure
