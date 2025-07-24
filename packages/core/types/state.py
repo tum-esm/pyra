@@ -99,7 +99,7 @@ class StateObject(StricterBaseModel):
     measurements_should_be_running: Optional[bool] = None
     last_rain_detection_time: Optional[float] = None
     tum_enclosure_state: TUMEnclosureState = TUMEnclosureState()
-    coccon_spain_enclosure_state = COCCONSpainEnclosureState()
+    coccon_spain_enclosure_state: COCCONSpainEnclosureState = COCCONSpainEnclosureState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
     exceptions_state: ExceptionsState = ExceptionsState()
     opus_state: OpusState = OpusState()

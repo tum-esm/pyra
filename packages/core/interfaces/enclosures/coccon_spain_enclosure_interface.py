@@ -38,11 +38,11 @@ class COCCONSpainEnclosureInterface:
         try:
             # TODO
 
-            return types.tum_enclosure.TUMEnclosureState(
+            return types.coccon_spain_enclosure.COCCONSpainEnclosureState(
                 last_full_fetch=datetime.datetime.now(),
                 actors=types.coccon_spain_enclosure.ActorsState(
                     fan_speed=None,
-                    current_angle=None,
+                    cover_position=None,
                 ),
                 sensors=types.coccon_spain_enclosure.SensorsState(
                     humidity=None,
