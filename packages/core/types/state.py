@@ -6,6 +6,7 @@ import pydantic
 from tum_esm_utils.validators import StricterBaseModel
 
 from .enclosures.tum_enclosure import TUMEnclosureState
+from .enclosures.coccon_spain_enclosure import COCCONSpainEnclosureState
 
 # --- SUBSTATES ---
 
@@ -98,6 +99,7 @@ class StateObject(StricterBaseModel):
     measurements_should_be_running: Optional[bool] = None
     last_rain_detection_time: Optional[float] = None
     tum_enclosure_state: TUMEnclosureState = TUMEnclosureState()
+    coccon_spain_enclosure_state = COCCONSpainEnclosureState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
     exceptions_state: ExceptionsState = ExceptionsState()
     opus_state: OpusState = OpusState()
@@ -112,5 +114,6 @@ class StateObject(StricterBaseModel):
         self.measurements_should_be_running = None
         self.last_rain_detection_time = None
         self.tum_enclosure_state = TUMEnclosureState()
+        self.coccon_spain_enclosure_state = COCCONSpainEnclosureState()
         self.operating_system_state = OperatingSystemState()
         self.activity = ActivityState()

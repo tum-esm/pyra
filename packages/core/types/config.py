@@ -10,7 +10,15 @@ import pydantic
 import tum_esm_utils
 from tum_esm_utils.validators import StricterBaseModel, StrictIPv4Adress
 
-from .enclosures.tum_enclosure import PartialTUMEnclosureConfig, TUMEnclosureConfig
+from .enclosures.tum_enclosure import (
+    PartialTUMEnclosureConfig,
+    TUMEnclosureConfig,
+)
+from .enclosures.coccon_spain_enclosure import (
+    PartialCOCCONSpainEnclosureConfig,
+    COCCONSpainEnclosureConfig,
+)
+
 
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 _CONFIG_FILE_PATH = os.path.join(_PROJECT_DIR, "config", "config.json")
@@ -248,6 +256,7 @@ class Config(StricterBaseModel):
     measurement_decision: MeasurementDecisionConfig
     measurement_triggers: MeasurementTriggersConfig
     tum_enclosure: Optional[TUMEnclosureConfig] = None
+    coccon_spain_enclosure: Optional[COCCONSpainEnclosureConfig] = None
     helios: Optional[HeliosConfig] = None
     upload: Optional[UploadConfig] = None
 
@@ -359,6 +368,7 @@ class PartialConfig(StricterBaseModel):
     measurement_decision: Optional[PartialMeasurementDecisionConfig] = None
     measurement_triggers: Optional[PartialMeasurementTriggersConfig] = None
     tum_enclosure: Optional[PartialTUMEnclosureConfig] = None
+    coccon_spain_enclosure: Optional[PartialCOCCONSpainEnclosureConfig] = None
     helios: Optional[PartialHeliosConfig] = None
     upload: Optional[PartialUploadConfig] = None
 
