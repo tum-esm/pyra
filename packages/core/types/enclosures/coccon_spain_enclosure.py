@@ -24,8 +24,8 @@ class PartialCOCCONSpainEnclosureConfig(StricterBaseModel):
 
 
 class ActorsState(StricterBaseModel):
-    fan_speed: Optional[int] = None
-    cover_position: Optional[int] = None
+    fan_speed: Optional[float] = None
+    cover_position: Optional[float] = None
 
 
 class SensorsState(StricterBaseModel):
