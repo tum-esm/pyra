@@ -9,9 +9,7 @@ from ..abstract_thread import AbstractThread
 
 
 class TUMEnclosureThread(AbstractThread):
-    """Thread for to evaluate whether to conduct measurements or not.
-
-    CAS = Condition Assessment System."""
+    """Thread interacting with the TUM Enclosure"""
 
     logger_origin = "tum-enclosure-thread"
 
