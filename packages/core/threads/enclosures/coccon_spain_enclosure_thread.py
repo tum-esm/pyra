@@ -8,9 +8,7 @@ from ..abstract_thread import AbstractThread
 
 
 class COCCONSpainEnclosureThread(AbstractThread):
-    """Thread for to evaluate whether to conduct measurements or not.
-
-    CAS = Condition Assessment System."""
+    """Thread interacting with the COCCON Spain Enclosure"""
 
     logger_origin = "coccon-spain-enclosure-thread"
 

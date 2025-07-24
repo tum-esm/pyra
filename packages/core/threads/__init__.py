@@ -10,5 +10,5 @@ from .enclosures.tum_enclosure_thread import (
     TUMEnclosureThread as TUMEnclosureThread,
 )
 from .enclosures.coccon_spain_enclosure_thread import (
-    CocconSpainEnclosureThread as CocconSpainEnclosureThread,
+    COCCONSpainEnclosureThread as COCCONSpainEnclosureThread,
 )
