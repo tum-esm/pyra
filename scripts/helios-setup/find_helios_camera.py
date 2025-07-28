@@ -28,7 +28,7 @@ def camera_id_exists(camera_id: int) -> bool:
 def find_available_camera_ids() -> list[int]:
     """Find an available camera IDs."""
     available_ids = []
-    for i in tqdm.tqdm(range(10)):  # Check camera IDs from 0 to 9
+    for i in tqdm.tqdm(range(20)):  # Check camera IDs from 0 to 9
         if camera_id_exists(i):
             available_ids.append(i)
             print(f"Camera ID {i} is available.")

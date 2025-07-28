@@ -57,3 +57,10 @@ Example images in **good** conditions:
     className="tw-rounded-lg !tw-h-36 sm:!tw-h-40 2xl:!tw-h-48"
   />
 </div>
+
+## How to set up Helios
+
+You can use the script in `scripts/helios-setup` to set up Helios:
+
+1. `scripts/helios-setup/find_helios_camera.py` will look for all cameras connected to the system, take some images with the ones available and save them to the `scripts/helios-setup/finding` directory.
+2. `scripts/helios-setup/evaluate_helios_camera.py` will run the Helios evaluation for a certain camera id (determined with the first script) and save the raw and processed images to the `scripts/helios-setup/evaluation` directory.
