@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 import threading
 import time
 from typing import Any, Optional
@@ -88,12 +89,19 @@ class HeliosInterface:
         initialization_tries: int = 5,
     ) -> None:
         self.logger = logger
-        self.camera: cv.VideoCapture = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+        self.camera: cv.VideoCapture
+        if sys.platform.startswith("win"):
+            self.camera = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+        else:
+            self.camera = cv.VideoCapture(camera_id)
 
         self.camera.release()
 
         for _ in range(initialization_tries):
-            self.camera = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+            if sys.platform.startswith("win"):
+                self.camera = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+            else:
+                self.camera = cv.VideoCapture(camera_id)
             if self.camera.isOpened():
                 available_exposures = self.get_available_exposures()
                 logger.debug(f"determined available exposures: {available_exposures}")
