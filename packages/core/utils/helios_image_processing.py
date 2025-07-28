@@ -8,7 +8,6 @@ import numpy as np
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _LOGS_DIR = os.path.join(_PROJECT_DIR, "logs")
-_IMG_DIR = os.path.join(_LOGS_DIR, "helios")
 
 
 class HeliosImageProcessing:
@@ -155,6 +154,7 @@ class HeliosImageProcessing:
         save_images_to_archive: bool = False,
         save_current_image: bool = False,
         image_name: Optional[str] = None,
+        image_directory: str = os.path.join(_LOGS_DIR, "helios", "%Y%m%d"),
     ) -> float:
         """For a given frame determine the number of "edge pixels" with
         respect to the inner 90% of the lense diameter and the "status".
@@ -217,7 +217,10 @@ class HeliosImageProcessing:
 
             # used in post-analysis
             if save_images_to_archive:
-                img_directory_path = os.path.join(_IMG_DIR, now.strftime("%Y%m%d"))
+                img_directory_path = os.path.join(
+                    os.path.dirname(image_directory),
+                    now.strftime(os.path.basename(image_directory)),
+                )
                 os.makedirs(img_directory_path, exist_ok=True)
                 image_slug = os.path.join(
                     img_directory_path, f"{station_id}-{img_timestamp}-{edge_fraction_str}"
