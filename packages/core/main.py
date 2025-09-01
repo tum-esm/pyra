@@ -35,6 +35,8 @@ def run() -> None:
     and resolved exceptions. The actual work is done by the threads."""
 
     logs_lock = threading.Lock()
+    state_lock = threading.Lock()
+
     logger = utils.Logger(origin="main", lock=logs_lock, main_thread=True)
     logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
 
@@ -76,17 +78,17 @@ def run() -> None:
     # load the config periodically and stop themselves
     logger.info("Initializing threads")
     thread_instances: list[threads.abstract_thread.AbstractThread] = [
-        threads.CamTrackerThread(logs_lock),
-        threads.CASThread(logs_lock),
-        threads.HeliosThread(logs_lock),
-        threads.OpusThread(logs_lock),
-        threads.SystemMonitorThread(logs_lock),
-        threads.TUMEnclosureThread(logs_lock),
-        threads.UploadThread(logs_lock),
+        threads.CamTrackerThread(state_lock, logs_lock),
+        threads.CASThread(state_lock, logs_lock),
+        threads.HeliosThread(state_lock, logs_lock),
+        threads.OpusThread(state_lock, logs_lock),
+        threads.SystemMonitorThread(state_lock, logs_lock),
+        threads.TUMEnclosureThread(state_lock, logs_lock),
+        threads.UploadThread(state_lock, logs_lock),
     ]
 
     logger.info("Removing temporary state from previous runs")
-    with interfaces.StateInterface.update_state(logger) as s:
+    with interfaces.StateInterface.update_state(state_lock, logger) as s:
         s.reset()
         s.exceptions_state.clear_exception_subject("PyraCoreNotRunning")
 
