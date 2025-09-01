@@ -3,31 +3,27 @@ from __future__ import annotations
 import contextlib
 import datetime
 import os
-from typing import Generator
-
 import pydantic
-import tum_esm_utils
+import threading
+from typing import Generator
 
 from packages.core import types, utils
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
-_STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "logs", ".state.lock")
 _STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
-
-# TODO: reduce the number of state updates (only update when it changes)
 
 
 class StateInterface:
     @staticmethod
-    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=5)
-    def load_state(logger: utils.Logger) -> types.StateObject:
+    def load_state(state_lock: threading.lock, logger: utils.Logger) -> types.StateObject:
         """Load the state from the state file."""
 
-        return StateInterface._load_state_without_filelock(logger)
+        with utils.functions.timeout_lock(state_lock, timeout=10):
+            return StateInterface._load_state_without_lock(logger)
 
     @staticmethod
-    def _load_state_without_filelock(logger: utils.Logger) -> types.StateObject:
+    def _load_state_without_lock(logger: utils.Logger) -> types.StateObject:
         """Load the state from the state file."""
 
         try:
@@ -46,8 +42,10 @@ class StateInterface:
 
     @staticmethod
     @contextlib.contextmanager
-    @tum_esm_utils.decorators.with_filelock(lockfile_path=_STATE_LOCK_PATH, timeout=5)
-    def update_state(logger: utils.Logger) -> Generator[types.StateObject, None, None]:
+    def update_state(
+        state_lock: threading.Lock,
+        logger: utils.Logger,
+    ) -> Generator[types.StateObject, None, None]:
         """Update the state file in a context manager.
 
         Example:
@@ -61,12 +59,13 @@ class StateInterface:
         interfere with the state file and the state
         """
 
-        state = StateInterface._load_state_without_filelock(logger)
-        state_before = state.model_copy(deep=True)
+        with utils.functions.timeout_lock(state_lock, timeout=10):
+            state = StateInterface._load_state_without_lock(logger)
+            state_before = state.model_copy(deep=True)
 
-        yield state
+            yield state
 
-        if state != state_before:
-            state.last_updated = datetime.datetime.now()
-            with open(_STATE_FILE_PATH, "w") as f:
-                f.write(state.model_dump_json(indent=4))
+            if state != state_before:
+                state.last_updated = datetime.datetime.now()
+                with open(_STATE_FILE_PATH, "w") as f:
+                    f.write(state.model_dump_json(indent=4))
