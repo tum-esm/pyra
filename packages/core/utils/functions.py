@@ -1,8 +1,10 @@
+import contextlib
 import datetime
 import glob
 import os
+import threading
 import time
-from typing import Literal
+from typing import Generator, Literal
 
 
 def read_last_file_line(
@@ -94,3 +96,17 @@ def parse_verbal_timedelta_string(timedelta_string: str) -> datetime.timedelta:
 
     # Create and return the timedelta object
     return datetime.timedelta(days=days, hours=hours, minutes=minutes)
+
+
+@contextlib.contextmanager
+def timeout_lock(lock: threading.Lock, timeout: int) -> Generator[None, None, None]:
+    """Try to acquire a lock, return whether it was successful."""
+    lock_successful: bool = False
+    try:
+        lock_successful = lock.acquire(timeout=timeout)
+        yield
+    except TimeoutError:
+        raise TimeoutError("Could not acquire the lock within 5 seconds.")
+    finally:
+        if lock_successful:
+            lock.release()
