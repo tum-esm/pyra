@@ -50,8 +50,6 @@ def _get_plc_interface() -> Optional[interfaces.TUMEnclosureInterface]:
 )
 @click.option("--no-indent", is_flag=True, help="Do not print the JSON in an indented manner")
 def _read(no_indent: bool) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.debug('running command "plc read"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
@@ -65,8 +63,6 @@ def _read(no_indent: bool) -> None:
     help="Run plc function 'reset()'",
 )
 def _reset() -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info('running command "plc reset"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
@@ -114,8 +110,6 @@ def _wait_until_cover_is_at_angle(
 )
 @click.argument("angle")
 def _set_cover_angle(angle: str) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info(f'running command "plc set-cover-angle {angle}"')
     plc_interface = _get_plc_interface()
     if plc_interface is not None:
@@ -139,8 +133,6 @@ def _set_cover_angle(angle: str) -> None:
     help="Run plc function 'force_cover_close()'",
 )
 def _close_cover() -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info('running command "plc close-cover"')
     with types.Config.update_in_context() as config:
         assert config.tum_enclosure is not None, "PLC not configured"
@@ -175,8 +167,6 @@ def _set_boolean_tum_enclosure_state(
 )
 @click.argument("state")
 def _set_sync_to_tracker(state: Literal["true", "false"]) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info(f'running command "plc set-sync-to-tracker {state}"')
     _set_boolean_tum_enclosure_state(state, lambda p: p.set_sync_to_tracker)
 
@@ -187,8 +177,6 @@ def _set_sync_to_tracker(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_auto_temperature(state: Literal["true", "false"]) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info(f'running command "plc set-auto-temperature {state}"')
     _set_boolean_tum_enclosure_state(state, lambda p: p.set_auto_temperature)
 
@@ -199,8 +187,6 @@ def _set_auto_temperature(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_heater_power(state: Literal["true", "false"]) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info(f'running command "plc set-heater-power {state}"')
     _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_heater)
 
@@ -211,8 +197,6 @@ def _set_heater_power(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_camera_power(state: Literal["true", "false"]) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info(f'running command "plc set-camera-power {state}"')
     _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_camera)
 
@@ -223,8 +207,6 @@ def _set_camera_power(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_router_power(state: Literal["true", "false"]) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info(f'running command "plc set-router-power {state}"')
     _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_router)
 
@@ -235,8 +217,6 @@ def _set_router_power(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_spectrometer_power(state: Literal["true", "false"]) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info(f'running command "plc set-spectrometer-power {state}"')
     _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_spectrometer)
 
@@ -247,7 +227,5 @@ def _set_spectrometer_power(state: Literal["true", "false"]) -> None:
 )
 @click.argument("state")
 def _set_computer_power(state: Literal["true", "false"]) -> None:
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info(f'running command "plc set-computer-power {state}"')
     _set_boolean_tum_enclosure_state(state, lambda p: p.set_power_computer)

@@ -23,8 +23,6 @@ def test_command_group() -> None:
 @test_command_group.command(name="opus")
 def _test_opus() -> None:
     """Start OPUS, run a macro, stop the macro, close opus."""
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info('running command "test opus"')
     config = types.Config.load()
     try:
@@ -37,8 +35,6 @@ def _test_opus() -> None:
 @test_command_group.command(name="camtracker")
 def _test_camtracker() -> None:
     """Start CamTracker, check if it is running, stop CamTracker."""
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info('running command "test camtracker"')
     config = types.Config.load()
     threads.camtracker_thread.CamTrackerThread.test_setup(config, logger)
@@ -48,8 +44,6 @@ def _test_camtracker() -> None:
 @test_command_group.command(name="email")
 def _test_emailing() -> None:
     """Send a test email."""
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info('running command "test email"')
     config = types.Config.load()
     utils.ExceptionEmailClient.send_test_email(config)
@@ -59,8 +53,6 @@ def _test_emailing() -> None:
 @test_command_group.command(name="upload")
 def _test_uploading() -> None:
     """try to connect to upload server."""
-    with interfaces.StateInterface.update_state(logger) as s:
-        s.activity.cli_calls += 1
     logger.info('running command "test upload"')
     config = types.Config.load()
     if config.upload is None:
