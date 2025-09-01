@@ -1,10 +1,12 @@
+import threading
 import circadian_scp_upload
 import click
 import fabric.runners
 
-from packages.core import interfaces, threads, types, utils
+from packages.core import threads, types, utils
 
 logger = utils.Logger(origin="cli", lock=None)
+state_lock = threading.Lock()
 
 
 def _print_green(text: str) -> None:
@@ -26,7 +28,7 @@ def _test_opus() -> None:
     logger.info('running command "test opus"')
     config = types.Config.load()
     try:
-        threads.OpusThread.test_setup(config, logger)
+        threads.OpusThread.test_setup(config, state_lock, logger)
     finally:
         threads.opus_thread.OpusProgram.stop(logger)
     _print_green("Successfully tested opus connection.")
@@ -37,7 +39,7 @@ def _test_camtracker() -> None:
     """Start CamTracker, check if it is running, stop CamTracker."""
     logger.info('running command "test camtracker"')
     config = types.Config.load()
-    threads.camtracker_thread.CamTrackerThread.test_setup(config, logger)
+    threads.camtracker_thread.CamTrackerThread.test_setup(config, state_lock, logger)
     _print_green("Successfully tested CamTracker connection.")
 
 
