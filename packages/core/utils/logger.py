@@ -4,6 +4,7 @@ import os
 import traceback
 import time
 import threading
+from .functions import timeout_lock
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -114,7 +115,7 @@ class Logger:
                 if self.lock is None:
                     _log_to_file(log_string)
                 else:
-                    with self.lock:
+                    with timeout_lock(self.lock, timeout=10):
                         _log_to_file(log_string)
             except TimeoutError:
                 self.pending_log_lines.append(log_string)
@@ -134,7 +135,7 @@ class Logger:
 
         for i in range(5):
             try:
-                with lock:
+                with timeout_lock(lock, timeout=10):
                     with open(_DEBUG_LOG_FILE, "r") as f:
                         log_lines_in_file = f.readlines()
                     if len(log_lines_in_file) == 0:
