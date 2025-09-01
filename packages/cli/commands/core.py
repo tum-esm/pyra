@@ -4,6 +4,7 @@ import datetime
 import os
 import subprocess
 import sys
+import threading
 from typing import Optional
 
 import click
@@ -97,7 +98,7 @@ def _stop_pyra_core() -> None:
     lifecycle_logger.info('running command "core stop"')
 
     config = types.Config.load(ignore_path_existence=True)
-    state = interfaces.StateInterface.load_state(logger)
+    state = interfaces.StateInterface.load_state(threading.Lock(), logger)
 
     if config.general.test_mode:
         _print_green("Skip closing Enlosure, CamTracker, and OPUS teardown in test mode")
@@ -105,15 +106,13 @@ def _stop_pyra_core() -> None:
 
     if config.tum_enclosure is not None:
         _print_green("Running teardown for TUM enclosure")
-        current_cover_angle = interfaces.StateInterface.load_state(
-            logger
-        ).tum_enclosure_state.actors.current_angle
+        current_cover_angle = state.tum_enclosure_state.actors.current_angle
         if current_cover_angle == 0:
             _print_green("Cover is already closed")
         else:
             try:
                 click.echo("Closing cover")
-                threads.TUMEnclosureThread.force_cover_close(config, logger)
+                threads.TUMEnclosureThread.force_cover_close(config, threading.Lock(), logger)
                 _print_green("Successfully closed cover")
             except Exception as e:
                 _print_red(f"Failed to close cover: {e}")
@@ -147,7 +146,7 @@ def _stop_pyra_core() -> None:
         exit(1)
 
     _print_green("Successfully closed all processes, resetting temporary state")
-    with interfaces.StateInterface.update_state(logger) as s:
+    with interfaces.StateInterface.update_state(threading.Lock(), logger) as s:
         s.reset()
 
 
@@ -234,7 +233,7 @@ def _pyra_core_is_running() -> None:
                 details="Pyra Core has not been shut down properly.",
                 send_emails=True,
             )
-            with interfaces.StateInterface.update_state(logger) as s:
+            with interfaces.StateInterface.update_state(threading.Lock(), logger) as s:
                 if new_exception_state_item not in s.exceptions_state.current:
                     _print_red("exception not raised yet, loading config")
                     config = types.Config.load()

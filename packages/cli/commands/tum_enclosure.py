@@ -34,7 +34,8 @@ def _get_plc_interface() -> Optional[interfaces.TUMEnclosureInterface]:
         plc_interface = interfaces.TUMEnclosureInterface(
             config.tum_enclosure.version,
             config.tum_enclosure.ip,
-            logger,
+            state_lock=None,
+            logger=logger,
         )
         plc_interface.connect()
     except Exception as e:
@@ -74,9 +75,9 @@ def _reset() -> None:
             time.sleep(2)
             running_time += 2
             if not plc_interface.reset_is_needed():
-                with interfaces.StateInterface.update_state(logger) as s:
+                """with interfaces.StateInterface.update_state(logger) as s:
                     if s.tum_enclosure_state is not None:
-                        s.tum_enclosure_state.state.reset_needed = False
+                        s.tum_enclosure_state.state.reset_needed = False"""
                 break
             assert running_time <= 20, "plc took to long to set reset_needed to false"
         _print_green("Ok")
@@ -93,9 +94,9 @@ def _wait_until_cover_is_at_angle(
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
-            with interfaces.StateInterface.update_state(logger) as s:
+            """with interfaces.StateInterface.update_state(logger) as s:
                 s.tum_enclosure_state.actors.current_angle = current_cover_angle
-                s.tum_enclosure_state.state.cover_closed = current_cover_angle == 0
+                s.tum_enclosure_state.state.cover_closed = current_cover_angle == 0"""
             break
 
         if running_time > timeout:
