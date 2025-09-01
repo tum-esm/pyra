@@ -11,7 +11,11 @@ class AbstractThread(abc.ABC):
 
     logger_origin: Optional[str] = None
 
-    def __init__(self, logs_lock: threading.Lock) -> None:
+    def __init__(
+        self,
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+    ) -> None:
         """Initialize the thread instance. This does not start the
         thread but only initializes the instance that triggers the
         thread to start and stop correctly."""
@@ -22,12 +26,17 @@ class AbstractThread(abc.ABC):
             lock=logs_lock,
         )
         self.thread = self.get_new_thread_object(
+            state_lock=state_lock,
             logs_lock=logs_lock,
         )
         self.thread_start_time: Optional[float] = None
+        self.state_lock: threading.Lock = logs_lock
         self.logs_lock: threading.Lock = logs_lock
 
-    def update_thread_state(self, config: types.Config) -> bool:
+    def update_thread_state(
+        self,
+        config: types.Config,
+    ) -> bool:
         """Use `self.should_be_running` to determine if the thread
         should be running or not. If it should be running and it is
         not running, start the thread. If it should not be running
@@ -51,6 +60,7 @@ class AbstractThread(abc.ABC):
                     self.thread_start_time = None
                     # set up a new thread instance for the next time the thread should start
                     self.thread = self.get_new_thread_object(
+                        state_lock=self.state_lock,
                         logs_lock=self.logs_lock,
                     )
             else:
@@ -74,16 +84,26 @@ class AbstractThread(abc.ABC):
 
     @staticmethod
     @abc.abstractmethod
-    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
+    def should_be_running(
+        config: types.Config,
+        logger: utils.Logger,
+    ) -> bool:
         """Based on the config, should the thread be running or not?"""
 
     @staticmethod
     @abc.abstractmethod
-    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
+    def get_new_thread_object(
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+    ) -> threading.Thread:
         """Return a new thread object that is to be started."""
 
     @staticmethod
     @abc.abstractmethod
-    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
+    def main(
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+        headless: bool = False,
+    ) -> None:
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""

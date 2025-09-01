@@ -175,22 +175,32 @@ class CamTrackerThread(AbstractThread):
     logger_origin = "camtracker-thread"
 
     @staticmethod
-    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
+    def should_be_running(
+        config: types.Config,
+        logger: utils.Logger,
+    ) -> bool:
         """Based on the config, should the thread be running or not?"""
 
         return not config.general.test_mode
 
     @staticmethod
-    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
+    def get_new_thread_object(
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+    ) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
             target=CamTrackerThread.main,
             daemon=True,
-            args=(logs_lock,),
+            args=(state_lock, logs_lock),
         )
 
     @staticmethod
-    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
+    def main(
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+        headless: bool = False,
+    ) -> None:
         """Main entrypoint of the thread."""
 
         logger = utils.Logger(origin="camtracker", lock=logs_lock, just_print=headless)
@@ -340,7 +350,8 @@ class CamTrackerThread(AbstractThread):
 
     @staticmethod
     def check_tracker_motor_positions(
-        config: types.Config, logger: utils.Logger
+        config: types.Config,
+        logger: utils.Logger,
     ) -> Literal["no logs", "logs too old", "valid", "invalid"]:
         """Checks whether CamTracker is running and is pointing in the right direction.
 
@@ -388,7 +399,10 @@ class CamTrackerThread(AbstractThread):
             return "closed"
 
     @staticmethod
-    def test_setup(config: types.Config, logger: utils.Logger) -> None:
+    def test_setup(
+        config: types.Config,
+        logger: utils.Logger,
+    ) -> None:
         """Function to test the functonality of this module. Starts up
         CamTracker to initialize the tracking mirrors. Then moves mirrors
         back to parking position and shuts dosn CamTracker."""

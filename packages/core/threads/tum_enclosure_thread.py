@@ -16,22 +16,32 @@ class TUMEnclosureThread(AbstractThread):
     logger_origin = "tum-enclosure-thread"
 
     @staticmethod
-    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
+    def should_be_running(
+        config: types.Config,
+        logger: utils.Logger,
+    ) -> bool:
         """Based on the config, should the thread be running or not?"""
 
         return config.tum_enclosure is not None
 
     @staticmethod
-    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
+    def get_new_thread_object(
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+    ) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
             target=TUMEnclosureThread.main,
             daemon=True,
-            args=(logs_lock,),
+            args=(state_lock, logs_lock),
         )
 
     @staticmethod
-    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
+    def main(
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+        headless: bool = False,
+    ) -> None:
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
@@ -352,7 +362,10 @@ class TUMEnclosureThread(AbstractThread):
                 )
 
     @staticmethod
-    def force_cover_close(config: types.Config, logger: utils.Logger) -> None:
+    def force_cover_close(
+        config: types.Config,
+        logger: utils.Logger,
+    ) -> None:
         """Force the cover to close by disabling syncing to tracker."""
 
         enclosure_config = config.tum_enclosure

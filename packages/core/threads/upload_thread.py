@@ -20,7 +20,10 @@ class UploadThread(AbstractThread):
     last_measurement_time: Optional[datetime.datetime] = None
 
     @staticmethod
-    def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
+    def should_be_running(
+        config: types.Config,
+        logger: utils.Logger,
+    ) -> bool:
         """Based on the config, should the thread be running or not?"""
 
         # only upload when upload is configured
@@ -64,16 +67,23 @@ class UploadThread(AbstractThread):
         return should_be_running
 
     @staticmethod
-    def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
+    def get_new_thread_object(
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+    ) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
             target=UploadThread.main,
             daemon=True,
-            args=(logs_lock,),
+            args=(state_lock, logs_lock),
         )
 
     @staticmethod
-    def main(logs_lock: threading.Lock, headless: bool = False) -> None:
+    def main(
+        state_lock: threading.Lock,
+        logs_lock: threading.Lock,
+        headless: bool = False,
+    ) -> None:
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
