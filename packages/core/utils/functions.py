@@ -99,14 +99,18 @@ def parse_verbal_timedelta_string(timedelta_string: str) -> datetime.timedelta:
 
 
 @contextlib.contextmanager
-def timeout_lock(lock: threading.Lock, timeout: int) -> Generator[None, None, None]:
+def timeout_lock(
+    lock: threading.Lock,
+    timeout: int,
+    label: str,
+) -> Generator[None, None, None]:
     """Try to acquire a lock, return whether it was successful."""
     lock_successful: bool = False
     try:
         lock_successful = lock.acquire(timeout=timeout)
         yield
     except TimeoutError:
-        raise TimeoutError("Could not acquire the lock within 5 seconds.")
+        raise TimeoutError(f"Could not acquire the {label} within {timeout} seconds.")
     finally:
         if lock_successful:
             lock.release()

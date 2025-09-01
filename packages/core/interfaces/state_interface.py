@@ -19,7 +19,7 @@ class StateInterface:
     def load_state(state_lock: threading.lock, logger: utils.Logger) -> types.StateObject:
         """Load the state from the state file."""
 
-        with utils.functions.timeout_lock(state_lock, timeout=10):
+        with utils.functions.timeout_lock(state_lock, timeout=10, label="state lock"):
             return StateInterface._load_state_without_lock(logger)
 
     @staticmethod
@@ -59,7 +59,7 @@ class StateInterface:
         interfere with the state file and the state
         """
 
-        with utils.functions.timeout_lock(state_lock, timeout=10):
+        with utils.functions.timeout_lock(state_lock, timeout=10, label="state lock"):
             state = StateInterface._load_state_without_lock(logger)
             state_before = state.model_copy(deep=True)
 
