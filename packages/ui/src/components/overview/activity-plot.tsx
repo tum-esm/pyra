@@ -66,7 +66,7 @@ function ActivityPlot() {
                         </div>
                     ))}
                 </div>
-                <div className={'relative flex-grow w-full h-[calc(3.5rem+2px)]'}>
+                <div className={'relative flex-grow w-full h-[calc(3rem+2px)]'}>
                     {hoverLabel !== undefined && (
                         <div className="absolute top-[-2.75rem] px-2 py-1 text-xs -translate-x-1/2 rounded-md shadow-md left-1/2 bg-slate-900 text-slate-100">
                             {hoverLabel}
@@ -80,14 +80,14 @@ function ActivityPlot() {
                         {range(1 / 6, 24, 1 / 6).map((h) => (
                             <div
                                 key={`thin-hour-line-${h}`}
-                                className="absolute top-0 z-10 w-[1px] h-14 bg-gray-600 translate-x-[-1px]"
+                                className="absolute top-0 z-10 w-[1px] h-12 bg-gray-600 translate-x-[-1px]"
                                 style={{ left: `${h / 0.24}%` }}
                             />
                         ))}
                         {range(1, 24).map((h) => (
                             <div
                                 key={`bold-hour-line-${h}`}
-                                className="absolute top-0 z-10 w-[1px] h-14 bg-gray-400 translate-x-[-1px]"
+                                className="absolute top-0 z-10 w-[1px] h-12 bg-gray-400 translate-x-[-1px]"
                                 style={{ left: `${h / 0.24}%` }}
                             />
                         ))}
@@ -155,18 +155,6 @@ function ActivityPlot() {
                                 onMouseLeave={() => setHoverLabel(undefined)}
                             />
                         ))}
-                        {activitySections.cli_calls.map((s) => (
-                            <div
-                                className="absolute z-20 h-2 bg-indigo-300 cursor-pointer top-12 hover:bg-indigo-200"
-                                style={sectionToStyle(s)}
-                                onMouseOver={() =>
-                                    setHoverLabel(
-                                        getSectionHoverLabel('cli was called', s, 'count')
-                                    )
-                                }
-                                onMouseLeave={() => setHoverLabel(undefined)}
-                            />
-                        ))}
 
                         {/* gray blocks of past and future time */}
                         <div
@@ -193,7 +181,6 @@ function ActivityPlot() {
                         <span className="px-2 py-0.5 text-violet-700 bg-violet-100">
                             opus startups
                         </span>
-                        <span className="px-2 py-0.5 text-indigo-700 bg-indigo-100">cli calls</span>
                     </div>
                     <div className="flex-grow" />
                     <div className=" text-slate-400">
