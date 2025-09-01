@@ -28,10 +28,14 @@ class TrackerPosition(pydantic.BaseModel):
 
 class CamTrackerProgram:
     @staticmethod
-    def start(config: types.Config, logger: utils.Logger) -> None:
+    def start(
+        config: types.Config,
+        state_lock: threading.Lock,
+        logger: utils.Logger,
+    ) -> None:
         """Starts the OPUS.exe with os.startfile()."""
 
-        with interfaces.StateInterface.update_state(logger) as s:
+        with interfaces.StateInterface.update_state(state_lock, logger) as s:
             s.activity.camtracker_startups += 1
 
         logger.info("Removing old stop.txt file")
@@ -177,6 +181,7 @@ class CamTrackerThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
+        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -241,7 +246,7 @@ class CamTrackerThread(AbstractThread):
 
                 if measurements_should_be_running and (not camtracker_is_running):
                     logger.info("CamTracker should be running, but is not. Starting CamTracker.")
-                    CamTrackerProgram.start(config, logger)
+                    CamTrackerProgram.start(config, state_lock, logger)
                     last_camtracker_start_time = time.time()
 
                 if (not measurements_should_be_running) and camtracker_is_running:
@@ -300,7 +305,9 @@ class CamTrackerThread(AbstractThread):
                                     logger.error(
                                         "Enclosure cover is closed even though, there is no rain. Stopping CamTracker."
                                     )
-                                    with interfaces.StateInterface.update_state(logger) as s:
+                                    with interfaces.StateInterface.update_state(
+                                        state_lock, logger
+                                    ) as s:
                                         s.exceptions_state.add_exception_state_item(
                                             types.ExceptionStateItem(
                                                 origin="camtracker",
@@ -313,7 +320,7 @@ class CamTrackerThread(AbstractThread):
                                     last_camtracker_start_time = None
                                     break
                         if cover_state == "open":
-                            with interfaces.StateInterface.update_state(logger) as s:
+                            with interfaces.StateInterface.update_state(state_lock, logger) as s:
                                 s.exceptions_state.clear_exception_subject(
                                     subject="Camtracker was started but cover is closed."
                                 )
@@ -321,7 +328,7 @@ class CamTrackerThread(AbstractThread):
                 # CLEAR EXCEPTIONS
                 # besides the one about the cover not opening
 
-                with interfaces.StateInterface.update_state(logger) as s:
+                with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.exceptions_state.current = [
                         e
                         for e in s.exceptions_state.current
@@ -341,7 +348,7 @@ class CamTrackerThread(AbstractThread):
             except Exception as e:
                 logger.exception(e)
                 CamTrackerProgram.stop(config, logger)
-                with interfaces.StateInterface.update_state(logger) as s:
+                with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.exceptions_state.add_exception(origin="camtracker", exception=e)
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
@@ -401,6 +408,7 @@ class CamTrackerThread(AbstractThread):
     @staticmethod
     def test_setup(
         config: types.Config,
+        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> None:
         """Function to test the functonality of this module. Starts up
@@ -410,6 +418,6 @@ class CamTrackerThread(AbstractThread):
         assert not CamTrackerProgram.is_running(), (
             "This test cannot be run if CamTracker is already running"
         )
-        CamTrackerProgram.start(config, logger)
+        CamTrackerProgram.start(config, state_lock, logger)
         time.sleep(2)
         CamTrackerProgram.stop(config, logger)

@@ -17,6 +17,7 @@ class CASThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
+        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -131,7 +132,7 @@ class CASThread(AbstractThread):
 
                 # UPDATE STATE
 
-                with interfaces.StateInterface.update_state(logger) as s:
+                with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.position.latitude = camtracker_coordinates[0]
                     s.position.longitude = camtracker_coordinates[1]
                     s.position.altitude = camtracker_coordinates[2]
@@ -148,7 +149,7 @@ class CASThread(AbstractThread):
 
             except Exception as e:
                 logger.exception(e)
-                with interfaces.StateInterface.update_state(logger) as s:
+                with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.exceptions_state.add_exception(origin="cas", exception=e)
 
     @staticmethod

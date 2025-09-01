@@ -16,6 +16,7 @@ class SystemMonitorThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
+        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -80,7 +81,7 @@ class SystemMonitorThread(AbstractThread):
                 if disk_space > 90:
                     subject = "StorageError"
                     details = "Disk space is more than 90%. This is bad for the OS stability."
-                    with interfaces.StateInterface.update_state(logger) as s:
+                    with interfaces.StateInterface.update_state(state_lock, logger) as s:
                         s.exceptions_state.add_exception_state_item(
                             types.ExceptionStateItem(
                                 origin="system-monitor", subject=subject, details=details
@@ -98,7 +99,7 @@ class SystemMonitorThread(AbstractThread):
                         details = (
                             "The battery of the system is below 30%. Please check the power supply."
                         )
-                        with interfaces.StateInterface.update_state(logger) as s:
+                        with interfaces.StateInterface.update_state(state_lock, logger) as s:
                             s.exceptions_state.add_exception_state_item(
                                 types.ExceptionStateItem(
                                     origin="system-monitor", subject=subject, details=details
@@ -108,7 +109,7 @@ class SystemMonitorThread(AbstractThread):
 
                 # UPDATE STATE AND FETCH RECENT ACTIVITY
 
-                with interfaces.StateInterface.update_state(logger) as s:
+                with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.operating_system_state = types.OperatingSystemState(
                         cpu_usage=cpu_usage,
                         memory_usage=memory_usage,
@@ -150,5 +151,5 @@ class SystemMonitorThread(AbstractThread):
             except Exception as e:
                 logger.exception(e)
                 activity_history_interface.flush()
-                with interfaces.StateInterface.update_state(logger) as s:
+                with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.exceptions_state.add_exception(origin="system-monitor", exception=e)

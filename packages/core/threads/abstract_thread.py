@@ -45,7 +45,9 @@ class AbstractThread(abc.ABC):
         Returns True if the thread is running/pausing correctly, False
         otherwise."""
 
-        should_be_running: bool = self.__class__.should_be_running(config, self.logger)
+        should_be_running: bool = self.__class__.should_be_running(
+            config, self.state_lock, self.logger
+        )
 
         if should_be_running:
             if self.thread_start_time is not None:
@@ -86,6 +88,7 @@ class AbstractThread(abc.ABC):
     @abc.abstractmethod
     def should_be_running(
         config: types.Config,
+        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""

@@ -18,10 +18,14 @@ class OpusProgram:
     """Class for starting and stopping OPUS."""
 
     @staticmethod
-    def start(config: types.Config, logger: utils.Logger) -> None:
+    def start(
+        config: types.Config,
+        state_lock: threading.Lock,
+        logger: utils.Logger,
+    ) -> None:
         """Starts the OPUS.exe with os.startfile()."""
 
-        with interfaces.StateInterface.update_state(logger) as s:
+        with interfaces.StateInterface.update_state(state_lock, logger) as s:
             s.activity.opus_startups += 1
 
         logger.info("Starting OPUS")
@@ -124,6 +128,7 @@ class OpusThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
+        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -193,7 +198,7 @@ class OpusThread(AbstractThread):
                             logger.info("The Macro started by Pyra is still running, nothing to do")
                             current_macro = (mid, mfp)
 
-            with interfaces.StateInterface.update_state(logger) as s:
+            with interfaces.StateInterface.update_state(state_lock, logger) as s:
                 s.opus_state.experiment_filepath = current_experiment
                 s.opus_state.macro_id = None if current_macro is None else current_macro[0]
                 s.opus_state.macro_filepath = None if current_macro is None else current_macro[1]
@@ -230,7 +235,7 @@ class OpusThread(AbstractThread):
 
                 if opus_should_be_running and (not opus_is_running):
                     logger.info("OPUS should be running, starting OPUS")
-                    OpusProgram.start(config, logger)
+                    OpusProgram.start(config, state_lock, logger)
                     continue
 
                 if (not opus_should_be_running) and opus_is_running:
@@ -242,7 +247,7 @@ class OpusThread(AbstractThread):
                             logger.info("Stopping macro")
                             OpusHTTPInterface.stop_macro(current_macro[1])
                             current_macro = None
-                            with interfaces.StateInterface.update_state(logger) as s:
+                            with interfaces.StateInterface.update_state(state_lock, logger) as s:
                                 s.opus_state.macro_id = None
                                 s.opus_state.macro_filepath = None
 
@@ -267,7 +272,7 @@ class OpusThread(AbstractThread):
                     OpusHTTPInterface.load_experiment(config.opus.experiment_path.root)
                     current_experiment = config.opus.experiment_path.root
                     logger.info(f"Experiment file {current_experiment} was loaded")
-                    with interfaces.StateInterface.update_state(logger) as s:
+                    with interfaces.StateInterface.update_state(state_lock, logger) as s:
                         s.opus_state.experiment_filepath = current_experiment
 
                 # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
@@ -391,7 +396,7 @@ class OpusThread(AbstractThread):
                         "Waiting for thread to run for 3 minutes before clearing exceptions"
                     )
 
-                with interfaces.StateInterface.update_state(logger) as s:
+                with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     if current_macro is None:
                         s.opus_state.macro_id = None
                         s.opus_state.macro_filepath = None
@@ -432,7 +437,7 @@ class OpusThread(AbstractThread):
                     )
                 last_http_connection_issue_time = now
 
-            with interfaces.StateInterface.update_state(logger) as s:
+            with interfaces.StateInterface.update_state(state_lock, logger) as s:
                 s.opus_state.macro_id = None
                 s.opus_state.macro_filepath = None
                 s.opus_state.last_http_connection_issue_time = last_http_connection_issue_time
@@ -446,9 +451,10 @@ class OpusThread(AbstractThread):
     @staticmethod
     def test_setup(
         config: types.Config,
+        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> None:
-        OpusProgram.start(config, logger)
+        OpusProgram.start(config, state_lock, logger)
 
         OpusHTTPInterface.load_experiment(config.opus.experiment_path.root)
         time.sleep(5)
