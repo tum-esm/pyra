@@ -162,7 +162,7 @@ class OpusThread(AbstractThread):
         config = types.Config.load()
 
         logger.debug("Loading state file")
-        state = interfaces.StateInterface.load_state(logger)
+        state = interfaces.StateInterface.load_state(state_lock, logger)
 
         thread_start_time = time.time()
         last_successful_ping_time = time.time()
@@ -277,7 +277,7 @@ class OpusThread(AbstractThread):
 
                 # DETERMINE WHETHER MEASUREMENTS SHOULD BE RUNNING
 
-                state = interfaces.StateInterface.load_state(logger)
+                state = interfaces.StateInterface.load_state(state_lock, logger)
                 measurements_should_be_running = bool(state.measurements_should_be_running)
                 if measurements_should_be_running:
                     # only measure if cover is open

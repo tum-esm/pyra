@@ -86,6 +86,7 @@ class TUMEnclosureThread(AbstractThread):
                     plc_interface = interfaces.TUMEnclosureInterface(
                         plc_version=enclosure_config.version,
                         plc_ip=enclosure_config.ip,
+                        state_lock=state_lock,
                         logger=logger,
                     )
                     try:
@@ -213,7 +214,7 @@ class TUMEnclosureThread(AbstractThread):
 
                     # SPECTROMETER POWER
 
-                    state = interfaces.StateInterface.load_state(logger)
+                    state = interfaces.StateInterface.load_state(state_lock, logger)
 
                     if state.position.sun_elevation is None:
                         logger.warning(
@@ -383,6 +384,7 @@ class TUMEnclosureThread(AbstractThread):
         plc_interface = interfaces.TUMEnclosureInterface(
             plc_version=enclosure_config.version,
             plc_ip=enclosure_config.ip,
+            state_lock=state_lock,
             logger=logger,
         )
         logger.info("Connecting to PLC")

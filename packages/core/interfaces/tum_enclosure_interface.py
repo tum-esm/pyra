@@ -1,5 +1,6 @@
 import datetime
 import os
+import threading
 import time
 from typing import Literal, Optional
 
@@ -116,12 +117,14 @@ class TUMEnclosureInterface:
         self,
         plc_version: Literal[1, 2],
         plc_ip: StrictIPv4Adress,
+        state_lock: Optional[threading.Lock],
         logger: utils.Logger,
     ) -> None:
         self.plc_version = plc_version
         self.plc_ip = plc_ip.root
         self.specification = _PLC_SPECIFICATION_VERSIONS[plc_version]
         self.plc = snap7.client.Client()
+        self.state_lock = state_lock
         self.logger = logger
 
     # CONNECTION/CLASS MANAGEMENT
@@ -359,61 +362,70 @@ class TUMEnclosureInterface:
     def set_power_camera(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.camera)
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.power.camera = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.power.camera = new_state
 
     def set_power_computer(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         assert self.specification.power.computer is not None
         self.__update_bool(new_state, self.specification.power.computer)
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.power.computer = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.power.computer = new_state
 
     def set_power_heater(self, new_state: bool) -> None:
         """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.heater)
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.power.heater = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.power.heater = new_state
 
     def set_power_router(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         assert self.specification.power.router is not None, "Router is not configured"
         self.__update_bool(new_state, self.specification.power.router)
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.power.router = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.power.router = new_state
 
     def set_power_spectrometer(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.spectrometer)
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.power.spectrometer = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.power.spectrometer = new_state
 
     # PLC.CONTROL SETTERS
 
     def set_sync_to_tracker(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.sync_to_tracker)
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.control.sync_to_tracker = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.control.sync_to_tracker = new_state
 
     def set_manual_control(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_control)
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.control.manual_control = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.control.manual_control = new_state
 
     def set_auto_temperature(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.auto_temp_mode)
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.control.auto_temp_mode = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.control.auto_temp_mode = new_state
 
     def set_manual_temperature(self, new_state: bool) -> None:
         """Raises PLCInterface.PLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_temp_mode)
 
-        with interfaces.StateInterface.update_state(self.logger) as s:
-            s.tum_enclosure_state.control.manual_temp_mode = new_state
+        if self.state_lock is not None:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.tum_enclosure_state.control.manual_temp_mode = new_state
 
     def reset(self) -> None:
         """Does not check, whether the value has been changed"""

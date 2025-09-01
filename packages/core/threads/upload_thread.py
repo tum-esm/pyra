@@ -31,7 +31,7 @@ class UploadThread(AbstractThread):
         if config.upload is None:
             return False
 
-        current_state = interfaces.StateInterface.load_state(logger)
+        current_state = interfaces.StateInterface.load_state(state_lock, logger)
         should_be_running: bool = True
         if current_state.measurements_should_be_running:
             UploadThread.last_measurement_time = datetime.datetime.now()

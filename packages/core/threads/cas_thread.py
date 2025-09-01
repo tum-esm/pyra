@@ -69,7 +69,7 @@ class CASThread(AbstractThread):
                     time.sleep(0.1)  # for the tests to work
 
                 logger.debug("Loading state file")
-                state = interfaces.StateInterface.load_state(logger)
+                state = interfaces.StateInterface.load_state(state_lock, logger)
 
                 # FETCH COORDINATES AND SUN ELEVATION
 

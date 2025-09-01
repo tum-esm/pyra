@@ -236,7 +236,9 @@ class CamTrackerThread(AbstractThread):
 
                 camtracker_is_running = CamTrackerProgram.is_running()
                 measurements_should_be_running = bool(
-                    interfaces.StateInterface.load_state(logger).measurements_should_be_running
+                    interfaces.StateInterface.load_state(
+                        state_lock, logger
+                    ).measurements_should_be_running
                 )
 
                 if config.general.test_mode:
@@ -281,7 +283,9 @@ class CamTrackerThread(AbstractThread):
                                 logger.debug("Tracker offsets are within threshold.")
 
                         logger.debug("Checking enclosure cover state.")
-                        cover_state = CamTrackerThread.get_enclosure_cover_state(config, logger)
+                        cover_state = CamTrackerThread.get_enclosure_cover_state(
+                            config, state_lock, logger
+                        )
                         logger.debug(f"Enclosure cover state: {cover_state}")
 
                         if config.camtracker.restart_if_cover_remains_closed and (
@@ -290,7 +294,7 @@ class CamTrackerThread(AbstractThread):
                             t1 = time.time()
                             while True:
                                 time.sleep(5)
-                                state = interfaces.StateInterface.load_state(logger)
+                                state = interfaces.StateInterface.load_state(state_lock, logger)
                                 if state.tum_enclosure_state.state.rain:
                                     logger.info("Enclosure cover is closed due to rain.")
                                     break
@@ -385,6 +389,7 @@ class CamTrackerThread(AbstractThread):
     @staticmethod
     def get_enclosure_cover_state(
         config: types.Config,
+        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> Literal["not configured", "angle not reported", "open", "closed"]:
         """Checks whether the TUM PLC cover is open or closed. Returns
@@ -395,7 +400,7 @@ class CamTrackerThread(AbstractThread):
             return "not configured"
 
         current_cover_angle = interfaces.StateInterface.load_state(
-            logger
+            state_lock, logger
         ).tum_enclosure_state.actors.current_angle
 
         if current_cover_angle is None:

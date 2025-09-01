@@ -16,7 +16,7 @@ _STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
 
 class StateInterface:
     @staticmethod
-    def load_state(state_lock: threading.lock, logger: utils.Logger) -> types.StateObject:
+    def load_state(state_lock: threading.Lock, logger: utils.Logger) -> types.StateObject:
         """Load the state from the state file."""
 
         with utils.functions.timeout_lock(state_lock, timeout=10, label="state lock"):

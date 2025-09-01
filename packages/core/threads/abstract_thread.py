@@ -75,6 +75,7 @@ class AbstractThread(abc.ABC):
                 self.logger.debug("Joining the thread")
                 self.thread.join()
                 self.thread = self.get_new_thread_object(
+                    state_lock=self.state_lock,
                     logs_lock=self.logs_lock,
                 )
                 self.thread_start_time = None
