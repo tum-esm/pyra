@@ -6,10 +6,14 @@ import time
 from packages.core import interfaces, threads, types, utils
 
 
-def _send_exception_emails(logger: utils.Logger, config: types.Config) -> None:
+def _send_exception_emails(
+    state_lock: threading.Lock,
+    logger: utils.Logger,
+    config: types.Config,
+) -> None:
     """Send emails on occured/resolved exceptions."""
 
-    with interfaces.StateInterface.update_state(logger) as s:
+    with interfaces.StateInterface.update_state(state_lock, logger) as s:
         current_exceptions = s.exceptions_state.current
         notified_exceptions = s.exceptions_state.notified
 
@@ -125,7 +129,7 @@ def run() -> None:
                 time.sleep(0.1)  # for the tests to work
 
             # send emails on occured/resolved exceptions
-            _send_exception_emails(logger, config)
+            _send_exception_emails(state_lock, logger, config)
 
             # wait rest of loop time
             logger.debug("Finished iteration")
