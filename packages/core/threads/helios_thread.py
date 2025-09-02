@@ -85,23 +85,24 @@ class HeliosInterface:
     def __init__(
         self,
         logger: utils.Logger,
-        camera_id: int,
+        helios_config: types.config.HeliosConfig,
         initialization_tries: int = 5,
     ) -> None:
         self.logger = logger
         self.camera: cv.VideoCapture
+        self.helios_config = helios_config
         if sys.platform.startswith("win"):
-            self.camera = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+            self.camera = cv.VideoCapture(helios_config.camera_id, cv.CAP_DSHOW)
         else:
-            self.camera = cv.VideoCapture(camera_id)
+            self.camera = cv.VideoCapture(helios_config.camera_id)
 
         self.camera.release()
 
         for _ in range(initialization_tries):
             if sys.platform.startswith("win"):
-                self.camera = cv.VideoCapture(camera_id, cv.CAP_DSHOW)
+                self.camera = cv.VideoCapture(helios_config.camera_id, cv.CAP_DSHOW)
             else:
-                self.camera = cv.VideoCapture(camera_id)
+                self.camera = cv.VideoCapture(helios_config.camera_id)
             if self.camera.isOpened():
                 available_exposures = self.get_available_exposures()
                 logger.debug(f"determined available exposures: {available_exposures}")
@@ -113,7 +114,11 @@ class HeliosInterface:
                 self.target_pixel_brightness: int = 0
                 self.available_exposures: list[int] = available_exposures
 
-                self.update_camera_settings(exposure=self.current_exposure)
+                self.update_camera_settings(
+                    exposure=self.current_exposure,
+                    brightness=helios_config.camera_brightness,
+                    contrast=helios_config.camera_contrast,
+                )
                 return
             else:
                 logger.debug("could not open camera, retrying in 2 seconds")
@@ -142,8 +147,8 @@ class HeliosInterface:
     def update_camera_settings(
         self,
         exposure: int,
-        brightness: int = 64,
-        contrast: int = 64,
+        brightness: int,
+        contrast: int,
         saturation: int = 0,
         gain: int = 0,
         width: int = 1280,
@@ -154,11 +159,11 @@ class HeliosInterface:
         throw an AssertionError, when the value could not be changed."""
 
         properties = {
-            "width": (cv.CAP_PROP_FRAME_WIDTH, width),
-            "height": (cv.CAP_PROP_FRAME_HEIGHT, height),
             "exposure": (cv.CAP_PROP_EXPOSURE, exposure),
             "brightness": (cv.CAP_PROP_BRIGHTNESS, brightness),
             "contrast": (cv.CAP_PROP_CONTRAST, contrast),
+            "width": (cv.CAP_PROP_FRAME_WIDTH, width),
+            "height": (cv.CAP_PROP_FRAME_HEIGHT, height),
             "saturation": (cv.CAP_PROP_SATURATION, saturation),
             "gain": (cv.CAP_PROP_GAIN, gain),
         }
@@ -265,8 +270,11 @@ class HeliosInterface:
                 ),
             ).exposure
         )
-        self.update_camera_settings(exposure=new_exposure)
-
+        self.update_camera_settings(
+            exposure=new_exposure,
+            brightness=self.helios_config.camera_brightness,
+            contrast=self.helios_config.camera_contrast,
+        )
         if new_exposure != self.current_exposure:
             self.logger.info(f"Changing exposure: {self.current_exposure} -> {new_exposure}")
             self.current_exposure = new_exposure
@@ -416,9 +424,15 @@ class HeliosThread(AbstractThread):
                     )
                     return
 
-                if new_config.helios.camera_id != config.helios.camera_id:
+                if (
+                    (new_config.helios.camera_id != config.helios.camera_id)
+                    or (new_config.helios.camera_brightness != config.helios.camera_brightness)
+                    or (new_config.helios.camera_contrast != config.helios.camera_contrast)
+                ):
                     if helios_instance is not None:
-                        logger.info("Camera ID changed, reinitializing HeliosInterface")
+                        logger.info(
+                            "Camera id/brightness/contrast changed, reinitializing HeliosInterface"
+                        )
                         del helios_instance
                         helios_instance = None
                         time.sleep(1)
@@ -447,7 +461,7 @@ class HeliosThread(AbstractThread):
                 # initialize HeliosInterface if necessary
                 if helios_instance is None:
                     try:
-                        helios_instance = HeliosInterface(logger, config.helios.camera_id)
+                        helios_instance = HeliosInterface(logger, config.helios)
                     except CameraError as e:
                         logger.error(f"could not initialize HeliosInterface: {repr(e)}")
                         logger.exception(e)
