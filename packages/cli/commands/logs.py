@@ -8,7 +8,7 @@ from typing import Optional
 import click
 import tum_esm_utils
 
-from packages.core import interfaces, utils
+from packages.core import utils
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
