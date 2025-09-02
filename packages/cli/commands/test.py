@@ -2,8 +2,9 @@ import threading
 import circadian_scp_upload
 import click
 import fabric.runners
+import tum_esm_utils
 
-from packages.core import threads, types, utils
+from packages.core import threads, types, utils, interfaces
 
 logger = utils.Logger(origin="cli", lock=None)
 state_lock = threading.Lock()
@@ -27,6 +28,11 @@ def _test_opus() -> None:
     """Start OPUS, run a macro, stop the macro, close opus."""
     logger.info('running command "test opus"')
     config = types.Config.load()
+    state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+        filepath=interfaces.state_interface.STATE_LOCK_PATH,
+        timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+        poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+    )
     try:
         threads.OpusThread.test_setup(config, state_lock, logger)
     finally:

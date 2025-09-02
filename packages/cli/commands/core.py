@@ -4,7 +4,6 @@ import datetime
 import os
 import subprocess
 import sys
-import threading
 from typing import Optional
 
 import click
@@ -98,7 +97,12 @@ def _stop_pyra_core() -> None:
     lifecycle_logger.info('running command "core stop"')
 
     config = types.Config.load(ignore_path_existence=True)
-    state = interfaces.StateInterface.load_state(threading.Lock(), logger)
+    state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+        filepath=interfaces.state_interface.STATE_LOCK_PATH,
+        timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+        poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+    )
+    state = interfaces.StateInterface.load_state(state_lock, logger)
 
     if config.general.test_mode:
         _print_green("Skip closing Enlosure, CamTracker, and OPUS teardown in test mode")
@@ -112,7 +116,7 @@ def _stop_pyra_core() -> None:
         else:
             try:
                 click.echo("Closing cover")
-                threads.TUMEnclosureThread.force_cover_close(config, threading.Lock(), logger)
+                threads.TUMEnclosureThread.force_cover_close(config, state_lock, logger)
                 _print_green("Successfully closed cover")
             except Exception as e:
                 _print_red(f"Failed to close cover: {e}")
@@ -146,7 +150,7 @@ def _stop_pyra_core() -> None:
         exit(1)
 
     _print_green("Successfully closed all processes, resetting temporary state")
-    with interfaces.StateInterface.update_state(threading.Lock(), logger) as s:
+    with interfaces.StateInterface.update_state(state_lock, logger) as s:
         s.reset()
 
 
@@ -226,14 +230,18 @@ def _pyra_core_is_running() -> None:
 
         if 'lifecycle - INFO - running command "core stop"' not in "\n".join(log_lines):
             _print_red(f"Pyra Core has not been shut down properly")
-
+            state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+                filepath=interfaces.state_interface.STATE_LOCK_PATH,
+                timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+                poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+            )
             new_exception_state_item = types.ExceptionStateItem(
                 origin="cli",
                 subject="PyraCoreNotRunning",
                 details="Pyra Core has not been shut down properly.",
                 send_emails=True,
             )
-            with interfaces.StateInterface.update_state(threading.Lock(), logger) as s:
+            with interfaces.StateInterface.update_state(state_lock, logger) as s:
                 if new_exception_state_item not in s.exceptions_state.current:
                     _print_red("exception not raised yet, loading config")
                     config = types.Config.load()
