@@ -3,11 +3,13 @@ import sys
 import threading
 import time
 
+import tum_esm_utils
+
 from packages.core import interfaces, threads, types, utils
 
 
 def _send_exception_emails(
-    state_lock: threading.Lock,
+    state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
     logger: utils.Logger,
     config: types.Config,
 ) -> None:
@@ -39,7 +41,11 @@ def run() -> None:
     and resolved exceptions. The actual work is done by the threads."""
 
     logs_lock = threading.Lock()
-    state_lock = threading.Lock()
+    state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+        filepath=interfaces.state_interface.STATE_LOCK_PATH,
+        timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+        poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+    )
 
     logger = utils.Logger(origin="main", lock=logs_lock, main_thread=True)
     logger.info(f"Starting mainloop inside process with process ID {os.getpid()}")
@@ -82,13 +88,13 @@ def run() -> None:
     # load the config periodically and stop themselves
     logger.info("Initializing threads")
     thread_instances: list[threads.abstract_thread.AbstractThread] = [
-        threads.CamTrackerThread(state_lock, logs_lock),
-        threads.CASThread(state_lock, logs_lock),
-        threads.HeliosThread(state_lock, logs_lock),
-        threads.OpusThread(state_lock, logs_lock),
-        threads.SystemMonitorThread(state_lock, logs_lock),
-        threads.TUMEnclosureThread(state_lock, logs_lock),
-        threads.UploadThread(state_lock, logs_lock),
+        threads.CamTrackerThread(logs_lock),
+        threads.CASThread(logs_lock),
+        threads.HeliosThread(logs_lock),
+        threads.OpusThread(logs_lock),
+        threads.SystemMonitorThread(logs_lock),
+        threads.TUMEnclosureThread(logs_lock),
+        threads.UploadThread(logs_lock),
     ]
 
     logger.info("Removing temporary state from previous runs")
