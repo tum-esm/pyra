@@ -82,6 +82,8 @@ export const configSchema = z.object({
             edge_pixel_threshold: floatSchema,
             edge_color_threshold: intSchema,
             target_pixel_brightness: intSchema,
+            camera_brightness: intSchema,
+            camera_contrast: intSchema,
             save_images_to_archive: z.boolean(),
             save_current_image: z.boolean(),
         })

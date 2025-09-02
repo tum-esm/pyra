@@ -186,6 +186,8 @@ class HeliosConfig(StricterBaseModel):
     edge_pixel_threshold: float = pydantic.Field(..., ge=0, le=30)
     edge_color_threshold: int = pydantic.Field(..., ge=5, le=250)
     target_pixel_brightness: int = pydantic.Field(..., ge=20, le=235)
+    camera_brightness: int = pydantic.Field(..., ge=-1000, le=1000)
+    camera_contrast: int = pydantic.Field(..., ge=-1000, le=1000)
     save_images_to_archive: bool
     save_current_image: bool
 
@@ -200,6 +202,8 @@ class PartialHeliosConfig(StricterBaseModel):
     edge_pixel_threshold: Optional[float] = pydantic.Field(None, ge=0, le=30)
     edge_color_threshold: Optional[int] = pydantic.Field(None, ge=5, le=250)
     target_pixel_brightness: Optional[int] = pydantic.Field(None, ge=20, le=235)
+    camera_brightness: Optional[int] = pydantic.Field(None, ge=-1000, le=1000)
+    camera_contrast: Optional[int] = pydantic.Field(None, ge=-1000, le=1000)
     save_images_to_archive: Optional[bool] = None
     save_current_image: Optional[bool] = None
 

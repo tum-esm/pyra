@@ -6,6 +6,8 @@
   "edge_pixel_threshold": 1,
   "edge_color_threshold": 40,
   "target_pixel_brightness": 50,
+  "camera_brightness": 64,
+  "camera_contrast": 64,
   "save_images_to_archive": false,
   "save_current_image": false
 }
