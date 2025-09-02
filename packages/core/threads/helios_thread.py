@@ -401,7 +401,7 @@ class HeliosThread(AbstractThread):
 
             try:
                 # Check for termination
-                if not HeliosThread.should_be_running(new_config, state_lock, logger):
+                if not HeliosThread.should_be_running(new_config, logger):
                     if helios_instance is not None:
                         logger.info("Helios thread has been terminated")
                         del helios_instance

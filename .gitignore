@@ -6,6 +6,7 @@ test-tmp/
 hidden/
 cli.sh
 .pdm-python
+state.sqlitelock
 
 # runtime data
 pids

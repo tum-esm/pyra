@@ -45,7 +45,15 @@ def _test_camtracker() -> None:
     """Start CamTracker, check if it is running, stop CamTracker."""
     logger.info('running command "test camtracker"')
     config = types.Config.load()
-    threads.camtracker_thread.CamTrackerThread.test_setup(config, state_lock, logger)
+    state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+        filepath=interfaces.state_interface.STATE_LOCK_PATH,
+        timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+        poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+    )
+    try:
+        threads.camtracker_thread.CamTrackerThread.test_setup(config, state_lock, logger)
+    finally:
+        threads.camtracker_thread.CamTrackerProgram.stop(config, logger)
     _print_green("Successfully tested CamTracker connection.")
 
 
