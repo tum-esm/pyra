@@ -139,6 +139,8 @@ class TUMEnclosureThread(AbstractThread):
                     logger.debug("Updating enclosure state")
                     with interfaces.StateInterface.update_state(state_lock, logger) as s:
                         s.tum_enclosure_state = plc_state
+                        if plc_state.state.rain:
+                            s.last_rain_detection_time = time.time()
 
                     logger.debug("Logging enclosure state")
                     utils.TUMEnclosureLogger.log(config, s)

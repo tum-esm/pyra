@@ -143,6 +143,10 @@ class CASThread(AbstractThread):
                     s.position.altitude = camtracker_coordinates[2]
                     s.position.sun_elevation = sun_elevation
                     s.measurements_should_be_running = should_measure
+                    if (s.last_rain_detection_time is None) or (
+                        s.last_rain_detection_time < last_rain_detection
+                    ):
+                        s.last_rain_detection_time = last_rain_detection
                     s.exceptions_state.clear_exception_origin("cas")
 
                 # SLEEP
