@@ -172,6 +172,30 @@ export default function ConfigSectionHelios() {
                 `50` is a good baseline.
             </configurationComponents.ConfigElementNote>
             <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementText
+                title="Camera Brightness"
+                value={localSectionConfig.camera_brightness}
+                setValue={(v: any) => setLocalConfigItem('helios.camera_brightness', v)}
+                oldValue={
+                    centralSectionConfig !== null ? centralSectionConfig.camera_brightness : 'null'
+                }
+                numeric
+            />
+            <configurationComponents.ConfigElementText
+                title="Camera Contrast"
+                value={localSectionConfig.camera_contrast}
+                setValue={(v: any) => setLocalConfigItem('helios.camera_contrast', v)}
+                oldValue={
+                    centralSectionConfig !== null ? centralSectionConfig.camera_contrast : 'null'
+                }
+                numeric
+            />
+            <configurationComponents.ConfigElementNote>
+                The settings sent to the camera module. You could use a software like Logitech
+                LOGITUNE to find a good setting. The inner walls of the tube should not be too
+                bright.
+            </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
                 title="Save Images to Archive"
                 value={localSectionConfig.save_images_to_archive}
