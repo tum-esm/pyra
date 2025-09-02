@@ -42,7 +42,7 @@
     },
     "productName": "Pyra UI",
     "mainBinaryName": "Pyra UI",
-    "version": "4.2.3",
+    "version": "4.2.4",
     "identifier": "pyra-ui",
     "plugins": {},
     "app": {
@@ -61,11 +61,7 @@
         ],
         "security": {
             "assetProtocol": {
-                "scope": [
-                    "$DOWNLOAD/pyra/**",
-                    "$DOCUMENT/pyra/**",
-                    "$DOCUMENT/work/esm/pyra/**"
-                ],
+                "scope": ["$DOWNLOAD/pyra/**", "$DOCUMENT/pyra/**", "$DOCUMENT/work/esm/pyra/**"],
                 "enable": true
             },
             "csp": null
