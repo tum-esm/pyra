@@ -4,7 +4,7 @@ import contextlib
 import datetime
 import os
 import pydantic
-import threading
+import tum_esm_utils.sqlitelock
 from typing import Generator
 
 from packages.core import types, utils
@@ -13,17 +13,27 @@ _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _STATE_FILE_PATH = os.path.join(_PROJECT_DIR, "logs", "state.json")
 
+# shared lock file based on SQLite
+STATE_LOCK_PATH = os.path.join(_PROJECT_DIR, "logs", "state.sqlitelock")
+STATE_LOCK_TIMEOUT = 20
+STATE_LOCK_POLL_INTERVAL = 0.2
+
 
 class StateInterface:
     @staticmethod
-    def load_state(state_lock: threading.Lock, logger: utils.Logger) -> types.StateObject:
+    def load_state(
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
+        logger: utils.Logger,
+    ) -> types.StateObject:
         """Load the state from the state file."""
 
-        with utils.functions.timeout_lock(state_lock, timeout=10, label="state lock"):
+        with state_lock:
             return StateInterface._load_state_without_lock(logger)
 
     @staticmethod
-    def _load_state_without_lock(logger: utils.Logger) -> types.StateObject:
+    def _load_state_without_lock(
+        logger: utils.Logger,
+    ) -> types.StateObject:
         """Load the state from the state file."""
 
         try:
@@ -43,7 +53,7 @@ class StateInterface:
     @staticmethod
     @contextlib.contextmanager
     def update_state(
-        state_lock: threading.Lock,
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
         logger: utils.Logger,
     ) -> Generator[types.StateObject, None, None]:
         """Update the state file in a context manager.
@@ -59,7 +69,7 @@ class StateInterface:
         interfere with the state file and the state
         """
 
-        with utils.functions.timeout_lock(state_lock, timeout=10, label="state lock"):
+        with state_lock:
             state = StateInterface._load_state_without_lock(logger)
             state_before = state.model_copy(deep=True)
 
