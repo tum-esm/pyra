@@ -117,17 +117,13 @@ class TUMEnclosureInterface:
         self,
         plc_version: Literal[1, 2],
         plc_ip: StrictIPv4Adress,
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
         logger: utils.Logger,
     ) -> None:
         self.plc_version = plc_version
         self.plc_ip = plc_ip.root
         self.specification = _PLC_SPECIFICATION_VERSIONS[plc_version]
         self.plc = snap7.client.Client()
-        self.state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
-            filepath=interfaces.state_interface.STATE_LOCK_PATH,
-            timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
-            poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
-        )
         self.logger = logger
 
     # CONNECTION/CLASS MANAGEMENT

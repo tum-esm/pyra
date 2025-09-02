@@ -20,7 +20,7 @@ class OpusProgram:
     @staticmethod
     def start(
         config: types.Config,
-        state_lock: threading.Lock,
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
         logger: utils.Logger,
     ) -> None:
         """Starts the OPUS.exe with os.startfile()."""
@@ -128,7 +128,6 @@ class OpusThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
-        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -136,19 +135,17 @@ class OpusThread(AbstractThread):
 
     @staticmethod
     def get_new_thread_object(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
     ) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
             target=OpusThread.main,
             daemon=True,
-            args=(state_lock, logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod
     def main(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
         headless: bool = False,
     ) -> None:
@@ -162,6 +159,11 @@ class OpusThread(AbstractThread):
         config = types.Config.load()
 
         logger.debug("Loading state file")
+        state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+            filepath=interfaces.state_interface.STATE_LOCK_PATH,
+            timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+            poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+        )
         state = interfaces.StateInterface.load_state(state_lock, logger)
 
         thread_start_time = time.time()
@@ -451,7 +453,7 @@ class OpusThread(AbstractThread):
     @staticmethod
     def test_setup(
         config: types.Config,
-        state_lock: threading.Lock,
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
         logger: utils.Logger,
     ) -> None:
         OpusProgram.start(config, state_lock, logger)

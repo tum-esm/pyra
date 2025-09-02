@@ -13,7 +13,6 @@ class AbstractThread(abc.ABC):
 
     def __init__(
         self,
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
     ) -> None:
         """Initialize the thread instance. This does not start the
@@ -26,11 +25,9 @@ class AbstractThread(abc.ABC):
             lock=logs_lock,
         )
         self.thread = self.get_new_thread_object(
-            state_lock=state_lock,
             logs_lock=logs_lock,
         )
         self.thread_start_time: Optional[float] = None
-        self.state_lock: threading.Lock = logs_lock
         self.logs_lock: threading.Lock = logs_lock
 
     def update_thread_state(
@@ -45,9 +42,7 @@ class AbstractThread(abc.ABC):
         Returns True if the thread is running/pausing correctly, False
         otherwise."""
 
-        should_be_running: bool = self.__class__.should_be_running(
-            config, self.state_lock, self.logger
-        )
+        should_be_running: bool = self.__class__.should_be_running(config, self.logger)
 
         if should_be_running:
             if self.thread_start_time is not None:
@@ -61,10 +56,7 @@ class AbstractThread(abc.ABC):
                     self.thread.join()
                     self.thread_start_time = None
                     # set up a new thread instance for the next time the thread should start
-                    self.thread = self.get_new_thread_object(
-                        state_lock=self.state_lock,
-                        logs_lock=self.logs_lock,
-                    )
+                    self.thread = self.get_new_thread_object(logs_lock=self.logs_lock)
             else:
                 self.logger.debug("Starting the thread")
                 self.thread.start()
@@ -74,10 +66,7 @@ class AbstractThread(abc.ABC):
             if self.thread_start_time is not None:
                 self.logger.debug("Joining the thread")
                 self.thread.join()
-                self.thread = self.get_new_thread_object(
-                    state_lock=self.state_lock,
-                    logs_lock=self.logs_lock,
-                )
+                self.thread = self.get_new_thread_object(logs_lock=self.logs_lock)
                 self.thread_start_time = None
             else:
                 self.logger.debug("Thread is pausing")
@@ -89,7 +78,6 @@ class AbstractThread(abc.ABC):
     @abc.abstractmethod
     def should_be_running(
         config: types.Config,
-        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -97,7 +85,6 @@ class AbstractThread(abc.ABC):
     @staticmethod
     @abc.abstractmethod
     def get_new_thread_object(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
     ) -> threading.Thread:
         """Return a new thread object that is to be started."""
@@ -105,7 +92,6 @@ class AbstractThread(abc.ABC):
     @staticmethod
     @abc.abstractmethod
     def main(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
         headless: bool = False,
     ) -> None:

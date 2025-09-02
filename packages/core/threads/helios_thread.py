@@ -342,7 +342,6 @@ class HeliosThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
-        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -355,19 +354,17 @@ class HeliosThread(AbstractThread):
 
     @staticmethod
     def get_new_thread_object(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
     ) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
             target=HeliosThread.main,
             daemon=True,
-            args=(state_lock, logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod
     def main(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
         headless: bool = False,
     ) -> None:
@@ -376,8 +373,12 @@ class HeliosThread(AbstractThread):
 
         logger = utils.Logger(origin="helios", lock=logs_lock, just_print=headless)
         logger.info("Starting Helios thread")
+        state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+            filepath=interfaces.state_interface.STATE_LOCK_PATH,
+            timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+            poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+        )
         thread_start_time = time.time()
-
         config = types.Config.load()
         assert config.helios is not None, "This is a bug in Pyra"
         helios_instance: Optional[HeliosInterface] = None

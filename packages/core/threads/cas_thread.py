@@ -2,6 +2,8 @@ import datetime
 import threading
 import time
 
+import tum_esm_utils
+
 from packages.core import interfaces, types, utils
 
 from .abstract_thread import AbstractThread
@@ -17,7 +19,6 @@ class CASThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
-        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -26,19 +27,17 @@ class CASThread(AbstractThread):
 
     @staticmethod
     def get_new_thread_object(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
     ) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
             target=CASThread.main,
             daemon=True,
-            args=(state_lock, logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod
     def main(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
         headless: bool = False,
     ) -> None:
@@ -49,6 +48,12 @@ class CASThread(AbstractThread):
         logger.info("Starting Condition Assessment System (CAS) thread.")
         last_good_automatic_decision: float = 0
         last_rain_detection: float = 0
+
+        state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+            filepath=interfaces.state_interface.STATE_LOCK_PATH,
+            timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+            poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+        )
         thread_start_time = time.time()
 
         while True:

@@ -30,7 +30,7 @@ class CamTrackerProgram:
     @staticmethod
     def start(
         config: types.Config,
-        state_lock: threading.Lock,
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
         logger: utils.Logger,
     ) -> None:
         """Starts the OPUS.exe with os.startfile()."""
@@ -181,7 +181,6 @@ class CamTrackerThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
-        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
@@ -190,19 +189,17 @@ class CamTrackerThread(AbstractThread):
 
     @staticmethod
     def get_new_thread_object(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
     ) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
             target=CamTrackerThread.main,
             daemon=True,
-            args=(state_lock, logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod
     def main(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
         headless: bool = False,
     ) -> None:
@@ -212,6 +209,12 @@ class CamTrackerThread(AbstractThread):
         logger.info("Starting CamTracker thread")
         last_camtracker_start_time: Optional[float] = None
         thread_start_time = time.time()
+
+        state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+            filepath=interfaces.state_interface.STATE_LOCK_PATH,
+            timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+            poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+        )
 
         # STOP CAMTRACKER IF IT IS RUNNING
         config = types.Config.load()
@@ -389,7 +392,7 @@ class CamTrackerThread(AbstractThread):
     @staticmethod
     def get_enclosure_cover_state(
         config: types.Config,
-        state_lock: threading.Lock,
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
         logger: utils.Logger,
     ) -> Literal["not configured", "angle not reported", "open", "closed"]:
         """Checks whether the TUM PLC cover is open or closed. Returns
@@ -413,7 +416,7 @@ class CamTrackerThread(AbstractThread):
     @staticmethod
     def test_setup(
         config: types.Config,
-        state_lock: threading.Lock,
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
         logger: utils.Logger,
     ) -> None:
         """Function to test the functonality of this module. Starts up

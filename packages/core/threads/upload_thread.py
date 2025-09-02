@@ -4,6 +4,7 @@ import time
 from typing import Optional
 
 import circadian_scp_upload
+import tum_esm_utils
 
 from packages.core import interfaces, types, utils
 
@@ -22,10 +23,15 @@ class UploadThread(AbstractThread):
     @staticmethod
     def should_be_running(
         config: types.Config,
-        state_lock: threading.Lock,
         logger: utils.Logger,
     ) -> bool:
         """Based on the config, should the thread be running or not?"""
+
+        state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+            filepath=interfaces.state_interface.STATE_LOCK_PATH,
+            timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+            poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+        )
 
         # only upload when upload is configured
         if config.upload is None:
@@ -69,19 +75,17 @@ class UploadThread(AbstractThread):
 
     @staticmethod
     def get_new_thread_object(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
     ) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
             target=UploadThread.main,
             daemon=True,
-            args=(state_lock, logs_lock),
+            args=(logs_lock,),
         )
 
     @staticmethod
     def main(
-        state_lock: threading.Lock,
         logs_lock: threading.Lock,
         headless: bool = False,
     ) -> None:
@@ -92,6 +96,12 @@ class UploadThread(AbstractThread):
         logger.info("Starting Upload thread")
         thread_start_time = time.time()
 
+        state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+            filepath=interfaces.state_interface.STATE_LOCK_PATH,
+            timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+            poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+        )
+
         config = types.Config.load()
         assert config.upload is not None
 
@@ -99,9 +109,7 @@ class UploadThread(AbstractThread):
             """Update the config from the main thread."""
             new_config = types.Config.load()
             upload_config_has_changed = new_config.upload != config.upload
-            thread_should_not_be_running = not UploadThread.should_be_running(
-                new_config, state_lock, logger
-            )
+            thread_should_not_be_running = not UploadThread.should_be_running(new_config, logger)
             if not silent:
                 if upload_config_has_changed:
                     logger.info("upload config has changed")
