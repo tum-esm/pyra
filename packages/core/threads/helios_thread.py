@@ -224,6 +224,10 @@ class HeliosInterface:
         8. calculate mean color of all 3 images
         9. save images to disk"""
 
+        if len(self.available_exposures) <= 1:
+            self.logger.debug("not enough exposure options -> skipping autoexposure")
+            return
+
         class ExposureResult(pydantic.BaseModel):
             exposure: int
             means: list[float]
