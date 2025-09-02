@@ -5,6 +5,7 @@ import time
 from typing import Callable, Literal, Optional
 
 import click
+import tum_esm_utils
 
 from packages.core import interfaces, types, utils
 
@@ -27,6 +28,11 @@ def _print_red(text: str) -> None:
 def _get_plc_interface() -> Optional[interfaces.TUMEnclosureInterface]:
     config = types.Config.load()
     plc_interface = None
+    state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+        filepath=interfaces.state_interface.STATE_LOCK_PATH,
+        timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+        poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+    )
 
     try:
         assert config.tum_enclosure is not None, "PLC not configured"
@@ -34,7 +40,7 @@ def _get_plc_interface() -> Optional[interfaces.TUMEnclosureInterface]:
         plc_interface = interfaces.TUMEnclosureInterface(
             config.tum_enclosure.version,
             config.tum_enclosure.ip,
-            state_lock=None,
+            state_lock=state_lock,
             logger=logger,
         )
         plc_interface.connect()
@@ -85,7 +91,9 @@ def _reset() -> None:
 
 
 def _wait_until_cover_is_at_angle(
-    plc_interface: interfaces.TUMEnclosureInterface, new_cover_angle: int, timeout: float = 15
+    plc_interface: interfaces.TUMEnclosureInterface,
+    new_cover_angle: int,
+    timeout: float = 15,
 ) -> None:
     # waiting until cover is at this angle
     running_time = 0
@@ -94,9 +102,9 @@ def _wait_until_cover_is_at_angle(
         running_time += 2
         current_cover_angle = plc_interface.get_cover_angle()
         if abs(new_cover_angle - current_cover_angle) <= 3:
-            """with interfaces.StateInterface.update_state(logger) as s:
+            with interfaces.StateInterface.update_state(plc_interface.state_lock, logger) as s:
                 s.tum_enclosure_state.actors.current_angle = current_cover_angle
-                s.tum_enclosure_state.state.cover_closed = current_cover_angle == 0"""
+                s.tum_enclosure_state.state.cover_closed = current_cover_angle == 0
             break
 
         if running_time > timeout:

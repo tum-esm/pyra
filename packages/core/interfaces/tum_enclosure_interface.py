@@ -125,6 +125,7 @@ class TUMEnclosureInterface:
         self.specification = _PLC_SPECIFICATION_VERSIONS[plc_version]
         self.plc = snap7.client.Client()
         self.logger = logger
+        self.state_lock = state_lock
 
     # CONNECTION/CLASS MANAGEMENT
 
