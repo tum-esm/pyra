@@ -1,16 +1,23 @@
-"""Not doing anything because Pyra >= 4.2.4 is no longer using file locks."""
+"""Remove file locks that might be corrupted."""
 
+import os
 import click
+from packages.core import interfaces
 
 
 def _print_green(text: str) -> None:
     click.echo(click.style(text, fg="green"))
 
 
-# FIXME: remove with next breaking release
 @click.command(
     name="remove-filelocks",
-    help="Not doing anything because Pyra >= 4.2.4 is no longer using file locks.",
+    help="NRemove file locks that might be corrupted.",
 )
 def remove_filelocks() -> None:
-    _print_green("Not doing anything because Pyra >= 4.2.4 is no longer using file locks.")
+    for f in [
+        interfaces.state_interface.STATE_LOCK_PATH,
+        interfaces.state_interface.STATE_LOCK_PATH + "-journal",
+    ]:
+        if os.path.exists(f):
+            os.remove(f)
+            _print_green(f"Removed {f} lock.")
