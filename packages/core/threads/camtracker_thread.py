@@ -246,6 +246,8 @@ class CamTrackerThread(AbstractThread):
                     time.sleep(15)
                     continue
 
+                # RESOLVE COVER CLOSED WARNING WHEN IT IS RAINING
+
                 if (state.last_rain_detection_time is not None) and (
                     (time.time() - state.last_rain_detection_time) < 180
                 ):
@@ -256,6 +258,8 @@ class CamTrackerThread(AbstractThread):
                             s.exceptions_state.clear_exception_subject(
                                 subject="Camtracker was started but cover is closed."
                             )
+
+                # START/STOP CAMTRACKER IF NECESSARY
 
                 if measurements_should_be_running and (not camtracker_is_running):
                     logger.info("CamTracker should be running, but is not. Starting CamTracker.")
@@ -269,6 +273,7 @@ class CamTrackerThread(AbstractThread):
                     last_camtracker_start_time = None
 
                 # CHECK WHETHER CAMTRACKER IS RUNNING CORRECTLY
+
                 if measurements_should_be_running and (last_camtracker_start_time is not None):
                     if (time.time() - last_camtracker_start_time) < 180:
                         logger.info(
@@ -306,6 +311,8 @@ class CamTrackerThread(AbstractThread):
                             while True:
                                 time.sleep(5)
                                 state = interfaces.StateInterface.load_state(state_lock, logger)
+
+                                # if rain detected in last 3 minutes -> cover can be closed
                                 if (state.last_rain_detection_time is not None) and (
                                     (time.time() - state.last_rain_detection_time) < 180
                                 ):
@@ -317,6 +324,8 @@ class CamTrackerThread(AbstractThread):
                                             subject="Camtracker was started but cover is closed."
                                         )
                                     break
+
+                                # if conditions changed -> no need to open cover
                                 if not state.measurements_should_be_running:
                                     logger.info(
                                         "Measurements conditions have changed, hence no need to open cover."
@@ -328,9 +337,11 @@ class CamTrackerThread(AbstractThread):
                                             subject="Camtracker was started but cover is closed."
                                         )
                                     break
-                                if (time.time() - t1) > (
-                                    (config.general.seconds_per_core_iteration * 3) + 5
-                                ):
+
+                                # if enclosure cover is still closed after a good amount of waiting and no rain
+                                # -> rain an exception
+                                waiting_time = (config.general.seconds_per_core_iteration * 3) + 5
+                                if (time.time() - t1) > waiting_time:
                                     logger.error(
                                         "Enclosure cover is closed even though, there is no rain. Stopping CamTracker."
                                     )
@@ -348,6 +359,7 @@ class CamTrackerThread(AbstractThread):
                                     camtracker_is_running = False
                                     last_camtracker_start_time = None
                                     break
+
                         if cover_state == "open":
                             with interfaces.StateInterface.update_state(state_lock, logger) as s:
                                 s.exceptions_state.clear_exception_subject(
