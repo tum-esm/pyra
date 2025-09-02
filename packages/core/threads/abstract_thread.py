@@ -51,7 +51,7 @@ class AbstractThread(abc.ABC):
                     return True
                 else:
                     now = time.time()
-                    if (self.thread_start_time - now) <= 43199:  # 43200 seconds = 12 hours
+                    if (now - self.thread_start_time) <= 43080:  # 43200 seconds = 12 hours
                         self.logger.debug("Thread has crashed/stopped, running teardown")
                     self.thread.join()
                     self.thread_start_time = None

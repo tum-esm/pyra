@@ -56,7 +56,7 @@ class SystemMonitorThread(AbstractThread):
                 logger.debug("Starting iteration")
                 t1 = time.time()
 
-                if (thread_start_time - t1) > 43200:
+                if (t1 - thread_start_time) > 43200:
                     # Windows happens to have a problem with long-running multiprocesses/multithreads
                     logger.debug(
                         "Stopping and restarting thread after 12 hours for stability reasons"

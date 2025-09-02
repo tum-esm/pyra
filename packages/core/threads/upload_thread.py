@@ -116,7 +116,7 @@ class UploadThread(AbstractThread):
                 if thread_should_not_be_running:
                     logger.info("upload thread should not be running")
 
-            if (thread_start_time - time.time()) > 43200:
+            if (time.time() - thread_start_time) > 43200:
                 # Windows happens to have a problem with long-running multiprocesses/multithreads
                 logger.debug("Stopping and restarting thread after 12 hours for stability reasons")
                 return True
