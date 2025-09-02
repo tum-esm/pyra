@@ -74,6 +74,11 @@ class ExceptionsState(StricterBaseModel):
 
         self.current = [e for e in self.current if e.subject != subject]
 
+    def has_subject(self, subject: str) -> bool:
+        """Check if there is an exception with the given subject."""
+
+        return any(e.subject == subject for e in self.current)
+
 
 class ActivityState(StricterBaseModel):
     cli_calls: int = 0

@@ -238,16 +238,24 @@ class CamTrackerThread(AbstractThread):
                 config = types.Config.load()
 
                 camtracker_is_running = CamTrackerProgram.is_running()
-                measurements_should_be_running = bool(
-                    interfaces.StateInterface.load_state(
-                        state_lock, logger
-                    ).measurements_should_be_running
-                )
+                state = interfaces.StateInterface.load_state(state_lock, logger)
+                measurements_should_be_running = bool(state.measurements_should_be_running)
 
                 if config.general.test_mode:
                     logger.info("CamTracker thread is skipped in test mode")
                     time.sleep(15)
                     continue
+
+                if (state.last_rain_detection_time is not None) and (
+                    (time.time() - state.last_rain_detection_time) < 180
+                ):
+                    if state.exceptions_state.has_subject(
+                        "Camtracker was started but cover is closed."
+                    ):
+                        with interfaces.StateInterface.update_state(state_lock, logger) as s:
+                            s.exceptions_state.clear_exception_subject(
+                                subject="Camtracker was started but cover is closed."
+                            )
 
                 if measurements_should_be_running and (not camtracker_is_running):
                     logger.info("CamTracker should be running, but is not. Starting CamTracker.")
@@ -298,13 +306,27 @@ class CamTrackerThread(AbstractThread):
                             while True:
                                 time.sleep(5)
                                 state = interfaces.StateInterface.load_state(state_lock, logger)
-                                if state.tum_enclosure_state.state.rain:
+                                if (state.last_rain_detection_time is not None) and (
+                                    (time.time() - state.last_rain_detection_time) < 180
+                                ):
                                     logger.info("Enclosure cover is closed due to rain.")
+                                    with interfaces.StateInterface.update_state(
+                                        state_lock, logger
+                                    ) as s:
+                                        s.exceptions_state.clear_exception_subject(
+                                            subject="Camtracker was started but cover is closed."
+                                        )
                                     break
                                 if not state.measurements_should_be_running:
                                     logger.info(
                                         "Measurements conditions have changed, hence no need to open cover."
                                     )
+                                    with interfaces.StateInterface.update_state(
+                                        state_lock, logger
+                                    ) as s:
+                                        s.exceptions_state.clear_exception_subject(
+                                            subject="Camtracker was started but cover is closed."
+                                        )
                                     break
                                 if (time.time() - t1) > (
                                     (config.general.seconds_per_core_iteration * 3) + 5
