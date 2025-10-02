@@ -56,8 +56,8 @@ class HeliosImageProcessing:
 
         # computing possible radii of lense
         image_height = min(bw_frame.shape)
-        min_lense_size = round(image_height * 0.5 * 0.85)
-        max_lense_size = round(image_height * 0.5 * 1.15)
+        min_lense_size = round(image_height * 0.5 * 0.45)
+        max_lense_size = round(image_height * 0.5 * 1.2)
         lense_radii = np.arange(min_lense_size, max_lense_size, 2)
 
         # pick the 50 best circles
