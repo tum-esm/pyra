@@ -291,7 +291,7 @@ class CamTrackerThread(AbstractThread):
                                     continue
                             case "invalid":
                                 logger.error(
-                                    "Restarting CamTracker because tracker offsets are too high."
+                                    "Restarting CamTracker because tracker offsets are zero or too high."
                                 )
                                 CamTrackerProgram.stop(config, logger)
                                 continue
@@ -418,7 +418,8 @@ class CamTrackerThread(AbstractThread):
 
         if (abs(tracker_position.azimuth_offset) <= config.camtracker.motor_offset_threshold) and (
             abs(tracker_position.elevation_offset) <= config.camtracker.motor_offset_threshold
-        ):
+        ) and (
+            (tracker_position.azimuth_offset != 0) and (tracker_position.elevation_offset) != 0):
             return "valid"
         else:
             return "invalid"
