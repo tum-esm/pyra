@@ -93,6 +93,29 @@ export function SystemState() {
                     </StatePanel>
                 </div>
             )}
+            {centralConfig.coccon_spain_enclosure !== null && (
+                <div className="grid w-full grid-cols-4 px-4 pb-1 text-sm gap-x-1">
+                    <StatePanel title="Cover Angle">
+                        {renderString(coreState.coccon_spain_enclosure_state.actors.cover_position)}
+                    </StatePanel>
+                    <StatePanel title="Temperature">
+                        {renderString(coreState.coccon_spain_enclosure_state.sensors.temperature, {
+                            appendix: ' °C',
+                        })}
+                    </StatePanel>
+                    <StatePanel title="Humidity">
+                        {renderString(coreState.coccon_spain_enclosure_state.sensors.humidity, {
+                            appendix: ' rH',
+                        })}
+                    </StatePanel>
+                    <StatePanel title="Helios Edge Pixels">
+                        {renderNumber(
+                            lastEdgeFractionValue === null ? null : lastEdgeFractionValue * 100,
+                            { appendix: ' %' }
+                        )}
+                    </StatePanel>
+                </div>
+            )}
             {coreState?.tum_enclosure_state.state.rain === true &&
                 coreState?.tum_enclosure_state.state.cover_closed === false && (
                     <div className="w-full px-4 mb-4 -mt-2 text-sm">

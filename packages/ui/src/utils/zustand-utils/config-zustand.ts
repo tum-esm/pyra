@@ -73,6 +73,11 @@ export const configSchema = z.object({
             controlled_by_user: z.boolean(),
         })
         .nullable(),
+    coccon_spain_enclosure: z
+        .object({
+            ip: z.string(),
+        })
+        .nullable(),
     helios: z
         .object({
             camera_id: intSchema,
