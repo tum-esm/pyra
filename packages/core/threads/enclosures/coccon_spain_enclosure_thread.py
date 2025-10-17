@@ -2,6 +2,8 @@ import threading
 import time
 from typing import Optional
 
+import tum_esm_utils
+
 from packages.core import interfaces, types, utils
 
 from ..abstract_thread import AbstractThread
@@ -39,6 +41,12 @@ class COCCONSpainEnclosureThread(AbstractThread):
 
         exception_was_set: Optional[bool] = None
         thread_start_time = time.time()
+
+        state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+            filepath=interfaces.state_interface.STATE_LOCK_PATH,
+            timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+            poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+        )
 
         try:
             while True:
@@ -85,7 +93,7 @@ class COCCONSpainEnclosureThread(AbstractThread):
                     enclosure_state = enclosure_interface.read()
 
                     logger.debug("Updating enclosure state")
-                    with interfaces.StateInterface.update_state(logger) as s:
+                    with interfaces.StateInterface.update_state(state_lock, logger) as s:
                         s.coccon_spain_enclosure_state = enclosure_state
 
                     logger.debug("Logging enclosure state")
@@ -98,7 +106,7 @@ class COCCONSpainEnclosureThread(AbstractThread):
                     # `exception_was_set` variable used to recude the number of state updates
                     if not exception_was_set:
                         exception_was_set = False
-                        with interfaces.StateInterface.update_state(logger) as s:
+                        with interfaces.StateInterface.update_state(state_lock, logger) as s:
                             s.exceptions_state.clear_exception_origin(
                                 origin="coccon-spain-enclosure"
                             )
@@ -120,5 +128,5 @@ class COCCONSpainEnclosureThread(AbstractThread):
 
         except Exception as e:
             logger.exception(e)
-            with interfaces.StateInterface.update_state(logger) as s:
+            with interfaces.StateInterface.update_state(state_lock, logger) as s:
                 s.exceptions_state.add_exception(origin="coccon-spain-enclosure", exception=e)
