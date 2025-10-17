@@ -289,12 +289,31 @@ class CamTrackerThread(AbstractThread):
                                     logger.info("Restarting CamTracker because logs are too old.")
                                     CamTrackerProgram.stop(config, logger)
                                     continue
-                            case "invalid":
+                            case "offsets too high":
                                 logger.error(
-                                    "Restarting CamTracker because tracker offsets are zero or too high."
+                                    "Restarting CamTracker because tracker offsets are too high."
                                 )
                                 CamTrackerProgram.stop(config, logger)
                                 continue
+                            case "offsets are zero":
+                                logger.warning(
+                                    "CamTracker motor offsets are zero, waiting 30 seconds to confirm this state."
+                                )
+                                time.sleep(30)
+                                result_after_waiting = (
+                                    CamTrackerThread.check_tracker_motor_positions(config, logger)
+                                )
+                                if result_after_waiting == "offsets are zero":
+                                    logger.error(
+                                        "Restarting CamTracker because tracker offsets are zero for at least 30 seconds."
+                                    )
+                                    CamTrackerProgram.stop(config, logger)
+                                    continue
+                                else:
+                                    # if the error is something else now, it will be handled in the next iteration
+                                    logger.debug(
+                                        "Tracker offsets are no longer zero after waiting 30 seconds."
+                                    )
                             case "valid":
                                 logger.debug("Tracker offsets are within threshold.")
 
@@ -400,7 +419,13 @@ class CamTrackerThread(AbstractThread):
     def check_tracker_motor_positions(
         config: types.Config,
         logger: utils.Logger,
-    ) -> Literal["no logs", "logs too old", "valid", "invalid"]:
+    ) -> Literal[
+        "no logs",
+        "logs too old",
+        "offsets too high",
+        "offsets are zero",
+        "valid",
+    ]:
         """Checks whether CamTracker is running and is pointing in the right direction.
 
         If the last logline is younger than 5 minutes, the function returns
@@ -416,13 +441,17 @@ class CamTrackerThread(AbstractThread):
         if tracker_position.dt < datetime.datetime.now() - datetime.timedelta(minutes=5):
             return "logs too old"
 
-        if (abs(tracker_position.azimuth_offset) <= config.camtracker.motor_offset_threshold) and (
-            abs(tracker_position.elevation_offset) <= config.camtracker.motor_offset_threshold
-        ) and (
-            (tracker_position.azimuth_offset != 0) and (tracker_position.elevation_offset) != 0):
-            return "valid"
-        else:
-            return "invalid"
+        if (abs(tracker_position.azimuth_offset) > config.camtracker.motor_offset_threshold) or (
+            abs(tracker_position.elevation_offset) > config.camtracker.motor_offset_threshold
+        ):
+            return "offsets too high"
+
+        if (round(tracker_position.azimuth_offset, 6) == 0) or (
+            round(tracker_position.elevation_offset, 6) == 0
+        ):
+            return "offsets are zero"
+
+        return "valid"
 
     @staticmethod
     def get_enclosure_cover_state(
