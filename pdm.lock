@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:b45e3a21eef12cdf59630c12a406290582b37f2113c5601e5aa017d900b8a255"
+content_hash = "sha256:7587f580ff1affb3331897ac882a7ab6c8c21a2644f098ddd1afed0109ae7d08"
 
 [[metadata.targets]]
 requires_python = "==3.10.*"
@@ -642,19 +642,18 @@ files = [
 
 [[package]]
 name = "psutil"
-version = "7.0.0"
+version = "7.1.2"
 requires_python = ">=3.6"
-summary = "Cross-platform lib for process and system monitoring in Python.  NOTE: the syntax of this script MUST be kept compatible with Python 2.7."
+summary = "Cross-platform lib for process and system monitoring."
 groups = ["default"]
 files = [
-    {file = "psutil-7.0.0-cp36-abi3-macosx_10_9_x86_64.whl", hash = "sha256:101d71dc322e3cffd7cea0650b09b3d08b8e7c4109dd6809fe452dfd00e58b25"},
-    {file = "psutil-7.0.0-cp36-abi3-macosx_11_0_arm64.whl", hash = "sha256:39db632f6bb862eeccf56660871433e111b6ea58f2caea825571951d4b6aa3da"},
-    {file = "psutil-7.0.0-cp36-abi3-manylinux_2_12_i686.manylinux2010_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:1fcee592b4c6f146991ca55919ea3d1f8926497a713ed7faaf8225e174581e91"},
-    {file = "psutil-7.0.0-cp36-abi3-manylinux_2_12_x86_64.manylinux2010_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4b1388a4f6875d7e2aff5c4ca1cc16c545ed41dd8bb596cefea80111db353a34"},
-    {file = "psutil-7.0.0-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a5f098451abc2828f7dc6b58d44b532b22f2088f4999a937557b603ce72b1993"},
-    {file = "psutil-7.0.0-cp37-abi3-win32.whl", hash = "sha256:ba3fcef7523064a6c9da440fc4d6bd07da93ac726b5733c29027d7dc95b39d99"},
-    {file = "psutil-7.0.0-cp37-abi3-win_amd64.whl", hash = "sha256:4cf3d4eb1aa9b348dec30105c55cd9b7d4629285735a102beb4441e38db90553"},
-    {file = "psutil-7.0.0.tar.gz", hash = "sha256:7be9c3eba38beccb6495ea33afd982a44074b78f28c434a1f51cc07fd315c456"},
+    {file = "psutil-7.1.2-cp36-abi3-macosx_10_9_x86_64.whl", hash = "sha256:c9ba5c19f2d46203ee8c152c7b01df6eec87d883cfd8ee1af2ef2727f6b0f814"},
+    {file = "psutil-7.1.2-cp36-abi3-macosx_11_0_arm64.whl", hash = "sha256:2a486030d2fe81bec023f703d3d155f4823a10a47c36784c84f1cc7f8d39bedb"},
+    {file = "psutil-7.1.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:3efd8fc791492e7808a51cb2b94889db7578bfaea22df931424f874468e389e3"},
+    {file = "psutil-7.1.2-cp36-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:e2aeb9b64f481b8eabfc633bd39e0016d4d8bbcd590d984af764d80bf0851b8a"},
+    {file = "psutil-7.1.2-cp37-abi3-win_amd64.whl", hash = "sha256:8e17852114c4e7996fe9da4745c2bdef001ebbf2f260dec406290e66628bdb91"},
+    {file = "psutil-7.1.2-cp37-abi3-win_arm64.whl", hash = "sha256:3e988455e61c240cc879cb62a008c2699231bf3e3d061d7fce4234463fd2abb4"},
+    {file = "psutil-7.1.2.tar.gz", hash = "sha256:aa225cdde1335ff9684708ee8c72650f6598d5ed2114b9a7c5802030b1785018"},
 ]
 
 [[package]]
@@ -1052,26 +1051,26 @@ files = [
 
 [[package]]
 name = "tum-esm-utils"
-version = "2.9.0"
+version = "2.10.0"
 requires_python = "<4.0,>=3.10"
 summary = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
 groups = ["default"]
 dependencies = [
     "filelock>=3.18.0",
-    "psutil>=7.0.0",
+    "psutil>=7.1.2",
     "pydantic>=2.11.3",
     "pytz>=2025.2",
     "requests>=2.32.3",
     "tailwind-colors>=1.3.0",
 ]
 files = [
-    {file = "tum_esm_utils-2.9.0-py3-none-any.whl", hash = "sha256:6ac29ef920b08ca4683a853ad4b6df437948c10cd4c2bfae476d89886f37c60e"},
-    {file = "tum_esm_utils-2.9.0.tar.gz", hash = "sha256:9d38ad18042ebfa6852fbe7c107bd66a87729f9ee0eabf0e0f8131dde6778133"},
+    {file = "tum_esm_utils-2.10.0-py3-none-any.whl", hash = "sha256:ef5606419171a4967e490f7bf0362bad5c92a98ca52da1e4c99166d4f63aa87f"},
+    {file = "tum_esm_utils-2.10.0.tar.gz", hash = "sha256:ee8da3099497faf0d2c830be705effa29fcf34ea851eeb7beb3fc36225e51046"},
 ]
 
 [[package]]
 name = "tum-esm-utils"
-version = "2.9.0"
+version = "2.10.0"
 extras = ["opus"]
 requires_python = "<4.0,>=3.10"
 summary = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
@@ -1079,11 +1078,11 @@ groups = ["default"]
 dependencies = [
     "numpy>=2.2.5",
     "tenacity>=9.1.2",
-    "tum-esm-utils==2.9.0",
+    "tum-esm-utils==2.10.0",
 ]
 files = [
-    {file = "tum_esm_utils-2.9.0-py3-none-any.whl", hash = "sha256:6ac29ef920b08ca4683a853ad4b6df437948c10cd4c2bfae476d89886f37c60e"},
-    {file = "tum_esm_utils-2.9.0.tar.gz", hash = "sha256:9d38ad18042ebfa6852fbe7c107bd66a87729f9ee0eabf0e0f8131dde6778133"},
+    {file = "tum_esm_utils-2.10.0-py3-none-any.whl", hash = "sha256:ef5606419171a4967e490f7bf0362bad5c92a98ca52da1e4c99166d4f63aa87f"},
+    {file = "tum_esm_utils-2.10.0.tar.gz", hash = "sha256:ee8da3099497faf0d2c830be705effa29fcf34ea851eeb7beb3fc36225e51046"},
 ]
 
 [[package]]
