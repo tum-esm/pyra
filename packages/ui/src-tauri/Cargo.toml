@@ -1,10 +1,8 @@
 [package]
 name = "pyra-ui"
-version = "4.2.5"
+version = "4.2.6"
 description = "Pyra UI"
-authors = [
-    "Moritz Makowski <moritz.makowski@tum.de>",
-]
+authors = ["Moritz Makowski <moritz.makowski@tum.de>"]
 license = ""
 repository = "https://github.com/tum-esm/pyra"
 default-run = "pyra-ui"
@@ -14,18 +12,12 @@ rust-version = "1.57"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "2", features = [
-] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
 serde_json = "1.0"
-serde = { version = "1.0", features = [
-    "derive",
-] }
-tauri = { version = "2", features = [
-    "protocol-asset",
-    "devtools",
-] }
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "2", features = ["protocol-asset", "devtools"] }
 tauri-plugin-shell = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-dialog = "2"
@@ -36,6 +28,4 @@ tauri-plugin-dialog = "2"
 default = ["custom-protocol"]
 # this feature is used used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
-custom-protocol = [
-    "tauri/custom-protocol",
-]
+custom-protocol = ["tauri/custom-protocol"]
