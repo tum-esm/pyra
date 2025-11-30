@@ -218,9 +218,6 @@ class CamTrackerThread(AbstractThread):
 
         # STOP CAMTRACKER IF IT IS RUNNING
         config = types.Config.load()
-        if CamTrackerProgram.is_running() and (not config.general.test_mode):
-            logger.info("Stopping CamTracker")
-            CamTrackerProgram.stop(config, logger)
 
         while True:
             try:
