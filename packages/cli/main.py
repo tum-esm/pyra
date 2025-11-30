@@ -28,7 +28,7 @@ def print_cli_information() -> None:
     logger.debug('running command "info"')
     click.echo(
         click.style(
-            f'This CLI is running Pyra version 4.2.6 in directory "{_PROJECT_DIR}"',
+            f'This CLI is running Pyra version 4.2.7 in directory "{_PROJECT_DIR}"',
             fg="green",
         )
     )
