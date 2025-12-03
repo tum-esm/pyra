@@ -43,6 +43,7 @@ const hardwareSections: {
     icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
 }[] = [
     { key: 'tum_enclosure', label: 'TUM Enclosure', icon: IconCpu },
+    { key: 'coccon_spain_enclosure', label: 'COCCON Spain Enclosure', icon: IconCpu },
     { key: 'helios', label: 'Helios', icon: IconCpu },
 ];
 
@@ -169,6 +170,9 @@ export default function ConfigurationTab() {
                 )}
                 {activeKey === 'tum_enclosure' && (
                     <configurationComponents.ConfigSectionTUMEnclosure />
+                )}
+                {activeKey === 'coccon_spain_enclosure' && (
+                    <configurationComponents.ConfigSectionCOCCONSpainEnclosure />
                 )}
                 {activeKey === 'helios' && <configurationComponents.ConfigSectionHelios />}
                 {activeKey === 'upload' && <configurationComponents.ConfigSectionUpload />}
