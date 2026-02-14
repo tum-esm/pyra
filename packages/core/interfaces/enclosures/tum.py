@@ -219,7 +219,7 @@ class TUMEnclosureInterface:
 
     # BULK READ
 
-    def read(self) -> types.tum_enclosure.TUMEnclosureState:
+    def read(self) -> types.tum.TUMEnclosureState:
         """Read the whole state of the PLC"""
 
         try:
@@ -244,37 +244,37 @@ class TUMEnclosureInterface:
 
             s = self.specification
 
-            return types.tum_enclosure.TUMEnclosureState(
+            return types.tum.TUMEnclosureState(
                 last_full_fetch=datetime.datetime.now(),
-                actors=types.tum_enclosure.ActorsState(
+                actors=types.tum.ActorsState(
                     fan_speed=_get_int(s.actors.fan_speed),
                     current_angle=_get_int(s.actors.current_angle),
                 ),
-                control=types.tum_enclosure.ControlState(
+                control=types.tum.ControlState(
                     auto_temp_mode=_get_bool(s.control.auto_temp_mode),
                     manual_control=_get_bool(s.control.manual_control),
                     manual_temp_mode=_get_bool(s.control.manual_temp_mode),
                     sync_to_tracker=_get_bool(s.control.sync_to_tracker),
                 ),
-                sensors=types.tum_enclosure.SensorsState(
+                sensors=types.tum.SensorsState(
                     humidity=_get_int(s.sensors.humidity),
                     temperature=_get_int(s.sensors.temperature),
                 ),
-                state=types.tum_enclosure.StateState(
+                state=types.tum.StateState(
                     cover_closed=_get_bool(s.state.cover_closed),
                     motor_failed=_get_bool(s.state.motor_failed),
                     rain=_get_bool(s.state.rain),
                     reset_needed=_get_bool(s.state.reset_needed),
                     ups_alert=_get_bool(s.state.ups_alert),
                 ),
-                power=types.tum_enclosure.PowerState(
+                power=types.tum.PowerState(
                     camera=_get_bool(s.power.camera),
                     computer=_get_bool(s.power.computer),
                     heater=_get_bool(s.power.heater),
                     router=_get_bool(s.power.router),
                     spectrometer=_get_bool(s.power.spectrometer),
                 ),
-                connections=types.tum_enclosure.ConnectionsState(
+                connections=types.tum.ConnectionsState(
                     camera=_get_bool(s.connections.camera),
                     computer=_get_bool(s.connections.computer),
                     heater=_get_bool(s.connections.heater),

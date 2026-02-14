@@ -10,11 +10,11 @@ import pydantic
 import tum_esm_utils
 from tum_esm_utils.validators import StricterBaseModel, StrictIPv4Adress
 
-from .enclosures.tum_enclosure import (
+from .enclosures.tum import (
     PartialTUMEnclosureConfig,
     TUMEnclosureConfig,
 )
-from .enclosures.aemet_enclosure import (
+from .enclosures.aemet import (
     PartialAEMETEnclosureConfig,
     AEMETEnclosureConfig,
 )

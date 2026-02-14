@@ -5,8 +5,8 @@ from typing import Literal, Optional
 import pydantic
 from tum_esm_utils.validators import StricterBaseModel
 
-from .enclosures.tum_enclosure import TUMEnclosureState
-from .enclosures.aemet_enclosure import AEMETEnclosureState
+from .enclosures.tum import TUMEnclosureState
+from .enclosures.aemet import AEMETEnclosureState
 
 # --- SUBSTATES ---
 

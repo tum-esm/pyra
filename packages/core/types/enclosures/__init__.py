@@ -1,2 +1,2 @@
-from . import tum_enclosure as tum_enclosure
-from . import aemet_enclosure as aemet_enclosure
+from . import tum as tum
+from . import aemet as aemet

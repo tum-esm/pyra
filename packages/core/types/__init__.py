@@ -15,5 +15,5 @@ from .state import OperatingSystemState as OperatingSystemState
 from .state import Position as Position
 from .state import StateObject as StateObject
 
-from .enclosures import tum_enclosure as tum_enclosure
-from .enclosures import aemet_enclosure as aemet_enclosure
+from .enclosures import tum as tum
+from .enclosures import aemet as aemet

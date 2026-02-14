@@ -31,19 +31,19 @@ class AEMETEnclosureInterface:
 
     # BULK READ
 
-    def read(self) -> types.aemet_enclosure.AEMETEnclosureState:
+    def read(self) -> types.aemet.AEMETEnclosureState:
         """Read the whole state of the datalogger."""
 
         try:
             # TODO
 
-            return types.aemet_enclosure.AEMETEnclosureState(
+            return types.aemet.AEMETEnclosureState(
                 last_full_fetch=datetime.datetime.now(),
-                actors=types.aemet_enclosure.ActorsState(
+                actors=types.aemet.ActorsState(
                     fan_speed=None,
                     cover_position=None,
                 ),
-                sensors=types.aemet_enclosure.SensorsState(
+                sensors=types.aemet.SensorsState(
                     humidity=None,
                     temperature=None,
                     wind_direction=None,

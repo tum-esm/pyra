@@ -6,9 +6,9 @@ from .opus_thread import OpusThread as OpusThread
 from .system_monitor_thread import SystemMonitorThread as SystemMonitorThread
 from .upload_thread import UploadThread as UploadThread
 
-from .enclosures.tum_enclosure_thread import (
+from .enclosures.tum import (
     TUMEnclosureThread as TUMEnclosureThread,
 )
-from .enclosures.aemet_enclosure_thread import (
+from .enclosures.aemet import (
     AEMETEnclosureThread as AEMETEnclosureThread,
 )

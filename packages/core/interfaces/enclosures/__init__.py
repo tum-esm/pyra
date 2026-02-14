@@ -1,2 +1,2 @@
-from .tum_enclosure import TUMEnclosureInterface as TUMEnclosureInterface
-from .aemet_enclosure import AEMETEnclosureInterface as AEMETEnclosureInterface
+from .tum import TUMEnclosureInterface as TUMEnclosureInterface
+from .aemet import AEMETEnclosureInterface as AEMETEnclosureInterface

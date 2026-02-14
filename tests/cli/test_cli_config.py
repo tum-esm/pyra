@@ -141,7 +141,7 @@ def test_add_default_config(sample_config: types.Config) -> None:
         if c == "helios":
             sample_config.helios = types.config.HeliosConfig.model_validate(default_subconfig)
         if c == "tum_enclosure":
-            sample_config.tum_enclosure = types.tum_enclosure.TUMEnclosureConfig.model_validate(
+            sample_config.tum_enclosure = types.tum.TUMEnclosureConfig.model_validate(
                 default_subconfig
             )
         assert_config_file_content(sample_config, f'config.json does not include the "{c}" config')

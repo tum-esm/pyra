@@ -1,2 +1,2 @@
-from .tum_enclosure_thread import TUMEnclosureThread as TUMEnclosureThread
-from .aemet_enclosure_thread import AEMETEnclosureThread as AEMETEnclosureThread
+from .tum import TUMEnclosureThread as TUMEnclosureThread
+from .aemet import AEMETEnclosureThread as AEMETEnclosureThread
