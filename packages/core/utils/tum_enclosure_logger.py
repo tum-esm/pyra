@@ -1,5 +1,6 @@
 import datetime
 import os
+from typing import Any
 
 import tum_esm_utils
 
@@ -17,7 +18,7 @@ class TUMEnclosureLogger:
         timestamp = now.timestamp()
         datetime_string = now.isoformat()
 
-        log_line = [
+        log_line: list[Any] = [
             timestamp,
             datetime_string,
             state.position.sun_elevation,

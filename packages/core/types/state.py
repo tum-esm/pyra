@@ -6,7 +6,7 @@ import pydantic
 from tum_esm_utils.validators import StricterBaseModel
 
 from .enclosures.tum_enclosure import TUMEnclosureState
-from .enclosures.coccon_spain_enclosure import COCCONSpainEnclosureState
+from .enclosures.aemet_enclosure import AEMETEnclosureState
 
 # --- SUBSTATES ---
 
@@ -41,10 +41,10 @@ class OpusState(StricterBaseModel):
 
 class ExceptionsState(StricterBaseModel):
     current: list[ExceptionStateItem] = pydantic.Field(
-        [], description="List of exceptions that are currently active."
+        default=[], description="List of exceptions that are currently active."
     )
     notified: list[ExceptionStateItem] = pydantic.Field(
-        [], description="List of exceptions for which an email was sent out."
+        default=[], description="List of exceptions for which an email was sent out."
     )
 
     def add_exception_state_item(self, item: ExceptionStateItem) -> None:
@@ -99,7 +99,7 @@ class StateObject(StricterBaseModel):
     measurements_should_be_running: Optional[bool] = None
     last_rain_detection_time: Optional[float] = None
     tum_enclosure_state: TUMEnclosureState = TUMEnclosureState()
-    coccon_spain_enclosure_state: COCCONSpainEnclosureState = COCCONSpainEnclosureState()
+    aemet_enclosure_state: AEMETEnclosureState = AEMETEnclosureState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
     exceptions_state: ExceptionsState = ExceptionsState()
     opus_state: OpusState = OpusState()
@@ -114,6 +114,6 @@ class StateObject(StricterBaseModel):
         self.measurements_should_be_running = None
         self.last_rain_detection_time = None
         self.tum_enclosure_state = TUMEnclosureState()
-        self.coccon_spain_enclosure_state = COCCONSpainEnclosureState()
+        self.aemet_enclosure_state = AEMETEnclosureState()
         self.operating_system_state = OperatingSystemState()
         self.activity = ActivityState()

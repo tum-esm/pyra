@@ -101,8 +101,7 @@ class TUMEnclosureInterface:
     Manual: https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
     """
 
-    @staticmethod
-    class PLCError(BaseException):
+    class PLCError(Exception):
         """
         Raised when updating a boolean value on the
         plc did not change its internal value.

@@ -59,7 +59,7 @@
     "shutdown_grace_period": 300
   },
   "tum_enclosure": null,
-  "coccon_spain_enclosure": null,
+  "aemet_enclosure": null,
   "helios": null,
   "upload": null
 }

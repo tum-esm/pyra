@@ -9,6 +9,6 @@ from .upload_thread import UploadThread as UploadThread
 from .enclosures.tum_enclosure_thread import (
     TUMEnclosureThread as TUMEnclosureThread,
 )
-from .enclosures.coccon_spain_enclosure_thread import (
-    COCCONSpainEnclosureThread as COCCONSpainEnclosureThread,
+from .enclosures.aemet_enclosure_thread import (
+    AEMETEnclosureThread as AEMETEnclosureThread,
 )

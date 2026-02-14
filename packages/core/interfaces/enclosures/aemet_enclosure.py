@@ -3,11 +3,10 @@ from tum_esm_utils.validators import StrictIPv4Adress
 from packages.core import types, utils
 
 
-class COCCONSpainEnclosureInterface:
+class AEMETEnclosureInterface:
     """TODO"""
 
-    @staticmethod
-    class DataloggerError(BaseException):
+    class DataloggerError(Exception):
         """Raised when the datalogger did not respond as expected."""
 
     def __init__(
@@ -32,19 +31,19 @@ class COCCONSpainEnclosureInterface:
 
     # BULK READ
 
-    def read(self) -> types.coccon_spain_enclosure.COCCONSpainEnclosureState:
+    def read(self) -> types.aemet_enclosure.AEMETEnclosureState:
         """Read the whole state of the datalogger."""
 
         try:
             # TODO
 
-            return types.coccon_spain_enclosure.COCCONSpainEnclosureState(
+            return types.aemet_enclosure.AEMETEnclosureState(
                 last_full_fetch=datetime.datetime.now(),
-                actors=types.coccon_spain_enclosure.ActorsState(
+                actors=types.aemet_enclosure.ActorsState(
                     fan_speed=None,
                     cover_position=None,
                 ),
-                sensors=types.coccon_spain_enclosure.SensorsState(
+                sensors=types.aemet_enclosure.SensorsState(
                     humidity=None,
                     temperature=None,
                     wind_direction=None,
@@ -52,4 +51,4 @@ class COCCONSpainEnclosureInterface:
                 ),
             )
         except Exception as e:
-            raise COCCONSpainEnclosureInterface.DataloggerError() from e
+            raise AEMETEnclosureInterface.DataloggerError() from e

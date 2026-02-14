@@ -1,2 +1,2 @@
 from .tum_enclosure_thread import TUMEnclosureThread as TUMEnclosureThread
-from .coccon_spain_enclosure_thread import COCCONSpainEnclosureThread as COCCONSpainEnclosureThread
+from .aemet_enclosure_thread import AEMETEnclosureThread as AEMETEnclosureThread

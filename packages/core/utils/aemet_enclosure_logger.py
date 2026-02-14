@@ -1,5 +1,6 @@
 import datetime
 import os
+from typing import Any
 
 import tum_esm_utils
 
@@ -8,8 +9,8 @@ from packages.core import types
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
 
 
-class COCCONSpainEnclosureLogger:
-    """A class to save the current COCCON Spain Enclosure state to a log file."""
+class AEMETEnclosureLogger:
+    """A class to save the current AEMET Enclosure state to a log file."""
 
     @staticmethod
     def log(config: types.Config, state: types.StateObject) -> None:
@@ -17,7 +18,7 @@ class COCCONSpainEnclosureLogger:
         timestamp = now.timestamp()
         datetime_string = now.isoformat()
 
-        log_line = [
+        log_line: list[Any] = [
             timestamp,
             datetime_string,
             state.position.sun_elevation,
@@ -27,8 +28,8 @@ class COCCONSpainEnclosureLogger:
         current_log_file = os.path.join(
             _PROJECT_DIR,
             "logs",
-            "coccon-spain-enclosure",
-            f"{config.general.station_id}-coccon-spain-enclosure-logs-{now.strftime('%Y-%m-%d')}.csv",
+            "aemet-enclosure",
+            f"{config.general.station_id}-aemet-enclosure-logs-{now.strftime('%Y-%m-%d')}.csv",
         )
         if not os.path.isfile(current_log_file):
             with open(current_log_file, "w") as f:

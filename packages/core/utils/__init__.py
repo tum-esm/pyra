@@ -7,4 +7,4 @@ from .helios_image_processing import HeliosImageProcessing as HeliosImageProcess
 from .old_helios_image_processing import OldHeliosImageProcessing as OldHeliosImageProcessing
 from .logger import Logger as Logger
 from .tum_enclosure_logger import TUMEnclosureLogger as TUMEnclosureLogger
-from .coccon_spain_enclosure_logger import COCCONSpainEnclosureLogger as COCCONSpainEnclosureLogger
+from .aemet_enclosure_logger import AEMETEnclosureLogger as AEMETEnclosureLogger

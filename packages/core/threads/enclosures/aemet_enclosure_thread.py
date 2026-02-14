@@ -9,22 +9,22 @@ from packages.core import interfaces, types, utils
 from ..abstract_thread import AbstractThread
 
 
-class COCCONSpainEnclosureThread(AbstractThread):
-    """Thread interacting with the COCCON Spain Enclosure"""
+class AEMETEnclosureThread(AbstractThread):
+    """Thread interacting with the AEMET Enclosure"""
 
-    logger_origin = "coccon-spain-enclosure-thread"
+    logger_origin = "aemet-enclosure-thread"
 
     @staticmethod
     def should_be_running(config: types.Config, logger: utils.Logger) -> bool:
         """Based on the config, should the thread be running or not?"""
 
-        return config.coccon_spain_enclosure is not None
+        return config.aemet_enclosure is not None
 
     @staticmethod
     def get_new_thread_object(logs_lock: threading.Lock) -> threading.Thread:
         """Return a new thread object that is to be started."""
         return threading.Thread(
-            target=COCCONSpainEnclosureThread.main,
+            target=AEMETEnclosureThread.main,
             daemon=True,
             args=(logs_lock,),
         )
@@ -34,10 +34,10 @@ class COCCONSpainEnclosureThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="coccon-spain-enclosure", lock=logs_lock)
-        logger.info("Starting COCCON Spain Enclosure thread")
+        logger = utils.Logger(origin="aemet-enclosure", lock=logs_lock)
+        logger.info("Starting AEMET Enclosure thread")
 
-        enclosure_interface: Optional[interfaces.COCCONSpainEnclosureInterface] = None
+        enclosure_interface: Optional[interfaces.AEMETEnclosureInterface] = None
 
         exception_was_set: Optional[bool] = None
         thread_start_time = time.time()
@@ -62,13 +62,13 @@ class COCCONSpainEnclosureThread(AbstractThread):
 
                 logger.debug("Loading configuration file")
                 config = types.Config.load()
-                enclosure_config = config.coccon_spain_enclosure
+                enclosure_config = config.aemet_enclosure
                 if enclosure_config is None:
-                    logger.info("COCCON Spain Enclosure configuration not found, shutting down")
+                    logger.info("AEMET Enclosure configuration not found, shutting down")
                     break
 
                 if config.general.test_mode:
-                    logger.info("COCCON Spain Enclosure thread is skipped in test mode")
+                    logger.info("AEMET Enclosure thread is skipped in test mode")
                     time.sleep(15)
                     continue
 
@@ -76,7 +76,7 @@ class COCCONSpainEnclosureThread(AbstractThread):
 
                 if enclosure_interface is None:
                     logger.debug("Connecting to Datalogger")
-                    enclosure_interface = interfaces.COCCONSpainEnclosureInterface(
+                    enclosure_interface = interfaces.AEMETEnclosureInterface(
                         datalogger_ip=enclosure_config.ip, logger=logger
                     )
                 else:
@@ -94,10 +94,10 @@ class COCCONSpainEnclosureThread(AbstractThread):
 
                     logger.debug("Updating enclosure state")
                     with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                        s.coccon_spain_enclosure_state = enclosure_state
+                        s.aemet_enclosure_state = enclosure_state
 
                     logger.debug("Logging enclosure state")
-                    utils.COCCONSpainEnclosureLogger.log(config, s)
+                    utils.AEMETEnclosureLogger.log(config, s)
 
                     # ENCLOSURE SPECIFIC LOGIC
 
@@ -107,9 +107,7 @@ class COCCONSpainEnclosureThread(AbstractThread):
                     if not exception_was_set:
                         exception_was_set = False
                         with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                            s.exceptions_state.clear_exception_origin(
-                                origin="coccon-spain-enclosure"
-                            )
+                            s.exceptions_state.clear_exception_origin(origin="aemet-enclosure")
 
                     # SLEEP
 
@@ -118,7 +116,7 @@ class COCCONSpainEnclosureThread(AbstractThread):
                     logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                     time.sleep(sleep_time)
 
-                except interfaces.COCCONSpainEnclosureInterface.DataloggerError as e:
+                except interfaces.AEMETEnclosureInterface.DataloggerError as e:
                     logger.error("Datalogger connection lost during interaction")
                     logger.exception(e)
                     enclosure_interface = None
@@ -129,4 +127,4 @@ class COCCONSpainEnclosureThread(AbstractThread):
         except Exception as e:
             logger.exception(e)
             with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                s.exceptions_state.add_exception(origin="coccon-spain-enclosure", exception=e)
+                s.exceptions_state.add_exception(origin="aemet-enclosure", exception=e)

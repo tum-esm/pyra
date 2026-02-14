@@ -16,4 +16,4 @@ from .state import Position as Position
 from .state import StateObject as StateObject
 
 from .enclosures import tum_enclosure as tum_enclosure
-from .enclosures import coccon_spain_enclosure as coccon_spain_enclosure
+from .enclosures import aemet_enclosure as aemet_enclosure

@@ -8,12 +8,12 @@ from tum_esm_utils.validators import StricterBaseModel, StrictIPv4Adress
 # TODO: add the config options you need
 
 
-class COCCONSpainEnclosureConfig(StricterBaseModel):
+class AEMETEnclosureConfig(StricterBaseModel):
     ip: StrictIPv4Adress
 
 
-class PartialCOCCONSpainEnclosureConfig(StricterBaseModel):
-    """Like `COCCONSpainEnclosureConfig`, but all fields are optional."""
+class PartialAEMETEnclosureConfig(StricterBaseModel):
+    """Like `AEMETEnclosureConfig`, but all fields are optional."""
 
     ip: Optional[StrictIPv4Adress] = None
 
@@ -35,7 +35,7 @@ class SensorsState(StricterBaseModel):
     wind_speed: Optional[float] = None
 
 
-class COCCONSpainEnclosureState(StricterBaseModel):
+class AEMETEnclosureState(StricterBaseModel):
     last_full_fetch: Optional[datetime.datetime] = None
     actors: ActorsState = ActorsState()
     sensors: SensorsState = SensorsState()

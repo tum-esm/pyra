@@ -14,9 +14,9 @@ from .enclosures.tum_enclosure import (
     PartialTUMEnclosureConfig,
     TUMEnclosureConfig,
 )
-from .enclosures.coccon_spain_enclosure import (
-    PartialCOCCONSpainEnclosureConfig,
-    COCCONSpainEnclosureConfig,
+from .enclosures.aemet_enclosure import (
+    PartialAEMETEnclosureConfig,
+    AEMETEnclosureConfig,
 )
 
 
@@ -256,7 +256,7 @@ class Config(StricterBaseModel):
     measurement_decision: MeasurementDecisionConfig
     measurement_triggers: MeasurementTriggersConfig
     tum_enclosure: Optional[TUMEnclosureConfig] = None
-    coccon_spain_enclosure: Optional[COCCONSpainEnclosureConfig] = None
+    aemet_enclosure: Optional[AEMETEnclosureConfig] = None
     helios: Optional[HeliosConfig] = None
     upload: Optional[UploadConfig] = None
 
@@ -368,7 +368,7 @@ class PartialConfig(StricterBaseModel):
     measurement_decision: Optional[PartialMeasurementDecisionConfig] = None
     measurement_triggers: Optional[PartialMeasurementTriggersConfig] = None
     tum_enclosure: Optional[PartialTUMEnclosureConfig] = None
-    coccon_spain_enclosure: Optional[PartialCOCCONSpainEnclosureConfig] = None
+    aemet_enclosure: Optional[PartialAEMETEnclosureConfig] = None
     helios: Optional[PartialHeliosConfig] = None
     upload: Optional[PartialUploadConfig] = None
 
