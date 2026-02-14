@@ -93,18 +93,18 @@ export function SystemState() {
                     </StatePanel>
                 </div>
             )}
-            {centralConfig.coccon_spain_enclosure !== null && (
+            {centralConfig.aemet_enclosure !== null && (
                 <div className="grid w-full grid-cols-4 px-4 pb-1 text-sm gap-x-1">
                     <StatePanel title="Cover Angle">
-                        {renderString(coreState.coccon_spain_enclosure_state.actors.cover_position)}
+                        {renderString(coreState.aemet_enclosure_state.actors.cover_position)}
                     </StatePanel>
                     <StatePanel title="Temperature">
-                        {renderString(coreState.coccon_spain_enclosure_state.sensors.temperature, {
+                        {renderString(coreState.aemet_enclosure_state.sensors.temperature, {
                             appendix: ' °C',
                         })}
                     </StatePanel>
                     <StatePanel title="Humidity">
-                        {renderString(coreState.coccon_spain_enclosure_state.sensors.humidity, {
+                        {renderString(coreState.aemet_enclosure_state.sensors.humidity, {
                             appendix: ' rH',
                         })}
                     </StatePanel>

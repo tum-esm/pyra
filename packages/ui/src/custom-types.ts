@@ -18,7 +18,7 @@ export namespace customTypes {
         | 'error_email'
         | 'measurement_triggers'
         | 'tum_enclosure'
-        | 'coccon_spain_enclosure'
+        | 'aemet_enclosure'
         | 'helios'
         | 'upload';
     export type config = {
@@ -73,7 +73,7 @@ export namespace customTypes {
             version: number;
             controlled_by_user: boolean;
         };
-        coccon_spain_enclosure: null | {
+        aemet_enclosure: null | {
             ip: string;
         };
         helios: null | {
@@ -150,7 +150,7 @@ export namespace customTypes {
             version?: number;
             controlled_by_user?: boolean;
         };
-        coccon_spain_enclosure?: null | {
+        aemet_enclosure?: null | {
             ip?: string;
         };
         helios?: null | {

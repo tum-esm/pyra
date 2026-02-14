@@ -49,7 +49,7 @@ const coreStateSchema = z.object({
             spectrometer: z.boolean().nullable(),
         }),
     }),
-    coccon_spain_enclosure_state: z.object({
+    aemet_enclosure_state: z.object({
         last_full_fetch: z.string().nullable(),
         actors: z.object({
             fan_speed: z.number().nullable(),

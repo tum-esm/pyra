@@ -73,7 +73,7 @@ export const configSchema = z.object({
             controlled_by_user: z.boolean(),
         })
         .nullable(),
-    coccon_spain_enclosure: z
+    aemet_enclosure: z
         .object({
             ip: z.string(),
         })

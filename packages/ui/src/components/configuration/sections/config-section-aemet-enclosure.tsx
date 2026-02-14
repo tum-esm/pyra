@@ -2,20 +2,20 @@ import { configurationComponents, essentialComponents } from '../..';
 import { useConfigStore } from '../../../utils/zustand-utils/config-zustand';
 import { Button } from '../../ui/button';
 
-export default function ConfigSectionCOCCONSpainEnclosure() {
+export default function ConfigSectionAEMETEnclosure() {
     const { centralConfig, localConfig, setLocalConfigItem } = useConfigStore();
 
-    const centralSectionConfig = centralConfig?.coccon_spain_enclosure;
-    const localSectionConfig = localConfig?.coccon_spain_enclosure;
+    const centralSectionConfig = centralConfig?.aemet_enclosure;
+    const localSectionConfig = localConfig?.aemet_enclosure;
 
     function addDefault() {
-        setLocalConfigItem('coccon_spain_enclosure', {
+        setLocalConfigItem('aemet_enclosure', {
             ip: '10.10.0.4',
         });
     }
 
     function setNull() {
-        setLocalConfigItem('coccon_spain_enclosure', null);
+        setLocalConfigItem('aemet_enclosure', null);
     }
 
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
@@ -51,7 +51,7 @@ export default function ConfigSectionCOCCONSpainEnclosure() {
             <configurationComponents.ConfigElementText
                 title="IP"
                 value={localSectionConfig.ip}
-                setValue={(v: string) => setLocalConfigItem('coccon_spain_enclosure.ip', v)}
+                setValue={(v: string) => setLocalConfigItem('aemet_enclosure_enclosure.ip', v)}
                 oldValue={centralSectionConfig !== null ? centralSectionConfig.ip : 'null'}
             />
         </>
