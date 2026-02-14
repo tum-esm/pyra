@@ -44,6 +44,7 @@ dev = [
     "types-paramiko>=3.4.0.20240106",
     "types-invoke>=2.0.0.10",
     "types-requests>=2.32.0.20241016",
+    "pyright>=1.1.408",
 ]
 
 [tool.ruff]
@@ -95,3 +96,7 @@ distribution = false
 
 [tool.setuptools]
 packages = []
+
+[tool.pyright]
+exclude = [".venv", "packages/ui", "packages/docs", "hidden"]
+strict = ["packages", "tests", "run_pyra_core.py"]
