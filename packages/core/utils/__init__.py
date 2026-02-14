@@ -6,5 +6,5 @@ from .functions import parse_verbal_timedelta_string as parse_verbal_timedelta_s
 from .helios_image_processing import HeliosImageProcessing as HeliosImageProcessing
 from .old_helios_image_processing import OldHeliosImageProcessing as OldHeliosImageProcessing
 from .logger import Logger as Logger
-from .tum_enclosure_logger import TUMEnclosureLogger as TUMEnclosureLogger
-from .aemet_enclosure_logger import AEMETEnclosureLogger as AEMETEnclosureLogger
+from .enclosure_logger import TUMEnclosureLogger as TUMEnclosureLogger
+from .enclosure_logger import AEMETEnclosureLogger as AEMETEnclosureLogger
