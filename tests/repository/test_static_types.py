@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 import pytest
 import tum_esm_utils
 
@@ -29,4 +30,10 @@ def test_static_types() -> None:
         "packages/cli/main.py",
         "tests/",
     ]:
-        assert os.system(f"cd {PROJECT_DIR} && python -m mypy {path}") == 0
+        assert os.system(f"cd {PROJECT_DIR} && {sys.executable} -m mypy {path}") == 0
+
+
+@pytest.mark.order(1)
+@pytest.mark.quick
+def test_with_pyright() -> None:
+    assert os.system(f"cd {PROJECT_DIR} && {sys.executable} -m pyright") == 0  # pyright: ignore[reportDeprecated]
