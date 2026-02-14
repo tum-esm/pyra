@@ -1,4 +1,3 @@
-import threading
 import pytest
 import tum_esm_utils
 from packages.core import interfaces, types, threads, utils

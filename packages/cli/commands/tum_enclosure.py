@@ -1,5 +1,7 @@
 """Interact with the PLC that controls the enclosure hardware."""
 
+# pyright: reportUnusedFunction=false
+
 import json
 import time
 from typing import Callable, Literal, Optional

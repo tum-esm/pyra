@@ -1,5 +1,7 @@
 """Interact with log files"""
 
+# pyright: reportUnusedFunction=false
+
 import glob
 import os
 import re
@@ -99,7 +101,7 @@ def split_log_files_by_origin(path: str) -> None:
                 assert m is not None
                 origin = m.group(1)
                 if origin not in data:
-                    data[origin] = []
+                    data[str(origin)] = []
 
             if origin is not None:
                 data[origin].append(line)

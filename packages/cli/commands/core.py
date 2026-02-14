@@ -1,5 +1,7 @@
 """Start and stop the pyra-core background process."""
 
+# pyright: reportUnusedFunction=false
+
 import datetime
 import os
 import subprocess

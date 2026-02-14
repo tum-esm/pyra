@@ -1,5 +1,7 @@
 """Read the current state.json file."""
 
+# pyright: reportUnusedFunction=false
+
 import click
 import tum_esm_utils
 

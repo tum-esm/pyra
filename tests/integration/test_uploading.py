@@ -10,7 +10,7 @@ def test_uploading() -> None:
     if config.upload is None:
         return
 
-    with circadian_scp_upload.RemoteConnection(
+    with circadian_scp_upload.client.RemoteConnection(
         config.upload.host.root,
         config.upload.user,
         config.upload.password,

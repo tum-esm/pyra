@@ -2,6 +2,7 @@ import json
 import os
 from typing import Any, Generator
 import pytest
+import tum_esm_utils
 from packages.core import types
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,10 +17,10 @@ SAMPLE_CONFIG = types.Config(
         min_sun_elevation=11,
     ),
     opus=types.config.OpusConfig(
-        em27_ip="10.10.0.1",
-        executable_path=EXISTING_TEST_FILE_PATH,
-        experiment_path=EXISTING_TEST_FILE_PATH,
-        macro_path=EXISTING_TEST_FILE_PATH,
+        em27_ip=tum_esm_utils.validators.StrictIPv4Adress("10.10.0.1"),
+        executable_path=tum_esm_utils.validators.StrictFilePath(EXISTING_TEST_FILE_PATH),
+        experiment_path=tum_esm_utils.validators.StrictFilePath(EXISTING_TEST_FILE_PATH),
+        macro_path=tum_esm_utils.validators.StrictFilePath(EXISTING_TEST_FILE_PATH),
         username="Default",
         password="...",
         automatic_peak_positioning=True,
@@ -27,11 +28,11 @@ SAMPLE_CONFIG = types.Config(
         interferogram_path="",
     ),
     camtracker=types.config.CamtrackerConfig(
-        config_path=EXISTING_TEST_FILE_PATH,
-        executable_path=EXISTING_TEST_FILE_PATH,
-        working_directory_path=PROJECT_DIR,
-        learn_az_elev_path=EXISTING_TEST_FILE_PATH,
-        sun_intensity_path=EXISTING_TEST_FILE_PATH,
+        config_path=tum_esm_utils.validators.StrictFilePath(EXISTING_TEST_FILE_PATH),
+        executable_path=tum_esm_utils.validators.StrictFilePath(EXISTING_TEST_FILE_PATH),
+        working_directory_path=tum_esm_utils.validators.StrictDirectoryPath(PROJECT_DIR),
+        learn_az_elev_path=tum_esm_utils.validators.StrictFilePath(EXISTING_TEST_FILE_PATH),
+        sun_intensity_path=tum_esm_utils.validators.StrictFilePath(EXISTING_TEST_FILE_PATH),
         motor_offset_threshold=10,
         restart_if_logs_are_too_old=True,
         restart_if_cover_remains_closed=True,
@@ -54,8 +55,8 @@ SAMPLE_CONFIG = types.Config(
         consider_time=True,
         consider_sun_elevation=True,
         consider_helios=False,
-        start_time={"hour": 7, "minute": 0, "second": 0},
-        stop_time={"hour": 21, "minute": 0, "second": 0},
+        start_time=types.config.TimeDict(hour=7, minute=0, second=0),
+        stop_time=types.config.TimeDict(hour=21, minute=0, second=0),
         min_sun_elevation=0,
         shutdown_grace_period=300,
     ),

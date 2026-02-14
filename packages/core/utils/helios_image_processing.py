@@ -1,3 +1,5 @@
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
+
 import datetime
 import os
 from typing import Any, Optional

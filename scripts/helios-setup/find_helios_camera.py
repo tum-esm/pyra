@@ -2,15 +2,13 @@ import sys
 import time
 from PIL import Image
 import numpy as np
-import skimage
 import tqdm
 import tum_esm_utils
 import cv2 as cv
 
 sys.path.append(tum_esm_utils.files.rel_to_abs_path("../.."))
 
-from packages.core import threads
-from packages.core import utils
+from packages.core import threads, utils, types
 
 
 def camera_id_exists(camera_id: int) -> bool:
@@ -27,7 +25,7 @@ def camera_id_exists(camera_id: int) -> bool:
 
 def find_available_camera_ids() -> list[int]:
     """Find an available camera IDs."""
-    available_ids = []
+    available_ids: list[int] = []
     for i in tqdm.tqdm(range(20)):  # Check camera IDs from 0 to 9
         if camera_id_exists(i):
             available_ids.append(i)
@@ -46,7 +44,19 @@ if __name__ == "__main__":
         try:
             helios_interface = threads.helios_thread.HeliosInterface(
                 logger=logger,
-                camera_id=camera_id,
+                helios_config=types.config.HeliosConfig(
+                    camera_id=camera_id,
+                    evaluation_size=5,
+                    seconds_per_interval=10,
+                    min_seconds_between_state_changes=180,
+                    edge_pixel_threshold=40,
+                    edge_color_threshold=40,
+                    target_pixel_brightness=60,
+                    camera_brightness=50,
+                    camera_contrast=50,
+                    save_current_image=False,
+                    save_images_to_archive=False,
+                ),
                 initialization_tries=3,
             )
         except Exception as e:

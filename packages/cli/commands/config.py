@@ -1,5 +1,7 @@
 """Read or update the `config.json` file."""
 
+# pyright: reportUnusedFunction=false
+
 import os
 import shutil
 import time

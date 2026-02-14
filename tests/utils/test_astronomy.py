@@ -5,7 +5,7 @@ import sys
 import tempfile
 import pytest
 import tum_esm_utils
-from ..fixtures import sample_config
+from ..fixtures import sample_config  # pyright: ignore[reportUnusedImport]
 
 PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=3)
 CONFIG_DIR = os.path.join(PROJECT_DIR, "config")

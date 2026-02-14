@@ -312,7 +312,7 @@ class OpusThread(AbstractThread):
 
                     macro_successfully_started: bool = False
                     mid = 0  # required for mypy checks to pass
-                    for i in range(5):
+                    for _ in range(5):
                         mid = OpusHTTPInterface.start_macro(config.opus.macro_path.root)
                         time.sleep(5)
                         if OpusHTTPInterface.macro_is_running(mid):

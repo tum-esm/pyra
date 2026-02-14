@@ -6,7 +6,7 @@ import time
 from packages.core import types
 from typing import Any
 import pytest
-from ..fixtures import sample_config, empty_logs
+from ..fixtures import sample_config, empty_logs  # pyright: ignore[reportUnusedImport]
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
@@ -30,9 +30,10 @@ def run_cli_command(command: list[str]) -> str:
 
 
 @pytest.fixture()
-def _stop_pyra_core() -> Any:
+def _stop_pyra_core() -> Any:  # pyright: ignore[reportUnusedFunction]
     yield
     stdout = run_cli_command(["core", "stop"])
+    print(stdout)
 
 
 @pytest.mark.order(3)
@@ -126,7 +127,7 @@ def test_start_stop_procedure(
             parsed_line_times += 1
             assert (line_time >= now) and ((now - line_time).total_seconds() < 12)
             assert line_time >= now
-        except ValueError as e:
+        except ValueError:
             continue
 
     assert parsed_line_times >= 5, "Could not parse the timestamps of the log lines"

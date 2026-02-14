@@ -94,7 +94,7 @@ def run() -> None:
         threads.OpusThread(logs_lock),
         threads.SystemMonitorThread(logs_lock),
         threads.TUMEnclosureThread(logs_lock),
-        threads.COCCONSpainEnclosureThread(logs_lock),
+        threads.AEMETEnclosureThread(logs_lock),
         threads.UploadThread(logs_lock),
     ]
 

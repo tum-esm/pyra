@@ -252,7 +252,7 @@ class HeliosInterface:
             for i in range(_NUMBER_OF_EXPOSURE_IMAGES):
                 time.sleep(0.1)
                 rgb_frame: Any = self.take_image(trow_away_white_images=False)
-                mean_colors.append(round(float(np.mean(rgb_frame)), 3))
+                mean_colors.append(round(float(np.mean(rgb_frame)), 3))  # type: ignore
                 pil_image = Image.fromarray((rgb_frame * 255).astype(np.uint8))
                 draw = ImageDraw.Draw(pil_image)
                 draw.text((10, 10), f"mean={mean_colors[-1]}", (255, 255, 255), font_size=25)

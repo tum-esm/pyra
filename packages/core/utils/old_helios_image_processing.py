@@ -1,3 +1,5 @@
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
+
 import datetime
 import math
 import os
@@ -101,7 +103,7 @@ class OldHeliosImageProcessing:
 
         image_height, image_width = grayscale_image.shape[0], grayscale_image.shape[1]
 
-        circles = cv.HoughCircles(
+        circles: Any = cv.HoughCircles(
             grayscale_image,
             cv.HOUGH_GRADIENT,
             dp=20,

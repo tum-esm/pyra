@@ -1,11 +1,12 @@
 import json
 import subprocess
 import sys
+from typing import Any
 from packages.core import types
 import pytest
 import os
 from tum_esm_utils.validators import StrictIPv4Adress
-from ..fixtures import sample_config
+from ..fixtures import sample_config  # pyright: ignore[reportUnusedImport]
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
@@ -64,7 +65,7 @@ def test_validate_current_config(sample_config: types.Config) -> None:
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_update_config(sample_config: types.Config) -> None:
-    updates = [
+    updates: list[dict[str, Any]] = [
         {"general": {"seconds_per_core_iteration": False}},
         {"opus": {"experiment_path": ["should not be an array"]}},
         {"camtracker": {"sun_intensity_path": 10}},

@@ -69,7 +69,7 @@ def find_most_recent_files(
         key=lambda x: x[1],
         reverse=True,
     )
-    return [f for f, t in merged]
+    return [f for f, _ in merged]
 
 
 def parse_verbal_timedelta_string(timedelta_string: str) -> datetime.timedelta:

@@ -2,7 +2,7 @@ import datetime
 import os
 from typing import Any, Optional
 
-import skyfield.api
+import skyfield.api  # pyright: ignore[reportMissingTypeStubs]
 import tum_esm_utils
 
 from packages.core import types
@@ -22,7 +22,7 @@ class Astronomy:
         assert os.path.isfile(filepath), "Astronomical dataset not found"
 
         if Astronomy._PLANETS is None:
-            Astronomy._PLANETS = skyfield.api.load_file(filepath)
+            Astronomy._PLANETS = skyfield.api.load_file(filepath)  # pyright: ignore[reportUnknownMemberType]
 
     @staticmethod
     def get_current_sun_elevation(
@@ -42,16 +42,16 @@ class Astronomy:
         if datetime_object is not None:
             current_timestamp = datetime_object.timestamp()  # type: ignore
             assert isinstance(current_timestamp, float)
-            current_time = skyfield.api.load.timescale().from_datetime(
+            current_time = skyfield.api.load.timescale().from_datetime(  # pyright: ignore[reportUnknownMemberType]
                 datetime.datetime.fromtimestamp(current_timestamp, tz=skyfield.api.utc)
             )
         else:
-            current_time = skyfield.api.load.timescale().now()
+            current_time = skyfield.api.load.timescale().now()  # pyright: ignore[reportUnknownMemberType]
 
         if (lat is None) or (lon is None) or (alt is None):
             lat, lon, alt = Astronomy.get_camtracker_coordinates(config)
 
-        current_position = earth + skyfield.api.wgs84.latlon(
+        current_position = earth + skyfield.api.wgs84.latlon(  # pyright: ignore[reportUnknownMemberType]
             latitude_degrees=lat,
             longitude_degrees=lon,
             elevation_m=alt,

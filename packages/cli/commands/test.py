@@ -1,7 +1,9 @@
+# pyright: reportUnusedFunction=false
+
 import threading
 import circadian_scp_upload
 import click
-import fabric.runners
+import fabric.runners  # pyright: ignore[reportMissingTypeStubs]
 import tum_esm_utils
 
 from packages.core import threads, types, utils, interfaces
@@ -75,7 +77,7 @@ def _test_uploading() -> None:
         _print_red("No upload server configured.")
         return
 
-    with circadian_scp_upload.RemoteConnection(
+    with circadian_scp_upload.client.RemoteConnection(
         config.upload.host.root,
         config.upload.user,
         config.upload.password,
