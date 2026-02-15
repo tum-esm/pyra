@@ -211,3 +211,18 @@ class AEMETEnclosureState(pydantic.BaseModel):
             return "closed"
         else:
             return "unknown"
+
+    @property
+    def pretty_enclosure_mode(
+        self,
+    ) -> Literal[
+        "auto",
+        "manual",
+        "unknown",
+    ]:
+        if self.auto_mode == 1:
+            return "auto"
+        elif self.auto_mode == 0:
+            return "manual"
+        else:
+            return "unknown"

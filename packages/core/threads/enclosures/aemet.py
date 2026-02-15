@@ -77,10 +77,10 @@ class AEMETEnclosureThread(AbstractThread):
                 if enclosure_interface is None:
                     logger.debug("Connecting to Datalogger")
                     enclosure_interface = interfaces.AEMETEnclosureInterface(
-                        datalogger_ip=enclosure_config.ip, logger=logger
+                        config=enclosure_config,
                     )
                 else:
-                    enclosure_interface.update_config(new_datalogger_ip=enclosure_config.ip)
+                    enclosure_interface.update_config(new_config=enclosure_config)
 
                 # UPDATING RECONNECTION STATE
 
