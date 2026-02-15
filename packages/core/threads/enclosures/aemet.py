@@ -103,25 +103,116 @@ class AEMETEnclosureThread(AbstractThread):
 
                     # ENCLOSURE SPECIFIC LOGIC
 
-                    # TODO: if controlled by user, dont do anything else
+                    if enclosure_config.controlled_by_user:
+                        logger.debug("Enclosure is controlled by user, skipping control logic")
+                    else:
+                        # If auto mode is not 0, set it to 0 (manual mode)
+                        if enclosure_state.auto_mode != 0:
+                            logger.debug("Auto mode is not 0, setting it to 0")
+                            enclosure_interface.set_enclosure_mode("manual")
 
-                    # TODO: if in auto mode, set auto mode to 0
+                        # Set enhanced security mode to 1 if it's not already 1
+                        if enclosure_state.enhanced_security_mode != 1:
+                            logger.debug("Enhanced security mode is not 1, setting it to 1")
+                            enclosure_interface.set_enhanced_security_mode(True)
 
-                    # TODO: if enhanced security mode is 0, set it to 1
+                        # If the power state of the spectrometer is unknown, fetch it from the power plug
+                        if enclosure_state.em27_has_power is None:
+                            logger.debug("EM27 power state is unknown, fetching it")
+                            enclosure_state.em27_has_power = (
+                                enclosure_interface.get_em27_power_state()
+                            )
 
-                    # TODO: if spectrometer power is unknown, fetch spectrometer power
+                        # Load the current state
+                        state = interfaces.StateInterface.load_state(state_lock, logger)
 
-                    # TODO: if toggle spectrometer power is enabled, toggle spectrometer power if night
+                        # If toggle spectrometer power is enabled, toggle spectrometer power if night
+                        if enclosure_config.toggle_em27_power:
+                            if state.position.sun_elevation is None:
+                                logger.warning(
+                                    "Sun elevation is not yet set, skipping spectrometer power toggle"
+                                )
+                            else:
+                                min_sun_angle = config.general.min_sun_elevation - 3
+                                power_should_be_on = state.position.sun_elevation > min_sun_angle
 
-                    # TODO: if closed due to weather conditions, don't do anything else
+                                if power_should_be_on and (not enclosure_state.em27_has_power):
+                                    logger.info("Powering up the spectrometer")
+                                    enclosure_interface.set_em27_power(True)
+                                    enclosure_state.em27_has_power = True
 
-                    # TODO: if opened due to high internal humidity, don't do anything else
+                                elif (not power_should_be_on) and (enclosure_state.em27_has_power):
+                                    logger.info("Powering down the spectrometer")
+                                    enclosure_interface.set_em27_power(False)
+                                    enclosure_state.em27_has_power = False
 
-                    # TODO: if alert is non-zero, don't do anything else
+                        # only control the cover if the enclosure did no open or close it for safety reasons
+                        skip_cover_control: bool = False
 
-                    # TODO: if should measure but cover is closed, open cover
+                        # If closed due to weather conditions, don't do anything else
+                        # If opened due to high internal humidity, don't do anything else
+                        if enclosure_state.closed_due_to_rain:
+                            logger.info("Enclosure is closed due to rain, skipping cover control")
+                            skip_cover_control = True
+                        elif enclosure_state.closed_due_to_wind_velocity:
+                            logger.info(
+                                "Enclosure is closed due to high wind speed, skipping cover control"
+                            )
+                            skip_cover_control = True
+                        elif enclosure_state.closed_due_to_internal_air_temperature:
+                            logger.info(
+                                "Enclosure is closed due to high internal air temperature, skipping cover control"
+                            )
+                            skip_cover_control = True
+                        elif enclosure_state.closed_due_to_external_air_temperature:
+                            logger.info(
+                                "Enclosure is closed due to low external air temperature, skipping cover control"
+                            )
+                            skip_cover_control = True
+                        elif enclosure_state.closed_due_to_internal_relative_humidity:
+                            logger.info(
+                                "Enclosure is closed due to high internal relative humidity, skipping cover control"
+                            )
+                            skip_cover_control = True
+                        elif enclosure_state.closed_due_to_external_relative_humidity:
+                            logger.info(
+                                "Enclosure is closed due to high external relative humidity, skipping cover control"
+                            )
+                            skip_cover_control = True
+                        elif enclosure_state.opened_due_to_elevated_internal_humidity:
+                            logger.info(
+                                "Enclosure is opened due to high internal relative humidity, skipping cover control"
+                            )
+                            skip_cover_control = True
 
-                    # TODO: if should not measure but cover is open, close cover
+                        # If alert level is 2, don't do anything else
+                        if enclosure_state.alert_level == 2:
+                            logger.info("Enclosure is in alert level 2, skipping cover control")
+                            skip_cover_control = True
+
+                        if not skip_cover_control:
+                            logger.debug("Cover is managed by Pyra")
+
+                            if state.measurements_should_be_running is None:
+                                logger.warning(
+                                    "Measurements should be running is not yet set, skipping cover control"
+                                )
+                            else:
+                                if state.measurements_should_be_running and (
+                                    enclosure_state.pretty_cover_status != "open"
+                                ):
+                                    logger.info(
+                                        "Measurements should be running but cover is not open, opening cover"
+                                    )
+                                    enclosure_interface.open_cover()
+
+                                if (not state.measurements_should_be_running) and (
+                                    enclosure_state.pretty_cover_status != "closed"
+                                ):
+                                    logger.info(
+                                        "Measurements should not be running but cover is not closed, closing cover"
+                                    )
+                                    enclosure_interface.close_cover()
 
                     # `exception_was_set` variable used to recude the number of state updates
                     if not exception_was_set:

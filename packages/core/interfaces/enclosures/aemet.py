@@ -164,7 +164,7 @@ class AEMETEnclosureInterface:
         # TODO: communicate with the EM27 power plug
         # TODO: update power state
 
-    def get_em27_power(self) -> bool:
+    def get_em27_power_state(self) -> bool:
         self.logger.info(f"Fetch the EM27 power state")
         self.logger.debug(
             "This is currently not implemented, because the power plugs did not arrive yet."
