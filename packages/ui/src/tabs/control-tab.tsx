@@ -83,7 +83,33 @@ function VariableBlock(props: {
         </div>
     );
 }
-export default function ControlTab() {
+
+function HeaderBlock(props: {
+    plcIsControlledByUser: boolean;
+    setPlcIsControlledByUser: (v: boolean) => void;
+    lastEnclosureStateRead: string | null;
+}) {
+    return (
+        <div className="w-full px-4 py-4 bg-white border-b flex-row-left gap-x-2 border-slate-300">
+            <essentialComponents.Toggle
+                value={props.plcIsControlledByUser ? 'user controlled' : 'automatic'}
+                values={['user controlled', 'automatic']}
+                setValue={(v) => props.setPlcIsControlledByUser(v === 'user controlled')}
+            />
+            <div className="text-sm text-gray-500 flex-row-center">
+                {props.plcIsControlledByUser && 'The automation will skip all PLC related logic'}
+                {!props.plcIsControlledByUser && 'You cannot send any commands to the PLC'}
+            </div>
+            <div className="flex-grow" />
+            <div className="text-sm text-slate-700">
+                Last PLC-read:{' '}
+                {props.lastEnclosureStateRead === null ? '-' : props.lastEnclosureStateRead}
+            </div>
+        </div>
+    );
+}
+
+export function TUMEnclosureControlTab() {
     const { coreState } = useCoreStateStore();
     const { centralConfig, setConfigItem } = useConfigStore();
     const { setCoreStateItem } = useCoreStateStore();
@@ -235,26 +261,16 @@ export default function ControlTab() {
 
     return (
         <div className={'w-full relative flex-col-left'}>
-            <div className="w-full px-4 py-4 bg-white border-b flex-row-left gap-x-2 border-slate-300">
-                <essentialComponents.Toggle
-                    value={plcIsControlledByUser ? 'user controlled' : 'automatic'}
-                    values={['user controlled', 'automatic']}
-                    setValue={(v) => setPlcIsControlledByUser(v === 'user controlled')}
-                />
-                <div className="text-sm text-gray-500 flex-row-center">
-                    {plcIsControlledByUser && 'The automation will skip all PLC related logic'}
-                    {!plcIsControlledByUser && 'You cannot send any commands to the PLC'}
-                </div>
-                <div className="flex-grow" />
-                <div className="text-sm text-slate-700">
-                    Last PLC-read:{' '}
-                    {coreState === undefined ||
+            <HeaderBlock
+                plcIsControlledByUser={plcIsControlledByUser || false}
+                setPlcIsControlledByUser={setPlcIsControlledByUser}
+                lastEnclosureStateRead={
                     coreState.tum_enclosure_state.dt === null ||
                     coreState.tum_enclosure_state.dt === undefined
-                        ? '-'
-                        : coreState?.tum_enclosure_state.dt}
-                </div>
-            </div>
+                        ? null
+                        : coreState.tum_enclosure_state.dt
+                }
+            />
             <div className="flex flex-col w-full text-sm divide-y divide-slate-300">
                 <>
                     <VariableBlock

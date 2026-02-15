@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchUtils } from '../../utils';
-import { OverviewTab, ConfigurationTab, LogTab, ControlTab } from '../../tabs';
+import { OverviewTab, ConfigurationTab, LogTab, TUMEnclosureControlTab } from '../../tabs';
 import { structuralComponents } from '../../components';
 import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
@@ -10,7 +10,7 @@ import { ChildProcess } from '@tauri-apps/plugin-shell';
 import { useConfigStore, configSchema } from '../../utils/zustand-utils/config-zustand';
 import { useCoreProcessStore } from '../../utils/zustand-utils/core-process-zustand';
 
-type TabType = 'Overview' | 'Configuration' | 'Logs' | 'PLC Controls';
+type TabType = 'Overview' | 'Configuration' | 'Logs' | 'TUM Enclosure' | 'AEMET Enclosure';
 const tabs: TabType[] = ['Overview', 'Configuration', 'Logs'];
 
 export default function Dashboard() {
@@ -22,8 +22,13 @@ export default function Dashboard() {
     const { setActivityHistory } = useActivityHistoryStore();
     const { runPromisingCommand } = fetchUtils.useCommand();
 
-    const enclosureControlsIsVisible =
+    const TUMEnclosureControlsIsVisible =
         centralConfig?.tum_enclosure !== null && centralConfig?.tum_enclosure !== undefined;
+
+    const AEMETEnclosureControlsIsVisible =
+        centralConfig?.aemet_enclosure !== null &&
+        centralConfig?.aemet_enclosure !== undefined &&
+        !TUMEnclosureControlsIsVisible;
 
     function checkPyraCoreState() {
         runPromisingCommand({
@@ -121,7 +126,11 @@ export default function Dashboard() {
         <div className="flex flex-col items-stretch w-screen h-screen overflow-hidden">
             <structuralComponents.Header
                 {...{
-                    tabs: [...tabs, ...(enclosureControlsIsVisible ? ['PLC Controls'] : [])],
+                    tabs: [
+                        ...tabs,
+                        ...(TUMEnclosureControlsIsVisible ? ['TUM Enclosure'] : []),
+                        ...(AEMETEnclosureControlsIsVisible ? ['AEMET Enclosure'] : []),
+                    ],
                     activeTab,
                     setActiveTab: (t: any) => setActiveTab(t),
                 }}
@@ -140,10 +149,13 @@ export default function Dashboard() {
                         {t[1]}
                     </div>
                 ))}
-                {enclosureControlsIsVisible && (
-                    <div className={activeTab === 'PLC Controls' ? '' : 'hidden'}>
-                        <ControlTab />
+                {TUMEnclosureControlsIsVisible && (
+                    <div className={activeTab === 'TUM Enclosure' ? '' : 'hidden'}>
+                        <TUMEnclosureControlTab />
                     </div>
+                )}
+                {AEMETEnclosureControlsIsVisible && (
+                    <div className={activeTab === 'AEMET Enclosure' ? '' : 'hidden'}>TODO</div>
                 )}
             </main>
         </div>

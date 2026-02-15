@@ -54,6 +54,9 @@ const backend = {
     writeToTUMEnclosure: async (command: string[]): Promise<ChildProcess<string>> => {
         return await callCLI(['tum-enclosure', ...command]);
     },
+    writeToAEMETEnclosure: async (command: string[]): Promise<ChildProcess<string>> => {
+        return await callCLI(['aemet-enclosure', ...command]);
+    },
     testOpus: async (): Promise<ChildProcess<string>> => {
         return await callCLI(['test', 'opus']);
     },
