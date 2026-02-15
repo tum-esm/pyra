@@ -5,7 +5,6 @@
 import datetime
 import os
 import subprocess
-import sys
 from typing import Optional
 
 import click
@@ -66,7 +65,7 @@ def _start_pyra_core() -> None:
         return
 
     p = subprocess.Popen(
-        [sys.executable, _RUN_PYRA_CORE_SCRIPT_PATH],
+        ["python", _RUN_PYRA_CORE_SCRIPT_PATH],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )

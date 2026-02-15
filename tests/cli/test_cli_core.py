@@ -1,7 +1,6 @@
 import datetime
 import subprocess
 import os
-import sys
 import time
 from packages.core import types
 from typing import Any
@@ -10,14 +9,13 @@ from ..fixtures import sample_config, empty_logs  # pyright: ignore[reportUnused
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
-INTERPRETER_PATH = sys.executable
 PYRA_CLI_PATH = os.path.join(PROJECT_DIR, "packages", "cli", "main.py")
 DEBUG_LOG_PATH = os.path.join(PROJECT_DIR, "logs", "debug.log")
 
 
 def run_cli_command(command: list[str]) -> str:
     process = subprocess.run(
-        [INTERPRETER_PATH, PYRA_CLI_PATH, *command],
+        ["python", PYRA_CLI_PATH, *command],
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
@@ -66,6 +64,8 @@ def test_start_stop_procedure(
         stdout_4.replace("Started background process with process ID", "")
         .replace("\n", "")
         .replace(" ", "")
+        .replace("\r", "")
+        .replace("\t", "")
     )
     assert pid_string.isnumeric()
     pid = int(pid_string)

@@ -1,6 +1,5 @@
 import json
 import subprocess
-import sys
 from typing import Any
 from packages.core import types
 import pytest
@@ -10,7 +9,6 @@ from ..fixtures import sample_config  # pyright: ignore[reportUnusedImport]
 
 dir = os.path.dirname
 PROJECT_DIR = dir(dir(dir(os.path.abspath(__file__))))
-INTERPRETER_PATH = sys.executable
 PYRA_CLI_PATH = os.path.join(PROJECT_DIR, "packages", "cli", "main.py")
 CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 
@@ -26,7 +24,7 @@ def run_cli_command(
     command: list[str], should_succeed: bool = False, should_fail: bool = False
 ) -> str:
     process = subprocess.run(
-        [INTERPRETER_PATH, PYRA_CLI_PATH, *command],
+        ["python", PYRA_CLI_PATH, *command],
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
     )
