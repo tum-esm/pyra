@@ -72,10 +72,10 @@ class AEMETEnclosureThread(AbstractThread):
                     time.sleep(15)
                     continue
 
-                # CONNECTING TO PLC
+                # SETTING UP INTERFACE
 
                 if enclosure_interface is None:
-                    logger.debug("Connecting to Datalogger")
+                    logger.debug("Setting up enclosure interface")
                     enclosure_interface = interfaces.AEMETEnclosureInterface(
                         config=enclosure_config,
                         state_lock=state_lock,
@@ -86,14 +86,13 @@ class AEMETEnclosureThread(AbstractThread):
 
                 # UPDATING RECONNECTION STATE
 
-                # now the PLC is connected - otherwise it would loop in the section above
-                # TODO: remove this ignore
-                last_plc_connection_time = time.time()  # pyright: ignore[reportUnusedVariable]
                 try:
-                    # READING PLC
+                    # READING DATALOGGER STATE
 
-                    logger.debug("Reading Datalogger registers")
-                    enclosure_state = enclosure_interface.read()
+                    logger.debug("Reading datalogger state")
+                    enclosure_state = enclosure_interface.read(
+                        immediate_write_to_central_state=False
+                    )
 
                     logger.debug("Updating enclosure state")
                     with interfaces.StateInterface.update_state(state_lock, logger) as s:
@@ -104,7 +103,25 @@ class AEMETEnclosureThread(AbstractThread):
 
                     # ENCLOSURE SPECIFIC LOGIC
 
-                    # TODO:
+                    # TODO: if controlled by user, dont do anything else
+
+                    # TODO: if in auto mode, set auto mode to 0
+
+                    # TODO: if enhanced security mode is 0, set it to 1
+
+                    # TODO: if spectrometer power is unknown, fetch spectrometer power
+
+                    # TODO: if toggle spectrometer power is enabled, toggle spectrometer power if night
+
+                    # TODO: if closed due to weather conditions, don't do anything else
+
+                    # TODO: if opened due to high internal humidity, don't do anything else
+
+                    # TODO: if alert is non-zero, don't do anything else
+
+                    # TODO: if should measure but cover is closed, open cover
+
+                    # TODO: if should not measure but cover is open, close cover
 
                     # `exception_was_set` variable used to recude the number of state updates
                     if not exception_was_set:

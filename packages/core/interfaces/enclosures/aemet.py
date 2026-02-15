@@ -51,7 +51,10 @@ class AEMETEnclosureInterface:
 
         self.enclosure_config = new_config
 
-    def read(self) -> types.aemet.AEMETEnclosureState:
+    def read(
+        self,
+        immediate_write_to_central_state: bool = True,
+    ) -> types.aemet.AEMETEnclosureState:
         try:
             out = self._run_command("DataQuery", mode="most-recent", uri="dl:Public")
             headers = [d["name"] for d in out["head"]["fields"]]
@@ -62,8 +65,9 @@ class AEMETEnclosureInterface:
             news = types.aemet.AEMETEnclosureState.model_validate(d)
             news.em27_has_power = self.latest_read_state.em27_has_power
             self.latest_read_state = news
-            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
-                s.aemet_enclosure_state = news
+            if immediate_write_to_central_state:
+                with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                    s.aemet_enclosure_state = news
             return news
         except Exception as e:
             raise AEMETEnclosureInterface.DataloggerError() from e
@@ -153,5 +157,23 @@ class AEMETEnclosureInterface:
         self.logger.debug(
             "This is currently not implemented, because the power plugs did not arrive yet."
         )
+        with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+            s.aemet_enclosure_state.em27_has_power = power_on
+            self.latest_read_state.em27_has_power = power_on
+
         # TODO: communicate with the EM27 power plug
         # TODO: update power state
+
+    def get_em27_power(self) -> bool:
+        self.logger.info(f"Fetch the EM27 power state")
+        self.logger.debug(
+            "This is currently not implemented, because the power plugs did not arrive yet."
+        )
+        with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+            s.aemet_enclosure_state.em27_has_power = True
+            self.latest_read_state.em27_has_power = True
+
+        # TODO: communicate with the EM27 power plug
+        # TODO: read power state
+
+        return True
