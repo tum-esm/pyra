@@ -1,0 +1,14 @@
+{
+  "datalogger_ip": "10.0.0.4",
+  "datalogger_port": 8080,
+  "datalogger_username": "someone",
+  "datalogger_password": "withapassword",
+
+  "em27_power_plug_ip": "10.0.0.5",
+  "em27_power_plug_port": 8080,
+  "em27_power_plug_username": "someone",
+  "em27_power_plug_password": "withapassword",
+
+  "toggle_em27_power": false,
+  "controlled_by_user": false
+}

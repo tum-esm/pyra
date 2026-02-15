@@ -10,7 +10,18 @@ export default function ConfigSectionAEMETEnclosure() {
 
     function addDefault() {
         setLocalConfigItem('aemet_enclosure', {
-            ip: '10.10.0.4',
+            datalogger_ip: '10.0.0.4',
+            datalogger_port: 8080,
+            datalogger_username: 'someone',
+            datalogger_password: 'withapassword',
+
+            em27_power_plug_ip: '10.0.0.5',
+            em27_power_plug_port: 8080,
+            em27_power_plug_username: 'someone',
+            em27_power_plug_password: 'withapassword',
+
+            toggle_em27_power: false,
+            controlled_by_user: false,
         });
     }
 
@@ -49,10 +60,15 @@ export default function ConfigSectionAEMETEnclosure() {
             </div>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementText
-                title="IP"
-                value={localSectionConfig.ip}
-                setValue={(v: string) => setLocalConfigItem('aemet_enclosure_enclosure.ip', v)}
-                oldValue={centralSectionConfig !== null ? centralSectionConfig.ip : 'null'}
+                title="Datalogger IP"
+                value={localSectionConfig.datalogger_ip}
+                setValue={(v: string) =>
+                    setLocalConfigItem('aemet_enclosure_enclosure.datalogger_ip', v)
+                }
+                oldValue={
+                    centralSectionConfig !== null ? centralSectionConfig.datalogger_ip : 'null'
+                }
+            />
             />
         </>
     );

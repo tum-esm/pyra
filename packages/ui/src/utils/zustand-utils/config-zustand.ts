@@ -75,7 +75,16 @@ export const configSchema = z.object({
         .nullable(),
     aemet_enclosure: z
         .object({
-            ip: z.string(),
+            datalogger_ip: z.string(),
+            datalogger_port: z.number(),
+            datalogger_username: z.string(),
+            datalogger_password: z.string(),
+            em27_power_plug_ip: z.string(),
+            em27_power_plug_port: z.number(),
+            em27_power_plug_username: z.string(),
+            em27_power_plug_password: z.string(),
+            toggle_em27_power: z.boolean(),
+            controlled_by_user: z.boolean(),
         })
         .nullable(),
     helios: z

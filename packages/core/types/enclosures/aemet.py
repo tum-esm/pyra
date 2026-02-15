@@ -6,17 +6,37 @@ from tum_esm_utils.validators import StricterBaseModel, StrictIPv4Adress
 
 # --- CONFIG ---
 
-# TODO: add the config options you need
-
 
 class AEMETEnclosureConfig(StricterBaseModel):
-    ip: StrictIPv4Adress
+    datalogger_ip: StrictIPv4Adress
+    datalogger_port: int
+    datalogger_username: str
+    datalogger_password: str
+
+    em27_power_plug_ip: StrictIPv4Adress
+    em27_power_plug_port: int
+    em27_power_plug_username: str
+    em27_power_plug_password: str
+
+    toggle_em27_power: bool
+    controlled_by_user: bool
 
 
 class PartialAEMETEnclosureConfig(StricterBaseModel):
     """Like `AEMETEnclosureConfig`, but all fields are optional."""
 
-    ip: Optional[StrictIPv4Adress] = None
+    datalogger_ip: Optional[StrictIPv4Adress] = None
+    datalogger_port: Optional[int] = None
+    datalogger_username: Optional[str] = None
+    datalogger_password: Optional[str] = None
+
+    em27_power_plug_ip: Optional[StrictIPv4Adress] = None
+    em27_power_plug_port: Optional[int] = None
+    em27_power_plug_username: Optional[str] = None
+    em27_power_plug_password: Optional[str] = None
+
+    toggle_em27_power: Optional[bool] = None
+    controlled_by_user: Optional[bool] = None
 
 
 # --- STATE ---
