@@ -249,10 +249,10 @@ export default function ControlTab() {
                 <div className="text-sm text-slate-700">
                     Last PLC-read:{' '}
                     {coreState === undefined ||
-                    coreState.tum_enclosure_state.last_full_fetch === null ||
-                    coreState.tum_enclosure_state.last_full_fetch === undefined
+                    coreState.tum_enclosure_state.dt === null ||
+                    coreState.tum_enclosure_state.dt === undefined
                         ? '-'
-                        : coreState?.tum_enclosure_state.last_full_fetch}
+                        : coreState?.tum_enclosure_state.dt}
                 </div>
             </div>
             <div className="flex flex-col w-full text-sm divide-y divide-slate-300">

@@ -85,7 +85,8 @@ class AEMETEnclosureThread(AbstractThread):
                 # UPDATING RECONNECTION STATE
 
                 # now the PLC is connected - otherwise it would loop in the section above
-                last_plc_connection_time = time.time()
+                # TODO: remove this ignore
+                last_plc_connection_time = time.time()  # pyright: ignore[reportUnusedVariable]
                 try:
                     # READING PLC
 

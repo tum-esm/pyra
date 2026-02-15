@@ -245,7 +245,7 @@ class TUMEnclosureInterface:
             s = self.specification
 
             return types.tum.TUMEnclosureState(
-                last_full_fetch=datetime.datetime.now(),
+                dt=datetime.datetime.now(),
                 actors=types.tum.ActorsState(
                     fan_speed=_get_int(s.actors.fan_speed),
                     current_angle=_get_int(s.actors.current_angle),

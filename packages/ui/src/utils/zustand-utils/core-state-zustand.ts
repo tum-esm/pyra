@@ -12,7 +12,7 @@ const coreStateSchema = z.object({
     measurements_should_be_running: z.boolean().nullable(),
     last_rain_detection_time: z.number().nullable(),
     tum_enclosure_state: z.object({
-        last_full_fetch: z.string().nullable(),
+        dt: z.string().nullable(),
         actors: z.object({
             fan_speed: z.number().nullable(),
             current_angle: z.number().nullable(),
@@ -50,17 +50,41 @@ const coreStateSchema = z.object({
         }),
     }),
     aemet_enclosure_state: z.object({
-        last_full_fetch: z.string().nullable(),
-        actors: z.object({
-            fan_speed: z.number().nullable(),
-            cover_position: z.number().nullable(),
-        }),
-        sensors: z.object({
-            humidity: z.number().nullable(),
-            temperature: z.number().nullable(),
-            wind_direction: z.number().nullable(),
-            wind_speed: z.number().nullable(),
-        }),
+        dt: z.string().nullable(),
+
+        // general
+        battery_voltage: z.number().nullable(),
+        logger_panel_temperature: z.number().nullable(),
+        auto_mode: z.number().nullable(),
+        enhanced_security_mode: z.number().nullable(),
+
+        // weather sensor readings
+        air_pressure_internal: z.number().nullable(),
+        air_pressure_external: z.number().nullable(),
+        relative_humidity_internal: z.number().nullable(),
+        relative_humidity_external: z.number().nullable(),
+        air_temperature_internal: z.number().nullable(),
+        air_temperature_external: z.number().nullable(),
+        dew_point_temperature_internal: z.number().nullable(),
+        dew_point_temperature_external: z.number().nullable(),
+        wind_direction: z.number().nullable(),
+        wind_velocity: z.number().nullable(),
+        rain_sensor_counter_1: z.number().nullable(),
+        rain_sensor_counter_2: z.number().nullable(),
+
+        // closing reasons
+        closed_due_to_rain: z.boolean().nullable(),
+        closed_due_to_relative_humidity: z.boolean().nullable(),
+        closed_due_to_external_air_temperature: z.boolean().nullable(),
+        closed_due_to_internal_relative_humidity: z.boolean().nullable(),
+        closed_due_to_internal_air_temperature: z.boolean().nullable(),
+        closed_due_to_wind_velocity: z.boolean().nullable(),
+
+        // cover states
+        alert_level: z.number().nullable(),
+        aviera_fault_code: z.number().nullable(),
+        cover_status: z.string().nullable(),
+        motor_position: z.number().nullable(),
     }),
     operating_system_state: z.object({
         cpu_usage: z.array(z.number()).nullable(),

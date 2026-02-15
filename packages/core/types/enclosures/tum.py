@@ -65,7 +65,7 @@ class ConnectionsState(StricterBaseModel):
 
 
 class TUMEnclosureState(StricterBaseModel):
-    last_full_fetch: Optional[datetime.datetime] = None
+    dt: Optional[datetime.datetime] = None
     actors: ActorsState = ActorsState()
     control: ControlState = ControlState()
     sensors: SensorsState = SensorsState()
