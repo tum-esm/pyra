@@ -24,7 +24,7 @@ class AEMETEnclosureInterface:
             em27_has_power=True
         )
 
-    def _run_command(self, command: str, **kwargs: Any) -> dict[Any, Any]:
+    def _run_command(self, command: str, **kwargs: Any) -> Any:
         return requests.get(
             (
                 f"http://{self.enclosure_config.datalogger_ip}:{self.enclosure_config.datalogger_port}/csapi/"
