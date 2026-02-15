@@ -62,14 +62,105 @@ export default function ConfigSectionAEMETEnclosure() {
             <configurationComponents.ConfigElementText
                 title="Datalogger IP"
                 value={localSectionConfig.datalogger_ip}
-                setValue={(v: string) =>
-                    setLocalConfigItem('aemet_enclosure_enclosure.datalogger_ip', v)
-                }
+                setValue={(v: string) => setLocalConfigItem('aemet_enclosure.datalogger_ip', v)}
                 oldValue={
                     centralSectionConfig !== null ? centralSectionConfig.datalogger_ip : 'null'
                 }
             />
+            <configurationComponents.ConfigElementText
+                title="Datalogger Port"
+                value={localSectionConfig.datalogger_port}
+                setValue={(v: string) => setLocalConfigItem('aemet_enclosure.datalogger_port', v)}
+                oldValue={
+                    centralSectionConfig !== null ? centralSectionConfig.datalogger_port : 'null'
+                }
+                numeric
             />
+            <configurationComponents.ConfigElementText
+                title="Datalogger Username"
+                value={localSectionConfig.datalogger_username}
+                setValue={(v: string) =>
+                    setLocalConfigItem('aemet_enclosure.datalogger_username', v)
+                }
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.datalogger_username
+                        : 'null'
+                }
+            />
+            <configurationComponents.ConfigElementText
+                title="Datalogger Password"
+                value={localSectionConfig.datalogger_password}
+                setValue={(v: string) =>
+                    setLocalConfigItem('aemet_enclosure.datalogger_password', v)
+                }
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.datalogger_password
+                        : 'null'
+                }
+            />
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementText
+                title="EM27 Power Plug IP"
+                value={localSectionConfig.em27_power_plug_ip}
+                setValue={(v: string) =>
+                    setLocalConfigItem('aemet_enclosure.em27_power_plug_ip', v)
+                }
+                oldValue={
+                    centralSectionConfig !== null ? centralSectionConfig.em27_power_plug_ip : 'null'
+                }
+            />
+            <configurationComponents.ConfigElementText
+                title="EM27 Power Plug Port"
+                value={localSectionConfig.em27_power_plug_port}
+                setValue={(v: string) =>
+                    setLocalConfigItem('aemet_enclosure.em27_power_plug_port', v)
+                }
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.em27_power_plug_port
+                        : 'null'
+                }
+                numeric
+            />
+            <configurationComponents.ConfigElementText
+                title="EM27 Power Plug Username"
+                value={localSectionConfig.em27_power_plug_username}
+                setValue={(v: string) =>
+                    setLocalConfigItem('aemet_enclosure.em27_power_plug_username', v)
+                }
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.em27_power_plug_username
+                        : 'null'
+                }
+            />
+            <configurationComponents.ConfigElementText
+                title="EM27 Power Plug Password"
+                value={localSectionConfig.em27_power_plug_password}
+                setValue={(v: string) =>
+                    setLocalConfigItem('aemet_enclosure.em27_power_plug_password', v)
+                }
+                oldValue={
+                    centralSectionConfig !== null
+                        ? centralSectionConfig.em27_power_plug_password
+                        : 'null'
+                }
+            />
+            <configurationComponents.ConfigElementLine />
+            <configurationComponents.ConfigElementBooleanToggle
+                title="Toggle EM27 Power"
+                value={localSectionConfig.toggle_em27_power}
+                setValue={(v: boolean) =>
+                    setLocalConfigItem('aemet_enclosure.toggle_em27_power', v)
+                }
+                oldValue={centralSectionConfig?.toggle_em27_power === true}
+            />
+            <configurationComponents.ConfigElementNote>
+                I.e., turn off the power of the EM27/SUN whenever the sun elevation is below
+                `config.general.min_sun_elevation`.
+            </configurationComponents.ConfigElementNote>
         </>
     );
 }
