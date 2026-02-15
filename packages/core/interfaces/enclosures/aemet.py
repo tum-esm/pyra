@@ -27,7 +27,7 @@ class AEMETEnclosureInterface:
     def _run_command(self, command: str, **kwargs: Any) -> Any:
         return requests.get(
             (
-                f"http://{self.enclosure_config.datalogger_ip}:{self.enclosure_config.datalogger_port}/csapi/"
+                f"http://{self.enclosure_config.datalogger_ip.root}:{self.enclosure_config.datalogger_port}/csapi/"
                 + f"?command={command}&format=json&"
                 + urllib.parse.urlencode(kwargs, safe=":")
             ),
