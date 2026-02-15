@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { fetchUtils } from '../../utils';
-import { OverviewTab, ConfigurationTab, LogTab, TUMEnclosureControlTab } from '../../tabs';
+import {
+    OverviewTab,
+    ConfigurationTab,
+    LogTab,
+    TUMEnclosureControlTab,
+    AEMETEnclosureControlTab,
+} from '../../tabs';
 import { structuralComponents } from '../../components';
 import moment from 'moment';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
@@ -155,7 +161,9 @@ export default function Dashboard() {
                     </div>
                 )}
                 {AEMETEnclosureControlsIsVisible && (
-                    <div className={activeTab === 'AEMET Enclosure' ? '' : 'hidden'}>TODO</div>
+                    <div className={activeTab === 'AEMET Enclosure' ? '' : 'hidden'}>
+                        <AEMETEnclosureControlTab />
+                    </div>
                 )}
             </main>
         </div>

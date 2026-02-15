@@ -129,3 +129,15 @@ def _set_alert_level(value: int) -> None:
     enclosure_interface = _get_enclosure_interface()
     enclosure_interface.set_alert_level(int(value))
     _print_green("Ok")
+
+
+@aemet_enclosure_command_group.command(
+    name="set-auto-mode",
+    help="Set the variable AUTO to a given integer value.",
+)
+@click.argument("state")
+def _set_auto_mode(value: int) -> None:
+    logger.info(f'running command "plc set-auto-mode {value}"')
+    enclosure_interface = _get_enclosure_interface()
+    enclosure_interface.set_enclosure_mode("auto" if value == 1 else "manual")
+    _print_green("Ok")

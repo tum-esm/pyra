@@ -113,17 +113,17 @@ export function TUMEnclosureControlTab() {
     const { coreState } = useCoreStateStore();
     const { centralConfig, setConfigItem } = useConfigStore();
     const { setCoreStateItem } = useCoreStateStore();
-    const plcIsControlledByUser = centralConfig?.tum_enclosure?.controlled_by_user;
+    const enclosureIsControlledByUser = centralConfig?.tum_enclosure?.controlled_by_user;
 
     const { commandIsRunning, runPromisingCommand } = fetchUtils.useCommand();
-    const buttonsAreDisabled = !plcIsControlledByUser || commandIsRunning;
+    const buttonsAreDisabled = !enclosureIsControlledByUser || commandIsRunning;
 
-    async function setPlcIsControlledByUser(v: boolean) {
+    async function setEnclosureIsControlledByUser(v: boolean) {
         runPromisingCommand({
             command: () =>
                 fetchUtils.backend.updateConfig({ tum_enclosure: { controlled_by_user: v } }),
-            label: 'toggling PLC control mode',
-            successLabel: 'successfully toggled PLC control mode',
+            label: 'toggling enclosure control mode',
+            successLabel: 'successfully toggled enclosure control mode',
             onSuccess: () => setConfigItem('tum_enclosure.controlled_by_user', v),
         });
     }
@@ -262,8 +262,8 @@ export function TUMEnclosureControlTab() {
     return (
         <div className={'w-full relative flex-col-left'}>
             <HeaderBlock
-                plcIsControlledByUser={plcIsControlledByUser || false}
-                setPlcIsControlledByUser={setPlcIsControlledByUser}
+                plcIsControlledByUser={enclosureIsControlledByUser || false}
+                setPlcIsControlledByUser={setEnclosureIsControlledByUser}
                 lastEnclosureStateRead={
                     coreState.tum_enclosure_state.dt === null ||
                     coreState.tum_enclosure_state.dt === undefined
@@ -544,6 +544,132 @@ export function TUMEnclosureControlTab() {
                             },
                         ]}
                     />
+                </>
+            </div>
+        </div>
+    );
+}
+
+export function AEMETEnclosureControlTab() {
+    const { coreState } = useCoreStateStore();
+    const { centralConfig, setConfigItem } = useConfigStore();
+    const { setCoreStateItem } = useCoreStateStore();
+    const enclosureIsControlledByUser = centralConfig?.aemet_enclosure?.controlled_by_user;
+
+    const { commandIsRunning, runPromisingCommand } = fetchUtils.useCommand();
+    const buttonsAreDisabled = !enclosureIsControlledByUser || commandIsRunning;
+
+    async function setEnclosureIsControlledByUser(v: boolean) {
+        runPromisingCommand({
+            command: () =>
+                fetchUtils.backend.updateConfig({ aemet_enclosure: { controlled_by_user: v } }),
+            label: 'toggling enclosure control mode',
+            successLabel: 'successfully toggled enclosure control mode',
+            onSuccess: () => setConfigItem('aemet_enclosure.controlled_by_user', v),
+        });
+    }
+
+    async function runPLCCommand(
+        command: string[],
+        label: string,
+        successLabel: string,
+        onSuccess: () => void
+    ) {
+        runPromisingCommand({
+            command: () => fetchUtils.backend.writeToAEMETEnclosure(command),
+            label: label,
+            successLabel: successLabel,
+            onSuccess: onSuccess,
+        });
+    }
+
+    async function openCover() {
+        await runPLCCommand(['open-cover'], 'opening cover', 'successfully opened cover', () => {
+            setCoreStateItem('aemet_enclosure_state.cover_state', 'A');
+        });
+    }
+
+    async function closeCover() {
+        await runPLCCommand(['close-cover'], 'closing cover', 'successfully closed cover', () => {
+            setCoreStateItem('aemet_enclosure_state.cover_state', 'C');
+        });
+    }
+
+    async function setAutoMode(value: number) {
+        await runPLCCommand(
+            ['set-auto-mode', `${value}`],
+            'setting auto mode',
+            `successfully set auto mode to ${value}`,
+            () => {
+                setCoreStateItem('aemet_enclosure_state.auto_mode', value);
+            }
+        );
+    }
+
+    async function setAlertLevel(value: number) {
+        await runPLCCommand(
+            ['set-alert-level', `${value}`],
+            'setting alert level',
+            `successfully set alert level to ${value}`,
+            () => {
+                setCoreStateItem('aemet_enclosure_state.alert_level', value);
+            }
+        );
+    }
+
+    async function setAveriaFaultCode(value: number) {
+        await runPLCCommand(
+            ['set-averia-fault-code', `${value}`],
+            'setting averia fault code',
+            `successfully set averia fault code to ${value}`,
+            () => {
+                setCoreStateItem('aemet_enclosure_state.averia_fault_code', value);
+            }
+        );
+    }
+
+    async function setEnhancedSecurityMode(value: number) {
+        await runPLCCommand(
+            ['set-enhanced-security-mode', `${value}`],
+            'setting enhanced security mode',
+            `successfully set enhanced security mode to ${value}`,
+            () => {
+                setCoreStateItem('aemet_enclosure_state.enhanced_security_mode', value);
+            }
+        );
+    }
+
+    async function togglePowerSpectrometer() {
+        if (coreState !== undefined) {
+            const newValue = !coreState.aemet_enclosure_state.em27_has_power;
+            await runPLCCommand(
+                ['set-spectrometer-power', JSON.stringify(newValue)],
+                'toggling spectrometer power',
+                'successfully toggled spectrometer power',
+                () => setCoreStateItem('aemet_enclosure_state.em27_has_power', newValue)
+            );
+        }
+    }
+
+    if (coreState === undefined || centralConfig === undefined) {
+        return <></>;
+    }
+
+    return (
+        <div className={'w-full relative flex-col-left'}>
+            <HeaderBlock
+                plcIsControlledByUser={enclosureIsControlledByUser || false}
+                setPlcIsControlledByUser={setEnclosureIsControlledByUser}
+                lastEnclosureStateRead={
+                    coreState.aemet_enclosure_state.dt === null ||
+                    coreState.aemet_enclosure_state.dt === undefined
+                        ? null
+                        : coreState.aemet_enclosure_state.dt
+                }
+            />
+            <div className="flex flex-col w-full text-sm divide-y divide-slate-300">
+                <>
+                    <VariableBlock label="Errors" disabled={buttonsAreDisabled} rows={[]} />
                 </>
             </div>
         </div>

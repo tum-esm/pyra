@@ -86,6 +86,9 @@ const coreStateSchema = z.object({
         averia_fault_code: z.number().nullable(),
         cover_status: z.string().nullable(),
         motor_position: z.number().nullable(),
+
+        // other
+        em27_has_power: z.boolean().nullable(),
     }),
     operating_system_state: z.object({
         cpu_usage: z.array(z.number()).nullable(),
