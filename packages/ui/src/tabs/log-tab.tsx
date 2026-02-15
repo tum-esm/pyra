@@ -23,6 +23,7 @@ export default function LogTab() {
         | 'System Monitor'
         | 'Upload'
         | 'TUM Enclosure'
+        | 'AEMET Enclosure'
         | 'Helios'
         | 'UI'
     >('Main');
@@ -43,6 +44,9 @@ export default function LogTab() {
     const [renderedTumEnclosureLogs, setRenderedTumEnclosureLogs] = useState<string[] | undefined>(
         undefined
     );
+    const [renderedAemetEnclosureLogs, setRenderedAemetEnclosureLogs] = useState<
+        string[] | undefined
+    >(undefined);
     const [renderedHeliosLogs, setRenderedHeliosLogs] = useState<string[] | undefined>(undefined);
 
     const { coreLogs, uiLogs } = useLogsStore();
@@ -55,6 +59,7 @@ export default function LogTab() {
             setRenderedCasLogs(coreLogs.cas);
             setRenderedUploadLogs(coreLogs.upload);
             setRenderedTumEnclosureLogs(coreLogs.tum_enclosure);
+            setRenderedAemetEnclosureLogs(coreLogs.aemet_enclosure);
             setRenderedHeliosLogs(coreLogs.helios);
             if (logsContainerRef.current) {
                 logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
@@ -99,20 +104,22 @@ export default function LogTab() {
         logType === 'All'
             ? renderedAllLogs
             : logType === 'Main'
-            ? renderedMainLogs
-            : logType === 'OPUS'
-            ? renderedOpusLogs
-            : logType === 'CamTracker'
-            ? renderedCamtrackerLogs
-            : logType === 'CAS'
-            ? renderedCasLogs
-            : logType === 'System Monitor'
-            ? coreLogs.system_monitor
-            : logType === 'Upload'
-            ? renderedUploadLogs
-            : logType === 'TUM Enclosure'
-            ? renderedTumEnclosureLogs
-            : renderedHeliosLogs;
+              ? renderedMainLogs
+              : logType === 'OPUS'
+                ? renderedOpusLogs
+                : logType === 'CamTracker'
+                  ? renderedCamtrackerLogs
+                  : logType === 'CAS'
+                    ? renderedCasLogs
+                    : logType === 'System Monitor'
+                      ? coreLogs.system_monitor
+                      : logType === 'Upload'
+                        ? renderedUploadLogs
+                        : logType === 'TUM Enclosure'
+                          ? renderedTumEnclosureLogs
+                          : logType === 'AEMET Enclosure'
+                            ? renderedAemetEnclosureLogs
+                            : renderedHeliosLogs;
 
     const filteredRenderedLogs = renderedLogs?.filter((l) => {
         if (showDebugLogs) {
@@ -145,6 +152,7 @@ export default function LogTab() {
                         <SelectItem value="Upload">Upload</SelectItem>
                         <Separator className="my-1" />
                         <SelectItem value="TUM Enclosure">TUM Enclosure</SelectItem>
+                        <SelectItem value="AEMET Enclosure">AEMET Enclosure</SelectItem>
                         <SelectItem value="Helios">Helios</SelectItem>
                         <Separator className="my-1" />
                         <SelectItem value="UI">UI</SelectItem>
