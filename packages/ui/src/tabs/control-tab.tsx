@@ -272,279 +272,269 @@ export function TUMEnclosureControlTab() {
                 }
             />
             <div className="flex flex-col w-full text-sm divide-y divide-slate-300">
-                <>
-                    <VariableBlock
-                        label="Errors"
-                        disabled={buttonsAreDisabled}
-                        rows={[
-                            {
-                                variable: {
-                                    key: 'Reset needed',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.state.reset_needed
-                                    ),
-                                },
-                                action: {
-                                    label: 'reset now',
-                                    callback: reset,
-                                },
+                <VariableBlock
+                    label="Errors"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Reset needed',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.state.reset_needed
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Motor failed',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.state.motor_failed
-                                    ),
-                                },
+                            action: {
+                                label: 'reset now',
+                                callback: reset,
                             },
-                            {
-                                variable: {
-                                    key: 'UPS alert',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.state.ups_alert
-                                    ),
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Motor failed',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.state.motor_failed
+                                ),
                             },
-                        ]}
-                    />
+                        },
+                        {
+                            variable: {
+                                key: 'UPS alert',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.state.ups_alert
+                                ),
+                            },
+                        },
+                    ]}
+                />
 
-                    <VariableBlock
-                        label="Rain Detection"
-                        disabled={buttonsAreDisabled}
-                        rows={[
-                            {
-                                variable: {
-                                    key: 'Cover is closed',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.state.cover_closed
-                                    ),
-                                },
-                                action: {
-                                    label: 'force cover close',
-                                    callback: closeCover,
-                                },
+                <VariableBlock
+                    label="Rain Detection"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Cover is closed',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.state.cover_closed
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Rain detected',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.state.rain
-                                    ),
-                                },
+                            action: {
+                                label: 'force cover close',
+                                callback: closeCover,
                             },
-                        ]}
-                    />
+                        },
+                        {
+                            variable: {
+                                key: 'Rain detected',
+                                value: renderBoolValue(coreState.tum_enclosure_state.state.rain),
+                            },
+                        },
+                    ]}
+                />
 
-                    <VariableBlock
-                        label="Cover Angle"
-                        disabled={buttonsAreDisabled}
-                        rows={[
-                            {
-                                variable: {
-                                    key: 'Current cover angle',
-                                    value: renderStringValue(
-                                        coreState.tum_enclosure_state.actors.current_angle,
-                                        '°'
-                                    ),
-                                },
-                                action: {
-                                    label: 'move to angle',
-                                    callback: moveCover,
-                                    variant: 'numeric',
-                                    initialValue:
-                                        coreState.tum_enclosure_state.actors.current_angle || 0,
-                                    postfix: '°',
-                                },
+                <VariableBlock
+                    label="Cover Angle"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Current cover angle',
+                                value: renderStringValue(
+                                    coreState.tum_enclosure_state.actors.current_angle,
+                                    '°'
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Sync to CamTracker',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.control.sync_to_tracker
-                                    ),
-                                },
-                                action: {
-                                    label: coreState.tum_enclosure_state.control.sync_to_tracker
-                                        ? 'do not sync'
-                                        : 'sync',
-                                    callback: toggleSyncToTracker,
-                                },
+                            action: {
+                                label: 'move to angle',
+                                callback: moveCover,
+                                variant: 'numeric',
+                                initialValue:
+                                    coreState.tum_enclosure_state.actors.current_angle || 0,
+                                postfix: '°',
                             },
-                        ]}
-                    />
+                        },
+                        {
+                            variable: {
+                                key: 'Sync to CamTracker',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.control.sync_to_tracker
+                                ),
+                            },
+                            action: {
+                                label: coreState.tum_enclosure_state.control.sync_to_tracker
+                                    ? 'do not sync'
+                                    : 'sync',
+                                callback: toggleSyncToTracker,
+                            },
+                        },
+                    ]}
+                />
 
-                    <VariableBlock
-                        label="Climate"
-                        disabled={buttonsAreDisabled}
-                        rows={[
-                            {
-                                variable: {
-                                    key: 'Temperature',
-                                    value: renderStringValue(
-                                        coreState.tum_enclosure_state.sensors.temperature,
-                                        ' °C'
-                                    ),
-                                },
+                <VariableBlock
+                    label="Climate"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Temperature',
+                                value: renderStringValue(
+                                    coreState.tum_enclosure_state.sensors.temperature,
+                                    ' °C'
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Humidity',
-                                    value: renderStringValue(
-                                        coreState.tum_enclosure_state.sensors.humidity,
-                                        '%'
-                                    ),
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Humidity',
+                                value: renderStringValue(
+                                    coreState.tum_enclosure_state.sensors.humidity,
+                                    '%'
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Fan Speed',
-                                    value: renderStringValue(
-                                        coreState.tum_enclosure_state.actors.fan_speed,
-                                        '%'
-                                    ),
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Fan Speed',
+                                value: renderStringValue(
+                                    coreState.tum_enclosure_state.actors.fan_speed,
+                                    '%'
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Auto temperature',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.control.auto_temp_mode
-                                    ),
-                                },
-                                action: {
-                                    label: coreState.tum_enclosure_state.control.auto_temp_mode
-                                        ? 'disable'
-                                        : 'enable',
-                                    callback: toggleAutoTemperature,
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Auto temperature',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.control.auto_temp_mode
+                                ),
                             },
-                        ]}
-                    />
+                            action: {
+                                label: coreState.tum_enclosure_state.control.auto_temp_mode
+                                    ? 'disable'
+                                    : 'enable',
+                                callback: toggleAutoTemperature,
+                            },
+                        },
+                    ]}
+                />
 
-                    <VariableBlock
-                        label="Power"
-                        disabled={buttonsAreDisabled}
-                        rows={[
-                            {
-                                variable: {
-                                    key: 'Camera Power',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.power.camera
-                                    ),
-                                },
-                                action: {
-                                    label: coreState.tum_enclosure_state.power.camera
-                                        ? 'disable'
-                                        : 'enable',
-                                    callback: togglePowerCamera,
-                                },
+                <VariableBlock
+                    label="Power"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Camera Power',
+                                value: renderBoolValue(coreState.tum_enclosure_state.power.camera),
                             },
-                            {
-                                variable: {
-                                    key: 'Router Power',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.power.router
-                                    ),
-                                },
-                                action: {
-                                    label: coreState.tum_enclosure_state.power.router
-                                        ? 'disable'
-                                        : 'enable',
-                                    callback: togglePowerRouter,
-                                },
+                            action: {
+                                label: coreState.tum_enclosure_state.power.camera
+                                    ? 'disable'
+                                    : 'enable',
+                                callback: togglePowerCamera,
                             },
-                            {
-                                variable: {
-                                    key: 'Spectrometer Power',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.power.spectrometer
-                                    ),
-                                },
-                                action: {
-                                    label: coreState.tum_enclosure_state.power.spectrometer
-                                        ? 'disable'
-                                        : 'enable',
-                                    callback: togglePowerSpectrometer,
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Router Power',
+                                value: renderBoolValue(coreState.tum_enclosure_state.power.router),
                             },
-                            {
-                                variable: {
-                                    key: 'Computer Power',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.power.computer
-                                    ),
-                                },
-                                action: {
-                                    label: coreState.tum_enclosure_state.power.computer
-                                        ? 'disable'
-                                        : 'enable',
-                                    callback: togglePowerComputer,
-                                },
+                            action: {
+                                label: coreState.tum_enclosure_state.power.router
+                                    ? 'disable'
+                                    : 'enable',
+                                callback: togglePowerRouter,
                             },
-                            {
-                                variable: {
-                                    key: 'Heater power',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.power.heater
-                                    ),
-                                },
-                                action: {
-                                    label: coreState.tum_enclosure_state.power.heater
-                                        ? 'disable'
-                                        : 'enable',
-                                    callback: togglePowerHeater,
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Spectrometer Power',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.power.spectrometer
+                                ),
                             },
-                        ]}
-                    />
+                            action: {
+                                label: coreState.tum_enclosure_state.power.spectrometer
+                                    ? 'disable'
+                                    : 'enable',
+                                callback: togglePowerSpectrometer,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Computer Power',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.power.computer
+                                ),
+                            },
+                            action: {
+                                label: coreState.tum_enclosure_state.power.computer
+                                    ? 'disable'
+                                    : 'enable',
+                                callback: togglePowerComputer,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Heater power',
+                                value: renderBoolValue(coreState.tum_enclosure_state.power.heater),
+                            },
+                            action: {
+                                label: coreState.tum_enclosure_state.power.heater
+                                    ? 'disable'
+                                    : 'enable',
+                                callback: togglePowerHeater,
+                            },
+                        },
+                    ]}
+                />
 
-                    <VariableBlock
-                        label="Connections"
-                        disabled={buttonsAreDisabled}
-                        rows={[
-                            {
-                                variable: {
-                                    key: 'Camera',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.connections.camera
-                                    ),
-                                },
+                <VariableBlock
+                    label="Connections"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Camera',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.connections.camera
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Computer',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.connections.computer
-                                    ),
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Computer',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.connections.computer
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Heater',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.connections.heater
-                                    ),
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Heater',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.connections.heater
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Router',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.connections.router
-                                    ),
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Router',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.connections.router
+                                ),
                             },
-                            {
-                                variable: {
-                                    key: 'Spectrometer',
-                                    value: renderBoolValue(
-                                        coreState.tum_enclosure_state.connections.spectrometer
-                                    ),
-                                },
+                        },
+                        {
+                            variable: {
+                                key: 'Spectrometer',
+                                value: renderBoolValue(
+                                    coreState.tum_enclosure_state.connections.spectrometer
+                                ),
                             },
-                        ]}
-                    />
-                </>
+                        },
+                    ]}
+                />
             </div>
         </div>
     );
