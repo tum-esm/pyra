@@ -57,13 +57,13 @@ class CamTrackerProgram:
             arguments="-autostart",
             show_cmd=2,
         )
-        tum_esm_utils.timing.wait_for_condition(
+        dt = tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: CamTrackerProgram.is_running(),
             timeout_message="CamTracker did not start within 90 seconds.",
             timeout_seconds=90,
             check_interval_seconds=8,
         )
-        logger.info("Successfully started CamTracker")
+        logger.info(f"Successfully started CamTracker withing {dt:.2f} seconds")
 
     @staticmethod
     def is_running() -> bool:
@@ -101,13 +101,13 @@ class CamTrackerProgram:
             tum_esm_utils.files.dump_file(os.path.join(d, "stop.txt"), "")
 
         try:
-            tum_esm_utils.timing.wait_for_condition(
+            dt = tum_esm_utils.timing.wait_for_condition(
                 is_successful=lambda: not CamTrackerProgram.is_running(),
                 timeout_message="CamTracker did not stop within 90 seconds.",
                 timeout_seconds=90,
                 check_interval_seconds=9,
             )
-            logger.info("Successfully stopped CamTracker")
+            logger.info(f"Successfully stopped CamTracker gracefully within {dt:.2f} seconds")
             return
         except TimeoutError as e:
             logger.error(f"Could not stop CamTracker gracefully: {e}")

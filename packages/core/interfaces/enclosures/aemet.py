@@ -75,12 +75,13 @@ class AEMETEnclosureInterface:
     def set_enhanced_security_mode(self, mode: bool) -> None:
         self.logger.info(f"Setting enhanced security mode to {mode}")
         self._set_value("dl:Public.ENHANCED_SECURITY", 1 if mode else 0)
-        tum_esm_utils.timing.wait_for_condition(
+        dt = tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: self.read().enhanced_security_mode == mode,
             timeout_seconds=40,
             timeout_message="Enhanced security mode did not update within 30 seconds.",
             check_interval_seconds=5,
         )
+        self.logger.info(f"Successfully set enhanced security mode within {dt:.2f} seconds")
 
     def set_enclosure_mode(self, mode: Literal["auto", "manual"]) -> None:
         self.logger.info(f"Setting enclosure mode to {mode}")
@@ -88,36 +89,38 @@ class AEMETEnclosureInterface:
             self._set_value("dl:Public.AUTO_", 1)
         else:
             self._set_value("dl:Public.AUTO_", 0)
-        tum_esm_utils.timing.wait_for_condition(
+        dt = tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: self.read().auto_mode == (1 if mode == "auto" else 0),
             timeout_seconds=40,
             timeout_message="Enclosure mode did not update within 30 seconds.",
             check_interval_seconds=5,
         )
+        self.logger.info(f"Successfully set enclosure mode within {dt:.2f} seconds")
 
     def set_averia_fault_code(self, new_value: int) -> None:
         """Set the averia fault code to the given value, and wait until the datalogger state reflects this change."""
         self.logger.info(f"Setting averia fault code to {new_value}")
         self._set_value("dl:Public.AVERIA", new_value)
-        tum_esm_utils.timing.wait_for_condition(
+        dt = tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: self.read().averia_fault_code == new_value,
             timeout_seconds=40,
             timeout_message="Averia fault code did not update within 30 seconds.",
             check_interval_seconds=5,
         )
         self.logger.info("Averia fault code updated successfully")
+        self.logger.info(f"Successfully set averia fault code within {dt:.2f} seconds")
 
     def set_alert_level(self, new_value: int) -> None:
         """Set the alert level to the given value, and wait until the datalogger state reflects this change."""
         self.logger.info(f"Setting alert level to {new_value}")
         self._set_value("dl:Public.ALERTA", new_value)
-        tum_esm_utils.timing.wait_for_condition(
+        dt = tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: self.read().alert_level == new_value,
             timeout_seconds=40,
             timeout_message="Alert level did not update within 30 seconds.",
             check_interval_seconds=5,
         )
-        self.logger.info("Alert level updated successfully")
+        self.logger.info(f"Successfully set alert level within {dt:.2f} seconds")
 
     def open_cover(self) -> None:
         self.logger.info("Opening cover")
@@ -130,12 +133,13 @@ class AEMETEnclosureInterface:
                 self.set_enclosure_mode("manual")
             self._set_value("dl:Public.MOTOR_ON", 1)
             self._set_value("dl:Public.Estado_actual", "AF")  # open releasing fechillo
-            tum_esm_utils.timing.wait_for_condition(
+            dt = tum_esm_utils.timing.wait_for_condition(
                 is_successful=lambda: self.read().pretty_cover_status == "open",
                 timeout_seconds=90,
                 timeout_message="Cover did not open within 90 seconds.",
                 check_interval_seconds=5,
             )
+            self.logger.info(f"Successfully opened cover within {dt:.2f} seconds")
 
     def close_cover(self) -> None:
         self.logger.info("Closing cover")
@@ -145,12 +149,13 @@ class AEMETEnclosureInterface:
                 self.set_enclosure_mode("manual")
             self._set_value("dl:Public.MOTOR_ON", 1)
             self._set_value("dl:Public.Estado_actual", "C.")  # closing
-            tum_esm_utils.timing.wait_for_condition(
+            dt = tum_esm_utils.timing.wait_for_condition(
                 is_successful=lambda: self.read().pretty_cover_status == "closed",
                 timeout_seconds=90,
                 timeout_message="Cover did not close within 90 seconds.",
                 check_interval_seconds=5,
             )
+            self.logger.info(f"Successfully closed cover within {dt:.2f} seconds")
 
     def set_em27_power(self, power_on: bool) -> None:
         self.logger.info(f"Turning EM27 power {'on' if power_on else 'off'}")

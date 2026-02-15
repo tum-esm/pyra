@@ -35,19 +35,21 @@ class OpusProgram:
             arguments=f"/HTTPSERVER=ON /LANGUAGE=ENGLISH /DIRECTLOGINPASSWORD={config.opus.username}@{config.opus.password}",
             show_cmd=2,
         )
-        tum_esm_utils.timing.wait_for_condition(
+        dt = tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: OpusProgram.is_running(logger),
             timeout_message="OPUS.exe did not start within 90 seconds.",
             timeout_seconds=90,
             check_interval_seconds=5,
         )
+        logger.info(f"Successfully started OPUS.exe within {dt:.2f} seconds")
         try:
-            tum_esm_utils.timing.wait_for_condition(
+            dt = tum_esm_utils.timing.wait_for_condition(
                 is_successful=OpusHTTPInterface.is_working,
                 timeout_message="OPUS HTTP interface did not start within 90 seconds.",
                 timeout_seconds=90,
                 check_interval_seconds=5,
             )
+            logger.info(f"Successfully connected to OPUS HTTP interface within {dt:.2f} seconds")
         except TimeoutError as e:
             raise ConnectionError("OPUS HTTP interface did not start within 90 seconds.") from e
 
@@ -82,13 +84,13 @@ class OpusProgram:
 
             logger.info("Waiting for OPUS to close gracefully")
             try:
-                tum_esm_utils.timing.wait_for_condition(
+                dt = tum_esm_utils.timing.wait_for_condition(
                     is_successful=lambda: not OpusProgram.is_running(logger),
                     timeout_message="OPUS.exe did not stop within 60 seconds.",
                     timeout_seconds=60,
                     check_interval_seconds=4,
                 )
-                logger.info("Successfully stopped OPUS")
+                logger.info(f"Successfully stopped OPUS gracefully within {dt:.2f} seconds")
                 return
             except TimeoutError:
                 logger.warning("OPUS.exe did not stop gracefully within 60 seconds.")
@@ -295,15 +297,16 @@ class OpusThread(AbstractThread):
                 if measurements_should_be_running:
                     if last_successful_ping_time < (time.time() - 300):
                         logger.info("Pinging EM27")
-                        tum_esm_utils.timing.wait_for_condition(
-                            is_successful=lambda: os.system("ping -n 3 " + config.opus.em27_ip.root)
-                            == 0,
+                        dt = tum_esm_utils.timing.wait_for_condition(
+                            is_successful=lambda: (
+                                os.system("ping -n 3 " + config.opus.em27_ip.root) == 0
+                            ),
                             timeout_seconds=90,
                             timeout_message="EM27 did not respond to ping within 90 seconds.",
-                            check_interval_seconds=9,
+                            check_interval_seconds=3,
                         )
                         last_successful_ping_time = time.time()
-                        logger.info("Successfully pinged EM27")
+                        logger.info(f"Successfully pinged EM27 within {dt:.2f} seconds")
 
                 # STARTING MACRO
 
@@ -468,12 +471,14 @@ class OpusThread(AbstractThread):
         OpusHTTPInterface.stop_macro(config.opus.macro_path.root)
         time.sleep(2)
 
-        tum_esm_utils.timing.wait_for_condition(
+        dt = tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: not OpusHTTPInterface.macro_is_running(macro_id),
             timeout_message="Macro did not stop within 60 seconds.",
             timeout_seconds=60,
             check_interval_seconds=4,
         )
+        logger.info(f"Successfully stopped macro gracefully within {dt:.2f} seconds")
+
         OpusProgram.stop(logger)
 
     @staticmethod
