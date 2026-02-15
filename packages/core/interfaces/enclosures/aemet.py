@@ -62,14 +62,14 @@ class AEMETEnclosureInterface:
 
     def open_cover(self) -> None:
         state = self.read()
-        if (state.aviera_fault_code == 0) and (state.alert_level == 0):
+        if (state.averia_fault_code == 0) and (state.alert_level == 0):
             self.set_enclosure_mode("manual")
             self._set_value("dl:Public.MOTOR_ON", 1)
             self._set_value("dl:Public.Estado_actual", "AF")  # open releasing fechillo
 
     def cover_close(self) -> None:
         state = self.read()
-        if (state.aviera_fault_code == 0) and (state.alert_level == 0):
+        if (state.averia_fault_code == 0) and (state.alert_level == 0):
             self._set_value("dl:Public.AUTO_", 0)  # manual
             self._set_value("dl:Public.MOTOR_ON", 1)
             self._set_value("dl:Public.Estado_actual", "C.")  # closing

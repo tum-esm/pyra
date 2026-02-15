@@ -74,15 +74,15 @@ const coreStateSchema = z.object({
 
         // closing reasons
         closed_due_to_rain: z.boolean().nullable(),
-        closed_due_to_relative_humidity: z.boolean().nullable(),
-        closed_due_to_external_air_temperature: z.boolean().nullable(),
+        closed_due_to_external_relative_humidity: z.boolean().nullable(),
         closed_due_to_internal_relative_humidity: z.boolean().nullable(),
+        closed_due_to_external_air_temperature: z.boolean().nullable(),
         closed_due_to_internal_air_temperature: z.boolean().nullable(),
         closed_due_to_wind_velocity: z.boolean().nullable(),
 
         // cover states
         alert_level: z.number().nullable(),
-        aviera_fault_code: z.number().nullable(),
+        averia_fault_code: z.number().nullable(),
         cover_status: z.string().nullable(),
         motor_position: z.number().nullable(),
     }),

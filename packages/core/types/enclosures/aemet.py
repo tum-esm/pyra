@@ -138,7 +138,7 @@ class AEMETEnclosureState(pydantic.BaseModel):
         validation_alias="Cerrar_Lluvia",
         description="Whether the cover has been closed due to rain. 0 if not, 1 if it has been closed due to rain.",
     )
-    closed_due_to_relative_humidity: Optional[bool] = pydantic.Field(
+    closed_due_to_external_relative_humidity: Optional[bool] = pydantic.Field(
         default=None,
         validation_alias="Cerrar_RH_Ext",
         description="Whether the cover has been closed due to high external relative humidity. 0 if not, 1 if it has been closed due to high external relative humidity.",
@@ -170,7 +170,7 @@ class AEMETEnclosureState(pydantic.BaseModel):
         validation_alias="ALERTA",
         description="Alert level. 0 if no alert, 1 if counting towards closing, 2 if should be closed due to alert.",
     )
-    aviera_fault_code: Optional[int] = pydantic.Field(
+    averia_fault_code: Optional[int] = pydantic.Field(
         default=None,
         validation_alias="AVERIA",
         description="Value of AVERIA.",
