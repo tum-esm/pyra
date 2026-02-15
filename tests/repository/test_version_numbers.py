@@ -15,7 +15,9 @@ def test_version_numbers() -> None:
         pyproject_version = third_line.split(" = ")[1].strip('"')
 
     cli_info_stdout = tum_esm_utils.shell.run_shell_command(
-        f"python ./packages/cli/main.py info", working_directory=PROJECT_DIR
+        f"python ./packages/cli/main.py info",
+        working_directory=PROJECT_DIR,
+        executable=None,
     ).strip(" \n")
     assert (
         cli_info_stdout

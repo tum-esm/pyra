@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:6cbfe3e07cc0f32db611cdd7075f5ac9d30ee8ecb4a91fa11e3f4d672bec6a76"
+content_hash = "sha256:4422d11a84106f51baf2aa287229a2522624da2e72da81b07a537602045fbe9b"
 
 [[metadata.targets]]
 requires_python = "==3.10.*"
@@ -1190,7 +1190,7 @@ files = [
 
 [[package]]
 name = "tum-esm-utils"
-version = "2.11.3"
+version = "2.11.6"
 requires_python = "<4.0,>=3.10"
 summary = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
 groups = ["default"]
@@ -1204,13 +1204,13 @@ dependencies = [
     "tailwind-colors>=1.3.0",
 ]
 files = [
-    {file = "tum_esm_utils-2.11.3-py3-none-any.whl", hash = "sha256:718bd62728d51d9deaadbdf35bfc66fa48cc128719415d32b31dfaf056615463"},
-    {file = "tum_esm_utils-2.11.3.tar.gz", hash = "sha256:66efb4bb39de180f24aa7cba72d18152feae4bedca0030127fd0cde91b1e79d7"},
+    {file = "tum_esm_utils-2.11.6-py3-none-any.whl", hash = "sha256:c2734ebd9480f96b01c19a04173ec569b308f6876f07e1edab570c7c3d867c2a"},
+    {file = "tum_esm_utils-2.11.6.tar.gz", hash = "sha256:f8ff530a1aee8ab423888addf857ba10e1227ca53645c5adf429ea7166579a19"},
 ]
 
 [[package]]
 name = "tum-esm-utils"
-version = "2.11.3"
+version = "2.11.6"
 extras = ["opus"]
 requires_python = "<4.0,>=3.10"
 summary = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
@@ -1219,11 +1219,11 @@ marker = "python_version == \"3.10\""
 dependencies = [
     "numpy>=2.2.5",
     "tenacity>=9.1.2",
-    "tum-esm-utils==2.11.3",
+    "tum-esm-utils==2.11.6",
 ]
 files = [
-    {file = "tum_esm_utils-2.11.3-py3-none-any.whl", hash = "sha256:718bd62728d51d9deaadbdf35bfc66fa48cc128719415d32b31dfaf056615463"},
-    {file = "tum_esm_utils-2.11.3.tar.gz", hash = "sha256:66efb4bb39de180f24aa7cba72d18152feae4bedca0030127fd0cde91b1e79d7"},
+    {file = "tum_esm_utils-2.11.6-py3-none-any.whl", hash = "sha256:c2734ebd9480f96b01c19a04173ec569b308f6876f07e1edab570c7c3d867c2a"},
+    {file = "tum_esm_utils-2.11.6.tar.gz", hash = "sha256:f8ff530a1aee8ab423888addf857ba10e1227ca53645c5adf429ea7166579a19"},
 ]
 
 [[package]]
