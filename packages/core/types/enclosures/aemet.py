@@ -163,6 +163,11 @@ class AEMETEnclosureState(pydantic.BaseModel):
         validation_alias="Cerrar_Wvel_Alta",
         description="Whether the cover has been closed due to high wind velocity. 0 if not, 1 if it has been closed due to high wind velocity.",
     )
+    opened_due_to_elevated_internal_humidity: Optional[bool] = pydantic.Field(
+        default=None,
+        validation_alias="Abrir_RH_Int_Elevado",
+        description="Whether the cover has been opened due to elevated internal relative humidity. 0 if not, 1 if it has been opened due to elevated internal relative humidity.",
+    )
 
     # cover states
     alert_level: Optional[Literal[0, 1, 2]] = pydantic.Field(

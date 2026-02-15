@@ -202,7 +202,12 @@ export function SystemState() {
                             appendix: ' °',
                         })}
                     </StatePanel>
-                    <div />
+
+                    <StatePanel title="Opened Due to Elevated Internal rH">
+                        {renderBoolean(
+                            coreState.aemet_enclosure_state.opened_due_to_elevated_internal_humidity
+                        )}
+                    </StatePanel>
 
                     {/* other environmental parameters */}
                     <StatePanel title="Internal Pressure">

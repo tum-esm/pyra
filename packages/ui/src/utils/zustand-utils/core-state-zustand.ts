@@ -79,6 +79,7 @@ const coreStateSchema = z.object({
         closed_due_to_external_air_temperature: z.boolean().nullable(),
         closed_due_to_internal_air_temperature: z.boolean().nullable(),
         closed_due_to_wind_velocity: z.boolean().nullable(),
+        opened_due_to_elevated_internal_humidity: z.boolean().nullable(),
 
         // cover states
         alert_level: z.number().nullable(),
