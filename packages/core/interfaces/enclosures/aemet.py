@@ -2,7 +2,9 @@ from typing import Any, Literal
 import requests
 import requests.auth
 import urllib.parse
-from packages.core import types
+
+import tum_esm_utils
+from packages.core import utils, types, interfaces
 
 
 class AEMETEnclosureInterface:
@@ -12,8 +14,15 @@ class AEMETEnclosureInterface:
     def __init__(
         self,
         config: types.aemet.AEMETEnclosureConfig,
+        state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
+        logger: utils.Logger,
     ) -> None:
         self.enclosure_config = config
+        self.state_lock = state_lock
+        self.logger = logger
+        self.latest_read_state: types.aemet.AEMETEnclosureState = types.aemet.AEMETEnclosureState(
+            em27_has_power=True
+        )
 
     def _run_command(self, command: str, **kwargs: Any) -> dict[Any, Any]:
         return requests.get(
@@ -27,6 +36,9 @@ class AEMETEnclosureInterface:
                 self.enclosure_config.datalogger_password,
             ),
         ).json()
+
+    def _set_value(self, uri: str, value: str | int) -> None:
+        self._run_command("SetValueEx", uri=uri, value=value)
 
     def update_config(
         self,
@@ -47,29 +59,99 @@ class AEMETEnclosureInterface:
             d = dict(zip(headers, out["data"][0]["vals"]))
             d["time"] = out["data"][0]["time"]
             d["no"] = out["data"][0]["no"]
-            return types.aemet.AEMETEnclosureState.model_validate(d)
+            news = types.aemet.AEMETEnclosureState.model_validate(d)
+            news.em27_has_power = self.latest_read_state.em27_has_power
+            self.latest_read_state = news
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.aemet_enclosure_state = news
+            return news
         except Exception as e:
             raise AEMETEnclosureInterface.DataloggerError() from e
 
-    def _set_value(self, uri: str, value: str | int) -> None:
-        self._run_command("SetValueEx", uri=uri, value=value)
+    def set_enhanced_security_mode(self, mode: Literal[0, 1]) -> None:
+        self.logger.info(f"Setting enhanced security mode to {mode}")
+        self._set_value("dl:Public.ENHANCED_SECURITY", mode)
+        tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: self.read().enhanced_security_mode == mode,
+            timeout_seconds=40,
+            timeout_message="Enhanced security mode did not update within 30 seconds.",
+            check_interval_seconds=5,
+        )
 
     def set_enclosure_mode(self, mode: Literal["auto", "manual"]) -> None:
+        self.logger.info(f"Setting enclosure mode to {mode}")
         if mode == "auto":
             self._set_value("dl:Public.AUTO_", 1)
         else:
             self._set_value("dl:Public.AUTO_", 0)
+        tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: self.read().auto_mode == (1 if mode == "auto" else 0),
+            timeout_seconds=40,
+            timeout_message="Enclosure mode did not update within 30 seconds.",
+            check_interval_seconds=5,
+        )
+
+    def set_averia_fault_code(self, new_value: int) -> None:
+        """Set the averia fault code to the given value, and wait until the datalogger state reflects this change."""
+        self.logger.info(f"Setting averia fault code to {new_value}")
+        self._set_value("dl:Public.AVERIA", new_value)
+        tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: self.read().averia_fault_code == new_value,
+            timeout_seconds=40,
+            timeout_message="Averia fault code did not update within 30 seconds.",
+            check_interval_seconds=5,
+        )
+        self.logger.info("Averia fault code updated successfully")
+
+    def set_alert_level(self, new_value: int) -> None:
+        """Set the alert level to the given value, and wait until the datalogger state reflects this change."""
+        self.logger.info(f"Setting alert level to {new_value}")
+        self._set_value("dl:Public.ALERTA", new_value)
+        tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: self.read().alert_level == new_value,
+            timeout_seconds=40,
+            timeout_message="Alert level did not update within 30 seconds.",
+            check_interval_seconds=5,
+        )
+        self.logger.info("Alert level updated successfully")
 
     def open_cover(self) -> None:
+        self.logger.info("Opening cover")
         state = self.read()
+        with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+            self.latest_read_state.em27_has_power = s.aemet_enclosure_state.em27_has_power
+            s.aemet_enclosure_state = state
         if (state.averia_fault_code == 0) and (state.alert_level == 0):
-            self.set_enclosure_mode("manual")
+            if state.auto_mode == 1:
+                self.set_enclosure_mode("manual")
             self._set_value("dl:Public.MOTOR_ON", 1)
             self._set_value("dl:Public.Estado_actual", "AF")  # open releasing fechillo
+            tum_esm_utils.timing.wait_for_condition(
+                is_successful=lambda: self.read().pretty_cover_status == "open",
+                timeout_seconds=90,
+                timeout_message="Cover did not open within 90 seconds.",
+                check_interval_seconds=5,
+            )
 
     def cover_close(self) -> None:
+        self.logger.info("Closing cover")
         state = self.read()
         if (state.averia_fault_code == 0) and (state.alert_level == 0):
-            self._set_value("dl:Public.AUTO_", 0)  # manual
+            if state.auto_mode == 1:
+                self.set_enclosure_mode("manual")
             self._set_value("dl:Public.MOTOR_ON", 1)
             self._set_value("dl:Public.Estado_actual", "C.")  # closing
+            tum_esm_utils.timing.wait_for_condition(
+                is_successful=lambda: self.read().pretty_cover_status == "closed",
+                timeout_seconds=90,
+                timeout_message="Cover did not close within 90 seconds.",
+                check_interval_seconds=5,
+            )
+
+    def set_em27_power(self, power_on: bool) -> None:
+        self.logger.info(f"Turning EM27 power {'on' if power_on else 'off'}")
+        self.logger.debug(
+            "This is currently not implemented, because the power plugs did not arrive yet."
+        )
+        # TODO: communicate with the EM27 power plug
+        # TODO: update power state

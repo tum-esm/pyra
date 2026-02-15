@@ -191,6 +191,12 @@ class AEMETEnclosureState(pydantic.BaseModel):
         description="Current motor position. 0 is fully open, higher values are more closed.",
     )
 
+    # other
+    em27_has_power: Optional[bool] = pydantic.Field(
+        default=None,
+        description="Whether the EM27 power plug is currently powered on (i.e. whether the EM27 has power). This value does not come from the datalogger, but from the wifi power interruptor.",
+    )
+
     @property
     def pretty_cover_status(
         self,

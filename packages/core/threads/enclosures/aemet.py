@@ -78,6 +78,8 @@ class AEMETEnclosureThread(AbstractThread):
                     logger.debug("Connecting to Datalogger")
                     enclosure_interface = interfaces.AEMETEnclosureInterface(
                         config=enclosure_config,
+                        state_lock=state_lock,
+                        logger=logger,
                     )
                 else:
                     enclosure_interface.update_config(new_config=enclosure_config)
