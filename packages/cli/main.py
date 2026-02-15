@@ -17,6 +17,7 @@ from packages.cli.commands import (
     state_command_group,
     test_command_group,
     tum_enclosure_command_group,
+    aemet_enclosure_command_group,
 )
 from packages.core import utils
 
@@ -44,6 +45,7 @@ cli.add_command(config_command_group, name="config")
 cli.add_command(core_command_group, name="core")
 cli.add_command(logs_command_group, name="logs")
 cli.add_command(tum_enclosure_command_group, name="tum-enclosure")
+cli.add_command(aemet_enclosure_command_group, name="aemet-enclosure")
 cli.add_command(remove_filelocks, name="remove-filelocks")
 cli.add_command(state_command_group, name="state")
 cli.add_command(test_command_group, name="test")

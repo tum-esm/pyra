@@ -5,3 +5,4 @@ from .remove_filelocks import remove_filelocks as remove_filelocks
 from .state import state_command_group as state_command_group
 from .test import test_command_group as test_command_group
 from .tum_enclosure import tum_enclosure_command_group as tum_enclosure_command_group
+from .aemet_enclosure import aemet_enclosure_command_group as aemet_enclosure_command_group

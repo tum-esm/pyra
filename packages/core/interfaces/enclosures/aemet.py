@@ -68,9 +68,9 @@ class AEMETEnclosureInterface:
         except Exception as e:
             raise AEMETEnclosureInterface.DataloggerError() from e
 
-    def set_enhanced_security_mode(self, mode: Literal[0, 1]) -> None:
+    def set_enhanced_security_mode(self, mode: bool) -> None:
         self.logger.info(f"Setting enhanced security mode to {mode}")
-        self._set_value("dl:Public.ENHANCED_SECURITY", mode)
+        self._set_value("dl:Public.ENHANCED_SECURITY", 1 if mode else 0)
         tum_esm_utils.timing.wait_for_condition(
             is_successful=lambda: self.read().enhanced_security_mode == mode,
             timeout_seconds=40,
@@ -133,7 +133,7 @@ class AEMETEnclosureInterface:
                 check_interval_seconds=5,
             )
 
-    def cover_close(self) -> None:
+    def close_cover(self) -> None:
         self.logger.info("Closing cover")
         state = self.read()
         if (state.averia_fault_code == 0) and (state.alert_level == 0):
