@@ -658,9 +658,331 @@ export function AEMETEnclosureControlTab() {
                 }
             />
             <div className="flex flex-col w-full text-sm divide-y divide-slate-300">
-                <>
-                    <VariableBlock label="Errors" disabled={buttonsAreDisabled} rows={[]} />
-                </>
+                <VariableBlock
+                    label="System"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Battery Voltage',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.battery_voltage,
+                                    ' V'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Logger Panel Temperature',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.logger_panel_temperature,
+                                    ' °C'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'AUTO mode',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.auto_mode,
+                                    ''
+                                ),
+                            },
+                            action: {
+                                label: 'set auto mode',
+                                callback: setAutoMode,
+                                variant: 'numeric',
+                                initialValue: coreState.aemet_enclosure_state.auto_mode || 0,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'ENHANCED_SECURITY mode',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.enhanced_security_mode,
+                                    ''
+                                ),
+                            },
+                            action: {
+                                label: 'set enhanced security mode',
+                                callback: setEnhancedSecurityMode,
+                                variant: 'numeric',
+                                initialValue:
+                                    coreState.aemet_enclosure_state.enhanced_security_mode || 0,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Spectrometer Power',
+                                value: renderBoolValue(
+                                    coreState.aemet_enclosure_state.em27_has_power
+                                ),
+                            },
+                            action: {
+                                label: coreState.aemet_enclosure_state.em27_has_power
+                                    ? 'disable'
+                                    : 'enable',
+                                callback: togglePowerSpectrometer,
+                            },
+                        },
+                    ]}
+                />
+                <VariableBlock
+                    label="Meteorological Conditions"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        // air pressure
+                        {
+                            variable: {
+                                key: 'Air Pressure (internal)',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.air_pressure_internal,
+                                    ' hPa'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Air Pressure (external)',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.air_pressure_external,
+                                    ' hPa'
+                                ),
+                            },
+                        },
+                        // relative humidity
+                        {
+                            variable: {
+                                key: 'Relative Humidity (internal)',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.relative_humidity_internal,
+                                    ' %'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Relative Humidity (external)',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.relative_humidity_external,
+                                    ' %'
+                                ),
+                            },
+                        },
+
+                        // air temperature
+                        {
+                            variable: {
+                                key: 'Air Temperature (internal)',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.air_temperature_internal,
+                                    ' °C'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Air Temperature (external)',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.air_temperature_external,
+                                    ' °C'
+                                ),
+                            },
+                        },
+
+                        // dew point temperature
+                        {
+                            variable: {
+                                key: 'Dew Point Temperature (internal)',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.dew_point_temperature_internal,
+                                    ' °C'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Dew Point Temperature (external)',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.dew_point_temperature_external,
+                                    ' °C'
+                                ),
+                            },
+                        },
+
+                        // wind direction and speed
+                        {
+                            variable: {
+                                key: 'Wind Direction',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.wind_direction,
+                                    ' °'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Wind Speed',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.wind_velocity,
+                                    ' m/s'
+                                ),
+                            },
+                        },
+
+                        // rain sensor counter
+                        {
+                            variable: {
+                                key: 'Rain Sensor 1 Counter',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.rain_sensor_counter_1,
+                                    ''
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Rain Sensor 2 Counter',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.rain_sensor_counter_2,
+                                    ''
+                                ),
+                            },
+                        },
+                    ]}
+                />
+                <VariableBlock
+                    label="Cover Opening Logic"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Closed due to rain',
+                                value: renderBoolValue(
+                                    coreState.aemet_enclosure_state.closed_due_to_rain
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Closed due to external relative humidity',
+                                value: renderBoolValue(
+                                    coreState.aemet_enclosure_state
+                                        .closed_due_to_external_relative_humidity
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Closed due to internal relative humidity',
+                                value: renderBoolValue(
+                                    coreState.aemet_enclosure_state
+                                        .closed_due_to_internal_relative_humidity
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Closed due to external air temperature',
+                                value: renderBoolValue(
+                                    coreState.aemet_enclosure_state
+                                        .closed_due_to_external_air_temperature
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Closed due to internal air temperature',
+                                value: renderBoolValue(
+                                    coreState.aemet_enclosure_state
+                                        .closed_due_to_internal_air_temperature
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Closed due to wind velocity',
+                                value: renderBoolValue(
+                                    coreState.aemet_enclosure_state.closed_due_to_wind_velocity
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Opened due to elevated internal humidity',
+                                value: renderBoolValue(
+                                    coreState.aemet_enclosure_state
+                                        .opened_due_to_elevated_internal_humidity
+                                ),
+                            },
+                        },
+                    ]}
+                />
+                <VariableBlock
+                    label="Motor State"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Alert Level',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.alert_level,
+                                    ''
+                                ),
+                            },
+                            action: {
+                                label: 'set alert level',
+                                callback: setAlertLevel,
+                                variant: 'numeric',
+                                initialValue: coreState.aemet_enclosure_state.alert_level || 0,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Averia Fault Code',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.averia_fault_code,
+                                    ''
+                                ),
+                            },
+                            action: {
+                                label: 'set averia fault code',
+                                callback: setAveriaFaultCode,
+                                variant: 'numeric',
+                                initialValue:
+                                    coreState.aemet_enclosure_state.averia_fault_code || 0,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Cover Status',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.cover_status,
+                                    ''
+                                ),
+                            },
+                            action: {
+                                label:
+                                    coreState.aemet_enclosure_state.cover_status !== 'C'
+                                        ? 'close cover'
+                                        : 'open cover',
+                                callback:
+                                    coreState.aemet_enclosure_state.cover_status !== 'C'
+                                        ? closeCover
+                                        : openCover,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Motor Position',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.motor_position,
+                                    ''
+                                ),
+                            },
+                        },
+                    ]}
+                />
             </div>
         </div>
     );
