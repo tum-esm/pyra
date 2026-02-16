@@ -34,7 +34,7 @@ class AEMETEnclosureThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="aemet-enclosure", lock=logs_lock)
+        logger = utils.Logger(origin="aemet-enclosure", lock=logs_lock, just_print=headless)
         logger.info("Starting AEMET Enclosure thread")
 
         enclosure_interface: Optional[interfaces.AEMETEnclosureInterface] = None

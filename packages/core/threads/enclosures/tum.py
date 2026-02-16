@@ -43,7 +43,7 @@ class TUMEnclosureThread(AbstractThread):
         """Main entrypoint of the thread. In headless mode,
         don't write to log files but print to console."""
 
-        logger = utils.Logger(origin="tum-enclosure", lock=logs_lock)
+        logger = utils.Logger(origin="tum-enclosure", lock=logs_lock, just_print=headless)
         logger.info("Starting TUM Enclosure thread")
 
         plc_interface: Optional[interfaces.TUMEnclosureInterface] = None

@@ -1,3 +1,5 @@
+"""Runs the Upload thread standalone, does not generate logs, but only prints."""
+
 import sys
 import threading
 import tum_esm_utils

@@ -1,4 +1,4 @@
-"""Runs the Helios thread standalone, does not generate logs, but only prints."""
+"""Runs the AEMET enclosure thread standalone, does not generate logs, but only prints."""
 
 import sys
 import threading
@@ -9,4 +9,4 @@ sys.path.append(tum_esm_utils.files.rel_to_abs_path(".."))
 from packages.core import threads
 
 if __name__ == "__main__":
-    threads.HeliosThread.main(logs_lock=threading.Lock(), headless=True)
+    threads.AEMETEnclosureThread.main(logs_lock=threading.Lock(), headless=True)
