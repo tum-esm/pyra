@@ -15,7 +15,9 @@ function StatePanel(props: { title: string; children: React.ReactNode }) {
     return (
         <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
             <div className="text-xs font-semibold">{props.title}</div>
-            <div className="flex flex-row items-center gap-x-2">{props.children}</div>
+            <div className="flex flex-row items-center justify-center w-full text-center gap-x-2">
+                {props.children}
+            </div>
         </div>
     );
 }
@@ -24,7 +26,7 @@ function StateBarPanel(props: { title: string; value: number | null }) {
     return (
         <div className="flex flex-col p-2 bg-white border rounded-md shadow-sm border-slate-200 gap-y-1">
             <div className="text-xs font-semibold">{props.title}</div>
-            <div className="flex flex-row items-center gap-x-2">
+            <div className="flex flex-row items-center justify-center text-center gap-x-2">
                 {props.value ? (
                     <>
                         <div className="min-w-12 whitespace-nowrap">
@@ -46,6 +48,15 @@ function StateBarPanel(props: { title: string; value: number | null }) {
         </div>
     );
 }
+
+const COVERR_STATUS_MAP: Record<string, string> = {
+    AF: 'Opening (Unlocking)',
+    'A.': 'Opening (Hood)',
+    A: 'Open',
+    'C.': 'Closing (Hood)',
+    CF: 'Closing (Locking)',
+    C: 'Closed',
+};
 
 export function SystemState() {
     const { coreState } = useCoreStateStore();
@@ -119,37 +130,57 @@ export function SystemState() {
             )}
             {centralConfig.aemet_enclosure !== null && (
                 <>
+                    {/* SECURITY INTERVENTIONS */}
+
                     <div className="grid w-full grid-cols-4 px-4 pb-1 text-sm gap-x-1 gap-y-1">
-                        {/* SECURITY INTERVENTIONS */}
                         <StatePanel title="Closed Due To Weather (Rain | Wind)">
-                            {renderColorfulBoolean(
-                                coreState.aemet_enclosure_state.closed_due_to_rain
-                            )}{' '}
-                            |
-                            {renderColorfulBoolean(
-                                coreState.aemet_enclosure_state.closed_due_to_wind_velocity
-                            )}
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderColorfulBoolean(
+                                        coreState.aemet_enclosure_state.closed_due_to_rain
+                                    )}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderColorfulBoolean(
+                                        coreState.aemet_enclosure_state.closed_due_to_wind_velocity
+                                    )}
+                                </div>
+                            </div>
                         </StatePanel>
                         <StatePanel title="Closed Due To rH (Int. | Ext.)">
-                            {renderColorfulBoolean(
-                                coreState.aemet_enclosure_state
-                                    .closed_due_to_internal_relative_humidity
-                            )}{' '}
-                            |
-                            {renderColorfulBoolean(
-                                coreState.aemet_enclosure_state
-                                    .closed_due_to_external_relative_humidity
-                            )}
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderColorfulBoolean(
+                                        coreState.aemet_enclosure_state
+                                            .closed_due_to_internal_relative_humidity
+                                    )}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderColorfulBoolean(
+                                        coreState.aemet_enclosure_state
+                                            .closed_due_to_external_relative_humidity
+                                    )}
+                                </div>
+                            </div>
                         </StatePanel>
                         <StatePanel title="Closed Due To Temperature (Int. | Ext.)">
-                            {renderColorfulBoolean(
-                                coreState.aemet_enclosure_state
-                                    .closed_due_to_internal_air_temperature
-                            )}
-                            {renderColorfulBoolean(
-                                coreState.aemet_enclosure_state
-                                    .closed_due_to_external_air_temperature
-                            )}
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderColorfulBoolean(
+                                        coreState.aemet_enclosure_state
+                                            .closed_due_to_internal_air_temperature
+                                    )}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderColorfulBoolean(
+                                        coreState.aemet_enclosure_state
+                                            .closed_due_to_external_air_temperature
+                                    )}
+                                </div>
+                            </div>
                         </StatePanel>
                         <StatePanel title="Opened Due To Elevated Int. rH">
                             {renderColorfulBoolean(
@@ -160,15 +191,28 @@ export function SystemState() {
                     </div>
 
                     {/* ENCLOSURE STATE */}
-                    <div className="grid w-full grid-cols-5 px-4 pb-1 text-sm gap-x-1 gap-y-1">
-                        <StatePanel title="Alert Level">
-                            {renderInteger(coreState.aemet_enclosure_state.alert_level)}
-                        </StatePanel>
-                        <StatePanel title="Averia Fault Code">
-                            {renderInteger(coreState.aemet_enclosure_state.averia_fault_code)}
+
+                    <div className="grid w-full grid-cols-4 px-4 pb-1 text-sm gap-x-1 gap-y-1">
+                        <StatePanel title="Alert Level | Averia Fault Code">
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderInteger(coreState.aemet_enclosure_state.alert_level)}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderInteger(
+                                        coreState.aemet_enclosure_state.averia_fault_code
+                                    )}
+                                </div>
+                            </div>
                         </StatePanel>
                         <StatePanel title="Cover Status">
-                            {renderString(coreState.aemet_enclosure_state.cover_status)}
+                            {(() => {
+                                const value = coreState.aemet_enclosure_state.cover_status;
+                                if (value == null) return '-';
+                                if (COVERR_STATUS_MAP[value]) return COVERR_STATUS_MAP[value];
+                                return `unknown (${value})`;
+                            })()}
                         </StatePanel>
                         <StatePanel title="Motor Position">
                             {renderNumber(coreState.aemet_enclosure_state.motor_position)}
@@ -177,85 +221,6 @@ export function SystemState() {
                             {renderNumber(
                                 lastEdgeFractionValue === null ? null : lastEdgeFractionValue * 100,
                                 { appendix: ' %' }
-                            )}
-                        </StatePanel>
-                    </div>
-                    <div className="grid w-full grid-cols-3 px-4 pb-1 text-sm gap-x-1 gap-y-1">
-                        {/* closing reasons RAIN */}
-                        <StatePanel title="Rain Sensor Counters (1 | 2)">
-                            {renderNumber(coreState.aemet_enclosure_state.rain_sensor_counter_1)} |
-                            {renderNumber(coreState.aemet_enclosure_state.rain_sensor_counter_2)}
-                        </StatePanel>
-
-                        {/*  HUMIDITY */}
-                        <StatePanel title="rH (Int. | Ext.)">
-                            {renderNumber(
-                                coreState.aemet_enclosure_state.relative_humidity_internal,
-                                {
-                                    appendix: ' %',
-                                }
-                            )}{' '}
-                            |
-                            {renderNumber(
-                                coreState.aemet_enclosure_state.relative_humidity_external,
-                                {
-                                    appendix: ' %',
-                                }
-                            )}
-                        </StatePanel>
-
-                        {/* closing reasons TEMPERATURE */}
-
-                        <StatePanel title="Air Temperature (Int. | Ext.)">
-                            {renderNumber(
-                                coreState.aemet_enclosure_state.air_temperature_internal,
-                                {
-                                    appendix: ' °C',
-                                }
-                            )}{' '}
-                            |
-                            {renderNumber(
-                                coreState.aemet_enclosure_state.air_temperature_external,
-                                {
-                                    appendix: ' °C',
-                                }
-                            )}
-                        </StatePanel>
-
-                        {/* closing reasons WIND */}
-                        <StatePanel title="Wind Speed | Wind Direction">
-                            {renderNumber(coreState.aemet_enclosure_state.wind_velocity, {
-                                appendix: ' m/s',
-                            })}
-                            |{' '}
-                            {renderNumber(coreState.aemet_enclosure_state.wind_direction, {
-                                appendix: ' °',
-                            })}
-                        </StatePanel>
-
-                        {/* other environmental parameters */}
-                        <StatePanel title="Air Pressure (Int. | Ext.)">
-                            {renderNumber(coreState.aemet_enclosure_state.air_pressure_internal, {
-                                appendix: ' hPa',
-                            })}{' '}
-                            |
-                            {renderNumber(coreState.aemet_enclosure_state.air_pressure_external, {
-                                appendix: ' hPa',
-                            })}
-                        </StatePanel>
-                        <StatePanel title="Dew Point Temperature (Int. | Ext.)">
-                            {renderNumber(
-                                coreState.aemet_enclosure_state.dew_point_temperature_internal,
-                                {
-                                    appendix: ' °C',
-                                }
-                            )}{' '}
-                            |
-                            {renderNumber(
-                                coreState.aemet_enclosure_state.dew_point_temperature_external,
-                                {
-                                    appendix: ' °C',
-                                }
                             )}
                         </StatePanel>
                     </div>
@@ -314,6 +279,131 @@ export function SystemState() {
                     })}
                 </StatePanel>
             </div>
+            {centralConfig.aemet_enclosure !== null && (
+                <>
+                    <div className="flex flex-row items-center w-full px-4 py-4 pb-2 text-base font-semibold border-t border-slate-300">
+                        <div>Environmental Conditions</div>
+                    </div>
+                    <div className="grid w-full grid-cols-3 px-4 pb-4 text-sm gap-x-1 gap-y-1">
+                        <StatePanel title="Rain Sensor Counters (1 | 2)">
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state.rain_sensor_counter_1
+                                    )}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state.rain_sensor_counter_2
+                                    )}
+                                </div>
+                            </div>
+                        </StatePanel>
+                        <StatePanel title="rH (Int. | Ext.)">
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state.relative_humidity_internal,
+                                        {
+                                            appendix: ' %',
+                                        }
+                                    )}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state.relative_humidity_external,
+                                        {
+                                            appendix: ' %',
+                                        }
+                                    )}
+                                </div>
+                            </div>
+                        </StatePanel>
+                        <StatePanel title="Air Temperature (Int. | Ext.)">
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state.air_temperature_internal,
+                                        {
+                                            appendix: ' °C',
+                                        }
+                                    )}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state.air_temperature_external,
+                                        {
+                                            appendix: ' °C',
+                                        }
+                                    )}
+                                </div>
+                            </div>
+                        </StatePanel>
+                        <StatePanel title="Wind Speed | Wind Direction">
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderNumber(coreState.aemet_enclosure_state.wind_velocity, {
+                                        appendix: ' m/s',
+                                    })}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderNumber(coreState.aemet_enclosure_state.wind_direction, {
+                                        appendix: ' °',
+                                    })}
+                                </div>
+                            </div>
+                        </StatePanel>
+                        <StatePanel title="Air Pressure (Int. | Ext.)">
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state.air_pressure_internal,
+                                        {
+                                            appendix: ' hPa',
+                                        }
+                                    )}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state.air_pressure_external,
+                                        {
+                                            appendix: ' hPa',
+                                        }
+                                    )}
+                                </div>
+                            </div>
+                        </StatePanel>
+                        <StatePanel title="Dew Point Temperature (Int. | Ext.)">
+                            <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state
+                                            .dew_point_temperature_internal,
+                                        {
+                                            appendix: ' °C',
+                                        }
+                                    )}
+                                </div>
+                                <div className="bg-slate-300 h-3.5 w-px" />
+                                <div className="flex-grow text-center">
+                                    {renderNumber(
+                                        coreState.aemet_enclosure_state
+                                            .dew_point_temperature_external,
+                                        {
+                                            appendix: ' °C',
+                                        }
+                                    )}
+                                </div>
+                            </div>
+                        </StatePanel>
+                    </div>
+                </>
+            )}
         </>
     );
 }
