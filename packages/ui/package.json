@@ -21,6 +21,8 @@
         "@tauri-apps/plugin-dialog": "^2.2.0",
         "@tauri-apps/plugin-fs": "^2.2.0",
         "@tauri-apps/plugin-shell": "^2.2.0",
+        "baseline-browser-mapping": "^2.9.19",
+        "caniuse-lite": "^1.0.30001770",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "deep-diff": "^1.0.2",
