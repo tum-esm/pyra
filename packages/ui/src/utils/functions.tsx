@@ -22,9 +22,21 @@ export function renderColorfulBoolean(value: undefined | null | boolean) {
         return '-';
     } else {
         return value ? (
-            <span className="text-red-700">Yes</span>
+            <span className="font-semibold text-red-700">yes</span>
         ) : (
-            <span className="text-green-700">No</span>
+            <span className="font-semibold text-green-700">no</span>
+        );
+    }
+}
+
+export function renderColorfulInteger(value: undefined | null | string | number) {
+    if (value === undefined || value === null) {
+        return '-';
+    } else {
+        return Number(value) == 0 ? (
+            <span className="font-semibold text-green-700">0</span>
+        ) : (
+            <span className="font-semibold text-red-700">{Number(value).toFixed(0)}</span>
         );
     }
 }

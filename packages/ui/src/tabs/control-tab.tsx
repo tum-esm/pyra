@@ -19,6 +19,15 @@ function renderStringValue(value: string | number | null, postfix: string) {
     return `${value} ${postfix}`;
 }
 
+const COVERR_STATUS_MAP: Record<string, string> = {
+    AF: 'opening lock',
+    'A.': 'opening hood',
+    A: 'open',
+    'C.': 'closing hood',
+    CF: 'closing lock',
+    C: 'closed',
+};
+
 function VariableBlock(props: {
     label: string;
     disabled: boolean;
@@ -44,8 +53,8 @@ function VariableBlock(props: {
                 {props.rows.map((r, i) => (
                     <div className="w-full h-8 flex-row-left" key={i}>
                         <div className="flex-row-center whitespace-nowrap">
-                            <div className="w-40">{r.variable.key}:</div>{' '}
-                            <span className="w-12 font-semibold text-right">
+                            <div className="w-72">{r.variable.key}:</div>{' '}
+                            <span className="w-20 font-semibold text-right">
                                 {r.variable.value}
                             </span>
                         </div>
@@ -57,7 +66,7 @@ function VariableBlock(props: {
                                         variant="white"
                                         onClick={r.action.callback}
                                         key={r.action.label}
-                                        className="w-52"
+                                        className="w-60"
                                         disabled={props.disabled}
                                     >
                                         {r.action.label}
@@ -68,7 +77,7 @@ function VariableBlock(props: {
                                         initialValue={r.action.initialValue}
                                         onClick={r.action.callback}
                                         key={r.action.label}
-                                        className="w-52"
+                                        className="w-60"
                                         postfix={r.action.postfix}
                                         disabled={props.disabled}
                                     >
@@ -704,7 +713,7 @@ export function AEMETEnclosureControlTab() {
                                 ),
                             },
                             action: {
-                                label: 'set enhanced security mode',
+                                label: 'set enhanced security',
                                 callback: setEnhancedSecurityMode,
                                 variant: 'numeric',
                                 initialValue:
@@ -990,7 +999,13 @@ export function AEMETEnclosureControlTab() {
                             variable: {
                                 key: 'Cover Status',
                                 value: renderStringValue(
-                                    coreState.aemet_enclosure_state.cover_status,
+                                    (() => {
+                                        const value = coreState.aemet_enclosure_state.cover_status;
+                                        if (value == null) return '-';
+                                        if (COVERR_STATUS_MAP[value])
+                                            return COVERR_STATUS_MAP[value];
+                                        return `unknown (${value})`;
+                                    })(),
                                     ''
                                 ),
                             },

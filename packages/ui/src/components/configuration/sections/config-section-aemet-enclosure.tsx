@@ -150,7 +150,7 @@ export default function ConfigSectionAEMETEnclosure() {
             />
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
-                title="Toggle EM27 Power"
+                title="Use EM27 Power Plug"
                 value={localSectionConfig.use_em27_power_plug}
                 setValue={(v: boolean) =>
                     setLocalConfigItem('aemet_enclosure.use_em27_power_plug', v)

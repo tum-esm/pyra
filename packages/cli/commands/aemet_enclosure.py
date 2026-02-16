@@ -96,14 +96,14 @@ def _set_spectrometer_power(state: Literal["true", "false"]) -> None:
 
 
 @aemet_enclosure_command_group.command(
-    name="set-enhance-security-mode",
+    name="set-enhanced-security-mode",
     help="Set the variable ENHANCED_SECURITY to 1 (true) or 0 (false).",
 )
-@click.argument("state")
-def _set_enhance_security_mode(state: Literal["true", "false"]) -> None:
-    logger.info(f'running command "plc set-enhance-security-mode {state}"')
+@click.argument("value")
+def _set_enhance_security_mode(value: int) -> None:
+    logger.info(f'running command "plc set-enhance-security-mode {value}"')
     enclosure_interface = _get_enclosure_interface()
-    enclosure_interface.set_enhanced_security_mode(state == "true")
+    enclosure_interface.set_enhanced_security_mode(int(value) == 1)
     _print_green("Ok")
 
 
@@ -111,7 +111,7 @@ def _set_enhance_security_mode(state: Literal["true", "false"]) -> None:
     name="set-averia-fault-code",
     help="Set the variable AVERIA to a given integer value.",
 )
-@click.argument("state")
+@click.argument("value")
 def _set_averia_fault_code(value: int) -> None:
     logger.info(f'running command "plc set-averia-fault-code {value}"')
     enclosure_interface = _get_enclosure_interface()
@@ -123,7 +123,7 @@ def _set_averia_fault_code(value: int) -> None:
     name="set-alert-level",
     help="Set the variable ALERTA to a given integer value.",
 )
-@click.argument("state")
+@click.argument("value")
 def _set_alert_level(value: int) -> None:
     logger.info(f'running command "plc set-alert-level {value}"')
     enclosure_interface = _get_enclosure_interface()
@@ -135,9 +135,9 @@ def _set_alert_level(value: int) -> None:
     name="set-auto-mode",
     help="Set the variable AUTO to a given integer value.",
 )
-@click.argument("state")
+@click.argument("value")
 def _set_auto_mode(value: int) -> None:
     logger.info(f'running command "plc set-auto-mode {value}"')
     enclosure_interface = _get_enclosure_interface()
-    enclosure_interface.set_enclosure_mode("auto" if value == 1 else "manual")
+    enclosure_interface.set_enclosure_mode("auto" if int(value) == 1 else "manual")
     _print_green("Ok")

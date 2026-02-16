@@ -5,6 +5,7 @@ import {
     renderString,
     renderNumber,
     renderColorfulBoolean,
+    renderColorfulInteger,
     renderInteger,
 } from '../../utils/functions';
 import { IconCloudRain } from '@tabler/icons-react';
@@ -50,12 +51,12 @@ function StateBarPanel(props: { title: string; value: number | null }) {
 }
 
 const COVERR_STATUS_MAP: Record<string, string> = {
-    AF: 'Opening (Unlocking)',
-    'A.': 'Opening (Hood)',
-    A: 'Open',
-    'C.': 'Closing (Hood)',
-    CF: 'Closing (Locking)',
-    C: 'Closed',
+    AF: 'opening lock',
+    'A.': 'opening hood',
+    A: 'open',
+    'C.': 'closing hood',
+    CF: 'closing lock',
+    C: 'closed',
 };
 
 export function SystemState() {
@@ -196,11 +197,13 @@ export function SystemState() {
                         <StatePanel title="Alert Level | Averia Fault Code">
                             <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
                                 <div className="flex-grow text-center">
-                                    {renderInteger(coreState.aemet_enclosure_state.alert_level)}
+                                    {renderColorfulInteger(
+                                        coreState.aemet_enclosure_state.alert_level
+                                    )}
                                 </div>
                                 <div className="bg-slate-300 h-3.5 w-px" />
                                 <div className="flex-grow text-center">
-                                    {renderInteger(
+                                    {renderColorfulInteger(
                                         coreState.aemet_enclosure_state.averia_fault_code
                                     )}
                                 </div>
