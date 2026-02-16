@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import datetime
 import os
+import time
 import pydantic
 import tum_esm_utils.sqlitelock
 from typing import Generator
@@ -75,7 +76,10 @@ class StateInterface:
 
             yield state
 
-            if state != state_before:
+            state_changed = state != state_before
+            if state_changed:
                 state.last_updated = datetime.datetime.now()
                 with open(_STATE_FILE_PATH, "w") as f:
                     f.write(state.model_dump_json(indent=4))
+                    f.flush()
+                time.sleep(0.05)  # ensure that the file is written before releasing the lock
