@@ -4,10 +4,10 @@
   "datalogger_username": "someone",
   "datalogger_password": "withapassword",
 
-  "em27_power_plug_ip": "10.10.0.6",
+  "em27_power_plug_ip": "10.10.0.2",
   "em27_power_plug_port": 80,
-  "em27_power_plug_username": "someone",
-  "em27_power_plug_password": "withapassword",
+  "em27_power_plug_username": "",
+  "em27_power_plug_password": "",
 
   "use_em27_power_plug": false,
   "controlled_by_user": false
