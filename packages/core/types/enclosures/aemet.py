@@ -205,6 +205,18 @@ class AEMETEnclosureState(pydantic.BaseModel):
         default=None,
         description="Whether the EM27 power plug is currently powered on (i.e. whether the EM27 has power). This value does not come from the datalogger, but from the wifi power interruptor.",
     )
+    em27_voltage: Optional[float] = pydantic.Field(
+        default=None,
+        description="Voltage of the EM27 in volts. This value does not come from the datalogger, but from the wifi power interruptor.",
+    )
+    em27_current: Optional[float] = pydantic.Field(
+        default=None,
+        description="Current of the EM27 in amps. This value does not come from the datalogger, but from the wifi power interruptor.",
+    )
+    em27_power: Optional[float] = pydantic.Field(
+        default=None,
+        description="Power consumption of the EM27 in watts. This value does not come from the datalogger, but from the wifi power interruptor.",
+    )
 
     @property
     def pretty_cover_status(

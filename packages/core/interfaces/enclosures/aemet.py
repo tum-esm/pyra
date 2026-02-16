@@ -66,6 +66,20 @@ class TasmotaPlug:
                 f"Unexpected response from Tasmota plug when getting power state: {answer}"
             ) from e
 
+    def get_throughput_state(self) -> dict[str, float]:
+        answer = self._request("Status 8")
+        try:
+            energy_data = answer["StatusSNS"]["ENERGY"]
+            return {
+                "em27_voltage": float(energy_data["Voltage"]),
+                "em27_current": float(energy_data["Current"]),
+                "em27_power": float(energy_data["em27_power"]),
+            }
+        except Exception as e:
+            raise AEMETEnclosureInterface.DataloggerError(
+                f"Unexpected response from Tasmota plug when getting energy state: {answer}"
+            ) from e
+
 
 class AEMETEnclosureInterface:
     class DataloggerError(Exception):
@@ -262,9 +276,19 @@ class AEMETEnclosureInterface:
             self.latest_read_state.em27_has_power = power_on
 
     def get_em27_power_state(self) -> bool:
-        self.logger.info(f"Fetch the EM27 power state")
+        self.logger.info(f"Fetching the EM27 power state")
         power_state = self.tasmota_plug.get_power_state()
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.aemet_enclosure_state.em27_has_power = power_state
             self.latest_read_state.em27_has_power = power_state
         return power_state
+
+    def update_em27_plug_throughput(self) -> None:
+        throughput_state = self.tasmota_plug.get_throughput_state()
+        with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+            s.aemet_enclosure_state.em27_voltage = throughput_state["em27_voltage"]
+            s.aemet_enclosure_state.em27_current = throughput_state["em27_current"]
+            s.aemet_enclosure_state.em27_power = throughput_state["em27_power"]
+            self.latest_read_state.em27_voltage = throughput_state["em27_voltage"]
+            self.latest_read_state.em27_current = throughput_state["em27_current"]
+            self.latest_read_state.em27_power = throughput_state["em27_power"]

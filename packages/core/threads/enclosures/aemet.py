@@ -101,6 +101,10 @@ class AEMETEnclosureThread(AbstractThread):
                     logger.debug("Logging enclosure state")
                     utils.AEMETEnclosureLogger.log(config, s)
 
+                    if enclosure_config.use_em27_power_plug:
+                        logger.debug("Updating EM27 plug throughput state")
+                        enclosure_interface.update_em27_plug_throughput()
+
                     # ENCLOSURE SPECIFIC LOGIC
 
                     if enclosure_config.controlled_by_user:
