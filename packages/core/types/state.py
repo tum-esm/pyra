@@ -97,7 +97,7 @@ class StateObject(StricterBaseModel):
     helios_indicates_good_conditions: Optional[Literal["yes", "no", "inconclusive"]] = None
     position: Position = Position()
     measurements_should_be_running: Optional[bool] = None
-    last_rain_detection_time: Optional[float] = None
+    last_bad_weather_detection: Optional[float] = None
     tum_enclosure_state: TUMEnclosureState = TUMEnclosureState()
     aemet_enclosure_state: AEMETEnclosureState = AEMETEnclosureState()
     operating_system_state: OperatingSystemState = OperatingSystemState()
@@ -112,7 +112,7 @@ class StateObject(StricterBaseModel):
         self.helios_indicates_good_conditions = None
         self.position = Position()
         self.measurements_should_be_running = None
-        self.last_rain_detection_time = None
+        self.last_bad_weather_detection = None
         self.tum_enclosure_state = TUMEnclosureState()
         self.aemet_enclosure_state = AEMETEnclosureState()
         self.operating_system_state = OperatingSystemState()

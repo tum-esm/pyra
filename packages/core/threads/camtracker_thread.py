@@ -245,8 +245,8 @@ class CamTrackerThread(AbstractThread):
 
                 # RESOLVE COVER CLOSED WARNING WHEN IT IS RAINING
 
-                if (state.last_rain_detection_time is not None) and (
-                    (time.time() - state.last_rain_detection_time) < 180
+                if (state.last_bad_weather_detection is not None) and (
+                    (time.time() - state.last_bad_weather_detection) < 180
                 ):
                     if state.exceptions_state.has_subject(
                         "Camtracker was started but cover is closed."
@@ -329,10 +329,10 @@ class CamTrackerThread(AbstractThread):
                                 state = interfaces.StateInterface.load_state(state_lock, logger)
 
                                 # if rain detected in last 3 minutes -> cover can be closed
-                                if (state.last_rain_detection_time is not None) and (
-                                    (time.time() - state.last_rain_detection_time) < 180
+                                if (state.last_bad_weather_detection is not None) and (
+                                    (time.time() - state.last_bad_weather_detection) < 180
                                 ):
-                                    logger.info("Enclosure cover is closed due to rain.")
+                                    logger.info("Enclosure cover is closed due to bad weather.")
                                     with interfaces.StateInterface.update_state(
                                         state_lock, logger
                                     ) as s:
@@ -460,19 +460,29 @@ class CamTrackerThread(AbstractThread):
         "angle not reported" if the cover position has not beenreported
         by the PLC yet."""
 
-        if config.tum_enclosure is None:
-            return "not configured"
+        if config.tum_enclosure is not None:
+            current_cover_angle = interfaces.StateInterface.load_state(
+                state_lock, logger
+            ).tum_enclosure_state.actors.current_angle
 
-        current_cover_angle = interfaces.StateInterface.load_state(
-            state_lock, logger
-        ).tum_enclosure_state.actors.current_angle
-
-        if current_cover_angle is None:
-            return "angle not reported"
-        if 20 < ((current_cover_angle + 360) % 360) < 340:
-            return "open"
+            if current_cover_angle is None:
+                return "angle not reported"
+            if 20 < ((current_cover_angle + 360) % 360) < 340:
+                return "open"
+            else:
+                return "closed"
+        elif config.aemet_enclosure is not None:
+            if (
+                interfaces.StateInterface.load_state(
+                    state_lock, logger
+                ).aemet_enclosure_state.pretty_cover_status
+                == "open"
+            ):
+                return "open"
+            else:
+                return "closed"
         else:
-            return "closed"
+            return "not configured"
 
     @staticmethod
     def test_setup(

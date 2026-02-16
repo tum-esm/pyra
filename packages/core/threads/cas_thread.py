@@ -47,7 +47,7 @@ class CASThread(AbstractThread):
         logger = utils.Logger(origin="cas", lock=logs_lock)
         logger.info("Starting Condition Assessment System (CAS) thread.")
         last_good_automatic_decision: float = 0
-        last_rain_detection: float = 0
+        last_bad_weather_detection: float = 0
 
         state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
             filepath=interfaces.state_interface.STATE_LOCK_PATH,
@@ -90,10 +90,20 @@ class CASThread(AbstractThread):
                 )
                 logger.debug(f"Theoretical sun elevation is: {sun_elevation} degrees.")
 
-                # RAIN DETECTION
+                # BAD WEATHER DETECTION
 
                 if state.tum_enclosure_state.state.rain:
-                    last_rain_detection = time.time()
+                    last_bad_weather_detection = time.time()
+
+                if (
+                    state.aemet_enclosure_state.closed_due_to_rain
+                    or state.aemet_enclosure_state.closed_due_to_external_relative_humidity
+                    or state.aemet_enclosure_state.closed_due_to_external_air_temperature
+                    or state.aemet_enclosure_state.closed_due_to_internal_relative_humidity
+                    or state.aemet_enclosure_state.closed_due_to_internal_air_temperature
+                    or state.aemet_enclosure_state.closed_due_to_wind_velocity
+                ):
+                    last_bad_weather_detection = time.time()
 
                 # DECIDING WHETHER TO MEASURE
 
@@ -101,9 +111,9 @@ class CASThread(AbstractThread):
                 logger.info(f"Decision mode for measurements is: {d.mode}.")
 
                 should_measure: bool
-                if (time.time() - last_rain_detection) < 180:
+                if (time.time() - last_bad_weather_detection) < 180:
                     logger.info(
-                        "Not trying to measure when rain was detected within the last 3 minutes."
+                        "Not trying to measure when bad environmental conditions were detected by enclosure within the last 3 minutes."
                     )
                     should_measure = False
                 else:
@@ -143,10 +153,10 @@ class CASThread(AbstractThread):
                     s.position.altitude = camtracker_coordinates[2]
                     s.position.sun_elevation = sun_elevation
                     s.measurements_should_be_running = should_measure
-                    if (s.last_rain_detection_time is None) or (
-                        s.last_rain_detection_time < last_rain_detection
+                    if (s.last_bad_weather_detection is None) or (
+                        s.last_bad_weather_detection < last_bad_weather_detection
                     ):
-                        s.last_rain_detection_time = last_rain_detection
+                        s.last_bad_weather_detection = last_bad_weather_detection
                     s.exceptions_state.clear_exception_origin("cas")
 
                 # SLEEP

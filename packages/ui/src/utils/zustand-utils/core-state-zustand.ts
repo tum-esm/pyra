@@ -10,7 +10,7 @@ const coreStateSchema = z.object({
         sun_elevation: z.number().nullable(),
     }),
     measurements_should_be_running: z.boolean().nullable(),
-    last_rain_detection_time: z.number().nullable(),
+    last_bad_weather_detection: z.number().nullable(),
     tum_enclosure_state: z.object({
         dt: z.string().nullable(),
         actors: z.object({

@@ -290,7 +290,12 @@ class OpusThread(AbstractThread):
                             20 < state.tum_enclosure_state.actors.current_angle < 340
                         )
                         if not measurements_should_be_running:
-                            logger.info("Cover is closed, not running any measurements")
+                            logger.info(
+                                "TUM enclosure cover is closed, not running any measurements"
+                            )
+                    if state.aemet_enclosure_state.pretty_cover_status == "closed":
+                        measurements_should_be_running = False
+                        logger.info("AEMET enclosure cover is closed, not running any measurements")
 
                 # PING EM27 EVERY 5 MINUTES
 
