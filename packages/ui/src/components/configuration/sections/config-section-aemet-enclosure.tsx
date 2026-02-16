@@ -20,7 +20,7 @@ export default function ConfigSectionAEMETEnclosure() {
             em27_power_plug_username: 'someone',
             em27_power_plug_password: 'withapassword',
 
-            toggle_em27_power: false,
+            use_em27_power_plug: false,
             controlled_by_user: false,
         });
     }
@@ -151,11 +151,11 @@ export default function ConfigSectionAEMETEnclosure() {
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle
                 title="Toggle EM27 Power"
-                value={localSectionConfig.toggle_em27_power}
+                value={localSectionConfig.use_em27_power_plug}
                 setValue={(v: boolean) =>
-                    setLocalConfigItem('aemet_enclosure.toggle_em27_power', v)
+                    setLocalConfigItem('aemet_enclosure.use_em27_power_plug', v)
                 }
-                oldValue={centralSectionConfig?.toggle_em27_power === true}
+                oldValue={centralSectionConfig?.use_em27_power_plug === true}
             />
             <configurationComponents.ConfigElementNote>
                 I.e., turn off the power of the EM27/SUN whenever the sun elevation is below

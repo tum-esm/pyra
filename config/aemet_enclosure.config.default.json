@@ -9,6 +9,6 @@
   "em27_power_plug_username": "someone",
   "em27_power_plug_password": "withapassword",
 
-  "toggle_em27_power": false,
+  "use_em27_power_plug": false,
   "controlled_by_user": false
 }

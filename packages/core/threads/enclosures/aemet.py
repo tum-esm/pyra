@@ -127,7 +127,7 @@ class AEMETEnclosureThread(AbstractThread):
                         state = interfaces.StateInterface.load_state(state_lock, logger)
 
                         # If toggle spectrometer power is enabled, toggle spectrometer power if night
-                        if enclosure_config.toggle_em27_power:
+                        if enclosure_config.use_em27_power_plug:
                             if state.position.sun_elevation is None:
                                 logger.warning(
                                     "Sun elevation is not yet set, skipping spectrometer power toggle"

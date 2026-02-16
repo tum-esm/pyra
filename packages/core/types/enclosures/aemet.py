@@ -18,7 +18,7 @@ class AEMETEnclosureConfig(StricterBaseModel):
     em27_power_plug_username: str
     em27_power_plug_password: str
 
-    toggle_em27_power: bool
+    use_em27_power_plug: bool
     controlled_by_user: bool
 
 
@@ -35,7 +35,7 @@ class PartialAEMETEnclosureConfig(StricterBaseModel):
     em27_power_plug_username: Optional[str] = None
     em27_power_plug_password: Optional[str] = None
 
-    toggle_em27_power: Optional[bool] = None
+    use_em27_power_plug: Optional[bool] = None
     controlled_by_user: Optional[bool] = None
 
 

@@ -83,7 +83,7 @@ export const configSchema = z.object({
             em27_power_plug_port: intSchema,
             em27_power_plug_username: z.string(),
             em27_power_plug_password: z.string(),
-            toggle_em27_power: z.boolean(),
+            use_em27_power_plug: z.boolean(),
             controlled_by_user: z.boolean(),
         })
         .nullable(),

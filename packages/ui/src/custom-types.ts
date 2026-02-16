@@ -82,7 +82,7 @@ export namespace customTypes {
             em27_power_plug_port: number;
             em27_power_plug_username: string;
             em27_power_plug_password: string;
-            toggle_em27_power: boolean;
+            use_em27_power_plug: boolean;
             controlled_by_user: boolean;
         };
         helios: null | {
@@ -168,7 +168,7 @@ export namespace customTypes {
             em27_power_plug_port?: number;
             em27_power_plug_username?: string;
             em27_power_plug_password?: string;
-            toggle_em27_power?: boolean;
+            use_em27_power_plug?: boolean;
             controlled_by_user?: boolean;
         };
         helios?: null | {
