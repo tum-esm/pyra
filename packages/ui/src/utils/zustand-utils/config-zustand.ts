@@ -76,11 +76,11 @@ export const configSchema = z.object({
     aemet_enclosure: z
         .object({
             datalogger_ip: z.string(),
-            datalogger_port: z.number(),
+            datalogger_port: intSchema,
             datalogger_username: z.string(),
             datalogger_password: z.string(),
             em27_power_plug_ip: z.string(),
-            em27_power_plug_port: z.number(),
+            em27_power_plug_port: intSchema,
             em27_power_plug_username: z.string(),
             em27_power_plug_password: z.string(),
             toggle_em27_power: z.boolean(),
