@@ -90,20 +90,14 @@ class AEMETEnclosureThread(AbstractThread):
                     # READING DATALOGGER STATE
 
                     logger.debug("Reading datalogger state")
-                    enclosure_state = enclosure_interface.read(
-                        immediate_write_to_central_state=False
-                    )
+                    enclosure_interface.read(immediate_write_to_central_state=False)
 
                     logger.debug("Updating enclosure state")
                     with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                        s.aemet_enclosure_state = enclosure_state
+                        s.aemet_enclosure_state = enclosure_interface.state
 
                     logger.debug("Logging enclosure state")
                     utils.AEMETEnclosureLogger.log(config, s)
-
-                    if enclosure_config.use_em27_power_plug:
-                        logger.debug("Fetching the EM27 power state")
-                        enclosure_interface.get_em27_power_state()
 
                     # ENCLOSURE SPECIFIC LOGIC
 
@@ -111,12 +105,12 @@ class AEMETEnclosureThread(AbstractThread):
                         logger.debug("Enclosure is controlled by user, skipping control logic")
                     else:
                         # If auto mode is not 0, set it to 0 (manual mode)
-                        if enclosure_state.auto_mode != 0:
+                        if enclosure_interface.state.auto_mode != 0:
                             logger.debug("Auto mode is not 0, setting it to 0")
                             enclosure_interface.set_enclosure_mode("manual")
 
                         # Set enhanced security mode to 1 if it's not already 1
-                        if enclosure_state.enhanced_security_mode != 1:
+                        if enclosure_interface.state.enhanced_security_mode != 1:
                             logger.debug("Enhanced security mode is not 1, setting it to 1")
                             enclosure_interface.set_enhanced_security_mode(True)
 
@@ -133,57 +127,59 @@ class AEMETEnclosureThread(AbstractThread):
                                 min_sun_angle = config.general.min_sun_elevation - 3
                                 power_should_be_on = state.position.sun_elevation > min_sun_angle
 
-                                if power_should_be_on and (not enclosure_state.em27_has_power):
+                                if power_should_be_on and (
+                                    not enclosure_interface.state.em27_has_power
+                                ):
                                     logger.info("Powering up the spectrometer")
                                     enclosure_interface.set_em27_power(True)
-                                    enclosure_state.em27_has_power = True
 
-                                elif (not power_should_be_on) and (enclosure_state.em27_has_power):
+                                elif (not power_should_be_on) and (
+                                    enclosure_interface.state.em27_has_power
+                                ):
                                     logger.info("Powering down the spectrometer")
                                     enclosure_interface.set_em27_power(False)
-                                    enclosure_state.em27_has_power = False
 
                         # only control the cover if the enclosure did no open or close it for safety reasons
                         skip_cover_control: bool = False
 
                         # If closed due to weather conditions, don't do anything else
                         # If opened due to high internal humidity, don't do anything else
-                        if enclosure_state.closed_due_to_rain:
+                        if enclosure_interface.state.closed_due_to_rain:
                             logger.info("Enclosure is closed due to rain, skipping cover control")
                             skip_cover_control = True
-                        elif enclosure_state.closed_due_to_wind_velocity:
+                        elif enclosure_interface.state.closed_due_to_wind_velocity:
                             logger.info(
                                 "Enclosure is closed due to high wind speed, skipping cover control"
                             )
                             skip_cover_control = True
-                        elif enclosure_state.closed_due_to_internal_air_temperature:
+                        elif enclosure_interface.state.closed_due_to_internal_air_temperature:
                             logger.info(
                                 "Enclosure is closed due to high internal air temperature, skipping cover control"
                             )
                             skip_cover_control = True
-                        elif enclosure_state.closed_due_to_external_air_temperature:
+                        elif enclosure_interface.state.closed_due_to_external_air_temperature:
                             logger.info(
                                 "Enclosure is closed due to low external air temperature, skipping cover control"
                             )
                             skip_cover_control = True
-                        elif enclosure_state.closed_due_to_internal_relative_humidity:
+                        elif enclosure_interface.state.closed_due_to_internal_relative_humidity:
                             logger.info(
                                 "Enclosure is closed due to high internal relative humidity, skipping cover control"
                             )
                             skip_cover_control = True
-                        elif enclosure_state.closed_due_to_external_relative_humidity:
+                        elif enclosure_interface.state.closed_due_to_external_relative_humidity:
                             logger.info(
                                 "Enclosure is closed due to high external relative humidity, skipping cover control"
                             )
                             skip_cover_control = True
-                        elif enclosure_state.opened_due_to_elevated_internal_humidity:
+                        elif enclosure_interface.state.opened_due_to_elevated_internal_humidity:
                             logger.info(
                                 "Enclosure is opened due to high internal relative humidity, skipping cover control"
                             )
                             skip_cover_control = True
 
                         # If alert level is 2, don't do anything else
-                        if enclosure_state.alert_level == 2:
+                        if enclosure_interface.state.alert_level == 2:
                             logger.info("Enclosure is in alert level 2, skipping cover control")
                             skip_cover_control = True
 
@@ -196,7 +192,7 @@ class AEMETEnclosureThread(AbstractThread):
                                 )
                             else:
                                 if state.measurements_should_be_running and (
-                                    enclosure_state.pretty_cover_status != "open"
+                                    enclosure_interface.state.pretty_cover_status != "open"
                                 ):
                                     logger.info(
                                         "Measurements should be running but cover is not open, opening cover"
@@ -204,7 +200,7 @@ class AEMETEnclosureThread(AbstractThread):
                                     enclosure_interface.open_cover()
 
                                 if (not state.measurements_should_be_running) and (
-                                    enclosure_state.pretty_cover_status != "closed"
+                                    enclosure_interface.state.pretty_cover_status != "closed"
                                 ):
                                     logger.info(
                                         "Measurements should not be running but cover is not closed, closing cover"

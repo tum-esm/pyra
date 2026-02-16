@@ -1,3 +1,4 @@
+import time
 import pytest
 import tum_esm_utils
 from packages.core import interfaces, types, utils
@@ -23,6 +24,15 @@ def test_aemet_enclosure_connection() -> None:
             logger=logger,
         )
         enclosure_interface.read(immediate_write_to_central_state=False)
-
         if config.aemet_enclosure.use_em27_power_plug:
-            enclosure_interface.get_em27_power_state(update_state=False)
+            enclosure_interface.set_em27_power(True)
+            enclosure_interface.read(immediate_write_to_central_state=False)
+            assert enclosure_interface.state.em27_has_power == True
+            time.sleep(2)
+            enclosure_interface.set_em27_power(False)
+            enclosure_interface.read(immediate_write_to_central_state=False)
+            assert enclosure_interface.state.em27_has_power == False
+            time.sleep(2)
+            enclosure_interface.set_em27_power(True)
+            enclosure_interface.read(immediate_write_to_central_state=False)
+            assert enclosure_interface.state.em27_has_power == True
