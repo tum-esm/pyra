@@ -12,6 +12,7 @@ import {
 } from '../components/ui/select';
 import { Separator } from '../components/ui/separator';
 import { Checkbox } from '../components/ui/checkbox';
+import { useConfigStore } from '../utils/zustand-utils/config-zustand';
 
 export default function LogTab() {
     const [logType, setLogType] = useState<
@@ -49,9 +50,12 @@ export default function LogTab() {
     >(undefined);
     const [renderedHeliosLogs, setRenderedHeliosLogs] = useState<string[] | undefined>(undefined);
 
+    const { centralConfig } = useConfigStore();
+
     const { coreLogs, uiLogs } = useLogsStore();
     useEffect(() => {
         if (liveUpdateIsActice) {
+            console.debug('updating logs');
             setRenderedAllLogs(coreLogs.all);
             setRenderedMainLogs(coreLogs.main);
             setRenderedOpusLogs(coreLogs.opus);
@@ -62,6 +66,7 @@ export default function LogTab() {
             setRenderedAemetEnclosureLogs(coreLogs.aemet_enclosure);
             setRenderedHeliosLogs(coreLogs.helios);
             if (logsContainerRef.current) {
+                console.debug('scrolling to bottom due to live update');
                 logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
             }
         }
@@ -69,6 +74,7 @@ export default function LogTab() {
 
     useEffect(() => {
         if (logsContainerRef.current) {
+            console.debug('scrolling to bottom due to log type change');
             logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
         }
     }, [logType]);
@@ -121,13 +127,13 @@ export default function LogTab() {
                             ? renderedAemetEnclosureLogs
                             : renderedHeliosLogs;
 
-    const filteredRenderedLogs = renderedLogs?.filter((l) => {
-        if (showDebugLogs) {
-            return true;
-        } else {
+    let filteredRenderedLogs = renderedLogs;
+    if (!showDebugLogs) {
+        console.debug('filtering debug logs out of rendered logs');
+        filteredRenderedLogs = renderedLogs?.filter((l) => {
             return !l.includes(' - DEBUG - ');
-        }
-    });
+        });
+    }
 
     return (
         <div className={'flex flex-col w-full h-[calc(100vh-3.5rem)] overflow-hidden '}>
@@ -141,7 +147,7 @@ export default function LogTab() {
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Main" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[28rem]">
                         <SelectItem value="All">All Logs</SelectItem>
                         <SelectItem value="Main">Main</SelectItem>
                         <Separator className="my-1" />
@@ -151,8 +157,12 @@ export default function LogTab() {
                         <SelectItem value="System Monitor">System Monitor</SelectItem>
                         <SelectItem value="Upload">Upload</SelectItem>
                         <Separator className="my-1" />
-                        <SelectItem value="TUM Enclosure">TUM Enclosure</SelectItem>
-                        <SelectItem value="AEMET Enclosure">AEMET Enclosure</SelectItem>
+                        {centralConfig?.tum_enclosure !== null && (
+                            <SelectItem value="TUM Enclosure">TUM Enclosure</SelectItem>
+                        )}
+                        {centralConfig?.aemet_enclosure !== null && (
+                            <SelectItem value="AEMET Enclosure">AEMET Enclosure</SelectItem>
+                        )}
                         <SelectItem value="Helios">Helios</SelectItem>
                         <Separator className="my-1" />
                         <SelectItem value="UI">UI</SelectItem>
