@@ -73,7 +73,7 @@ class TasmotaPlug:
             return {
                 "em27_voltage": float(energy_data["Voltage"]),
                 "em27_current": float(energy_data["Current"]),
-                "em27_power": float(energy_data["em27_power"]),
+                "em27_power": float(energy_data["Power"]),
             }
         except Exception as e:
             raise AEMETEnclosureInterface.DataloggerError(
@@ -283,12 +283,14 @@ class AEMETEnclosureInterface:
             self.latest_read_state.em27_has_power = power_state
         return power_state
 
-    def update_em27_plug_throughput(self) -> None:
+    def get_em27_plug_throughput(self, update_state: bool = True) -> dict[str, float]:
         throughput_state = self.tasmota_plug.get_throughput_state()
-        with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
-            s.aemet_enclosure_state.em27_voltage = throughput_state["em27_voltage"]
-            s.aemet_enclosure_state.em27_current = throughput_state["em27_current"]
-            s.aemet_enclosure_state.em27_power = throughput_state["em27_power"]
-            self.latest_read_state.em27_voltage = throughput_state["em27_voltage"]
-            self.latest_read_state.em27_current = throughput_state["em27_current"]
-            self.latest_read_state.em27_power = throughput_state["em27_power"]
+        if update_state:
+            with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.aemet_enclosure_state.em27_voltage = throughput_state["em27_voltage"]
+                s.aemet_enclosure_state.em27_current = throughput_state["em27_current"]
+                s.aemet_enclosure_state.em27_power = throughput_state["em27_power"]
+                self.latest_read_state.em27_voltage = throughput_state["em27_voltage"]
+                self.latest_read_state.em27_current = throughput_state["em27_current"]
+                self.latest_read_state.em27_power = throughput_state["em27_power"]
+        return throughput_state

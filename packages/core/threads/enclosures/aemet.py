@@ -103,7 +103,7 @@ class AEMETEnclosureThread(AbstractThread):
 
                     if enclosure_config.use_em27_power_plug:
                         logger.debug("Updating EM27 plug throughput state")
-                        enclosure_interface.update_em27_plug_throughput()
+                        enclosure_interface.get_em27_plug_throughput()
 
                     # ENCLOSURE SPECIFIC LOGIC
 
