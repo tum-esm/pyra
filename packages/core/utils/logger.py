@@ -32,7 +32,9 @@ class Logger:
     log files and providing a simple API.
     """
 
-    last_archive_time = datetime.datetime.now().astimezone()
+    last_archive_time = datetime.datetime.now().astimezone(
+        datetime.timezone.utc
+    ) - datetime.timedelta(minutes=10)
 
     def __init__(
         self,
@@ -77,7 +79,7 @@ class Logger:
     def _write_log_line(self, level: str, message: str) -> None:
         """Format the log line string and write it to "logs/debug.log"
         and possibly "logs/info.log"""
-        now = datetime.datetime.now().astimezone()
+        now = datetime.datetime.now().astimezone(datetime.timezone.utc)
         log_string = (
             f"{now.strftime('%Y-%m-%d %H:%M:%S.%f UTC%z')} - {self.origin} - {level} - {message}\n"
         )

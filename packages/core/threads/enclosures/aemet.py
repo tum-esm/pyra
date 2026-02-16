@@ -102,8 +102,8 @@ class AEMETEnclosureThread(AbstractThread):
                     utils.AEMETEnclosureLogger.log(config, s)
 
                     if enclosure_config.use_em27_power_plug:
-                        logger.debug("Updating EM27 plug throughput state")
-                        enclosure_interface.get_em27_plug_throughput()
+                        logger.debug("Fetching the EM27 power state")
+                        enclosure_interface.get_em27_power_state()
 
                     # ENCLOSURE SPECIFIC LOGIC
 
@@ -119,13 +119,6 @@ class AEMETEnclosureThread(AbstractThread):
                         if enclosure_state.enhanced_security_mode != 1:
                             logger.debug("Enhanced security mode is not 1, setting it to 1")
                             enclosure_interface.set_enhanced_security_mode(True)
-
-                        # If the power state of the spectrometer is unknown, fetch it from the power plug
-                        if enclosure_state.em27_has_power is None:
-                            logger.debug("EM27 power state is unknown, fetching it")
-                            enclosure_state.em27_has_power = (
-                                enclosure_interface.get_em27_power_state()
-                            )
 
                         # Load the current state
                         state = interfaces.StateInterface.load_state(state_lock, logger)

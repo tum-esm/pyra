@@ -25,5 +25,4 @@ def test_aemet_enclosure_connection() -> None:
         enclosure_interface.read(immediate_write_to_central_state=False)
 
         if config.aemet_enclosure.use_em27_power_plug:
-            enclosure_interface.get_em27_power_state()
-            enclosure_interface.get_em27_plug_throughput(update_state=False)
+            enclosure_interface.get_em27_power_state(update_state=False)

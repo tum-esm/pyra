@@ -275,22 +275,18 @@ class AEMETEnclosureInterface:
             s.aemet_enclosure_state.em27_has_power = power_on
             self.latest_read_state.em27_has_power = power_on
 
-    def get_em27_power_state(self) -> bool:
-        self.logger.info(f"Fetching the EM27 power state")
+    def get_em27_power_state(self, update_state: bool = True) -> tuple[bool, dict[str, float]]:
         power_state = self.tasmota_plug.get_power_state()
-        with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
-            s.aemet_enclosure_state.em27_has_power = power_state
-            self.latest_read_state.em27_has_power = power_state
-        return power_state
-
-    def get_em27_plug_throughput(self, update_state: bool = True) -> dict[str, float]:
         throughput_state = self.tasmota_plug.get_throughput_state()
         if update_state:
             with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                s.aemet_enclosure_state.em27_has_power = power_state
+                self.latest_read_state.em27_has_power = power_state
+
                 s.aemet_enclosure_state.em27_voltage = throughput_state["em27_voltage"]
                 s.aemet_enclosure_state.em27_current = throughput_state["em27_current"]
                 s.aemet_enclosure_state.em27_power = throughput_state["em27_power"]
                 self.latest_read_state.em27_voltage = throughput_state["em27_voltage"]
                 self.latest_read_state.em27_current = throughput_state["em27_current"]
                 self.latest_read_state.em27_power = throughput_state["em27_power"]
-        return throughput_state
+        return power_state, throughput_state
