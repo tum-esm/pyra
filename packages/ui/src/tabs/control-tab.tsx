@@ -711,6 +711,12 @@ export function AEMETEnclosureControlTab() {
                                     coreState.aemet_enclosure_state.enhanced_security_mode || 0,
                             },
                         },
+                    ]}
+                />
+                <VariableBlock
+                    label="EM27 Power Supply"
+                    disabled={buttonsAreDisabled}
+                    rows={[
                         {
                             variable: {
                                 key: 'Spectrometer Power',
@@ -723,6 +729,33 @@ export function AEMETEnclosureControlTab() {
                                     ? 'disable'
                                     : 'enable',
                                 callback: togglePowerSpectrometer,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Spectrometer Voltage',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.em27_voltage,
+                                    ' V'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Spectrometer Current',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.em27_current,
+                                    ' A'
+                                ),
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Spectrometer Power',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.em27_power,
+                                    ' W'
+                                ),
                             },
                         },
                     ]}

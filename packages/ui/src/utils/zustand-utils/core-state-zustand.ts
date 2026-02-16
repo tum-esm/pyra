@@ -89,6 +89,9 @@ const coreStateSchema = z.object({
 
         // other
         em27_has_power: z.boolean().nullable(),
+        em27_voltage: z.number().nullable(),
+        em27_current: z.number().nullable(),
+        em27_power: z.number().nullable(),
     }),
     operating_system_state: z.object({
         cpu_usage: z.array(z.number()).nullable(),
