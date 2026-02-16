@@ -1,4 +1,5 @@
 import datetime
+import time
 from typing import Any, Literal, Optional
 import requests
 import requests.auth
@@ -6,6 +7,64 @@ import urllib.parse
 
 import tum_esm_utils
 from packages.core import utils, types, interfaces
+
+
+class TasmotaPlug:
+    def __init__(
+        self,
+        ip_address: str,
+        port: int,
+        username: str,
+        password: str,
+    ):
+        self.ip_address = ip_address
+        self.port = port
+        self.username = username
+        self.password = password
+
+    def _request(self, command: str) -> dict[Any, Any]:
+        auth: Optional[requests.auth.HTTPBasicAuth] = None
+
+        try:
+            response = requests.get(
+                f"http://{self.ip_address}:{self.port}/cm",
+                params={"cmnd": command},
+                auth=auth,
+                timeout=5,
+            )
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            raise AEMETEnclosureInterface.DataloggerError(
+                f"Failed to send command '{command}' to Tasmota plug: {e}"
+            ) from e
+
+    def power_on(self) -> None:
+        self._request("Power ON")
+        time.sleep(0.1)
+        new_state = self.get_power_state()
+        if not new_state:
+            raise AEMETEnclosureInterface.DataloggerError(
+                "Failed to turn on the Tasmota plug - power state did not update."
+            )
+
+    def power_off(self) -> None:
+        self._request("Power OFF")
+        time.sleep(0.1)
+        new_state = self.get_power_state()
+        if new_state:
+            raise AEMETEnclosureInterface.DataloggerError(
+                "Failed to turn off the Tasmota plug - power state did not update."
+            )
+
+    def get_power_state(self) -> bool:
+        answer = self._request("Power OFF")
+        try:
+            return answer["POWER"] == "ON"
+        except Exception as e:
+            raise AEMETEnclosureInterface.DataloggerError(
+                f"Unexpected response from Tasmota plug when getting power state: {answer}"
+            ) from e
 
 
 class AEMETEnclosureInterface:
@@ -23,6 +82,12 @@ class AEMETEnclosureInterface:
         self.logger = logger
         self.latest_read_state: types.aemet.AEMETEnclosureState = types.aemet.AEMETEnclosureState(
             em27_has_power=True
+        )
+        self.tasmota_plug = TasmotaPlug(
+            ip_address=config.em27_power_plug_ip.root,
+            port=config.em27_power_plug_port,
+            username=config.em27_power_plug_username,
+            password=config.em27_power_plug_password,
         )
 
     def _run_command(self, command: str, **kwargs: Any) -> Any:
@@ -51,6 +116,12 @@ class AEMETEnclosureInterface:
         Reconnecting to Datalogger, when IP has changed."""
 
         self.enclosure_config = new_config
+        self.tasmota_plug = TasmotaPlug(
+            ip_address=new_config.em27_power_plug_ip.root,
+            port=new_config.em27_power_plug_port,
+            username=new_config.em27_power_plug_username,
+            password=new_config.em27_power_plug_password,
+        )
 
     def read(
         self,
@@ -182,26 +253,18 @@ class AEMETEnclosureInterface:
 
     def set_em27_power(self, power_on: bool) -> None:
         self.logger.info(f"Turning EM27 power {'on' if power_on else 'off'}")
-        self.logger.debug(
-            "This is currently not implemented, because the power plugs did not arrive yet."
-        )
+        if power_on:
+            self.tasmota_plug.power_on()
+        else:
+            self.tasmota_plug.power_off()
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.aemet_enclosure_state.em27_has_power = power_on
             self.latest_read_state.em27_has_power = power_on
 
-        # TODO: communicate with the EM27 power plug
-        # TODO: update power state
-
     def get_em27_power_state(self) -> bool:
         self.logger.info(f"Fetch the EM27 power state")
-        self.logger.debug(
-            "This is currently not implemented, because the power plugs did not arrive yet."
-        )
+        power_state = self.tasmota_plug.get_power_state()
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
-            s.aemet_enclosure_state.em27_has_power = True
-            self.latest_read_state.em27_has_power = True
-
-        # TODO: communicate with the EM27 power plug
-        # TODO: read power state
-
-        return True
+            s.aemet_enclosure_state.em27_has_power = power_state
+            self.latest_read_state.em27_has_power = power_state
+        return power_state
