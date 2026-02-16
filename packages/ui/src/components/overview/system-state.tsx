@@ -1,6 +1,12 @@
 import { useCoreStateStore } from '../../utils/zustand-utils/core-state-zustand';
 import { mean } from 'lodash';
-import { renderBoolean, renderString, renderNumber } from '../../utils/functions';
+import {
+    renderBoolean,
+    renderString,
+    renderNumber,
+    renderColorfulBoolean,
+    renderInteger,
+} from '../../utils/functions';
 import { IconCloudRain } from '@tabler/icons-react';
 import { useConfigStore } from '../../utils/zustand-utils/config-zustand';
 import { useLogsStore } from '../../utils/zustand-utils/logs-zustand';
@@ -81,7 +87,7 @@ export function SystemState() {
     return (
         <>
             {centralConfig.tum_enclosure !== null && (
-                <div className="grid w-full grid-cols-6 px-4 pb-1 text-sm gap-x-1">
+                <div className="grid w-full grid-cols-6 px-4 pb-1 text-sm gap-x-1 gap-y-1">
                     <StatePanel title="Cover Angle">
                         {renderString(coreState.tum_enclosure_state.actors.current_angle, {
                             appendix: ' °',
@@ -112,131 +118,148 @@ export function SystemState() {
                 </div>
             )}
             {centralConfig.aemet_enclosure !== null && (
-                <div className="grid w-full grid-cols-4 px-4 pb-1 text-sm gap-x-1">
-                    <StatePanel title="Alert Level">
-                        {renderNumber(coreState.aemet_enclosure_state.alert_level)}
-                    </StatePanel>
-                    <StatePanel title="Averia Fault Code">
-                        {renderNumber(coreState.aemet_enclosure_state.averia_fault_code)}
-                    </StatePanel>
-                    <StatePanel title="Cover Status">
-                        {renderString(coreState.aemet_enclosure_state.cover_status)}
-                    </StatePanel>
-                    <StatePanel title="Motor Position">
-                        {renderNumber(coreState.aemet_enclosure_state.motor_position)}
-                    </StatePanel>
+                <>
+                    <div className="grid w-full grid-cols-4 px-4 pb-1 text-sm gap-x-1 gap-y-1">
+                        {/* SECURITY INTERVENTIONS */}
+                        <StatePanel title="Closed Due To Weather (Rain | Wind)">
+                            {renderColorfulBoolean(
+                                coreState.aemet_enclosure_state.closed_due_to_rain
+                            )}{' '}
+                            |
+                            {renderColorfulBoolean(
+                                coreState.aemet_enclosure_state.closed_due_to_wind_velocity
+                            )}
+                        </StatePanel>
+                        <StatePanel title="Closed Due To rH (Int. | Ext.)">
+                            {renderColorfulBoolean(
+                                coreState.aemet_enclosure_state
+                                    .closed_due_to_internal_relative_humidity
+                            )}{' '}
+                            |
+                            {renderColorfulBoolean(
+                                coreState.aemet_enclosure_state
+                                    .closed_due_to_external_relative_humidity
+                            )}
+                        </StatePanel>
+                        <StatePanel title="Closed Due To Temperature (Int. | Ext.)">
+                            {renderColorfulBoolean(
+                                coreState.aemet_enclosure_state
+                                    .closed_due_to_internal_air_temperature
+                            )}
+                            {renderColorfulBoolean(
+                                coreState.aemet_enclosure_state
+                                    .closed_due_to_external_air_temperature
+                            )}
+                        </StatePanel>
+                        <StatePanel title="Opened Due To Elevated Int. rH">
+                            {renderColorfulBoolean(
+                                coreState.aemet_enclosure_state
+                                    .opened_due_to_elevated_internal_humidity
+                            )}
+                        </StatePanel>
+                    </div>
 
-                    {/* closing reasons RAIN */}
-                    <StatePanel title="Closed Due To Rain">
-                        {renderBoolean(coreState.aemet_enclosure_state.closed_due_to_rain)}
-                    </StatePanel>
-                    <StatePanel title="Rain Sensor Counter 1">
-                        {renderNumber(coreState.aemet_enclosure_state.rain_sensor_counter_1)}
-                    </StatePanel>
-                    <StatePanel title="Rain Sensor Counter 2">
-                        {renderNumber(coreState.aemet_enclosure_state.rain_sensor_counter_2)}
-                    </StatePanel>
-                    <StatePanel title="Helios Edge Pixels">
-                        {renderNumber(
-                            lastEdgeFractionValue === null ? null : lastEdgeFractionValue * 100,
-                            { appendix: ' %' }
-                        )}
-                    </StatePanel>
+                    {/* ENCLOSURE STATE */}
+                    <div className="grid w-full grid-cols-5 px-4 pb-1 text-sm gap-x-1 gap-y-1">
+                        <StatePanel title="Alert Level">
+                            {renderInteger(coreState.aemet_enclosure_state.alert_level)}
+                        </StatePanel>
+                        <StatePanel title="Averia Fault Code">
+                            {renderInteger(coreState.aemet_enclosure_state.averia_fault_code)}
+                        </StatePanel>
+                        <StatePanel title="Cover Status">
+                            {renderString(coreState.aemet_enclosure_state.cover_status)}
+                        </StatePanel>
+                        <StatePanel title="Motor Position">
+                            {renderNumber(coreState.aemet_enclosure_state.motor_position)}
+                        </StatePanel>
+                        <StatePanel title="Helios Edge Pixels">
+                            {renderNumber(
+                                lastEdgeFractionValue === null ? null : lastEdgeFractionValue * 100,
+                                { appendix: ' %' }
+                            )}
+                        </StatePanel>
+                    </div>
+                    <div className="grid w-full grid-cols-3 px-4 pb-1 text-sm gap-x-1 gap-y-1">
+                        {/* closing reasons RAIN */}
+                        <StatePanel title="Rain Sensor Counters (1 | 2)">
+                            {renderNumber(coreState.aemet_enclosure_state.rain_sensor_counter_1)} |
+                            {renderNumber(coreState.aemet_enclosure_state.rain_sensor_counter_2)}
+                        </StatePanel>
 
-                    {/* closing reasons HUMIDITY */}
-                    <StatePanel title="Closed Due To Internal rH">
-                        {renderBoolean(
-                            coreState.aemet_enclosure_state.closed_due_to_internal_relative_humidity
-                        )}
-                    </StatePanel>
-                    <StatePanel title="Closed Due To External rH">
-                        {renderBoolean(
-                            coreState.aemet_enclosure_state.closed_due_to_external_relative_humidity
-                        )}
-                    </StatePanel>
+                        {/*  HUMIDITY */}
+                        <StatePanel title="rH (Int. | Ext.)">
+                            {renderNumber(
+                                coreState.aemet_enclosure_state.relative_humidity_internal,
+                                {
+                                    appendix: ' %',
+                                }
+                            )}{' '}
+                            |
+                            {renderNumber(
+                                coreState.aemet_enclosure_state.relative_humidity_external,
+                                {
+                                    appendix: ' %',
+                                }
+                            )}
+                        </StatePanel>
 
-                    <StatePanel title="Internal rH">
-                        {renderNumber(coreState.aemet_enclosure_state.relative_humidity_internal, {
-                            appendix: ' %',
-                        })}
-                    </StatePanel>
-                    <StatePanel title="External rH">
-                        {renderNumber(coreState.aemet_enclosure_state.relative_humidity_external, {
-                            appendix: ' %',
-                        })}
-                    </StatePanel>
+                        {/* closing reasons TEMPERATURE */}
 
-                    {/* closing reasons TEMPERATURE */}
-                    <StatePanel title="Closed Due To Internal Temp.">
-                        {renderBoolean(
-                            coreState.aemet_enclosure_state.closed_due_to_internal_air_temperature
-                        )}
-                    </StatePanel>
-                    <StatePanel title="Closed Due To External Temp.">
-                        {renderBoolean(
-                            coreState.aemet_enclosure_state.closed_due_to_external_air_temperature
-                        )}
-                    </StatePanel>
-                    <StatePanel title="Internal Air Temperature">
-                        {renderNumber(coreState.aemet_enclosure_state.air_temperature_internal, {
-                            appendix: ' °C',
-                        })}
-                    </StatePanel>
-                    <StatePanel title="External Air Temperature">
-                        {renderNumber(coreState.aemet_enclosure_state.air_temperature_external, {
-                            appendix: ' °C',
-                        })}
-                    </StatePanel>
+                        <StatePanel title="Air Temperature (Int. | Ext.)">
+                            {renderNumber(
+                                coreState.aemet_enclosure_state.air_temperature_internal,
+                                {
+                                    appendix: ' °C',
+                                }
+                            )}{' '}
+                            |
+                            {renderNumber(
+                                coreState.aemet_enclosure_state.air_temperature_external,
+                                {
+                                    appendix: ' °C',
+                                }
+                            )}
+                        </StatePanel>
 
-                    {/* closing reasons WIND */}
-                    <StatePanel title="Closed Due to Wind Speed.">
-                        {renderBoolean(coreState.aemet_enclosure_state.closed_due_to_wind_velocity)}
-                    </StatePanel>
-                    <StatePanel title="Wind Speed">
-                        {renderNumber(coreState.aemet_enclosure_state.wind_velocity, {
-                            appendix: ' m/s',
-                        })}
-                    </StatePanel>
-                    <StatePanel title="Wind Direction">
-                        {renderNumber(coreState.aemet_enclosure_state.wind_direction, {
-                            appendix: ' °',
-                        })}
-                    </StatePanel>
+                        {/* closing reasons WIND */}
+                        <StatePanel title="Wind Speed | Wind Direction">
+                            {renderNumber(coreState.aemet_enclosure_state.wind_velocity, {
+                                appendix: ' m/s',
+                            })}
+                            |{' '}
+                            {renderNumber(coreState.aemet_enclosure_state.wind_direction, {
+                                appendix: ' °',
+                            })}
+                        </StatePanel>
 
-                    <StatePanel title="Opened Due to Elevated Internal rH">
-                        {renderBoolean(
-                            coreState.aemet_enclosure_state.opened_due_to_elevated_internal_humidity
-                        )}
-                    </StatePanel>
-
-                    {/* other environmental parameters */}
-                    <StatePanel title="Internal Pressure">
-                        {renderNumber(coreState.aemet_enclosure_state.air_pressure_internal, {
-                            appendix: ' hPa',
-                        })}
-                    </StatePanel>
-                    <StatePanel title="External Pressure">
-                        {renderNumber(coreState.aemet_enclosure_state.air_pressure_external, {
-                            appendix: ' hPa',
-                        })}
-                    </StatePanel>
-                    <StatePanel title="Internal Dew Point Temp.">
-                        {renderNumber(
-                            coreState.aemet_enclosure_state.dew_point_temperature_internal,
-                            {
-                                appendix: ' °C',
-                            }
-                        )}
-                    </StatePanel>
-                    <StatePanel title="External Dew Point Temp.">
-                        {renderNumber(
-                            coreState.aemet_enclosure_state.dew_point_temperature_external,
-                            {
-                                appendix: ' °C',
-                            }
-                        )}
-                    </StatePanel>
-                </div>
+                        {/* other environmental parameters */}
+                        <StatePanel title="Air Pressure (Int. | Ext.)">
+                            {renderNumber(coreState.aemet_enclosure_state.air_pressure_internal, {
+                                appendix: ' hPa',
+                            })}{' '}
+                            |
+                            {renderNumber(coreState.aemet_enclosure_state.air_pressure_external, {
+                                appendix: ' hPa',
+                            })}
+                        </StatePanel>
+                        <StatePanel title="Dew Point Temperature (Int. | Ext.)">
+                            {renderNumber(
+                                coreState.aemet_enclosure_state.dew_point_temperature_internal,
+                                {
+                                    appendix: ' °C',
+                                }
+                            )}{' '}
+                            |
+                            {renderNumber(
+                                coreState.aemet_enclosure_state.dew_point_temperature_external,
+                                {
+                                    appendix: ' °C',
+                                }
+                            )}
+                        </StatePanel>
+                    </div>
+                </>
             )}
             {weatherWarning !== null && (
                 <div className="w-full px-4 mb-4 -mt-2 text-sm">
