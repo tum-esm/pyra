@@ -1,4 +1,5 @@
-from typing import Any, Literal
+import datetime
+from typing import Any, Literal, Optional
 import requests
 import requests.auth
 import urllib.parse
@@ -58,17 +59,42 @@ class AEMETEnclosureInterface:
         try:
             out = self._run_command("DataQuery", mode="most-recent", uri="dl:Public")
             headers = [d["name"] for d in out["head"]["fields"]]
-            assert len(out["data"]) == 1
-            d = dict(zip(headers, out["data"][0]["vals"]))
-            d["time"] = out["data"][0]["time"]
-            d["no"] = out["data"][0]["no"]
-            news = types.aemet.AEMETEnclosureState.model_validate(d)
-            news.em27_has_power = self.latest_read_state.em27_has_power
-            self.latest_read_state = news
-            if immediate_write_to_central_state:
-                with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
-                    s.aemet_enclosure_state = news
-            return news
+
+            new_state_invalid: bool = False
+            news: Optional[types.aemet.AEMETEnclosureState] = None
+            if len(out["data"]) == 0:
+                new_state_invalid = True
+            else:
+                d = dict(zip(headers, out["data"][0]["vals"]))
+                # d["time"] = out["data"][0]["time"]
+                # d["no"] = out["data"][0]["no"]
+                news = types.aemet.AEMETEnclosureState.model_validate(d)
+                news.em27_has_power = self.latest_read_state.em27_has_power
+                news.dt = datetime.datetime.now(tz=datetime.timezone.utc)
+                if news.auto_mode is None:
+                    new_state_invalid = True
+
+            if new_state_invalid:
+                self.logger.warning("Datalogger returned null data")
+                if self.latest_read_state.dt is None:
+                    raise AEMETEnclosureInterface.DataloggerError(
+                        "Datalogger returned invalid state, and no previous valid state available."
+                    )
+                elif self.latest_read_state.dt < (
+                    datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(minutes=3)
+                ):
+                    raise AEMETEnclosureInterface.DataloggerError(
+                        "Datalogger returned invalid state, and the latest valid state is older than 3 minutes."
+                    )
+                else:
+                    return self.latest_read_state
+            else:
+                assert news is not None  # should not happen
+                self.latest_read_state = news
+                if immediate_write_to_central_state:
+                    with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
+                        s.aemet_enclosure_state = news
+                return news
         except Exception as e:
             raise AEMETEnclosureInterface.DataloggerError() from e
 
@@ -125,9 +151,6 @@ class AEMETEnclosureInterface:
     def open_cover(self) -> None:
         self.logger.info("Opening cover")
         state = self.read()
-        with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
-            self.latest_read_state.em27_has_power = s.aemet_enclosure_state.em27_has_power
-            s.aemet_enclosure_state = state
         if (state.averia_fault_code == 0) and (state.alert_level == 0):
             if state.auto_mode == 1:
                 self.set_enclosure_mode("manual")

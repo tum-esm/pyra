@@ -46,7 +46,6 @@ class AEMETEnclosureState(pydantic.BaseModel):
     # general
     dt: Optional[datetime.datetime] = pydantic.Field(
         default=None,
-        validation_alias="time",
         description="Time of this datalogger state.",
     )
     battery_voltage: Optional[float] = pydantic.Field(
