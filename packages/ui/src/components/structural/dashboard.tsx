@@ -28,6 +28,9 @@ export default function Dashboard() {
     const { setActivityHistory } = useActivityHistoryStore();
     const { runPromisingCommand } = fetchUtils.useCommand();
 
+    const [logFetchingIsRunning, setLogFetchingIsRunning] = useState<boolean>(false);
+    const [stateFetchingIsRunning, setStateFetchingIsRunning] = useState<boolean>(false);
+
     const TUMEnclosureControlsIsVisible =
         centralConfig?.tum_enclosure !== null && centralConfig?.tum_enclosure !== undefined;
 
@@ -63,8 +66,12 @@ export default function Dashboard() {
     }
     async function fetchStateFile() {
         try {
-            const fileContent = await fetchUtils.getFileContent('logs/state.json');
-            setCoreState(JSON.parse(fileContent));
+            if (!stateFetchingIsRunning) {
+                setStateFetchingIsRunning(true);
+                const fileContent = await fetchUtils.getFileContent('logs/state.json');
+                setCoreState(JSON.parse(fileContent));
+                setStateFetchingIsRunning(false);
+            }
         } catch (e) {
             addUiLogLine('Could not load logs/state.json', `${e}`);
         }
@@ -72,8 +79,12 @@ export default function Dashboard() {
 
     async function fetchLogFile() {
         try {
-            const fileContent = await fetchUtils.getFileContent('logs/debug.log');
-            setLogs(fileContent.split('\n'));
+            if (!logFetchingIsRunning) {
+                setLogFetchingIsRunning(true);
+                const fileContent = await fetchUtils.getFileContent('logs/debug.log');
+                setLogs(fileContent.split('\n'));
+                setLogFetchingIsRunning(false);
+            }
         } catch (e) {
             addUiLogLine('Could not load logs/debug.log', `${e}`);
         }
@@ -101,7 +112,7 @@ export default function Dashboard() {
 
         const interval1 = setInterval(checkPyraCoreState, 180000);
         const interval2 = setInterval(fetchStateFile, 5000);
-        const interval3 = setInterval(fetchLogFile, 5000);
+        const interval3 = setInterval(fetchLogFile, 10000);
         const interval4 = setInterval(fetchActivityFile, 60000);
 
         return () => {

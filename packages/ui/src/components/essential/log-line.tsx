@@ -1,4 +1,4 @@
-export function CoreLogLine(props: { text: string; displayInterationSeparator?: boolean }) {
+export function CoreLogLine(props: { text: string; displayIterationSeparator?: boolean }) {
     const text = props.text.replace('\\r', '');
 
     if (!text.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6} UTC(\+|-)\d{4} - .* - .* - .*/)) {
@@ -37,14 +37,14 @@ export function CoreLogLine(props: { text: string; displayInterationSeparator?: 
         showSeparator = true;
     }
     if (logMessage.includes('Starting iteration')) {
-        if (props.displayInterationSeparator) {
+        if (props.displayIterationSeparator) {
             showSeparator = true;
         }
     }
 
     if (logMessage.match(/Starting [A-Z].+ thread/)) {
         highlightLine = true;
-        if (props.displayInterationSeparator) {
+        if (props.displayIterationSeparator) {
             showSeparator = true;
         }
     }

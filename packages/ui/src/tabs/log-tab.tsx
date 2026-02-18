@@ -189,11 +189,11 @@ export default function LogTab() {
             >
                 {logType !== 'UI' && filteredRenderedLogs !== undefined && (
                     <>
-                        {filteredRenderedLogs.map((l, i) => (
+                        {filteredRenderedLogs.map((l) => (
                             <essentialComponents.CoreLogLine
                                 text={l}
-                                key={`${i} ${l}`}
-                                displayInterationSeparator={logType != 'All'}
+                                key={`${l}`}
+                                displayIterationSeparator={logType != 'All'}
                             />
                         ))}
                         {filteredRenderedLogs.length == 0 && (
@@ -203,8 +203,8 @@ export default function LogTab() {
                 )}
                 {logType === 'UI' && (
                     <>
-                        {uiLogs.map((l, i) => (
-                            <essentialComponents.UILogLine logLine={l} key={`${i} ${l.text}`} />
+                        {uiLogs.map((l) => (
+                            <essentialComponents.UILogLine logLine={l} key={`${l}`} />
                         ))}
                         {uiLogs.length == 0 && <div className="px-4 py-2">logs are empty</div>}
                     </>
