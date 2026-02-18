@@ -45,22 +45,21 @@ function VariableBlock(props: {
     }[];
 }) {
     return (
-        <div className="relative flex overflow-hidden divide-x divide-slate-300">
-            <div className="flex items-center flex-shrink-0 w-48 px-4 py-2 -m-px text-base font-semibold text-gray-900 bg-slate-200">
+        <div className="relative flex flex-col flex-shrink-0 overflow-hidden divide-y divide-blue-200">
+            <div className="flex items-center flex-shrink-0 w-full px-3 py-1 text-sm font-semibold bg-blue-100 text-blue-950">
                 {props.label}
             </div>
-            <div className="flex-grow py-3 pl-4 pr-3 bg-slate-50 flex-col-left gap-y-1">
+            <div className="flex-grow bg-white divide-y divide-slate-100 flex-col-left">
                 {props.rows.map((r, i) => (
-                    <div className="w-full h-8 flex-row-left" key={i}>
-                        <div className="flex-row-center whitespace-nowrap">
-                            <div className="w-72">{r.variable.key}:</div>{' '}
-                            <span className="w-20 font-semibold text-right">
-                                {r.variable.value}
-                            </span>
-                        </div>
+                    <div
+                        className="flex flex-row items-center justify-center w-full px-3 text-sm h-11"
+                        key={i}
+                    >
+                        <div className="w-72 font-base">{r.variable.key}:</div>{' '}
+                        <div className="w-20 font-semibold text-right">{r.variable.value}</div>
+                        <div className="flex-grow" />
                         {r.action && r.variable.value !== '-' && (
                             <>
-                                <div className="flex-grow" />
                                 {r.action.variant === undefined && (
                                     <essentialComponents.Button
                                         variant="white"
@@ -99,7 +98,7 @@ function HeaderBlock(props: {
     lastEnclosureStateRead: string | null;
 }) {
     return (
-        <div className="w-full px-4 py-4 bg-white border-b flex-row-left gap-x-2 border-slate-300">
+        <div className="z-10 flex-shrink-0 w-full h-16 px-4 py-4 bg-white border-b flex-row-left gap-x-2 border-slate-300">
             <essentialComponents.Toggle
                 value={props.plcIsControlledByUser ? 'user controlled' : 'automatic'}
                 values={['user controlled', 'automatic']}
@@ -269,7 +268,7 @@ export function TUMEnclosureControlTab() {
     }
 
     return (
-        <div className={'w-full relative flex-col-left'}>
+        <div className={'w-full h-[calc(100vh-3.5rem)] relative flex-col-left'}>
             <HeaderBlock
                 plcIsControlledByUser={enclosureIsControlledByUser || false}
                 setPlcIsControlledByUser={setEnclosureIsControlledByUser}
@@ -280,7 +279,7 @@ export function TUMEnclosureControlTab() {
                         : coreState.tum_enclosure_state.dt
                 }
             />
-            <div className="flex flex-col w-full text-sm divide-y divide-slate-300">
+            <div className="flex flex-col flex-1 w-full overflow-y-scroll text-sm divide-y divide-blue-200 h-[calc(100vh-7.5rem)]">
                 <VariableBlock
                     label="Errors"
                     disabled={buttonsAreDisabled}
@@ -655,7 +654,7 @@ export function AEMETEnclosureControlTab() {
     }
 
     return (
-        <div className={'w-full relative flex-col-left'}>
+        <div className={'w-full h-[calc(100vh-3.5rem)] relative flex-col-left'}>
             <HeaderBlock
                 plcIsControlledByUser={enclosureIsControlledByUser || false}
                 setPlcIsControlledByUser={setEnclosureIsControlledByUser}
@@ -666,7 +665,7 @@ export function AEMETEnclosureControlTab() {
                         : coreState.aemet_enclosure_state.dt
                 }
             />
-            <div className="flex flex-col w-full text-sm divide-y divide-slate-300">
+            <div className="flex flex-col flex-1 w-full overflow-y-scroll text-sm divide-y divide-blue-200 h-[calc(100vh-7.5rem)]">
                 <VariableBlock
                     label="System"
                     disabled={buttonsAreDisabled}
@@ -718,6 +717,77 @@ export function AEMETEnclosureControlTab() {
                                 variant: 'numeric',
                                 initialValue:
                                     coreState.aemet_enclosure_state.enhanced_security_mode || 0,
+                            },
+                        },
+                    ]}
+                />
+                <VariableBlock
+                    label="Motor State"
+                    disabled={buttonsAreDisabled}
+                    rows={[
+                        {
+                            variable: {
+                                key: 'Alert Level',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.alert_level,
+                                    ''
+                                ),
+                            },
+                            action: {
+                                label: 'set alert level',
+                                callback: setAlertLevel,
+                                variant: 'numeric',
+                                initialValue: coreState.aemet_enclosure_state.alert_level || 0,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Averia Fault Code',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.averia_fault_code,
+                                    ''
+                                ),
+                            },
+                            action: {
+                                label: 'set averia fault code',
+                                callback: setAveriaFaultCode,
+                                variant: 'numeric',
+                                initialValue:
+                                    coreState.aemet_enclosure_state.averia_fault_code || 0,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Cover Status',
+                                value: renderStringValue(
+                                    (() => {
+                                        const value = coreState.aemet_enclosure_state.cover_status;
+                                        if (value == null) return '-';
+                                        if (COVERR_STATUS_MAP[value])
+                                            return COVERR_STATUS_MAP[value];
+                                        return `unknown (${value})`;
+                                    })(),
+                                    ''
+                                ),
+                            },
+                            action: {
+                                label:
+                                    coreState.aemet_enclosure_state.cover_status !== 'C'
+                                        ? 'close cover'
+                                        : 'open cover',
+                                callback:
+                                    coreState.aemet_enclosure_state.cover_status !== 'C'
+                                        ? closeCover
+                                        : openCover,
+                            },
+                        },
+                        {
+                            variable: {
+                                key: 'Motor Position',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.motor_position,
+                                    ''
+                                ),
                             },
                         },
                     ]}
@@ -955,77 +1025,6 @@ export function AEMETEnclosureControlTab() {
                                 value: renderBoolValue(
                                     coreState.aemet_enclosure_state
                                         .opened_due_to_elevated_internal_humidity
-                                ),
-                            },
-                        },
-                    ]}
-                />
-                <VariableBlock
-                    label="Motor State"
-                    disabled={buttonsAreDisabled}
-                    rows={[
-                        {
-                            variable: {
-                                key: 'Alert Level',
-                                value: renderStringValue(
-                                    coreState.aemet_enclosure_state.alert_level,
-                                    ''
-                                ),
-                            },
-                            action: {
-                                label: 'set alert level',
-                                callback: setAlertLevel,
-                                variant: 'numeric',
-                                initialValue: coreState.aemet_enclosure_state.alert_level || 0,
-                            },
-                        },
-                        {
-                            variable: {
-                                key: 'Averia Fault Code',
-                                value: renderStringValue(
-                                    coreState.aemet_enclosure_state.averia_fault_code,
-                                    ''
-                                ),
-                            },
-                            action: {
-                                label: 'set averia fault code',
-                                callback: setAveriaFaultCode,
-                                variant: 'numeric',
-                                initialValue:
-                                    coreState.aemet_enclosure_state.averia_fault_code || 0,
-                            },
-                        },
-                        {
-                            variable: {
-                                key: 'Cover Status',
-                                value: renderStringValue(
-                                    (() => {
-                                        const value = coreState.aemet_enclosure_state.cover_status;
-                                        if (value == null) return '-';
-                                        if (COVERR_STATUS_MAP[value])
-                                            return COVERR_STATUS_MAP[value];
-                                        return `unknown (${value})`;
-                                    })(),
-                                    ''
-                                ),
-                            },
-                            action: {
-                                label:
-                                    coreState.aemet_enclosure_state.cover_status !== 'C'
-                                        ? 'close cover'
-                                        : 'open cover',
-                                callback:
-                                    coreState.aemet_enclosure_state.cover_status !== 'C'
-                                        ? closeCover
-                                        : openCover,
-                            },
-                        },
-                        {
-                            variable: {
-                                key: 'Motor Position',
-                                value: renderStringValue(
-                                    coreState.aemet_enclosure_state.motor_position,
-                                    ''
                                 ),
                             },
                         },
