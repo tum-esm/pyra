@@ -1,6 +1,6 @@
 [package]
 name = "pyra-ui"
-version = "5.0.0-beta.1"
+version = "5.0.0-1"
 description = "Pyra UI"
 authors = ["Moritz Makowski <moritz.makowski@tum.de>"]
 license = ""

@@ -2533,7 +2533,7 @@ dependencies = [
 
 [[package]]
 name = "pyra-ui"
-version = "5.0.0-beta.1"
+version = "5.0.0-1"
 dependencies = [
  "serde",
  "serde_json",
