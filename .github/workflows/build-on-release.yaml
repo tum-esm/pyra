@@ -24,8 +24,17 @@ jobs:
             const packageJson = JSON.parse(fs.readFileSync(path, 'utf8'));
             core.setOutput('version', packageJson.version);
 
+      - name: Compute artifact filename version
+        id: artifact_version
+        shell: bash
+        run: |
+          version="${{ steps.read_version.outputs.version }}"
+          version="${version//-beta./-}"
+          version="${version//-alpha./-}"
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
       - name: Print version number
-        run: echo "Building UI for PYRA version ${{ steps.read_version.outputs.version }}"
+        run: echo "Building UI for PYRA version ${{ steps.read_version.outputs.version }}, artifact version: ${{ steps.artifact_version.outputs.value }}"
 
       - name: Check if tag exists
         uses: actions/github-script@v7
@@ -79,5 +88,5 @@ jobs:
           body: "TODO: description"
           target_commitish: release
           files: |
-            packages/ui/src-tauri/target/release/bundle/msi/Pyra UI_${{ steps.read_version.outputs.version }}_x64_en-US.msi
-            packages/ui/src-tauri/target/release/bundle/nsis/Pyra UI_${{ steps.read_version.outputs.version }}_x64-setup.exe
+            packages/ui/src-tauri/target/release/bundle/msi/Pyra UI_${{ steps.artifact_version.outputs.value }}_x64_en-US.msi
+            packages/ui/src-tauri/target/release/bundle/nsis/Pyra UI_${{ steps.artifact_version.outputs.value }}_x64-setup.exe
