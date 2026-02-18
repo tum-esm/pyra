@@ -53,7 +53,7 @@ export default function OverviewTab() {
                             <essentialComponents.CoreLogLine
                                 key={`${i} ${l}`}
                                 text={l}
-                                displayInterationSeparator={false}
+                                displayIterationSeparator={false}
                             />
                         ))}
             </div>
