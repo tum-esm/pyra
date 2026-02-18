@@ -5,6 +5,19 @@ import toast from 'react-hot-toast';
 import { useCoreStateStore } from '../utils/zustand-utils/core-state-zustand';
 import { useConfigStore } from '../utils/zustand-utils/config-zustand';
 
+import {
+    Icon,
+    IconAlertTriangle,
+    IconCpu,
+    IconLogicOr,
+    IconNetwork,
+    IconPlugConnected,
+    IconProps,
+    IconSun,
+    IconTemperatureSun,
+    IconUmbrella,
+} from '@tabler/icons-react';
+
 function renderBoolValue(value: boolean | null) {
     if (value === null) {
         return '-';
@@ -31,6 +44,7 @@ const COVERR_STATUS_MAP: Record<string, string> = {
 function VariableBlock(props: {
     label: string;
     disabled: boolean;
+    icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>;
     rows: {
         variable: { key: string; value: string | number };
         action?:
@@ -45,9 +59,9 @@ function VariableBlock(props: {
     }[];
 }) {
     return (
-        <div className="relative flex flex-col flex-shrink-0 overflow-hidden divide-y divide-blue-200">
-            <div className="flex items-center flex-shrink-0 w-full px-3 py-1 text-sm font-semibold bg-blue-100 text-blue-950">
-                {props.label}
+        <div className="relative flex flex-col flex-shrink-0 overflow-hidden divide-y divide-blue-100">
+            <div className="flex items-center flex-shrink-0 w-full px-3 py-1 text-sm font-semibold bg-blue-50 text-blue-950">
+                <props.icon className="mr-2.5 opacity-60 stroke-blue-800 h-4 w-4" /> {props.label}
             </div>
             <div className="flex-grow bg-white divide-y divide-slate-100 flex-col-left">
                 {props.rows.map((r, i) => (
@@ -279,10 +293,11 @@ export function TUMEnclosureControlTab() {
                         : coreState.tum_enclosure_state.dt
                 }
             />
-            <div className="flex flex-col flex-1 w-full overflow-y-scroll text-sm divide-y divide-blue-200 h-[calc(100vh-7.5rem)]">
+            <div className="flex flex-col flex-1 w-full overflow-y-scroll text-sm divide-y divide-blue-100 h-[calc(100vh-7.5rem)]">
                 <VariableBlock
                     label="Errors"
                     disabled={buttonsAreDisabled}
+                    icon={IconAlertTriangle}
                     rows={[
                         {
                             variable: {
@@ -318,6 +333,7 @@ export function TUMEnclosureControlTab() {
                 <VariableBlock
                     label="Rain Detection"
                     disabled={buttonsAreDisabled}
+                    icon={IconUmbrella}
                     rows={[
                         {
                             variable: {
@@ -341,8 +357,9 @@ export function TUMEnclosureControlTab() {
                 />
 
                 <VariableBlock
-                    label="Cover Angle"
+                    label="Cover State"
                     disabled={buttonsAreDisabled}
+                    icon={IconSun}
                     rows={[
                         {
                             variable: {
@@ -381,6 +398,7 @@ export function TUMEnclosureControlTab() {
                 <VariableBlock
                     label="Climate"
                     disabled={buttonsAreDisabled}
+                    icon={IconTemperatureSun}
                     rows={[
                         {
                             variable: {
@@ -429,6 +447,7 @@ export function TUMEnclosureControlTab() {
                 <VariableBlock
                     label="Power"
                     disabled={buttonsAreDisabled}
+                    icon={IconPlugConnected}
                     rows={[
                         {
                             variable: {
@@ -500,6 +519,7 @@ export function TUMEnclosureControlTab() {
                 <VariableBlock
                     label="Connections"
                     disabled={buttonsAreDisabled}
+                    icon={IconNetwork}
                     rows={[
                         {
                             variable: {
@@ -669,6 +689,7 @@ export function AEMETEnclosureControlTab() {
                 <VariableBlock
                     label="System"
                     disabled={buttonsAreDisabled}
+                    icon={IconCpu}
                     rows={[
                         {
                             variable: {
@@ -724,6 +745,7 @@ export function AEMETEnclosureControlTab() {
                 <VariableBlock
                     label="Motor State"
                     disabled={buttonsAreDisabled}
+                    icon={IconAlertTriangle}
                     rows={[
                         {
                             variable: {
@@ -795,6 +817,7 @@ export function AEMETEnclosureControlTab() {
                 <VariableBlock
                     label="EM27 Power Supply"
                     disabled={buttonsAreDisabled}
+                    icon={IconPlugConnected}
                     rows={[
                         {
                             variable: {
@@ -842,6 +865,7 @@ export function AEMETEnclosureControlTab() {
                 <VariableBlock
                     label="Meteorological Conditions"
                     disabled={buttonsAreDisabled}
+                    icon={IconTemperatureSun}
                     rows={[
                         // air pressure
                         {
@@ -966,6 +990,7 @@ export function AEMETEnclosureControlTab() {
                 <VariableBlock
                     label="Cover Opening Logic"
                     disabled={buttonsAreDisabled}
+                    icon={IconLogicOr}
                     rows={[
                         {
                             variable: {
