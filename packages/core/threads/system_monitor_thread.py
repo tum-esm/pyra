@@ -1,5 +1,6 @@
 import threading
 import time
+import datetime
 
 import tum_esm_utils
 
@@ -62,6 +63,19 @@ class SystemMonitorThread(AbstractThread):
                         "Stopping and restarting thread after 12 hours for stability reasons"
                     )
                     return
+
+                # CHECK IF SYSTEM TIMEZONE IS UTC
+
+                local_tz = datetime.datetime.now().astimezone()
+                local_tz_offset = local_tz.utcoffset()
+                if local_tz_offset is not None and local_tz_offset != datetime.timedelta(0):
+                    local_tz_name = local_tz.tzname() or "unknown"
+                    local_tz_offset_seconds = int(local_tz_offset.total_seconds())
+                    local_tz_offset_hours = local_tz_offset_seconds / 3600
+                    logger.warning(
+                        "System timezone does not run in UTC time"
+                        f"(current timezone: {local_tz_name}, UTC offset: {local_tz_offset_hours:+g}h). It works but is not recommended."
+                    )
 
                 # CPU/MEMORY USAGE AND BOOT TIME
 
