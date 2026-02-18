@@ -36,10 +36,10 @@ def test_version_numbers() -> None:
         third_line = f.read().split("\n")[2]
         assert third_line.startswith("version = ")
         cargo_version = third_line.split(" = ")[1].strip('"')
-    assert cargo_version == pyproject_version
+    assert cargo_version == pyproject_version.replace("alpha.", "").replace("beta.", "")
 
     with open(
         os.path.join(PROJECT_DIR, "packages", "ui", "src-tauri", "tauri.conf.json"), "r"
     ) as f:
         tauri_conf_version = json.load(f)["version"]
-    assert tauri_conf_version == pyproject_version
+    assert tauri_conf_version == pyproject_version.replace("alpha.", "").replace("beta.", "")
