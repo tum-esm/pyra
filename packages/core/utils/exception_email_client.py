@@ -18,7 +18,7 @@ def _get_pyra_version() -> str:
 
     with open(os.path.join(_PROJECT_DIR, "packages", "ui", "package.json")) as f:
         pyra_version: str = json.load(f)["version"]
-    assert pyra_version.startswith("4.")
+    assert pyra_version.startswith("5.")
     return pyra_version
 
 
