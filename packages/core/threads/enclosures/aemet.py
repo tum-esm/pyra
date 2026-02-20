@@ -99,6 +99,10 @@ class AEMETEnclosureThread(AbstractThread):
                     logger.debug("Logging enclosure state")
                     utils.AEMETEnclosureLogger.log(config, s)
 
+                    logger.info(
+                        f"Enclosure is running on datalogger software version {enclosure_interface.state.datalogger_software_version}"
+                    )
+
                     # ENCLOSURE SPECIFIC LOGIC
 
                     if enclosure_config.controlled_by_user:

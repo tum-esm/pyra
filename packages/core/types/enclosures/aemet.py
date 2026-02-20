@@ -58,15 +58,23 @@ class AEMETEnclosureState(pydantic.BaseModel):
         validation_alias=pydantic.AliasChoices("PTemp_C", "logger_panel_temperature"),
         description="Temperature of the logger panel in degrees celsius.",
     )
-    auto_mode: Optional[Literal[0, 1]] = pydantic.Field(
+    auto_mode: Optional[int] = pydantic.Field(
         default=None,
         validation_alias=pydantic.AliasChoices("AUTO_", "auto_mode"),
         description="Enclosure mode. auto if the enclosure is in automatic mode, manual if it is in manual mode.",
     )
-    enhanced_security_mode: Optional[Literal[0, 1]] = pydantic.Field(
+    enhanced_security_mode: Optional[int] = pydantic.Field(
         default=None,
         validation_alias=pydantic.AliasChoices("ENHANCED_SECURITY", "enhanced_security_mode"),
         description="Whether the enhanced security mode is active. 0 if not, 1 if it is active.",
+    )
+    datalogger_software_version: Optional[str] = pydantic.Field(
+        default=None,
+        validation_alias=pydantic.AliasChoices(
+            "DATALOGGER_SOFTWARE_VERSION", "datalogger_software_version"
+        ),
+        description="Software version of the datalogger.",
+        examples=["158", "159"],
     )
 
     # weather sensor readings
