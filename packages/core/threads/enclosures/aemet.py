@@ -114,9 +114,14 @@ class AEMETEnclosureThread(AbstractThread):
                             enclosure_interface.set_enclosure_mode("manual")
 
                         # Set enhanced security mode to 1 if it's not already 1
-                        if enclosure_interface.state.enhanced_security_mode != 1:
-                            logger.debug("Enhanced security mode is not 1, setting it to 1")
-                            enclosure_interface.set_enhanced_security_mode(True)
+                        try:
+                            if enclosure_interface.state.enhanced_security_mode != 1:
+                                logger.debug("Enhanced security mode is not 1, setting it to 1")
+                                enclosure_interface.set_enhanced_security_mode(True)
+                        except:
+                            logger.warning(
+                                "Could not set enhanced security mode to 1, the datalogger software version might be too old to support it"
+                            )
 
                         # Load the current state
                         state = interfaces.StateInterface.load_state(state_lock, logger)
@@ -189,15 +194,14 @@ class AEMETEnclosureThread(AbstractThread):
 
                         if enclosure_interface.state.averia_fault_code not in [0, None]:
                             logger.info(
-                                f"Enclosure has Averia fault code {enclosure_interface.state.averia_fault_code}, waiting for 30s to see whether it resolves itself."
+                                f"Enclosure has Averia fault code {enclosure_interface.state.averia_fault_code}, waiting for 90s to see whether it resolves itself."
                             )
+                            time.sleep(90)
                             new_code = enclosure_interface.read().averia_fault_code
                             if new_code not in [0, None]:
-                                logger.warning(
-                                    f"Averia fault code is still {new_code} after 30s, trying to clear it with Pyra"
+                                raise interfaces.AEMETEnclosureInterface.DataloggerError(
+                                    f"Averia fault code is still > 0 after 90s"
                                 )
-                                assert new_code is not None, "This should not happen"
-                                enclosure_interface.clear_averia_fault(new_code)
 
                         if not skip_cover_control:
                             logger.debug("Cover is managed by Pyra")
