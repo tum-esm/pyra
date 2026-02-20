@@ -1,6 +1,6 @@
 [project]
 name = "pyra"
-version = "5.0.0-beta.1"
+version = "5.0.0-beta.2"
 description = "Automated EM27/SUN Greenhouse Gas Measurements"
 authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },

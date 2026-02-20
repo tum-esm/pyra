@@ -29,7 +29,7 @@ def print_cli_information() -> None:
     logger.debug('running command "info"')
     click.echo(
         click.style(
-            f'This CLI is running Pyra version 5.0.0-beta.1 in directory "{_PROJECT_DIR}"',
+            f'This CLI is running Pyra version 5.0.0-beta.2 in directory "{_PROJECT_DIR}"',
             fg="green",
         )
     )

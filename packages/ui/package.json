@@ -1,6 +1,6 @@
 {
     "name": "pyra-ui",
-    "version": "5.0.0-beta.1",
+    "version": "5.0.0-beta.2",
     "private": true,
     "scripts": {
         "dev": "vite --port 3000",

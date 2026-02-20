@@ -10,7 +10,7 @@ EXISTING_TEST_FILE_PATH = os.path.join(PROJECT_DIR, "pyproject.toml")
 
 SAMPLE_CONFIG = types.Config(
     general=types.config.GeneralConfig(
-        version="5.0.0-beta.1",
+        version="5.0.0-beta.2",
         seconds_per_core_iteration=30,
         test_mode=True,
         station_id="...",
