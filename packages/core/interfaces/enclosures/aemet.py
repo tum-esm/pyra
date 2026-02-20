@@ -269,6 +269,28 @@ class AEMETEnclosureInterface:
             )
             self.logger.info(f"Successfully closed cover within {dt:.2f} seconds")
 
+    def clear_averia_fault(self, current_averia_code: int) -> None:
+        code: Optional[int] = current_averia_code
+        self.logger.info(f"Trying to clear averia fault, current code: {code}")
+        for i in range(3):
+            self.logger.info(f"Clearing averia fault, attempt {i + 1}/3")
+            self.set_enclosure_mode("manual")
+            self.set_averia_fault_code(0)
+            self.logger.info("Waiting 30 seconds to check for averia fault clearance...")
+            time.sleep(30)
+            code = self.read().averia_fault_code
+            if code == 0:
+                self.logger.info(
+                    f"Averia fault successfully cleared (AVERIA=0) after {i + 1} attempts"
+                )
+                return
+            else:
+                self.logger.warning(f"Averia fault code is still {code} after attempt {i + 1}")
+
+        raise AEMETEnclosureInterface.DataloggerError(
+            f"Failed to clear averia fault after 3 attempts. Current averia code: {code}"
+        )
+
     def set_em27_power(self, power_on: bool) -> None:
         self.logger.info(f"Turning EM27 power {'on' if power_on else 'off'}")
         if power_on:
