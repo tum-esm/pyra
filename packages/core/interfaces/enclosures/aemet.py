@@ -253,7 +253,7 @@ class AEMETEnclosureInterface:
             self.logger.warning(
                 f"Averia fault code is {state.averia_fault_code}, not moving cover until it is cleared."
             )
-            self.clear_averia_fault(state.averia_fault_code)
+            return
 
         self.logger.info("Opening cover")
         if state.auto_mode == 1:
@@ -284,7 +284,7 @@ class AEMETEnclosureInterface:
             self.logger.warning(
                 f"Averia fault code is {state.averia_fault_code}, not moving cover until it is cleared."
             )
-            self.clear_averia_fault(state.averia_fault_code)
+            return
 
         self.logger.info("Closing cover")
         if state.auto_mode == 1:

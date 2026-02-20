@@ -187,6 +187,18 @@ class AEMETEnclosureThread(AbstractThread):
                             logger.info("Enclosure is in alert level 2, skipping cover control")
                             skip_cover_control = True
 
+                        if enclosure_interface.state.averia_fault_code not in [0, None]:
+                            logger.info(
+                                f"Enclosure has Averia fault code {enclosure_interface.state.averia_fault_code}, waiting for 30s to see whether it resolves itself."
+                            )
+                            new_code = enclosure_interface.read().averia_fault_code
+                            if new_code not in [0, None]:
+                                logger.warning(
+                                    f"Averia fault code is still {new_code} after 30s, trying to clear it with Pyra"
+                                )
+                                assert new_code is not None, "This should not happen"
+                                enclosure_interface.clear_averia_fault(new_code)
+
                         if not skip_cover_control:
                             logger.debug("Cover is managed by Pyra")
 
@@ -203,7 +215,7 @@ class AEMETEnclosureThread(AbstractThread):
                                     )
                                     enclosure_interface.open_cover()
 
-                                if (not state.measurements_should_be_running) and (
+                                elif (not state.measurements_should_be_running) and (
                                     enclosure_interface.state.pretty_cover_status != "closed"
                                 ):
                                     logger.info(
