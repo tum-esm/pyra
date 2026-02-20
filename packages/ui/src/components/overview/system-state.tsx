@@ -193,8 +193,8 @@ export function SystemState() {
 
                     {/* ENCLOSURE STATE */}
 
-                    <div className="grid w-full grid-cols-4 px-4 pb-1 text-sm gap-x-1 gap-y-1">
-                        <StatePanel title="Alert Level | Averia Fault Code">
+                    <div className="grid w-full grid-cols-5 px-4 pb-1 text-sm gap-x-1 gap-y-1">
+                        <StatePanel title="Alert Level | Averia Code">
                             <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
                                 <div className="flex-grow text-center">
                                     {renderColorfulInteger(
@@ -219,6 +219,25 @@ export function SystemState() {
                         </StatePanel>
                         <StatePanel title="Motor Position">
                             {renderNumber(coreState.aemet_enclosure_state.motor_position)}
+                        </StatePanel>
+                        <StatePanel title="EM27 Power">
+                            {renderBoolean(coreState.aemet_enclosure_state.em27_has_power, {
+                                trueLabel: 'on',
+                                falseLabel: 'off',
+                            })}
+                            {coreState.aemet_enclosure_state.em27_power !== null && (
+                                <>
+                                    (
+                                    {renderNumber(coreState.aemet_enclosure_state.em27_voltage, {
+                                        appendix: ' V',
+                                    })}
+                                    ,
+                                    {renderNumber(coreState.aemet_enclosure_state.em27_power, {
+                                        appendix: ' W',
+                                    })}
+                                    )
+                                </>
+                            )}
                         </StatePanel>
                         <StatePanel title="Helios Edge Pixels">
                             {renderNumber(

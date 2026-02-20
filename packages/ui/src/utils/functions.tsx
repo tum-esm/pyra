@@ -9,11 +9,14 @@ export function renderString(
     }
 }
 
-export function renderBoolean(value: undefined | null | boolean) {
+export function renderBoolean(
+    value: undefined | null | boolean,
+    options?: { trueLabel?: string; falseLabel?: string }
+) {
     if (value === undefined || value === null) {
         return '-';
     } else {
-        return value ? 'Yes' : 'No';
+        return value ? (options?.trueLabel ?? 'Yes') : (options?.falseLabel ?? 'No');
     }
 }
 
