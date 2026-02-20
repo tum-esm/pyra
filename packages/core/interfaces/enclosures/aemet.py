@@ -238,36 +238,66 @@ class AEMETEnclosureInterface:
         self.logger.info(f"Successfully set alert level within {dt:.2f} seconds")
 
     def open_cover(self) -> None:
-        self.logger.info("Opening cover")
         state = self.read()
-        if (state.averia_fault_code == 0) and (state.alert_level == 0):
-            if state.auto_mode == 1:
-                self.set_enclosure_mode("manual")
-            self._set_value("dl:Public.MOTOR_ON", 1)
-            self._set_value("dl:Public.Estado_actual", "AF")  # open releasing fechillo
-            dt = tum_esm_utils.timing.wait_for_condition(
-                is_successful=lambda: self.read().pretty_cover_status == "open",
-                timeout_seconds=90,
-                timeout_message="Cover did not open within 90 seconds.",
-                check_interval_seconds=5,
+        if state.alert_level == 2:
+            self.logger.warning("Alert level is 2, Pyra will not attempt to move the cover.")
+            return
+
+        if state.averia_fault_code is None:
+            self.logger.warning(
+                "Averia fault code is null, Pyra will not attempt to move the cover."
             )
-            self.logger.info(f"Successfully opened cover within {dt:.2f} seconds")
+            return
+
+        if state.averia_fault_code != 0:
+            self.logger.warning(
+                f"Averia fault code is {state.averia_fault_code}, not moving cover until it is cleared."
+            )
+            self.clear_averia_fault(state.averia_fault_code)
+
+        self.logger.info("Opening cover")
+        if state.auto_mode == 1:
+            self.set_enclosure_mode("manual")
+        self._set_value("dl:Public.MOTOR_ON", 1)
+        self._set_value("dl:Public.Estado_actual", "AF")  # open releasing fechillo
+        dt = tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: self.read().pretty_cover_status == "open",
+            timeout_seconds=90,
+            timeout_message="Cover did not open within 90 seconds.",
+            check_interval_seconds=5,
+        )
+        self.logger.info(f"Successfully opened cover within {dt:.2f} seconds")
 
     def close_cover(self) -> None:
-        self.logger.info("Closing cover")
         state = self.read()
-        if (state.averia_fault_code == 0) and (state.alert_level == 0):
-            if state.auto_mode == 1:
-                self.set_enclosure_mode("manual")
-            self._set_value("dl:Public.MOTOR_ON", 1)
-            self._set_value("dl:Public.Estado_actual", "C.")  # closing
-            dt = tum_esm_utils.timing.wait_for_condition(
-                is_successful=lambda: self.read().pretty_cover_status == "closed",
-                timeout_seconds=90,
-                timeout_message="Cover did not close within 90 seconds.",
-                check_interval_seconds=5,
+        if state.alert_level == 2:
+            self.logger.warning("Alert level is 2, Pyra will not attempt to move the cover.")
+            return
+
+        if state.averia_fault_code is None:
+            self.logger.warning(
+                "Averia fault code is null, Pyra will not attempt to move the cover."
             )
-            self.logger.info(f"Successfully closed cover within {dt:.2f} seconds")
+            return
+
+        if state.averia_fault_code != 0:
+            self.logger.warning(
+                f"Averia fault code is {state.averia_fault_code}, not moving cover until it is cleared."
+            )
+            self.clear_averia_fault(state.averia_fault_code)
+
+        self.logger.info("Closing cover")
+        if state.auto_mode == 1:
+            self.set_enclosure_mode("manual")
+        self._set_value("dl:Public.MOTOR_ON", 1)
+        self._set_value("dl:Public.Estado_actual", "C.")  # closing
+        dt = tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: self.read().pretty_cover_status == "closed",
+            timeout_seconds=90,
+            timeout_message="Cover did not close within 90 seconds.",
+            check_interval_seconds=5,
+        )
+        self.logger.info(f"Successfully closed cover within {dt:.2f} seconds")
 
     def clear_averia_fault(self, current_averia_code: int) -> None:
         code: Optional[int] = current_averia_code
