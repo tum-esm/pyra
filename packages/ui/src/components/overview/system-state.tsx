@@ -218,7 +218,7 @@ export function SystemState() {
                             })()}
                         </StatePanel>
                         <StatePanel title="Motor Position">
-                            {renderNumber(coreState.aemet_enclosure_state.motor_position)}
+                            {renderInteger(coreState.aemet_enclosure_state.motor_position)}
                         </StatePanel>
                         <StatePanel title="EM27 Power">
                             {renderBoolean(coreState.aemet_enclosure_state.em27_has_power, {
@@ -227,12 +227,13 @@ export function SystemState() {
                             })}
                             {coreState.aemet_enclosure_state.em27_power !== null && (
                                 <>
+                                    {' '}
                                     (
-                                    {renderNumber(coreState.aemet_enclosure_state.em27_voltage, {
+                                    {renderInteger(coreState.aemet_enclosure_state.em27_voltage, {
                                         appendix: ' V',
                                     })}
-                                    ,
-                                    {renderNumber(coreState.aemet_enclosure_state.em27_power, {
+                                    ,{' '}
+                                    {renderInteger(coreState.aemet_enclosure_state.em27_power, {
                                         appendix: ' W',
                                     })}
                                     )
