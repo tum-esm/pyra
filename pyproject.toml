@@ -1,6 +1,6 @@
 [project]
 name = "pyra"
-version = "5.0.0-beta.2"
+version = "5.0.0-beta.3"
 description = "Automated EM27/SUN Greenhouse Gas Measurements"
 authors = [
     { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
@@ -58,7 +58,9 @@ exclude = ["tests/*"]
 strict = true
 implicit_reexport = true
 warn_unused_ignores = false
-untyped_calls_exclude = ["skimage"]
+untyped_calls_exclude = [
+    "skimage",
+]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
@@ -98,7 +100,16 @@ distribution = false
 packages = []
 
 [tool.pyright]
-exclude = [".venv", "packages/ui", "packages/docs", "hidden"]
-strict = ["packages", "tests", "run_pyra_core.py"]
+exclude = [
+    ".venv",
+    "packages/ui",
+    "packages/docs",
+    "hidden",
+]
+strict = [
+    "packages",
+    "tests",
+    "run_pyra_core.py",
+]
 typeCheckingMode = "strict"
 reportUnusedCallResult = "none"

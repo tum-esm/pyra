@@ -42,7 +42,7 @@
     },
     "productName": "Pyra UI",
     "mainBinaryName": "Pyra UI",
-    "version": "5.0.0-2",
+    "version": "5.0.0-3",
     "identifier": "pyra-ui",
     "plugins": {},
     "app": {
