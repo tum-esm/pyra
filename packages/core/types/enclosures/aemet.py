@@ -63,10 +63,15 @@ class AEMETEnclosureState(pydantic.BaseModel):
         validation_alias=pydantic.AliasChoices("AUTO_", "auto_mode"),
         description="Enclosure mode. auto if the enclosure is in automatic mode, manual if it is in manual mode.",
     )
-    enhanced_security_mode: Optional[int] = pydantic.Field(
+    sun_evaluation_by_pyra: Optional[int] = pydantic.Field(
         default=None,
-        validation_alias=pydantic.AliasChoices("ENHANCED_SECURITY", "enhanced_security_mode"),
-        description="Whether the enhanced security mode is active. 0 if not, 1 if it is active.",
+        validation_alias=pydantic.AliasChoices("SUN_EVALUATION_BY_PYRA", "sun_evaluation_by_pyra"),
+        description="Whether the sun evaluation is done by pyra (1) or by the datalogger (0)",
+    )
+    sun_evaluation_result: Optional[int] = pydantic.Field(
+        default=None,
+        validation_alias=pydantic.AliasChoices("SUN_EVALUATION_RESULT", "sun_evaluation_result"),
+        description="The result of the sun evaluation. 0 = no sun or sun is down, 1 = sun detected and sun is up",
     )
     datalogger_software_version: Optional[str] = pydantic.Field(
         default=None,

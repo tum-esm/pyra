@@ -187,17 +187,27 @@ class AEMETEnclosureInterface:
         except Exception as e:
             raise AEMETEnclosureInterface.DataloggerError() from e
 
-    def set_enhanced_security_mode(self, mode: bool) -> None:
-        self.logger.info(f"Setting enhanced security mode to {mode}")
-        self._set_value("dl:Public.ENHANCED_SECURITY", 1 if mode else 0)
+    def set_sun_evaluation_by_pyra(self, sun_evaluation_by_pyra: Literal[0, 1]) -> None:
+        self.logger.info(f"Setting sun evaluation by Pyra to {sun_evaluation_by_pyra}")
+        self._set_value("dl:Public.SUN_EVALUATION_BY_PYRA", sun_evaluation_by_pyra)
         dt = tum_esm_utils.timing.wait_for_condition(
-            is_successful=lambda: self.read().enhanced_security_mode == mode,
-            # TODO: set timeout_seconds to 40 seconds once all systems run on datalogger software version 158 or higher
-            timeout_seconds=20,
-            timeout_message="Enhanced security mode did not update within 30 seconds.",
+            is_successful=lambda: self.read().sun_evaluation_by_pyra == sun_evaluation_by_pyra,
+            timeout_seconds=30,
+            timeout_message="Sun evaluation by Pyra did not update within 30 seconds.",
             check_interval_seconds=5,
         )
-        self.logger.info(f"Successfully set enhanced security mode within {dt:.2f} seconds")
+        self.logger.info(f"Successfully set sun evaluation by Pyra within {dt:.2f} seconds")
+
+    def set_sun_evaluation_result(self, sun_evaluation_result: Literal[0, 1]) -> None:
+        self.logger.info(f"Setting sun evaluation result to {sun_evaluation_result}")
+        self._set_value("dl:Public.SUN_EVALUATION_RESULT", sun_evaluation_result)
+        dt = tum_esm_utils.timing.wait_for_condition(
+            is_successful=lambda: self.read().sun_evaluation_result == sun_evaluation_result,
+            timeout_seconds=40,
+            timeout_message="Sun evaluation result did not update within 40 seconds.",
+            check_interval_seconds=5,
+        )
+        self.logger.info(f"Successfully set sun evaluation result within {dt:.2f} seconds")
 
     def set_enclosure_mode(self, mode: Literal["auto", "manual"]) -> None:
         self.logger.info(f"Setting enclosure mode to {mode}")
