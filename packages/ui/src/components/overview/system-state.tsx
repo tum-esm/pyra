@@ -133,7 +133,7 @@ export function SystemState() {
                 <>
                     {/* SECURITY INTERVENTIONS */}
 
-                    <div className="grid w-full grid-cols-4 px-4 pb-1 text-sm gap-x-1 gap-y-1">
+                    <div className="grid w-full grid-cols-3 px-4 pb-1 text-sm gap-x-1 gap-y-1">
                         <StatePanel title="Closed Due To Weather (Rain | Wind)">
                             <div className="flex flex-row items-center w-full justitfy-center gap-x-2">
                                 <div className="flex-grow text-center">
@@ -182,12 +182,6 @@ export function SystemState() {
                                     )}
                                 </div>
                             </div>
-                        </StatePanel>
-                        <StatePanel title="Opened Due To Elevated Int. rH">
-                            {renderColorfulBoolean(
-                                coreState.aemet_enclosure_state
-                                    .opened_due_to_elevated_internal_humidity
-                            )}
                         </StatePanel>
                     </div>
 

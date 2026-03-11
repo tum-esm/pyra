@@ -1035,15 +1035,6 @@ export function AEMETEnclosureControlTab() {
                                 ),
                             },
                         },
-                        {
-                            variable: {
-                                key: 'Opened due to elevated internal humidity',
-                                value: renderBoolValue(
-                                    coreState.aemet_enclosure_state
-                                        .opened_due_to_elevated_internal_humidity
-                                ),
-                            },
-                        },
                     ]}
                 />
             </div>

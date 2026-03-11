@@ -177,11 +177,6 @@ class AEMETEnclosureThread(AbstractThread):
                                 "Enclosure is closed due to high external relative humidity, skipping cover control"
                             )
                             skip_cover_control = True
-                        elif enclosure_interface.state.opened_due_to_elevated_internal_humidity:
-                            logger.info(
-                                "Enclosure is opened due to high internal relative humidity, skipping cover control"
-                            )
-                            skip_cover_control = True
 
                         # If alert level is 2, don't do anything else
                         if enclosure_interface.state.alert_level == 2:
