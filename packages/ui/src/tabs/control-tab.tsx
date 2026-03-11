@@ -646,17 +646,6 @@ export function AEMETEnclosureControlTab() {
         );
     }
 
-    async function setEnhancedSecurityMode(value: number) {
-        await runPLCCommand(
-            ['set-enhanced-security-mode', `${value}`],
-            'setting enhanced security mode',
-            `successfully set enhanced security mode to ${value}`,
-            () => {
-                setCoreStateItem('aemet_enclosure_state.enhanced_security_mode', value);
-            }
-        );
-    }
-
     async function togglePowerSpectrometer() {
         if (coreState !== undefined) {
             const newValue = !coreState.aemet_enclosure_state.em27_has_power;
@@ -726,18 +715,20 @@ export function AEMETEnclosureControlTab() {
                         },
                         {
                             variable: {
-                                key: 'ENHANCED_SECURITY mode',
+                                key: 'Sun Evaluation by Pyra',
                                 value: renderStringValue(
-                                    coreState.aemet_enclosure_state.enhanced_security_mode,
+                                    coreState.aemet_enclosure_state.sun_evaluation_by_pyra,
                                     ''
                                 ),
                             },
-                            action: {
-                                label: 'set enhanced security',
-                                callback: setEnhancedSecurityMode,
-                                variant: 'numeric',
-                                initialValue:
-                                    coreState.aemet_enclosure_state.enhanced_security_mode || 0,
+                        },
+                        {
+                            variable: {
+                                key: 'Sun Evaluation Result',
+                                value: renderStringValue(
+                                    coreState.aemet_enclosure_state.sun_evaluation_result,
+                                    ''
+                                ),
                             },
                         },
                     ]}

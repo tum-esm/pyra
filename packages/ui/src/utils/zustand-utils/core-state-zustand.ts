@@ -56,7 +56,8 @@ const coreStateSchema = z.object({
         battery_voltage: z.number().nullable(),
         logger_panel_temperature: z.number().nullable(),
         auto_mode: z.number().nullable(),
-        enhanced_security_mode: z.number().nullable(),
+        sun_evaluation_by_pyra: z.number().nullable(),
+        sun_evaluation_result: z.number().nullable(),
 
         // weather sensor readings
         air_pressure_internal: z.number().nullable(),
