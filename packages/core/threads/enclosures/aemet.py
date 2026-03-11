@@ -1,6 +1,6 @@
 import threading
 import time
-from typing import Optional
+from typing import Literal, Optional
 
 import tum_esm_utils
 
@@ -41,6 +41,8 @@ class AEMETEnclosureThread(AbstractThread):
 
         exception_was_set: Optional[bool] = None
         thread_start_time = time.time()
+        last_sun_evaluation_result_change: Optional[float] = time.time()
+        cover_position_check: Literal["valid", "invalid-once", "invalid-persisting"] = "valid"
 
         state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
             filepath=interfaces.state_interface.STATE_LOCK_PATH,
@@ -107,21 +109,13 @@ class AEMETEnclosureThread(AbstractThread):
 
                     if enclosure_config.controlled_by_user:
                         logger.debug("Enclosure is controlled by user, skipping control logic")
+                    elif enclosure_interface.state.auto_mode != 1:
+                        logger.debug("Enclosure is not in auto mode, skipping control logic")
                     else:
-                        # If auto mode is not 0, set it to 0 (manual mode)
-                        if enclosure_interface.state.auto_mode != 0:
-                            logger.debug("Auto mode is not 0, setting it to 0")
-                            enclosure_interface.set_enclosure_mode("manual")
-
-                        # Set enhanced security mode to 1 if it's not already 1
-                        try:
-                            if enclosure_interface.state.enhanced_security_mode != 1:
-                                logger.debug("Enhanced security mode is not 1, setting it to 1")
-                                enclosure_interface.set_enhanced_security_mode(True)
-                        except:
-                            logger.warning(
-                                "Could not set enhanced security mode to 1, the datalogger software version might be too old to support it"
-                            )
+                        # Set sun evaluation by Pyra to 1 if it is not already
+                        if enclosure_interface.state.sun_evaluation_by_pyra != 1:
+                            logger.debug("Sun evaluation by Pyra is not 1, setting it to 1")
+                            enclosure_interface.set_sun_evaluation_by_pyra(1)
 
                         # Load the current state
                         state = interfaces.StateInterface.load_state(state_lock, logger)
@@ -203,6 +197,11 @@ class AEMETEnclosureThread(AbstractThread):
                                     f"Averia fault code is still > 0 after 90s"
                                 )
 
+                        if skip_cover_control:
+                            logger.debug("Cover is managed by datalogger")
+                            last_sun_evaluation_result_change = None
+                            cover_position_check = "valid"
+                            exception_was_set = False
                         if not skip_cover_control:
                             logger.debug("Cover is managed by Pyra")
 
@@ -211,21 +210,92 @@ class AEMETEnclosureThread(AbstractThread):
                                     "Measurements should be running is not yet set, skipping cover control"
                                 )
                             else:
-                                if state.measurements_should_be_running and (
-                                    enclosure_interface.state.pretty_cover_status != "open"
-                                ):
-                                    logger.info(
-                                        "Measurements should be running but cover is not open, opening cover"
+                                if last_sun_evaluation_result_change is None:
+                                    logger.debug(
+                                        "Last sun evaluation result change is None, setting it to current time"
                                     )
-                                    enclosure_interface.open_cover()
+                                    last_sun_evaluation_result_change = time.time()
+                                    cover_position_check = "valid"
 
-                                elif (not state.measurements_should_be_running) and (
-                                    enclosure_interface.state.pretty_cover_status != "closed"
+                                if state.aemet_enclosure_state.sun_evaluation_result != int(
+                                    state.measurements_should_be_running
                                 ):
+                                    old_value = state.aemet_enclosure_state.sun_evaluation_result
+                                    new_value = int(state.measurements_should_be_running)
                                     logger.info(
-                                        "Measurements should not be running but cover is not closed, closing cover"
+                                        f"Updating sun evaluation result from {old_value} to {new_value}"
                                     )
-                                    enclosure_interface.close_cover()
+                                    enclosure_interface.set_sun_evaluation_result(
+                                        1 if state.measurements_should_be_running else 0
+                                    )
+                                    last_sun_evaluation_result_change = time.time()
+                                    cover_position_check = "valid"
+
+                                if last_sun_evaluation_result_change > (time.time() - 180):
+                                    logger.debug(
+                                        "Sun evaluation result changed less than 3 minutes ago, waiting before checking cover position"
+                                    )
+                                    exception_was_set = False
+                                else:
+                                    if state.measurements_should_be_running and (
+                                        enclosure_interface.state.pretty_cover_status != "open"
+                                    ):
+                                        if cover_position_check == "invalid-once":
+                                            with interfaces.StateInterface.update_state(
+                                                state_lock, logger
+                                            ) as s:
+                                                new_exception_state_item = types.ExceptionStateItem(
+                                                    origin="aemet-enclosure",
+                                                    subject="CoverNotOpening",
+                                                    details="Measurements should be running but cover is not open for more than 3 minutes.",
+                                                    send_emails=True,
+                                                )
+                                                if (
+                                                    new_exception_state_item
+                                                    not in s.exceptions_state.current
+                                                ):
+                                                    s.exceptions_state.add_exception_state_item(
+                                                        new_exception_state_item
+                                                    )
+                                            cover_position_check = "invalid-persisting"
+                                        elif cover_position_check == "valid":
+                                            cover_position_check = "invalid-once"
+                                        logger.warning(
+                                            "Measurements should be running but cover is not open for more than 3 minutes"
+                                        )
+                                        exception_was_set = True
+
+                                    elif (not state.measurements_should_be_running) and (
+                                        enclosure_interface.state.pretty_cover_status != "closed"
+                                    ):
+                                        if cover_position_check == "invalid-once":
+                                            with interfaces.StateInterface.update_state(
+                                                state_lock, logger
+                                            ) as s:
+                                                new_exception_state_item = types.ExceptionStateItem(
+                                                    origin="aemet-enclosure",
+                                                    subject="CoverNotClosing",
+                                                    details="Measurements should not be running but cover is not closed for more than 3 minutes.",
+                                                    send_emails=True,
+                                                )
+                                                if (
+                                                    new_exception_state_item
+                                                    not in s.exceptions_state.current
+                                                ):
+                                                    s.exceptions_state.add_exception_state_item(
+                                                        new_exception_state_item
+                                                    )
+                                            cover_position_check = "invalid-persisting"
+                                        elif cover_position_check == "valid":
+                                            cover_position_check = "invalid-once"
+                                        logger.warning(
+                                            "Measurements should not be running but cover is not closed for more than 3 minutes"
+                                        )
+                                        exception_was_set = True
+                                    else:
+                                        cover_position_check = "valid"
+                                        logger.debug("Cover position is valid")
+                                        exception_was_set = False
 
                     # `exception_was_set` variable used to recude the number of state updates
                     if not exception_was_set:
