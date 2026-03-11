@@ -55,7 +55,7 @@ class AEMETEnclosureThread(AbstractThread):
                 t1 = time.time()
                 logger.debug("Starting iteration")
 
-                if (thread_start_time - t1) > 43200:
+                if (t1 - thread_start_time) > 43200:
                     # Windows happens to have a problem with long-running multiprocesses/multithreads
                     logger.debug(
                         "Stopping and restarting thread after 12 hours for stability reasons"
@@ -109,8 +109,10 @@ class AEMETEnclosureThread(AbstractThread):
 
                     if enclosure_config.controlled_by_user:
                         logger.debug("Enclosure is controlled by user, skipping control logic")
+                        exception_was_set = False
                     elif enclosure_interface.state.auto_mode != 1:
                         logger.debug("Enclosure is not in auto mode, skipping control logic")
+                        exception_was_set = False
                     else:
                         # Set sun evaluation by Pyra to 1 if it is not already
                         if enclosure_interface.state.sun_evaluation_by_pyra != 1:
