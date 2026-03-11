@@ -245,9 +245,10 @@ class CamTrackerThread(AbstractThread):
 
                 # RESOLVE COVER CLOSED WARNING WHEN IT IS RAINING
 
-                if (state.last_bad_weather_detection is not None) and (
-                    (time.time() - state.last_bad_weather_detection) < 180
-                ):
+                if (
+                    (state.last_bad_weather_detection is not None)
+                    and ((time.time() - state.last_bad_weather_detection) < 180)
+                ) or (not measurements_should_be_running):
                     if state.exceptions_state.has_subject(
                         "Camtracker was started but cover is closed."
                     ):

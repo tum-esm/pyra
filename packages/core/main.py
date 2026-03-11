@@ -101,7 +101,6 @@ def run() -> None:
     logger.info("Removing temporary state from previous runs")
     with interfaces.StateInterface.update_state(state_lock, logger) as s:
         s.reset()
-        s.exceptions_state.clear_exception_subject("PyraCoreNotRunning")
 
     while True:
         start_time = time.time()

@@ -133,6 +133,7 @@ class SystemMonitorThread(AbstractThread):
                         filled_disk_space_fraction=disk_space,
                     )
                     s.exceptions_state.clear_exception_origin("system-monitor")
+                    s.exceptions_state.clear_exception_subject("PyraCoreNotRunning")
 
                     is_measuring = s.measurements_should_be_running
                     has_errors = len(s.exceptions_state.current) > 0
