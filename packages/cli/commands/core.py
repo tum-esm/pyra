@@ -2,11 +2,9 @@
 
 # pyright: reportUnusedFunction=false
 
-import datetime
+from typing import Optional
 import os
 import subprocess
-from typing import Optional
-
 import click
 import filelock
 import tum_esm_utils
@@ -173,64 +171,45 @@ def _pyra_core_is_running() -> None:
         logs_archive_path = os.path.join(_PROJECT_DIR, "logs", "archive")
         logfile_names = [
             f for f in sorted(os.listdir(logs_archive_path)) if f.endswith("-debug.log")
-        ]
-        last_main_log_date: Optional[datetime.date] = None
+        ][-5:]
+
+        log_lines: list[str] = []
         for logfile_name in logfile_names:
-            last_mainlog_line: Optional[int] = None
-            lines = (
+            log_lines.extend(
                 tum_esm_utils.files.load_file(os.path.join(logs_archive_path, logfile_name))
                 .strip("\n\t ")
                 .split("\n")
             )
-            for i, line in list(enumerate(lines))[::-1]:
-                if "main - INFO - " in line:
-                    last_mainlog_line = i
 
-            if last_mainlog_line is not None:
-                try:
-                    last_main_log_date = datetime.datetime.strptime(
-                        logfile_name[:10], "%Y-%m-%d"
-                    ).date()
-                except ValueError:
-                    pass
-        if last_main_log_date is None:
-            _print_red("core has never run before")
+        # find the last core start
+        last_start_index: Optional[int] = None
+        for i in range(len(log_lines) - 1, -1, -1):
+            if 'lifecycle - INFO - running command "core start"' in log_lines[i]:
+                if last_start_index is None:
+                    last_start_index = i
+
+        # only consider the logs since the last start
+        if last_start_index is not None:
+            log_lines = log_lines[last_start_index:]
+
+        # fine the last core stop and the last main log
+        last_stop_index: Optional[int] = None
+        last_mainlog_index: Optional[int] = None
+        for i in range(len(log_lines) - 1, -1, -1):
+            if 'lifecycle - INFO - running command "core stop"' in log_lines[i]:
+                if last_stop_index is None:
+                    last_stop_index = i
+            if ("main - INFO - " in log_lines[i]) or ("main - DEBUG - " in log_lines[i]):
+                if last_mainlog_index is None:
+                    last_mainlog_index = i
+
+        # detect if core has stopped running without a "stop" command
+        if last_mainlog_index is None:
+            print("core has not been running in the last 5 days")
             return
 
-        # 2. load the three log files around that date (date and date ± 1 day)
-
-        log_lines: list[str] = []
-        for offset in [-1, 0, 1]:
-            logfile_path = os.path.join(
-                logs_archive_path,
-                (last_main_log_date + datetime.timedelta(days=offset)).strftime(
-                    "%Y-%m-%d-debug.log"
-                ),
-            )
-            if os.path.exists(logfile_path):
-                log_lines += tum_esm_utils.files.load_file(logfile_path).strip("\t\n ").split("\n")
-
-        # 3. only consider the log lines ± 200 lines around the last core activity
-
-        last_mainlog_index: Optional[int] = None
-        for i, line in list(enumerate(log_lines))[::-1]:
-            if "main - INFO - " in line:
-                last_mainlog_index = i
-                break
-        assert last_mainlog_index is not None
-
-        from_log_line_index = last_mainlog_index - 200
-        to_log_line_index = last_mainlog_index + 200
-        if from_log_line_index < 0:
-            from_log_line_index = 0
-        if to_log_line_index >= len(log_lines):
-            to_log_line_index = len(log_lines) - 1
-        log_lines = log_lines[from_log_line_index:to_log_line_index]
-
-        # 4. Check whether core has been stopped properly
-
-        if 'lifecycle - INFO - running command "core stop"' not in "\n".join(log_lines):
-            _print_red(f"Pyra Core has not been shut down properly")
+        if last_stop_index is None:
+            print("core has not been shut down properly")
             state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
                 filepath=interfaces.state_interface.STATE_LOCK_PATH,
                 timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
@@ -253,5 +232,3 @@ def _pyra_core_is_running() -> None:
                     s.exceptions_state.notified.append(new_exception_state_item)
                 else:
                     _print_red("exception already raised")
-
-            return
