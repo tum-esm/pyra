@@ -555,7 +555,7 @@ class OpusThread(AbstractThread):
                 abp = opus_file.channel_parameters[0].instrument["ABP"]
                 assert isinstance(abp, (float, int)), f"ABP is not a number (got {abp})"
 
-                fwd_pass: np.ndarray[Any, Any] = ifg[0][: ifg.shape[1] // 2]
+                fwd_pass: np.ndarray[Any, Any] = ifg[0, : ifg.shape[1] // 2]
                 assert len(fwd_pass) == 114256, (
                     f"Interferogram has wrong length (got {len(fwd_pass)}, expected 114256)"
                 )
