@@ -64,9 +64,7 @@ if __name__ == "__main__":
             continue
 
         for i in range(5):
-            img = helios_interface.take_image()
-            # make image grayscale
-            img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+            img = cv.cvtColor(helios_interface.take_image(), cv.COLOR_BGR2GRAY)
             img_object = Image.fromarray((img.astype(np.uint8)))
             path = tum_esm_utils.files.rel_to_abs_path(
                 f"./finding/find-helios-camera-id-{camera_id}-take-{i + 1}.jpg"
