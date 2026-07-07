@@ -8,11 +8,22 @@ class KnownException(tum_esm_utils.validators.StricterBaseModel):
     )
     long_description: str = pydantic.Field(
         ...,
-        description="A proper description of the error which will also be rendered in the documentation.",
+        description=(
+            "A proper description of the error which will also be rendered in the documentation."
+        ),
     )
-
-    def _raise(self) -> None:
-        raise Exception(self.error_message)
+    min_patience: float = pydantic.Field(
+        default=0,
+        description=(
+            "The user-configured patience value is the time in sectonds after which to send an email notification for this exception if it was not resolved before. This is used to avoid spamming the user with emails for the same exception over and over again. This value is the minimum time allowed for the user-configured patience value for this exception."
+        ),
+    )
+    max_patience: float = pydantic.Field(
+        default=3600,
+        description=(
+            "The user-configured patience value is the time in sectonds after which to send an email notification for this exception if it was not resolved before. This is used to avoid spamming the user with emails for the same exception over and over again. This value is the maximum time allowed for the user-configured patience value for this exception."
+        ),
+    )
 
 
 class KnownExceptions:
