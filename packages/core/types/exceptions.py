@@ -3,6 +3,8 @@ import tum_esm_utils
 
 
 class KnownException(tum_esm_utils.validators.StricterBaseModel):
+    """A known exception that can be raised by the system."""
+
     error_message: str = pydantic.Field(
         ..., description="The error message raised by the exception."
     )
@@ -26,7 +28,9 @@ class KnownException(tum_esm_utils.validators.StricterBaseModel):
     )
 
 
-class KnownExceptions:
+class KNOWN_EXCEPTIONS:
+    """A collection of known exceptions that can be raised by the system."""
+
     COVER_DID_NOT_OPEN = KnownException(
         error_message="Enclosure cover did not open.",
         long_description=(
@@ -42,7 +46,7 @@ class KnownExceptions:
     STORAGE_ERROR = KnownException(
         error_message="The system disk is more than 90% full.",
         long_description=(
-            "The system disk is more than 90% full. This can make the operating system unstable."
+            "The system disk is more than 90% full. This can make the operating system unstable and might indicate that the system is producing data faster than it can upload it."
         ),
     )
     LOW_ENERGY_ERROR = KnownException(
@@ -51,7 +55,7 @@ class KnownExceptions:
     )
     PYRA_CORE_CRASHED = KnownException(
         error_message="Pyra Core is not running and has not been shut down properly.",
-        long_description='Pyra core did not shutdown with a graceful shutdown message. Normally this should only happen if the operating system forcefully killed the Pyra core process. This can also happen if the system lost power and booted back up. This error is usually raised by the Pyra UI calling "pyra-cli core is-running" to check whether a proper shutdown happened.',
+        long_description='Pyra core did not shutdown with a graceful shutdown message. Normally this should only happen if the operating system forcefully killed the Pyra core process. This can also happen if the system lost power and booted back up. This error is usually raised by the Pyra UI calling "pyra-cli core is-running" to check whether a proper shutdown happened. It is automatically resolved when the Pyra core is starting again.',
     )
 
     # TUM enclosure
@@ -64,15 +68,13 @@ class KnownExceptions:
     )
     TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED = KnownException(
         error_message="Rain detected but cover is not closed.",
-        long_description=(
-            "The TUM enclosure reports rain, but the cover did not reach the closed position."
-        ),
+        long_description=("The TUM enclosure reports rain, but the cover did not close yet."),
         # different from COVER_DID_NOT_CLOSE error because now it is quite urgent to close the cover
     )
     TUM_ENCLOSURE_PLC_RESET_FAILED = KnownException(
-        error_message="PLC reset was required but did not work",
+        error_message="TUM enclosure PLC reset was required but did not work",
         long_description=(
-            "The TUM enclosure PLC reported that a reset was required but the reset did not resolve the issue."
+            "The TUM enclosure PLC reported that a reset was required but triggering the reset did not resolve the issue."
         ),
     )
     TUM_ENCLOSURE_PLC_ERROR = KnownException(
@@ -105,7 +107,7 @@ class KnownExceptions:
     HELIOS_CAMERA_ERROR = KnownException(
         error_message="Helios camera is not working as expected.",
         long_description=(
-            "Helios could not initialize the camera, determine usable exposure settings, open the camera, or take images. This can happen if the camera is not responding for a while."
+            "Helios could not initialize the camera, determine usable exposure settings, open the camera, or take images. This issues is typically raised if the camera is not responding for a while."
         ),
     )
 
@@ -118,9 +120,14 @@ class KnownExceptions:
         ),
     )
 
+    EM27_CONNECTION_ERROR = KnownException(
+        error_message="The EM27 HTTP interface is not reachable.",
+        long_description=("The EM27 web interface could not be reached under the configured IP."),
+    )
+
     # Infrastructure
 
     LOCK_TIMEOUT_ERROR = KnownException(
         error_message="PYRA could not acquire a required lock in time.",
-        long_description="Pyra uses a lock file to ensure that only one thread can access certain resources at a time. If this lock cannot be acquired in time, this error is raised. In normal operation this should not happen. If you see this error, your computer might be under heavy load so that the operating system does not allow writing to a file in time.",
+        long_description="Pyra uses a lock file to ensure that only one thread can access certain resources at a time. If this lock cannot be acquired in time, this error is raised. In normal operation this should not happen. If you see this error, your computer might be under heavy load so that the operating system does not allow writing to a file in time. Or your disk might be 100% occupied.",
     )
