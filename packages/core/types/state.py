@@ -1,5 +1,4 @@
 import datetime
-import traceback
 from typing import Literal, Optional
 
 import pydantic
@@ -13,9 +12,14 @@ from .enclosures.aemet import AEMETEnclosureState
 
 class ExceptionStateItem(StricterBaseModel):
     origin: str
+    exception_type: str
     subject: str
+    description: str
+    traceback: Optional[str] = None
     details: Optional[str] = None
-    send_emails: Optional[bool] = True
+    raised_at: float
+    notified_at: Optional[float] = None
+    cleared_at: Optional[float] = None
 
 
 class Position(StricterBaseModel):
@@ -40,45 +44,13 @@ class OpusState(StricterBaseModel):
 
 
 class ExceptionsState(StricterBaseModel):
-    current: list[ExceptionStateItem] = pydantic.Field(
-        default=[], description="List of exceptions that are currently active."
+    exceptions: list[ExceptionStateItem] = pydantic.Field(
+        default=[], description="Exceptions awaiting notification or cleanup."
     )
-    notified: list[ExceptionStateItem] = pydantic.Field(
-        default=[], description="List of exceptions for which an email was sent out."
+    notification_sent: bool = pydantic.Field(
+        default=False,
+        description="Whether an exception notification was sent since this list became nonempty.",
     )
-
-    def add_exception_state_item(self, item: ExceptionStateItem) -> None:
-        """Add a new exception state item to the state."""
-
-        if item not in self.current:
-            self.current.append(item)
-
-    def add_exception(self, origin: str, exception: Exception, send_emails: bool = True) -> None:
-        """Add a new exception to the state."""
-
-        self.add_exception_state_item(
-            ExceptionStateItem(
-                origin=origin,
-                subject=type(exception).__name__,
-                details="\n".join(traceback.format_exception(exception)),
-                send_emails=send_emails,
-            )
-        )
-
-    def clear_exception_origin(self, origin: str) -> None:
-        """Clear all exceptions with the given origin."""
-
-        self.current = [e for e in self.current if e.origin != origin]
-
-    def clear_exception_subject(self, subject: str) -> None:
-        """Clear all exceptions with the given subject."""
-
-        self.current = [e for e in self.current if e.subject != subject]
-
-    def has_subject(self, subject: str) -> bool:
-        """Check if there is an exception with the given subject."""
-
-        return any(e.subject == subject for e in self.current)
 
 
 class ActivityState(StricterBaseModel):

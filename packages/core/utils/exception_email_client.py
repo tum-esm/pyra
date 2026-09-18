@@ -148,11 +148,27 @@ class ExceptionEmailClient:
         text: str = ""
         html: list[str] = []
         for e in new_exceptions:
-            text += f"{e.subject} occured inside {e.origin}:\n{e.details}\n\n"
+            text += f"{e.subject} occurred inside {e.origin}:\n\n{e.description}\n"
+            if e.details is not None:
+                text += f"\nDetails:\n{e.details}\n"
+            if e.traceback is not None:
+                text += f"\nTraceback:\n{e.traceback}\n"
+            text += "\n"
+
             html += [
-                f'   <p><strong><span style="color: #dc2626">{e.subject}</span> occured inside {e.origin}. Details:</strong></p>',
-                f"    {_PRE_CODE_TAG}{e.details}{_POST_CODE_TAG}",
+                f'    <p><strong><span style="color: #dc2626">{e.subject}</span> occurred inside {e.origin}.</strong></p>',
+                f"    <p>{e.description}</p>",
             ]
+            if e.details is not None:
+                html += [
+                    "    <p><strong>Details:</strong></p>",
+                    f"    {_PRE_CODE_TAG}{e.details}{_POST_CODE_TAG}",
+                ]
+            if e.traceback is not None:
+                html += [
+                    "    <p><strong>Traceback:</strong></p>",
+                    f"    {_PRE_CODE_TAG}{e.traceback}{_POST_CODE_TAG}",
+                ]
 
         text_body = (
             f"{text}"
