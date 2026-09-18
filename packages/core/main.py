@@ -8,31 +8,6 @@ import tum_esm_utils
 from packages.core import interfaces, threads, types, utils
 
 
-def _send_exception_emails(
-    state_lock: tum_esm_utils.sqlitelock.SQLiteLock,
-    logger: utils.Logger,
-    config: types.Config,
-) -> None:
-    """Send emails on occured/resolved exceptions."""
-
-    with interfaces.StateInterface.update_state(state_lock, logger) as s:
-        current_exceptions = s.exceptions_state.current
-        notified_exceptions = s.exceptions_state.notified
-
-        new_exception_emails = [
-            e for e in current_exceptions if ((e not in notified_exceptions) and e.send_emails)
-        ]
-        if len(new_exception_emails) > 0:
-            utils.ExceptionEmailClient.handle_occured_exceptions(config, new_exception_emails)
-
-        if any([e.send_emails for e in notified_exceptions]) and (
-            not any([e.send_emails for e in current_exceptions])
-        ):
-            utils.ExceptionEmailClient.handle_resolved_exception(config)
-
-        s.exceptions_state.notified = s.exceptions_state.current
-
-
 def run() -> None:
     """The entrypoint of PYRA Core.
 
@@ -135,7 +110,9 @@ def run() -> None:
                 time.sleep(0.1)  # for the tests to work
 
             # send emails on occured/resolved exceptions
-            _send_exception_emails(state_lock, logger, config)
+            interfaces.ExceptionsInterface.update_exception_notifications(
+                state_lock, logger, config
+            )
 
             # wait rest of loop time
             logger.debug("Finished iteration")
