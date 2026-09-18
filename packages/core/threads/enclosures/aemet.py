@@ -193,7 +193,7 @@ class AEMETEnclosureThread(AbstractThread):
                             new_code = enclosure_interface.read().averia_fault_code
                             if new_code not in [0, None]:
                                 raise interfaces.AEMETEnclosureInterface.DataloggerError(
-                                    f"Averia fault code is still > 0 after 90s"
+                                    "Averia fault code is still > 0 after 90s"
                                 )
 
                         if skip_cover_control:
@@ -312,5 +312,8 @@ class AEMETEnclosureThread(AbstractThread):
 
         except Exception as e:
             logger.exception(e)
-            with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                s.exceptions_state.add_exception(origin="aemet-enclosure", exception=e)
+            exceptions_interface.add_exception(
+                "aemet-enclosure",
+                types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                traceback=traceback.format_exc(),
+            )

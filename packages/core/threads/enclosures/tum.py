@@ -361,8 +361,11 @@ class TUMEnclosureThread(AbstractThread):
 
         except Exception as e:
             logger.exception(e)
-            with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                s.exceptions_state.add_exception(origin="tum-enclosure", exception=e)
+            exceptions_interface.add_exception(
+                "tum-enclosure",
+                types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                traceback=traceback.format_exc(),
+            )
 
     @staticmethod
     def clear_plc_reset(

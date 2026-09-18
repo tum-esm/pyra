@@ -2,6 +2,7 @@ import datetime
 import os
 import threading
 import time
+import traceback
 from typing import Literal, Optional
 
 import psutil
@@ -144,7 +145,7 @@ class CamTrackerProgram:
         try:
             last_line = utils.read_last_file_line(ct_logfile_path)
         except OSError as e:
-            raise AssertionError(f"CamTracker logfile is empty") from e
+            raise AssertionError("CamTracker logfile is empty") from e
 
         # last_line: [Julian Date, Tracker Elevation, Tracker Azimuth,
         # Elev Offset from Astro, Az Offset from Astro, Ellipse distance/px]
@@ -384,8 +385,11 @@ class CamTrackerThread(AbstractThread):
             except Exception as e:
                 logger.exception(e)
                 CamTrackerProgram.stop(config, logger)
-                with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                    s.exceptions_state.add_exception(origin="camtracker", exception=e)
+                exceptions_interface.add_exception(
+                    "camtracker",
+                    types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                    traceback=traceback.format_exc(),
+                )
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")

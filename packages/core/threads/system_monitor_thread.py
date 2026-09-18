@@ -1,6 +1,7 @@
 import threading
 import time
 import datetime
+import traceback
 
 import tum_esm_utils
 
@@ -175,5 +176,8 @@ class SystemMonitorThread(AbstractThread):
             except Exception as e:
                 logger.exception(e)
                 activity_history_interface.flush()
-                with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                    s.exceptions_state.add_exception(origin="system-monitor", exception=e)
+                exceptions_interface.add_exception(
+                    "system-monitor",
+                    types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                    traceback=traceback.format_exc(),
+                )

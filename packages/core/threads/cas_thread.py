@@ -1,6 +1,7 @@
 import datetime
 import threading
 import time
+import traceback
 
 import tum_esm_utils
 
@@ -171,8 +172,11 @@ class CASThread(AbstractThread):
 
             except Exception as e:
                 logger.exception(e)
-                with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                    s.exceptions_state.add_exception(origin="cas", exception=e)
+                exceptions_interface.add_exception(
+                    "cas",
+                    types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                    traceback=traceback.format_exc(),
+                )
 
     @staticmethod
     def get_automatic_decision(

@@ -1,6 +1,7 @@
 import datetime
 import threading
 import time
+import traceback
 from typing import Optional
 
 import circadian_scp_upload
@@ -212,9 +213,11 @@ class UploadThread(AbstractThread):
                 logger.exception(e)
                 with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.activity.upload_is_running = False
-                    s.exceptions_state.add_exception(
-                        origin="upload", exception=e, send_emails=False
-                    )
+                exceptions_interface.add_exception(
+                    "upload",
+                    types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                    traceback=traceback.format_exc(),
+                )
                 for i in range(20):
                     minutes_left = 20 - i
                     logger.info(
