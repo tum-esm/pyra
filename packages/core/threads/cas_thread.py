@@ -54,6 +54,7 @@ class CASThread(AbstractThread):
             timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
             poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
         )
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
         thread_start_time = time.time()
 
         while True:
@@ -157,7 +158,9 @@ class CASThread(AbstractThread):
                         s.last_bad_weather_detection < last_bad_weather_detection
                     ):
                         s.last_bad_weather_detection = last_bad_weather_detection
-                    s.exceptions_state.clear_exception_origin("cas")
+                exceptions_interface.resolve_exception(
+                    "cas", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                )
 
                 # SLEEP
 

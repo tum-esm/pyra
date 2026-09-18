@@ -215,20 +215,24 @@ def _pyra_core_is_running() -> None:
                 timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
                 poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
             )
-            new_exception_state_item = types.ExceptionStateItem(
-                origin="cli",
-                subject="PyraCoreNotRunning",
-                details="Pyra Core has not been shut down properly.",
-                send_emails=True,
+            exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
+            state = interfaces.StateInterface.load_state(state_lock, logger)
+            exception_is_active = any(
+                item.origin == "cli"
+                and item.exception_type
+                == types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED.identifier
+                and item.cleared_at is None
+                for item in state.exceptions_state.exceptions
             )
-            with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                if new_exception_state_item not in s.exceptions_state.current:
-                    _print_red("exception not raised yet, loading config")
-                    config = types.Config.load()
-                    utils.ExceptionEmailClient.handle_occured_exceptions(
-                        config, [new_exception_state_item]
-                    )
-                    s.exceptions_state.current.append(new_exception_state_item)
-                    s.exceptions_state.notified.append(new_exception_state_item)
-                else:
-                    _print_red("exception already raised")
+            exceptions_interface.add_exception(
+                "cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED
+            )
+            if exception_is_active:
+                _print_red("exception already raised")
+            else:
+                _print_red("exception not raised yet, loading config")
+
+            config = types.Config.load()
+            interfaces.ExceptionsInterface.update_exception_notifications(
+                state_lock, logger, config
+            )

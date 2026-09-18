@@ -66,10 +66,11 @@ class UploadThread(AbstractThread):
             should_be_running = False
 
         if not should_be_running:
-            if any([e.origin == "upload" for e in current_state.exceptions_state.current]):
-                with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                    s.activity.upload_is_running = False
-                    s.exceptions_state.clear_exception_origin("upload")
+            with interfaces.StateInterface.update_state(state_lock, logger) as s:
+                s.activity.upload_is_running = False
+            interfaces.ExceptionsInterface(state_lock, logger).resolve_exception(
+                "upload", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+            )
 
         return should_be_running
 
@@ -101,6 +102,7 @@ class UploadThread(AbstractThread):
             timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
             poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
         )
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
 
         config = types.Config.load()
         assert config.upload is not None
@@ -179,7 +181,9 @@ class UploadThread(AbstractThread):
 
                 with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.activity.upload_is_running = False  # not necessary, but ...
-                    s.exceptions_state.clear_exception_origin("upload")
+                exceptions_interface.resolve_exception(
+                    "upload", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                )
 
                 # sleep 60 minutes until running again
                 # stop thread if upload config has changed

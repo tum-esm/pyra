@@ -215,6 +215,7 @@ class CamTrackerThread(AbstractThread):
             timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
             poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
         )
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
 
         # STOP CAMTRACKER IF IT IS RUNNING
         config = types.Config.load()
@@ -249,13 +250,9 @@ class CamTrackerThread(AbstractThread):
                     (state.last_bad_weather_detection is not None)
                     and ((time.time() - state.last_bad_weather_detection) < 180)
                 ) or (not measurements_should_be_running):
-                    if state.exceptions_state.has_subject(
-                        "Camtracker was started but cover is closed."
-                    ):
-                        with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                            s.exceptions_state.clear_exception_subject(
-                                subject="Camtracker was started but cover is closed."
-                            )
+                    exceptions_interface.resolve_exception(
+                        "camtracker", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN
+                    )
 
                 # START/STOP CAMTRACKER IF NECESSARY
 
@@ -334,12 +331,9 @@ class CamTrackerThread(AbstractThread):
                                     (time.time() - state.last_bad_weather_detection) < 180
                                 ):
                                     logger.info("Enclosure cover is closed due to bad weather.")
-                                    with interfaces.StateInterface.update_state(
-                                        state_lock, logger
-                                    ) as s:
-                                        s.exceptions_state.clear_exception_subject(
-                                            subject="Camtracker was started but cover is closed."
-                                        )
+                                    exceptions_interface.resolve_exception(
+                                        "camtracker", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN
+                                    )
                                     break
 
                                 # if conditions changed -> no need to open cover
@@ -347,12 +341,9 @@ class CamTrackerThread(AbstractThread):
                                     logger.info(
                                         "Measurements conditions have changed, hence no need to open cover."
                                     )
-                                    with interfaces.StateInterface.update_state(
-                                        state_lock, logger
-                                    ) as s:
-                                        s.exceptions_state.clear_exception_subject(
-                                            subject="Camtracker was started but cover is closed."
-                                        )
+                                    exceptions_interface.resolve_exception(
+                                        "camtracker", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN
+                                    )
                                     break
 
                                 # if enclosure cover is still closed after a good amount of waiting and no rain
@@ -362,39 +353,26 @@ class CamTrackerThread(AbstractThread):
                                     logger.error(
                                         "Enclosure cover is closed even though, there is no rain. Stopping CamTracker."
                                     )
-                                    with interfaces.StateInterface.update_state(
-                                        state_lock, logger
-                                    ) as s:
-                                        s.exceptions_state.add_exception_state_item(
-                                            types.ExceptionStateItem(
-                                                origin="camtracker",
-                                                subject="Camtracker was started but cover is closed.",
-                                                details="Restarting CamTracker. No interaction needed.\n\nThis error might have been caused by the enclosures rain sensor being triggered long enough to cause the cover to be closed but too short for PYRA to read from rain sensor in time.",
-                                            )
-                                        )
+                                    exceptions_interface.add_exception(
+                                        "camtracker",
+                                        types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN,
+                                    )
                                     CamTrackerProgram.stop(config, logger)
                                     camtracker_is_running = False
                                     last_camtracker_start_time = None
                                     break
 
                         if cover_state == "open":
-                            with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                                s.exceptions_state.clear_exception_subject(
-                                    subject="Camtracker was started but cover is closed."
-                                )
+                            exceptions_interface.resolve_exception(
+                                "camtracker", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN
+                            )
 
                 # CLEAR EXCEPTIONS
                 # besides the one about the cover not opening
 
-                with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                    s.exceptions_state.current = [
-                        e
-                        for e in s.exceptions_state.current
-                        if (
-                            (e.origin != "camtracker")
-                            or (e.subject == "Camtracker was started but cover is closed.")
-                        )
-                    ]
+                exceptions_interface.resolve_exception(
+                    "camtracker", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                )
 
                 # SLEEP
 

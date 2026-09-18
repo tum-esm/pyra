@@ -2,6 +2,7 @@ import datetime
 import os
 import threading
 import time
+import traceback
 from typing import Any, Optional
 
 import numpy as np
@@ -166,6 +167,7 @@ class OpusThread(AbstractThread):
             timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
             poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
         )
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
         state = interfaces.StateInterface.load_state(state_lock, logger)
 
         thread_start_time = time.time()
@@ -413,8 +415,13 @@ class OpusThread(AbstractThread):
                     else:
                         s.opus_state.macro_id = current_macro[0]
                         s.opus_state.macro_filepath = current_macro[1]
-                    if clear_issues:
-                        s.exceptions_state.clear_exception_origin("opus")
+                if clear_issues:
+                    exceptions_interface.resolve_exception(
+                        "opus", types.KNOWN_EXCEPTIONS.OPUS_CONNECTION_ERROR
+                    )
+                    exceptions_interface.resolve_exception(
+                        "opus", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                    )
 
                 # SLEEP
 
@@ -427,32 +434,21 @@ class OpusThread(AbstractThread):
             logger.exception(e)
             OpusProgram.stop(logger)
 
-            silence_exception: bool = False
-            now = time.time()
-
-            # forget about the last http connection issue if it was more than 10 minutes ago
-            if last_http_connection_issue_time is not None:
-                if (now - last_http_connection_issue_time) > 600:
-                    last_http_connection_issue_time = None
-
             if isinstance(e, ConnectionError):
-                if last_http_connection_issue_time is None:
-                    silence_exception = True
-                    logger.error(
-                        "Not sending emails about ConnectionError when it doesn't repeat within 10 minutes"
-                    )
-                else:
-                    logger.error(
-                        "ConnectionError repeated within 10 minutes, sending email about it"
-                    )
-                last_http_connection_issue_time = now
+                last_http_connection_issue_time = time.time()
 
             with interfaces.StateInterface.update_state(state_lock, logger) as s:
                 s.opus_state.macro_id = None
                 s.opus_state.macro_filepath = None
                 s.opus_state.last_http_connection_issue_time = last_http_connection_issue_time
-                if not silence_exception:
-                    s.exceptions_state.add_exception(origin="opus", exception=e)
+            exception_type = (
+                types.KNOWN_EXCEPTIONS.OPUS_CONNECTION_ERROR
+                if isinstance(e, ConnectionError)
+                else types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+            )
+            exceptions_interface.add_exception(
+                "opus", exception_type, traceback=traceback.format_exc()
+            )
             logger.info("Sleeping 3 minutes until retrying")
             time.sleep(180)
             logger.info("Stopping thread")

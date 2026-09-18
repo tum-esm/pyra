@@ -3,6 +3,7 @@ import os
 import sys
 import threading
 import time
+import traceback
 from typing import Any, Optional
 
 import cv2 as cv
@@ -390,6 +391,7 @@ class HeliosThread(AbstractThread):
             timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
             poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
         )
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
         thread_start_time = time.time()
         config = types.Config.load()
         assert config.helios is not None, "This is a bug in Pyra"
@@ -595,8 +597,12 @@ class HeliosThread(AbstractThread):
 
                 # clear exceptions
 
-                with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                    s.exceptions_state.clear_exception_origin("helios")
+                exceptions_interface.resolve_exception(
+                    "helios", types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
+                )
+                exceptions_interface.resolve_exception(
+                    "helios", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                )
 
                 # wait rest of loop time
                 elapsed_time = time.time() - t1
@@ -612,8 +618,14 @@ class HeliosThread(AbstractThread):
 
                 logger.error(f"error in HeliosThread: {repr(e)}")
                 logger.exception(e)
-                with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                    s.exceptions_state.add_exception(origin="helios", exception=e)
+                exception_type = (
+                    types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
+                    if isinstance(e, CameraError)
+                    else types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                )
+                exceptions_interface.add_exception(
+                    "helios", exception_type, traceback=traceback.format_exc()
+                )
 
                 logger.info("sleeping 60 seconds, reinitializing HeliosThread")
                 time.sleep(60)

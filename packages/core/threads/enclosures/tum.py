@@ -1,6 +1,7 @@
 import datetime
 import threading
 import time
+import traceback
 from typing import Optional
 
 import tum_esm_utils
@@ -57,6 +58,7 @@ class TUMEnclosureThread(AbstractThread):
             timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
             poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
         )
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
 
         try:
             while True:
@@ -102,13 +104,11 @@ class TUMEnclosureThread(AbstractThread):
                         plc_interface = None
                         if last_plc_connection_time < (time.time() - 360):
                             exception_was_set = True
-                            with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                                s.exceptions_state.add_exception_state_item(
-                                    types.ExceptionStateItem(
-                                        origin="tum-enclosure",
-                                        subject="Could not connect to PLC for 6 minutes",
-                                    )
-                                )
+                            exceptions_interface.add_exception(
+                                "tum-enclosure",
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_CONNECTION_ERROR,
+                                traceback=traceback.format_exc(),
+                            )
                         logger.info("Waiting 60 seconds before retrying")
                         time.sleep(60)
                         continue
@@ -128,6 +128,10 @@ class TUMEnclosureThread(AbstractThread):
 
                 # now the PLC is connected - otherwise it would loop in the section above
                 last_plc_connection_time = time.time()
+                exceptions_interface.resolve_exception(
+                    "tum-enclosure",
+                    types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_CONNECTION_ERROR,
+                )
                 try:
                     # READING PLC
 
@@ -151,20 +155,30 @@ class TUMEnclosureThread(AbstractThread):
                             if plc_interface.get_cover_angle() != 0:
                                 logger.warning("Rain detected, but cover is closed yet")
                                 exception_was_set = True
-                                with interfaces.StateInterface.update_state(
-                                    state_lock, logger
-                                ) as s:
-                                    s.exceptions_state.add_exception_state_item(
-                                        types.ExceptionStateItem(
-                                            origin="tum-enclosure",
-                                            subject="Rain detected but cover is not closed",
-                                        )
-                                    )
+                                exceptions_interface.add_exception(
+                                    "tum-enclosure",
+                                    types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
+                                )
                         logger.debug("Skipping remaining PLC logic during rain")
                         if not exception_was_set:
                             exception_was_set = False
-                            with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                                s.exceptions_state.clear_exception_origin(origin="tum-enclosure")
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure",
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
+                            )
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
+                            )
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure",
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED,
+                            )
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
+                            )
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                            )
                         continue
 
                     # SKIP REMAINING LOGIC IF IN USER CONTROLLED MODE
@@ -175,8 +189,23 @@ class TUMEnclosureThread(AbstractThread):
                         )
                         if not exception_was_set:
                             exception_was_set = False
-                            with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                                s.exceptions_state.clear_exception_origin(origin="tum-enclosure")
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure",
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
+                            )
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
+                            )
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure",
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED,
+                            )
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
+                            )
+                            exceptions_interface.resolve_exception(
+                                "tum-enclosure", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                            )
                         t2 = time.time()
                         sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
                         logger.debug(f"Sleeping {sleep_time:.2f} seconds")
@@ -284,15 +313,10 @@ class TUMEnclosureThread(AbstractThread):
                                     if (time.time() - start_time) > 62:
                                         logger.error("Cover is still not closed")
                                         exception_was_set = True
-                                        with interfaces.StateInterface.update_state(
-                                            state_lock, logger
-                                        ) as s:
-                                            s.exceptions_state.add_exception_state_item(
-                                                types.ExceptionStateItem(
-                                                    origin="tum-enclosure",
-                                                    subject="Cover did not closed after disabling sync to tracker and moving to 0°",
-                                                )
-                                            )
+                                        exceptions_interface.add_exception(
+                                            "tum-enclosure",
+                                            types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE,
+                                        )
                                         break
 
                     # CLEAR EXCEPTIONS
@@ -300,8 +324,20 @@ class TUMEnclosureThread(AbstractThread):
                     # `exception_was_set` variable used to recude the number of state updates
                     if not exception_was_set:
                         exception_was_set = False
-                        with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                            s.exceptions_state.clear_exception_origin(origin="tum-enclosure")
+                        exceptions_interface.resolve_exception(
+                            "tum-enclosure",
+                            types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
+                        )
+                        exceptions_interface.resolve_exception(
+                            "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
+                        )
+
+                    exceptions_interface.resolve_exception(
+                        "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
+                    )
+                    exceptions_interface.resolve_exception(
+                        "tum-enclosure", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                    )
 
                     # SLEEP
 
@@ -313,6 +349,11 @@ class TUMEnclosureThread(AbstractThread):
                 except interfaces.TUMEnclosureInterface.PLCError as e:
                     logger.error("PLC connection lost during interaction")
                     logger.exception(e)
+                    exceptions_interface.add_exception(
+                        "tum-enclosure",
+                        types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR,
+                        traceback=traceback.format_exc(),
+                    )
                     plc_interface = None
                     logger.info("Waiting 60 seconds before retrying")
                     time.sleep(60)
@@ -332,6 +373,8 @@ class TUMEnclosureThread(AbstractThread):
     ) -> None:
         """Resetting the PLC if needed. If the reset doesn't work,
         add an exception to the state object."""
+
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
 
         r = plc_interface.reset_is_needed()
         m = plc_interface.motor_has_failed()
@@ -355,23 +398,23 @@ class TUMEnclosureThread(AbstractThread):
                 m = plc_interface.motor_has_failed()
                 if not (r or m):
                     logger.info("PLC reset was successful")
+                    exceptions_interface.resolve_exception(
+                        "tum-enclosure",
+                        types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED,
+                    )
                     break
 
                 if (time.time() - start_time) > timeout:
-                    with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                        s.exceptions_state.add_exception_state_item(
-                            types.ExceptionStateItem(
-                                origin="tum-enclosure",
-                                subject="PLC reset was required but did not work",
-                            )
-                        )
+                    exceptions_interface.add_exception(
+                        "tum-enclosure",
+                        types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED,
+                    )
                     break
         else:
             logger.debug("PLC reset is not needed")
-            with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                s.exceptions_state.clear_exception_subject(
-                    subject="PLC reset was required but did not work"
-                )
+            exceptions_interface.resolve_exception(
+                "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED
+            )
 
     @staticmethod
     def force_cover_close(

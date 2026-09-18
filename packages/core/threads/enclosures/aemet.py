@@ -1,5 +1,6 @@
 import threading
 import time
+import traceback
 from typing import Literal, Optional
 
 import tum_esm_utils
@@ -49,6 +50,7 @@ class AEMETEnclosureThread(AbstractThread):
             timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
             poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
         )
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
 
         try:
             while True:
@@ -238,22 +240,10 @@ class AEMETEnclosureThread(AbstractThread):
                                         enclosure_interface.state.pretty_cover_status != "open"
                                     ):
                                         if cover_position_check == "invalid-once":
-                                            with interfaces.StateInterface.update_state(
-                                                state_lock, logger
-                                            ) as s:
-                                                new_exception_state_item = types.ExceptionStateItem(
-                                                    origin="aemet-enclosure",
-                                                    subject="CoverNotOpening",
-                                                    details="Measurements should be running but cover is not open for more than 3 minutes.",
-                                                    send_emails=True,
-                                                )
-                                                if (
-                                                    new_exception_state_item
-                                                    not in s.exceptions_state.current
-                                                ):
-                                                    s.exceptions_state.add_exception_state_item(
-                                                        new_exception_state_item
-                                                    )
+                                            exceptions_interface.add_exception(
+                                                "aemet-enclosure",
+                                                types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN,
+                                            )
                                             cover_position_check = "invalid-persisting"
                                         elif cover_position_check == "valid":
                                             cover_position_check = "invalid-once"
@@ -266,22 +256,10 @@ class AEMETEnclosureThread(AbstractThread):
                                         enclosure_interface.state.pretty_cover_status != "closed"
                                     ):
                                         if cover_position_check == "invalid-once":
-                                            with interfaces.StateInterface.update_state(
-                                                state_lock, logger
-                                            ) as s:
-                                                new_exception_state_item = types.ExceptionStateItem(
-                                                    origin="aemet-enclosure",
-                                                    subject="CoverNotClosing",
-                                                    details="Measurements should not be running but cover is not closed for more than 3 minutes.",
-                                                    send_emails=True,
-                                                )
-                                                if (
-                                                    new_exception_state_item
-                                                    not in s.exceptions_state.current
-                                                ):
-                                                    s.exceptions_state.add_exception_state_item(
-                                                        new_exception_state_item
-                                                    )
+                                            exceptions_interface.add_exception(
+                                                "aemet-enclosure",
+                                                types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE,
+                                            )
                                             cover_position_check = "invalid-persisting"
                                         elif cover_position_check == "valid":
                                             cover_position_check = "invalid-once"
@@ -297,8 +275,20 @@ class AEMETEnclosureThread(AbstractThread):
                     # `exception_was_set` variable used to recude the number of state updates
                     if not exception_was_set:
                         exception_was_set = False
-                        with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                            s.exceptions_state.clear_exception_origin(origin="aemet-enclosure")
+                        exceptions_interface.resolve_exception(
+                            "aemet-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN
+                        )
+                        exceptions_interface.resolve_exception(
+                            "aemet-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
+                        )
+
+                    exceptions_interface.resolve_exception(
+                        "aemet-enclosure",
+                        types.KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR,
+                    )
+                    exceptions_interface.resolve_exception(
+                        "aemet-enclosure", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                    )
 
                     # SLEEP
 
@@ -310,6 +300,11 @@ class AEMETEnclosureThread(AbstractThread):
                 except interfaces.AEMETEnclosureInterface.DataloggerError as e:
                     logger.error("Datalogger connection lost during interaction")
                     logger.exception(e)
+                    exceptions_interface.add_exception(
+                        "aemet-enclosure",
+                        types.KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR,
+                        traceback=traceback.format_exc(),
+                    )
                     enclosure_interface = None
                     logger.info("Waiting 60 seconds before retrying")
                     time.sleep(60)

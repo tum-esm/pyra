@@ -51,6 +51,7 @@ class SystemMonitorThread(AbstractThread):
             timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
             poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
         )
+        exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
 
         while True:
             try:
@@ -95,15 +96,14 @@ class SystemMonitorThread(AbstractThread):
                 disk_space = tum_esm_utils.system.get_disk_space()
                 logger.debug(f"The disk is currently filled with {disk_space} %.")
                 if disk_space > 90:
-                    subject = "StorageError"
-                    details = "Disk space is more than 90%. This is bad for the OS stability."
-                    with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                        s.exceptions_state.add_exception_state_item(
-                            types.ExceptionStateItem(
-                                origin="system-monitor", subject=subject, details=details
-                            )
-                        )
-                    logger.error(f"{subject}: {details}")
+                    exceptions_interface.add_exception(
+                        "system-monitor", types.KNOWN_EXCEPTIONS.STORAGE_ERROR
+                    )
+                    logger.error(types.KNOWN_EXCEPTIONS.STORAGE_ERROR.error_message)
+                else:
+                    exceptions_interface.resolve_exception(
+                        "system-monitor", types.KNOWN_EXCEPTIONS.STORAGE_ERROR
+                    )
 
                 # BATTERY LEVEL
 
@@ -111,17 +111,25 @@ class SystemMonitorThread(AbstractThread):
                 if battery_level is not None:
                     logger.debug(f"The battery level is {battery_level} %.")
                     if battery_level < 30:
-                        subject = "LowEnergyError"
-                        details = (
-                            "The battery of the system is below 30%. Please check the power supply."
+                        exceptions_interface.add_exception(
+                            "system-monitor", types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
                         )
-                        with interfaces.StateInterface.update_state(state_lock, logger) as s:
-                            s.exceptions_state.add_exception_state_item(
-                                types.ExceptionStateItem(
-                                    origin="system-monitor", subject=subject, details=details
-                                )
-                            )
-                        logger.error(f"{subject}: {details}")
+                        logger.error(types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR.error_message)
+                    else:
+                        exceptions_interface.resolve_exception(
+                            "system-monitor", types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
+                        )
+                else:
+                    exceptions_interface.resolve_exception(
+                        "system-monitor", types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
+                    )
+
+                exceptions_interface.resolve_exception(
+                    "system-monitor", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                )
+                exceptions_interface.resolve_exception(
+                    "cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED
+                )
 
                 # UPDATE STATE AND FETCH RECENT ACTIVITY
 
@@ -132,11 +140,10 @@ class SystemMonitorThread(AbstractThread):
                         last_boot_time=str(last_boot_time),
                         filled_disk_space_fraction=disk_space,
                     )
-                    s.exceptions_state.clear_exception_origin("system-monitor")
-                    s.exceptions_state.clear_exception_subject("PyraCoreNotRunning")
-
                     is_measuring = s.measurements_should_be_running
-                    has_errors = len(s.exceptions_state.current) > 0
+                    has_errors = any(
+                        item.cleared_at is None for item in s.exceptions_state.exceptions
+                    )
                     new_camtracker_startups = s.activity.camtracker_startups
                     new_opus_startups = s.activity.opus_startups
                     new_cli_calls = s.activity.cli_calls
