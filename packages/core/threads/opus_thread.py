@@ -306,7 +306,7 @@ class OpusThread(AbstractThread):
                         logger.info("Pinging EM27")
                         dt = tum_esm_utils.timing.wait_for_condition(
                             is_successful=lambda: (
-                                os.system("ping -n 3 " + config.opus.em27_ip.root) == 0
+                                os.system("ping -n 3 " + config.opus.em27_ip.root) == 0  # type: ignore
                             ),
                             timeout_seconds=90,
                             timeout_message="EM27 did not respond to ping within 90 seconds.",

@@ -219,14 +219,11 @@ def _pyra_core_is_running() -> None:
             state = interfaces.StateInterface.load_state(state_lock, logger)
             exception_is_active = any(
                 item.origin == "cli"
-                and item.exception_type
-                == types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED.identifier
+                and item.exception_type == types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED.identifier
                 and item.cleared_at is None
                 for item in state.exceptions_state.exceptions
             )
-            exceptions_interface.add_exception(
-                "cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED
-            )
+            exceptions_interface.add_exception("cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED)
             if exception_is_active:
                 _print_red("exception already raised")
             else:

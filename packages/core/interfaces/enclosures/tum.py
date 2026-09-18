@@ -187,7 +187,7 @@ class TUMEnclosureInterface:
                 return False
         except Exception:
             return False
-        return os.system("ping -n 1 " + self.plc_ip) == 0
+        return os.system("ping -n 1 " + self.plc_ip) == 0  # type: ignore
 
     # DIRECT READ FUNCTIONS
 

@@ -36,7 +36,7 @@ class EM27Interface:
                 timeout=3,
             )
         except Exception as e:
-            raise RuntimeError(f"Could not set peak position") from e
+            raise RuntimeError("Could not set peak position") from e
 
     @staticmethod
     def get_last_powerup_timestamp(

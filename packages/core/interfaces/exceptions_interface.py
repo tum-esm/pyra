@@ -92,8 +92,7 @@ class ExceptionsInterface:
             due_exceptions = [
                 item
                 for item in active_exceptions
-                if item.notified_at is None
-                and (now - item.raised_at) > _NOTIFICATION_DELAY_SECONDS
+                if item.notified_at is None and (now - item.raised_at) > _NOTIFICATION_DELAY_SECONDS
             ]
 
             if due_exceptions and config.error_email.notify_recipients:

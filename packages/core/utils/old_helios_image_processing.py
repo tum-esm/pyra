@@ -118,8 +118,10 @@ class OldHeliosImageProcessing:
         # get the circle that is closest to the image center
         x, y, r = min(
             np.round(circles[0, :]).astype("int"),  # type: ignore
-            key=lambda c: math.pow(c[0] - (image_width * 0.5), 2)  # type: ignore
-            + pow(c[1] - (image_height * 0.5), 2),
+            key=lambda c: (  # type: ignore
+                math.pow(c[0] - (image_width * 0.5), 2)  # type: ignore
+                + pow(c[1] - (image_height * 0.5), 2)
+            ),
         )
         return round(x), round(y), round(r)
 
