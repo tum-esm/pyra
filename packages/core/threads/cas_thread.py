@@ -159,9 +159,7 @@ class CASThread(AbstractThread):
                         s.last_bad_weather_detection < last_bad_weather_detection
                     ):
                         s.last_bad_weather_detection = last_bad_weather_detection
-                exceptions_interface.resolve_exception(
-                    "cas", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                )
+                exceptions_interface.resolve_exception("cas")
 
                 # SLEEP
 

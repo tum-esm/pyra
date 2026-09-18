@@ -78,6 +78,47 @@ def test_add_resolve_and_reraise_exception(
     assert state.exceptions_state.exceptions[1].raised_at == 1002.0
 
 
+def test_resolve_all_with_excluded_exception_types(
+    exception_store: tuple[
+        interfaces.ExceptionsInterface,
+        tum_esm_utils.sqlitelock.SQLiteLock,
+        utils.Logger,
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    exception_interface, state_lock, logger = exception_store
+    now = [1000.0]
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
+
+    storage_error = types.KNOWN_EXCEPTIONS.STORAGE_ERROR
+    low_energy_error = types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
+    unexpected_error = types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+    exception_interface.add_exception("system-monitor", storage_error)
+    exception_interface.add_exception("system-monitor", low_energy_error)
+    exception_interface.add_exception("another-origin", unexpected_error)
+
+    now[0] = 1001.0
+    exception_interface.resolve_exception(
+        "system-monitor", exclude_exception_types=[low_energy_error]
+    )
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    items_by_identifier = {
+        item.exception_type: item for item in state.exceptions_state.exceptions
+    }
+    assert items_by_identifier[storage_error.identifier].cleared_at == 1001.0
+    assert items_by_identifier[low_energy_error.identifier].cleared_at is None
+    assert items_by_identifier[unexpected_error.identifier].cleared_at is None
+
+    now[0] = 1002.0
+    exception_interface.resolve_exception("system-monitor")
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    items_by_identifier = {
+        item.exception_type: item for item in state.exceptions_state.exceptions
+    }
+    assert items_by_identifier[low_energy_error.identifier].cleared_at == 1002.0
+    assert items_by_identifier[unexpected_error.identifier].cleared_at is None
+
+
 def test_rejects_unregistered_exception(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -94,6 +135,10 @@ def test_rejects_unregistered_exception(
 
     with pytest.raises(ValueError):
         exception_interface.add_exception("test", unregistered)
+    with pytest.raises(ValueError):
+        exception_interface.resolve_exception(
+            "test", exclude_exception_types=[unregistered]
+        )
 
 
 def test_notification_delay_and_staggered_resolution(

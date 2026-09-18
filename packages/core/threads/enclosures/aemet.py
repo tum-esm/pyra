@@ -276,19 +276,16 @@ class AEMETEnclosureThread(AbstractThread):
                     if not exception_was_set:
                         exception_was_set = False
                         exceptions_interface.resolve_exception(
-                            "aemet-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN
+                            "aemet-enclosure"
                         )
+                    else:
                         exceptions_interface.resolve_exception(
-                            "aemet-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
+                            "aemet-enclosure",
+                            exclude_exception_types=[
+                                types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN,
+                                types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE,
+                            ],
                         )
-
-                    exceptions_interface.resolve_exception(
-                        "aemet-enclosure",
-                        types.KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR,
-                    )
-                    exceptions_interface.resolve_exception(
-                        "aemet-enclosure", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                    )
 
                     # SLEEP
 

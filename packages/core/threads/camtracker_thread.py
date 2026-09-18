@@ -372,7 +372,8 @@ class CamTrackerThread(AbstractThread):
                 # besides the one about the cover not opening
 
                 exceptions_interface.resolve_exception(
-                    "camtracker", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                    "camtracker",
+                    exclude_exception_types=[types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN],
                 )
 
                 # SLEEP

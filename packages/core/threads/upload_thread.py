@@ -69,9 +69,7 @@ class UploadThread(AbstractThread):
         if not should_be_running:
             with interfaces.StateInterface.update_state(state_lock, logger) as s:
                 s.activity.upload_is_running = False
-            interfaces.ExceptionsInterface(state_lock, logger).resolve_exception(
-                "upload", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-            )
+            interfaces.ExceptionsInterface(state_lock, logger).resolve_exception("upload")
 
         return should_be_running
 
@@ -182,9 +180,7 @@ class UploadThread(AbstractThread):
 
                 with interfaces.StateInterface.update_state(state_lock, logger) as s:
                     s.activity.upload_is_running = False  # not necessary, but ...
-                exceptions_interface.resolve_exception(
-                    "upload", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                )
+                exceptions_interface.resolve_exception("upload")
 
                 # sleep 60 minutes until running again
                 # stop thread if upload config has changed

@@ -597,12 +597,7 @@ class HeliosThread(AbstractThread):
 
                 # clear exceptions
 
-                exceptions_interface.resolve_exception(
-                    "helios", types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
-                )
-                exceptions_interface.resolve_exception(
-                    "helios", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                )
+                exceptions_interface.resolve_exception("helios")
 
                 # wait rest of loop time
                 elapsed_time = time.time() - t1

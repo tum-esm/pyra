@@ -94,17 +94,15 @@ class SystemMonitorThread(AbstractThread):
 
                 # DISK SPACE
 
+                active_exception_types: list[types.KnownException] = []
                 disk_space = tum_esm_utils.system.get_disk_space()
                 logger.debug(f"The disk is currently filled with {disk_space} %.")
                 if disk_space > 90:
+                    active_exception_types.append(types.KNOWN_EXCEPTIONS.STORAGE_ERROR)
                     exceptions_interface.add_exception(
                         "system-monitor", types.KNOWN_EXCEPTIONS.STORAGE_ERROR
                     )
                     logger.error(types.KNOWN_EXCEPTIONS.STORAGE_ERROR.error_message)
-                else:
-                    exceptions_interface.resolve_exception(
-                        "system-monitor", types.KNOWN_EXCEPTIONS.STORAGE_ERROR
-                    )
 
                 # BATTERY LEVEL
 
@@ -112,21 +110,15 @@ class SystemMonitorThread(AbstractThread):
                 if battery_level is not None:
                     logger.debug(f"The battery level is {battery_level} %.")
                     if battery_level < 30:
+                        active_exception_types.append(types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR)
                         exceptions_interface.add_exception(
                             "system-monitor", types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
                         )
                         logger.error(types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR.error_message)
-                    else:
-                        exceptions_interface.resolve_exception(
-                            "system-monitor", types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
-                        )
-                else:
-                    exceptions_interface.resolve_exception(
-                        "system-monitor", types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
-                    )
 
                 exceptions_interface.resolve_exception(
-                    "system-monitor", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+                    "system-monitor",
+                    exclude_exception_types=active_exception_types,
                 )
                 exceptions_interface.resolve_exception(
                     "cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED

@@ -162,23 +162,7 @@ class TUMEnclosureThread(AbstractThread):
                         logger.debug("Skipping remaining PLC logic during rain")
                         if not exception_was_set:
                             exception_was_set = False
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure",
-                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
-                            )
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
-                            )
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure",
-                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED,
-                            )
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
-                            )
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                            )
+                            exceptions_interface.resolve_exception("tum-enclosure")
                         continue
 
                     # SKIP REMAINING LOGIC IF IN USER CONTROLLED MODE
@@ -189,23 +173,7 @@ class TUMEnclosureThread(AbstractThread):
                         )
                         if not exception_was_set:
                             exception_was_set = False
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure",
-                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
-                            )
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
-                            )
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure",
-                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED,
-                            )
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
-                            )
-                            exceptions_interface.resolve_exception(
-                                "tum-enclosure", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                            )
+                            exceptions_interface.resolve_exception("tum-enclosure")
                         t2 = time.time()
                         sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
                         logger.debug(f"Sleeping {sleep_time:.2f} seconds")
@@ -326,18 +294,19 @@ class TUMEnclosureThread(AbstractThread):
                         exception_was_set = False
                         exceptions_interface.resolve_exception(
                             "tum-enclosure",
-                            types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
+                            exclude_exception_types=[
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED
+                            ],
                         )
+                    else:
                         exceptions_interface.resolve_exception(
-                            "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
+                            "tum-enclosure",
+                            exclude_exception_types=[
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
+                                types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE,
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED,
+                            ],
                         )
-
-                    exceptions_interface.resolve_exception(
-                        "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
-                    )
-                    exceptions_interface.resolve_exception(
-                        "tum-enclosure", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                    )
 
                     # SLEEP
 

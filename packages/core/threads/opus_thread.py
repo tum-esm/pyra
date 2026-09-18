@@ -416,12 +416,7 @@ class OpusThread(AbstractThread):
                         s.opus_state.macro_id = current_macro[0]
                         s.opus_state.macro_filepath = current_macro[1]
                 if clear_issues:
-                    exceptions_interface.resolve_exception(
-                        "opus", types.KNOWN_EXCEPTIONS.OPUS_CONNECTION_ERROR
-                    )
-                    exceptions_interface.resolve_exception(
-                        "opus", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                    )
+                    exceptions_interface.resolve_exception("opus")
 
                 # SLEEP
 

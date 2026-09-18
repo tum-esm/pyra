@@ -60,19 +60,38 @@ class ExceptionsInterface:
     def resolve_exception(
         self,
         origin: str,
-        exception_type: types.KnownException,
+        exception_type: types.KnownException | None = None,
+        exclude_exception_types: list[types.KnownException] | None = None,
     ) -> None:
-        """Mark an active catalogued exception as cleared."""
+        """Mark matching active exceptions as cleared.
 
-        self._validate_exception_type(exception_type)
+        If no exception type is provided, all active exceptions from the
+        origin are resolved except explicitly excluded types.
+        """
+
+        if exception_type is not None:
+            self._validate_exception_type(exception_type)
+        excluded_exception_types = exclude_exception_types or []
+        for excluded_exception_type in excluded_exception_types:
+            self._validate_exception_type(excluded_exception_type)
+
+        excluded_identifiers = {
+            excluded_exception_type.identifier
+            for excluded_exception_type in excluded_exception_types
+        }
+        cleared_at = time.time()
         with StateInterface.update_state(self.state_lock, self.logger) as state:
             for item in state.exceptions_state.exceptions:
                 if (
                     item.origin == origin
-                    and item.exception_type == exception_type.identifier
                     and item.cleared_at is None
+                    and (
+                        exception_type is None
+                        or item.exception_type == exception_type.identifier
+                    )
+                    and item.exception_type not in excluded_identifiers
                 ):
-                    item.cleared_at = time.time()
+                    item.cleared_at = cleared_at
 
     @staticmethod
     def update_exception_notifications(
