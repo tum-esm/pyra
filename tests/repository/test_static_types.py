@@ -14,7 +14,7 @@ def _rmdir(path: str) -> None:
 
 def _rm(path: str) -> None:
     path = os.path.join(PROJECT_DIR, path)
-    os.system(f"rm -rf {path}")
+    os.system(f"rm -rf {path}")  # type: ignore
 
 
 @pytest.mark.order(1)
@@ -29,7 +29,7 @@ def test_static_types() -> None:
         "packages/cli/main.py",
         "tests/",
     ]:
-        assert os.system(f"cd {PROJECT_DIR} && python -m mypy {path}") == 0
+        assert os.system(f"cd {PROJECT_DIR} && python -m mypy {path}") == 0  # type: ignore
 
 
 @pytest.mark.order(1)
