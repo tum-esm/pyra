@@ -5,7 +5,7 @@ import { set as lodashSet } from 'lodash';
 
 const floatSchema = z.union([z.number(), z.string().transform((x) => parseFloat(x) || 0.0)]);
 const intSchema = floatSchema; //z.union([z.number(), z.string().transform((x) => parseInt(x) || 0)]);
-const emailPatienceSchema = z.number().min(-1).max(86400);
+const emailPatienceSchema = floatSchema.pipe(z.number().min(-1).max(86400));
 
 export const configSchema = z.object({
     general: z.object({

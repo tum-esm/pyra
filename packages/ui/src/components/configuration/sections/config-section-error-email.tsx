@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import toast from 'react-hot-toast';
 import { configurationComponents } from '../..';
 import { fetchUtils } from '../../../utils';
@@ -98,6 +99,74 @@ export default function ConfigSectionErrorEmail() {
                 <br />
                 For TUM: Use the TUM ID and its password.
             </configurationComponents.ConfigElementNote>
+            <configurationComponents.ConfigElementLine />
+            <h3 className="text-sm font-semibold text-gray-700">Exception Email Patience</h3>
+            <configurationComponents.ConfigElementNote>
+                Set the delay in seconds before an unresolved exception triggers an email.
+                Use -1 to send no emails for that exception. Values up to 86400 (one day) are allowed.
+            </configurationComponents.ConfigElementNote>
+            {[
+                {
+                    key: 'general',
+                    visible: true,
+                    rows: ([
+                        ['cover-did-not-open', 'Cover Did Not Open'],
+                        ['cover-did-not-close', 'Cover Did Not Close'],
+                        ['storage-error', 'Storage Error'],
+                        ['low-energy-error', 'Low Energy Error'],
+                        ['pyra-core-crashed', 'Pyra Core Crashed'],
+                        ['camtracker-configuration-error', 'CamTracker Configuration Error'],
+                        ['helios-camera-error', 'Helios Camera Error'],
+                        ['opus-connection-error', 'OPUS Connection Error'],
+                        ['em27-connection-error', 'EM27 Connection Error'],
+                        ['lock-timeout-error', 'Lock Timeout Error'],
+                    ] as const).filter(([identifier]) =>
+                        identifier !== 'helios-camera-error' || localConfig?.helios != null
+                    ),
+                },
+                {
+                    key: 'tum',
+                    visible: localConfig?.tum_enclosure != null,
+                    rows: [
+                        ['tum-enclosure-plc-connection-error', 'TUM Enclosure PLC Connection Error'],
+                        [
+                            'tum-enclosure-rain-detected-cover-not-closed',
+                            'TUM Enclosure Rain: Cover Not Closed',
+                        ],
+                        ['tum-enclosure-plc-reset-failed', 'TUM Enclosure PLC Reset Failed'],
+                        ['tum-enclosure-plc-error', 'TUM Enclosure PLC Error'],
+                    ] as const,
+                },
+                {
+                    key: 'aemet',
+                    visible: localConfig?.aemet_enclosure != null,
+                    rows: [
+                        ['aemet-enclosure-datalogger-error', 'AEMET Enclosure Datalogger Error'],
+                    ] as const,
+                },
+            ]
+                .filter((group) => group.visible)
+                .map((group, index) => (
+                    <Fragment key={group.key}>
+                        {index > 0 && <configurationComponents.ConfigElementLine />}
+                        {group.rows.map(([identifier, title]) => (
+                            <configurationComponents.ConfigElementText
+                                key={identifier}
+                                title={title}
+                                value={localSectionConfig.exception_patience[identifier]}
+                                setValue={(v) =>
+                                    setLocalConfigItem(
+                                        `error_email.exception_patience.${identifier}`,
+                                        v
+                                    )
+                                }
+                                oldValue={centralSectionConfig.exception_patience[identifier]}
+                                postfix="second(s)"
+                                numeric
+                            />
+                        ))}
+                    </Fragment>
+                ))}
         </>
     );
 }
