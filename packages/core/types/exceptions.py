@@ -19,16 +19,30 @@ class KnownException(tum_esm_utils.validators.StricterBaseModel):
     )
     min_patience: float = pydantic.Field(
         default=0,
-        description=(
-            "The user-configured patience value is the time in sectonds after which to send an email notification for this exception if it was not resolved before. This is used to avoid spamming the user with emails for the same exception over and over again. This value is the minimum time allowed for the user-configured patience value for this exception."
-        ),
+        ge=0,
+        allow_inf_nan=False,
+        description="Minimum configurable email delay in seconds, except for -1 (disabled).",
     )
     max_patience: float = pydantic.Field(
-        default=3600,
-        description=(
-            "The user-configured patience value is the time in sectonds after which to send an email notification for this exception if it was not resolved before. This is used to avoid spamming the user with emails for the same exception over and over again. This value is the maximum time allowed for the user-configured patience value for this exception."
-        ),
+        default=86400,
+        ge=0,
+        allow_inf_nan=False,
+        description="Maximum configurable email delay in seconds.",
     )
+    default_patience: float = pydantic.Field(
+        default=300,
+        ge=0,
+        allow_inf_nan=False,
+        description="Default time in seconds before emailing an unresolved exception.",
+    )
+
+    @pydantic.model_validator(mode="after")
+    def _validate_patience(self) -> "KnownException":
+        if not self.min_patience <= self.default_patience <= self.max_patience:
+            raise ValueError(
+                "Patience must satisfy min_patience <= default_patience <= max_patience"
+            )
+        return self
 
 
 class KNOWN_EXCEPTIONS:
@@ -43,6 +57,7 @@ class KNOWN_EXCEPTIONS:
     )
     COVER_DID_NOT_CLOSE = KnownException(
         identifier="cover-did-not-close",
+        default_patience=90,
         error_message="Enclosure cover did not close.",
         long_description=(
             "Even though Pyra requested the enclosure cover to close, it did not reach the closed position. The cover could be blocked or the motor could have an issue. Please check the enclosure cover and motor."
@@ -77,6 +92,7 @@ class KNOWN_EXCEPTIONS:
     )
     TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED = KnownException(
         identifier="tum-enclosure-rain-detected-cover-not-closed",
+        default_patience=0,
         error_message="Rain detected but cover is not closed.",
         long_description=("The TUM enclosure reports rain, but the cover did not close yet."),
         # different from COVER_DID_NOT_CLOSE error because now it is quite urgent to close the cover
@@ -152,6 +168,7 @@ class KNOWN_EXCEPTIONS:
 
     UNEXPECTED_ERROR = KnownException(
         identifier="unexpected-error",
+        default_patience=0,
         error_message="An unexpected error occurred.",
         long_description=(
             "PYRA encountered an error that could not be assigned to a more specific sdocumented exception type. Refer to the traceback for the underlying cause."

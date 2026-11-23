@@ -5,6 +5,7 @@ import { set as lodashSet } from 'lodash';
 
 const floatSchema = z.union([z.number(), z.string().transform((x) => parseFloat(x) || 0.0)]);
 const intSchema = floatSchema; //z.union([z.number(), z.string().transform((x) => parseInt(x) || 0)]);
+const emailPatienceSchema = z.number().min(-1).max(86400);
 
 export const configSchema = z.object({
     general: z.object({
@@ -43,6 +44,26 @@ export const configSchema = z.object({
         sender_address: z.string(),
         notify_recipients: z.boolean(),
         recipients: z.string(),
+        exception_patience: z
+            .object({
+                'cover-did-not-open': emailPatienceSchema.default(300),
+                'cover-did-not-close': emailPatienceSchema.default(90),
+                'storage-error': emailPatienceSchema.default(300),
+                'low-energy-error': emailPatienceSchema.default(300),
+                'pyra-core-crashed': emailPatienceSchema.default(300),
+                'tum-enclosure-plc-connection-error': emailPatienceSchema.default(300),
+                'tum-enclosure-rain-detected-cover-not-closed': emailPatienceSchema.default(0),
+                'tum-enclosure-plc-reset-failed': emailPatienceSchema.default(300),
+                'tum-enclosure-plc-error': emailPatienceSchema.default(300),
+                'aemet-enclosure-datalogger-error': emailPatienceSchema.default(300),
+                'camtracker-configuration-error': emailPatienceSchema.default(300),
+                'helios-camera-error': emailPatienceSchema.default(300),
+                'opus-connection-error': emailPatienceSchema.default(300),
+                'em27-connection-error': emailPatienceSchema.default(300),
+                'lock-timeout-error': emailPatienceSchema.default(300),
+            })
+            .strict()
+            .default({}),
     }),
     measurement_decision: z.object({
         mode: z.union([z.literal('automatic'), z.literal('manual'), z.literal('cli')]),

@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 import datetime
 import os
-from typing import Any, Generator, Literal, Optional
+from typing import Annotated, Any, Generator, Literal, Optional
 
 import filelock
 import pydantic
@@ -118,6 +118,55 @@ class PartialCamtrackerConfig(StricterBaseModel):
     restart_if_cover_remains_closed: Optional[bool] = None
 
 
+EmailPatienceSeconds = Annotated[float, pydantic.Field(ge=-1, le=86400, allow_inf_nan=False)]
+
+
+class ExceptionPatienceConfig(StricterBaseModel):
+    """Email delays in seconds; -1 disables reporting for that exception."""
+
+    model_config = pydantic.ConfigDict(populate_by_name=True, serialize_by_alias=True)
+
+    cover_did_not_open: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="cover-did-not-open"
+    )
+    cover_did_not_close: EmailPatienceSeconds = pydantic.Field(
+        default=90, alias="cover-did-not-close"
+    )
+    storage_error: EmailPatienceSeconds = pydantic.Field(default=300, alias="storage-error")
+    low_energy_error: EmailPatienceSeconds = pydantic.Field(default=300, alias="low-energy-error")
+    pyra_core_crashed: EmailPatienceSeconds = pydantic.Field(default=300, alias="pyra-core-crashed")
+    tum_enclosure_plc_connection_error: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="tum-enclosure-plc-connection-error"
+    )
+    tum_enclosure_rain_detected_cover_not_closed: EmailPatienceSeconds = pydantic.Field(
+        default=0, alias="tum-enclosure-rain-detected-cover-not-closed"
+    )
+    tum_enclosure_plc_reset_failed: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="tum-enclosure-plc-reset-failed"
+    )
+    tum_enclosure_plc_error: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="tum-enclosure-plc-error"
+    )
+    aemet_enclosure_datalogger_error: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="aemet-enclosure-datalogger-error"
+    )
+    camtracker_configuration_error: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="camtracker-configuration-error"
+    )
+    helios_camera_error: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="helios-camera-error"
+    )
+    opus_connection_error: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="opus-connection-error"
+    )
+    em27_connection_error: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="em27-connection-error"
+    )
+    lock_timeout_error: EmailPatienceSeconds = pydantic.Field(
+        default=300, alias="lock-timeout-error"
+    )
+
+
 class ErrorEmailConfig(StricterBaseModel):
     smtp_host: str
     smtp_port: Literal[465, 587]
@@ -126,6 +175,10 @@ class ErrorEmailConfig(StricterBaseModel):
     sender_address: str
     notify_recipients: bool
     recipients: str
+    exception_patience: ExceptionPatienceConfig = pydantic.Field(
+        default_factory=ExceptionPatienceConfig,
+        description="Email delay in seconds by exception identifier; -1 disables emails.",
+    )
 
 
 class PartialErrorEmailConfig(StricterBaseModel):
@@ -138,6 +191,7 @@ class PartialErrorEmailConfig(StricterBaseModel):
     sender_address: Optional[str] = None
     notify_recipients: Optional[bool] = None
     recipients: Optional[str] = None
+    exception_patience: Optional[ExceptionPatienceConfig] = None
 
 
 class MeasurementDecisionConfig(StricterBaseModel):

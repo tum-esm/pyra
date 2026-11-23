@@ -6,15 +6,41 @@ PYRA now uses `KNOWN_EXCEPTIONS` as the canonical catalog for exceptions that ar
 
 - `add_exception(origin, exception_type, traceback=None, details=None)` adds a catalogued exception and prevents duplicate active records.
 - `resolve_exception(origin, exception_type=None, exclude_exception_types=None)` resolves one type or every active exception from an origin, optionally preserving selected types.
-- `update_exception_notifications(...)` emails exceptions that remain active for more than five minutes, removes cleared records, retries failed notifications, and sends an all-resolved email when appropriate.
+- `update_exception_notifications(...)` emails exceptions once their configured patience has elapsed, removes cleared records, retries failed notifications, and sends a recovery email when all email-enabled exceptions have cleared.
 
 Persistent exception records contain the catalog metadata, optional details and traceback, and Unix timestamps for when they were raised, notified, and cleared. The occurrence email renders the description, details, and traceback as separate sections.
 
-All previous direct exception-state mutations were migrated to this interface. Focused tests cover catalog validation, persistence, deduplication, resolution and exclusions, notification timing and retries, email rendering, staggered resolution, and legacy-state reset behavior.
+All previous direct exception-state mutations were migrated to this interface. Focused tests cover catalog validation, persistence, deduplication, resolution and exclusions, notification timing and retries, email rendering, and staggered resolution. Compatibility with old config or state files is not required on this development branch.
 
-## Patience behavior before and after the migration
+## Configurable email patience
 
-The current five-minute notification delay starts when an exception is added to state. Some producers still wait before adding an exception, so their effective email delay is the producer-side delay plus five minutes. This must be considered when moving patience into a unified per-catalog configuration.
+`ExceptionPatienceConfig` explicitly lists configurable exception identifiers and their email delays in seconds. The default is 90 seconds for `COVER_DID_NOT_CLOSE`, zero for `TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED`, and 300 seconds for every other field. Any finite value from -1 through 86400 seconds (one day), inclusive, is allowed. Exactly -1 disables emails; values between -1 and zero are eligible on the next notification update. The config schema is independent of the exception catalog.
+
+Override defaults in full or partial configuration using stable identifiers:
+
+```json
+{
+  "error_email": {
+    "exception_patience": {
+      "opus-connection-error": 600,
+      "cover-did-not-close": 90,
+      "storage-error": -1
+    }
+  }
+}
+```
+
+Omitting `exception_patience` or an individual identifier uses the explicit config field defaults. The default config JSON lists every supported key and its default value for the UI. Partial updates merge overrides by identifier. Unknown fields, nonfinite numbers, and values outside the allowed range are rejected. `-1` disables email reporting for that type. `UNEXPECTED_ERROR` is not configurable and always has zero email patience; an `unexpected-error` config key is rejected.
+
+Patience starts at `raised_at`, when a fault is recorded. An active, unnotified exception is due when its age is greater than or equal to its effective patience. Zero means eligible on the next notification update. Configuration changes apply to existing active exceptions without resetting timestamps. Any exception without a configurable field uses 300 seconds, even if it exists in the catalog with different patience metadata, except `UNEXPECTED_ERROR`, which always uses zero.
+
+Muted exceptions remain in state until resolved and are never marked notified merely because they are muted. They do not block recovery emails. After a prior occurrence email, clearing or muting the last email-enabled exception sends one recovery email: "All email-enabled exceptions have been resolved." Unmuting an unnotified exception uses its original age; unmuting an already-notified exception does not resend its occurrence email.
+
+Connection timeouts, retry intervals, and other operational timing remain local and unchanged. Existing producer-side suppression also remains for now, so delays before recording a fault still add to email patience. No configuration or persisted-state migration is needed for this addition.
+
+## Patience behavior at the initial migration
+
+The following table records behavior before configurable patience was added: the migration introduced a shared five-minute email delay. References to "current behavior" in this table describe that migration snapshot; the configurable defaults and overrides above now replace its fixed 300-second delay.
 
 | Exception or path | Before the migration | Current behavior |
 | --- | --- | --- |
@@ -34,4 +60,4 @@ The current five-minute notification delay starts when an exception is added to 
 | `HELIOS_CAMERA_ERROR` while taking images | Three consecutive camera errors were tolerated, with a 30-second reinitialization wait after each. The fourth consecutive error reached the persistent exception state and was emailed on the next main iteration. | The three-error tolerance remains. The fourth error is added to state and must then remain active for more than 300 seconds before email. |
 | Helios camera initialization failure | Initialization failures were retried every 30 seconds and never reached persistent exception state through this path. | This behavior is unchanged, so this path still bypasses the unified notification lifecycle entirely. It should be addressed when patience becomes catalog-driven. |
 
-When configurable patience is added, each retained producer-side delay should be reviewed deliberately. If the catalog patience is intended to represent the full time from first detection to notification, the corresponding local timer or retry counter should be removed or converted into state updates; otherwise the two delays will stack.
+As follow-up work, review each producer-side suppression timer or retry counter and move email suppression into catalog patience. Retain operational connection timeouts, retry intervals, and time needed for physical operations or fault confirmation as separate controls.

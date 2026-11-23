@@ -53,6 +53,23 @@ export namespace customTypes {
             sender_password: string;
             notify_recipients: boolean;
             recipients: string;
+            exception_patience: {
+                'cover-did-not-open': number;
+                'cover-did-not-close': number;
+                'storage-error': number;
+                'low-energy-error': number;
+                'pyra-core-crashed': number;
+                'tum-enclosure-plc-connection-error': number;
+                'tum-enclosure-rain-detected-cover-not-closed': number;
+                'tum-enclosure-plc-reset-failed': number;
+                'tum-enclosure-plc-error': number;
+                'aemet-enclosure-datalogger-error': number;
+                'camtracker-configuration-error': number;
+                'helios-camera-error': number;
+                'opus-connection-error': number;
+                'em27-connection-error': number;
+                'lock-timeout-error': number;
+            };
         };
         measurement_decision: {
             mode: 'automatic' | 'manual' | 'cli';
@@ -139,6 +156,23 @@ export namespace customTypes {
             sender_password?: string;
             notify_recipients?: boolean;
             recipients?: string;
+            exception_patience?: {
+                'cover-did-not-open'?: number;
+                'cover-did-not-close'?: number;
+                'storage-error'?: number;
+                'low-energy-error'?: number;
+                'pyra-core-crashed'?: number;
+                'tum-enclosure-plc-connection-error'?: number;
+                'tum-enclosure-rain-detected-cover-not-closed'?: number;
+                'tum-enclosure-plc-reset-failed'?: number;
+                'tum-enclosure-plc-error'?: number;
+                'aemet-enclosure-datalogger-error'?: number;
+                'camtracker-configuration-error'?: number;
+                'helios-camera-error'?: number;
+                'opus-connection-error'?: number;
+                'em27-connection-error'?: number;
+                'lock-timeout-error'?: number;
+            };
         };
         measurement_decision?: {
             mode?: 'automatic' | 'manual' | 'cli';

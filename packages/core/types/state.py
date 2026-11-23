@@ -49,7 +49,7 @@ class ExceptionsState(StricterBaseModel):
     )
     notification_sent: bool = pydantic.Field(
         default=False,
-        description="Whether an exception notification was sent since this list became nonempty.",
+        description="Whether an occurrence email was sent since the last email-enabled recovery.",
     )
 
 

@@ -34,7 +34,24 @@
     "smtp_password": "...",
     "sender_address": "technical-user@domain.com",
     "notify_recipients": true,
-    "recipients": "your@mail.com"
+    "recipients": "your@mail.com",
+    "exception_patience": {
+      "cover-did-not-open": 300,
+      "cover-did-not-close": 90,
+      "storage-error": 300,
+      "low-energy-error": 300,
+      "pyra-core-crashed": 300,
+      "tum-enclosure-plc-connection-error": 300,
+      "tum-enclosure-rain-detected-cover-not-closed": 0,
+      "tum-enclosure-plc-reset-failed": 300,
+      "tum-enclosure-plc-error": 300,
+      "aemet-enclosure-datalogger-error": 300,
+      "camtracker-configuration-error": 300,
+      "helios-camera-error": 300,
+      "opus-connection-error": 300,
+      "em27-connection-error": 300,
+      "lock-timeout-error": 300
+    }
   },
   "measurement_decision": {
     "mode": "automatic",

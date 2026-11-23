@@ -6,7 +6,7 @@ from packages.core import types, utils
 
 from .state_interface import StateInterface
 
-_NOTIFICATION_DELAY_SECONDS = 300
+_DEFAULT_EXCEPTION_PATIENCE_SECONDS = 300
 
 
 class ExceptionsInterface:
@@ -85,10 +85,7 @@ class ExceptionsInterface:
                 if (
                     item.origin == origin
                     and item.cleared_at is None
-                    and (
-                        exception_type is None
-                        or item.exception_type == exception_type.identifier
-                    )
+                    and (exception_type is None or item.exception_type == exception_type.identifier)
                     and item.exception_type not in excluded_identifiers
                 ):
                     item.cleared_at = cleared_at
@@ -102,16 +99,29 @@ class ExceptionsInterface:
         """Send due notifications and remove cleared exception records."""
 
         now = time.time()
+        patience_by_identifier = config.error_email.exception_patience.model_dump(by_alias=True)
+        patience_by_identifier[types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR.identifier] = 0
         with StateInterface.update_state(state_lock, logger) as state:
             exception_state = state.exceptions_state
-            had_exceptions = len(exception_state.exceptions) > 0
             active_exceptions = [
                 item for item in exception_state.exceptions if item.cleared_at is None
             ]
-            due_exceptions = [
+            email_enabled_exceptions = [
                 item
                 for item in active_exceptions
-                if item.notified_at is None and (now - item.raised_at) > _NOTIFICATION_DELAY_SECONDS
+                if patience_by_identifier.get(
+                    item.exception_type, _DEFAULT_EXCEPTION_PATIENCE_SECONDS
+                )
+                != -1
+            ]
+            due_exceptions = [
+                item
+                for item in email_enabled_exceptions
+                if item.notified_at is None
+                and (now - item.raised_at)
+                >= patience_by_identifier.get(
+                    item.exception_type, _DEFAULT_EXCEPTION_PATIENCE_SECONDS
+                )
             ]
 
             if due_exceptions and config.error_email.notify_recipients:
@@ -120,7 +130,7 @@ class ExceptionsInterface:
                     item.notified_at = now
                 exception_state.notification_sent = True
 
-            if had_exceptions and not active_exceptions:
+            if not email_enabled_exceptions:
                 if exception_state.notification_sent and config.error_email.notify_recipients:
                     utils.ExceptionEmailClient.handle_resolved_exception(config)
                 exception_state.notification_sent = False

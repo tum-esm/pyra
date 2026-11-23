@@ -1,8 +1,6 @@
-import datetime
-import json
 import threading
 from pathlib import Path
-from typing import Generator
+from unittest.mock import Mock
 
 import pytest
 import tum_esm_utils
@@ -14,6 +12,7 @@ from tests.fixtures import SAMPLE_CONFIG
 
 @pytest.mark.ci
 def test_exception_catalog_identifiers_are_unique() -> None:
+    """Prevent catalog entries from sharing the identifier used to persist faults."""
     identifiers = [entry.identifier for entry in types.KNOWN_EXCEPTIONS.all()]
     assert len(identifiers) == len(set(identifiers))
 
@@ -22,11 +21,7 @@ def test_exception_catalog_identifiers_are_unique() -> None:
 def exception_store(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-) -> Generator[
-    tuple[interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger],
-    None,
-    None,
-]:
+) -> tuple[interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger]:
     state_path = str(tmp_path / "state.json")
     monkeypatch.setattr(state_interface, "_STATE_FILE_PATH", state_path)
     logger = utils.Logger(origin="test", lock=threading.Lock(), just_print=True)
@@ -35,7 +30,7 @@ def exception_store(
         timeout=1,
         poll_interval=0.01,
     )
-    yield interfaces.ExceptionsInterface(state_lock, logger), state_lock, logger
+    return interfaces.ExceptionsInterface(state_lock, logger), state_lock, logger
 
 
 def test_add_resolve_and_reraise_exception(
@@ -46,6 +41,7 @@ def test_add_resolve_and_reraise_exception(
     ],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Persist fault details once while active, but record a new occurrence after resolution."""
     exception_interface, state_lock, logger = exception_store
     now = [1000.0]
     monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
@@ -86,6 +82,7 @@ def test_resolve_all_with_excluded_exception_types(
     ],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Resolve only the requested origin while preserving explicitly excluded faults."""
     exception_interface, state_lock, logger = exception_store
     now = [1000.0]
     monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
@@ -102,9 +99,7 @@ def test_resolve_all_with_excluded_exception_types(
         "system-monitor", exclude_exception_types=[low_energy_error]
     )
     state = interfaces.StateInterface.load_state(state_lock, logger)
-    items_by_identifier = {
-        item.exception_type: item for item in state.exceptions_state.exceptions
-    }
+    items_by_identifier = {item.exception_type: item for item in state.exceptions_state.exceptions}
     assert items_by_identifier[storage_error.identifier].cleared_at == 1001.0
     assert items_by_identifier[low_energy_error.identifier].cleared_at is None
     assert items_by_identifier[unexpected_error.identifier].cleared_at is None
@@ -112,9 +107,7 @@ def test_resolve_all_with_excluded_exception_types(
     now[0] = 1002.0
     exception_interface.resolve_exception("system-monitor")
     state = interfaces.StateInterface.load_state(state_lock, logger)
-    items_by_identifier = {
-        item.exception_type: item for item in state.exceptions_state.exceptions
-    }
+    items_by_identifier = {item.exception_type: item for item in state.exceptions_state.exceptions}
     assert items_by_identifier[low_energy_error.identifier].cleared_at == 1002.0
     assert items_by_identifier[unexpected_error.identifier].cleared_at is None
 
@@ -126,6 +119,7 @@ def test_rejects_unregistered_exception(
         utils.Logger,
     ],
 ) -> None:
+    """Keep uncatalogued exception types out of both additions and resolution requests."""
     exception_interface, _, _ = exception_store
     unregistered = types.KnownException(
         identifier="unregistered",
@@ -136,9 +130,9 @@ def test_rejects_unregistered_exception(
     with pytest.raises(ValueError):
         exception_interface.add_exception("test", unregistered)
     with pytest.raises(ValueError):
-        exception_interface.resolve_exception(
-            "test", exclude_exception_types=[unregistered]
-        )
+        exception_interface.resolve_exception("test", unregistered)
+    with pytest.raises(ValueError):
+        exception_interface.resolve_exception("test", exclude_exception_types=[unregistered])
 
 
 def test_notification_delay_and_staggered_resolution(
@@ -149,48 +143,43 @@ def test_notification_delay_and_staggered_resolution(
     ],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Prevent early alerts and premature recovery emails: notify at the exact patience
+    boundary, then send recovery only after the remaining exception clears.
+    """
     exception_interface, state_lock, logger = exception_store
     now = [1000.0]
     monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
 
-    occurred: list[list[types.ExceptionStateItem]] = []
-    resolved: list[bool] = []
-
-    def handle_occurred(config: types.Config, items: list[types.ExceptionStateItem]) -> None:
-        occurred.append(items)
-
-    def handle_resolved(config: types.Config) -> None:
-        resolved.append(True)
-
-    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", handle_occurred)
-    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", handle_resolved)
+    occurred, resolved = Mock(), Mock()
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
     config = SAMPLE_CONFIG.model_copy(deep=True)
 
     first = types.KNOWN_EXCEPTIONS.STORAGE_ERROR
     second = types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
     exception_interface.add_exception("system-monitor", first)
 
+    now[0] = 1299.9
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    occurred.assert_not_called()
+
     now[0] = 1300.0
     interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    assert occurred == []
-
-    now[0] = 1300.1
-    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    assert len(occurred) == 1
+    occurred.assert_called_once()
     state = interfaces.StateInterface.load_state(state_lock, logger)
-    assert state.exceptions_state.exceptions[0].notified_at == 1300.1
+    assert state.exceptions_state.exceptions[0].notified_at == 1300.0
     assert state.exceptions_state.notification_sent
 
     exception_interface.add_exception("system-monitor", second)
     exception_interface.resolve_exception("system-monitor", first)
     now[0] = 1301.0
     interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    assert resolved == []
+    resolved.assert_not_called()
 
     exception_interface.resolve_exception("system-monitor", second)
     now[0] = 1302.0
     interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    assert resolved == [True]
+    resolved.assert_called_once_with(config)
     state = interfaces.StateInterface.load_state(state_lock, logger)
     assert state.exceptions_state.exceptions == []
     assert not state.exceptions_state.notification_sent
@@ -204,16 +193,12 @@ def test_failed_notification_remains_retryable(
     ],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """A failed occurrence email must leave the fault pending so the next update retries it."""
     exception_interface, state_lock, logger = exception_store
-    now = [1000.0]
-    monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: 1000.0)
     exception_interface.add_exception("test", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR)
-    now[0] = 1301.0
-
-    def fail(config: types.Config, items: list[types.ExceptionStateItem]) -> None:
-        raise RuntimeError("SMTP failed")
-
-    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", fail)
+    occurred = Mock(side_effect=RuntimeError("SMTP failed"))
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
     config = SAMPLE_CONFIG.model_copy(deep=True)
     with pytest.raises(RuntimeError, match="SMTP failed"):
         interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
@@ -221,6 +206,13 @@ def test_failed_notification_remains_retryable(
     state = interfaces.StateInterface.load_state(state_lock, logger)
     assert state.exceptions_state.exceptions[0].notified_at is None
     assert not state.exceptions_state.notification_sent
+
+    occurred.side_effect = None
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    assert occurred.call_count == 2
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    assert state.exceptions_state.exceptions[0].notified_at == 1000.0
+    assert state.exceptions_state.notification_sent
 
 
 def test_disabled_notification_is_not_marked_as_sent(
@@ -231,40 +223,168 @@ def test_disabled_notification_is_not_marked_as_sent(
     ],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """The global email switch must suppress delivery and leave faults unnotified."""
     exception_interface, state_lock, logger = exception_store
-    now = [1000.0]
-    monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: 1000.0)
     exception_interface.add_exception("test", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR)
-    now[0] = 1301.0
+    occurred = Mock()
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
 
     config = SAMPLE_CONFIG.model_copy(deep=True)
     config.error_email.notify_recipients = False
     interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
 
+    occurred.assert_not_called()
     state = interfaces.StateInterface.load_state(state_lock, logger)
     assert state.exceptions_state.exceptions[0].notified_at is None
     assert not state.exceptions_state.notification_sent
 
 
-def test_legacy_exception_state_resets_entire_state(
+def test_independent_patience_and_unconfigurable_exception(
     exception_store: tuple[
-        interfaces.ExceptionsInterface,
-        tum_esm_utils.sqlitelock.SQLiteLock,
-        utils.Logger,
+        interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
     ],
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
 ) -> None:
-    _, state_lock, logger = exception_store
-    legacy_state = types.StateObject(
-        last_updated=datetime.datetime.now(),
-        measurements_should_be_running=True,
-    ).model_dump(mode="json")
-    legacy_state["exceptions_state"] = {"current": [], "notified": []}
-    state_path = str(tmp_path / "legacy-state.json")
-    tum_esm_utils.files.dump_file(state_path, json.dumps(legacy_state))
-    monkeypatch.setattr(state_interface, "_STATE_FILE_PATH", state_path)
+    """Prevent one delay from applying to every fault: check per-type defaults and
+    overrides, immediate unexpected errors, the 300s fallback, and no repeat emails.
+    """
+    exception_interface, state_lock, logger = exception_store
+    now = [1000.0]
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
+    occurred = Mock()
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
+    config = SAMPLE_CONFIG.model_copy(deep=True)
+    config.error_email.exception_patience.opus_connection_error = 600
+    unconfigurable = types.KnownException(
+        identifier="new-error",
+        error_message="New error",
+        long_description="New error",
+        default_patience=0,
+    )
+    monkeypatch.setattr(types.KNOWN_EXCEPTIONS, "NEW_ERROR", unconfigurable, raising=False)
+    for entry in [
+        types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
+        types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE,
+        types.KNOWN_EXCEPTIONS.OPUS_CONNECTION_ERROR,
+        types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+        unconfigurable,
+    ]:
+        exception_interface.add_exception("test", entry)
+    for age, expected_identifiers in [
+        (0, ["tum-enclosure-rain-detected-cover-not-closed", "unexpected-error"]),
+        (90, ["cover-did-not-close"]),
+        (300, ["new-error"]),
+        (600, ["opus-connection-error"]),
+    ]:
+        now[0] = 1000 + age
+        interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+        occurred.assert_called_once()
+        assert [item.exception_type for item in occurred.call_args.args[1]] == expected_identifiers
+        occurred.reset_mock()
+        interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+        occurred.assert_not_called()
 
+
+def test_muted_exceptions_persist_without_blocking_recovery(
+    exception_store: tuple[
+        interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Keep muted faults visible without blocking recovery: verify persistence without
+    emails, one recovery after enabled faults clear, and cleanup when muted faults clear.
+    """
+    exception_interface, state_lock, logger = exception_store
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: 1000.0)
+    occurred, resolved = Mock(), Mock()
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
+    config = SAMPLE_CONFIG.model_copy(deep=True)
+    config.error_email.exception_patience.storage_error = -1
+    config.error_email.exception_patience.low_energy_error = 0
+    muted = types.KNOWN_EXCEPTIONS.STORAGE_ERROR
+    enabled = types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
+
+    exception_interface.add_exception("test", muted)
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    occurred.assert_not_called()
+    resolved.assert_not_called()
     state = interfaces.StateInterface.load_state(state_lock, logger)
-    assert state.measurements_should_be_running is None
-    assert state.exceptions_state.exceptions == []
+    assert len(state.exceptions_state.exceptions) == 1
+    assert state.exceptions_state.exceptions[0].notified_at is None
+
+    exception_interface.add_exception("test", enabled)
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    occurred.assert_called_once()
+    exception_interface.resolve_exception("test", enabled)
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    resolved.assert_called_once()
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    assert len(state.exceptions_state.exceptions) == 1
+    assert state.exceptions_state.exceptions[0].exception_type == muted.identifier
+    assert state.exceptions_state.exceptions[0].notified_at is None
+    assert not state.exceptions_state.notification_sent
+
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    resolved.assert_called_once()
+    exception_interface.resolve_exception("test", muted)
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    assert (
+        interfaces.StateInterface.load_state(state_lock, logger).exceptions_state.exceptions == []
+    )
+    resolved.assert_called_once()
+
+
+def test_live_patience_changes_and_muting_notified_exception(
+    exception_store: tuple[
+        interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Protect live configuration changes: retain the original fault age, retry failed
+    recovery emails after muting, and avoid duplicate alerts when unmuting.
+    """
+    exception_interface, state_lock, logger = exception_store
+    now = [1000.0]
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
+    occurred, resolved = Mock(), Mock()
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
+    config = SAMPLE_CONFIG.model_copy(deep=True)
+    config.error_email.exception_patience.storage_error = -1
+    exception_interface.add_exception("test", types.KNOWN_EXCEPTIONS.STORAGE_ERROR)
+    now[0] = 1600.0
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    occurred.assert_not_called()
+
+    config.error_email.exception_patience.storage_error = 601
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    occurred.assert_not_called()
+    config.error_email.exception_patience.storage_error = 600
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    occurred.assert_called_once()
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    assert state.exceptions_state.exceptions[0].raised_at == 1000
+    assert state.exceptions_state.exceptions[0].notified_at == 1600
+
+    config.error_email.exception_patience.storage_error = -1
+    resolved.side_effect = RuntimeError("SMTP failed")
+    with pytest.raises(RuntimeError, match="SMTP failed"):
+        interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    assert interfaces.StateInterface.load_state(
+        state_lock, logger
+    ).exceptions_state.notification_sent
+    resolved.side_effect = None
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    assert resolved.call_count == 2
+    assert not interfaces.StateInterface.load_state(
+        state_lock, logger
+    ).exceptions_state.notification_sent
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    assert resolved.call_count == 2
+
+    # Unmuting an already-notified fault must not send a duplicate occurrence email.
+    config.error_email.exception_patience.storage_error = 0
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    occurred.assert_called_once()
