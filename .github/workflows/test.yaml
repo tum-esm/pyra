@@ -1,4 +1,4 @@
-name: "test-python-code"
+name: "test"
 on:
   push:
     branches:
@@ -11,7 +11,7 @@ on:
       - "LICENSE.md"
       - "netlify.toml"
       - ".github/workflows/*.yaml"
-      - "!.github/workflows/test-python-code.yaml"
+      - "!.github/workflows/test.yaml"
   pull_request:
     branches:
       - main
@@ -24,13 +24,19 @@ on:
       - "LICENSE.md"
       - "netlify.toml"
       - ".github/workflows/*.yaml"
-      - "!.github/workflows/test-python-code.yaml"
+      - "!.github/workflows/test.yaml"
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Set up NodeJS
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Set up Python 3.10.11
         uses: actions/setup-python@v6
         with:
