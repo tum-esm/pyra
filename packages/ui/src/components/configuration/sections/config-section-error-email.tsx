@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import toast from 'react-hot-toast';
+import configSchema from '../../../config.schema.json';
 import { configurationComponents } from '../..';
 import { fetchUtils } from '../../../utils';
 import useCommand from '../../../utils/fetch-utils/use-command';
@@ -150,20 +151,27 @@ export default function ConfigSectionErrorEmail() {
                     <Fragment key={group.key}>
                         {index > 0 && <configurationComponents.ConfigElementLine />}
                         {group.rows.map(([identifier, title]) => (
-                            <configurationComponents.ConfigElementText
-                                key={identifier}
-                                title={title}
-                                value={localSectionConfig.exception_patience[identifier]}
-                                setValue={(v) =>
-                                    setLocalConfigItem(
-                                        `error_email.exception_patience.${identifier}`,
-                                        v
-                                    )
-                                }
-                                oldValue={centralSectionConfig.exception_patience[identifier]}
-                                postfix="second(s)"
-                                numeric
-                            />
+                            <Fragment key={identifier}>
+                                <configurationComponents.ConfigElementText
+                                    title={title}
+                                    value={localSectionConfig.exception_patience[identifier]}
+                                    setValue={(v) =>
+                                        setLocalConfigItem(
+                                            `error_email.exception_patience.${identifier}`,
+                                            v
+                                        )
+                                    }
+                                    oldValue={centralSectionConfig.exception_patience[identifier]}
+                                    postfix="second(s)"
+                                    numeric
+                                />
+                                <configurationComponents.ConfigElementNote>
+                                    {
+                                        configSchema.$defs.ExceptionPatienceConfig.properties[identifier]
+                                            .description
+                                    }
+                                </configurationComponents.ConfigElementNote>
+                            </Fragment>
                         ))}
                     </Fragment>
                 ))}

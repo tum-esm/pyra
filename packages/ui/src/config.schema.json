@@ -1,0 +1,783 @@
+{
+    "$defs": {
+        "AEMETEnclosureConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "datalogger_ip": {
+                    "$ref": "#/$defs/StrictIPv4Adress"
+                },
+                "datalogger_port": {
+                    "title": "Datalogger Port",
+                    "type": "integer"
+                },
+                "datalogger_username": {
+                    "title": "Datalogger Username",
+                    "type": "string"
+                },
+                "datalogger_password": {
+                    "title": "Datalogger Password",
+                    "type": "string"
+                },
+                "em27_power_plug_ip": {
+                    "$ref": "#/$defs/StrictIPv4Adress"
+                },
+                "em27_power_plug_port": {
+                    "title": "Em27 Power Plug Port",
+                    "type": "integer"
+                },
+                "em27_power_plug_username": {
+                    "title": "Em27 Power Plug Username",
+                    "type": "string"
+                },
+                "em27_power_plug_password": {
+                    "title": "Em27 Power Plug Password",
+                    "type": "string"
+                },
+                "use_em27_power_plug": {
+                    "title": "Use Em27 Power Plug",
+                    "type": "boolean"
+                },
+                "controlled_by_user": {
+                    "title": "Controlled By User",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "datalogger_ip",
+                "datalogger_port",
+                "datalogger_username",
+                "datalogger_password",
+                "em27_power_plug_ip",
+                "em27_power_plug_port",
+                "em27_power_plug_username",
+                "em27_power_plug_password",
+                "use_em27_power_plug",
+                "controlled_by_user"
+            ],
+            "title": "AEMETEnclosureConfig",
+            "type": "object"
+        },
+        "CamtrackerConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "config_path": {
+                    "$ref": "#/$defs/StrictFilePath"
+                },
+                "executable_path": {
+                    "$ref": "#/$defs/StrictFilePath"
+                },
+                "working_directory_path": {
+                    "$ref": "#/$defs/StrictDirectoryPath"
+                },
+                "learn_az_elev_path": {
+                    "$ref": "#/$defs/StrictFilePath"
+                },
+                "sun_intensity_path": {
+                    "$ref": "#/$defs/StrictFilePath"
+                },
+                "motor_offset_threshold": {
+                    "maximum": 360,
+                    "minimum": 0,
+                    "title": "Motor Offset Threshold",
+                    "type": "number"
+                },
+                "restart_if_logs_are_too_old": {
+                    "title": "Restart If Logs Are Too Old",
+                    "type": "boolean"
+                },
+                "restart_if_cover_remains_closed": {
+                    "title": "Restart If Cover Remains Closed",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "config_path",
+                "executable_path",
+                "working_directory_path",
+                "learn_az_elev_path",
+                "sun_intensity_path",
+                "motor_offset_threshold",
+                "restart_if_logs_are_too_old",
+                "restart_if_cover_remains_closed"
+            ],
+            "title": "CamtrackerConfig",
+            "type": "object"
+        },
+        "ErrorEmailConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "smtp_host": {
+                    "title": "Smtp Host",
+                    "type": "string"
+                },
+                "smtp_port": {
+                    "enum": [
+                        465,
+                        587
+                    ],
+                    "title": "Smtp Port",
+                    "type": "integer"
+                },
+                "smtp_username": {
+                    "title": "Smtp Username",
+                    "type": "string"
+                },
+                "smtp_password": {
+                    "title": "Smtp Password",
+                    "type": "string"
+                },
+                "sender_address": {
+                    "title": "Sender Address",
+                    "type": "string"
+                },
+                "notify_recipients": {
+                    "title": "Notify Recipients",
+                    "type": "boolean"
+                },
+                "recipients": {
+                    "title": "Recipients",
+                    "type": "string"
+                },
+                "exception_patience": {
+                    "$ref": "#/$defs/ExceptionPatienceConfig",
+                    "description": "Email delay in seconds by exception identifier; -1 disables emails."
+                }
+            },
+            "required": [
+                "smtp_host",
+                "smtp_port",
+                "smtp_username",
+                "smtp_password",
+                "sender_address",
+                "notify_recipients",
+                "recipients"
+            ],
+            "title": "ErrorEmailConfig",
+            "type": "object"
+        },
+        "ExceptionPatienceConfig": {
+            "additionalProperties": false,
+            "description": "Email delays in seconds; -1 disables reporting for that exception.",
+            "properties": {
+                "cover-did-not-open": {
+                    "default": 300,
+                    "description": "Reason for this exception: This error might have been caused by the enclosures rain sensor being triggered long enough to cause the cover to be closed but too short for PYRA to read from rain sensor in time. This is usually self-resolving after some time since the cover either opens or the rain sensor is triggered long enough for PYRA to read it. If not resolving, the cover might be stuck/the motor might be broken and needs to be checked.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Cover-Did-Not-Open",
+                    "type": "number"
+                },
+                "cover-did-not-close": {
+                    "default": 90,
+                    "description": "Reason for this exception: Even though Pyra requested the enclosure cover to close, it did not reach the closed position. The cover could be blocked or the motor could have an issue. Please check the enclosure cover and motor.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Cover-Did-Not-Close",
+                    "type": "number"
+                },
+                "storage-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: The system disk is more than 90% full. This can make the operating system unstable and might indicate that the system is producing data faster than it can upload it.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Storage-Error",
+                    "type": "number"
+                },
+                "low-energy-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: The system battery level is below 30%. Check the power supply.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Low-Energy-Error",
+                    "type": "number"
+                },
+                "pyra-core-crashed": {
+                    "default": 300,
+                    "description": "Reason for this exception: Pyra core did not shutdown with a graceful shutdown message. Normally this should only happen if the operating system forcefully killed the Pyra core process. This can also happen if the system lost power and booted back up. This error is usually raised by the Pyra UI calling \"pyra-cli core is-running\" to check whether a proper shutdown happened. It is automatically resolved when the Pyra core is starting again.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Pyra-Core-Crashed",
+                    "type": "number"
+                },
+                "tum-enclosure-plc-connection-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: PYRA could not establish a connection to the TUM enclosure PLC for several consecutive retries.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Tum-Enclosure-Plc-Connection-Error",
+                    "type": "number"
+                },
+                "tum-enclosure-rain-detected-cover-not-closed": {
+                    "default": 0,
+                    "description": "Reason for this exception: The TUM enclosure reports rain, but the cover did not close yet.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Tum-Enclosure-Rain-Detected-Cover-Not-Closed",
+                    "type": "number"
+                },
+                "tum-enclosure-plc-reset-failed": {
+                    "default": 300,
+                    "description": "Reason for this exception: The TUM enclosure PLC reported that a reset was required but triggering the reset did not resolve the issue.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Tum-Enclosure-Plc-Reset-Failed",
+                    "type": "number"
+                },
+                "tum-enclosure-plc-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: Communication with the TUM enclosure PLC failed or a requested PLC value did not update as expected.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Tum-Enclosure-Plc-Error",
+                    "type": "number"
+                },
+                "aemet-enclosure-datalogger-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: Communication with the AEMET enclosure datalogger or related power plug failed, returned invalid data, or did not update as expected.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Aemet-Enclosure-Datalogger-Error",
+                    "type": "number"
+                },
+                "camtracker-configuration-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: PYRA could not read the CamTracker configuration file or determine the coordinates from it. Please make sure to configure the correct path for the CamTracker configuration file in the PYRA configuration.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Camtracker-Configuration-Error",
+                    "type": "number"
+                },
+                "helios-camera-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: Helios could not initialize the camera, determine usable exposure settings, open the camera, or take images. This issues is typically raised if the camera is not responding for a while.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Helios-Camera-Error",
+                    "type": "number"
+                },
+                "opus-connection-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: OPUS started, but the OPUS HTTP interface did not become reachable in time. This can happen if OPUS did not start properly (normally should not happen) or if the localhost is occupied by another application. You can check whether the latter is true by opening http://localhost:8080 in a web browser and checking whether any other application is running there.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Opus-Connection-Error",
+                    "type": "number"
+                },
+                "em27-connection-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: The EM27 web interface could not be reached under the configured IP.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Em27-Connection-Error",
+                    "type": "number"
+                },
+                "lock-timeout-error": {
+                    "default": 300,
+                    "description": "Reason for this exception: Pyra uses a lock file to ensure that only one thread can access certain resources at a time. If this lock cannot be acquired in time, this error is raised. In normal operation this should not happen. If you see this error, your computer might be under heavy load so that the operating system does not allow writing to a file in time. Or your disk might be 100% occupied.",
+                    "maximum": 86400,
+                    "minimum": -1,
+                    "title": "Lock-Timeout-Error",
+                    "type": "number"
+                }
+            },
+            "title": "ExceptionPatienceConfig",
+            "type": "object"
+        },
+        "GeneralConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "version": {
+                    "const": "5.0.0-beta.3",
+                    "title": "Version",
+                    "type": "string"
+                },
+                "seconds_per_core_iteration": {
+                    "maximum": 600,
+                    "minimum": 5,
+                    "title": "Seconds Per Core Iteration",
+                    "type": "number"
+                },
+                "test_mode": {
+                    "title": "Test Mode",
+                    "type": "boolean"
+                },
+                "station_id": {
+                    "title": "Station Id",
+                    "type": "string"
+                },
+                "min_sun_elevation": {
+                    "maximum": 90,
+                    "minimum": -90,
+                    "title": "Min Sun Elevation",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "version",
+                "seconds_per_core_iteration",
+                "test_mode",
+                "station_id",
+                "min_sun_elevation"
+            ],
+            "title": "GeneralConfig",
+            "type": "object"
+        },
+        "HeliosConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "camera_id": {
+                    "maximum": 999999,
+                    "minimum": 0,
+                    "title": "Camera Id",
+                    "type": "integer"
+                },
+                "evaluation_size": {
+                    "maximum": 100,
+                    "minimum": 1,
+                    "title": "Evaluation Size",
+                    "type": "integer"
+                },
+                "seconds_per_interval": {
+                    "maximum": 600,
+                    "minimum": 5,
+                    "title": "Seconds Per Interval",
+                    "type": "number"
+                },
+                "min_seconds_between_state_changes": {
+                    "maximum": 3600,
+                    "minimum": 0,
+                    "title": "Min Seconds Between State Changes",
+                    "type": "integer"
+                },
+                "edge_pixel_threshold": {
+                    "maximum": 30,
+                    "minimum": 0,
+                    "title": "Edge Pixel Threshold",
+                    "type": "number"
+                },
+                "edge_color_threshold": {
+                    "maximum": 250,
+                    "minimum": 5,
+                    "title": "Edge Color Threshold",
+                    "type": "integer"
+                },
+                "target_pixel_brightness": {
+                    "maximum": 235,
+                    "minimum": 20,
+                    "title": "Target Pixel Brightness",
+                    "type": "integer"
+                },
+                "camera_brightness": {
+                    "maximum": 1000,
+                    "minimum": -1000,
+                    "title": "Camera Brightness",
+                    "type": "integer"
+                },
+                "camera_contrast": {
+                    "maximum": 1000,
+                    "minimum": -1000,
+                    "title": "Camera Contrast",
+                    "type": "integer"
+                },
+                "save_images_to_archive": {
+                    "title": "Save Images To Archive",
+                    "type": "boolean"
+                },
+                "save_current_image": {
+                    "title": "Save Current Image",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "camera_id",
+                "evaluation_size",
+                "seconds_per_interval",
+                "min_seconds_between_state_changes",
+                "edge_pixel_threshold",
+                "edge_color_threshold",
+                "target_pixel_brightness",
+                "camera_brightness",
+                "camera_contrast",
+                "save_images_to_archive",
+                "save_current_image"
+            ],
+            "title": "HeliosConfig",
+            "type": "object"
+        },
+        "MeasurementDecisionConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "mode": {
+                    "enum": [
+                        "automatic",
+                        "manual",
+                        "cli"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                },
+                "manual_decision_result": {
+                    "title": "Manual Decision Result",
+                    "type": "boolean"
+                },
+                "cli_decision_result": {
+                    "title": "Cli Decision Result",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "mode",
+                "manual_decision_result",
+                "cli_decision_result"
+            ],
+            "title": "MeasurementDecisionConfig",
+            "type": "object"
+        },
+        "MeasurementTriggersConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "consider_time": {
+                    "title": "Consider Time",
+                    "type": "boolean"
+                },
+                "consider_sun_elevation": {
+                    "title": "Consider Sun Elevation",
+                    "type": "boolean"
+                },
+                "consider_helios": {
+                    "title": "Consider Helios",
+                    "type": "boolean"
+                },
+                "start_time": {
+                    "$ref": "#/$defs/TimeDict"
+                },
+                "stop_time": {
+                    "$ref": "#/$defs/TimeDict"
+                },
+                "min_sun_elevation": {
+                    "maximum": 90,
+                    "minimum": -90,
+                    "title": "Min Sun Elevation",
+                    "type": "number"
+                },
+                "shutdown_grace_period": {
+                    "description": "How long to wait to stop measurements after the trigger conditions are not met anymore (in seconds)",
+                    "maximum": 3600,
+                    "minimum": 0,
+                    "title": "Shutdown Grace Period",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "consider_time",
+                "consider_sun_elevation",
+                "consider_helios",
+                "start_time",
+                "stop_time",
+                "min_sun_elevation",
+                "shutdown_grace_period"
+            ],
+            "title": "MeasurementTriggersConfig",
+            "type": "object"
+        },
+        "OpusConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "em27_ip": {
+                    "$ref": "#/$defs/StrictIPv4Adress"
+                },
+                "executable_path": {
+                    "$ref": "#/$defs/StrictFilePath"
+                },
+                "experiment_path": {
+                    "$ref": "#/$defs/StrictFilePath"
+                },
+                "macro_path": {
+                    "$ref": "#/$defs/StrictFilePath"
+                },
+                "username": {
+                    "title": "Username",
+                    "type": "string"
+                },
+                "password": {
+                    "title": "Password",
+                    "type": "string"
+                },
+                "automatic_peak_positioning": {
+                    "description": "Whether to use automatic peak positioning",
+                    "title": "Automatic Peak Positioning",
+                    "type": "boolean"
+                },
+                "automatic_peak_positioning_dcmin": {
+                    "description": "Minimum absolute DC mean value for interferograms to be considered in the automatic peak positioning. This is an additional way to ensure that the peak position is not saved when the sun is not in the center of the receptor.",
+                    "minimum": 0,
+                    "title": "Automatic Peak Positioning Dcmin",
+                    "type": "number"
+                },
+                "interferogram_path": {
+                    "description": "Path to the directory containing today's interferograms files. You can use the wildcards '%Y', '%y', '%m', '%d' that will be replaced on the current date. Refer to the documentation for this 'automatic peak positioning'. Do not attach a '*' to the end - after replacing the date, it should point to exactly one directory.",
+                    "examples": [
+                        "/path/to/interferograms/%Y-%m-%d"
+                    ],
+                    "title": "Interferogram Path",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "em27_ip",
+                "executable_path",
+                "experiment_path",
+                "macro_path",
+                "username",
+                "password",
+                "automatic_peak_positioning",
+                "automatic_peak_positioning_dcmin",
+                "interferogram_path"
+            ],
+            "title": "OpusConfig",
+            "type": "object"
+        },
+        "StrictDirectoryPath": {
+            "description": "A pydantic model that validates a directory path.\n\nExample usage:\n\n```python\nclass MyModel(pyndatic.BaseModel):\n    path: StrictDirectoryPath\n\nm = MyModel(path='/path/to/directory') # validates that the directory exists\n```\n\nThe validation can be ignored by setting the context variable:\n\n```python\nm = MyModel.model_validate(\n    {\"path\": \"somenonexistingpath\"},\n    context={\"ignore-path-existence\": True},\n) # does not raise an error\n```",
+            "title": "StrictDirectoryPath",
+            "type": "string"
+        },
+        "StrictFilePath": {
+            "description": "A pydantic model that validates a file path.\n\nExample usage:\n\n```python\nclass MyModel(pyndatic.BaseModel):\n    path: StrictFilePath\n\nm = MyModel(path='/path/to/file') # validates that the file exists\n```\n\nThe validation can be ignored by setting the context variable:\n\n```python\nm = MyModel.model_validate(\n    {\"path\": \"somenonexistingpath\"},\n    context={\"ignore-path-existence\": True},\n) # does not raise an error\n```",
+            "title": "StrictFilePath",
+            "type": "string"
+        },
+        "StrictIPv4Adress": {
+            "description": "A pydantic model that validates an IPv4 address.\n\nExample usage:\n\n```python\nclass MyModel(pyndatic.BaseModel):\n    ip: StrictIPv4Adress\n\nm = MyModel(ip='192.186.2.1')\nm = MyModel(ip='192.186.2.1:22')\n```",
+            "pattern": "^((\\d)|([1-9]\\d)|(1\\d\\d)|(2[0-4]\\d)|(25[0-5]))\\.((\\d)|([1-9]\\d)|(1\\d\\d)|(2[0-4]\\d)|(25[0-5]))\\.((\\d)|([1-9]\\d)|(1\\d\\d)|(2[0-4]\\d)|(25[0-5]))\\.((\\d)|([1-9]\\d)|(1\\d\\d)|(2[0-4]\\d)|(25[0-5]))(:\\d{1,5})?$",
+            "title": "StrictIPv4Adress",
+            "type": "string"
+        },
+        "TUMEnclosureConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "ip": {
+                    "$ref": "#/$defs/StrictIPv4Adress"
+                },
+                "version": {
+                    "enum": [
+                        1,
+                        2
+                    ],
+                    "title": "Version",
+                    "type": "integer"
+                },
+                "controlled_by_user": {
+                    "title": "Controlled By User",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "ip",
+                "version",
+                "controlled_by_user"
+            ],
+            "title": "TUMEnclosureConfig",
+            "type": "object"
+        },
+        "TimeDict": {
+            "additionalProperties": false,
+            "properties": {
+                "hour": {
+                    "maximum": 23,
+                    "minimum": 0,
+                    "title": "Hour",
+                    "type": "integer"
+                },
+                "minute": {
+                    "maximum": 59,
+                    "minimum": 0,
+                    "title": "Minute",
+                    "type": "integer"
+                },
+                "second": {
+                    "maximum": 59,
+                    "minimum": 0,
+                    "title": "Second",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "hour",
+                "minute",
+                "second"
+            ],
+            "title": "TimeDict",
+            "type": "object"
+        },
+        "UploadConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "host": {
+                    "$ref": "#/$defs/StrictIPv4Adress"
+                },
+                "user": {
+                    "title": "User",
+                    "type": "string"
+                },
+                "password": {
+                    "title": "Password",
+                    "type": "string"
+                },
+                "is_active": {
+                    "title": "Is Active",
+                    "type": "boolean"
+                },
+                "only_upload_at_night": {
+                    "title": "Only Upload At Night",
+                    "type": "boolean"
+                },
+                "only_upload_when_not_measuring": {
+                    "title": "Only Upload When Not Measuring",
+                    "type": "boolean"
+                },
+                "streams": {
+                    "items": {
+                        "$ref": "#/$defs/UploadStreamConfig"
+                    },
+                    "title": "Streams",
+                    "type": "array"
+                }
+            },
+            "required": [
+                "host",
+                "user",
+                "password",
+                "is_active",
+                "only_upload_at_night",
+                "only_upload_when_not_measuring",
+                "streams"
+            ],
+            "title": "UploadConfig",
+            "type": "object"
+        },
+        "UploadStreamConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "is_active": {
+                    "title": "Is Active",
+                    "type": "boolean"
+                },
+                "label": {
+                    "title": "Label",
+                    "type": "string"
+                },
+                "variant": {
+                    "enum": [
+                        "directories",
+                        "files"
+                    ],
+                    "title": "Variant",
+                    "type": "string"
+                },
+                "dated_regex": {
+                    "pattern": "^\\^.*\\$$",
+                    "title": "Dated Regex",
+                    "type": "string"
+                },
+                "src_directory": {
+                    "$ref": "#/$defs/StrictDirectoryPath"
+                },
+                "dst_directory": {
+                    "title": "Dst Directory",
+                    "type": "string"
+                },
+                "remove_src_after_upload": {
+                    "title": "Remove Src After Upload",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "is_active",
+                "label",
+                "variant",
+                "dated_regex",
+                "src_directory",
+                "dst_directory",
+                "remove_src_after_upload"
+            ],
+            "title": "UploadStreamConfig",
+            "type": "object"
+        }
+    },
+    "additionalProperties": false,
+    "properties": {
+        "general": {
+            "$ref": "#/$defs/GeneralConfig"
+        },
+        "opus": {
+            "$ref": "#/$defs/OpusConfig"
+        },
+        "camtracker": {
+            "$ref": "#/$defs/CamtrackerConfig"
+        },
+        "error_email": {
+            "$ref": "#/$defs/ErrorEmailConfig"
+        },
+        "measurement_decision": {
+            "$ref": "#/$defs/MeasurementDecisionConfig"
+        },
+        "measurement_triggers": {
+            "$ref": "#/$defs/MeasurementTriggersConfig"
+        },
+        "tum_enclosure": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/TUMEnclosureConfig"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null
+        },
+        "aemet_enclosure": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/AEMETEnclosureConfig"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null
+        },
+        "helios": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/HeliosConfig"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null
+        },
+        "upload": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/UploadConfig"
+                },
+                {
+                    "type": "null"
+                }
+            ],
+            "default": null
+        }
+    },
+    "required": [
+        "general",
+        "opus",
+        "camtracker",
+        "error_email",
+        "measurement_decision",
+        "measurement_triggers"
+    ],
+    "title": "Config",
+    "type": "object"
+}
