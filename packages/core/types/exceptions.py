@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import pydantic
 import tum_esm_utils
 
@@ -186,3 +188,9 @@ class KNOWN_EXCEPTIONS:
         """Return whether an object is a registered catalog entry."""
 
         return any(exception_type is entry for entry in cls.all())
+
+
+class CataloguedError(Exception):
+    """A raised error carrying the catalog entry used for persistent reporting."""
+
+    exception_type: ClassVar[KnownException] = KNOWN_EXCEPTIONS.UNEXPECTED_ERROR

@@ -299,7 +299,7 @@ class AEMETEnclosureThread(AbstractThread):
                     logger.exception(e)
                     exceptions_interface.add_exception(
                         "aemet-enclosure",
-                        types.KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR,
+                        e,
                         traceback=traceback.format_exc(),
                     )
                     enclosure_interface = None
@@ -311,6 +311,6 @@ class AEMETEnclosureThread(AbstractThread):
             logger.exception(e)
             exceptions_interface.add_exception(
                 "aemet-enclosure",
-                types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                e,
                 traceback=traceback.format_exc(),
             )

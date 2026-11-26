@@ -170,6 +170,6 @@ class SystemMonitorThread(AbstractThread):
                 activity_history_interface.flush()
                 exceptions_interface.add_exception(
                     "system-monitor",
-                    types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                    e,
                     traceback=traceback.format_exc(),
                 )

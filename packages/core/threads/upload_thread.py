@@ -214,7 +214,7 @@ class UploadThread(AbstractThread):
                     s.activity.upload_is_running = False
                 exceptions_interface.add_exception(
                     "upload",
-                    types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                    e,
                     traceback=traceback.format_exc(),
                 )
                 for i in range(20):

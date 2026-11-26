@@ -172,7 +172,7 @@ class CASThread(AbstractThread):
                 logger.exception(e)
                 exceptions_interface.add_exception(
                     "cas",
-                    types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                    e,
                     traceback=traceback.format_exc(),
                 )
 

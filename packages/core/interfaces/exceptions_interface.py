@@ -28,12 +28,16 @@ class ExceptionsInterface:
     def add_exception(
         self,
         origin: str,
-        exception_type: types.KnownException,
+        exception_type: types.KnownException | Exception,
         traceback: str | None = None,
         details: str | None = None,
     ) -> None:
-        """Add a catalogued exception unless the same exception is already active."""
+        """Record a catalog entry or caught error, unless the same fault is already active."""
 
+        if isinstance(exception_type, types.CataloguedError):
+            exception_type = exception_type.exception_type
+        elif isinstance(exception_type, Exception):
+            exception_type = types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
         self._validate_exception_type(exception_type)
         with StateInterface.update_state(self.state_lock, self.logger) as state:
             is_active = any(

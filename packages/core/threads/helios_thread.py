@@ -78,8 +78,8 @@ class LenseFinder:
         return self._lense
 
 
-class CameraError(Exception):
-    pass
+class CameraError(types.CataloguedError):
+    exception_type = types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
 
 
 class HeliosInterface:
@@ -476,7 +476,7 @@ class HeliosThread(AbstractThread):
                         logger.exception(e)
                         exceptions_interface.add_exception(
                             "helios",
-                            types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR,
+                            e,
                             traceback=traceback.format_exc(),
                         )
                         logger.info("sleeping 30 seconds, reinitializing HeliosInterface")
@@ -621,13 +621,8 @@ class HeliosThread(AbstractThread):
 
                 logger.error(f"error in HeliosThread: {repr(e)}")
                 logger.exception(e)
-                exception_type = (
-                    types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
-                    if isinstance(e, CameraError)
-                    else types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-                )
                 exceptions_interface.add_exception(
-                    "helios", exception_type, traceback=traceback.format_exc()
+                    "helios", e, traceback=traceback.format_exc()
                 )
 
                 logger.info("sleeping 60 seconds, reinitializing HeliosThread")

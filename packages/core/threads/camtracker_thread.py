@@ -387,7 +387,7 @@ class CamTrackerThread(AbstractThread):
                 logger.exception(e)
                 exceptions_interface.add_exception(
                     "camtracker",
-                    types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
+                    e,
                     traceback=traceback.format_exc(),
                 )
                 CamTrackerProgram.stop(config, logger)

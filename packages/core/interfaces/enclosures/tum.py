@@ -101,7 +101,7 @@ class TUMEnclosureInterface:
     Manual: https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
     """
 
-    class PLCError(Exception):
+    class PLCError(types.CataloguedError):
         """
         Raised when updating a boolean value on the
         plc did not change its internal value.
@@ -111,6 +111,8 @@ class TUMEnclosureInterface:
         * set_sync_to_tracker/_manual_control
         * set_auto_temperature/_manual_temperature
         """
+
+        exception_type = types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
 
     def __init__(
         self,

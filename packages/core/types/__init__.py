@@ -11,6 +11,7 @@ from .config import Config as Config
 from .config import PartialConfig as PartialConfig
 
 from .exceptions import KnownException as KnownException
+from .exceptions import CataloguedError as CataloguedError
 from .exceptions import KNOWN_EXCEPTIONS as KNOWN_EXCEPTIONS
 
 from .state import ExceptionStateItem as ExceptionStateItem

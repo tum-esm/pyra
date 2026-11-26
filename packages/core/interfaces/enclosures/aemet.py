@@ -82,8 +82,10 @@ class TasmotaPlug:
 
 
 class AEMETEnclosureInterface:
-    class DataloggerError(Exception):
+    class DataloggerError(types.CataloguedError):
         """Raised when the datalogger did not respond as expected."""
+
+        exception_type = types.KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR
 
     def __init__(
         self,

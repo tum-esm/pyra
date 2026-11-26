@@ -76,6 +76,39 @@ def test_add_resolve_and_reraise_exception(
     assert state.exceptions_state.exceptions[1].raised_at == 1002.0
 
 
+@pytest.mark.parametrize("catalogued", [True, False])
+def test_add_caught_exception(
+    exception_store: tuple[
+        interfaces.ExceptionsInterface,
+        tum_esm_utils.sqlitelock.SQLiteLock,
+        utils.Logger,
+    ],
+    catalogued: bool,
+) -> None:
+    """Report raised errors by their catalog entry or fallback, preserving diagnostic fields."""
+
+    class CameraError(types.CataloguedError):
+        exception_type = types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
+
+    exception_interface, state_lock, logger = exception_store
+    error = CameraError("camera is not open") if catalogued else RuntimeError("unknown failure")
+    expected = (
+        types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
+        if catalogued
+        else types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+    )
+    exception_interface.add_exception("test", error, traceback="traceback", details="details")
+
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    assert len(state.exceptions_state.exceptions) == 1
+    item = state.exceptions_state.exceptions[0]
+    assert item.exception_type == expected.identifier
+    assert item.subject == expected.error_message
+    assert item.description == expected.long_description
+    assert item.traceback == "traceback"
+    assert item.details == "details"
+
+
 def test_resolve_all_with_excluded_exception_types(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -131,6 +164,12 @@ def test_rejects_unregistered_exception(
 
     with pytest.raises(ValueError):
         exception_interface.add_exception("test", unregistered)
+
+    class UnregisteredError(types.CataloguedError):
+        exception_type = unregistered
+
+    with pytest.raises(ValueError):
+        exception_interface.add_exception("test", UnregisteredError())
     with pytest.raises(ValueError):
         exception_interface.resolve_exception("test", unregistered)
     with pytest.raises(ValueError):
