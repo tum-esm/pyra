@@ -15,6 +15,12 @@ from packages.core import interfaces, types, utils
 from .abstract_thread import AbstractThread
 
 
+class _EM27ConnectionError(types.CataloguedError):
+    """The EM27 did not respond within the operational ping timeout."""
+
+    exception_type = types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR
+
+
 class OpusProgram:
     """Class for starting and stopping OPUS."""
 
@@ -231,6 +237,7 @@ class OpusThread(AbstractThread):
 
                 if config.general.test_mode:
                     logger.info("OPUS thread is skipped in test mode")
+                    exceptions_interface.resolve_exception("opus")
                     logger.debug("Sleeping 15 seconds")
                     time.sleep(15)
                     continue
@@ -258,6 +265,7 @@ class OpusThread(AbstractThread):
                                 s.opus_state.macro_filepath = None
 
                     OpusProgram.stop(logger)
+                    exceptions_interface.resolve_exception("opus")
                     time.sleep(3)
                     continue
 
@@ -265,6 +273,7 @@ class OpusThread(AbstractThread):
 
                 if not opus_should_be_running:
                     logger.debug("Sleeping 30 seconds (idling at night)")
+                    exceptions_interface.resolve_exception("opus")
                     time.sleep(30)
                     continue
 
@@ -299,21 +308,32 @@ class OpusThread(AbstractThread):
                         measurements_should_be_running = False
                         logger.info("AEMET enclosure cover is closed, not running any measurements")
 
+                if not measurements_should_be_running:
+                    exceptions_interface.resolve_exception(
+                        "opus", types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR
+                    )
+
                 # PING EM27 EVERY 5 MINUTES
 
                 if measurements_should_be_running:
                     if last_successful_ping_time < (time.time() - 300):
                         logger.info("Pinging EM27")
-                        dt = tum_esm_utils.timing.wait_for_condition(
-                            is_successful=lambda: (
-                                os.system("ping -n 3 " + config.opus.em27_ip.root) == 0  # type: ignore
-                            ),
-                            timeout_seconds=90,
-                            timeout_message="EM27 did not respond to ping within 90 seconds.",
-                            check_interval_seconds=3,
-                        )
+                        try:
+                            dt = tum_esm_utils.timing.wait_for_condition(
+                                is_successful=lambda: (
+                                    os.system("ping -n 3 " + config.opus.em27_ip.root) == 0  # type: ignore
+                                ),
+                                timeout_seconds=90,
+                                timeout_message="EM27 did not respond to ping within 90 seconds.",
+                                check_interval_seconds=3,
+                            )
+                        except TimeoutError as e:
+                            raise _EM27ConnectionError(str(e)) from e
                         last_successful_ping_time = time.time()
                         logger.info(f"Successfully pinged EM27 within {dt:.2f} seconds")
+                        exceptions_interface.resolve_exception(
+                            "opus", types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR
+                        )
 
                 # STARTING MACRO
 
@@ -416,7 +436,9 @@ class OpusThread(AbstractThread):
                         s.opus_state.macro_id = current_macro[0]
                         s.opus_state.macro_filepath = current_macro[1]
                 if clear_issues:
-                    exceptions_interface.resolve_exception("opus")
+                    exceptions_interface.resolve_exception(
+                        "opus", exclude_exception_types=[types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR]
+                    )
 
                 # SLEEP
 
@@ -427,6 +449,14 @@ class OpusThread(AbstractThread):
 
         except Exception as e:
             logger.exception(e)
+            exception_type = (
+                types.KNOWN_EXCEPTIONS.OPUS_CONNECTION_ERROR
+                if isinstance(e, ConnectionError)
+                else e
+            )
+            exceptions_interface.add_exception(
+                "opus", exception_type, traceback=traceback.format_exc()
+            )
             OpusProgram.stop(logger)
 
             if isinstance(e, ConnectionError):
@@ -436,14 +466,6 @@ class OpusThread(AbstractThread):
                 s.opus_state.macro_id = None
                 s.opus_state.macro_filepath = None
                 s.opus_state.last_http_connection_issue_time = last_http_connection_issue_time
-            exception_type = (
-                types.KNOWN_EXCEPTIONS.OPUS_CONNECTION_ERROR
-                if isinstance(e, ConnectionError)
-                else types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-            )
-            exceptions_interface.add_exception(
-                "opus", exception_type, traceback=traceback.format_exc()
-            )
             logger.info("Sleeping 3 minutes until retrying")
             time.sleep(180)
             logger.info("Stopping thread")
