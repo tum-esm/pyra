@@ -5,8 +5,12 @@ import tum_esm_utils
 from packages.core import types, utils
 
 from .state_interface import StateInterface
+from .state_interface import STATE_LOCK_PATH
 
 _DEFAULT_EXCEPTION_PATIENCE_SECONDS = 300
+_NOTIFICATION_LOCK_PATH = STATE_LOCK_PATH + ".notifications"
+_NOTIFICATION_RETRY_SECONDS = 600
+_notification_retry_at = 0.0
 
 
 class ExceptionsInterface:
@@ -100,12 +104,24 @@ class ExceptionsInterface:
         logger: utils.Logger,
         config: types.Config,
     ) -> None:
-        """Send due notifications and remove cleared exception records."""
+        """Send due notifications, retry failed delivery after ten minutes, and clean up."""
 
+        global _notification_retry_at
         now = time.time()
         patience_by_identifier = config.error_email.exception_patience.model_dump(by_alias=True)
         patience_by_identifier[types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR.identifier] = 0
-        with StateInterface.update_state(state_lock, logger) as state:
+        # Serialize core/CLI senders without blocking producers on the state lock.
+        notification_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+            filepath=_NOTIFICATION_LOCK_PATH, timeout=0
+        )
+        try:
+            notification_lock.acquire()
+        except TimeoutError:
+            logger.debug("Another process is updating exception notifications")
+            return
+
+        try:
+            state = StateInterface.load_state(state_lock, logger)
             exception_state = state.exceptions_state
             active_exceptions = [
                 item for item in exception_state.exceptions if item.cleared_at is None
@@ -128,15 +144,38 @@ class ExceptionsInterface:
                 )
             ]
 
-            if due_exceptions and config.error_email.notify_recipients:
-                utils.ExceptionEmailClient.handle_occured_exceptions(config, due_exceptions)
-                for item in due_exceptions:
-                    item.notified_at = now
-                exception_state.notification_sent = True
+            can_send = (
+                config.error_email.notify_recipients and time.monotonic() >= _notification_retry_at
+            )
+            if can_send:
+                try:
+                    if due_exceptions:
+                        utils.ExceptionEmailClient.handle_occured_exceptions(config, due_exceptions)
+                    elif not email_enabled_exceptions and exception_state.notification_sent:
+                        utils.ExceptionEmailClient.handle_resolved_exception(config)
+                except Exception as e:
+                    _notification_retry_at = time.monotonic() + _NOTIFICATION_RETRY_SECONDS
+                    can_send = False
+                    logger.exception(e)
+                    logger.error("Email delivery failed; retrying notifications in 10 minutes")
 
-            if not email_enabled_exceptions:
-                if exception_state.notification_sent and config.error_email.notify_recipients:
-                    utils.ExceptionEmailClient.handle_resolved_exception(config)
-                exception_state.notification_sent = False
-
-            exception_state.exceptions = active_exceptions
+            # Reload so faults raised or resolved during SMTP are preserved.
+            with StateInterface.update_state(state_lock, logger) as state:
+                if due_exceptions and can_send:
+                    sent_occurrences = {
+                        (item.origin, item.exception_type, item.raised_at)
+                        for item in due_exceptions
+                    }
+                    for item in state.exceptions_state.exceptions:
+                        if (item.origin, item.exception_type, item.raised_at) in sent_occurrences:
+                            item.notified_at = now
+                    state.exceptions_state.notification_sent = True
+                if not email_enabled_exceptions and (
+                    can_send or not config.error_email.notify_recipients
+                ):
+                    state.exceptions_state.notification_sent = False
+                state.exceptions_state.exceptions = [
+                    item for item in state.exceptions_state.exceptions if item.cleared_at is None
+                ]
+        finally:
+            notification_lock.release()

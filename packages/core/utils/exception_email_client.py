@@ -11,6 +11,7 @@ _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
 _PRE_CODE_TAG = '<pre style="background-color: #f1f5f9; color: #334155; padding: 8px 8px 12px 12px; border-radius: 3px; overflow-x: scroll;"><code style="white-space: pre;">'
 _POST_CODE_TAG = "</code></pre>"
+_SMTP_TIMEOUT_SECONDS = 30
 
 
 def _get_pyra_version() -> str:
@@ -81,15 +82,21 @@ class ExceptionEmailClient:
         # Create secure connection with server and send email
         context = ssl.create_default_context()
         if config.error_email.smtp_port == 587:
-            session = smtplib.SMTP(config.error_email.smtp_host, config.error_email.smtp_port)
-            session.ehlo()
-            session.starttls()
-            session.login(config.error_email.smtp_username, config.error_email.smtp_password)
-            session.sendmail(sender_email, recipients, message.as_string())
-            session.quit()
+            with smtplib.SMTP(
+                config.error_email.smtp_host,
+                config.error_email.smtp_port,
+                timeout=_SMTP_TIMEOUT_SECONDS,
+            ) as session:
+                session.ehlo()
+                session.starttls()
+                session.login(smtp_username, smtp_password)
+                session.sendmail(sender_email, recipients, message.as_string())
         else:
             with smtplib.SMTP_SSL(
-                config.error_email.smtp_host, config.error_email.smtp_port, context=context
+                config.error_email.smtp_host,
+                config.error_email.smtp_port,
+                context=context,
+                timeout=_SMTP_TIMEOUT_SECONDS,
             ) as server:
                 server.login(smtp_username, smtp_password)
                 server.sendmail(
