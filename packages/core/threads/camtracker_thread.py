@@ -245,12 +245,16 @@ class CamTrackerThread(AbstractThread):
                     time.sleep(15)
                     continue
 
-                # RESOLVE COVER CLOSED WARNING WHEN IT IS RAINING
+                # Clear cover faults when opening is no longer required or checked.
 
                 if (
                     (state.last_bad_weather_detection is not None)
                     and ((time.time() - state.last_bad_weather_detection) < 180)
-                ) or (not measurements_should_be_running):
+                ) or (
+                    not measurements_should_be_running
+                    or not config.camtracker.restart_if_cover_remains_closed
+                    or (config.tum_enclosure is None and config.aemet_enclosure is None)
+                ):
                     exceptions_interface.resolve_exception(
                         "camtracker", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN
                     )
@@ -326,6 +330,21 @@ class CamTrackerThread(AbstractThread):
                             while True:
                                 time.sleep(5)
                                 state = interfaces.StateInterface.load_state(state_lock, logger)
+                                config = types.Config.load()
+
+                                if not config.camtracker.restart_if_cover_remains_closed or (
+                                    config.tum_enclosure is None and config.aemet_enclosure is None
+                                ):
+                                    exceptions_interface.resolve_exception(
+                                        "camtracker", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN
+                                    )
+                                    break
+
+                                cover_state = CamTrackerThread.get_enclosure_cover_state(
+                                    config, state_lock, logger
+                                )
+                                if cover_state != "closed":
+                                    break
 
                                 # if rain detected in last 3 minutes -> cover can be closed
                                 if (state.last_bad_weather_detection is not None) and (

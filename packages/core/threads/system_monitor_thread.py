@@ -116,10 +116,12 @@ class SystemMonitorThread(AbstractThread):
                         )
                         logger.error(types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR.error_message)
 
-                exceptions_interface.resolve_exception(
-                    "system-monitor",
-                    exclude_exception_types=active_exception_types,
-                )
+                for exception_type in (
+                    types.KNOWN_EXCEPTIONS.STORAGE_ERROR,
+                    types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR,
+                ):
+                    if exception_type not in active_exception_types:
+                        exceptions_interface.resolve_exception("system-monitor", exception_type)
                 exceptions_interface.resolve_exception(
                     "cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED
                 )
@@ -159,6 +161,10 @@ class SystemMonitorThread(AbstractThread):
                 current_ah.is_uploading[current_ah_index] = 1 if is_uploading else 0
 
                 activity_history_interface.update(current_ah)
+                exceptions_interface.resolve_exception(
+                    "system-monitor",
+                    exclude_exception_types=active_exception_types,
+                )
 
                 # SLEEP FOR 30 SECONDS
 

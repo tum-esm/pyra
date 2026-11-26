@@ -139,11 +139,9 @@ class TUMEnclosureThread(AbstractThread):
                     logger.debug("Logging enclosure state")
                     utils.TUMEnclosureLogger.log(config, s)
 
-                    for exception_type in (
-                        types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_CONNECTION_ERROR,
-                        types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR,
-                    ):
-                        exceptions_interface.resolve_exception("tum-enclosure", exception_type)
+                    exceptions_interface.resolve_exception(
+                        "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_CONNECTION_ERROR
+                    )
 
                     # CHECKING FOR OPEN COVER DURING RAIN
 
@@ -169,6 +167,9 @@ class TUMEnclosureThread(AbstractThread):
                             exceptions_interface.resolve_exception(
                                 "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
                             )
+                        exceptions_interface.resolve_exception(
+                            "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
+                        )
                         logger.debug("Skipping remaining PLC logic during rain")
                         continue
 
@@ -193,6 +194,9 @@ class TUMEnclosureThread(AbstractThread):
                         )
                         exceptions_interface.resolve_exception(
                             "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED
+                        )
+                        exceptions_interface.resolve_exception(
+                            "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
                         )
                         t2 = time.time()
                         sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
