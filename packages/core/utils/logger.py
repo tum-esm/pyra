@@ -5,6 +5,7 @@ import traceback
 import time
 import threading
 from .functions import timeout_lock
+from packages.core import types
 
 _dir = os.path.dirname
 _PROJECT_DIR = _dir(_dir(_dir(_dir(os.path.abspath(__file__)))))
@@ -122,7 +123,7 @@ class Logger:
             except TimeoutError:
                 self.pending_log_lines.append(log_string)
                 if (time.time() - self.last_successful_logging_time) > 300:
-                    raise TimeoutError("Could not acquire logs lock for 5 minutes.")
+                    raise types.LockTimeoutError("Could not acquire logs lock for 5 minutes.")
 
         # Archive lines older than 5 minutes, every 5 minutes
         if self.main_thread:
@@ -158,5 +159,7 @@ class Logger:
                         f.writelines(lines_to_be_kept)
             except TimeoutError:
                 if i == 4:
-                    raise TimeoutError("Could not acquire logs lock to archive the current logs.")
+                    raise types.LockTimeoutError(
+                        "Could not acquire logs lock to archive the current logs."
+                    )
                 time.sleep(1)

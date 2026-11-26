@@ -194,3 +194,11 @@ class CataloguedError(Exception):
     """A raised error carrying the catalog entry used for persistent reporting."""
 
     exception_type: ClassVar[KnownException] = KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+
+
+class CamTrackerConfigurationError(CataloguedError):
+    exception_type = KNOWN_EXCEPTIONS.CAMTRACKER_CONFIGURATION_ERROR
+
+
+class LockTimeoutError(CataloguedError, TimeoutError):
+    exception_type = KNOWN_EXCEPTIONS.LOCK_TIMEOUT_ERROR

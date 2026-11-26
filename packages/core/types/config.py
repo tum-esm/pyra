@@ -18,7 +18,7 @@ from .enclosures.aemet import (
     PartialAEMETEnclosureConfig,
     AEMETEnclosureConfig,
 )
-from .exceptions import KNOWN_EXCEPTIONS
+from .exceptions import KNOWN_EXCEPTIONS, LockTimeoutError
 
 
 _PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=4)
@@ -401,6 +401,8 @@ class Config(StricterBaseModel):
                         return _read()
                 else:
                     return _read()
+        except filelock.Timeout as e:
+            raise LockTimeoutError("Could not acquire the config lock in time.") from e
         except pydantic.ValidationError as e:
             pretty_errors: list[str] = []
             for er in e.errors():

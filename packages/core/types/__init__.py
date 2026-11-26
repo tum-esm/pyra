@@ -12,6 +12,8 @@ from .config import PartialConfig as PartialConfig
 
 from .exceptions import KnownException as KnownException
 from .exceptions import CataloguedError as CataloguedError
+from .exceptions import CamTrackerConfigurationError as CamTrackerConfigurationError
+from .exceptions import LockTimeoutError as LockTimeoutError
 from .exceptions import KNOWN_EXCEPTIONS as KNOWN_EXCEPTIONS
 
 from .state import ExceptionStateItem as ExceptionStateItem

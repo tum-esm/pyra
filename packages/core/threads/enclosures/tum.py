@@ -168,7 +168,11 @@ class TUMEnclosureThread(AbstractThread):
                                 "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
                             )
                         exceptions_interface.resolve_exception(
-                            "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
+                            "tum-enclosure",
+                            exclude_exception_types=[
+                                types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED,
+                                types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE,
+                            ],
                         )
                         logger.debug("Skipping remaining PLC logic during rain")
                         continue
@@ -189,15 +193,7 @@ class TUMEnclosureThread(AbstractThread):
                         logger.info(
                             "User is controlling the TUM Enclosure, skipping operational logic"
                         )
-                        exceptions_interface.resolve_exception(
-                            "tum-enclosure", types.KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE
-                        )
-                        exceptions_interface.resolve_exception(
-                            "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED
-                        )
-                        exceptions_interface.resolve_exception(
-                            "tum-enclosure", types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
-                        )
+                        exceptions_interface.resolve_exception("tum-enclosure")
                         t2 = time.time()
                         sleep_time = max(5, config.general.seconds_per_core_iteration - (t2 - t1))
                         logger.debug(f"Sleeping {sleep_time:.2f} seconds")

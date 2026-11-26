@@ -81,7 +81,7 @@ class Astronomy:
             alt = float(_lines[_marker_line_index + 3].strip()) * 1000
             return lat, lon, alt
         except Exception as e:
-            raise Exception(
+            raise types.CamTrackerConfigurationError(
                 "Could not read CamTracker config file. Please make sure that "
                 f"the config located at {config.camtracker.config_path.root} is "
                 "valid or change the path in the config."

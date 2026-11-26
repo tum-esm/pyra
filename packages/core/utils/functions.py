@@ -6,6 +6,8 @@ import threading
 import time
 from typing import Generator, Literal
 
+from packages.core import types
+
 
 def read_last_file_line(
     file_path: str,
@@ -104,13 +106,10 @@ def timeout_lock(
     timeout: int,
     label: str,
 ) -> Generator[None, None, None]:
-    """Try to acquire a lock, return whether it was successful."""
-    lock_successful: bool = False
+    """Run the protected block only after acquiring the lock."""
+    if not lock.acquire(timeout=timeout):
+        raise types.LockTimeoutError(f"Could not acquire the {label} within {timeout} seconds.")
     try:
-        lock_successful = lock.acquire(timeout=timeout)
         yield
-    except TimeoutError:
-        raise TimeoutError(f"Could not acquire the {label} within {timeout} seconds.")
     finally:
-        if lock_successful:
-            lock.release()
+        lock.release()

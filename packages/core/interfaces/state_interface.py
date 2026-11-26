@@ -20,6 +20,18 @@ STATE_LOCK_TIMEOUT = 20
 STATE_LOCK_POLL_INTERVAL = 0.2
 
 
+@contextlib.contextmanager
+def _locked_state(state_lock: tum_esm_utils.sqlitelock.SQLiteLock) -> Generator[None, None, None]:
+    try:
+        state_lock.acquire()
+    except TimeoutError as e:
+        raise types.LockTimeoutError("Could not acquire the state lock in time.") from e
+    try:
+        yield
+    finally:
+        state_lock.release()
+
+
 class StateInterface:
     @staticmethod
     def load_state(
@@ -28,7 +40,7 @@ class StateInterface:
     ) -> types.StateObject:
         """Load the state from the state file."""
 
-        with state_lock:
+        with _locked_state(state_lock):
             return StateInterface._load_state_without_lock(logger)
 
     @staticmethod
@@ -70,7 +82,7 @@ class StateInterface:
         interfere with the state file and the state
         """
 
-        with state_lock:
+        with _locked_state(state_lock):
             state = StateInterface._load_state_without_lock(logger)
             state_before = state.model_copy(deep=True)
 
