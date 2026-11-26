@@ -9,8 +9,9 @@ from packages.core import interfaces, types, utils
 from packages.core.interfaces import exceptions_interface, state_interface
 from tests.fixtures import SAMPLE_CONFIG
 
+pytestmark = pytest.mark.ci
 
-@pytest.mark.ci
+
 def test_exception_catalog_identifiers_are_unique() -> None:
     """Prevent catalog entries from sharing the identifier used to persist faults."""
     identifiers = [entry.identifier for entry in types.KNOWN_EXCEPTIONS.all()]
@@ -50,6 +51,7 @@ def test_add_resolve_and_reraise_exception(
     exception_interface.add_exception(
         "helios", exception_type, traceback="traceback", details="details"
     )
+    now[0] = 1000.5
     exception_interface.add_exception("helios", exception_type)
 
     state = interfaces.StateInterface.load_state(state_lock, logger)
@@ -180,6 +182,34 @@ def test_notification_delay_and_staggered_resolution(
     now[0] = 1302.0
     interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
     resolved.assert_called_once_with(config)
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    assert state.exceptions_state.exceptions == []
+    assert not state.exceptions_state.notification_sent
+
+
+def test_resolved_before_patience_sends_no_email(
+    exception_store: tuple[
+        interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A fault that recovers or is no longer required before its delay must disappear without emails."""
+    exception_interface, state_lock, logger = exception_store
+    now = [1000.0]
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
+    occurred, resolved = Mock(), Mock()
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
+    config = SAMPLE_CONFIG.model_copy(deep=True)
+
+    exception_interface.add_exception("helios", types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR)
+    now[0] = 1001.0
+    exception_interface.resolve_exception("helios")
+    now[0] = 1600.0
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+
+    occurred.assert_not_called()
+    resolved.assert_not_called()
     state = interfaces.StateInterface.load_state(state_lock, logger)
     assert state.exceptions_state.exceptions == []
     assert not state.exceptions_state.notification_sent

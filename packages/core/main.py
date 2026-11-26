@@ -109,6 +109,21 @@ def run() -> None:
                 logger.debug("pyra-core in test mode")
                 time.sleep(0.1)  # for the tests to work
 
+            # Disabled producers may have stopped before they could clear their faults.
+            for origin, is_configured in (
+                (
+                    "helios",
+                    config.helios is not None and config.measurement_triggers.consider_helios,
+                ),
+                ("tum-enclosure", config.tum_enclosure is not None),
+                ("aemet-enclosure", config.aemet_enclosure is not None),
+                ("camtracker", True),
+                ("opus", True),
+                ("upload", config.upload is not None),
+            ):
+                if config.general.test_mode or not is_configured:
+                    interfaces.ExceptionsInterface(state_lock, logger).resolve_exception(origin)
+
             # send emails on occured/resolved exceptions
             interfaces.ExceptionsInterface.update_exception_notifications(
                 state_lock, logger, config

@@ -36,6 +36,9 @@ class UploadThread(AbstractThread):
 
         # only upload when upload is configured
         if config.upload is None:
+            with interfaces.StateInterface.update_state(state_lock, logger) as s:
+                s.activity.upload_is_running = False
+            interfaces.ExceptionsInterface(state_lock, logger).resolve_exception("upload")
             return False
 
         current_state = interfaces.StateInterface.load_state(state_lock, logger)

@@ -348,7 +348,7 @@ class CamTrackerThread(AbstractThread):
                                     break
 
                                 # if enclosure cover is still closed after a good amount of waiting and no rain
-                                # -> rain an exception
+                                # -> raise an exception
                                 waiting_time = (config.general.seconds_per_core_iteration * 3) + 5
                                 if (time.time() - t1) > waiting_time:
                                     logger.error(
@@ -385,12 +385,12 @@ class CamTrackerThread(AbstractThread):
 
             except Exception as e:
                 logger.exception(e)
-                CamTrackerProgram.stop(config, logger)
                 exceptions_interface.add_exception(
                     "camtracker",
                     types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR,
                     traceback=traceback.format_exc(),
                 )
+                CamTrackerProgram.stop(config, logger)
                 logger.info("Sleeping 2 minutes")
                 time.sleep(120)
                 logger.info("Stopping thread")

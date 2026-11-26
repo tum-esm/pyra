@@ -416,6 +416,7 @@ class HeliosThread(AbstractThread):
             try:
                 # Check for termination
                 if not HeliosThread.should_be_running(new_config, logger):
+                    exceptions_interface.resolve_exception("helios")
                     if helios_instance is not None:
                         logger.info("Helios thread has been terminated")
                         del helios_instance
@@ -430,6 +431,7 @@ class HeliosThread(AbstractThread):
                     )
                     return
 
+                assert config.helios is not None, "This is a bug in Pyra"
                 if (
                     (new_config.helios.camera_id != config.helios.camera_id)
                     or (new_config.helios.camera_brightness != config.helios.camera_brightness)
@@ -450,6 +452,7 @@ class HeliosThread(AbstractThread):
                 min_sun_elevation = config.general.min_sun_elevation
                 if current_sun_elevation < min_sun_elevation:
                     logger.debug("Current sun elevation below minimum, sleeping 5 minutes")
+                    exceptions_interface.resolve_exception("helios")
                     with interfaces.StateInterface.update_state(state_lock, logger) as s:
                         s.helios_indicates_good_conditions = "no"
                     if helios_instance is not None:
@@ -471,6 +474,11 @@ class HeliosThread(AbstractThread):
                     except CameraError as e:
                         logger.error(f"could not initialize HeliosInterface: {repr(e)}")
                         logger.exception(e)
+                        exceptions_interface.add_exception(
+                            "helios",
+                            types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR,
+                            traceback=traceback.format_exc(),
+                        )
                         logger.info("sleeping 30 seconds, reinitializing HeliosInterface")
                         time.sleep(30)
                         continue
