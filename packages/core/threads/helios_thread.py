@@ -78,10 +78,6 @@ class LenseFinder:
         return self._lense
 
 
-class CameraError(types.CataloguedError):
-    exception_type = types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
-
-
 class HeliosInterface:
     def __init__(
         self,
@@ -108,7 +104,7 @@ class HeliosInterface:
                 available_exposures = self.get_available_exposures()
                 logger.debug(f"determined available exposures: {available_exposures}")
                 if len(available_exposures) == 0:
-                    raise CameraError("did not find any available exposures")
+                    raise types.HeliosCameraError("did not find any available exposures")
 
                 self.current_exposure: int = min(available_exposures)
                 self.last_autoexposure_time: float = 0.0
@@ -125,7 +121,9 @@ class HeliosInterface:
                 logger.debug("could not open camera, retrying in 2 seconds")
                 time.sleep(2)
 
-        raise CameraError(f"could not initialize camera in {initialization_tries} tries")
+        raise types.HeliosCameraError(
+            f"could not initialize camera in {initialization_tries} tries"
+        )
 
     def __del__(self) -> None:
         """Release the camera"""
@@ -195,7 +193,7 @@ class HeliosInterface:
         except when specified not to (used in autoexposure)."""
 
         if not self.camera.isOpened():
-            raise CameraError("camera is not open")
+            raise types.HeliosCameraError("camera is not open")
         for _ in range(retries + 1):
             ret, frame = self.camera.read()
             if ret:
@@ -209,7 +207,7 @@ class HeliosInterface:
                     # image is mostly white
                     continue
                 return np.array(frame)
-        raise CameraError("could not take image")
+        raise types.HeliosCameraError("could not take image")
 
     def adjust_exposure(self) -> None:
         """This function will loop over all available exposures and
@@ -471,7 +469,7 @@ class HeliosThread(AbstractThread):
                 if helios_instance is None:
                     try:
                         helios_instance = HeliosInterface(logger, config.helios)
-                    except CameraError as e:
+                    except types.HeliosCameraError as e:
                         logger.error(f"could not initialize HeliosInterface: {repr(e)}")
                         logger.exception(e)
                         exceptions_interface.add_exception(
@@ -494,7 +492,7 @@ class HeliosThread(AbstractThread):
                     edge_fraction_history.set_max_size(new_max_history_size)
 
                 # take a picture and process it: status is in [0, 1]
-                # a CameraError is allowed to happen 3 times in a row
+                # a camera error is allowed to happen 3 times in a row
                 # at the 4th time the camera is not able to take an image
                 # an Exception will be raised (and Helios will be restarted)
                 try:
@@ -507,7 +505,7 @@ class HeliosThread(AbstractThread):
                         lense_finder=lense_finder,
                     )
                     repeated_camera_error_count = 0
-                except CameraError as e:
+                except types.HeliosCameraError as e:
                     repeated_camera_error_count += 1
                     if repeated_camera_error_count > 3:
                         raise e

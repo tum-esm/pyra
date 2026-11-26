@@ -202,3 +202,31 @@ class CamTrackerConfigurationError(CataloguedError):
 
 class LockTimeoutError(CataloguedError, TimeoutError):
     exception_type = KNOWN_EXCEPTIONS.LOCK_TIMEOUT_ERROR
+
+
+class HeliosCameraError(CataloguedError):
+    exception_type = KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
+
+
+class EM27ConnectionError(CataloguedError):
+    """The EM27 did not respond within the operational ping timeout."""
+
+    exception_type = KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR
+
+
+class TUMPLCError(CataloguedError):
+    """Raised when PLC communication fails or a requested value does not update.
+
+    Can originate from:
+    * set_power_camera/_computer/_heater/_router/_spectrometer
+    * set_sync_to_tracker/_manual_control
+    * set_auto_temperature/_manual_temperature
+    """
+
+    exception_type = KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
+
+
+class AEMETDataloggerError(CataloguedError):
+    """Raised when the datalogger did not respond as expected."""
+
+    exception_type = KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR

@@ -101,19 +101,6 @@ class TUMEnclosureInterface:
     Manual: https://buildmedia.readthedocs.org/media/pdf/python-snap7/latest/python-snap7.pdf
     """
 
-    class PLCError(types.CataloguedError):
-        """
-        Raised when updating a boolean value on the
-        plc did not change its internal value.
-
-        Can originate from:
-        * set_power_camera/_computer/_heater/_router/_spectrometer
-        * set_sync_to_tracker/_manual_control
-        * set_auto_temperature/_manual_temperature
-        """
-
-        exception_type = types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR
-
     def __init__(
         self,
         plc_version: Literal[1, 2],
@@ -147,12 +134,12 @@ class TUMEnclosureInterface:
     def connect(self) -> None:
         """Connects to the PLC Snap7. Times out after 30 seconds.
 
-        Raises TUMEnclosureInterface.PLCError if connection fails."""
+        Raises types.TUMPLCError if connection fails."""
 
         start_time = time.time()
         while True:
             if (time.time() - start_time) > 30:
-                raise TUMEnclosureInterface.PLCError("Connect to PLC timed out.")
+                raise types.TUMPLCError("Connect to PLC timed out.")
 
             try:
                 self.plc.connect(self.plc_ip, 0, 1)
@@ -285,7 +272,7 @@ class TUMEnclosureInterface:
                 ),
             )
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError() from e
+            raise types.TUMPLCError() from e
 
     # LOW LEVEL READ FUNCTIONS
 
@@ -309,7 +296,7 @@ class TUMEnclosureInterface:
             self.__sleep_while_cpu_is_busy()
             return value
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError() from e
+            raise types.TUMPLCError() from e
 
     def __write_int(self, action: tuple[int, int, int], value: int) -> None:
         """Changes an INT value in the PLC database."""
@@ -321,7 +308,7 @@ class TUMEnclosureInterface:
             self.plc.db_write(db_number, start, msg)
             self.__sleep_while_cpu_is_busy()
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError() from e
+            raise types.TUMPLCError() from e
 
     def __read_bool(self, action: tuple[int, int, int, int]) -> bool:
         """Reads a BOOL value in the PLC database."""
@@ -333,7 +320,7 @@ class TUMEnclosureInterface:
             self.__sleep_while_cpu_is_busy()
             return value
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError() from e
+            raise types.TUMPLCError() from e
 
     def __write_bool(self, action: tuple[int, int, int, int], value: bool) -> None:
         """Changes a BOOL value in the PLC database."""
@@ -345,7 +332,7 @@ class TUMEnclosureInterface:
             self.plc.db_write(db_number, start, msg)
             self.__sleep_while_cpu_is_busy()
         except Exception as e:
-            raise TUMEnclosureInterface.PLCError() from e
+            raise types.TUMPLCError() from e
 
     # PLC.POWER SETTERS
 
@@ -354,40 +341,40 @@ class TUMEnclosureInterface:
 
         1. low-level direct-write new_state to PLC according to spec
         2. low-level direct-read of plc's value according to spec
-        3. raise `PLCInterface.PLCError` if value is different"""
+        3. raise `types.TUMPLCError` if value is different"""
 
         self.__write_bool(spec, new_state)
         if self.__read_bool(spec) != new_state:
-            raise TUMEnclosureInterface.PLCError("PLC state did not change")
+            raise types.TUMPLCError("PLC state did not change")
 
     def set_power_camera(self, new_state: bool) -> None:
-        """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
+        """Raises `types.TUMPLCError`, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.camera)
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.tum_enclosure_state.power.camera = new_state
 
     def set_power_computer(self, new_state: bool) -> None:
-        """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
+        """Raises `types.TUMPLCError`, if value hasn't been changed"""
         assert self.specification.power.computer is not None
         self.__update_bool(new_state, self.specification.power.computer)
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.tum_enclosure_state.power.computer = new_state
 
     def set_power_heater(self, new_state: bool) -> None:
-        """Raises `PLCInterface.PLCError`, if value hasn't been changed"""
+        """Raises `types.TUMPLCError`, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.heater)
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.tum_enclosure_state.power.heater = new_state
 
     def set_power_router(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises types.TUMPLCError, if value hasn't been changed"""
         assert self.specification.power.router is not None, "Router is not configured"
         self.__update_bool(new_state, self.specification.power.router)
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.tum_enclosure_state.power.router = new_state
 
     def set_power_spectrometer(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises types.TUMPLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.power.spectrometer)
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.tum_enclosure_state.power.spectrometer = new_state
@@ -395,25 +382,25 @@ class TUMEnclosureInterface:
     # PLC.CONTROL SETTERS
 
     def set_sync_to_tracker(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises types.TUMPLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.sync_to_tracker)
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.tum_enclosure_state.control.sync_to_tracker = new_state
 
     def set_manual_control(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises types.TUMPLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_control)
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.tum_enclosure_state.control.manual_control = new_state
 
     def set_auto_temperature(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises types.TUMPLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.auto_temp_mode)
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:
             s.tum_enclosure_state.control.auto_temp_mode = new_state
 
     def set_manual_temperature(self, new_state: bool) -> None:
-        """Raises PLCInterface.PLCError, if value hasn't been changed"""
+        """Raises types.TUMPLCError, if value hasn't been changed"""
         self.__update_bool(new_state, self.specification.control.manual_temp_mode)
 
         with interfaces.StateInterface.update_state(self.state_lock, self.logger) as s:

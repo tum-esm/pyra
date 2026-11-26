@@ -96,7 +96,7 @@ class TUMEnclosureThread(AbstractThread):
                         plc_interface.connect()
                         plc_interface.set_auto_temperature(True)
                         logger.info("Successfully connected to PLC")
-                    except interfaces.TUMEnclosureInterface.PLCError as e:
+                    except types.TUMPLCError as e:
                         logger.error("Could not connect to PLC")
                         logger.exception(e)
                         plc_interface = None
@@ -327,7 +327,7 @@ class TUMEnclosureThread(AbstractThread):
                     logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                     time.sleep(sleep_time)
 
-                except interfaces.TUMEnclosureInterface.PLCError as e:
+                except types.TUMPLCError as e:
                     logger.error("PLC connection lost during interaction")
                     logger.exception(e)
                     exceptions_interface.add_exception(

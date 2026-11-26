@@ -15,12 +15,6 @@ from packages.core import interfaces, types, utils
 from .abstract_thread import AbstractThread
 
 
-class _EM27ConnectionError(types.CataloguedError):
-    """The EM27 did not respond within the operational ping timeout."""
-
-    exception_type = types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR
-
-
 class OpusProgram:
     """Class for starting and stopping OPUS."""
 
@@ -328,7 +322,7 @@ class OpusThread(AbstractThread):
                                 check_interval_seconds=3,
                             )
                         except TimeoutError as e:
-                            raise _EM27ConnectionError(str(e)) from e
+                            raise types.EM27ConnectionError(str(e)) from e
                         last_successful_ping_time = time.time()
                         logger.info(f"Successfully pinged EM27 within {dt:.2f} seconds")
                         exceptions_interface.resolve_exception(

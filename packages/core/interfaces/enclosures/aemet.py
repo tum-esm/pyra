@@ -35,7 +35,7 @@ class TasmotaPlug:
             response.raise_for_status()
             return response.json()  # type: ignore
         except Exception as e:
-            raise AEMETEnclosureInterface.DataloggerError(
+            raise types.AEMETDataloggerError(
                 f"Failed to send command '{command}' to Tasmota plug: {e}"
             ) from e
 
@@ -44,7 +44,7 @@ class TasmotaPlug:
         time.sleep(1)
         new_state = self.get_power_state()
         if not new_state:
-            raise AEMETEnclosureInterface.DataloggerError(
+            raise types.AEMETDataloggerError(
                 "Failed to turn on the Tasmota plug - power state did not update."
             )
 
@@ -53,7 +53,7 @@ class TasmotaPlug:
         time.sleep(1)
         new_state = self.get_power_state()
         if new_state:
-            raise AEMETEnclosureInterface.DataloggerError(
+            raise types.AEMETDataloggerError(
                 "Failed to turn off the Tasmota plug - power state did not update."
             )
 
@@ -62,7 +62,7 @@ class TasmotaPlug:
         try:
             return answer["POWER"] == "ON"  # type: ignore
         except Exception as e:
-            raise AEMETEnclosureInterface.DataloggerError(
+            raise types.AEMETDataloggerError(
                 f"Unexpected response from Tasmota plug when getting power state: {answer}"
             ) from e
 
@@ -76,17 +76,12 @@ class TasmotaPlug:
                 "em27_power": float(energy_data["Power"]),
             }
         except Exception as e:
-            raise AEMETEnclosureInterface.DataloggerError(
+            raise types.AEMETDataloggerError(
                 f"Unexpected response from Tasmota plug when getting energy state: {answer}"
             ) from e
 
 
 class AEMETEnclosureInterface:
-    class DataloggerError(types.CataloguedError):
-        """Raised when the datalogger did not respond as expected."""
-
-        exception_type = types.KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR
-
     def __init__(
         self,
         config: types.aemet.AEMETEnclosureConfig,
@@ -168,13 +163,13 @@ class AEMETEnclosureInterface:
             if new_state_invalid:
                 self.logger.warning("Datalogger returned null data")
                 if self.state.dt is None:
-                    raise AEMETEnclosureInterface.DataloggerError(
+                    raise types.AEMETDataloggerError(
                         "Datalogger returned invalid state, and no previous valid state available."
                     )
                 elif self.state.dt < (
                     datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(minutes=3)
                 ):
-                    raise AEMETEnclosureInterface.DataloggerError(
+                    raise types.AEMETDataloggerError(
                         "Datalogger returned invalid state, and the latest valid state is older than 3 minutes."
                     )
                 else:
@@ -187,7 +182,7 @@ class AEMETEnclosureInterface:
                         s.aemet_enclosure_state = news
                 return news
         except Exception as e:
-            raise AEMETEnclosureInterface.DataloggerError() from e
+            raise types.AEMETDataloggerError() from e
 
     def set_sun_evaluation_by_pyra(self, sun_evaluation_by_pyra: Literal[0, 1]) -> None:
         self.logger.info(f"Setting sun evaluation by Pyra to {sun_evaluation_by_pyra}")

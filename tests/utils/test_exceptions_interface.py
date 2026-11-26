@@ -80,27 +80,39 @@ def test_add_resolve_and_reraise_exception(
     assert state.exceptions_state.exceptions[1].raised_at == 1002.0
 
 
-@pytest.mark.parametrize("catalogued", [True, False])
+@pytest.mark.parametrize(
+    "error, expected",
+    [
+        (
+            types.CamTrackerConfigurationError("invalid config"),
+            types.KNOWN_EXCEPTIONS.CAMTRACKER_CONFIGURATION_ERROR,
+        ),
+        (types.LockTimeoutError("lock unavailable"), types.KNOWN_EXCEPTIONS.LOCK_TIMEOUT_ERROR),
+        (types.HeliosCameraError("camera unavailable"), types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR),
+        (types.EM27ConnectionError("ping timed out"), types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR),
+        (
+            types.TUMPLCError("PLC failed"),
+            types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR,
+        ),
+        (
+            types.AEMETDataloggerError("datalogger failed"),
+            types.KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR,
+        ),
+        (RuntimeError("unknown failure"), types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR),
+    ],
+)
 def test_add_caught_exception(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
         tum_esm_utils.sqlitelock.SQLiteLock,
         utils.Logger,
     ],
-    catalogued: bool,
+    error: Exception,
+    expected: types.KnownException,
 ) -> None:
     """Report raised errors by their catalog entry or fallback, preserving diagnostic fields."""
 
-    class CameraError(types.CataloguedError):
-        exception_type = types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
-
     exception_interface, state_lock, logger = exception_store
-    error = CameraError("camera is not open") if catalogued else RuntimeError("unknown failure")
-    expected = (
-        types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR
-        if catalogued
-        else types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
-    )
     exception_interface.add_exception("test", error, traceback="traceback", details="details")
 
     state = interfaces.StateInterface.load_state(state_lock, logger)

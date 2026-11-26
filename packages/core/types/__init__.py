@@ -14,6 +14,10 @@ from .exceptions import KnownException as KnownException
 from .exceptions import CataloguedError as CataloguedError
 from .exceptions import CamTrackerConfigurationError as CamTrackerConfigurationError
 from .exceptions import LockTimeoutError as LockTimeoutError
+from .exceptions import HeliosCameraError as HeliosCameraError
+from .exceptions import EM27ConnectionError as EM27ConnectionError
+from .exceptions import TUMPLCError as TUMPLCError
+from .exceptions import AEMETDataloggerError as AEMETDataloggerError
 from .exceptions import KNOWN_EXCEPTIONS as KNOWN_EXCEPTIONS
 
 from .state import ExceptionStateItem as ExceptionStateItem

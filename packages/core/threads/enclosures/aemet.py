@@ -192,7 +192,7 @@ class AEMETEnclosureThread(AbstractThread):
                             time.sleep(90)
                             new_code = enclosure_interface.read().averia_fault_code
                             if new_code not in [0, None]:
-                                raise interfaces.AEMETEnclosureInterface.DataloggerError(
+                                raise types.AEMETDataloggerError(
                                     "Averia fault code is still > 0 after 90s"
                                 )
 
@@ -294,7 +294,7 @@ class AEMETEnclosureThread(AbstractThread):
                     logger.debug(f"Sleeping {sleep_time:.2f} seconds")
                     time.sleep(sleep_time)
 
-                except interfaces.AEMETEnclosureInterface.DataloggerError as e:
+                except types.AEMETDataloggerError as e:
                     logger.error("Datalogger connection lost during interaction")
                     logger.exception(e)
                     exceptions_interface.add_exception(
