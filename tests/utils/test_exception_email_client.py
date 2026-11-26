@@ -10,7 +10,7 @@ from tests.fixtures import SAMPLE_CONFIG
 @pytest.mark.ci
 @pytest.mark.parametrize("port", [465, 587])
 def test_smtp_timeout_and_cleanup(monkeypatch: pytest.MonkeyPatch, port: Literal[465, 587]) -> None:
-    """Both SMTP transports need a finite timeout and must close connections when sending fails."""
+    """Both transports must verify TLS, use a timeout, and close connections on failure."""
     config = SAMPLE_CONFIG.model_copy(deep=True)
     config.general.test_mode = False
     config.error_email.smtp_port = port
@@ -28,10 +28,19 @@ def test_smtp_timeout_and_cleanup(monkeypatch: pytest.MonkeyPatch, port: Literal
         utils.ExceptionEmailClient.send_test_email(config)
 
     assert transport.call_args.kwargs["timeout"] == 30
+    context = (
+        session.starttls.call_args.kwargs["context"]
+        if port == 587
+        else transport.call_args.kwargs["context"]
+    )
+    assert context.check_hostname
+    assert context.verify_mode == exception_email_client.ssl.CERT_REQUIRED
     connection.__exit__.assert_called_once()
 
 
+@pytest.mark.ci
 def test_occurrence_email_renders_exception_fields(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep catalog descriptions and occurrence diagnostics in both email formats."""
     sent_email: list[tuple[str, str, str]] = []
 
     def send_email(config: types.Config, text: str, html: str, subject: str) -> None:

@@ -81,6 +81,7 @@ class ExceptionEmailClient:
 
         # Create secure connection with server and send email
         context = ssl.create_default_context()
+        # shortcut: partial sendmail() rejections are tolerated; add per-recipient retries if required.
         if config.error_email.smtp_port == 587:
             with smtplib.SMTP(
                 config.error_email.smtp_host,
@@ -88,7 +89,7 @@ class ExceptionEmailClient:
                 timeout=_SMTP_TIMEOUT_SECONDS,
             ) as session:
                 session.ehlo()
-                session.starttls()
+                session.starttls(context=context)
                 session.login(smtp_username, smtp_password)
                 session.sendmail(sender_email, recipients, message.as_string())
         else:
