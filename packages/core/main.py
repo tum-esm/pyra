@@ -12,8 +12,8 @@ def run() -> None:
     """The entrypoint of PYRA Core.
 
     Starting with Pyra 4.2.0, the mainloop is only responsible for starting
-    and stopping the different threads, and sendinging out emails on occured
-    and resolved exceptions. The actual work is done by the threads."""
+    and stopping the different threads. The actual work, including exception
+    notifications, is done by the threads."""
 
     logs_lock = threading.Lock()
     state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
@@ -68,6 +68,7 @@ def run() -> None:
         threads.HeliosThread(logs_lock),
         threads.OpusThread(logs_lock),
         threads.SystemMonitorThread(logs_lock),
+        threads.ExceptionEmailThread(logs_lock),
         threads.TUMEnclosureThread(logs_lock),
         threads.AEMETEnclosureThread(logs_lock),
         threads.UploadThread(logs_lock),
@@ -123,11 +124,6 @@ def run() -> None:
             ):
                 if config.general.test_mode or not is_configured:
                     interfaces.ExceptionsInterface(state_lock, logger).resolve_exception(origin)
-
-            # send emails on occured/resolved exceptions
-            interfaces.ExceptionsInterface.update_exception_notifications(
-                state_lock, logger, config
-            )
 
             # wait rest of loop time
             logger.debug("Finished iteration")

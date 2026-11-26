@@ -94,6 +94,7 @@ def test_start_stop_procedure(
         "helios-thread - DEBUG - Thread is pausing",
         "opus-thread - DEBUG - Starting the thread",
         "system-monitor-thread - DEBUG - Starting the thread",
+        "exception-email-thread - DEBUG - Starting the thread",
         "tum-enclosure-thread - DEBUG - Thread is pausing",
         "upload-thread - DEBUG - Thread is pausing",
         # cas
