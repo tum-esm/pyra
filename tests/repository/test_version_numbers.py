@@ -9,6 +9,7 @@ PROJECT_DIR = tum_esm_utils.files.get_parent_dir_path(__file__, current_depth=3)
 @pytest.mark.order(2)
 @pytest.mark.ci
 def test_version_numbers() -> None:
+    """Check that the CLI, starter config, and UI versions match the project version."""
     with open(os.path.join(PROJECT_DIR, "pyproject.toml"), "r") as f:
         third_line = f.read().split("\n")[2]
         assert third_line.startswith("version = ")

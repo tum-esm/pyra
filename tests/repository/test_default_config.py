@@ -13,6 +13,7 @@ from packages.core import types
 @pytest.mark.order(2)
 @pytest.mark.ci
 def test_default_config() -> None:
+    """Validate bundled configs and check email patience against the schema defaults."""
     with open(os.path.join(CONFIG_DIR, "config.default.json"), "r") as f:
         config = types.Config.load(f.read(), ignore_path_existence=True)
     assert config.error_email.exception_patience == types.config.ExceptionPatienceConfig()

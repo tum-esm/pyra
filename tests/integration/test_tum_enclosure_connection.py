@@ -6,6 +6,7 @@ from packages.core import interfaces, types, utils
 @pytest.mark.order(3)
 @pytest.mark.integration
 def test_tum_enclosure_connection() -> None:
+    """Connect to the configured TUM enclosure, read its state, and disconnect."""
     config = types.Config.load()
     logger = utils.Logger(origin="tum-enclosure", lock=None, just_print=True)
     state_lock = tum_esm_utils.sqlitelock.SQLiteLock(

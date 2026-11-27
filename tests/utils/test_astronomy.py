@@ -17,6 +17,7 @@ from packages.core import types, utils
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_astronomy(sample_config: types.Config) -> None:
+    """Check that CamTracker and explicit coordinates produce the same solar elevation."""
     # disable test mode because in test mode it uses
     # munich coordinates instead of reading them from
     # the CamTracker config file

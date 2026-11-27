@@ -18,6 +18,7 @@ DEBUG_LOG_PATH = os.path.join(PROJECT_DIR, "logs", "debug.log")
 
 
 def run_cli_command(command: list[str]) -> str:
+    """Run a CLI command, print its output, and return stdout after a successful exit."""
     process = subprocess.run(
         ["python", PYRA_CLI_PATH, *command],
         stderr=subprocess.PIPE,
@@ -33,6 +34,7 @@ def run_cli_command(command: list[str]) -> str:
 
 @pytest.fixture()
 def _stop_pyra_core() -> Any:  # pyright: ignore[reportUnusedFunction]
+    """Stop Core after the test to clean up any background process it started."""
     yield
     stdout = run_cli_command(["core", "stop"])
     print(stdout)
@@ -43,6 +45,7 @@ def _stop_pyra_core() -> Any:  # pyright: ignore[reportUnusedFunction]
 def test_is_running_checks_latest_core_run(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, crashed: bool
 ) -> None:
+    """Check that an earlier clean shutdown cannot mask a crash in the latest run."""
     archive = tmp_path / "logs" / "archive"
     archive.mkdir(parents=True)
     timestamps = "2026-01-01 12:00:00.000000 UTC+0000 - "
@@ -84,6 +87,7 @@ def test_start_stop_procedure(
     empty_logs: Any,
     _stop_pyra_core: Any,
 ) -> None:
+    """Start Core through the CLI, verify its status and logs, then stop it."""
     # stop all existing pyra core processes
     _ = run_cli_command(["core", "stop"])
 

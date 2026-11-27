@@ -67,6 +67,7 @@ SAMPLE_CONFIG = types.Config(
 
 
 def save_file(original_path: str, temporary_path: str, test_content: str) -> None:
+    """Back up the original file if it exists and write the test content in its place."""
     assert not os.path.exists(temporary_path)
 
     try:
@@ -79,6 +80,7 @@ def save_file(original_path: str, temporary_path: str, test_content: str) -> Non
 
 
 def restore_file(original_path: str, temporary_path: str) -> None:
+    """Remove the test file and restore the original if a backup exists."""
     os.remove(original_path)
     try:
         os.rename(temporary_path, original_path)

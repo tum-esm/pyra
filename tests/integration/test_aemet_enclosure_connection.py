@@ -7,6 +7,7 @@ from packages.core import interfaces, types, utils
 @pytest.mark.order(3)
 @pytest.mark.integration
 def test_aemet_enclosure_connection() -> None:
+    """Read the AEMET enclosure and verify power toggling if its plug is enabled."""
     config = types.Config.load()
     logger = utils.Logger(origin="aemet-enclosure", lock=None, just_print=True)
     state_lock = tum_esm_utils.sqlitelock.SQLiteLock(

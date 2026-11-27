@@ -397,8 +397,10 @@ def test_test_mode_pauses_automatic_email_but_allows_test_email(
     """Verify that test mode pauses only automatic emails until it is disabled."""
     exception_interface, state_lock, logger = exception_store
     smtp = Mock()
-    monkeypatch.setattr(exception_email_client.smtplib, "SMTP", Mock(return_value=nullcontext(smtp)))
-    monkeypatch.setattr(exception_email_client, "_get_current_log_lines", lambda: [])
+    monkeypatch.setattr(
+        exception_email_client.smtplib, "SMTP", Mock(return_value=nullcontext(smtp))
+    )
+    monkeypatch.setattr(exception_email_client, "_get_current_log_lines", lambda: [])  # type: ignore
     monkeypatch.setattr(exceptions_interface.time, "time", lambda: 1000.0)
     fault = types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
     config.general.test_mode = True

@@ -6,6 +6,7 @@ from packages.core import types
 @pytest.mark.order(2)
 @pytest.mark.integration
 def test_uploading() -> None:
+    """Check that the configured upload credentials can open a remote connection."""
     config = types.Config.load()
     if config.upload is None:
         return

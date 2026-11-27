@@ -14,6 +14,7 @@ CONFIG_FILE_PATH = os.path.join(PROJECT_DIR, "config", "config.json")
 
 
 def assert_config_file_content(expected_content: types.Config, message: str) -> None:
+    """Compare the saved config with the expected model and print both for debugging."""
     actual_content = types.Config.load(ignore_path_existence=True)
     print(f"actual_content: {actual_content.model_dump_json(indent=4)}")
     print(f"expected_content: {expected_content.model_dump_json(indent=4)}")
@@ -23,6 +24,7 @@ def assert_config_file_content(expected_content: types.Config, message: str) -> 
 def run_cli_command(
     command: list[str], should_succeed: bool = False, should_fail: bool = False
 ) -> str:
+    """Run a CLI command, check its exit status when requested, and return stdout."""
     process = subprocess.run(
         ["python", PYRA_CLI_PATH, *command],
         stderr=subprocess.PIPE,
@@ -43,6 +45,7 @@ def run_cli_command(
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_get_config(sample_config: types.Config) -> None:
+    """Check that the CLI returns JSON matching the saved configuration."""
     # get config from cli
     stdout = run_cli_command(["config", "get"], should_succeed=True)
     config_object_1 = types.Config.model_validate_json(
@@ -56,6 +59,7 @@ def test_get_config(sample_config: types.Config) -> None:
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_validate_current_config(sample_config: types.Config) -> None:
+    """Check that the CLI accepts the sample configuration as valid."""
     stdout = run_cli_command(["config", "validate"], should_succeed=True)
     assert stdout.startswith("Current config file is valid")
 
@@ -63,6 +67,7 @@ def test_validate_current_config(sample_config: types.Config) -> None:
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_update_config(sample_config: types.Config) -> None:
+    """Verify that invalid updates leave the file intact and valid updates persist."""
     updates: list[dict[str, Any]] = [
         {"general": {"seconds_per_core_iteration": False}},
         {"opus": {"experiment_path": ["should not be an array"]}},
@@ -90,6 +95,7 @@ def test_update_config(sample_config: types.Config) -> None:
     ]
 
     def transform(config: types.Config, i: int) -> types.Config:
+        """Apply the indexed update to the expected configuration for comparison."""
         if i == 0:
             config.general.seconds_per_core_iteration = 400
         if i == 1:
@@ -117,6 +123,7 @@ def test_update_config(sample_config: types.Config) -> None:
 @pytest.mark.order(3)
 @pytest.mark.ci
 def test_add_default_config(sample_config: types.Config) -> None:
+    """Check that the CLI can add and remove the default Helios and TUM sections."""
     cases = ["helios", "tum_enclosure"]
 
     for c in cases:

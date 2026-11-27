@@ -13,4 +13,5 @@ from packages.core import types
 @pytest.mark.order(1)
 @pytest.mark.integration
 def test_config() -> None:
+    """Validate the station config, including the existence of configured paths."""
     types.Config.load()
