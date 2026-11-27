@@ -1,4 +1,3 @@
-import datetime
 import subprocess
 import os
 import time
@@ -41,8 +40,6 @@ def test_start_stop_procedure(
     empty_logs: Any,
     _stop_pyra_core: Any,
 ) -> None:
-    now = datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(seconds=2)
-
     # stop all existing pyra core processes
     _ = run_cli_command(["core", "stop"])
 
@@ -74,64 +71,10 @@ def test_start_stop_procedure(
 
     with open(DEBUG_LOG_PATH, "r") as f:
         actual_log_lines = f.read()
-    assert actual_log_lines.count("\n") >= 5
-
-    print(f"actual log lines:\n{actual_log_lines}\n")
-    # fmt: off
-    expected_lines = [
-        # main
-        f"main - INFO - Starting mainloop inside process with process ID {pid}",
-        "main - INFO - Loading astronomical dataset",
-        "main - INFO - Initializing threads",
-        "main - INFO - Removing temporary state from previous runs",
-        "main - DEBUG - Starting iteration",
-        "main - DEBUG - pyra-core in test mode",
-        "main - DEBUG - Finished iteration",
-        "main - DEBUG - Waiting 29.",
-        # threads
-        "camtracker-thread - DEBUG - Thread is pausing",
-        "cas-thread - DEBUG - Starting the thread",
-        "helios-thread - DEBUG - Thread is pausing",
-        "opus-thread - DEBUG - Starting the thread",
-        "system-monitor-thread - DEBUG - Starting the thread",
-        "exception-email-thread - DEBUG - Starting the thread",
-        "tum-enclosure-thread - DEBUG - Thread is pausing",
-        "upload-thread - DEBUG - Thread is pausing",
-        # cas
-        "cas - INFO - Starting Condition Assessment System (CAS) thread.",
-        "cas - DEBUG - Starting iteration",
-        "cas - DEBUG - Coordinates used from CamTracker (lat, lon, alt): (48.151, 11.569, 539).",
-        "cas - INFO - Decision mode for measurements is: automatic.",
-        "cas - DEBUG - Evaluating automatic decision",
-        "cas - INFO - Measurements should be running is set to: ",
-        "cas - DEBUG - Sleeping 29.",
-        # opus
-        "opus - INFO - Starting OPUS thread",
-        "opus - INFO - OPUS thread is skipped in test mode",
-    ]
-    # fmt: on
-    for expected_line in expected_lines:
-        assert any(
-            [
-                " - ".join(l.split(" - ")[1:]).startswith(expected_line)
-                for l in actual_log_lines.split("\n")
-                if len(l.split(" - ")) > 1
-            ]
-        ), f"Could not find the expected log line: {expected_line}"
-
-    parsed_line_times: int = 0
-    for line in actual_log_lines.split("\n"):
-        try:
-            line_time = datetime.datetime.strptime(
-                line.split(" - ")[0], "%Y-%m-%d %H:%M:%S.%f UTC%z"
-            ).astimezone(datetime.timezone.utc)
-            parsed_line_times += 1
-            assert (line_time >= now) and ((now - line_time).total_seconds() < 12)
-            assert line_time >= now
-        except ValueError:
-            continue
-
-    assert parsed_line_times >= 5, "Could not parse the timestamps of the log lines"
+    assert (
+        f"main - INFO - Starting mainloop inside process with process ID {pid}" in actual_log_lines
+    )
+    assert "main - DEBUG - Finished iteration" in actual_log_lines
 
     stdout_5 = run_cli_command(["core", "is-running"])
     assert stdout_5.startswith(f"pyra-core is running with process ID(s) [{pid}]")

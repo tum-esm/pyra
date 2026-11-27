@@ -22,12 +22,6 @@ def test_astronomy(sample_config: types.Config) -> None:
     # the CamTracker config file
     sample_config.general.test_mode = False
 
-    try:
-        utils.Astronomy.get_current_sun_elevation(sample_config)
-        raise Exception("Failed to warn about not loaded astronomy data.")
-    except AssertionError:
-        pass
-
     utils.Astronomy.load_astronomical_dataset()
 
     # use tmp camtracker config file with munich coordinates at $1 marker

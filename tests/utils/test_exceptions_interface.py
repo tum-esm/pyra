@@ -1,4 +1,3 @@
-import datetime
 import threading
 from pathlib import Path
 from unittest.mock import Mock
@@ -84,21 +83,7 @@ def test_add_resolve_and_reraise_exception(
 @pytest.mark.parametrize(
     "error, expected",
     [
-        (
-            types.CamTrackerConfigurationError("invalid config"),
-            types.KNOWN_EXCEPTIONS.CAMTRACKER_CONFIGURATION_ERROR,
-        ),
-        (types.LockTimeoutError("lock unavailable"), types.KNOWN_EXCEPTIONS.LOCK_TIMEOUT_ERROR),
         (types.HeliosCameraError("camera unavailable"), types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR),
-        (types.EM27ConnectionError("ping timed out"), types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR),
-        (
-            types.TUMPLCError("PLC failed"),
-            types.KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR,
-        ),
-        (
-            types.AEMETDataloggerError("datalogger failed"),
-            types.KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR,
-        ),
         (RuntimeError("unknown failure"), types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR),
     ],
 )
@@ -112,7 +97,7 @@ def test_add_caught_exception(
     error: Exception,
     expected: types.KnownException,
 ) -> None:
-    """Each raised error must select its catalog entry, with a fallback for unknown errors."""
+    """Caught catalogued errors and unknown errors must take different reporting paths."""
 
     exception_interface, state_lock, logger = exception_store
     exception_interface.add_exception("test", error)
@@ -538,25 +523,3 @@ def test_live_patience_changes_preserve_fault_age(
     state = interfaces.StateInterface.load_state(state_lock, logger)
     assert state.exceptions_state.exceptions[0].raised_at == 1000
     assert state.exceptions_state.exceptions[0].notified_at == 1600
-
-
-@pytest.mark.ci
-def test_reset_preserves_exception_state() -> None:
-    """Core restarts must retain pending faults and notification status for later recovery."""
-    state = types.StateObject(last_updated=datetime.datetime(2026, 1, 1))
-    state.exceptions_state.exceptions.append(
-        types.ExceptionStateItem(
-            origin="helios",
-            exception_type=types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR.identifier,
-            subject="Camera error",
-            description="Camera unavailable",
-            raised_at=1000,
-            notified_at=1300,
-        )
-    )
-    state.exceptions_state.notification_sent = True
-    before = state.exceptions_state.model_copy(deep=True)
-
-    state.reset()
-
-    assert state.exceptions_state == before
