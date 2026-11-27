@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 import datetime
 import os
-import time
+import tempfile
 import pydantic
 import tum_esm_utils.sqlitelock
 from typing import Generator
@@ -30,6 +30,23 @@ def _locked_state(state_lock: tum_esm_utils.sqlitelock.SQLiteLock) -> Generator[
         yield
     finally:
         state_lock.release()
+
+
+def _write_state(state: types.StateObject) -> None:
+    temporary_file = tempfile.NamedTemporaryFile(
+        mode="w", dir=os.path.dirname(_STATE_FILE_PATH), prefix=".state-", delete=False
+    )
+    temporary_path = temporary_file.name
+    try:
+        with temporary_file:
+            temporary_file.write(state.model_dump_json(indent=4))
+            temporary_file.flush()
+            os.fsync(temporary_file.fileno())
+        # Windows requires the temporary file to be closed before replacement.
+        os.replace(temporary_path, _STATE_FILE_PATH)
+    finally:
+        with contextlib.suppress(FileNotFoundError):
+            os.unlink(temporary_path)
 
 
 class StateInterface:
@@ -59,8 +76,7 @@ class StateInterface:
         ) as e:
             logger.warning(f"Could not load state file - Creating new one: {e}")
             state = types.StateObject(last_updated=datetime.datetime.now())
-            with open(_STATE_FILE_PATH, "w") as f:
-                f.write(state.model_dump_json(indent=4))
+            _write_state(state)
         return state
 
     @staticmethod
@@ -91,7 +107,4 @@ class StateInterface:
             state_changed = state != state_before
             if state_changed:
                 state.last_updated = datetime.datetime.now()
-                with open(_STATE_FILE_PATH, "w") as f:
-                    f.write(state.model_dump_json(indent=4))
-                    f.flush()
-                time.sleep(0.05)  # ensure that the file is written before releasing the lock
+                _write_state(state)
