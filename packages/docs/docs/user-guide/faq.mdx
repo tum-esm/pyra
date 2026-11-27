@@ -38,19 +38,19 @@ We are using the Python library `filelock` to enforce exclusive use of state- an
 
 The config setting `config.camtracker.motor_offset_threshold`, set to `10` degrees by default, controls the shutdown of CamTracker if it drifts too much.
 
-CamTracker reports its motor's offset from the theoretical sun position every few seconds. When CamTracker has been running for at least 5 minutes, Pyra will check whether that reported offset is greater than the threshold. If so, Pyra will restart the CamTracker because this might mean that the CamTracker has lost the sun and is tracking something else in the sky.
+CamTracker reports its motor offsets from the theoretical sun position every few seconds. Pyra checks the latest offsets while measurements should be running. When Pyra starts CamTracker, it waits three minutes before checking. If the latest reading is at most five minutes old and either offset exceeds the threshold in absolute value, Pyra restarts CamTracker.
 
 In normal operation, you would see (debug) log lines like this every iteration:
 
 ```log
-DEBUG - CamTracker motor position is valid
+DEBUG - Checking motor positions.
+DEBUG - Tracker offsets are within threshold.
 ```
 
-If the motor position is not valid, you will see something like this:
+If an offset exceeds the threshold, Pyra logs the restart:
 
 ```log
-INFO - CamTracker motor position is over threshold.
-INFO - Stopping CamTracker. Preparing for reinitialization.
+ERROR - Restarting CamTracker because tracker offsets are too high.
 ```
 
 If that restart happens too often for your use case, you can increase this factor - or set it to `360` to disable it completely.

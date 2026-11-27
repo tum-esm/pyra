@@ -218,7 +218,6 @@ class CamTrackerThread(AbstractThread):
         )
         exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
 
-        # STOP CAMTRACKER IF IT IS RUNNING
         config = types.Config.load()
 
         while True:
@@ -274,8 +273,11 @@ class CamTrackerThread(AbstractThread):
 
                 # CHECK WHETHER CAMTRACKER IS RUNNING CORRECTLY
 
-                if measurements_should_be_running and (last_camtracker_start_time is not None):
-                    if (time.time() - last_camtracker_start_time) < 180:
+                if measurements_should_be_running:
+                    if (
+                        last_camtracker_start_time is not None
+                        and (time.time() - last_camtracker_start_time) < 180
+                    ):
                         logger.info(
                             "Waiting 3 minutes after CamTracker start to check motor positions."
                         )
