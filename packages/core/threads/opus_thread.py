@@ -431,7 +431,8 @@ class OpusThread(AbstractThread):
                         s.opus_state.macro_filepath = current_macro[1]
                 if clear_issues:
                     exceptions_interface.resolve_exception(
-                        "opus", exclude_exception_types=[types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR]
+                        "opus",
+                        exclude_exception_types=[types.KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR],
                     )
 
                 # SLEEP

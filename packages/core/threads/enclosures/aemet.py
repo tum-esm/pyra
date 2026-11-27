@@ -275,9 +275,7 @@ class AEMETEnclosureThread(AbstractThread):
                     # `exception_was_set` variable used to recude the number of state updates
                     if not exception_was_set:
                         exception_was_set = False
-                        exceptions_interface.resolve_exception(
-                            "aemet-enclosure"
-                        )
+                        exceptions_interface.resolve_exception("aemet-enclosure")
                     else:
                         exceptions_interface.resolve_exception(
                             "aemet-enclosure",

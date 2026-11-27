@@ -164,9 +164,9 @@ def _pyra_core_is_running() -> None:
 
     _print_red("pyra-core is not running")
     logs_archive_path = os.path.join(_PROJECT_DIR, "logs", "archive")
-    logfile_names = sorted(
-        f for f in os.listdir(logs_archive_path) if f.endswith("-debug.log")
-    )[-5:]
+    logfile_names = sorted(f for f in os.listdir(logs_archive_path) if f.endswith("-debug.log"))[
+        -5:
+    ]
 
     # Use actual Core activity so this also covers starts outside the CLI.
     for logfile_name in reversed(logfile_names):

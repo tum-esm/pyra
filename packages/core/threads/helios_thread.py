@@ -619,9 +619,7 @@ class HeliosThread(AbstractThread):
 
                 logger.error(f"error in HeliosThread: {repr(e)}")
                 logger.exception(e)
-                exceptions_interface.add_exception(
-                    "helios", e, traceback=traceback.format_exc()
-                )
+                exceptions_interface.add_exception("helios", e, traceback=traceback.format_exc())
 
                 logger.info("sleeping 60 seconds, reinitializing HeliosThread")
                 time.sleep(60)
