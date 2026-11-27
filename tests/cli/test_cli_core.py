@@ -1,6 +1,11 @@
 import subprocess
 import os
 import time
+from pathlib import Path
+from unittest.mock import Mock
+
+from click.testing import CliRunner
+from packages.cli.commands import core
 from packages.core import types
 from typing import Any
 import pytest
@@ -31,6 +36,45 @@ def _stop_pyra_core() -> Any:  # pyright: ignore[reportUnusedFunction]
     yield
     stdout = run_cli_command(["core", "stop"])
     print(stdout)
+
+
+@pytest.mark.ci
+@pytest.mark.parametrize("crashed", [False, True])
+def test_is_running_checks_latest_core_run(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, crashed: bool
+) -> None:
+    archive = tmp_path / "logs" / "archive"
+    archive.mkdir(parents=True)
+    timestamps = "2026-01-01 12:00:00.000000 UTC+0000 - "
+    startup = "main - INFO - Starting mainloop inside process with process ID 100"
+    stop = 'lifecycle - INFO - running command "core stop"'
+    messages = [startup, stop]
+    if crashed:
+        messages.append(startup.replace("100", "101"))
+    (archive / "2026-01-01-debug.log").write_text(
+        "".join(f"{timestamps}{message}\n" for message in messages)
+    )
+    monkeypatch.setattr(core, "_PROJECT_DIR", str(tmp_path))
+    monkeypatch.setattr(core.logger, "debug", Mock())
+    monkeypatch.setattr(core.tum_esm_utils.processes, "get_process_pids", Mock(return_value=[]))
+    monkeypatch.setattr(core.tum_esm_utils.sqlitelock, "SQLiteLock", Mock())
+    reporter = Mock()
+    monkeypatch.setattr(core.interfaces, "ExceptionsInterface", reporter)
+    config_load = Mock()
+    monkeypatch.setattr(core.types.Config, "load", config_load)
+
+    result = CliRunner().invoke(core.core_command_group, ["is-running"])
+
+    assert result.exit_code == 0
+    assert result.output.startswith("pyra-core is not running")
+    if crashed:
+        reporter.return_value.add_exception.assert_called_once_with(
+            "cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED
+        )
+        config_load.assert_called_once_with(ignore_path_existence=True)
+        reporter.update_exception_notifications.assert_called_once()
+    else:
+        reporter.assert_not_called()
 
 
 @pytest.mark.order(3)

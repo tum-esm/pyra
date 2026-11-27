@@ -2,7 +2,6 @@
 
 # pyright: reportUnusedFunction=false
 
-from typing import Optional
 import os
 import subprocess
 import click
@@ -159,77 +158,36 @@ def _stop_pyra_core() -> None:
 def _pyra_core_is_running() -> None:
     logger.debug('running command "core is-running"')
     existing_pids = tum_esm_utils.processes.get_process_pids(_RUN_PYRA_CORE_SCRIPT_PATH)
-    if len(existing_pids) > 0:
+    if existing_pids:
         _print_green(f"pyra-core is running with process ID(s) {existing_pids}")
-    else:
-        _print_red("pyra-core is not running")
+        return
 
-        # CHECK WHETHER PYRA CORE WAS PROPERLY SHUT DOWN
+    _print_red("pyra-core is not running")
+    logs_archive_path = os.path.join(_PROJECT_DIR, "logs", "archive")
+    logfile_names = sorted(
+        f for f in os.listdir(logs_archive_path) if f.endswith("-debug.log")
+    )[-5:]
 
-        # 1. search for the latest time the core was running
+    # Use actual Core activity so this also covers starts outside the CLI.
+    for logfile_name in reversed(logfile_names):
+        log_lines = tum_esm_utils.files.load_file(os.path.join(logs_archive_path, logfile_name))
+        for line in reversed(log_lines.splitlines()):
+            message = line.partition(" - ")[2]
+            if message == 'lifecycle - INFO - running command "core stop"':
+                return
+            if message.startswith(("main - INFO - ", "main - DEBUG - ")):
+                print("core has not been shut down properly")
+                state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
+                    filepath=interfaces.state_interface.STATE_LOCK_PATH,
+                    timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
+                    poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
+                )
+                exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
+                exceptions_interface.add_exception("cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED)
+                config = types.Config.load(ignore_path_existence=True)
+                interfaces.ExceptionsInterface.update_exception_notifications(
+                    state_lock, logger, config
+                )
+                return
 
-        logs_archive_path = os.path.join(_PROJECT_DIR, "logs", "archive")
-        logfile_names = [
-            f for f in sorted(os.listdir(logs_archive_path)) if f.endswith("-debug.log")
-        ][-5:]
-
-        log_lines: list[str] = []
-        for logfile_name in logfile_names:
-            log_lines.extend(
-                tum_esm_utils.files.load_file(os.path.join(logs_archive_path, logfile_name))
-                .strip("\n\t ")
-                .split("\n")
-            )
-
-        # find the last core start
-        last_start_index: Optional[int] = None
-        for i in range(len(log_lines) - 1, -1, -1):
-            if 'lifecycle - INFO - running command "core start"' in log_lines[i]:
-                if last_start_index is None:
-                    last_start_index = i
-
-        # only consider the logs since the last start
-        if last_start_index is not None:
-            log_lines = log_lines[last_start_index:]
-
-        # fine the last core stop and the last main log
-        last_stop_index: Optional[int] = None
-        last_mainlog_index: Optional[int] = None
-        for i in range(len(log_lines) - 1, -1, -1):
-            if 'lifecycle - INFO - running command "core stop"' in log_lines[i]:
-                if last_stop_index is None:
-                    last_stop_index = i
-            if ("main - INFO - " in log_lines[i]) or ("main - DEBUG - " in log_lines[i]):
-                if last_mainlog_index is None:
-                    last_mainlog_index = i
-
-        # detect if core has stopped running without a "stop" command
-        if last_mainlog_index is None:
-            print("core has not been running in the last 5 days")
-            return
-
-        if last_stop_index is None:
-            print("core has not been shut down properly")
-            state_lock = tum_esm_utils.sqlitelock.SQLiteLock(
-                filepath=interfaces.state_interface.STATE_LOCK_PATH,
-                timeout=interfaces.state_interface.STATE_LOCK_TIMEOUT,
-                poll_interval=interfaces.state_interface.STATE_LOCK_POLL_INTERVAL,
-            )
-            exceptions_interface = interfaces.ExceptionsInterface(state_lock, logger)
-            state = interfaces.StateInterface.load_state(state_lock, logger)
-            exception_is_active = any(
-                item.origin == "cli"
-                and item.exception_type == types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED.identifier
-                and item.cleared_at is None
-                for item in state.exceptions_state.exceptions
-            )
-            exceptions_interface.add_exception("cli", types.KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED)
-            if exception_is_active:
-                _print_red("exception already raised")
-            else:
-                _print_red("exception not raised yet, loading config")
-
-            config = types.Config.load()
-            interfaces.ExceptionsInterface.update_exception_notifications(
-                state_lock, logger, config
-            )
+    print("core has not been running in the last 5 days")
