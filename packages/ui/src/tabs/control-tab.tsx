@@ -110,12 +110,14 @@ function HeaderBlock(props: {
     plcIsControlledByUser: boolean;
     setPlcIsControlledByUser: (v: boolean) => void;
     lastEnclosureStateRead: string | null;
+    automaticControlLabel?: string;
 }) {
+    const automaticControlLabel = props.automaticControlLabel ?? 'automatic';
     return (
         <div className="z-10 flex-shrink-0 w-full h-16 px-4 py-4 bg-white border-b flex-row-left gap-x-2 border-slate-300">
             <essentialComponents.Toggle
-                value={props.plcIsControlledByUser ? 'user controlled' : 'automatic'}
-                values={['user controlled', 'automatic']}
+                value={props.plcIsControlledByUser ? 'user controlled' : automaticControlLabel}
+                values={['user controlled', automaticControlLabel]}
                 setValue={(v) => props.setPlcIsControlledByUser(v === 'user controlled')}
             />
             <div className="text-sm text-gray-500 flex-row-center">
@@ -667,6 +669,7 @@ export function AEMETEnclosureControlTab() {
             <HeaderBlock
                 plcIsControlledByUser={enclosureIsControlledByUser || false}
                 setPlcIsControlledByUser={setEnclosureIsControlledByUser}
+                automaticControlLabel="campbell controller"
                 lastEnclosureStateRead={
                     coreState.aemet_enclosure_state.dt === null ||
                     coreState.aemet_enclosure_state.dt === undefined
