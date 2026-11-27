@@ -98,6 +98,15 @@ class ExceptionsInterface:
                 ):
                     item.cleared_at = cleared_at
 
+    def resolve_all_exceptions(self) -> None:
+        """Mark active exceptions from every origin as cleared."""
+
+        with StateInterface.update_state(self.state_lock, self.logger) as state:
+            cleared_at = time.time()
+            for item in state.exceptions_state.exceptions:
+                if item.cleared_at is None:
+                    item.cleared_at = cleared_at
+
     @staticmethod
     def update_exception_notifications(
         state_lock: tum_esm_utils.sqlitelock.SQLiteLock,

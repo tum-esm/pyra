@@ -45,6 +45,9 @@ const backend = {
     stopPyraCore: async (): Promise<ChildProcess<string>> => {
         return await callCLI(['core', 'stop']);
     },
+    resolveAllExceptions: async (): Promise<ChildProcess<string>> => {
+        return await callCLI(['state', 'resolve-exceptions']);
+    },
     getConfig: async (): Promise<ChildProcess<string>> => {
         return await callCLI(['config', 'get', '--no-indent', '--no-color']);
     },

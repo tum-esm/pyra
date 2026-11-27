@@ -9,7 +9,7 @@ import { Button } from '../../ui/button';
 
 export default function ConfigSectionErrorEmail() {
     const { centralConfig, localConfig, setLocalConfigItem, configIsDiffering } = useConfigStore();
-    const { runPromisingCommand } = useCommand();
+    const { commandIsRunning, runPromisingCommand } = useCommand();
 
     const centralSectionConfig = centralConfig?.error_email;
     const localSectionConfig = localConfig?.error_email;
@@ -26,13 +26,26 @@ export default function ConfigSectionErrorEmail() {
         }
     }
 
+    function resolveAllExceptions() {
+        runPromisingCommand({
+            command: fetchUtils.backend.resolveAllExceptions,
+            label: 'resolving exceptions',
+            successLabel: 'All active exceptions marked as resolved',
+        });
+    }
+
     if (localSectionConfig === undefined || centralSectionConfig === undefined) {
         return <></>;
     }
     return (
         <>
-            <div>
-                <Button onClick={test}>send test email</Button>
+            <div className="flex flex-wrap gap-2">
+                <Button onClick={test} disabled={commandIsRunning}>
+                    send test email
+                </Button>
+                <Button onClick={resolveAllExceptions} disabled={commandIsRunning}>
+                    Resolve all exceptions
+                </Button>
             </div>
             <configurationComponents.ConfigElementLine />
             <configurationComponents.ConfigElementBooleanToggle

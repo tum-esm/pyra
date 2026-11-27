@@ -240,6 +240,46 @@ def test_notification_delay_and_staggered_resolution(
 
 
 @pytest.mark.ci
+def test_resolve_all_exceptions_sends_recovery(
+    exception_store: tuple[
+        interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
+) -> None:
+    """Clear faults across origins and let the notification pass send one recovery email."""
+    exception_interface, state_lock, logger = exception_store
+    now = [1000.0]
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", Mock())
+    resolved = Mock()
+    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
+
+    fault = types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+    exception_interface.add_exception("helios", fault)
+    exception_interface.add_exception("upload", fault)
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+
+    now[0] = 1001.0
+    exception_interface.add_exception("system-monitor", fault)
+    exception_interface.resolve_exception("system-monitor")
+    now[0] = 1002.0
+    exception_interface.resolve_all_exceptions()
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    assert [item.cleared_at for item in state.exceptions_state.exceptions] == [
+        1002.0,
+        1002.0,
+        1001.0,
+    ]
+    assert state.exceptions_state.notification_sent
+    resolved.assert_not_called()
+
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    resolved.assert_called_once_with(config)
+
+
+@pytest.mark.ci
 def test_resolved_before_patience_sends_no_email(
     exception_store: tuple[
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
