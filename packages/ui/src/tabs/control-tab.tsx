@@ -581,8 +581,16 @@ export function AEMETEnclosureControlTab() {
 
     async function setEnclosureIsControlledByUser(v: boolean) {
         runPromisingCommand({
-            command: () =>
-                fetchUtils.backend.updateConfig({ aemet_enclosure: { controlled_by_user: v } }),
+            command: async () => {
+                if (!v) {
+                    // The CLI requires user control to write AUTO.
+                    await fetchUtils.backend.writeToAEMETEnclosure(['set-auto-mode', '1']);
+                    setCoreStateItem('aemet_enclosure_state.auto_mode', 1);
+                }
+                return fetchUtils.backend.updateConfig({
+                    aemet_enclosure: { controlled_by_user: v },
+                });
+            },
             label: 'toggling enclosure control mode',
             successLabel: 'successfully toggled enclosure control mode',
             onSuccess: () => setConfigItem('aemet_enclosure.controlled_by_user', v),
