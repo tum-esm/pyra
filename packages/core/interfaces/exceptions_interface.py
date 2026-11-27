@@ -145,7 +145,9 @@ class ExceptionsInterface:
             ]
 
             can_send = (
-                config.error_email.notify_recipients and time.monotonic() >= _notification_retry_at
+                not config.general.test_mode
+                and config.error_email.notify_recipients
+                and time.monotonic() >= _notification_retry_at
             )
             if can_send:
                 try:
@@ -170,8 +172,10 @@ class ExceptionsInterface:
                         if (item.origin, item.exception_type, item.raised_at) in sent_occurrences:
                             item.notified_at = now
                     state.exceptions_state.notification_sent = True
-                if not email_enabled_exceptions and (
-                    can_send or not config.error_email.notify_recipients
+                if (
+                    not config.general.test_mode
+                    and not email_enabled_exceptions
+                    and (can_send or not config.error_email.notify_recipients)
                 ):
                     state.exceptions_state.notification_sent = False
                 state.exceptions_state.exceptions = [

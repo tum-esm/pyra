@@ -1,4 +1,5 @@
 import threading
+from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -7,6 +8,7 @@ import tum_esm_utils
 
 from packages.core import interfaces, types, utils
 from packages.core.interfaces import exceptions_interface, state_interface
+from packages.core.utils import exception_email_client
 from tests.fixtures import SAMPLE_CONFIG
 
 
@@ -22,6 +24,7 @@ def exception_store(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> tuple[interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger]:
+    """Provide an exception store with isolated state, locks, and retry timing."""
     state_path = str(tmp_path / "state.json")
     monkeypatch.setattr(state_interface, "_STATE_FILE_PATH", state_path)
     monkeypatch.setattr(exceptions_interface, "_notification_retry_at", 0.0)
@@ -35,6 +38,14 @@ def exception_store(
         poll_interval=0.01,
     )
     return interfaces.ExceptionsInterface(state_lock, logger), state_lock, logger
+
+
+@pytest.fixture()
+def config() -> types.Config:
+    """Return a fresh sample config with automatic email delivery enabled."""
+    notification_config = SAMPLE_CONFIG.model_copy(deep=True)
+    notification_config.general.test_mode = False
+    return notification_config
 
 
 @pytest.mark.ci
@@ -185,6 +196,7 @@ def test_notification_delay_and_staggered_resolution(
         utils.Logger,
     ],
     monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
 ) -> None:
     """Prevent early alerts and premature recovery emails: notify at the exact patience
     boundary, then send recovery only after the remaining exception clears.
@@ -196,7 +208,6 @@ def test_notification_delay_and_staggered_resolution(
     occurred, resolved = Mock(), Mock()
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
-    config = SAMPLE_CONFIG.model_copy(deep=True)
 
     first = types.KNOWN_EXCEPTIONS.STORAGE_ERROR
     second = types.KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR
@@ -234,6 +245,7 @@ def test_resolved_before_patience_sends_no_email(
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
     ],
     monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
 ) -> None:
     """A fault that recovers or is no longer required before its delay must disappear without emails."""
     exception_interface, state_lock, logger = exception_store
@@ -242,7 +254,6 @@ def test_resolved_before_patience_sends_no_email(
     occurred, resolved = Mock(), Mock()
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
-    config = SAMPLE_CONFIG.model_copy(deep=True)
 
     exception_interface.add_exception("helios", types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR)
     now[0] = 1001.0
@@ -267,6 +278,7 @@ def test_failed_notification_retries_every_ten_minutes(
     ],
     monkeypatch: pytest.MonkeyPatch,
     recovery: bool,
+    config: types.Config,
 ) -> None:
     """Delivery failures must not escape, and both email types retry at a fixed ten-minute interval."""
     exception_interface, state_lock, logger = exception_store
@@ -284,7 +296,6 @@ def test_failed_notification_retries_every_ten_minutes(
         "handle_resolved_exception" if recovery else "handle_occured_exceptions",
         delivery,
     )
-    config = SAMPLE_CONFIG.model_copy(deep=True)
     interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
     state = interfaces.StateInterface.load_state(state_lock, logger)
     assert state.exceptions_state.notification_sent == recovery
@@ -316,16 +327,17 @@ def test_occurrence_delivery_preserves_concurrent_producer_updates(
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
     ],
     monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
 ) -> None:
     """SMTP must release the state lock, preserve new occurrences, and exclude another sender."""
     exception_interface, state_lock, logger = exception_store
     now = [1000.0]
     monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
-    config = SAMPLE_CONFIG.model_copy(deep=True)
     error = types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
     exception_interface.add_exception("test", error)
 
     def deliver(config: types.Config, items: list[types.ExceptionStateItem]) -> None:
+        """Simulate a competing sender and a new occurrence during email delivery."""
         assert not state_lock.is_locked()
         # A competing notifier must skip delivery while this sender is active.
         interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
@@ -352,14 +364,15 @@ def test_recovery_delivery_preserves_new_faults(
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
     ],
     monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
 ) -> None:
     """Recovery delivery must also release the state lock and retain faults raised during SMTP."""
     exception_interface, state_lock, logger = exception_store
-    config = SAMPLE_CONFIG.model_copy(deep=True)
     with interfaces.StateInterface.update_state(state_lock, logger) as state:
         state.exceptions_state.notification_sent = True
 
     def deliver(config: types.Config) -> None:
+        """Raise a new fault while the simulated recovery email is being sent."""
         assert not state_lock.is_locked()
         exception_interface.add_exception("test", types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR)
 
@@ -374,6 +387,53 @@ def test_recovery_delivery_preserves_new_faults(
 
 
 @pytest.mark.ci
+def test_test_mode_pauses_automatic_email_but_allows_test_email(
+    exception_store: tuple[
+        interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
+) -> None:
+    """Verify that test mode pauses only automatic emails until it is disabled."""
+    exception_interface, state_lock, logger = exception_store
+    smtp = Mock()
+    monkeypatch.setattr(exception_email_client.smtplib, "SMTP", Mock(return_value=nullcontext(smtp)))
+    monkeypatch.setattr(exception_email_client, "_get_current_log_lines", lambda: [])
+    monkeypatch.setattr(exceptions_interface.time, "time", lambda: 1000.0)
+    fault = types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR
+    config.general.test_mode = True
+    exception_interface.add_exception("test", fault)
+
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    smtp.sendmail.assert_not_called()
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    assert state.exceptions_state.exceptions[0].notified_at is None
+    assert not state.exceptions_state.notification_sent
+
+    utils.ExceptionEmailClient.send_test_email(config)
+    smtp.sendmail.assert_called_once()
+
+    config.general.test_mode = False
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    assert smtp.sendmail.call_count == 2
+    utils.ExceptionEmailClient.send_test_email(config)
+    assert smtp.sendmail.call_count == 3
+
+    config.general.test_mode = True
+    exception_interface.resolve_exception("test", fault)
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    assert smtp.sendmail.call_count == 3
+    state = interfaces.StateInterface.load_state(state_lock, logger)
+    assert state.exceptions_state.exceptions == []
+    assert state.exceptions_state.notification_sent
+
+    config.general.test_mode = False
+    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
+    assert smtp.sendmail.call_count == 4
+
+
+@pytest.mark.ci
 def test_disabled_notification_is_not_marked_as_sent(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -381,6 +441,7 @@ def test_disabled_notification_is_not_marked_as_sent(
         utils.Logger,
     ],
     monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
 ) -> None:
     """The global email switch must suppress delivery and leave faults unnotified."""
     exception_interface, state_lock, logger = exception_store
@@ -389,7 +450,6 @@ def test_disabled_notification_is_not_marked_as_sent(
     occurred = Mock()
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
 
-    config = SAMPLE_CONFIG.model_copy(deep=True)
     config.error_email.notify_recipients = False
     interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
 
@@ -405,6 +465,7 @@ def test_independent_patience_and_unconfigurable_exception(
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
     ],
     monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
 ) -> None:
     """Prevent one delay from applying to every fault: check per-type defaults and
     overrides, immediate unexpected errors, the 300s fallback, and no repeat emails.
@@ -414,7 +475,6 @@ def test_independent_patience_and_unconfigurable_exception(
     monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
     occurred = Mock()
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
-    config = SAMPLE_CONFIG.model_copy(deep=True)
     config.error_email.exception_patience.opus_connection_error = 600
     unconfigurable = types.KnownException(
         identifier="new-error",
@@ -452,6 +512,7 @@ def test_muted_exceptions_persist_without_blocking_recovery(
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
     ],
     monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
 ) -> None:
     """Keep muted faults visible without blocking recovery: verify persistence without
     emails, one recovery after enabled faults clear, and cleanup when muted faults clear.
@@ -461,7 +522,6 @@ def test_muted_exceptions_persist_without_blocking_recovery(
     occurred, resolved = Mock(), Mock()
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
-    config = SAMPLE_CONFIG.model_copy(deep=True)
     config.error_email.exception_patience.storage_error = -1
     config.error_email.exception_patience.low_energy_error = 0
     muted = types.KNOWN_EXCEPTIONS.STORAGE_ERROR
@@ -503,6 +563,7 @@ def test_live_patience_changes_preserve_fault_age(
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
     ],
     monkeypatch: pytest.MonkeyPatch,
+    config: types.Config,
 ) -> None:
     """Changing patience must use the original fault age rather than restarting its timer."""
     exception_interface, state_lock, logger = exception_store
@@ -510,7 +571,6 @@ def test_live_patience_changes_preserve_fault_age(
     monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
     occurred = Mock()
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
-    config = SAMPLE_CONFIG.model_copy(deep=True)
     config.error_email.exception_patience.storage_error = 601
     exception_interface.add_exception("test", types.KNOWN_EXCEPTIONS.STORAGE_ERROR)
 

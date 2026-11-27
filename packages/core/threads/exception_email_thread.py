@@ -33,7 +33,7 @@ class ExceptionEmailThread(AbstractThread):
 
         while True:
             try:
-                config = types.Config.load()
+                config = types.Config.load(ignore_path_existence=True)
                 interfaces.ExceptionsInterface.update_exception_notifications(
                     state_lock, logger, config
                 )

@@ -18,6 +18,8 @@ The always-enabled `ExceptionEmailThread` loads config and checks notifications 
 
 Email patience starts when a fault is recorded. Only unresolved, unnotified faults whose patience has elapsed are emailed. Configuration changes preserve fault age. After an occurrence email, one recovery email is sent when no email-enabled faults remain. Cleared records are removed.
 
+Test mode pauses automatic occurrence and recovery emails. The explicit test-email command sends in either mode.
+
 SMTP runs outside the shared state lock. A separate notification lock serializes senders; state is reloaded after delivery to preserve concurrent producer changes. Failed delivery leaves notifications pending and suppresses further email attempts for a fixed 10 minutes. The cooldown is process-local and resets on restart. SMTP connections use a 30-second socket timeout.
 
 ## Configuration and generated documentation
