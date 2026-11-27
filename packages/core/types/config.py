@@ -128,77 +128,77 @@ class ExceptionPatienceConfig(StricterBaseModel):
     model_config = pydantic.ConfigDict(populate_by_name=True, serialize_by_alias=True)
 
     cover_did_not_open: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN.default_patience,
         alias="cover-did-not-open",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.COVER_DID_NOT_OPEN.long_description}",
     )
     cover_did_not_close: EmailPatienceSeconds = pydantic.Field(
-        default=90,
+        default=KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE.default_patience,
         alias="cover-did-not-close",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.COVER_DID_NOT_CLOSE.long_description}",
     )
     storage_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.STORAGE_ERROR.default_patience,
         alias="storage-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.STORAGE_ERROR.long_description}",
     )
     low_energy_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR.default_patience,
         alias="low-energy-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.LOW_ENERGY_ERROR.long_description}",
     )
     pyra_core_crashed: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED.default_patience,
         alias="pyra-core-crashed",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.PYRA_CORE_CRASHED.long_description}",
     )
     tum_enclosure_plc_connection_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_CONNECTION_ERROR.default_patience,
         alias="tum-enclosure-plc-connection-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_CONNECTION_ERROR.long_description}",
     )
     tum_enclosure_rain_detected_cover_not_closed: EmailPatienceSeconds = pydantic.Field(
-        default=0,
+        default=KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED.default_patience,
         alias="tum-enclosure-rain-detected-cover-not-closed",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.TUM_ENCLOSURE_RAIN_DETECTED_COVER_NOT_CLOSED.long_description}",
     )
     tum_enclosure_plc_reset_failed: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED.default_patience,
         alias="tum-enclosure-plc-reset-failed",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_RESET_FAILED.long_description}",
     )
     tum_enclosure_plc_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR.default_patience,
         alias="tum-enclosure-plc-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.TUM_ENCLOSURE_PLC_ERROR.long_description}",
     )
     aemet_enclosure_datalogger_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR.default_patience,
         alias="aemet-enclosure-datalogger-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.AEMET_ENCLOSURE_DATALOGGER_ERROR.long_description}",
     )
     camtracker_configuration_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.CAMTRACKER_CONFIGURATION_ERROR.default_patience,
         alias="camtracker-configuration-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.CAMTRACKER_CONFIGURATION_ERROR.long_description}",
     )
     helios_camera_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR.default_patience,
         alias="helios-camera-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR.long_description}",
     )
     opus_connection_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.OPUS_CONNECTION_ERROR.default_patience,
         alias="opus-connection-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.OPUS_CONNECTION_ERROR.long_description}",
     )
     em27_connection_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR.default_patience,
         alias="em27-connection-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.EM27_CONNECTION_ERROR.long_description}",
     )
     lock_timeout_error: EmailPatienceSeconds = pydantic.Field(
-        default=300,
+        default=KNOWN_EXCEPTIONS.LOCK_TIMEOUT_ERROR.default_patience,
         alias="lock-timeout-error",
         description=f"Reason for this exception: {KNOWN_EXCEPTIONS.LOCK_TIMEOUT_ERROR.long_description}",
     )

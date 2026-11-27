@@ -14,7 +14,8 @@ from packages.core import types
 @pytest.mark.ci
 def test_default_config() -> None:
     with open(os.path.join(CONFIG_DIR, "config.default.json"), "r") as f:
-        types.Config.load(f.read(), ignore_path_existence=True)
+        config = types.Config.load(f.read(), ignore_path_existence=True)
+    assert config.error_email.exception_patience == types.config.ExceptionPatienceConfig()
 
     with open(os.path.join(CONFIG_DIR, "tum_enclosure.config.default.json"), "r") as f:
         types.enclosures.tum.TUMEnclosureConfig.model_validate_json(f.read())

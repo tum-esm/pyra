@@ -168,7 +168,7 @@
                     "type": "number"
                 },
                 "cover-did-not-close": {
-                    "default": 90,
+                    "default": 90.0,
                     "description": "Reason for this exception: Even though Pyra requested the enclosure cover to close, it did not reach the closed position. The cover could be blocked or the motor could have an issue. Please check the enclosure cover and motor.",
                     "maximum": 86400,
                     "minimum": -1,
@@ -208,7 +208,7 @@
                     "type": "number"
                 },
                 "tum-enclosure-rain-detected-cover-not-closed": {
-                    "default": 0,
+                    "default": 0.0,
                     "description": "Reason for this exception: The TUM enclosure reports rain, but the cover did not close yet.",
                     "maximum": 86400,
                     "minimum": -1,
