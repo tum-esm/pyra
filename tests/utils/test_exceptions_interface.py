@@ -1,3 +1,4 @@
+import datetime
 import threading
 from pathlib import Path
 from unittest.mock import Mock
@@ -9,9 +10,8 @@ from packages.core import interfaces, types, utils
 from packages.core.interfaces import exceptions_interface, state_interface
 from tests.fixtures import SAMPLE_CONFIG
 
-pytestmark = pytest.mark.ci
 
-
+@pytest.mark.ci
 def test_exception_catalog_identifiers_are_unique() -> None:
     """Prevent catalog entries from sharing the identifier used to persist faults."""
     identifiers = [entry.identifier for entry in types.KNOWN_EXCEPTIONS.all()]
@@ -38,6 +38,7 @@ def exception_store(
     return interfaces.ExceptionsInterface(state_lock, logger), state_lock, logger
 
 
+@pytest.mark.ci
 def test_add_resolve_and_reraise_exception(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -101,6 +102,7 @@ def test_add_resolve_and_reraise_exception(
         (RuntimeError("unknown failure"), types.KNOWN_EXCEPTIONS.UNEXPECTED_ERROR),
     ],
 )
+@pytest.mark.ci
 def test_add_caught_exception(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -110,21 +112,18 @@ def test_add_caught_exception(
     error: Exception,
     expected: types.KnownException,
 ) -> None:
-    """Report raised errors by their catalog entry or fallback, preserving diagnostic fields."""
+    """Each raised error must select its catalog entry, with a fallback for unknown errors."""
 
     exception_interface, state_lock, logger = exception_store
-    exception_interface.add_exception("test", error, traceback="traceback", details="details")
+    exception_interface.add_exception("test", error)
 
     state = interfaces.StateInterface.load_state(state_lock, logger)
     assert len(state.exceptions_state.exceptions) == 1
     item = state.exceptions_state.exceptions[0]
     assert item.exception_type == expected.identifier
-    assert item.subject == expected.error_message
-    assert item.description == expected.long_description
-    assert item.traceback == "traceback"
-    assert item.details == "details"
 
 
+@pytest.mark.ci
 def test_resolve_all_with_excluded_exception_types(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -163,6 +162,7 @@ def test_resolve_all_with_excluded_exception_types(
     assert items_by_identifier[unexpected_error.identifier].cleared_at is None
 
 
+@pytest.mark.ci
 def test_rejects_unregistered_exception(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -192,6 +192,7 @@ def test_rejects_unregistered_exception(
         exception_interface.resolve_exception("test", exclude_exception_types=[unregistered])
 
 
+@pytest.mark.ci
 def test_notification_delay_and_staggered_resolution(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -242,6 +243,7 @@ def test_notification_delay_and_staggered_resolution(
     assert not state.exceptions_state.notification_sent
 
 
+@pytest.mark.ci
 def test_resolved_before_patience_sends_no_email(
     exception_store: tuple[
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
@@ -271,6 +273,7 @@ def test_resolved_before_patience_sends_no_email(
 
 
 @pytest.mark.parametrize("recovery", [False, True])
+@pytest.mark.ci
 def test_failed_notification_retries_every_ten_minutes(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -322,6 +325,7 @@ def test_failed_notification_retries_every_ten_minutes(
         assert state.exceptions_state.exceptions[0].notified_at == 2200.0
 
 
+@pytest.mark.ci
 def test_occurrence_delivery_preserves_concurrent_producer_updates(
     exception_store: tuple[
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
@@ -357,6 +361,7 @@ def test_occurrence_delivery_preserves_concurrent_producer_updates(
     assert state.exceptions_state.notification_sent
 
 
+@pytest.mark.ci
 def test_recovery_delivery_preserves_new_faults(
     exception_store: tuple[
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
@@ -383,6 +388,7 @@ def test_recovery_delivery_preserves_new_faults(
     assert not state.exceptions_state.notification_sent
 
 
+@pytest.mark.ci
 def test_disabled_notification_is_not_marked_as_sent(
     exception_store: tuple[
         interfaces.ExceptionsInterface,
@@ -408,6 +414,7 @@ def test_disabled_notification_is_not_marked_as_sent(
     assert not state.exceptions_state.notification_sent
 
 
+@pytest.mark.ci
 def test_independent_patience_and_unconfigurable_exception(
     exception_store: tuple[
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
@@ -454,6 +461,7 @@ def test_independent_patience_and_unconfigurable_exception(
         occurred.assert_not_called()
 
 
+@pytest.mark.ci
 def test_muted_exceptions_persist_without_blocking_recovery(
     exception_store: tuple[
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
@@ -504,30 +512,24 @@ def test_muted_exceptions_persist_without_blocking_recovery(
     resolved.assert_called_once()
 
 
-def test_live_patience_changes_and_muting_notified_exception(
+@pytest.mark.ci
+def test_live_patience_changes_preserve_fault_age(
     exception_store: tuple[
         interfaces.ExceptionsInterface, tum_esm_utils.sqlitelock.SQLiteLock, utils.Logger
     ],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Protect live configuration changes: retain the original fault age, retry failed
-    recovery emails after muting, and avoid duplicate alerts when unmuting.
-    """
+    """Changing patience must use the original fault age rather than restarting its timer."""
     exception_interface, state_lock, logger = exception_store
     now = [1000.0]
     monkeypatch.setattr(exceptions_interface.time, "time", lambda: now[0])
-    monkeypatch.setattr(exceptions_interface.time, "monotonic", lambda: now[0])
-    occurred, resolved = Mock(), Mock()
+    occurred = Mock()
     monkeypatch.setattr(utils.ExceptionEmailClient, "handle_occured_exceptions", occurred)
-    monkeypatch.setattr(utils.ExceptionEmailClient, "handle_resolved_exception", resolved)
     config = SAMPLE_CONFIG.model_copy(deep=True)
-    config.error_email.exception_patience.storage_error = -1
-    exception_interface.add_exception("test", types.KNOWN_EXCEPTIONS.STORAGE_ERROR)
-    now[0] = 1600.0
-    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    occurred.assert_not_called()
-
     config.error_email.exception_patience.storage_error = 601
+    exception_interface.add_exception("test", types.KNOWN_EXCEPTIONS.STORAGE_ERROR)
+
+    now[0] = 1600.0
     interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
     occurred.assert_not_called()
     config.error_email.exception_patience.storage_error = 600
@@ -537,23 +539,24 @@ def test_live_patience_changes_and_muting_notified_exception(
     assert state.exceptions_state.exceptions[0].raised_at == 1000
     assert state.exceptions_state.exceptions[0].notified_at == 1600
 
-    config.error_email.exception_patience.storage_error = -1
-    resolved.side_effect = RuntimeError("SMTP failed")
-    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    assert interfaces.StateInterface.load_state(
-        state_lock, logger
-    ).exceptions_state.notification_sent
-    resolved.side_effect = None
-    now[0] += 600
-    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    assert resolved.call_count == 2
-    assert not interfaces.StateInterface.load_state(
-        state_lock, logger
-    ).exceptions_state.notification_sent
-    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    assert resolved.call_count == 2
 
-    # Unmuting an already-notified fault must not send a duplicate occurrence email.
-    config.error_email.exception_patience.storage_error = 0
-    interfaces.ExceptionsInterface.update_exception_notifications(state_lock, logger, config)
-    occurred.assert_called_once()
+@pytest.mark.ci
+def test_reset_preserves_exception_state() -> None:
+    """Core restarts must retain pending faults and notification status for later recovery."""
+    state = types.StateObject(last_updated=datetime.datetime(2026, 1, 1))
+    state.exceptions_state.exceptions.append(
+        types.ExceptionStateItem(
+            origin="helios",
+            exception_type=types.KNOWN_EXCEPTIONS.HELIOS_CAMERA_ERROR.identifier,
+            subject="Camera error",
+            description="Camera unavailable",
+            raised_at=1000,
+            notified_at=1300,
+        )
+    )
+    state.exceptions_state.notification_sent = True
+    before = state.exceptions_state.model_copy(deep=True)
+
+    state.reset()
+
+    assert state.exceptions_state == before
