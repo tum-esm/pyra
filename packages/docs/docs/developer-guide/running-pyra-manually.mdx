@@ -5,9 +5,11 @@ hide_table_of_contents: true
 
 # Running Pyra manually
 
-## Install dependencies
+## Development dependencies
 
-Dependency management uses [PDM](https://pdm-project.org/latest). `pdm install --dev` installs all dependencies in the currently activated interpreter environment.
+For a standard Pyra installation, follow the [setup guide](../user-guide/setup.mdx), which includes installing the `pyra-cli` command.
+
+For local development, install [uv](https://docs.astral.sh/uv/getting-started/installation/) and run `uv sync --locked --extra dev` from the repository root. This installs runtime and development dependencies into `.venv` using Python 3.10.
 
 ## Pyra Core
 
@@ -19,15 +21,15 @@ pyra-cli core is-running
 pyra-cli core stop
 ```
 
-The start command will execute `python run-pyra-core.py` in a background process.
+The start command will execute `python run_pyra_core.py` in a background process.
 
 ## Upload/Helios threads
 
 In Pyra Core's regular operation, it will start and stop Upload and Helios in dedicated threads. These threads will write their output into the Core's log files. You can run these two threads in headless mode (without Pyra Core), and they will print all of their logs to the console:
 
 ```bash
-python run-headless-helios-thread.py
-python run-headless-upload-thread.py
+python scripts/run_headless_helios_thread.py
+python scripts/run_headless_upload_thread.py
 ```
 
 ## Building the frontend

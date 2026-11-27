@@ -88,13 +88,9 @@ markers = [
     "integration: can only be run on a configured system",
 ]
 
-[tool.pdm.options]
-add = ["--no-self"]
-install = ["--no-self"]
-remove = ["--no-self"]
-
-[tool.pdm]
-distribution = false
+[tool.uv]
+package = false
+environments = ["python_version == '3.10'"]
 
 [tool.setuptools]
 packages = []
